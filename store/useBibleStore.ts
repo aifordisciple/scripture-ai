@@ -1,12 +1,6 @@
 // store/useBibleStore.ts
 import { create } from 'zustand';
 
-interface VerseRef {
-  bookName: string;
-  chapter: number;
-  verse: number;
-}
-
 // 定义标签页数据结构
 export interface Tab {
   id: string;
@@ -15,24 +9,36 @@ export interface Tab {
   scrollTop?: number; // (预留) 记忆滚动位置
 }
 
+interface VerseRef {
+  bookName: string;
+  chapter: number;
+  verse: number;
+}
+
 interface BibleState {
   fontSize: number;
   setFontSize: (size: number) => void;
 
-// --- 新增：行高控制 ---
-  lineHeight: number; // 例如 1.6, 1.8, 2.0
+  // --- 新增：行高控制 ---
+  lineHeight: number;
   setLineHeight: (height: number) => void;
 
-  // 左侧目录
-  isSidebarOpen: boolean;
+  // --- 左侧目录 ---
+  isSidebarOpen: boolean; 
   toggleSidebar: (open?: boolean) => void;
 
-  // 右侧 AI
-  isAiOpen: boolean;
+  // --- 右侧 AI 面板 ---
+  isAiOpen: boolean; 
   setAiOpen: (open: boolean) => void;
 
-  // 多选与 AI 请求
+  // --- 新增：中英对照开关 ---
+  showEnglish: boolean; // <--- 之前缺这个
+  toggleEnglish: () => void; // <--- 之前缺这个
+
+  // --- 核心：多选状态 ---
   selectedVerses: number[];
+  
+  // --- 核心：AI 请求触发器 ---
   aiRequestTrigger: {
     prompt: string;
     content: string;
@@ -49,9 +55,8 @@ interface BibleState {
   addTab: (book?: string, chapter?: string) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
-  updateActiveTab: (book: string, chapter: string) => void; // 更新当前标签页的经文
+  updateActiveTab: (book: string, chapter: string) => void; 
   
-  // 原有动作
   toggleVerseSelection: (id: number) => void;
   clearSelection: () => void;
   triggerAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
@@ -61,7 +66,7 @@ export const useBibleStore = create<BibleState>((set) => ({
   fontSize: 18,
   setFontSize: (size) => set({ fontSize: size }),
 
-  lineHeight: 1.8, // 默认行高，比 loose (2.0) 稍微紧凑一点
+  lineHeight: 1.8,
   setLineHeight: (height) => set({ lineHeight: height }),
 
   isSidebarOpen: false,
@@ -72,11 +77,15 @@ export const useBibleStore = create<BibleState>((set) => ({
   isAiOpen: false,
   setAiOpen: (open) => set({ isAiOpen: open }),
 
+  // --- 初始化中英对照 ---
+  showEnglish: false,
+  toggleEnglish: () => set((state) => ({ showEnglish: !state.showEnglish })),
+
   selectedVerses: [],
   aiRequestTrigger: null,
 
   // --- 初始化标签页 ---
-  tabs: [{ id: 'tab-1', book: 'Gen', chapter: '1' }], // 默认打开创世记 1章
+  tabs: [{ id: 'tab-1', book: 'Gen', chapter: '1' }], 
   activeTabId: 'tab-1',
 
   addTab: (book = 'Gen', chapter = '1') => set((state) => {
@@ -88,10 +97,8 @@ export const useBibleStore = create<BibleState>((set) => ({
   }),
 
   closeTab: (id) => set((state) => {
-    if (state.tabs.length <= 1) return state; // 至少保留一个标签
+    if (state.tabs.length <= 1) return state; 
     const newTabs = state.tabs.filter(t => t.id !== id);
-    
-    // 如果关闭的是当前标签，切换到最后一个
     let newActiveId = state.activeTabId;
     if (id === state.activeTabId) {
       newActiveId = newTabs[newTabs.length - 1].id;

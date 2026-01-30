@@ -16,7 +16,7 @@ interface Verse {
   chapter: number;
   verse: number;
   content: string;
-  version: string;
+  version: string; // 确保有 version 字段
 }
 
 interface ReaderProps {
@@ -28,18 +28,16 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // 优先读取 URL 参数
   const book = searchParams.get("book") || initialBook;
   const chapter = searchParams.get("chapter") || initialChapter;
 
   const [verses, setVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 浮动菜单状态
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [isMenuVisible, setIsMenuVisible] = useState(false);
 
-  // Store
+  // 获取 showEnglish 和 lineHeight
   const { 
     fontSize, 
     lineHeight, 
@@ -128,7 +126,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       touchStartRef.current = null;
   };
 
-  // --- 点击与AI处理 ---
   const handleVerseClick = (v: Verse, e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); 
     toggleVerseSelection(v.verse);
@@ -142,9 +139,9 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     const selectedVerseObjects = verses.filter(v => selectedVerses.includes(v.verse));
     if (selectedVerseObjects.length === 0) return;
 
-    // 只发送中文给 AI
+    // 只发送中文版 (CUV) 给 AI，避免发两遍
     const cuvVerses = selectedVerseObjects.filter(v => v.version === 'CUV');
-    if (cuvVerses.length === 0) return; // 容错
+    if (cuvVerses.length === 0) return; 
 
     const combinedContent = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
     
@@ -152,6 +149,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     const maxVerseIdx = verses.findIndex(v => v.verse === Math.max(...selectedVerses));
     const start = Math.max(0, minVerseIdx - 5);
     const end = Math.min(verses.length, maxVerseIdx + 6);
+    // 上下文也只取 CUV
     const contextContent = verses.slice(start, end)
         .filter(v => v.version === 'CUV')
         .map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
@@ -163,14 +161,13 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     setIsMenuVisible(false);
   };
 
-  // 点击空白关闭菜单
   useEffect(() => {
     const handleClickOutside = () => setIsMenuVisible(false);
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // 数据分组 (CUV + KJV)
+  // --- 关键：数据分组 (将 CUV 和 KJV 配对) ---
   const verseMap = new Map<number, { CUV?: Verse, KJV?: Verse }>();
   verses.forEach(v => {
     if (!verseMap.has(v.verse)) verseMap.set(v.verse, {});
@@ -185,22 +182,13 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }
 
   return (
-    // --- 根布局: Flex ---
-    // 左栏 (flex-1) + 内容 (max-w-3xl) + 右栏 (flex-1)
-    // 默认 items-stretch，保证左右侧边栏高度填满，即使内容很长
     <div 
         className="w-full min-h-screen flex flex-row relative"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
     >
 
-      {/* --- 左侧点击区域 (上一章) --- */}
-      {/* 1. hidden md:flex: 仅桌面端显示
-         2. flex-1: 填满左侧空白
-         3. self-stretch: 高度跟随父容器（即跟随内容高度），确保底部空白也能触发
-         4. group: Hover 状态容器
-         5. sticky top-[50vh]: 图标固定在视口垂直中心
-      */}
+      {/* 左侧上一章区域 */}
       <div 
         className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 transition-colors"
         onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }}
@@ -213,7 +201,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      {/* --- 中间核心内容区 --- */}
+      {/* 中间核心内容区 */}
       <div className="w-full max-w-3xl px-4 py-8 md:px-8 pb-32 bg-white shadow-sm min-h-screen z-0">
         <h1 className="text-3xl font-serif font-bold text-center mb-8 text-slate-800">
           {verses[0]?.bookName || book} 第 {chapter} 章
@@ -248,7 +236,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                 </span>
                 
                 <div className="flex-1 min-w-0">
-                  {/* 中文 */}
+                  {/* 中文渲染 */}
                   <div 
                       className={cn(
                         "font-serif transition-colors text-justify",
@@ -258,10 +246,11 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                   >
                       {cuvVerse.content}
                   </div>
-                  {/* 英文 (KJV) */}
+                  
+                  {/* 英文渲染 (条件控制) */}
                   {showEnglish && kjvVerse && (
-                     <div className="mt-1 text-slate-500 font-sans"
-                          style={{ fontSize: `${fontSize * 0.85}px`, lineHeight: 1.4 }}>
+                     <div className="mt-2 text-slate-500 font-sans tracking-wide"
+                          style={{ fontSize: `${fontSize * 0.85}px`, lineHeight: 1.5 }}>
                        {kjvVerse.content}
                      </div>
                   )}
@@ -276,7 +265,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
           <button 
             onClick={(e) => {
                e.stopPropagation();
-               // 只传中文做总结
                const cuvVerses = verses.filter(v => v.version === 'CUV');
                if (cuvVerses.length > 0) {
                    const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
@@ -296,7 +284,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      {/* --- 右侧点击区域 (下一章) --- */}
+      {/* 右侧下一章区域 */}
       <div 
         className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 transition-colors"
         onClick={(e) => { e.stopPropagation(); handleNextChapter(); }}
