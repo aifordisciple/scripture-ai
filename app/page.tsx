@@ -154,4 +154,36 @@ export default function Home() {
             <Button 
                 variant={isAiOpen ? "secondary" : "ghost"} 
                 size="icon" 
-                onClick={() => setAiOpen(!is
+                onClick={() => setAiOpen(!isAiOpen)}
+                className={cn(isAiOpen && "text-blue-600 bg-blue-50")}
+            >
+                <Sparkles className="h-5 w-5" />
+            </Button>
+
+            {/* 字体设置 */}
+            <div className="hidden sm:flex items-center gap-2 w-24 mx-2">
+               <Slider 
+                value={[fontSize]} min={14} max={32} step={1} 
+                onValueChange={(val) => setFontSize(val[0])}
+               />
+            </div>
+            
+            <Button variant="ghost" size="icon" className="sm:hidden">
+              <Settings className="h-5 w-5 text-slate-500" />
+            </Button>
+          </div>
+        </header>
+
+        {/* 核心阅读区 - 使用 key 强制重渲染以重置滚动条 */}
+        <div className="flex-1 overflow-y-auto scroll-smooth bg-white">
+          <Reader 
+             key={activeTab.id} 
+             initialBook={activeTab.book} 
+             initialChapter={activeTab.chapter} 
+          />
+        </div>
+
+      </div>
+    </main>
+  );
+}
