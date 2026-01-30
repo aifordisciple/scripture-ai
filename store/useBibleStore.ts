@@ -30,10 +30,14 @@ interface BibleState {
   // --- 右侧 AI 面板 ---
   isAiOpen: boolean; 
   setAiOpen: (open: boolean) => void;
+  
+  // --- 新增：AI 面板宽度 (用于布局联动) ---
+  sidebarWidth: number;
+  setSidebarWidth: (width: number) => void;
 
   // --- 新增：中英对照开关 ---
-  showEnglish: boolean; // <--- 之前缺这个
-  toggleEnglish: () => void; // <--- 之前缺这个
+  showEnglish: boolean; 
+  toggleEnglish: () => void; 
 
   // --- 核心：多选状态 ---
   selectedVerses: number[];
@@ -77,7 +81,10 @@ export const useBibleStore = create<BibleState>((set) => ({
   isAiOpen: false,
   setAiOpen: (open) => set({ isAiOpen: open }),
 
-  // --- 初始化中英对照 ---
+  // 默认宽度 480px
+  sidebarWidth: 480,
+  setSidebarWidth: (width) => set({ sidebarWidth: width }),
+
   showEnglish: false,
   toggleEnglish: () => set((state) => ({ showEnglish: !state.showEnglish })),
 

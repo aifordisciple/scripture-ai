@@ -16,7 +16,7 @@ interface Verse {
   chapter: number;
   verse: number;
   content: string;
-  version: string; // 确保有 version 字段
+  version: string;
 }
 
 interface ReaderProps {
@@ -126,6 +126,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       touchStartRef.current = null;
   };
 
+  // --- 点击与AI处理 ---
   const handleVerseClick = (v: Verse, e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); 
     toggleVerseSelection(v.verse);
@@ -149,6 +150,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     const maxVerseIdx = verses.findIndex(v => v.verse === Math.max(...selectedVerses));
     const start = Math.max(0, minVerseIdx - 5);
     const end = Math.min(verses.length, maxVerseIdx + 6);
+    
     // 上下文也只取 CUV
     const contextContent = verses.slice(start, end)
         .filter(v => v.version === 'CUV')
@@ -161,13 +163,14 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     setIsMenuVisible(false);
   };
 
+  // 点击空白关闭菜单
   useEffect(() => {
     const handleClickOutside = () => setIsMenuVisible(false);
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // --- 关键：数据分组 (将 CUV 和 KJV 配对) ---
+  // 数据分组 (CUV + KJV)
   const verseMap = new Map<number, { CUV?: Verse, KJV?: Verse }>();
   verses.forEach(v => {
     if (!verseMap.has(v.verse)) verseMap.set(v.verse, {});
@@ -182,13 +185,15 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }
 
   return (
+    // --- 根布局: Flex ---
+    // 左栏 (flex-1) + 内容 (max-w-5xl) + 右栏 (flex-1)
     <div 
         className="w-full min-h-screen flex flex-row relative"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
     >
 
-      {/* 左侧上一章区域 */}
+      {/* --- 左侧点击区域 (上一章) --- */}
       <div 
         className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 transition-colors"
         onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }}
@@ -201,8 +206,9 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      {/* 中间核心内容区 */}
-      <div className="w-full max-w-3xl px-4 py-8 md:px-8 pb-32 bg-white shadow-sm min-h-screen z-0">
+      {/* --- 中间核心内容区 --- */}
+      {/* 修改点：max-w-5xl 增加阅读宽度 */}
+      <div className="w-full max-w-5xl px-4 py-8 md:px-8 pb-32 bg-white shadow-sm min-h-screen z-0">
         <h1 className="text-3xl font-serif font-bold text-center mb-8 text-slate-800">
           {verses[0]?.bookName || book} 第 {chapter} 章
         </h1>
@@ -265,6 +271,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
           <button 
             onClick={(e) => {
                e.stopPropagation();
+               // 只传中文做总结
                const cuvVerses = verses.filter(v => v.version === 'CUV');
                if (cuvVerses.length > 0) {
                    const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
@@ -284,7 +291,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      {/* 右侧下一章区域 */}
+      {/* --- 右侧点击区域 (下一章) --- */}
       <div 
         className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 transition-colors"
         onClick={(e) => { e.stopPropagation(); handleNextChapter(); }}

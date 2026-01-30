@@ -5,21 +5,22 @@ import { useChat } from 'ai/react';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, GripVertical } from 'lucide-react';
+import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 export function AISidebar() {
-  const { isAiOpen, setAiOpen, clearSelection, aiRequestTrigger } = useBibleStore();
+  // 从 Store 获取宽度状态
+  const { 
+    isAiOpen, setAiOpen, clearSelection, aiRequestTrigger,
+    sidebarWidth, setSidebarWidth 
+  } = useBibleStore();
   
-  // --- 新增状态：侧边栏宽度 (默认 480px) ---
-  const [sidebarWidth, setSidebarWidth] = useState(480);
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // --- 沉浸模式状态 ---
   const [isImmersive, setIsImmersive] = useState(false);
   
   const lastProcessedTimeRef = useRef<number>(0);
@@ -30,19 +31,16 @@ export function AISidebar() {
     onError: (error) => console.error("🔥 AI Error:", error)
   });
 
-  // 自动滚动
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // 打开时重置沉浸模式
   useEffect(() => {
     if (isAiOpen) {
       setIsImmersive(false);
     }
   }, [isAiOpen]);
 
-  // 监听触发器
   useEffect(() => {
     if (!aiRequestTrigger) return;
     if (aiRequestTrigger.timestamp === lastProcessedTimeRef.current) return;
@@ -80,15 +78,13 @@ export function AISidebar() {
   const resize = useCallback(
     (mouseMoveEvent: MouseEvent) => {
       if (isResizing) {
-        // 计算新宽度：窗口总宽 - 鼠标当前的 X 坐标
         const newWidth = document.body.clientWidth - mouseMoveEvent.clientX;
-        // 限制宽度范围：最小 300px，最大 800px
-        if (newWidth > 300 && newWidth < 800) {
+        if (newWidth > 300 && newWidth < 1200) { // 放宽最大宽度限制到 1200
           setSidebarWidth(newWidth);
         }
       }
     },
-    [isResizing]
+    [isResizing, setSidebarWidth]
   );
 
   useEffect(() => {
@@ -132,27 +128,23 @@ export function AISidebar() {
   return (
     <div 
         ref={sidebarRef}
-        // 使用 style 变量传递宽度，配合 Tailwind 的 w-[var(...)] 实现响应式
-        style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties}
+        style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties & { [key: string]: string }}
         className={cn(
             "fixed inset-y-0 right-0 z-50 bg-white shadow-2xl border-l flex flex-col",
-            // 移动端 w-full，桌面端使用自定义宽度
             "w-full md:w-[var(--sidebar-width)]",
-            // 只有在非拖拽状态下才启用过渡动画，防止拖拽卡顿
             isResizing ? "transition-none" : "animate-in slide-in-from-right duration-300"
         )}
     >
       
-      {/* --- 拖拽手柄 (仅桌面端显示) --- */}
+      {/* 拖拽手柄 */}
       <div 
         onMouseDown={startResizing}
         className="hidden md:block absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-400/50 transition-colors z-50 group"
       >
-        {/* 视觉提示条 */}
         <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-slate-200 rounded group-hover:bg-blue-500 transition-colors" />
       </div>
 
-      {/* --- 顶部标题栏 --- */}
+      {/* 顶部标题栏 */}
       <div 
         className={cn(
           "flex items-center justify-between px-4 bg-slate-50 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
@@ -171,7 +163,7 @@ export function AISidebar() {
         </Button>
       </div>
 
-      {/* --- 聊天内容区域 --- */}
+      {/* 聊天内容 */}
       <div 
         className="flex-1 overflow-y-auto p-4 bg-slate-50/30 min-h-0 space-y-6 cursor-pointer relative tap-highlight-transparent"
         onClick={() => setIsImmersive(!isImmersive)} 
@@ -236,7 +228,7 @@ export function AISidebar() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* --- 底部操作区 --- */}
+      {/* 底部操作区 */}
       <div 
         className={cn(
             "bg-white flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]",
@@ -282,7 +274,6 @@ export function AISidebar() {
           </div>
       </div>
       
-      {/* 拖拽遮罩层 (防止拖拽时 iframe/text 干扰) */}
       {isResizing && <div className="fixed inset-0 z-[100] cursor-col-resize" />}
     </div>
   );

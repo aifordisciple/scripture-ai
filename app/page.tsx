@@ -20,13 +20,13 @@ export default function Home() {
   const { 
     fontSize, setFontSize, 
     isSidebarOpen, toggleSidebar,
-    isAiOpen, setAiOpen, // AI 面板状态
+    isAiOpen, setAiOpen, 
     showEnglish, toggleEnglish,
-    lineHeight, setLineHeight, // 行高状态
-    tabs, activeTabId, setActiveTab, addTab, closeTab, updateActiveTab // 标签页状态
+    lineHeight, setLineHeight, 
+    tabs, activeTabId, setActiveTab, addTab, closeTab, updateActiveTab,
+    sidebarWidth // <--- 获取 AI 面板宽度
   } = useBibleStore();
 
-  // 获取当前激活的 Tab
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
 
   // 1. URL 变化 -> 更新当前 Tab 数据
@@ -49,12 +49,10 @@ export default function Home() {
     }
   };
 
-  // 3. 新建 Tab
   const handleAddTab = () => {
     addTab(activeTab.book, activeTab.chapter);
   };
 
-  // 4. 切换行距 (1.6 -> 1.8 -> 2.2)
   const toggleLineHeight = () => {
     if (lineHeight <= 1.6) setLineHeight(1.8);
     else if (lineHeight <= 1.8) setLineHeight(2.2);
@@ -64,12 +62,10 @@ export default function Home() {
   return (
     <main className="flex h-screen w-full overflow-hidden bg-white relative">
       
-      {/* 桌面端左侧边栏 */}
       <aside className="hidden md:block w-72 h-full border-r shrink-0">
         <Sidebar />
       </aside>
 
-      {/* 移动端左侧边栏 */}
       <Sheet open={isSidebarOpen} onOpenChange={toggleSidebar}>
         <SheetContent side="left" className="p-0 w-80">
           <SheetTitle className="sr-only">圣经目录</SheetTitle>
@@ -77,16 +73,24 @@ export default function Home() {
         </SheetContent>
       </Sheet>
 
-      {/* AI 侧边栏 */}
       <AISidebar />
 
       {/* 主区域 */}
-      <div className="flex-1 flex flex-col h-full relative min-w-0">
+      <div 
+        // 关键修改：使用 style 动态计算右边距
+        // 当 AI 打开时，在 PC 端添加右边距，给 AI 面板腾出位置
+        style={{ 
+          '--ai-offset': isAiOpen ? `${sidebarWidth}px` : '0px'
+        } as React.CSSProperties & { [key: string]: string }}
+        className={cn(
+          "flex-1 flex flex-col h-full relative min-w-0 transition-[margin] duration-300 ease-in-out",
+          "md:mr-[var(--ai-offset)]" // 仅在 PC 端应用右边距
+        )}
+      >
         
-        {/* --- 顶部导航栏 --- */}
+        {/* 顶部导航栏 */}
         <header className="h-14 border-b flex items-center justify-between px-4 bg-white z-10 sticky top-0 shrink-0 gap-2">
           
-          {/* 左侧：菜单 & Logo */}
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => toggleSidebar()}>
               <Menu className="h-5 w-5" />
@@ -94,7 +98,7 @@ export default function Home() {
             <span className="font-semibold text-slate-700 hidden md:inline">Scripture AI</span>
           </div>
           
-          {/* 中间：多标签页栏 (支持水平滚动) */}
+          {/* 标签页栏 */}
           <div className="flex-1 flex items-center overflow-x-auto no-scrollbar gap-1 px-2 mask-linear-fade">
              {tabs.map(tab => (
                <div 
@@ -108,7 +112,6 @@ export default function Home() {
                  )}
                >
                  <span>{tab.book} {tab.chapter}</span>
-                 {/* 关闭按钮 (hover 显示，选中时常显) */}
                  <X 
                    className={cn(
                      "w-3 h-3 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors",
@@ -126,46 +129,23 @@ export default function Home() {
              </Button>
           </div>
 
-          {/* 右侧：工具栏 */}
+          {/* 右侧工具栏 */}
           <div className="flex items-center gap-1 shrink-0">
-            
-            {/* 行距调节 */}
-            <Button 
-              variant="ghost" size="icon" 
-              onClick={toggleLineHeight}
-              className="hidden sm:flex text-slate-500"
-              title="调整行距"
-            >
+            <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="hidden sm:flex text-slate-500" title="调整行距">
               <AlignJustify className="h-4 w-4" />
             </Button>
 
-            {/* 中英对照 */}
-            <Button 
-              variant={showEnglish ? "secondary" : "ghost"} 
-              size="sm" 
-              onClick={toggleEnglish}
-              className="hidden sm:flex gap-1 text-xs font-bold"
-            >
+            <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="hidden sm:flex gap-1 text-xs font-bold">
               <Languages className="h-4 w-4" />
               {showEnglish ? "中/英" : "中"}
             </Button>
             
-            {/* AI 开关 (高亮状态) */}
-            <Button 
-                variant={isAiOpen ? "secondary" : "ghost"} 
-                size="icon" 
-                onClick={() => setAiOpen(!isAiOpen)}
-                className={cn(isAiOpen && "text-blue-600 bg-blue-50")}
-            >
+            <Button variant={isAiOpen ? "secondary" : "ghost"} size="icon" onClick={() => setAiOpen(!isAiOpen)} className={cn(isAiOpen && "text-blue-600 bg-blue-50")}>
                 <Sparkles className="h-5 w-5" />
             </Button>
 
-            {/* 字体设置 */}
             <div className="hidden sm:flex items-center gap-2 w-24 mx-2">
-               <Slider 
-                value={[fontSize]} min={14} max={32} step={1} 
-                onValueChange={(val) => setFontSize(val[0])}
-               />
+               <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} />
             </div>
             
             <Button variant="ghost" size="icon" className="sm:hidden">
@@ -174,7 +154,7 @@ export default function Home() {
           </div>
         </header>
 
-        {/* 核心阅读区 - 使用 key 强制重渲染以重置滚动条 */}
+        {/* 核心阅读区 */}
         <div className="flex-1 overflow-y-auto scroll-smooth bg-white">
           <Reader 
              key={activeTab.id} 
