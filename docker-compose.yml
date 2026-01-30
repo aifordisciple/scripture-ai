@@ -1,0 +1,28 @@
+
+services:
+  # Next.js 应用
+  web:
+    container_name: scripture-ai-web
+    build: .
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # 在 Docker 内部连接数据库，主机名是 'db'
+      - DATABASE_URL=postgresql://user:password@db:5432/scripture_db
+    depends_on:
+      - db
+
+  # PostgreSQL 数据库
+  db:
+    image: postgres:15-alpine
+    container_name: scripture-ai-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: scripture_db
+    ports:
+      - "5432:5432" # 暴露端口，方便电脑直接连接数据库
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data # 数据持久化到当前目录
