@@ -39,6 +39,10 @@ interface BibleState {
   showEnglish: boolean; 
   toggleEnglish: () => void; 
 
+  // --- 新增：暗黑模式 ---
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+
   // --- 核心：多选状态 ---
   selectedVerses: number[];
   
@@ -87,6 +91,10 @@ export const useBibleStore = create<BibleState>((set) => ({
 
   showEnglish: false,
   toggleEnglish: () => set((state) => ({ showEnglish: !state.showEnglish })),
+
+  // --- 初始化暗黑模式 ---
+  isDarkMode: false,
+  toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
 
   selectedVerses: [],
   aiRequestTrigger: null,

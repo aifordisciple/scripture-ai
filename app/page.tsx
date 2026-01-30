@@ -8,7 +8,7 @@ import { Reader } from "@/components/bible/Reader";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Sparkles, Plus, X, AlignJustify } from "lucide-react";
+import { Menu, Settings, Languages, Sparkles, Plus, X, AlignJustify, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AISidebar } from "@/components/bible/AISidebar";
 import { cn } from "@/lib/utils";
@@ -24,10 +24,20 @@ export default function Home() {
     showEnglish, toggleEnglish,
     lineHeight, setLineHeight, 
     tabs, activeTabId, setActiveTab, addTab, closeTab, updateActiveTab,
-    sidebarWidth // <--- 获取 AI 面板宽度
+    sidebarWidth,
+    isDarkMode, toggleDarkMode // <--- 获取暗黑模式状态
   } = useBibleStore();
 
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
+
+  // 1. 监听暗黑模式变化，动态切换 class
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   // 1. URL 变化 -> 更新当前 Tab 数据
   useEffect(() => {
@@ -60,14 +70,17 @@ export default function Home() {
   };
 
   return (
-    <main className="flex h-screen w-full overflow-hidden bg-white relative">
+    // 主容器：添加 dark:bg-slate-950 和过渡效果
+    <main className="flex h-screen w-full overflow-hidden bg-white dark:bg-slate-950 relative transition-colors duration-300">
       
-      <aside className="hidden md:block w-72 h-full border-r shrink-0">
+      {/* 桌面端左侧边栏 */}
+      <aside className="hidden md:block w-72 h-full border-r dark:border-slate-800 shrink-0">
         <Sidebar />
       </aside>
 
+      {/* 移动端左侧边栏 */}
       <Sheet open={isSidebarOpen} onOpenChange={toggleSidebar}>
-        <SheetContent side="left" className="p-0 w-80">
+        <SheetContent side="left" className="p-0 w-80 dark:bg-slate-900 dark:border-slate-800">
           <SheetTitle className="sr-only">圣经目录</SheetTitle>
           <Sidebar />
         </SheetContent>
@@ -77,8 +90,6 @@ export default function Home() {
 
       {/* 主区域 */}
       <div 
-        // 关键修改：使用 style 动态计算右边距
-        // 当 AI 打开时，在 PC 端添加右边距，给 AI 面板腾出位置
         style={{ 
           '--ai-offset': isAiOpen ? `${sidebarWidth}px` : '0px'
         } as React.CSSProperties & { [key: string]: string }}
@@ -89,13 +100,13 @@ export default function Home() {
       >
         
         {/* 顶部导航栏 */}
-        <header className="h-14 border-b flex items-center justify-between px-4 bg-white z-10 sticky top-0 shrink-0 gap-2">
+        <header className="h-14 border-b flex items-center justify-between px-4 bg-white dark:bg-slate-950 dark:border-slate-800 z-10 sticky top-0 shrink-0 gap-2 transition-colors duration-300">
           
           <div className="flex items-center gap-2 shrink-0">
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => toggleSidebar()}>
+            <Button variant="ghost" size="icon" className="md:hidden dark:text-slate-200" onClick={() => toggleSidebar()}>
               <Menu className="h-5 w-5" />
             </Button>
-            <span className="font-semibold text-slate-700 hidden md:inline">Scripture AI</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200 hidden md:inline">Scripture AI</span>
           </div>
           
           {/* 标签页栏 */}
@@ -107,8 +118,8 @@ export default function Home() {
                  className={cn(
                    "flex items-center gap-1.5 px-3 py-1.5 rounded-t-lg text-xs font-medium cursor-pointer transition-all border-b-2 whitespace-nowrap min-w-[80px] justify-between group",
                    activeTabId === tab.id 
-                     ? "bg-slate-50 border-blue-500 text-blue-700 shadow-sm" 
-                     : "hover:bg-slate-50 border-transparent text-slate-500"
+                     ? "bg-slate-50 dark:bg-slate-900 border-blue-500 text-blue-700 dark:text-blue-400 shadow-sm" 
+                     : "hover:bg-slate-50 dark:hover:bg-slate-900 border-transparent text-slate-500 dark:text-slate-400"
                  )}
                >
                  <span>{tab.book} {tab.chapter}</span>
@@ -124,23 +135,37 @@ export default function Home() {
                  />
                </div>
              ))}
-             <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full ml-1 shrink-0" onClick={handleAddTab}>
-               <Plus className="w-4 h-4 text-slate-400" />
+             <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full ml-1 shrink-0 dark:text-slate-400 dark:hover:bg-slate-800" onClick={handleAddTab}>
+               <Plus className="w-4 h-4" />
              </Button>
           </div>
 
           {/* 右侧工具栏 */}
           <div className="flex items-center gap-1 shrink-0">
-            <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="hidden sm:flex text-slate-500" title="调整行距">
+            
+            {/* --- 新增：暗黑模式切换按钮 --- */}
+            <Button 
+              variant="ghost" size="icon" 
+              onClick={toggleDarkMode}
+              className="text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800"
+              title="切换主题"
+            >
+              {isDarkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </Button>
+
+            <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="hidden sm:flex text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800" title="调整行距">
               <AlignJustify className="h-4 w-4" />
             </Button>
 
-            <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="hidden sm:flex gap-1 text-xs font-bold">
+            <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="hidden sm:flex gap-1 text-xs font-bold dark:text-slate-300 dark:hover:bg-slate-800">
               <Languages className="h-4 w-4" />
               {showEnglish ? "中/英" : "中"}
             </Button>
             
-            <Button variant={isAiOpen ? "secondary" : "ghost"} size="icon" onClick={() => setAiOpen(!isAiOpen)} className={cn(isAiOpen && "text-blue-600 bg-blue-50")}>
+            <Button variant={isAiOpen ? "secondary" : "ghost"} size="icon" onClick={() => setAiOpen(!isAiOpen)} className={cn(
+              isAiOpen && "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400",
+              "dark:text-slate-400 dark:hover:bg-slate-800"
+            )}>
                 <Sparkles className="h-5 w-5" />
             </Button>
 
@@ -155,7 +180,7 @@ export default function Home() {
         </header>
 
         {/* 核心阅读区 */}
-        <div className="flex-1 overflow-y-auto scroll-smooth bg-white">
+        <div className="flex-1 overflow-y-auto scroll-smooth bg-white dark:bg-slate-950 transition-colors duration-300">
           <Reader 
              key={activeTab.id} 
              initialBook={activeTab.book} 

@@ -2,7 +2,7 @@
 "use client";
 
 import { BIBLE_BOOKS } from "@/lib/constants";
-// import { ScrollArea } from "@/components/ui/scroll-area"; // 删除此行，不再使用
+// import { ScrollArea } from "@/components/ui/scroll-area"; 
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -35,17 +35,19 @@ export function Sidebar({ className }: { className?: string }) {
   };
 
   return (
-    <div className={cn("h-full flex flex-col bg-slate-50 border-r", className)}>
+    <div className={cn(
+        "h-full flex flex-col border-r transition-colors duration-300", 
+        "bg-slate-50 dark:bg-slate-950 dark:border-slate-800", // 暗黑模式背景和边框
+        className
+    )}>
       {/* 顶部标题：增加 flex-shrink-0 防止被压缩 */}
-      <div className="p-4 font-bold text-xl border-b bg-white flex-shrink-0">
+      <div className={cn(
+          "p-4 font-bold text-xl border-b flex-shrink-0 transition-colors",
+          "bg-white dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100" // 标题暗黑模式
+      )}>
         📖 圣经目录
       </div>
       
-      {/* 核心修改：使用原生 div 实现滚动 
-          flex-1: 占满剩余空间
-          overflow-y-auto: 内容溢出时显示滚动条
-          min-h-0: 这是一个 Flexbox 的魔法属性，防止子元素溢出容器
-      */}
       <div className="flex-1 overflow-y-auto min-h-0">
         <div className="p-4 space-y-2">
           {BIBLE_BOOKS.map((book) => (
@@ -54,8 +56,11 @@ export function Sidebar({ className }: { className?: string }) {
               <button
                 onClick={() => setExpandedBook(expandedBook === book.id ? null : book.id)}
                 className={cn(
-                  "w-full text-left px-3 py-2 rounded-md font-medium transition-colors hover:bg-slate-200",
-                  currentBookId === book.id ? "text-blue-700 bg-blue-50" : "text-slate-700"
+                  "w-full text-left px-3 py-2 rounded-md font-medium transition-colors",
+                  "hover:bg-slate-200 dark:hover:bg-slate-800", // Hover 态
+                  currentBookId === book.id 
+                    ? "text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30" // 选中态：暗黑模式下用半透明蓝
+                    : "text-slate-700 dark:text-slate-300" // 默认态
                 )}
               >
                 {book.name}
@@ -69,10 +74,11 @@ export function Sidebar({ className }: { className?: string }) {
                       key={chapter}
                       onClick={() => handleChapterClick(book.id, chapter)}
                       className={cn(
-                        "text-sm py-1 rounded hover:bg-slate-200 border",
+                        "text-sm py-1 rounded border transition-colors",
+                        "hover:bg-slate-200 dark:hover:bg-slate-800", // Hover 态
                         (currentBookId === book.id && currentChapter === chapter)
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-white text-slate-600 border-slate-200"
+                          ? "bg-blue-600 text-white border-blue-600 dark:bg-blue-600 dark:border-blue-600" // 选中章节
+                          : "bg-white text-slate-600 border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400" // 默认章节
                       )}
                     >
                       {chapter}

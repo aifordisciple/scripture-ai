@@ -195,21 +195,20 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
       {/* --- 左侧点击区域 (上一章) --- */}
       <div 
-        className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 transition-colors"
+        className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 dark:hover:bg-slate-800/30 transition-colors"
         onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }}
         title="上一章"
       >
         <div className="sticky top-[50vh] -translate-y-1/2 p-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
-           <div className="bg-slate-100/80 p-3 rounded-full shadow-sm backdrop-blur-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 hover:scale-110 transition-all">
+           <div className="bg-slate-100/80 dark:bg-slate-800/80 p-3 rounded-full shadow-sm backdrop-blur-md text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-110 transition-all">
               <ChevronLeft className="w-8 h-8" />
            </div>
         </div>
       </div>
 
       {/* --- 中间核心内容区 --- */}
-      {/* 修改点：max-w-5xl 增加阅读宽度 */}
-      <div className="w-full max-w-5xl px-4 py-8 md:px-8 pb-32 bg-white shadow-sm min-h-screen z-0">
-        <h1 className="text-3xl font-serif font-bold text-center mb-8 text-slate-800">
+      <div className="w-full max-w-5xl px-4 py-8 md:px-8 pb-32 bg-white dark:bg-slate-950 shadow-sm min-h-screen z-0 transition-colors duration-300">
+        <h1 className="text-3xl font-serif font-bold text-center mb-8 text-slate-800 dark:text-slate-100">
           {verses[0]?.bookName || book} 第 {chapter} 章
         </h1>
 
@@ -228,13 +227,15 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                 onClick={(e) => handleVerseClick(cuvVerse, e)}
                 className={cn(
                   "relative flex items-start px-2 py-1.5 rounded cursor-pointer transition-all duration-200 group/verse border border-transparent",
-                  isSelected ? "bg-yellow-100 border-blue-200 shadow-sm" : "hover:bg-slate-50"
+                  isSelected 
+                    ? "bg-yellow-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-700 shadow-sm" 
+                    : "hover:bg-slate-50 dark:hover:bg-slate-900"
                 )}
               >
                 <span 
                    className={cn(
                      "font-bold mr-3 select-none shrink-0 mt-0.5", 
-                     isSelected ? "text-blue-600" : "text-slate-400"
+                     isSelected ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-600"
                    )}
                    style={{ fontSize: fontSize * 0.6 }} 
                 >
@@ -246,7 +247,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                   <div 
                       className={cn(
                         "font-serif transition-colors text-justify",
-                        isSelected ? "text-slate-900 font-medium" : "text-slate-800"
+                        isSelected ? "text-slate-900 dark:text-slate-100 font-medium" : "text-slate-800 dark:text-slate-300"
                       )}
                       style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }} 
                   >
@@ -255,7 +256,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                   
                   {/* 英文渲染 (条件控制) */}
                   {showEnglish && kjvVerse && (
-                     <div className="mt-2 text-slate-500 font-sans tracking-wide"
+                     <div className="mt-2 text-slate-500 dark:text-slate-500 font-sans tracking-wide"
                           style={{ fontSize: `${fontSize * 0.85}px`, lineHeight: 1.5 }}>
                        {kjvVerse.content}
                      </div>
@@ -271,7 +272,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
           <button 
             onClick={(e) => {
                e.stopPropagation();
-               // 只传中文做总结
                const cuvVerses = verses.filter(v => v.version === 'CUV');
                if (cuvVerses.length > 0) {
                    const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
@@ -283,9 +283,9 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                    );
                }
             }}
-            className="shadow-md inline-flex items-center gap-2 px-6 py-3 bg-white border hover:bg-slate-50 text-slate-700 rounded-full transition-colors font-medium text-sm"
+            className="shadow-md inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full transition-colors font-medium text-sm"
           >
-            <BookOpenCheck className="w-5 h-5 text-blue-600" />
+            <BookOpenCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             生成第 {chapter} 章摘要
           </button>
         </div>
@@ -293,12 +293,12 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
       {/* --- 右侧点击区域 (下一章) --- */}
       <div 
-        className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 transition-colors"
+        className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 dark:hover:bg-slate-800/30 transition-colors"
         onClick={(e) => { e.stopPropagation(); handleNextChapter(); }}
         title="下一章"
       >
         <div className="sticky top-[50vh] -translate-y-1/2 p-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
-           <div className="bg-slate-100/80 p-3 rounded-full shadow-sm backdrop-blur-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 hover:scale-110 transition-all">
+           <div className="bg-slate-100/80 dark:bg-slate-800/80 p-3 rounded-full shadow-sm backdrop-blur-md text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-110 transition-all">
               <ChevronRight className="w-8 h-8" />
            </div>
         </div>
