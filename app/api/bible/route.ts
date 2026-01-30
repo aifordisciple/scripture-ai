@@ -11,13 +11,17 @@ export async function GET(request: Request) {
   }
 
   try {
+    // 必须确保没有 version: 'CUV' 的限制
     const verses = await prisma.bibleVerse.findMany({
       where: {
         bookId: book,
         chapter: parseInt(chapter),
-        version: 'CUV'
+        // version: 'CUV'  <-- 这一行必须删掉或注释掉
       },
-      orderBy: { verse: 'asc' }
+      orderBy: [
+        { verse: 'asc' },
+        { version: 'asc' }
+      ]
     });
     return NextResponse.json({ data: verses });
   } catch (error) {
