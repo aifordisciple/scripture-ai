@@ -1,3 +1,4 @@
+// app/api/bible/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -11,18 +12,18 @@ export async function GET(request: Request) {
   }
 
   try {
-    // 必须确保没有 version: 'CUV' 的限制
+    // 关键修改：移除 version: 'CUV' 限制，获取该章节所有版本的数据
     const verses = await prisma.bibleVerse.findMany({
       where: {
         bookId: book,
         chapter: parseInt(chapter),
-        // version: 'CUV'  <-- 这一行必须删掉或注释掉
       },
       orderBy: [
-        { verse: 'asc' },
-        { version: 'asc' }
+        { verse: 'asc' },   // 先按节排序
+        { version: 'asc' }  // 再按版本排序 (CUV, KJV)
       ]
     });
+
     return NextResponse.json({ data: verses });
   } catch (error) {
     console.error(error);
