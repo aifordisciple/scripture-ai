@@ -12,8 +12,9 @@ interface FloatingMenuProps {
   onClose: () => void;
   onExplain: () => void;
   selectedCount: number;
-  currentBook: string; // 传入当前书卷
-  currentChapter: number; // 传入当前章
+  currentBook: string; 
+  currentChapter: number;
+  onCopy: () => void; // 新增：接收复制回调
 }
 
 const COLORS = [
@@ -21,24 +22,25 @@ const COLORS = [
   { id: 'green', bg: 'bg-green-300', border: 'border-green-500' },
   { id: 'blue', bg: 'bg-blue-300', border: 'border-blue-500' },
   { id: 'red', bg: 'bg-red-300', border: 'border-red-500' },
-  { id: 'none', bg: 'bg-slate-100', border: 'border-slate-300', icon: true } // 清除
+  { id: 'none', bg: 'bg-slate-100', border: 'border-slate-300', icon: true } 
 ];
 
-export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter }: FloatingMenuProps) {
+export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy }: FloatingMenuProps) {
   const [render, setRender] = useState(false);
+  const [copied, setCopied] = useState(false); // 新增状态：显示已复制
   const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor } = useBibleStore();
 
   useEffect(() => {
-    if (visible) setRender(true);
-    else {
+    if (visible) {
+        setRender(true);
+        setCopied(false); // 重置状态
+    } else {
       const timer = setTimeout(() => setRender(false), 200);
       return () => clearTimeout(timer);
     }
   }, [visible]);
 
-  // 处理高亮点击
   const handleHighlight = async (color: string) => {
-    // 1. 乐观更新 Store
     selectedVerses.forEach(verse => {
       if (color === 'none') {
         removeHighlightLocally(currentBook, currentChapter, verse);
@@ -47,7 +49,6 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
       }
     });
 
-    // 2. 发送 API 请求 (后台静默保存)
     await fetch('/api/highlight', {
       method: 'POST',
       body: JSON.stringify({
@@ -57,21 +58,16 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         color: color === 'none' ? null : color
       })
     });
-    
-    // 不关闭菜单，允许连续操作，或者你可以选择关闭
-    // onClose(); 
   };
 
-  const handleCopy = () => {
-    // 简单的复制逻辑，后续可扩展为带格式复制
-    const text = `已复制 ${selectedCount} 节经文`; 
-    alert(text); // 临时替代
-    onClose();
+  const handleCopyClick = () => {
+    onCopy(); // 调用父组件传来的真复制逻辑
+    setCopied(true);
+    // 这里的 onClose 会在父组件的 handleCopy 里调用，也可以在这里延迟关闭以显示 Feedback
   };
 
   const handleNote = () => {
     if (selectedVerses.length > 0) {
-      // 打开笔记编辑器，默认关联第一节选中的经文
       openNoteEditor(currentBook, currentChapter, selectedVerses[0]);
       onClose();
     }
@@ -88,11 +84,10 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
       style={{
         top: position.top, 
         left: position.left,
-        transform: "translate(-50%, -100%) translateY(-10px)" // 向上偏移显示在文字上方
+        transform: "translate(-50%, -100%) translateY(-10px)" 
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* 第一行：颜色选择器 */}
       <div className="flex items-center gap-2 pb-2 border-b dark:border-slate-700 mb-1 px-1 justify-center">
         {COLORS.map((c) => (
           <button
@@ -109,7 +104,6 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         ))}
       </div>
 
-      {/* 第二行：功能按钮 */}
       <div className="flex items-center gap-1">
         <div className="px-2 text-[10px] font-bold text-slate-400 border-r dark:border-slate-700 mr-1">
           {selectedCount} 节
@@ -125,13 +119,14 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           <span className="text-[10px] text-slate-600 dark:text-slate-300">写笔记</span>
         </button>
 
-        <button onClick={handleCopy} className="flex flex-col items-center p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group">
-          <Copy className="w-4 h-4 text-green-500 mb-0.5" />
-          <span className="text-[10px] text-slate-600 dark:text-slate-300">复制</span>
+        <button onClick={handleCopyClick} className="flex flex-col items-center p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group">
+          <Copy className={cn("w-4 h-4 mb-0.5", copied ? "text-green-600" : "text-green-500")} />
+          <span className={cn("text-[10px]", copied ? "text-green-600 font-bold" : "text-slate-600 dark:text-slate-300")}>
+            {copied ? "已复制" : "复制"}
+          </span>
         </button>
       </div>
 
-      {/* 底部小三角 */}
       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white dark:border-t-slate-800" />
     </div>
   );

@@ -172,6 +172,64 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     setIsMenuVisible(false);
   };
 
+  // --- 新增：处理复制逻辑 ---
+// --- 修复后的复制逻辑 ---
+  const handleCopy = async () => {
+    // 1. 筛选选中经文
+    // 移除 version === 'CUV' 的严格限制，优先找 CUV，找不到就找任意版本，防止数据为空
+    const selectedContent = verses
+      .filter(v => selectedVerses.includes(v.verse))
+      .sort((a, b) => a.verse - b.verse)
+      // 如果同一节有多个版本，优先取 CUV，否则取第一个
+      .reduce((acc, curr) => {
+        const existing = acc.find(item => item.verse === curr.verse);
+        if (!existing) {
+          acc.push(curr);
+        } else if (curr.version === 'CUV') {
+          // 如果遇到 CUV，替换掉之前的（比如 KJV）
+          const index = acc.indexOf(existing);
+          acc[index] = curr;
+        }
+        return acc;
+      }, [] as Verse[])
+      .map(v => `${v.content} (${v.bookName} ${v.chapter}:${v.verse})`)
+      .join("\n");
+
+    console.log("尝试复制的内容:", selectedContent); // 调试用
+
+    if (!selectedContent) return;
+
+    // 2. 尝试使用标准 API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(selectedContent);
+        return; // 成功则退出
+      } catch (err) {
+        console.warn("Clipboard API failed, trying fallback...", err);
+      }
+    }
+
+    // 3. 回退方案：传统 execCommand (兼容非 HTTPS 和旧浏览器)
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = selectedContent;
+      // 防止在移动端拉起键盘
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'absolute';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      
+      textarea.select();
+      textarea.setSelectionRange(0, 99999); // 兼容 iOS
+      
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    } catch (e) {
+      console.error("Fallback copy failed:", e);
+      alert("复制失败，请手动复制");
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = () => setIsMenuVisible(false);
     document.addEventListener("click", handleClickOutside);
@@ -312,7 +370,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      {/* 更新 FloatingMenu，传入当前书卷章节 */}
+      {/* 更新 FloatingMenu，传入当前书卷章节和复制回调 */}
       <FloatingMenu 
         visible={isMenuVisible && selectedVerses.length > 0} 
         position={menuPosition}
@@ -321,6 +379,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         onExplain={handleAIExplain}
         currentBook={book}
         currentChapter={parseInt(chapter)}
+        onCopy={handleCopy} // 关键：传入复制函数
       />
     </div>
   );
