@@ -1,21 +1,23 @@
 // store/useBibleStore.ts
 import { create } from 'zustand';
 
-// 修改：增加 results 字段缓存搜索结果
+// 定义标签页数据结构
 export interface Tab {
   id: string;
   type: 'read' | 'search';
-  
-  // 阅读模式
   book?: string; 
   chapter?: string; 
-  
-  // 搜索模式
   query?: string;
   searchMode?: 'exact' | 'ai';
-  results?: any[]; // <--- 新增：缓存搜索结果数据
-  
+  results?: any[]; 
   scrollTop?: number;
+}
+
+export interface HighlightData {
+  bookId: string;
+  chapter: number;
+  verse: number;
+  color: string;
 }
 
 interface VerseRef {
@@ -24,16 +26,7 @@ interface VerseRef {
   verse: number;
 }
 
-// 新增高亮数据接口
-export interface HighlightData {
-  bookId: string;
-  chapter: number;
-  verse: number;
-  color: string;
-}
-
 interface BibleState {
-  // ... (保留原有的 fontSize, sidebarWidth, showEnglish 等所有状态)
   fontSize: number;
   setFontSize: (size: number) => void;
   lineHeight: number;
@@ -48,35 +41,48 @@ interface BibleState {
   toggleEnglish: () => void; 
   isDarkMode: boolean;
   toggleDarkMode: () => void;
-  
+
   selectedVerses: number[];
-  aiRequestTrigger: any; 
-  tabs: any[]; 
+  aiRequestTrigger: {
+    prompt: string;
+    content: string;
+    context: string;
+    ref: VerseRef;
+    timestamp: number;
+  } | null;
+
+  tabs: Tab[];
   activeTabId: string;
 
-  // --- 新增：笔记与高亮相关状态 ---
-  highlights: HighlightData[]; // 当前章节的高亮列表
+  // --- 高亮相关 ---
+  highlights: HighlightData[];
   setHighlights: (highlights: HighlightData[]) => void;
-  addHighlightLocally: (h: HighlightData) => void; // 乐观更新
+  addHighlightLocally: (h: HighlightData) => void;
   removeHighlightLocally: (bookId: string, chapter: number, verse: number) => void;
 
+  // --- 笔记相关 ---
   isNoteOpen: boolean;
   noteTargetVerse: { bookId: string, chapter: number, verse: number } | null;
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
 
-  // ... (保留原有的 actions: addTab, closeTab 等)
-  addTab: (params: any) => void;
+  // --- 新增：分享卡片状态 ---
+  isShareOpen: boolean;
+  shareData: { book: string; chapter: number; verses: number[] } | null;
+  openShareModal: (book: string, chapter: number, verses: number[]) => void;
+  closeShareModal: () => void;
+  
+  // Actions
+  addTab: (params: { type: 'read' | 'search'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' }) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
-  updateActiveTab: (data: any) => void;
+  updateActiveTab: (data: Partial<Tab>) => void; 
   toggleVerseSelection: (id: number) => void;
   clearSelection: () => void;
-  triggerAI: (prompt: string, content: string, context: string, ref: any) => void;
+  triggerAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
 }
 
 export const useBibleStore = create<BibleState>((set) => ({
-  // ... (保留原有的初始值)
   fontSize: 18,
   setFontSize: (size) => set({ fontSize: size }),
   lineHeight: 1.8,
@@ -91,39 +97,46 @@ export const useBibleStore = create<BibleState>((set) => ({
   toggleEnglish: () => set((state) => ({ showEnglish: !state.showEnglish })),
   isDarkMode: false,
   toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
-  
+
   selectedVerses: [],
   aiRequestTrigger: null,
   tabs: [{ id: 'tab-1', type: 'read', book: 'Gen', chapter: '1' }], 
   activeTabId: 'tab-1',
 
-  // --- 新增：初始化笔记与高亮状态 ---
+  // --- 高亮逻辑 ---
   highlights: [],
   setHighlights: (highlights) => set({ highlights }),
-  
   addHighlightLocally: (h) => set((state) => ({
-    // 先移除旧的（如果是改颜色），再加新的
     highlights: [...state.highlights.filter(i => i.verse !== h.verse), h]
   })),
-  
   removeHighlightLocally: (bookId, chapter, verse) => set((state) => ({
     highlights: state.highlights.filter(h => !(h.bookId === bookId && h.chapter === chapter && h.verse === verse))
   })),
 
+  // --- 笔记逻辑 ---
   isNoteOpen: false,
   noteTargetVerse: null,
-  
-  openNoteEditor: (bookId, chapter, verse) => set({ 
-    isNoteOpen: true, 
-    noteTargetVerse: { bookId, chapter, verse } 
-  }),
-  
+  openNoteEditor: (bookId, chapter, verse) => set({ isNoteOpen: true, noteTargetVerse: { bookId, chapter, verse } }),
   closeNoteEditor: () => set({ isNoteOpen: false, noteTargetVerse: null }),
 
-  // ... (保留原有的 actions 实现)
-  addTab: (params) => set((state) => {
+  // --- 分享逻辑 ---
+  isShareOpen: false,
+  shareData: null,
+  openShareModal: (book, chapter, verses) => set({ isShareOpen: true, shareData: { book, chapter, verses } }),
+  closeShareModal: () => set({ isShareOpen: false, shareData: null }),
+
+  // Actions implementation
+  addTab: ({ type, book = 'Gen', chapter = '1', query, searchMode }) => set((state) => {
     const newId = `tab-${Date.now()}`;
-    return { tabs: [...state.tabs, { id: newId, ...params }], activeTabId: newId };
+    const newTab: Tab = { id: newId, type };
+    if (type === 'read') {
+        newTab.book = book;
+        newTab.chapter = chapter;
+    } else {
+        newTab.query = query;
+        newTab.searchMode = searchMode;
+    }
+    return { tabs: [...state.tabs, newTab], activeTabId: newId };
   }),
   closeTab: (id) => set((state) => {
     if (state.tabs.length <= 1) return state; 
@@ -133,7 +146,9 @@ export const useBibleStore = create<BibleState>((set) => ({
     return { tabs: newTabs, activeTabId: newActiveId };
   }),
   setActiveTab: (id) => set({ activeTabId: id }),
-  updateActiveTab: (data) => set((state) => ({ tabs: state.tabs.map(t => t.id === state.activeTabId ? { ...t, ...data } : t )})),
+  updateActiveTab: (data) => set((state) => ({
+    tabs: state.tabs.map(t => t.id === state.activeTabId ? { ...t, ...data } : t )
+  })),
   toggleVerseSelection: (id) => set((state) => {
     const isSelected = state.selectedVerses.includes(id);
     let newSelection;
@@ -142,5 +157,8 @@ export const useBibleStore = create<BibleState>((set) => ({
     return { selectedVerses: newSelection };
   }),
   clearSelection: () => set({ selectedVerses: [] }),
-  triggerAI: (prompt, content, context, ref) => set({ isAiOpen: true, aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() } })
+  triggerAI: (prompt, content, context, ref) => set({
+    isAiOpen: true,
+    aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() }
+  })
 }));

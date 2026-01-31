@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Copy, X, Highlighter, PenLine } from "lucide-react";
+import { Sparkles, Copy, X, Highlighter, PenLine, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
 
@@ -14,7 +14,7 @@ interface FloatingMenuProps {
   selectedCount: number;
   currentBook: string; 
   currentChapter: number;
-  onCopy: () => void; // 新增：接收复制回调
+  onCopy: () => void;
 }
 
 const COLORS = [
@@ -27,13 +27,13 @@ const COLORS = [
 
 export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy }: FloatingMenuProps) {
   const [render, setRender] = useState(false);
-  const [copied, setCopied] = useState(false); // 新增状态：显示已复制
-  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor } = useBibleStore();
+  const [copied, setCopied] = useState(false);
+  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal } = useBibleStore();
 
   useEffect(() => {
     if (visible) {
         setRender(true);
-        setCopied(false); // 重置状态
+        setCopied(false);
     } else {
       const timer = setTimeout(() => setRender(false), 200);
       return () => clearTimeout(timer);
@@ -61,14 +61,20 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
   };
 
   const handleCopyClick = () => {
-    onCopy(); // 调用父组件传来的真复制逻辑
+    onCopy();
     setCopied(true);
-    // 这里的 onClose 会在父组件的 handleCopy 里调用，也可以在这里延迟关闭以显示 Feedback
   };
 
   const handleNote = () => {
     if (selectedVerses.length > 0) {
       openNoteEditor(currentBook, currentChapter, selectedVerses[0]);
+      onClose();
+    }
+  };
+
+  const handleShare = () => {
+    if (selectedVerses.length > 0) {
+      openShareModal(currentBook, currentChapter, selectedVerses);
       onClose();
     }
   };
@@ -117,6 +123,11 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         <button onClick={handleNote} className="flex flex-col items-center p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group">
           <PenLine className="w-4 h-4 text-blue-500 mb-0.5" />
           <span className="text-[10px] text-slate-600 dark:text-slate-300">写笔记</span>
+        </button>
+
+        <button onClick={handleShare} className="flex flex-col items-center p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group">
+          <Share2 className="w-4 h-4 text-pink-500 mb-0.5" />
+          <span className="text-[10px] text-slate-600 dark:text-slate-300">分享</span>
         </button>
 
         <button onClick={handleCopyClick} className="flex flex-col items-center p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group">

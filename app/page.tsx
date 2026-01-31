@@ -7,7 +7,8 @@ import { Sidebar } from "@/components/bible/Sidebar";
 import { Reader } from "@/components/bible/Reader";
 import { SearchResults } from "@/components/bible/SearchResults";
 import { SearchDialog } from "@/components/bible/SearchDialog";
-import { NoteEditor } from "@/components/bible/NoteEditor"; // <--- 新增导入
+import { NoteEditor } from "@/components/bible/NoteEditor"; 
+import { ShareCard } from "@/components/bible/ShareCard"; 
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -42,7 +43,6 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
-  // URL 变化同步
   useEffect(() => {
     const book = searchParams.get("book");
     const chapter = searchParams.get("chapter");
@@ -79,9 +79,8 @@ export default function Home() {
     <main className="flex h-screen w-full overflow-hidden bg-white dark:bg-slate-950 relative transition-colors duration-300">
       
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
-      
-      {/* --- 新增：笔记编辑器 (全局挂载，通过 store 控制显示) --- */}
       <NoteEditor />
+      <ShareCard /> {/* 挂载组件 */}
 
       <aside className="hidden md:block w-72 h-full border-r dark:border-slate-800 shrink-0">
         <Sidebar />
