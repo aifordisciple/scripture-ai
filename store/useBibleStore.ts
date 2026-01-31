@@ -1,12 +1,21 @@
 // store/useBibleStore.ts
 import { create } from 'zustand';
 
-// 定义标签页数据结构
+// 修改：增加 results 字段缓存搜索结果
 export interface Tab {
   id: string;
-  book: string; // 书卷 ID，如 "Gen"
-  chapter: string; // 章节号
-  scrollTop?: number; // (预留) 记忆滚动位置
+  type: 'read' | 'search';
+  
+  // 阅读模式
+  book?: string; 
+  chapter?: string; 
+  
+  // 搜索模式
+  query?: string;
+  searchMode?: 'exact' | 'ai';
+  results?: any[]; // <--- 新增：缓存搜索结果数据
+  
+  scrollTop?: number;
 }
 
 interface VerseRef {
@@ -18,35 +27,20 @@ interface VerseRef {
 interface BibleState {
   fontSize: number;
   setFontSize: (size: number) => void;
-
-  // --- 新增：行高控制 ---
   lineHeight: number;
   setLineHeight: (height: number) => void;
-
-  // --- 左侧目录 ---
   isSidebarOpen: boolean; 
   toggleSidebar: (open?: boolean) => void;
-
-  // --- 右侧 AI 面板 ---
   isAiOpen: boolean; 
   setAiOpen: (open: boolean) => void;
-  
-  // --- 新增：AI 面板宽度 (用于布局联动) ---
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
-
-  // --- 新增：中英对照开关 ---
   showEnglish: boolean; 
   toggleEnglish: () => void; 
-
-  // --- 新增：暗黑模式 ---
   isDarkMode: boolean;
   toggleDarkMode: () => void;
 
-  // --- 核心：多选状态 ---
   selectedVerses: number[];
-  
-  // --- 核心：AI 请求触发器 ---
   aiRequestTrigger: {
     prompt: string;
     content: string;
@@ -55,15 +49,13 @@ interface BibleState {
     timestamp: number;
   } | null;
 
-  // --- 新增：多标签页管理 ---
   tabs: Tab[];
   activeTabId: string;
   
-  // 动作
-  addTab: (book?: string, chapter?: string) => void;
+  addTab: (params: { type: 'read' | 'search'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' }) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
-  updateActiveTab: (book: string, chapter: string) => void; 
+  updateActiveTab: (data: Partial<Tab>) => void; 
   
   toggleVerseSelection: (id: number) => void;
   clearSelection: () => void;
@@ -73,40 +65,39 @@ interface BibleState {
 export const useBibleStore = create<BibleState>((set) => ({
   fontSize: 18,
   setFontSize: (size) => set({ fontSize: size }),
-
   lineHeight: 1.8,
   setLineHeight: (height) => set({ lineHeight: height }),
-
   isSidebarOpen: false,
-  toggleSidebar: (open) => set((state) => ({ 
-    isSidebarOpen: open !== undefined ? open : !state.isSidebarOpen 
-  })),
-
+  toggleSidebar: (open) => set((state) => ({ isSidebarOpen: open !== undefined ? open : !state.isSidebarOpen })),
   isAiOpen: false,
   setAiOpen: (open) => set({ isAiOpen: open }),
-
-  // 默认宽度 480px
   sidebarWidth: 480,
   setSidebarWidth: (width) => set({ sidebarWidth: width }),
-
   showEnglish: false,
   toggleEnglish: () => set((state) => ({ showEnglish: !state.showEnglish })),
-
-  // --- 初始化暗黑模式 ---
   isDarkMode: false,
   toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
 
   selectedVerses: [],
   aiRequestTrigger: null,
 
-  // --- 初始化标签页 ---
-  tabs: [{ id: 'tab-1', book: 'Gen', chapter: '1' }], 
+  tabs: [{ id: 'tab-1', type: 'read', book: 'Gen', chapter: '1' }], 
   activeTabId: 'tab-1',
 
-  addTab: (book = 'Gen', chapter = '1') => set((state) => {
+  addTab: ({ type, book = 'Gen', chapter = '1', query, searchMode }) => set((state) => {
     const newId = `tab-${Date.now()}`;
+    const newTab: Tab = { id: newId, type };
+    
+    if (type === 'read') {
+        newTab.book = book;
+        newTab.chapter = chapter;
+    } else {
+        newTab.query = query;
+        newTab.searchMode = searchMode;
+    }
+
     return {
-      tabs: [...state.tabs, { id: newId, book, chapter }],
+      tabs: [...state.tabs, newTab],
       activeTabId: newId
     };
   }),
@@ -123,9 +114,9 @@ export const useBibleStore = create<BibleState>((set) => ({
 
   setActiveTab: (id) => set({ activeTabId: id }),
 
-  updateActiveTab: (book, chapter) => set((state) => ({
+  updateActiveTab: (data) => set((state) => ({
     tabs: state.tabs.map(t => 
-      t.id === state.activeTabId ? { ...t, book, chapter } : t
+      t.id === state.activeTabId ? { ...t, ...data } : t
     )
   })),
 
@@ -144,12 +135,6 @@ export const useBibleStore = create<BibleState>((set) => ({
 
   triggerAI: (prompt, content, context, ref) => set({
     isAiOpen: true,
-    aiRequestTrigger: {
-      prompt,
-      content,
-      context,
-      ref,
-      timestamp: Date.now()
-    }
+    aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() }
   })
 }));

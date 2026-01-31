@@ -1,0 +1,117 @@
+// components/bible/SearchResults.tsx
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import { useBibleStore } from "@/store/useBibleStore";
+import { Loader2, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface SearchResultsProps {
+  query: string;
+  mode: 'exact' | 'ai';
+  // 新增 props 用于缓存
+  cachedResults?: any[];
+  onUpdateResults?: (results: any[]) => void;
+}
+
+export function SearchResults({ query, mode, cachedResults, onUpdateResults }: SearchResultsProps) {
+  // 如果有缓存，直接用缓存初始化；否则为空
+  const [results, setResults] = useState<any[]>(cachedResults || []);
+  // 如果没有缓存，则 loading 初始为 true
+  const [loading, setLoading] = useState(!cachedResults);
+  
+  const { fontSize, lineHeight, addTab } = useBibleStore();
+  
+  // 使用 useRef 防止 useEffect 对 onUpdateResults 依赖导致的循环
+  const onUpdateResultsRef = useRef(onUpdateResults);
+  useEffect(() => { onUpdateResultsRef.current = onUpdateResults; }, [onUpdateResults]);
+
+  useEffect(() => {
+    // 关键逻辑：如果已有缓存，直接跳过 API 请求
+    if (cachedResults) {
+        setResults(cachedResults);
+        setLoading(false);
+        return;
+    }
+
+    async function search() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&mode=${mode}`);
+        const json = await res.json();
+        const data = json.data || [];
+        
+        setResults(data);
+        
+        // 搜索完成后，保存到 Store
+        if (onUpdateResultsRef.current) {
+            onUpdateResultsRef.current(data);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    search();
+  }, [query, mode, cachedResults]); // 依赖项加入 cachedResults 确保切换时响应
+
+  const handleResultClick = (book: string, chapter: number) => {
+    addTab({
+        type: 'read',
+        book: book,
+        chapter: chapter.toString()
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 gap-3">
+        <Loader2 className="w-8 h-8 animate-spin" />
+        <p>{mode === 'ai' ? "AI 正在思考并查找相关经文..." : "正在搜索..."}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8 pb-32">
+      <div className="mb-8 border-b pb-4 dark:border-slate-800">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          🔍 搜索结果: "{query}"
+        </h1>
+        <p className="text-slate-500 text-sm mt-1">
+          模式: {mode === 'exact' ? '精确匹配' : 'AI 智能推荐'} • 找到 {results.length} 条结果
+        </p>
+      </div>
+
+      {results.length === 0 ? (
+        <div className="text-center text-slate-500 py-10">
+          未找到相关经文，请尝试更换关键词。
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {results.map((verse) => (
+            <div 
+              key={verse.id} 
+              className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer group border border-transparent hover:border-blue-200 dark:hover:border-blue-800"
+              onClick={() => handleResultClick(verse.bookId, verse.chapter)}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded">
+                  {verse.bookName} {verse.chapter}:{verse.verse}
+                </span>
+                <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <div 
+                className="text-slate-800 dark:text-slate-300 font-serif"
+                style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
+              >
+                {verse.content}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
