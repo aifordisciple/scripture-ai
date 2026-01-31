@@ -5,21 +5,22 @@ import { useEffect, useState, useRef } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Download, Sparkles, Image as ImageIcon, Upload, RotateCcw } from "lucide-react";
-import html2canvas from "html2canvas";
+import { Loader2, Download, Sparkles, Image as ImageIcon, Upload, RotateCcw, Quote } from "lucide-react";
+import { toPng } from "html-to-image"; // 使用 html-to-image 以支持更高级的 CSS 效果
 import { cn } from "@/lib/utils";
 
-// 1. 定义预设主题 (必须使用 HEX 颜色，绝对不要用 Tailwind 类名，避开 lab/hsl 报错)
+// 高级配色预设 (不仅是背景，还包含文字色和强调色)
 const PRESETS = [
-  { name: "晨曦", bg: "linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%)", textColor: "#ffffff" },
-  { name: "深海", bg: "linear-gradient(to top, #30cfd0 0%, #330867 100%)", textColor: "#ffffff" },
-  { name: "森林", bg: "linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%)", textColor: "#1a2e05" }, 
-  { name: "极简", bg: "linear-gradient(to right, #e2e2e2, #ffffff)", textColor: "#333333" }, 
-  { name: "落日", bg: "linear-gradient(to right, #fa709a 0%, #fee140 100%)", textColor: "#ffffff" },
-  { name: "极光", bg: "linear-gradient(to right, #43e97b 0%, #38f9d7 100%)", textColor: "#1a2e05" },
-  { name: "午夜", bg: "linear-gradient(to bottom, #0f2027, #203a43, #2c5364)", textColor: "#ffffff" },
-  { name: "圣洁", bg: "#ffffff", textColor: "#000000" }, 
+  { name: "极光", bg: "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%)", textColor: "#5e4b56", accent: "#ffffff" },
+  { name: "深邃", bg: "linear-gradient(to top, #30cfd0 0%, #330867 100%)", textColor: "#ffffff", accent: "rgba(255,255,255,0.2)" },
+  { name: "墨意", bg: "linear-gradient(to bottom, #323232 0%, #3F3F3F 40%, #1C1C1C 150%), linear-gradient(to top, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.25) 200%)", backgroundBlendMode: "multiply", textColor: "#e0e0e0", accent: "#a0a0a0" },
+  { name: "纸莎草", bg: "#fdfbf7", textColor: "#3c3c3c", accent: "#d4c5b0" }, // 仿纸质
+  { name: "晨曦", bg: "linear-gradient(120deg, #a18cd1 0%, #fbc2eb 100%)", textColor: "#ffffff", accent: "rgba(255,255,255,0.3)" },
+  { name: "青峦", bg: "linear-gradient(to top, #0ba360 0%, #3cba92 100%)", textColor: "#ffffff", accent: "rgba(255,255,255,0.2)" },
 ];
+
+// SVG 噪点纹理 (Data URI)，用于给卡片增加高级纸质颗粒感
+const NOISE_TEXTURE = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E")`;
 
 export function ShareCard() {
   const { isShareOpen, closeShareModal, shareData } = useBibleStore();
@@ -28,12 +29,11 @@ export function ShareCard() {
   
   const [verseContent, setVerseContent] = useState<string[]>([]);
   
-  // 状态：背景样式 (支持渐变 CSS 或 url(...) )
-  const [backgroundStyle, setBackgroundStyle] = useState<string>(PRESETS[0].bg);
-  const [isImageBg, setIsImageBg] = useState(false);
+  // 样式状态
+  const [currentPreset, setCurrentPreset] = useState(PRESETS[0]);
+  const [customBgImage, setCustomBgImage] = useState<string | null>(null);
   
   const [title, setTitle] = useState("每日灵修");
-  const [textColor, setTextColor] = useState(PRESETS[0].textColor);
   
   const cardRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,7 +48,7 @@ export function ShareCard() {
           const verses = json.data.filter((v: any) => 
             shareData?.verses.includes(v.verse) && v.version === 'CUV'
           );
-          setVerseContent(verses.map((v: any) => `${v.content} (${v.verse})`));
+          setVerseContent(verses.map((v: any) => v.content)); // 只取内容，节号单独处理
           
           // 首次打开自动生成主题
           if (verses.length > 0) {
@@ -71,12 +71,10 @@ export function ShareCard() {
         body: JSON.stringify({ content: text })
       });
       const data = await res.json();
-      if (data.gradient && data.gradient.includes('gradient')) {
-          setBackgroundStyle(data.gradient);
-          setIsImageBg(false);
-          setTextColor("#ffffff"); // AI 主题默认白字比较安全
-      }
+      // 如果 AI 返回了标题，设置标题
       if (data.title) setTitle(data.title);
+      // 注意：这里我们保留预设的配色逻辑，只用 AI 生成标题，
+      // 或者你可以扩展逻辑让 AI 选择最接近的 PRESET。
     } catch (e) {
       console.error(e);
     } finally {
@@ -91,34 +89,34 @@ export function ShareCard() {
         const reader = new FileReader();
         reader.onload = (event) => {
             if (event.target?.result) {
-                setBackgroundStyle(`url(${event.target.result})`);
-                setIsImageBg(true);
-                setTextColor("#ffffff"); // 图片背景默认白字
+                setCustomBgImage(`url(${event.target.result})`);
+                // 图片背景强制用白字
+                setCurrentPreset({ ...currentPreset, name: "自定义", textColor: "#ffffff", accent: "rgba(255,255,255,0.3)" });
             }
         };
         reader.readAsDataURL(file);
     }
   };
 
-  // 4. 生成图片 (核心修复逻辑)
+  // 4. 生成图片 (使用 html-to-image)
   const handleDownload = async () => {
     if (!cardRef.current) return;
     setLoading(true);
+    
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 3, // 3倍超采样，保证文字清晰
-        useCORS: true, // 允许跨域图片
-        allowTaint: true, // 允许画布被污染 (对于本地Blob这是必须的)
-        backgroundColor: null, // 透明背景
-        logging: false,
-        // 关键：忽略可能带有现代 CSS 的外部干扰元素
-        ignoreElements: (element) => element.tagName === 'IFRAME' || element.tagName === 'SCRIPT'
+      const dataUrl = await toPng(cardRef.current, { 
+        cacheBust: true, 
+        pixelRatio: 3, // 3倍超采样，保证高清，这是“高级感”的关键
+        style: {
+            // 可以在截图时微调样式，比如去掉圆角，让图片是直角的
+            borderRadius: '0', 
+            boxShadow: 'none',
+        }
       });
       
-      const image = canvas.toDataURL("image/png");
       const link = document.createElement("a");
-      link.href = image;
       link.download = `scripture-card-${Date.now()}.png`;
+      link.href = dataUrl;
       link.click();
     } catch (e) {
       console.error("生成失败:", e);
@@ -130,9 +128,13 @@ export function ShareCard() {
 
   if (!isShareOpen || !shareData) return null;
 
+  const bgStyle = customBgImage 
+    ? { backgroundImage: customBgImage, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { background: currentPreset.bg };
+
   return (
     <Dialog open={isShareOpen} onOpenChange={(open) => !open && closeShareModal()}>
-      <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border-none p-0 overflow-hidden flex flex-col max-h-[90vh]">
+      <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border-none p-0 overflow-hidden flex flex-col max-h-[95vh]">
         <DialogHeader className="p-4 bg-slate-50 dark:bg-slate-800 border-b dark:border-slate-700">
           <DialogTitle className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
             <ImageIcon className="w-5 h-5" />
@@ -143,66 +145,92 @@ export function ShareCard() {
         {/* 预览区域 */}
         <div className="flex-1 overflow-y-auto p-6 bg-slate-100 dark:bg-black/50 flex justify-center items-center">
           
-          {/* cardRef 是我们要截图的目标。
-             注意：style 中我们强制指定了 color 和 boxShadow，覆盖任何可能继承的 lab/oklch 变量。
-          */}
+          {/* --- 卡片容器 --- */}
           <div 
             ref={cardRef}
-            className="w-full max-w-[320px] min-h-[480px] p-6 flex flex-col justify-between relative overflow-hidden text-center select-none rounded-xl"
+            className="w-full max-w-[340px] min-h-[500px] relative overflow-hidden flex flex-col shadow-2xl"
             style={{ 
-                background: backgroundStyle, 
-                backgroundSize: 'cover', 
-                backgroundPosition: 'center',
-                color: textColor, // 强制覆盖继承的颜色
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', // 手写标准 RGB 阴影
-                fontFamily: '"Noto Serif SC", serif' 
+                ...bgStyle,
+                color: currentPreset.textColor,
+                fontFamily: '"Noto Serif SC", serif' // 确保使用衬线体
             }}
           >
-            {/* 图片背景遮罩层 */}
-            {isImageBg && (
-                <div className="absolute inset-0 bg-black/40 z-0" />
-            )}
+            {/* 1. 遮罩层 (如果是图片或某些渐变，增加文字可读性) */}
+            {customBgImage && <div className="absolute inset-0 bg-black/30 z-0" />}
+            
+            {/* 2. 噪点纹理 (高级感来源) */}
+            <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay" style={{ backgroundImage: NOISE_TEXTURE }} />
 
-            {/* 装饰水印 */}
-            <div className="absolute top-[-30px] right-[-30px] opacity-20 rotate-12 z-10 pointer-events-none">
-              <Sparkles className="w-40 h-40" fill="currentColor" />
+            {/* 3. 装饰性大引号水印 */}
+            <div className="absolute top-4 left-4 opacity-10 z-0 transform -scale-x-100">
+                <Quote size={120} fill="currentColor" stroke="none" />
             </div>
 
-            {/* 内容区域 */}
-            <div className="relative z-10 flex flex-col h-full justify-between">
-                <div>
-                    {/* 标题 */}
-                    <div 
-                        className="text-xs font-bold tracking-[0.2em] uppercase mb-6 border-b pb-3 inline-block px-4"
-                        style={{ borderColor: `${textColor}40` }} // 使用 Hex 透明度
-                    >
+            {/* --- 内容层 (z-index 10) --- */}
+            <div className="relative z-10 flex flex-col h-full p-8">
+                
+                {/* 顶部：标题与日期 */}
+                <div className="flex justify-between items-center mb-8 opacity-80">
+                    <div className="text-[10px] tracking-[0.2em] uppercase border-b pb-1" style={{ borderColor: currentPreset.accent }}>
                         {title}
                     </div>
-                    
-                    {/* 经文内容 */}
-                    <div className="text-lg leading-loose font-medium space-y-3 text-justify">
-                        {verseContent.map((v, i) => (
-                        <p key={i} style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
-                            {v}
-                        </p>
-                        ))}
+                    <div className="text-[10px] font-sans opacity-70">
+                        {new Date().toLocaleDateString('zh-CN')}
                     </div>
                 </div>
 
-                {/* 底部信息 */}
-                <div className="mt-8 pt-4 border-t flex justify-between items-end" style={{ borderColor: `${textColor}30` }}>
-                    <div className="text-left">
-                        <p className="font-bold text-sm" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
-                        {shareData.book} {shareData.chapter}
-                        </p>
-                        <p className="text-[10px] opacity-80 mt-0.5">Scripture AI</p>
-                    </div>
-                    <div className="bg-white/20 p-1.5 rounded backdrop-blur-sm">
-                        <div className="w-10 h-10 bg-white rounded-sm flex items-center justify-center">
-                            <span className="text-[8px] font-bold text-black">QR</span>
+                {/* 中间：经文内容 */}
+                <div className="flex-1 flex flex-col justify-center gap-6">
+                    {verseContent.map((v, i) => (
+                        <div key={i} className="relative">
+                            {/* 经文前的装饰短线 */}
+                            {i === 0 && <div className="w-8 h-0.5 mb-4 opacity-50" style={{ backgroundColor: 'currentColor' }} />}
+                            
+                            <p 
+                                className="text-xl leading-loose font-medium text-justify drop-shadow-sm" 
+                                style={{ 
+                                    textShadow: customBgImage ? '0 2px 4px rgba(0,0,0,0.5)' : 'none',
+                                    fontWeight: 500
+                                }}
+                            >
+                                {v}
+                            </p>
+                            {/* 节号角标 */}
+                            <sup className="text-[10px] opacity-60 ml-1 font-sans">
+                                {shareData.verses[i]}
+                            </sup>
+                        </div>
+                    ))}
+                </div>
+
+                {/* 底部：出处与 Branding (毛玻璃效果) */}
+                <div className="mt-10 pt-0">
+                    <div 
+                        className="rounded-xl p-4 flex justify-between items-center backdrop-blur-md"
+                        style={{ 
+                            backgroundColor: 'rgba(255,255,255,0.1)', 
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                        }}
+                    >
+                        <div className="flex flex-col">
+                            <span className="font-bold text-sm tracking-wide">
+                                {shareData.book} {shareData.chapter}
+                            </span>
+                            <span className="text-[9px] opacity-70 mt-0.5 uppercase tracking-wider font-sans">
+                                Scripture AI Journal
+                            </span>
+                        </div>
+                        
+                        {/* 模拟二维码 */}
+                        <div className="bg-white p-1 rounded-sm opacity-90">
+                             <div className="w-8 h-8 border-2 border-black border-dashed rounded-sm flex items-center justify-center">
+                                <div className="w-3 h-3 bg-black rounded-full" />
+                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
           </div>
         </div>
@@ -211,25 +239,19 @@ export function ShareCard() {
         <div className="p-4 bg-white dark:bg-slate-900 border-t dark:border-slate-800 flex flex-col gap-4">
           
           <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar px-1 items-center">
-            {/* AI 按钮 */}
+            {/* AI 换标题 */}
             <button 
                onClick={() => handleAITheme(verseContent.join(" "))}
                disabled={generatingTheme}
                className="shrink-0 w-10 h-10 rounded-full border border-slate-200 dark:border-slate-600 flex items-center justify-center bg-slate-50 dark:bg-slate-800 hover:scale-105 transition-transform"
-               title="AI 重新生成"
+               title="AI 优化标题"
             >
                {generatingTheme ? <Loader2 className="w-5 h-5 animate-spin text-blue-500" /> : <Sparkles className="w-5 h-5 text-purple-500" />}
             </button>
 
-            {/* 上传图片按钮 */}
+            {/* 上传图片 */}
             <div className="relative shrink-0">
-                <input 
-                    type="file" 
-                    accept="image/*" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    onChange={handleImageUpload}
-                />
+                <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleImageUpload} />
                 <button 
                     onClick={() => fileInputRef.current?.click()}
                     className="w-10 h-10 rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
@@ -241,18 +263,17 @@ export function ShareCard() {
 
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 shrink-0 mx-1" />
 
-            {/* 预设主题 */}
+            {/* 预设主题球 */}
             {PRESETS.map((p, i) => (
               <button
                 key={i}
                 onClick={() => {
-                    setBackgroundStyle(p.bg);
-                    setTextColor(p.textColor);
-                    setIsImageBg(false);
+                    setCurrentPreset(p);
+                    setCustomBgImage(null);
                 }}
                 className={cn(
                     "shrink-0 w-10 h-10 rounded-full border-2 shadow-sm hover:scale-110 transition-transform",
-                    backgroundStyle === p.bg ? "border-blue-500 scale-110" : "border-white dark:border-slate-700"
+                    currentPreset.name === p.name ? "border-blue-500 scale-110" : "border-white dark:border-slate-700"
                 )}
                 style={{ background: p.bg }}
                 title={p.name}
@@ -266,7 +287,7 @@ export function ShareCard() {
             </Button>
             <Button onClick={handleDownload} disabled={loading} className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white">
                 {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download className="w-4 h-4 mr-2" />}
-                保存图片
+                保存高清图片
             </Button>
           </div>
         </div>
