@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/bible/Sidebar";
 import { Reader } from "@/components/bible/Reader";
 import { SearchResults } from "@/components/bible/SearchResults";
 import { SearchDialog } from "@/components/bible/SearchDialog";
+import { NoteEditor } from "@/components/bible/NoteEditor"; // <--- 新增导入
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -41,7 +42,7 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
-  // URL 变化同步 (仅当在阅读模式时)
+  // URL 变化同步
   useEffect(() => {
     const book = searchParams.get("book");
     const chapter = searchParams.get("chapter");
@@ -78,6 +79,9 @@ export default function Home() {
     <main className="flex h-screen w-full overflow-hidden bg-white dark:bg-slate-950 relative transition-colors duration-300">
       
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
+      
+      {/* --- 新增：笔记编辑器 (全局挂载，通过 store 控制显示) --- */}
+      <NoteEditor />
 
       <aside className="hidden md:block w-72 h-full border-r dark:border-slate-800 shrink-0">
         <Sidebar />
@@ -185,7 +189,6 @@ export default function Home() {
           </div>
         </header>
 
-        {/* 核心内容区 */}
         <div className="flex-1 overflow-y-auto scroll-smooth bg-white dark:bg-slate-950 transition-colors duration-300">
           {activeTab.type === 'read' ? (
               <Reader 
@@ -194,13 +197,12 @@ export default function Home() {
                 initialChapter={activeTab.chapter || '1'} 
               />
           ) : (
-              // 关键修改：传入 cachedResults 和 onUpdateResults
               <SearchResults 
                 key={activeTab.id}
                 query={activeTab.query || ''}
                 mode={activeTab.searchMode || 'exact'}
-                cachedResults={activeTab.results} // <--- 传入缓存
-                onUpdateResults={(data) => updateActiveTab({ results: data })} // <--- 更新缓存
+                cachedResults={activeTab.results}
+                onUpdateResults={(data) => updateActiveTab({ results: data })}
               />
           )}
         </div>

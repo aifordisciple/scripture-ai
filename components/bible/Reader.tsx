@@ -24,6 +24,14 @@ interface ReaderProps {
   initialChapter: string;
 }
 
+// 颜色映射表：将数据库存储的颜色名映射为 Tailwind 类
+const HIGHLIGHT_COLORS: Record<string, string> = {
+  yellow: "bg-yellow-200/50 dark:bg-yellow-900/30",
+  green: "bg-green-200/50 dark:bg-green-900/30",
+  blue: "bg-blue-200/50 dark:bg-blue-900/30",
+  red: "bg-red-200/50 dark:bg-red-900/30",
+};
+
 export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,7 +45,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [isMenuVisible, setIsMenuVisible] = useState(false);
 
-  // 获取 showEnglish 和 lineHeight
   const { 
     fontSize, 
     lineHeight, 
@@ -45,30 +52,43 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     toggleVerseSelection, 
     clearSelection, 
     triggerAI, 
-    showEnglish 
+    showEnglish,
+    // --- 新增：从 Store 获取高亮状态和设置方法 ---
+    highlights,
+    setHighlights 
   } = useBibleStore();
 
   const touchStartRef = useRef<{ x: number, y: number } | null>(null);
 
+  // 1. 获取经文 & 获取高亮
   useEffect(() => {
-    async function fetchVerses() {
+    async function fetchData() {
       setLoading(true);
       clearSelection();
       setIsMenuVisible(false);
       try {
-        const res = await fetch(`/api/bible?book=${book}&chapter=${chapter}`);
-        const json = await res.json();
-        if (json.data) setVerses(json.data);
+        // 并行请求：经文数据 + 高亮数据
+        const [versesRes, highlightsRes] = await Promise.all([
+          fetch(`/api/bible?book=${book}&chapter=${chapter}`),
+          fetch(`/api/highlight?bookId=${book}&chapter=${chapter}`)
+        ]);
+
+        const versesJson = await versesRes.json();
+        const highlightsJson = await highlightsRes.json();
+
+        if (versesJson.data) setVerses(versesJson.data);
+        if (highlightsJson.data) setHighlights(highlightsJson.data); // 存入 Store
+
       } catch (error) {
-        console.error("Failed to fetch verses:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
     }
-    fetchVerses();
-  }, [book, chapter, clearSelection]);
+    fetchData();
+  }, [book, chapter, clearSelection, setHighlights]);
 
-  // --- 导航逻辑 ---
+  // --- 导航逻辑 (保持不变) ---
   const navigateTo = (newBook: string, newChapter: number) => {
       router.push(`/?book=${newBook}&chapter=${newChapter}`);
   };
@@ -76,10 +96,8 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const handleNextChapter = () => {
       const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book);
       if (currentBookIndex === -1) return;
-      
       const currentBookConfig = BIBLE_BOOKS[currentBookIndex];
       const currentChapterInt = parseInt(chapter);
-
       if (currentChapterInt < currentBookConfig.chapters) {
           navigateTo(book, currentChapterInt + 1);
       } else if (currentBookIndex < BIBLE_BOOKS.length - 1) {
@@ -91,9 +109,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const handlePrevChapter = () => {
       const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book);
       if (currentBookIndex === -1) return;
-
       const currentChapterInt = parseInt(chapter);
-
       if (currentChapterInt > 1) {
           navigateTo(book, currentChapterInt - 1);
       } else if (currentBookIndex > 0) {
@@ -102,26 +118,17 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       }
   };
 
-  // --- 手势处理 ---
+  // --- 手势处理 (保持不变) ---
   const handleTouchStart = (e: React.TouchEvent) => {
-      touchStartRef.current = {
-          x: e.touches[0].clientX,
-          y: e.touches[0].clientY
-      };
+      touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
       if (!touchStartRef.current) return;
-      const touchEnd = {
-          x: e.changedTouches[0].clientX,
-          y: e.changedTouches[0].clientY
-      };
-      const diffX = touchStartRef.current.x - touchEnd.x; 
-      const diffY = touchStartRef.current.y - touchEnd.y;
-
+      const diffX = touchStartRef.current.x - e.changedTouches[0].clientX;
+      const diffY = touchStartRef.current.y - e.changedTouches[0].clientY;
       if (Math.abs(diffX) > 80 && Math.abs(diffY) < 60) {
-          if (diffX > 0) handleNextChapter();
-          else handlePrevChapter();
+          if (diffX > 0) handleNextChapter(); else handlePrevChapter();
       }
       touchStartRef.current = null;
   };
@@ -131,7 +138,11 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     e.preventDefault(); e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); 
     toggleVerseSelection(v.verse);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    setMenuPosition({ top: rect.top - 10, left: rect.left + rect.width / 2 });
+    // 调整菜单位置，避免太靠边
+    setMenuPosition({ 
+        top: rect.top - 10, 
+        left: Math.min(Math.max(rect.left + rect.width / 2, 80), window.innerWidth - 80)
+    });
     setIsMenuVisible(true);
   };
 
@@ -140,7 +151,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     const selectedVerseObjects = verses.filter(v => selectedVerses.includes(v.verse));
     if (selectedVerseObjects.length === 0) return;
 
-    // 只发送中文版 (CUV) 给 AI，避免发两遍
     const cuvVerses = selectedVerseObjects.filter(v => v.version === 'CUV');
     if (cuvVerses.length === 0) return; 
 
@@ -151,7 +161,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     const start = Math.max(0, minVerseIdx - 5);
     const end = Math.min(verses.length, maxVerseIdx + 6);
     
-    // 上下文也只取 CUV
     const contextContent = verses.slice(start, end)
         .filter(v => v.version === 'CUV')
         .map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
@@ -163,14 +172,12 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     setIsMenuVisible(false);
   };
 
-  // 点击空白关闭菜单
   useEffect(() => {
     const handleClickOutside = () => setIsMenuVisible(false);
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // 数据分组 (CUV + KJV)
   const verseMap = new Map<number, { CUV?: Verse, KJV?: Verse }>();
   verses.forEach(v => {
     if (!verseMap.has(v.verse)) verseMap.set(v.verse, {});
@@ -185,15 +192,12 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }
 
   return (
-    // --- 根布局: Flex ---
-    // 左栏 (flex-1) + 内容 (max-w-5xl) + 右栏 (flex-1)
     <div 
         className="w-full min-h-screen flex flex-row relative"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
     >
-
-      {/* --- 左侧点击区域 (上一章) --- */}
+      {/* 左侧区域 */}
       <div 
         className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 dark:hover:bg-slate-800/30 transition-colors"
         onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }}
@@ -206,7 +210,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      {/* --- 中间核心内容区 --- */}
+      {/* 中间阅读区 */}
       <div className="w-full max-w-5xl px-4 py-8 md:px-8 pb-32 bg-white dark:bg-slate-950 shadow-sm min-h-screen z-0 transition-colors duration-300">
         <h1 className="text-3xl font-serif font-bold text-center mb-8 text-slate-800 dark:text-slate-100">
           {verses[0]?.bookName || book} 第 {chapter} 章
@@ -220,6 +224,10 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             
             if (!cuvVerse) return null;
             const isSelected = selectedVerses.includes(verseNum);
+            
+            // --- 查找当前节是否有高亮 ---
+            const highlight = highlights.find(h => h.verse === verseNum);
+            const highlightClass = highlight ? HIGHLIGHT_COLORS[highlight.color] : "";
 
             return (
               <div
@@ -227,9 +235,12 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                 onClick={(e) => handleVerseClick(cuvVerse, e)}
                 className={cn(
                   "relative flex items-start px-2 py-1.5 rounded cursor-pointer transition-all duration-200 group/verse border border-transparent",
+                  // 样式优先级：选中态 > 高亮态 > 默认态
                   isSelected 
-                    ? "bg-yellow-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-700 shadow-sm" 
-                    : "hover:bg-slate-50 dark:hover:bg-slate-900"
+                    ? "bg-blue-100 dark:bg-blue-900/60 border-blue-300 dark:border-blue-500 shadow-sm" 
+                    : highlightClass 
+                      ? `${highlightClass} border-transparent` // 应用高亮色
+                      : "hover:bg-slate-50 dark:hover:bg-slate-900"
                 )}
               >
                 <span 
@@ -243,7 +254,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                 </span>
                 
                 <div className="flex-1 min-w-0">
-                  {/* 中文渲染 */}
                   <div 
                       className={cn(
                         "font-serif transition-colors text-justify",
@@ -254,7 +264,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                       {cuvVerse.content}
                   </div>
                   
-                  {/* 英文渲染 (条件控制) */}
                   {showEnglish && kjvVerse && (
                      <div className="mt-2 text-slate-500 dark:text-slate-500 font-sans tracking-wide"
                           style={{ fontSize: `${fontSize * 0.85}px`, lineHeight: 1.5 }}>
@@ -267,7 +276,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
           })}
         </div>
 
-        {/* 整章总结按钮 */}
         <div className="mt-16 text-center">
           <button 
             onClick={(e) => {
@@ -291,7 +299,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      {/* --- 右侧点击区域 (下一章) --- */}
+      {/* 右侧区域 */}
       <div 
         className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 dark:hover:bg-slate-800/30 transition-colors"
         onClick={(e) => { e.stopPropagation(); handleNextChapter(); }}
@@ -304,12 +312,15 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
+      {/* 更新 FloatingMenu，传入当前书卷章节 */}
       <FloatingMenu 
         visible={isMenuVisible && selectedVerses.length > 0} 
         position={menuPosition}
         selectedCount={selectedVerses.length}
         onClose={() => { setIsMenuVisible(false); clearSelection(); }}
         onExplain={handleAIExplain}
+        currentBook={book}
+        currentChapter={parseInt(chapter)}
       />
     </div>
   );

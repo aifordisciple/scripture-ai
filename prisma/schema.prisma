@@ -26,3 +26,63 @@ model BibleVerse {
   // 映射表名
   @@map("bible_verses")
 }
+
+// --- 新增用户系统相关模型 ---
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  name          String?
+  createdAt     DateTime    @default(now())
+  
+  highlights    Highlight[]
+  notes         Note[]
+  tags          Tag[]
+}
+
+model Highlight {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  bookId    String
+  chapter   Int
+  verse     Int
+  color     String   @default("yellow") // yellow, green, red, blue
+  
+  createdAt DateTime @default(now())
+
+  // 复合唯一索引：确保同一用户对同一节经文只能有一个高亮
+  @@unique([userId, bookId, chapter, verse]) 
+  @@index([userId, bookId, chapter])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  // 关联经文 (简化为关联单节，实际可扩展为 Range)
+  bookId    String
+  chapter   Int
+  verse     Int
+  
+  content   String   // 用户写的笔记，支持 Markdown
+  aiOrigin  String?  // 如果是引用AI的解释，存原始文本
+  
+  tags      Tag[]    // 多对多关系
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String   
+  user      User     @relation(fields: [userId], references: [id])
+  
+  notes     Note[]
+
+  @@unique([userId, name])
+}
