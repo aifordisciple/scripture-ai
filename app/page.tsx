@@ -16,6 +16,7 @@ import { Menu, Settings, Languages, Sparkles, Plus, X, AlignJustify, Moon, Sun, 
 import { Button } from "@/components/ui/button";
 import { AISidebar } from "@/components/bible/AISidebar";
 import { cn } from "@/lib/utils";
+import { MagicBall } from "@/components/bible/MagicBall"; // <--- 新增导入
 
 export default function Home() {
   const router = useRouter();
@@ -104,6 +105,7 @@ export default function Home() {
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <NoteEditor />
       <ShareCard />
+      <MagicBall /> {/* <--- 挂载功能球 */}
 
       {/* --- 桌面端可收缩侧边栏 --- */}
       {isDesktopSidebarOpen && (

@@ -14,7 +14,8 @@ import remarkGfm from 'remark-gfm';
 export function AISidebar() {
   const { 
     isAiOpen, setAiOpen, clearSelection, aiRequestTrigger,
-    sidebarWidth, setSidebarWidth 
+    sidebarWidth, setSidebarWidth,
+    setAiGenerating // <--- 新增：从 Store 获取设置生成状态的方法
   } = useBibleStore();
   
   const [isResizing, setIsResizing] = useState(false);
@@ -30,6 +31,11 @@ export function AISidebar() {
     onError: (error) => console.error("🔥 AI Error:", error)
   });
 
+  // --- 关键：将 AI 的 isLoading 状态同步给 Store，让球动起来 ---
+  useEffect(() => {
+    setAiGenerating(isLoading);
+  }, [isLoading, setAiGenerating]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -40,8 +46,10 @@ export function AISidebar() {
     }
   }, [isAiOpen]);
 
+  // --- 处理 AI 请求触发 ---
   useEffect(() => {
     if (!aiRequestTrigger) return;
+    // 防止重复处理同一个请求
     if (aiRequestTrigger.timestamp === lastProcessedTimeRef.current) return;
 
     lastProcessedTimeRef.current = aiRequestTrigger.timestamp;
@@ -54,6 +62,8 @@ export function AISidebar() {
       contextText: aiRequestTrigger.context   
     };
 
+    // 发送请求，此时 isLoading 会变为 true，进而触发 MagicBall 的动画
+    // 注意：这里我们不再自动 setAiOpen(true)，而是让用户通过 MagicBall 手动拉开，或者可以根据需求决定是否自动弹开
     append({
       role: 'user',
       content: aiRequestTrigger.prompt,
@@ -122,7 +132,9 @@ export function AISidebar() {
     }
   };
 
-  if (!isAiOpen) return null;
+  // --- 关键修改：移除 early return，改为 CSS 隐藏 ---
+  // 这样组件始终挂载，可以接收 store 的 trigger 并在后台运行
+  // if (!isAiOpen) return null; <--- 删除这行
 
   return (
     <div 
@@ -132,7 +144,10 @@ export function AISidebar() {
             // 面板背景：dark:bg-slate-900, 边框：dark:border-slate-800
             "fixed inset-y-0 right-0 z-50 bg-white dark:bg-slate-900 shadow-2xl border-l dark:border-slate-800 flex flex-col",
             "w-full md:w-[var(--sidebar-width)]",
-            isResizing ? "transition-none" : "animate-in slide-in-from-right duration-300"
+            // 使用 transform 替代条件渲染，保证后台能运行。关闭时平移出屏幕。
+            isAiOpen ? "translate-x-0" : "translate-x-full",
+            // 拖拽时禁用过渡以获得跟手感，否则使用缓动动画
+            isResizing ? "transition-none" : "transition-transform duration-300 ease-in-out"
         )}
     >
       

@@ -32,16 +32,18 @@ interface BibleState {
   lineHeight: number;
   setLineHeight: (height: number) => void;
   
-  // --- 移动端侧边栏 (Sheet) ---
   isSidebarOpen: boolean; 
   toggleSidebar: (open?: boolean) => void;
-
-  // --- 新增：桌面端侧边栏 (Collapsible) ---
   isDesktopSidebarOpen: boolean;
   toggleDesktopSidebar: () => void;
 
   isAiOpen: boolean; 
   setAiOpen: (open: boolean) => void;
+  
+  // --- AI 生成状态 ---
+  isAiGenerating: boolean;
+  setAiGenerating: (isGenerating: boolean) => void;
+
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
   showEnglish: boolean; 
@@ -61,25 +63,21 @@ interface BibleState {
   tabs: Tab[];
   activeTabId: string;
 
-  // --- 高亮相关 ---
   highlights: HighlightData[];
   setHighlights: (highlights: HighlightData[]) => void;
   addHighlightLocally: (h: HighlightData) => void;
   removeHighlightLocally: (bookId: string, chapter: number, verse: number) => void;
 
-  // --- 笔记相关 ---
   isNoteOpen: boolean;
   noteTargetVerse: { bookId: string, chapter: number, verse: number } | null;
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
 
-  // --- 分享卡片状态 ---
   isShareOpen: boolean;
   shareData: { book: string; chapter: number; verses: number[] } | null;
   openShareModal: (book: string, chapter: number, verses: number[]) => void;
   closeShareModal: () => void;
   
-  // Actions
   addTab: (params: { type: 'read' | 'search'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' }) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
@@ -97,13 +95,16 @@ export const useBibleStore = create<BibleState>((set) => ({
   
   isSidebarOpen: false,
   toggleSidebar: (open) => set((state) => ({ isSidebarOpen: open !== undefined ? open : !state.isSidebarOpen })),
-
-  // --- 初始化桌面侧边栏 ---
   isDesktopSidebarOpen: true,
   toggleDesktopSidebar: () => set((state) => ({ isDesktopSidebarOpen: !state.isDesktopSidebarOpen })),
 
   isAiOpen: false,
   setAiOpen: (open) => set({ isAiOpen: open }),
+
+  // --- AI 生成状态 (已修正参数名) ---
+  isAiGenerating: false,
+  setAiGenerating: (isAiGenerating) => set({ isAiGenerating }),
+
   sidebarWidth: 480,
   setSidebarWidth: (width) => set({ sidebarWidth: width }),
   showEnglish: false,
@@ -166,8 +167,8 @@ export const useBibleStore = create<BibleState>((set) => ({
     return { selectedVerses: newSelection };
   }),
   clearSelection: () => set({ selectedVerses: [] }),
+  
   triggerAI: (prompt, content, context, ref) => set({
-    isAiOpen: true,
     aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() }
   })
 }));
