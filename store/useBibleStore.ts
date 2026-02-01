@@ -31,8 +31,15 @@ interface BibleState {
   setFontSize: (size: number) => void;
   lineHeight: number;
   setLineHeight: (height: number) => void;
+  
+  // --- 移动端侧边栏 (Sheet) ---
   isSidebarOpen: boolean; 
   toggleSidebar: (open?: boolean) => void;
+
+  // --- 新增：桌面端侧边栏 (Collapsible) ---
+  isDesktopSidebarOpen: boolean;
+  toggleDesktopSidebar: () => void;
+
   isAiOpen: boolean; 
   setAiOpen: (open: boolean) => void;
   sidebarWidth: number;
@@ -66,7 +73,7 @@ interface BibleState {
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
 
-  // --- 新增：分享卡片状态 ---
+  // --- 分享卡片状态 ---
   isShareOpen: boolean;
   shareData: { book: string; chapter: number; verses: number[] } | null;
   openShareModal: (book: string, chapter: number, verses: number[]) => void;
@@ -87,8 +94,14 @@ export const useBibleStore = create<BibleState>((set) => ({
   setFontSize: (size) => set({ fontSize: size }),
   lineHeight: 1.8,
   setLineHeight: (height) => set({ lineHeight: height }),
+  
   isSidebarOpen: false,
   toggleSidebar: (open) => set((state) => ({ isSidebarOpen: open !== undefined ? open : !state.isSidebarOpen })),
+
+  // --- 初始化桌面侧边栏 ---
+  isDesktopSidebarOpen: true,
+  toggleDesktopSidebar: () => set((state) => ({ isDesktopSidebarOpen: !state.isDesktopSidebarOpen })),
+
   isAiOpen: false,
   setAiOpen: (open) => set({ isAiOpen: open }),
   sidebarWidth: 480,
@@ -103,7 +116,6 @@ export const useBibleStore = create<BibleState>((set) => ({
   tabs: [{ id: 'tab-1', type: 'read', book: 'Gen', chapter: '1' }], 
   activeTabId: 'tab-1',
 
-  // --- 高亮逻辑 ---
   highlights: [],
   setHighlights: (highlights) => set({ highlights }),
   addHighlightLocally: (h) => set((state) => ({
@@ -113,19 +125,16 @@ export const useBibleStore = create<BibleState>((set) => ({
     highlights: state.highlights.filter(h => !(h.bookId === bookId && h.chapter === chapter && h.verse === verse))
   })),
 
-  // --- 笔记逻辑 ---
   isNoteOpen: false,
   noteTargetVerse: null,
   openNoteEditor: (bookId, chapter, verse) => set({ isNoteOpen: true, noteTargetVerse: { bookId, chapter, verse } }),
   closeNoteEditor: () => set({ isNoteOpen: false, noteTargetVerse: null }),
 
-  // --- 分享逻辑 ---
   isShareOpen: false,
   shareData: null,
   openShareModal: (book, chapter, verses) => set({ isShareOpen: true, shareData: { book, chapter, verses } }),
   closeShareModal: () => set({ isShareOpen: false, shareData: null }),
 
-  // Actions implementation
   addTab: ({ type, book = 'Gen', chapter = '1', query, searchMode }) => set((state) => {
     const newId = `tab-${Date.now()}`;
     const newTab: Tab = { id: newId, type };

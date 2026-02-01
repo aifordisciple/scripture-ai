@@ -24,7 +24,6 @@ interface ReaderProps {
   initialChapter: string;
 }
 
-// 颜色映射表：将数据库存储的颜色名映射为 Tailwind 类
 const HIGHLIGHT_COLORS: Record<string, string> = {
   yellow: "bg-yellow-200/50 dark:bg-yellow-900/30",
   green: "bg-green-200/50 dark:bg-green-900/30",
@@ -46,28 +45,18 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
 
   const { 
-    fontSize, 
-    lineHeight, 
-    selectedVerses, 
-    toggleVerseSelection, 
-    clearSelection, 
-    triggerAI, 
-    showEnglish,
-    // --- 新增：从 Store 获取高亮状态和设置方法 ---
-    highlights,
-    setHighlights 
+    fontSize, lineHeight, selectedVerses, toggleVerseSelection, 
+    clearSelection, triggerAI, showEnglish, highlights, setHighlights 
   } = useBibleStore();
 
   const touchStartRef = useRef<{ x: number, y: number } | null>(null);
 
-  // 1. 获取经文 & 获取高亮
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       clearSelection();
       setIsMenuVisible(false);
       try {
-        // 并行请求：经文数据 + 高亮数据
         const [versesRes, highlightsRes] = await Promise.all([
           fetch(`/api/bible?book=${book}&chapter=${chapter}`),
           fetch(`/api/highlight?bookId=${book}&chapter=${chapter}`)
@@ -77,7 +66,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         const highlightsJson = await highlightsRes.json();
 
         if (versesJson.data) setVerses(versesJson.data);
-        if (highlightsJson.data) setHighlights(highlightsJson.data); // 存入 Store
+        if (highlightsJson.data) setHighlights(highlightsJson.data);
 
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -88,7 +77,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     fetchData();
   }, [book, chapter, clearSelection, setHighlights]);
 
-  // --- 导航逻辑 (保持不变) ---
   const navigateTo = (newBook: string, newChapter: number) => {
       router.push(`/?book=${newBook}&chapter=${newChapter}`);
   };
@@ -118,7 +106,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       }
   };
 
-  // --- 手势处理 (保持不变) ---
   const handleTouchStart = (e: React.TouchEvent) => {
       touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   };
@@ -133,12 +120,10 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       touchStartRef.current = null;
   };
 
-  // --- 点击与AI处理 ---
   const handleVerseClick = (v: Verse, e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); 
     toggleVerseSelection(v.verse);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    // 调整菜单位置，避免太靠边
     setMenuPosition({ 
         top: rect.top - 10, 
         left: Math.min(Math.max(rect.left + rect.width / 2, 80), window.innerWidth - 80)
@@ -150,21 +135,16 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     if (selectedVerses.length === 0) return;
     const selectedVerseObjects = verses.filter(v => selectedVerses.includes(v.verse));
     if (selectedVerseObjects.length === 0) return;
-
     const cuvVerses = selectedVerseObjects.filter(v => v.version === 'CUV');
     if (cuvVerses.length === 0) return; 
-
     const combinedContent = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
-    
     const minVerseIdx = verses.findIndex(v => v.verse === Math.min(...selectedVerses));
     const maxVerseIdx = verses.findIndex(v => v.verse === Math.max(...selectedVerses));
     const start = Math.max(0, minVerseIdx - 5);
     const end = Math.min(verses.length, maxVerseIdx + 6);
-    
     const contextContent = verses.slice(start, end)
         .filter(v => v.version === 'CUV')
         .map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
-    
     const firstV = cuvVerses[0];
     triggerAI("请详细解读这段经文，包含背景、逐节释经和现代应用。", combinedContent, contextContent, { 
         bookName: firstV.bookName, chapter: firstV.chapter, verse: firstV.verse 
@@ -172,56 +152,35 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     setIsMenuVisible(false);
   };
 
-  // --- 新增：处理复制逻辑 ---
-// --- 修复后的复制逻辑 ---
   const handleCopy = async () => {
-    // 1. 筛选选中经文
-    // 移除 version === 'CUV' 的严格限制，优先找 CUV，找不到就找任意版本，防止数据为空
     const selectedContent = verses
       .filter(v => selectedVerses.includes(v.verse))
       .sort((a, b) => a.verse - b.verse)
-      // 如果同一节有多个版本，优先取 CUV，否则取第一个
       .reduce((acc, curr) => {
         const existing = acc.find(item => item.verse === curr.verse);
-        if (!existing) {
-          acc.push(curr);
-        } else if (curr.version === 'CUV') {
-          // 如果遇到 CUV，替换掉之前的（比如 KJV）
-          const index = acc.indexOf(existing);
-          acc[index] = curr;
-        }
+        if (!existing) { acc.push(curr); } 
+        else if (curr.version === 'CUV') { const index = acc.indexOf(existing); acc[index] = curr; }
         return acc;
       }, [] as Verse[])
       .map(v => `${v.content} (${v.bookName} ${v.chapter}:${v.verse})`)
       .join("\n");
 
-    console.log("尝试复制的内容:", selectedContent); // 调试用
-
     if (!selectedContent) return;
 
-    // 2. 尝试使用标准 API
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      try {
-        await navigator.clipboard.writeText(selectedContent);
-        return; // 成功则退出
-      } catch (err) {
-        console.warn("Clipboard API failed, trying fallback...", err);
-      }
+      try { await navigator.clipboard.writeText(selectedContent); return; } 
+      catch (err) { console.warn("Clipboard API failed, trying fallback...", err); }
     }
 
-    // 3. 回退方案：传统 execCommand (兼容非 HTTPS 和旧浏览器)
     try {
       const textarea = document.createElement('textarea');
       textarea.value = selectedContent;
-      // 防止在移动端拉起键盘
       textarea.setAttribute('readonly', '');
       textarea.style.position = 'absolute';
       textarea.style.left = '-9999px';
       document.body.appendChild(textarea);
-      
       textarea.select();
-      textarea.setSelectionRange(0, 99999); // 兼容 iOS
-      
+      textarea.setSelectionRange(0, 99999); 
       document.execCommand('copy');
       document.body.removeChild(textarea);
     } catch (e) {
@@ -250,19 +209,19 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }
 
   return (
-    <div 
-        className="w-full min-h-screen flex flex-row relative"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-    >
-      {/* 左侧区域 */}
-      <div 
-        className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 dark:hover:bg-slate-800/30 transition-colors"
-        onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }}
-        title="上一章"
-      >
-        <div className="sticky top-[50vh] -translate-y-1/2 p-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
-           <div className="bg-slate-100/80 dark:bg-slate-800/80 p-3 rounded-full shadow-sm backdrop-blur-md text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-110 transition-all">
+    <div className="w-full min-h-screen flex flex-row relative" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+      
+      {/* 左侧导航区域：
+        移除了外层的 onClick，防止误触。
+        现在只有点击内部的箭头容器才会触发翻页。
+      */}
+      <div className="hidden md:flex flex-1 self-stretch group items-start justify-center transition-colors">
+        <div 
+            className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer"
+            onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }} // 点击事件移到这里
+            title="上一章"
+        >
+           <div className="bg-slate-100/50 dark:bg-slate-800/50 p-3 rounded-full shadow-sm backdrop-blur-sm text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-110 transition-all">
               <ChevronLeft className="w-8 h-8" />
            </div>
         </div>
@@ -283,7 +242,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             if (!cuvVerse) return null;
             const isSelected = selectedVerses.includes(verseNum);
             
-            // --- 查找当前节是否有高亮 ---
             const highlight = highlights.find(h => h.verse === verseNum);
             const highlightClass = highlight ? HIGHLIGHT_COLORS[highlight.color] : "";
 
@@ -293,38 +251,23 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                 onClick={(e) => handleVerseClick(cuvVerse, e)}
                 className={cn(
                   "relative flex items-start px-2 py-1.5 rounded cursor-pointer transition-all duration-200 group/verse border border-transparent",
-                  // 样式优先级：选中态 > 高亮态 > 默认态
                   isSelected 
                     ? "bg-blue-100 dark:bg-blue-900/60 border-blue-300 dark:border-blue-500 shadow-sm" 
                     : highlightClass 
-                      ? `${highlightClass} border-transparent` // 应用高亮色
+                      ? `${highlightClass} border-transparent`
                       : "hover:bg-slate-50 dark:hover:bg-slate-900"
                 )}
               >
-                <span 
-                   className={cn(
-                     "font-bold mr-3 select-none shrink-0 mt-0.5", 
-                     isSelected ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-600"
-                   )}
-                   style={{ fontSize: fontSize * 0.6 }} 
-                >
+                <span className={cn("font-bold mr-3 select-none shrink-0 mt-0.5", isSelected ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-600")} style={{ fontSize: fontSize * 0.6 }}>
                   {verseNum}
                 </span>
                 
                 <div className="flex-1 min-w-0">
-                  <div 
-                      className={cn(
-                        "font-serif transition-colors text-justify",
-                        isSelected ? "text-slate-900 dark:text-slate-100 font-medium" : "text-slate-800 dark:text-slate-300"
-                      )}
-                      style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }} 
-                  >
+                  <div className={cn("font-serif transition-colors text-justify", isSelected ? "text-slate-900 dark:text-slate-100 font-medium" : "text-slate-800 dark:text-slate-300")} style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}>
                       {cuvVerse.content}
                   </div>
-                  
                   {showEnglish && kjvVerse && (
-                     <div className="mt-2 text-slate-500 dark:text-slate-500 font-sans tracking-wide"
-                          style={{ fontSize: `${fontSize * 0.85}px`, lineHeight: 1.5 }}>
+                     <div className="mt-2 text-slate-500 dark:text-slate-500 font-sans tracking-wide" style={{ fontSize: `${fontSize * 0.85}px`, lineHeight: 1.5 }}>
                        {kjvVerse.content}
                      </div>
                   )}
@@ -335,42 +278,28 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
 
         <div className="mt-16 text-center">
-          <button 
-            onClick={(e) => {
-               e.stopPropagation();
-               const cuvVerses = verses.filter(v => v.version === 'CUV');
-               if (cuvVerses.length > 0) {
-                   const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
-                   triggerAI(
-                      CHAPTER_SUMMARY_PROMPT, 
-                      `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, 
-                      fullContext, 
-                      { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 }
-                   );
-               }
-            }}
-            className="shadow-md inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full transition-colors font-medium text-sm"
-          >
+          <button onClick={(e) => { e.stopPropagation(); const cuvVerses = verses.filter(v => v.version === 'CUV'); if (cuvVerses.length > 0) { const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n'); triggerAI(CHAPTER_SUMMARY_PROMPT, `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, fullContext, { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 }); } }} className="shadow-md inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full transition-colors font-medium text-sm">
             <BookOpenCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             生成第 {chapter} 章摘要
           </button>
         </div>
       </div>
 
-      {/* 右侧区域 */}
-      <div 
-        className="hidden md:flex flex-1 self-stretch group items-start justify-center cursor-pointer hover:bg-slate-50/30 dark:hover:bg-slate-800/30 transition-colors"
-        onClick={(e) => { e.stopPropagation(); handleNextChapter(); }}
-        title="下一章"
-      >
-        <div className="sticky top-[50vh] -translate-y-1/2 p-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
-           <div className="bg-slate-100/80 dark:bg-slate-800/80 p-3 rounded-full shadow-sm backdrop-blur-md text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-110 transition-all">
+      {/* 右侧导航区域：
+        同样移除了外层点击。
+      */}
+      <div className="hidden md:flex flex-1 self-stretch group items-start justify-center transition-colors">
+        <div 
+            className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer"
+            onClick={(e) => { e.stopPropagation(); handleNextChapter(); }} // 点击事件移到这里
+            title="下一章"
+        >
+           <div className="bg-slate-100/50 dark:bg-slate-800/50 p-3 rounded-full shadow-sm backdrop-blur-sm text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-110 transition-all">
               <ChevronRight className="w-8 h-8" />
            </div>
         </div>
       </div>
 
-      {/* 更新 FloatingMenu，传入当前书卷章节和复制回调 */}
       <FloatingMenu 
         visible={isMenuVisible && selectedVerses.length > 0} 
         position={menuPosition}
@@ -379,7 +308,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         onExplain={handleAIExplain}
         currentBook={book}
         currentChapter={parseInt(chapter)}
-        onCopy={handleCopy} // 关键：传入复制函数
+        onCopy={handleCopy}
       />
     </div>
   );
