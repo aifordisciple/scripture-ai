@@ -15,13 +15,14 @@ export function AISidebar() {
   const { 
     isAiOpen, setAiOpen, clearSelection, aiRequestTrigger,
     sidebarWidth, setSidebarWidth,
-    setAiGenerating // <--- 新增：从 Store 获取设置生成状态的方法
+    setAiGenerating
   } = useBibleStore();
   
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  const [isImmersive, setIsImmersive] = useState(false);
+  // --- 修改 1: 默认开启沉浸模式 (true = 隐藏菜单) ---
+  const [isImmersive, setIsImmersive] = useState(true);
   
   const lastProcessedTimeRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -31,25 +32,26 @@ export function AISidebar() {
     onError: (error) => console.error("🔥 AI Error:", error)
   });
 
-  // --- 关键：将 AI 的 isLoading 状态同步给 Store，让球动起来 ---
+  // 同步 AI 生成状态给 Store (用于 MagicBall 动画)
   useEffect(() => {
     setAiGenerating(isLoading);
   }, [isLoading, setAiGenerating]);
 
+  // 自动滚动到底部
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // --- 修改 2: 每次打开 AI 界面时，强制进入沉浸模式 ---
   useEffect(() => {
     if (isAiOpen) {
-      setIsImmersive(false);
+      setIsImmersive(true);
     }
   }, [isAiOpen]);
 
-  // --- 处理 AI 请求触发 ---
+  // 处理 AI 请求触发
   useEffect(() => {
     if (!aiRequestTrigger) return;
-    // 防止重复处理同一个请求
     if (aiRequestTrigger.timestamp === lastProcessedTimeRef.current) return;
 
     lastProcessedTimeRef.current = aiRequestTrigger.timestamp;
@@ -62,8 +64,6 @@ export function AISidebar() {
       contextText: aiRequestTrigger.context   
     };
 
-    // 发送请求，此时 isLoading 会变为 true，进而触发 MagicBall 的动画
-    // 注意：这里我们不再自动 setAiOpen(true)，而是让用户通过 MagicBall 手动拉开，或者可以根据需求决定是否自动弹开
     append({
       role: 'user',
       content: aiRequestTrigger.prompt,
@@ -71,7 +71,8 @@ export function AISidebar() {
       body: { context: contextRequest }
     });
     
-    setIsImmersive(false);
+    // --- 修改 3: 触发生成时，保持/进入沉浸模式 ---
+    setIsImmersive(true);
 
   }, [aiRequestTrigger, append]);
 
@@ -119,7 +120,9 @@ export function AISidebar() {
     };
 
     append({ role: 'user', content: prompt }, { body: { context: contextRequest } });
-    setIsImmersive(false); 
+    
+    // --- 修改 4: 点击探索后，进入沉浸模式阅读回答 ---
+    setIsImmersive(true); 
   };
 
   const getIcon = (id: string) => {
@@ -132,21 +135,14 @@ export function AISidebar() {
     }
   };
 
-  // --- 关键修改：移除 early return，改为 CSS 隐藏 ---
-  // 这样组件始终挂载，可以接收 store 的 trigger 并在后台运行
-  // if (!isAiOpen) return null; <--- 删除这行
-
   return (
     <div 
         ref={sidebarRef}
         style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties & { [key: string]: string }}
         className={cn(
-            // 面板背景：dark:bg-slate-900, 边框：dark:border-slate-800
             "fixed inset-y-0 right-0 z-50 bg-white dark:bg-slate-900 shadow-2xl border-l dark:border-slate-800 flex flex-col",
             "w-full md:w-[var(--sidebar-width)]",
-            // 使用 transform 替代条件渲染，保证后台能运行。关闭时平移出屏幕。
             isAiOpen ? "translate-x-0" : "translate-x-full",
-            // 拖拽时禁用过渡以获得跟手感，否则使用缓动动画
             isResizing ? "transition-none" : "transition-transform duration-300 ease-in-out"
         )}
     >
@@ -159,7 +155,7 @@ export function AISidebar() {
         <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-slate-200 dark:bg-slate-700 rounded group-hover:bg-blue-500 transition-colors" />
       </div>
 
-      {/* 顶部标题栏 */}
+      {/* 顶部标题栏 (Immersive 模式下隐藏) */}
       <div 
         className={cn(
           "flex items-center justify-between px-4 bg-slate-50 dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
@@ -178,7 +174,7 @@ export function AISidebar() {
         </Button>
       </div>
 
-      {/* 聊天内容 */}
+      {/* 聊天内容 (点击切换模式) */}
       <div 
         className="flex-1 overflow-y-auto p-4 bg-slate-50/30 dark:bg-slate-950/30 min-h-0 space-y-6 cursor-pointer relative tap-highlight-transparent"
         onClick={() => setIsImmersive(!isImmersive)} 
@@ -190,6 +186,7 @@ export function AISidebar() {
             </div>
         )}
 
+        {/* 沉浸模式下的提示 (仅在沉浸模式显示) */}
         {isImmersive && (
              <div className="fixed top-6 left-1/2 -translate-x-1/2 md:left-auto md:right-[calc(var(--sidebar-width)/2)] md:translate-x-1/2 z-50 pointer-events-none animate-in fade-in duration-500">
                  <div className="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
@@ -204,8 +201,8 @@ export function AISidebar() {
             <div className={cn(
               "max-w-[95%] rounded-xl px-4 py-3 shadow-sm border", 
               m.role === 'user' 
-                ? "bg-blue-600 text-white border-blue-600 text-base" // 用户消息保持蓝色
-                : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-lg" // AI 消息深色化
+                ? "bg-blue-600 text-white border-blue-600 text-base" 
+                : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-lg" 
             )}>
               {m.role === 'user' ? (
                  <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
@@ -243,7 +240,7 @@ export function AISidebar() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 底部操作区 */}
+      {/* 底部操作区 (Immersive 模式下隐藏) */}
       <div 
         className={cn(
             "bg-white dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]",

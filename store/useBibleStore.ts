@@ -95,7 +95,7 @@ export const useBibleStore = create<BibleState>((set) => ({
   
   isSidebarOpen: false,
   toggleSidebar: (open) => set((state) => ({ isSidebarOpen: open !== undefined ? open : !state.isSidebarOpen })),
-  isDesktopSidebarOpen: true,
+  isDesktopSidebarOpen: false,
   toggleDesktopSidebar: () => set((state) => ({ isDesktopSidebarOpen: !state.isDesktopSidebarOpen })),
 
   isAiOpen: false,
