@@ -28,7 +28,7 @@ const COLORS = [
 export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy }: FloatingMenuProps) {
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal } = useBibleStore();
+  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection } = useBibleStore();
 
   useEffect(() => {
     if (visible) {
@@ -58,11 +58,20 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         color: color === 'none' ? null : color
       })
     });
+    
+    // 修改：高亮后自动取消选择并关闭菜单
+    clearSelection();
+    onClose();
   };
 
   const handleCopyClick = () => {
     onCopy();
     setCopied(true);
+    // 修改：延迟一点时间后取消选择，让用户看到“已复制”反馈
+    setTimeout(() => {
+        clearSelection();
+        onClose();
+    }, 800);
   };
 
   const handleNote = () => {
