@@ -16,26 +16,27 @@ import { Menu, Settings, Languages, Sparkles, Plus, X, AlignJustify, Moon, Sun, 
 import { Button } from "@/components/ui/button";
 import { AISidebar } from "@/components/bible/AISidebar";
 import { cn } from "@/lib/utils";
-import { MagicBall } from "@/components/bible/MagicBall"; // <--- 新增导入
+import { MagicBall } from "@/components/bible/MagicBall"; 
+import { AudioButton } from "@/components/bible/AudioButton"; // [新增] 引入播放按钮
 
 export default function Home() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false); // 移动端设置面板状态
+  const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false); 
   
   const { 
     fontSize, setFontSize, 
     isSidebarOpen, toggleSidebar,
-    // 桌面端侧边栏状态
     isDesktopSidebarOpen, toggleDesktopSidebar,
     isAiOpen, setAiOpen, 
     showEnglish, toggleEnglish,
     lineHeight, setLineHeight, 
     tabs, activeTabId, setActiveTab, addTab, closeTab, updateActiveTab,
     sidebarWidth,
-    isDarkMode, toggleDarkMode 
+    isDarkMode, toggleDarkMode,
+    chapterSpeechText // [新增] 获取当前章节文本
   } = useBibleStore();
 
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
@@ -48,7 +49,6 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
-  // 监听全屏变化事件，保持图标状态同步
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -105,7 +105,7 @@ export default function Home() {
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <NoteEditor />
       <ShareCard />
-      <MagicBall /> {/* <--- 挂载功能球 */}
+      <MagicBall /> 
 
       {/* --- 桌面端可收缩侧边栏 --- */}
       {isDesktopSidebarOpen && (
@@ -122,7 +122,7 @@ export default function Home() {
         </SheetContent>
       </Sheet>
 
-      {/* --- 移动端设置面板 (字体/行高) --- */}
+      {/* --- 移动端设置面板 --- */}
       <Sheet open={isMobileSettingsOpen} onOpenChange={setIsMobileSettingsOpen}>
         <SheetContent side="bottom" className="dark:bg-slate-900 dark:border-slate-800 pb-10">
           <SheetHeader className="mb-4">
@@ -240,6 +240,16 @@ export default function Home() {
               {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </Button>
 
+            {/* [新增] 语音播放按钮: 仅在当前是阅读模式且有文本时显示 */}
+            {activeTab.type === 'read' && chapterSpeechText && (
+               <AudioButton 
+                 text={chapterSpeechText} 
+                 variant="ghost" 
+                 size="icon"
+                 className="text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800"
+               />
+            )}
+
             <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800" title="切换主题">
               {isDarkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
@@ -264,7 +274,7 @@ export default function Home() {
                <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} />
             </div>
             
-            {/* 移动端设置按钮：激活底部面板 */}
+            {/* 移动端设置按钮 */}
             <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => setIsMobileSettingsOpen(true)}>
               <Settings className="h-5 w-5 text-slate-500" />
             </Button>

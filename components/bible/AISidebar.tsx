@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { AudioButton } from './AudioButton'; // [新增 import]
 
 export function AISidebar() {
   const { 
@@ -20,8 +21,6 @@ export function AISidebar() {
   
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-
-  // --- 修改 1: 默认开启沉浸模式 (true = 隐藏菜单) ---
   const [isImmersive, setIsImmersive] = useState(true);
   
   const lastProcessedTimeRef = useRef<number>(0);
@@ -32,24 +31,20 @@ export function AISidebar() {
     onError: (error) => console.error("🔥 AI Error:", error)
   });
 
-  // 同步 AI 生成状态给 Store (用于 MagicBall 动画)
   useEffect(() => {
     setAiGenerating(isLoading);
   }, [isLoading, setAiGenerating]);
 
-  // 自动滚动到底部
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // --- 修改 2: 每次打开 AI 界面时，强制进入沉浸模式 ---
   useEffect(() => {
     if (isAiOpen) {
       setIsImmersive(true);
     }
   }, [isAiOpen]);
 
-  // 处理 AI 请求触发
   useEffect(() => {
     if (!aiRequestTrigger) return;
     if (aiRequestTrigger.timestamp === lastProcessedTimeRef.current) return;
@@ -71,12 +66,10 @@ export function AISidebar() {
       body: { context: contextRequest }
     });
     
-    // --- 修改 3: 触发生成时，保持/进入沉浸模式 ---
     setIsImmersive(true);
 
   }, [aiRequestTrigger, append]);
 
-  // --- 拖拽调整宽度逻辑 ---
   const startResizing = useCallback(() => {
     setIsResizing(true);
   }, []);
@@ -120,8 +113,6 @@ export function AISidebar() {
     };
 
     append({ role: 'user', content: prompt }, { body: { context: contextRequest } });
-    
-    // --- 修改 4: 点击探索后，进入沉浸模式阅读回答 ---
     setIsImmersive(true); 
   };
 
@@ -147,7 +138,6 @@ export function AISidebar() {
         )}
     >
       
-      {/* 拖拽手柄 */}
       <div 
         onMouseDown={startResizing}
         className="hidden md:block absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-400/50 transition-colors z-50 group"
@@ -155,7 +145,6 @@ export function AISidebar() {
         <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-slate-200 dark:bg-slate-700 rounded group-hover:bg-blue-500 transition-colors" />
       </div>
 
-      {/* 顶部标题栏 (Immersive 模式下隐藏) */}
       <div 
         className={cn(
           "flex items-center justify-between px-4 bg-slate-50 dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
@@ -174,7 +163,6 @@ export function AISidebar() {
         </Button>
       </div>
 
-      {/* 聊天内容 (点击切换模式) */}
       <div 
         className="flex-1 overflow-y-auto p-4 bg-slate-50/30 dark:bg-slate-950/30 min-h-0 space-y-6 cursor-pointer relative tap-highlight-transparent"
         onClick={() => setIsImmersive(!isImmersive)} 
@@ -186,7 +174,6 @@ export function AISidebar() {
             </div>
         )}
 
-        {/* 沉浸模式下的提示 (仅在沉浸模式显示) */}
         {isImmersive && (
              <div className="fixed top-6 left-1/2 -translate-x-1/2 md:left-auto md:right-[calc(var(--sidebar-width)/2)] md:translate-x-1/2 z-50 pointer-events-none animate-in fade-in duration-500">
                  <div className="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
@@ -197,9 +184,10 @@ export function AISidebar() {
         )}
 
         {messages.map((m) => (
-          <div key={m.id} className={cn("flex", m.role === 'user' ? "justify-end" : "justify-start")}>
+          <div key={m.id} className={cn("flex group relative", m.role === 'user' ? "justify-end" : "justify-start")}>
+            
             <div className={cn(
-              "max-w-[95%] rounded-xl px-4 py-3 shadow-sm border", 
+              "max-w-[95%] rounded-xl px-4 py-3 shadow-sm border relative", 
               m.role === 'user' 
                 ? "bg-blue-600 text-white border-blue-600 text-base" 
                 : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-lg" 
@@ -207,25 +195,32 @@ export function AISidebar() {
               {m.role === 'user' ? (
                  <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
               ) : (
-                <ReactMarkdown 
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    h3: ({node, ...props}) => <h3 className="text-lg font-bold text-blue-700 dark:text-blue-400 mt-6 mb-3 pb-1 border-b border-blue-100 dark:border-blue-900 flex items-center first:mt-0" {...props} />,
-                    h4: ({node, ...props}) => <h4 className="text-base font-bold text-slate-700 dark:text-slate-300 mt-4 mb-2" {...props} />,
-                    p: ({node, ...props}) => <p className="text-lg text-slate-700 dark:text-slate-300 leading-loose mb-4 last:mb-0 text-justify" {...props} />, 
-                    ul: ({node, ...props}) => <ul className="my-2 space-y-2 pl-1" {...props} />,
-                    li: ({node, ...props}) => (
-                      <li className="text-lg text-slate-700 dark:text-slate-300 leading-loose flex gap-2" {...props}>
-                         <span className="text-blue-300 dark:text-blue-500 select-none mt-3 text-[6px]">•</span> 
-                         <span className="flex-1">{props.children}</span>
-                      </li>
-                    ),
-                    strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white bg-yellow-50 dark:bg-blue-900/50 px-1 rounded mx-0.5" {...props} />,
-                    blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-slate-200 dark:border-slate-700 pl-3 italic text-slate-500 dark:text-slate-400 text-sm my-4 bg-slate-50 dark:bg-slate-900/50 py-2 pr-2 rounded-r" {...props} />,
-                  }}
-                >
-                  {m.content}
-                </ReactMarkdown>
+                <>
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h3: ({node, ...props}) => <h3 className="text-lg font-bold text-blue-700 dark:text-blue-400 mt-6 mb-3 pb-1 border-b border-blue-100 dark:border-blue-900 flex items-center first:mt-0" {...props} />,
+                      h4: ({node, ...props}) => <h4 className="text-base font-bold text-slate-700 dark:text-slate-300 mt-4 mb-2" {...props} />,
+                      p: ({node, ...props}) => <p className="text-lg text-slate-700 dark:text-slate-300 leading-loose mb-4 last:mb-0 text-justify" {...props} />, 
+                      ul: ({node, ...props}) => <ul className="my-2 space-y-2 pl-1" {...props} />,
+                      li: ({node, ...props}) => (
+                        <li className="text-lg text-slate-700 dark:text-slate-300 leading-loose flex gap-2" {...props}>
+                           <span className="text-blue-300 dark:text-blue-500 select-none mt-3 text-[6px]">•</span> 
+                           <span className="flex-1">{props.children}</span>
+                        </li>
+                      ),
+                      strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white bg-yellow-50 dark:bg-blue-900/50 px-1 rounded mx-0.5" {...props} />,
+                      blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-slate-200 dark:border-slate-700 pl-3 italic text-slate-500 dark:text-slate-400 text-sm my-4 bg-slate-50 dark:bg-slate-900/50 py-2 pr-2 rounded-r" {...props} />,
+                    }}
+                  >
+                    {m.content}
+                  </ReactMarkdown>
+                  
+                  {/* [新增] AI 回复底部的朗读按钮 */}
+                  <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 flex justify-end">
+                      <AudioButton text={m.content} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 h-8 px-2" label="朗读" />
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -240,7 +235,6 @@ export function AISidebar() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 底部操作区 (Immersive 模式下隐藏) */}
       <div 
         className={cn(
             "bg-white dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]",

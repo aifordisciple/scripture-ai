@@ -85,6 +85,10 @@ interface BibleState {
   toggleVerseSelection: (id: number) => void;
   clearSelection: () => void;
   triggerAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
+
+  // [新增] 用于语音播放的文本
+  chapterSpeechText: string;
+  setChapterSpeechText: (text: string) => void;
 }
 
 export const useBibleStore = create<BibleState>((set) => ({
@@ -170,5 +174,9 @@ export const useBibleStore = create<BibleState>((set) => ({
   
   triggerAI: (prompt, content, context, ref) => set({
     aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() }
-  })
+  }),
+
+  // [新增] 初始值和方法
+  chapterSpeechText: "",
+  setChapterSpeechText: (text) => set({ chapterSpeechText: text }),
 }));

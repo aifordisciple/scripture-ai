@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
+import { AudioButton } from "./AudioButton";
 
 export function Sidebar({ className }: { className?: string }) {
   const router = useRouter();

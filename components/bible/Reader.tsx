@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { Loader2, BookOpenCheck, ChevronLeft, ChevronRight } from "lucide-react"; 
 import { FloatingMenu } from "./FloatingMenu";
 import { CHAPTER_SUMMARY_PROMPT, BIBLE_BOOKS } from "@/lib/constants";
-import { motion, AnimatePresence } from "framer-motion"; // 引入动画库
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Verse {
   id: number;
@@ -32,7 +32,6 @@ const HIGHLIGHT_COLORS: Record<string, string> = {
   red: "bg-red-200/50 dark:bg-red-900/30",
 };
 
-// 定义切换动画变体 (滑动效果)
 const slideVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 100 : -100,
@@ -62,7 +61,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
   const [verses, setVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
-  // 新增：方向状态，1 为下一章，-1 为上一章
   const [direction, setDirection] = useState(0);
 
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -70,7 +68,8 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
   const { 
     fontSize, lineHeight, selectedVerses, toggleVerseSelection, 
-    clearSelection, triggerAI, showEnglish, highlights, setHighlights 
+    clearSelection, triggerAI, showEnglish, highlights, setHighlights,
+    setChapterSpeechText // [新增] 引入设置文本的方法
   } = useBibleStore();
 
   const touchStartRef = useRef<{ x: number, y: number } | null>(null);
@@ -89,7 +88,16 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         const versesJson = await versesRes.json();
         const highlightsJson = await highlightsRes.json();
 
-        if (versesJson.data) setVerses(versesJson.data);
+        if (versesJson.data) {
+            setVerses(versesJson.data);
+            
+            // [新增] 同步当前章节文本到全局 Store，供 Sidebar/Header 播放
+            const fullText = versesJson.data
+                .filter((v: any) => v.version === 'CUV')
+                .map((v: any) => v.content)
+                .join(" ");
+            setChapterSpeechText(fullText);
+        }
         if (highlightsJson.data) setHighlights(highlightsJson.data);
 
       } catch (error) {
@@ -99,14 +107,14 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       }
     }
     fetchData();
-  }, [book, chapter, clearSelection, setHighlights]);
+  }, [book, chapter, clearSelection, setHighlights, setChapterSpeechText]);
 
   const navigateTo = (newBook: string, newChapter: number) => {
       router.push(`/?book=${newBook}&chapter=${newChapter}`);
   };
 
   const handleNextChapter = () => {
-      setDirection(1); // 设置动画方向：向左滑入
+      setDirection(1);
       const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book);
       if (currentBookIndex === -1) return;
       const currentBookConfig = BIBLE_BOOKS[currentBookIndex];
@@ -120,7 +128,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   };
 
   const handlePrevChapter = () => {
-      setDirection(-1); // 设置动画方向：向右滑入
+      setDirection(-1);
       const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book);
       if (currentBookIndex === -1) return;
       const currentChapterInt = parseInt(chapter);
@@ -150,7 +158,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     e.preventDefault(); e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); 
     toggleVerseSelection(v.verse);
     
-    // 计算菜单位置，确保不溢出屏幕
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const menuWidth = 200; 
     const screenWidth = window.innerWidth;
@@ -185,7 +192,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         bookName: firstV.bookName, chapter: firstV.chapter, verse: firstV.verse 
     });
     setIsMenuVisible(false);
-    clearSelection(); // 触发后清除选择
+    clearSelection();
   };
 
   const handleCopy = async () => {
@@ -256,13 +263,12 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      {/* 中间阅读区 (添加了动画容器) */}
+      {/* 中间阅读区 */}
       <div className="w-full max-w-5xl px-4 py-8 md:px-8 pb-32 bg-white dark:bg-slate-950 shadow-sm min-h-screen z-0">
         
-        {/* 使用 AnimatePresence 管理进出场动画 */}
         <AnimatePresence mode='wait' custom={direction} initial={false}>
           <motion.div
-            key={`${book}-${chapter}`} // 关键：key 变化触发动画
+            key={`${book}-${chapter}`} 
             custom={direction}
             variants={slideVariants}
             initial="enter"
@@ -279,10 +285,13 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                     <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
                 </div>
             ) : (
-                <>
-                    <h1 className="text-3xl font-serif font-bold text-center mb-8 text-slate-800 dark:text-slate-100 select-none">
-                    {verses[0]?.bookName || book} 第 {chapter} 章
-                    </h1>
+                <>  
+                    {/* [修改] 标题区域：这里不再显示 AudioButton，改在 Header 显示 */}
+                    <div className="flex items-center justify-center mb-8 relative">
+                        <h1 className="text-3xl font-serif font-bold text-slate-800 dark:text-slate-100 select-none text-center">
+                            {verses[0]?.bookName || book} 第 {chapter} 章
+                        </h1>
+                    </div>
 
                     <div className="space-y-2">
                     {renderList.map((verseNum) => {
