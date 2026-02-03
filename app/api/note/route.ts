@@ -1,22 +1,38 @@
 // app/api/note/route.ts
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-
-const TEMP_USER_ID = "user_12345";
+import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth"; // [修改]
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  const { bookId, chapter, verse, content } = await req.json();
+  const session = await auth(); // [修改]
+  if (!session?.user?.email) return new NextResponse("Unauthorized", { status: 401 });
 
-  const note = await prisma.note.create({
-    data: {
-      userId: TEMP_USER_ID,
-      bookId,
-      chapter,
-      verse,
-      content,
-      // 可以在这里调用 AI 函数来提取标签 tags (此处略)
+  const { noteId, book, chapter, verse, content, action } = await req.json();
+  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+  if (!user) return new NextResponse("User not found", { status: 404 });
+
+  if (action === 'delete') {
+    if (noteId) {
+        await prisma.note.delete({ where: { id: noteId } });
     }
-  });
+  } else {
+    if (noteId && !noteId.startsWith('temp-')) {
+        await prisma.note.update({
+            where: { id: noteId },
+            data: { content }
+        });
+    } else {
+        await prisma.note.create({
+            data: {
+                userId: user.id,
+                bookId: book,
+                chapter: parseInt(chapter),
+                verse: parseInt(verse),
+                content
+            }
+        });
+    }
+  }
 
-  return NextResponse.json({ data: note });
+  return NextResponse.json({ success: true });
 }

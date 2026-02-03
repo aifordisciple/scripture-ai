@@ -19,7 +19,11 @@ import { cn } from "@/lib/utils";
 import { MagicBall } from "@/components/bible/MagicBall"; 
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer"; 
 import { BIBLE_BOOKS } from "@/lib/constants"; 
-import { useAudioPlayer } from "@/hooks/use-audio-player"; // 引入 Hook
+import { useAudioPlayer } from "@/hooks/use-audio-player"; 
+
+// [新增] 引入 Auth 组件
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 export default function Home() {
   const router = useRouter();
@@ -156,6 +160,9 @@ export default function Home() {
   return (
     <main className="flex h-screen w-full overflow-hidden bg-white dark:bg-slate-950 relative transition-colors duration-300">
       
+      {/* [新增] 认证弹窗 */}
+      <AuthDialog />
+
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <NoteEditor />
       <ShareCard />
@@ -310,7 +317,7 @@ export default function Home() {
               {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </Button>
 
-            {/* [关键] 播放器控制区 */}
+            {/* [关键] 播放器控制区：始终渲染，确保自动播放逻辑不中断 */}
             {activeTab.type === 'read' && (
                <>
                  {/* Desktop: 完整播放器 */}
@@ -330,9 +337,8 @@ export default function Home() {
                </>
             )}
 
-            <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800" title="切换主题">
-              {isDarkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            </Button>
+            {/* [修改] 用户菜单 (包含设置、主题切换、登录/注销) */}
+            <UserMenu />
 
             <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="hidden sm:flex text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800" title="行高">
               <AlignJustify className="h-4 w-4" />
@@ -354,7 +360,7 @@ export default function Home() {
                <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} />
             </div>
             
-            {/* 移动端设置按钮 */}
+            {/* Mobile Settings Trigger */}
             <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => setIsMobileSettingsOpen(true)}>
               <Settings className="h-5 w-5 text-slate-500" />
             </Button>

@@ -1,7 +1,10 @@
 // store/useBibleStore.ts
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
-// 定义标签页数据结构
+// 1. 定义数据结构
+// --------------------------------------------------
+
 export interface Tab {
   id: string;
   type: 'read' | 'search';
@@ -20,38 +23,55 @@ export interface HighlightData {
   color: string;
 }
 
+// 对应 Prisma Note 模型的简化版
+export interface NoteData {
+  id: string; // 可能是临时ID或数据库ID
+  bookId: string;
+  chapter: number;
+  verse: number;
+  content: string;
+}
+
 interface VerseRef {
   bookName: string;
   chapter: number;
   verse: number;
 }
 
-interface BibleState {
+// 2. 定义 Store 接口
+// --------------------------------------------------
+
+// 认证相关
+interface AuthSlice {
+  isAuthOpen: boolean;
+  setAuthOpen: (open: boolean) => void;
+}
+
+// 核心业务相关
+interface BibleSlice {
+  // --- 阅读器设置 ---
   fontSize: number;
   setFontSize: (size: number) => void;
   lineHeight: number;
   setLineHeight: (height: number) => void;
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+  showEnglish: boolean; 
+  toggleEnglish: () => void; 
   
+  // --- 界面状态 ---
   isSidebarOpen: boolean; 
   toggleSidebar: (open?: boolean) => void;
   isDesktopSidebarOpen: boolean;
   toggleDesktopSidebar: () => void;
-
-  isAiOpen: boolean; 
-  setAiOpen: (open: boolean) => void;
-  
-  // --- AI 生成状态 ---
-  isAiGenerating: boolean;
-  setAiGenerating: (isGenerating: boolean) => void;
-
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
-  showEnglish: boolean; 
-  toggleEnglish: () => void; 
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
 
-  selectedVerses: number[];
+  // --- AI 状态 ---
+  isAiOpen: boolean; 
+  setAiOpen: (open: boolean) => void;
+  isAiGenerating: boolean;
+  setAiGenerating: (isGenerating: boolean) => void;
   aiRequestTrigger: {
     prompt: string;
     content: string;
@@ -59,124 +79,227 @@ interface BibleState {
     ref: VerseRef;
     timestamp: number;
   } | null;
+  triggerAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
 
+  // --- 标签页系统 ---
   tabs: Tab[];
   activeTabId: string;
+  addTab: (params: { type: 'read' | 'search'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' }) => void;
+  closeTab: (id: string) => void;
+  setActiveTab: (id: string) => void;
+  updateActiveTab: (data: Partial<Tab>) => void;
 
+  // --- 选中与高亮 ---
+  selectedVerses: number[];
+  toggleVerseSelection: (id: number) => void;
+  clearSelection: () => void;
+  
   highlights: HighlightData[];
   setHighlights: (highlights: HighlightData[]) => void;
   addHighlightLocally: (h: HighlightData) => void;
   removeHighlightLocally: (bookId: string, chapter: number, verse: number) => void;
 
+  // --- 笔记系统 ---
+  notes: NoteData[]; // [新增] 本地笔记列表
+  addNote: (note: NoteData) => void;
+  updateNote: (id: string, content: string) => void;
+  deleteNote: (id: string) => void;
+  
   isNoteOpen: boolean;
   noteTargetVerse: { bookId: string, chapter: number, verse: number } | null;
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
 
+  // --- 分享系统 ---
   isShareOpen: boolean;
   shareData: { book: string; chapter: number; verses: number[] } | null;
   openShareModal: (book: string, chapter: number, verses: number[]) => void;
   closeShareModal: () => void;
-  
-  addTab: (params: { type: 'read' | 'search'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' }) => void;
-  closeTab: (id: string) => void;
-  setActiveTab: (id: string) => void;
-  updateActiveTab: (data: Partial<Tab>) => void; 
-  toggleVerseSelection: (id: number) => void;
-  clearSelection: () => void;
-  triggerAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
 
-  // [新增] 用于语音播放的文本
+  // --- 语音播放 ---
   chapterSpeechText: string;
   setChapterSpeechText: (text: string) => void;
+
+  // --- 数据同步 (用于从服务器批量更新) ---
+  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[] }) => void;
 }
 
-export const useBibleStore = create<BibleState>((set) => ({
-  fontSize: 18,
-  setFontSize: (size) => set({ fontSize: size }),
-  lineHeight: 1.8,
-  setLineHeight: (height) => set({ lineHeight: height }),
-  
-  isSidebarOpen: false,
-  toggleSidebar: (open) => set((state) => ({ isSidebarOpen: open !== undefined ? open : !state.isSidebarOpen })),
-  isDesktopSidebarOpen: false,
-  toggleDesktopSidebar: () => set((state) => ({ isDesktopSidebarOpen: !state.isDesktopSidebarOpen })),
+// 合并所有 Slice
+type BibleState = BibleSlice & AuthSlice;
 
-  isAiOpen: false,
-  setAiOpen: (open) => set({ isAiOpen: open }),
+// 3. 实现 Store
+// --------------------------------------------------
 
-  // --- AI 生成状态 (已修正参数名) ---
-  isAiGenerating: false,
-  setAiGenerating: (isAiGenerating) => set({ isAiGenerating }),
+export const useBibleStore = create<BibleState>()(
+  persist(
+    (set, get) => ({
+      // === 认证 ===
+      isAuthOpen: false,
+      setAuthOpen: (open) => set({ isAuthOpen: open }),
 
-  sidebarWidth: 480,
-  setSidebarWidth: (width) => set({ sidebarWidth: width }),
-  showEnglish: false,
-  toggleEnglish: () => set((state) => ({ showEnglish: !state.showEnglish })),
-  isDarkMode: false,
-  toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
+      // === 设置 ===
+      fontSize: 18,
+      setFontSize: (size) => set({ fontSize: size }),
+      lineHeight: 1.8,
+      setLineHeight: (height) => set({ lineHeight: height }),
+      isDarkMode: false,
+      toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
+      showEnglish: false,
+      toggleEnglish: () => set((state) => ({ showEnglish: !state.showEnglish })),
 
-  selectedVerses: [],
-  aiRequestTrigger: null,
-  tabs: [{ id: 'tab-1', type: 'read', book: 'Gen', chapter: '1' }], 
-  activeTabId: 'tab-1',
+      // === 界面 ===
+      isSidebarOpen: false,
+      toggleSidebar: (open) => set((state) => ({ isSidebarOpen: open !== undefined ? open : !state.isSidebarOpen })),
+      isDesktopSidebarOpen: false,
+      toggleDesktopSidebar: () => set((state) => ({ isDesktopSidebarOpen: !state.isDesktopSidebarOpen })),
+      sidebarWidth: 480,
+      setSidebarWidth: (width) => set({ sidebarWidth: width }),
 
-  highlights: [],
-  setHighlights: (highlights) => set({ highlights }),
-  addHighlightLocally: (h) => set((state) => ({
-    highlights: [...state.highlights.filter(i => i.verse !== h.verse), h]
-  })),
-  removeHighlightLocally: (bookId, chapter, verse) => set((state) => ({
-    highlights: state.highlights.filter(h => !(h.bookId === bookId && h.chapter === chapter && h.verse === verse))
-  })),
+      // === AI ===
+      isAiOpen: false,
+      setAiOpen: (open) => set({ isAiOpen: open }),
+      isAiGenerating: false,
+      setAiGenerating: (isAiGenerating) => set({ isAiGenerating }),
+      aiRequestTrigger: null,
+      triggerAI: (prompt, content, context, ref) => set({
+        aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() }
+      }),
 
-  isNoteOpen: false,
-  noteTargetVerse: null,
-  openNoteEditor: (bookId, chapter, verse) => set({ isNoteOpen: true, noteTargetVerse: { bookId, chapter, verse } }),
-  closeNoteEditor: () => set({ isNoteOpen: false, noteTargetVerse: null }),
+      // === 标签页 ===
+      tabs: [{ id: 'tab-1', type: 'read', book: 'Gen', chapter: '1' }],
+      activeTabId: 'tab-1',
+      addTab: ({ type, book = 'Gen', chapter = '1', query, searchMode }) => set((state) => {
+        const newId = `tab-${Date.now()}`;
+        const newTab: Tab = { id: newId, type };
+        if (type === 'read') {
+            newTab.book = book;
+            newTab.chapter = chapter;
+        } else {
+            newTab.query = query;
+            newTab.searchMode = searchMode;
+        }
+        return { tabs: [...state.tabs, newTab], activeTabId: newId };
+      }),
+      closeTab: (id) => set((state) => {
+        if (state.tabs.length <= 1) return state; 
+        const newTabs = state.tabs.filter(t => t.id !== id);
+        let newActiveId = state.activeTabId;
+        if (id === state.activeTabId) { newActiveId = newTabs[newTabs.length - 1].id; }
+        return { tabs: newTabs, activeTabId: newActiveId };
+      }),
+      setActiveTab: (id) => set({ activeTabId: id }),
+      updateActiveTab: (data) => set((state) => ({
+        tabs: state.tabs.map(t => t.id === state.activeTabId ? { ...t, ...data } : t )
+      })),
 
-  isShareOpen: false,
-  shareData: null,
-  openShareModal: (book, chapter, verses) => set({ isShareOpen: true, shareData: { book, chapter, verses } }),
-  closeShareModal: () => set({ isShareOpen: false, shareData: null }),
+      // === 选择与高亮 ===
+      selectedVerses: [],
+      toggleVerseSelection: (id) => set((state) => {
+        const isSelected = state.selectedVerses.includes(id);
+        let newSelection;
+        if (isSelected) { newSelection = state.selectedVerses.filter(v => v !== id); } 
+        else { newSelection = [...state.selectedVerses, id].sort((a, b) => a - b); }
+        return { selectedVerses: newSelection };
+      }),
+      clearSelection: () => set({ selectedVerses: [] }),
 
-  addTab: ({ type, book = 'Gen', chapter = '1', query, searchMode }) => set((state) => {
-    const newId = `tab-${Date.now()}`;
-    const newTab: Tab = { id: newId, type };
-    if (type === 'read') {
-        newTab.book = book;
-        newTab.chapter = chapter;
-    } else {
-        newTab.query = query;
-        newTab.searchMode = searchMode;
+      highlights: [],
+      setHighlights: (highlights) => set({ highlights }),
+      addHighlightLocally: (h) => set((state) => ({
+        highlights: [...state.highlights.filter(i => !(i.bookId === h.bookId && i.chapter === h.chapter && i.verse === h.verse)), h]
+      })),
+      removeHighlightLocally: (bookId, chapter, verse) => set((state) => ({
+        highlights: state.highlights.filter(h => !(h.bookId === bookId && h.chapter === chapter && h.verse === verse))
+      })),
+
+      // === 笔记 ===
+      notes: [],
+      addNote: (note) => set((state) => ({ notes: [...state.notes, note] })),
+      updateNote: (id, content) => set((state) => ({
+        notes: state.notes.map(n => n.id === id ? { ...n, content } : n)
+      })),
+      deleteNote: (id) => set((state) => ({
+        notes: state.notes.filter(n => n.id !== id)
+      })),
+      
+      isNoteOpen: false,
+      noteTargetVerse: null,
+      openNoteEditor: (bookId, chapter, verse) => set({ isNoteOpen: true, noteTargetVerse: { bookId, chapter, verse } }),
+      closeNoteEditor: () => set({ isNoteOpen: false, noteTargetVerse: null }),
+
+      // === 分享 ===
+      isShareOpen: false,
+      shareData: null,
+      openShareModal: (book, chapter, verses) => set({ isShareOpen: true, shareData: { book, chapter, verses } }),
+      closeShareModal: () => set({ isShareOpen: false, shareData: null }),
+
+      // === 语音 ===
+      chapterSpeechText: "",
+      setChapterSpeechText: (text) => set({ chapterSpeechText: text }),
+
+      // === 数据同步 (从服务器批量加载) ===
+      setAllUserData: (data) => {
+        const updates: any = {};
+        
+        if (data.settings) {
+          updates.fontSize = data.settings.fontSize;
+          updates.lineHeight = data.settings.lineHeight;
+          updates.isDarkMode = data.settings.isDarkMode;
+          updates.showEnglish = data.settings.showEnglish;
+          
+          // 恢复上次阅读位置 (更新第一个标签页)
+          if (data.settings.lastBook && data.settings.lastChapter) {
+             const tabs = get().tabs;
+             if (tabs.length > 0 && tabs[0].type === 'read') {
+                 // 创建一个新的 tabs 数组引用
+                 const newTabs = [...tabs];
+                 newTabs[0] = { 
+                    ...newTabs[0], 
+                    book: data.settings.lastBook, 
+                    chapter: data.settings.lastChapter.toString() 
+                 };
+                 updates.tabs = newTabs;
+             }
+          }
+        }
+        
+        if (data.highlights) {
+          // 确保数据格式匹配
+          updates.highlights = data.highlights.map((h: any) => ({
+              bookId: h.bookId,
+              chapter: h.chapter,
+              verse: h.verse,
+              color: h.color
+          }));
+        }
+        
+        if (data.notes) {
+          updates.notes = data.notes.map((n: any) => ({
+              id: n.id,
+              bookId: n.bookId,
+              chapter: n.chapter,
+              verse: n.verse,
+              content: n.content
+          }));
+        }
+
+        set(updates);
+      },
+    }),
+    {
+      name: 'bible-storage', // localStorage 中的 key
+      storage: createJSONStorage(() => localStorage),
+      // 过滤不需要持久化的状态 (如弹窗打开状态)
+      partialize: (state) => ({
+        ...state,
+        isAuthOpen: false,
+        isShareOpen: false,
+        isNoteOpen: false,
+        isAiGenerating: false,
+        aiRequestTrigger: null,
+        chapterSpeechText: "", // 语音文本太大且随章节变，不缓存
+        // 注意：tabs, highlights, notes, settings 都会被自动保存
+      }),
     }
-    return { tabs: [...state.tabs, newTab], activeTabId: newId };
-  }),
-  closeTab: (id) => set((state) => {
-    if (state.tabs.length <= 1) return state; 
-    const newTabs = state.tabs.filter(t => t.id !== id);
-    let newActiveId = state.activeTabId;
-    if (id === state.activeTabId) { newActiveId = newTabs[newTabs.length - 1].id; }
-    return { tabs: newTabs, activeTabId: newActiveId };
-  }),
-  setActiveTab: (id) => set({ activeTabId: id }),
-  updateActiveTab: (data) => set((state) => ({
-    tabs: state.tabs.map(t => t.id === state.activeTabId ? { ...t, ...data } : t )
-  })),
-  toggleVerseSelection: (id) => set((state) => {
-    const isSelected = state.selectedVerses.includes(id);
-    let newSelection;
-    if (isSelected) { newSelection = state.selectedVerses.filter(v => v !== id); } 
-    else { newSelection = [...state.selectedVerses, id].sort((a, b) => a - b); }
-    return { selectedVerses: newSelection };
-  }),
-  clearSelection: () => set({ selectedVerses: [] }),
-  
-  triggerAI: (prompt, content, context, ref) => set({
-    aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() }
-  }),
-
-  // [新增] 初始值和方法
-  chapterSpeechText: "",
-  setChapterSpeechText: (text) => set({ chapterSpeechText: text }),
-}));
+  )
+);

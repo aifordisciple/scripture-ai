@@ -1,88 +1,58 @@
 // app/api/highlight/route.ts
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth"; // [修改] 引入 auth
+import { prisma } from "@/lib/prisma";
 
-// 模拟用户ID (在没有 NextAuth 之前的临时方案)
-const TEMP_USER_ID = "user_12345";
-
-// 获取高亮
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const bookId = searchParams.get('bookId');
-  const chapter = searchParams.get('chapter');
+  const bookId = searchParams.get("bookId");
+  const chapter = parseInt(searchParams.get("chapter") || "0");
 
-  if (!bookId || !chapter) return NextResponse.json({ data: [] });
-
-  // 确保临时用户存在
-  await ensureUserExists();
-
-  const highlights = await prisma.highlight.findMany({
-    where: {
-      userId: TEMP_USER_ID,
-      bookId: bookId,
-      chapter: parseInt(chapter)
-    }
-  });
-
-  return NextResponse.json({ data: highlights });
-}
-
-// 保存或删除高亮
-export async function POST(req: Request) {
-  const { bookId, chapter, verses, color } = await req.json();
+  const session = await auth(); // [修改] 使用 auth()
   
-  await ensureUserExists();
+  if (session?.user?.email) {
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    if (!user) return NextResponse.json({ data: [] });
 
-  try {
-    const operations = [];
-
-    // 如果 color 是 null，说明是清除高亮
-    if (!color) {
-      operations.push(prisma.highlight.deleteMany({
-        where: {
-          userId: TEMP_USER_ID,
-          bookId,
-          chapter,
-          verse: { in: verses }
-        }
-      }));
-    } else {
-      // Upsert: 有则更新颜色，无则创建
-      for (const verse of verses) {
-        operations.push(prisma.highlight.upsert({
-          where: {
-            userId_bookId_chapter_verse: {
-              userId: TEMP_USER_ID,
-              bookId,
-              chapter,
-              verse
-            }
-          },
-          update: { color },
-          create: {
-            userId: TEMP_USER_ID,
-            bookId,
-            chapter,
-            verse,
-            color
-          }
-        }));
-      }
-    }
-
-    await prisma.$transaction(operations);
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed' }, { status: 500 });
+    const highlights = await prisma.highlight.findMany({
+      where: { userId: user.id, bookId: bookId!, chapter },
+    });
+    return NextResponse.json({ data: highlights });
+  } else {
+    return NextResponse.json({ data: [] });
   }
 }
 
-async function ensureUserExists() {
-  const user = await prisma.user.findUnique({ where: { id: TEMP_USER_ID } });
-  if (!user) {
-    await prisma.user.create({
-      data: { id: TEMP_USER_ID, email: 'demo@example.com', name: 'Demo User' }
+export async function POST(req: Request) {
+  const session = await auth(); // [修改] 使用 auth()
+  if (!session?.user?.email) return new NextResponse("Unauthorized", { status: 401 });
+
+  const body = await req.json();
+  const { bookId, chapter, verse, color, action } = body;
+  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+  
+  if (!user) return new NextResponse("User not found", { status: 404 });
+
+  if (action === 'remove') {
+    await prisma.highlight.deleteMany({
+      where: { userId: user.id, bookId, chapter, verse }
     });
+  } else {
+    const existing = await prisma.highlight.findFirst({
+        where: { userId: user.id, bookId, chapter, verse }
+    });
+
+    if (existing) {
+        await prisma.highlight.update({
+            where: { id: existing.id },
+            data: { color }
+        });
+    } else {
+        await prisma.highlight.create({
+            data: { userId: user.id, bookId, chapter, verse, color }
+        });
+    }
   }
+
+  return NextResponse.json({ success: true });
 }

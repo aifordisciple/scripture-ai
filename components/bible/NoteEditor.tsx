@@ -5,19 +5,27 @@ import { useState, useEffect } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea"; // 假设你有这个，没有的话用原生 textarea
 import { Loader2, Sparkles, Save, BookOpen } from "lucide-react";
+import { useSession } from "next-auth/react"; // [新增]
 
 export function NoteEditor() {
-  const { isNoteOpen, closeNoteEditor, noteTargetVerse } = useBibleStore();
+  const { isNoteOpen, closeNoteEditor, noteTargetVerse, addNote, notes } = useBibleStore();
+  const { data: session } = useSession(); // [新增]
   const [content, setContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // 查找当前是否已有笔记（用于编辑）
+  const existingNote = noteTargetVerse 
+    ? notes.find(n => n.bookId === noteTargetVerse.bookId && n.chapter === noteTargetVerse.chapter && n.verse === noteTargetVerse.verse)
+    : null;
 
-  // 当打开新经文时，重置或加载（这里先做简单的重置，实际应加载已有笔记）
+  // 当打开新经文时，加载已有笔记或重置
   useEffect(() => {
-    if (isNoteOpen) setContent("");
-  }, [isNoteOpen, noteTargetVerse]);
+    if (isNoteOpen) {
+        setContent(existingNote?.content || "");
+    }
+  }, [isNoteOpen, noteTargetVerse, existingNote]);
 
   const handleGeneratePrayer = async () => {
     if (!content.trim()) return;
@@ -41,19 +49,39 @@ export function NoteEditor() {
   const handleSave = async () => {
     if (!noteTargetVerse || !content.trim()) return;
     setIsSaving(true);
+    
     try {
-      await fetch('/api/note', {
-        method: 'POST',
-        body: JSON.stringify({
-          bookId: noteTargetVerse.bookId,
-          chapter: noteTargetVerse.chapter,
-          verse: noteTargetVerse.verse,
-          content: content
-        })
-      });
+      const noteData = {
+        id: existingNote?.id || `temp-${Date.now()}`, // 如果是新建，生成临时ID
+        bookId: noteTargetVerse.bookId,
+        chapter: noteTargetVerse.chapter,
+        verse: noteTargetVerse.verse,
+        content: content
+      };
+
+      // 1. 本地保存 (UI Optimistic Update)
+      addNote(noteData); // 注意：useBibleStore 需要支持 addNote/updateNote，这里简化为 addNote 覆盖
+
+      // 2. [新增] 远程保存
+      if (session?.user) {
+        await fetch('/api/note', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            noteId: existingNote?.id, // 如果是编辑，传旧ID
+            book: noteTargetVerse.bookId,
+            chapter: noteTargetVerse.chapter,
+            verse: noteTargetVerse.verse,
+            content: content,
+            action: "upsert"
+          })
+        });
+      }
+      
       closeNoteEditor();
     } catch (e) {
       console.error(e);
+      alert("保存失败，请重试");
     } finally {
       setIsSaving(false);
     }

@@ -30,59 +30,77 @@ model BibleVerse {
 // --- 新增用户系统相关模型 ---
 
 model User {
-  id            String      @id @default(cuid())
-  email         String      @unique
+  id            String    @id @default(cuid())
   name          String?
-  createdAt     DateTime    @default(now())
+  email         String    @unique
+  password      String    // 加密后的密码
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   
+  // 关联数据
+  settings      UserSetting?
   highlights    Highlight[]
   notes         Note[]
-  tags          Tag[]
+  cards         ScriptureCard[]
+}
+
+model UserSetting {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 阅读器设置
+  fontSize      Int     @default(20)
+  lineHeight    Float   @default(1.8)
+  isDarkMode    Boolean @default(false)
+  showEnglish   Boolean @default(true)
+  
+  // 进度记忆
+  lastBook      String?
+  lastChapter   Int?
 }
 
 model Highlight {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   bookId    String
   chapter   Int
   verse     Int
-  color     String   @default("yellow") // yellow, green, red, blue
+  color     String   // "yellow", "green", "blue", "red"
+  content   String?  // 选中的经文内容快照
   
   createdAt DateTime @default(now())
 
-  // 复合唯一索引：确保同一用户对同一节经文只能有一个高亮
-  @@unique([userId, bookId, chapter, verse]) 
   @@index([userId, bookId, chapter])
 }
 
 model Note {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  // 关联经文 (简化为关联单节，实际可扩展为 Range)
   bookId    String
   chapter   Int
   verse     Int
-  
-  content   String   // 用户写的笔记，支持 Markdown
-  aiOrigin  String?  // 如果是引用AI的解释，存原始文本
-  
-  tags      Tag[]    // 多对多关系
+  content   String   @db.Text
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId, bookId, chapter])
 }
 
-model Tag {
+model ScriptureCard {
   id        String   @id @default(cuid())
-  name      String
-  userId    String   
-  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  notes     Note[]
-
-  @@unique([userId, name])
+  imageUrl  String   @db.Text // 图片的 Base64 或 URL
+  note      String?  // 备注
+  
+  createdAt DateTime @default(now())
 }
+

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Sparkles, Copy, X, Highlighter, PenLine, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
+import { useSession } from "next-auth/react"; // [新增] 引入 Session
 
 interface FloatingMenuProps {
   visible: boolean;
@@ -29,6 +30,9 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
   const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection } = useBibleStore();
+  
+  // [新增] 获取用户 Session
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (visible) {
@@ -41,6 +45,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
   }, [visible]);
 
   const handleHighlight = async (color: string) => {
+    // 1. 本地立即更新 (UI Optimistic Update)
     selectedVerses.forEach(verse => {
       if (color === 'none') {
         removeHighlightLocally(currentBook, currentChapter, verse);
@@ -49,17 +54,28 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
       }
     });
 
-    await fetch('/api/highlight', {
-      method: 'POST',
-      body: JSON.stringify({
-        bookId: currentBook,
-        chapter: currentChapter,
-        verses: selectedVerses,
-        color: color === 'none' ? null : color
-      })
-    });
+    // 2. [新增] 如果已登录，同步到服务器
+    if (session?.user) {
+        // 注意：这里为了简化，循环请求。生产环境建议后端支持批量操作。
+        // 使用 Promise.all 并发请求以提高效率
+        const promises = selectedVerses.map(verse => 
+            fetch('/api/highlight', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bookId: currentBook,
+                    chapter: currentChapter,
+                    verse: verse,
+                    color: color === 'none' ? null : color,
+                    action: color === 'none' ? 'remove' : 'add'
+                })
+            })
+        );
+        
+        // 默默执行，不阻塞 UI 关闭
+        Promise.all(promises).catch(err => console.error("Sync highlight failed", err));
+    }
     
-    // 修改：高亮后自动取消选择并关闭菜单
     clearSelection();
     onClose();
   };
@@ -67,7 +83,6 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
   const handleCopyClick = () => {
     onCopy();
     setCopied(true);
-    // 修改：延迟一点时间后取消选择，让用户看到“已复制”反馈
     setTimeout(() => {
         clearSelection();
         onClose();
