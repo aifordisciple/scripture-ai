@@ -5,12 +5,13 @@ import { useEffect, useState, useRef } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Download, Image as ImageIcon, Upload, AlignLeft, AlignCenter, AlignRight, Type, Layout, Quote, Frame, Clapperboard, Columns, StickyNote, Minus, MoveVertical, Palette, Info, Eye, Settings2, Share2, X } from "lucide-react";
+import { Loader2, Download, Image as ImageIcon, Upload, AlignLeft, AlignCenter, AlignRight, Type, Layout, Quote, Frame, Clapperboard, Columns, StickyNote, Minus, MoveVertical, Palette, Info, Eye, Settings2, Share2, X, RefreshCw, ChevronLeft } from "lucide-react";
 import { toPng } from "html-to-image";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 
+// --- 资源库 ---
 const UNSPLASH_PRESETS = [
   "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1080&auto=format&fit=crop", 
   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1080&auto=format&fit=crop", 
@@ -41,66 +42,43 @@ const FONT_OPTIONS = [
   { name: "宋体 (默认)", value: "'Noto Serif SC', serif" },
   { name: "黑体", value: "'Noto Sans SC', sans-serif" },
   { name: "楷体", value: "'KaiTi', 'STKaiti', serif" },
-  { name: "系统宋体", value: "ui-serif, Georgia, serif" },
-  { name: "系统黑体", value: "ui-sans-serif, system-ui, sans-serif" },
 ];
 
 type LayoutMode = 'classic' | 'poster' | 'card' | 'modern' | 'split' | 'frame' | 'film' | 'minimal' | 'magazine' | 'stamp';
 
-// 稳健的图片加载：使用我们的 API 代理
-const proxyImageLoad = async (originalUrl: string): Promise<string> => {
-  // 本地上传的图片已经是 base64，直接返回
-  if (originalUrl.startsWith('data:')) return originalUrl;
-  
-  // 这里的 /api/proxy 是我们刚刚创建的路由
-  const proxyUrl = `/api/proxy?url=${encodeURIComponent(originalUrl)}`;
-  
-  try {
-    const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error('Proxy fetch failed');
-    const blob = await res.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
-    });
-  } catch (e) {
-    console.warn("Proxy failed, falling back to original", e);
-    return originalUrl;
-  }
-};
-
 export function ShareCard() {
   const { isShareOpen, closeShareModal, shareData } = useBibleStore();
-  const [loading, setLoading] = useState(false);
-  const [loadingText, setLoadingText] = useState("生成中...");
-  const [mobileTab, setMobileTab] = useState<'preview' | 'settings'>('preview');
-  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   
+  // 核心状态
+  const [step, setStep] = useState<'edit' | 'result'>('edit');
+  const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("准备中...");
+  const [resultImg, setResultImg] = useState<string | null>(null);
+
+  // 内容状态
   const [verseContent, setVerseContent] = useState<string[]>([]);
   const [bookName, setBookName] = useState(""); 
   
-  const [bgImage, setBgImage] = useState<string | null>(null);
+  // 样式状态
+  const [safeBgImage, setSafeBgImage] = useState<string | null>(null); // Base64
+  const [selectedBgUrl, setSelectedBgUrl] = useState<string | null>(null);
   const [bgGradient, setBgGradient] = useState<string>(GRADIENT_PRESETS[0].bg);
   
-  // 颜色配置
   const [recMainColor, setRecMainColor] = useState<string>(GRADIENT_PRESETS[0].text);
   const [recInfoColor, setRecInfoColor] = useState<string>(GRADIENT_PRESETS[0].info);
-  const [textColor, setTextColor] = useState(GRADIENT_PRESETS[0].text);
-  const [infoColor, setInfoColor] = useState(GRADIENT_PRESETS[0].info);
-
-  // 排版配置
+  
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('classic');
   const [fontSize, setFontSize] = useState(22);
   const [lineHeight, setLineHeight] = useState(1.8);
   const [fontFamily, setFontFamily] = useState(FONT_OPTIONS[0].value);
   const [textAlign, setTextAlign] = useState<'left' | 'center' | 'right'>('left');
+  const [textColor, setTextColor] = useState(GRADIENT_PRESETS[0].text);
+  const [infoColor, setInfoColor] = useState(GRADIENT_PRESETS[0].info);
   
   const cardRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mainColorRef = useRef<HTMLInputElement>(null);
   const infoColorRef = useRef<HTMLInputElement>(null);
-  const touchStartRef = useRef<{ x: number, y: number } | null>(null);
 
   const formatVerseRange = (verses: number[]) => {
     if (!verses || verses.length === 0) return "";
@@ -118,6 +96,8 @@ export function ShareCard() {
 
   useEffect(() => {
     if (isShareOpen && shareData) {
+      setStep('edit'); 
+      setResultImg(null);
       setBookName(shareData.book); 
       async function loadVerses() {
         try {
@@ -130,7 +110,8 @@ export function ShareCard() {
       }
       loadVerses();
       
-      setBgImage(null);
+      setSafeBgImage(null);
+      setSelectedBgUrl(null);
       setBgGradient(GRADIENT_PRESETS[0].bg);
       setRecMainColor(GRADIENT_PRESETS[0].text);
       setRecInfoColor(GRADIENT_PRESETS[0].info);
@@ -141,10 +122,36 @@ export function ShareCard() {
       setFontSize(22);
       setLineHeight(1.8);
       setFontFamily(FONT_OPTIONS[0].value);
-      setMobileTab('preview'); 
-      setGeneratedImageUrl(null);
     }
   }, [isShareOpen, shareData]);
+
+  // 图片代理处理 (API proxy -> Base64)
+  const handleBgSelect = async (url: string) => {
+      setSelectedBgUrl(url);
+      setLoading(true);
+      
+      try {
+          const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+          const res = await fetch(proxyUrl);
+          if (!res.ok) throw new Error("Load failed");
+          const blob = await res.blob();
+          
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              setSafeBgImage(reader.result as string); // 拿到 Base64
+              setLoading(false);
+          };
+          reader.readAsDataURL(blob);
+          
+          setRecMainColor("#ffffff"); setRecInfoColor("#e5e5e5");
+          if (!['card', 'split'].includes(layoutMode)) { setTextColor('#ffffff'); setInfoColor('#e5e5e5'); }
+          
+      } catch (e) {
+          console.error(e);
+          setSafeBgImage(null);
+          setLoading(false);
+      }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -152,11 +159,10 @@ export function ShareCard() {
         const reader = new FileReader();
         reader.onload = (event) => {
             if (event.target?.result) {
-                setBgImage(`url(${event.target.result})`);
-                setTextColor("#ffffff"); 
-                setInfoColor("#e5e5e5");
-                setRecMainColor("#ffffff");
-                setRecInfoColor("#e5e5e5");
+                setSafeBgImage(event.target.result as string);
+                setSelectedBgUrl("custom");
+                setTextColor("#ffffff"); setInfoColor("#e5e5e5");
+                setRecMainColor("#ffffff"); setRecInfoColor("#e5e5e5");
             }
         };
         reader.readAsDataURL(file);
@@ -166,199 +172,113 @@ export function ShareCard() {
   const handleLayoutChange = (mode: LayoutMode) => {
     setLayoutMode(mode);
     if (mode === 'card' || mode === 'split') {
-        setTextColor('#333333');
-        setInfoColor('#666666');
-        setTextAlign('left');
-    }
-    else if (mode === 'poster' || mode === 'film') {
-        setTextColor('#ffffff');
-        setInfoColor('#cccccc');
-        setTextAlign(mode === 'film' ? 'center' : 'left');
-    }
-    else {
-        setTextColor(recMainColor);
-        setInfoColor(recInfoColor);
+        setTextColor('#333333'); setInfoColor('#666666'); setTextAlign('left');
+    } else if (mode === 'poster' || mode === 'film') {
+        setTextColor('#ffffff'); setInfoColor('#cccccc'); setTextAlign(mode === 'film' ? 'center' : 'left');
+    } else {
+        setTextColor(recMainColor); setInfoColor(recInfoColor);
         if (mode === 'magazine') setTextAlign('right');
         else if (['minimal', 'stamp', 'classic'].includes(mode)) setTextAlign('center');
         else setTextAlign('left');
     }
   };
 
-  const generateImage = async (): Promise<string | null> => {
-    if (!cardRef.current) return null;
-    
-    let finalStyle: any = { transform: 'none' };
-    
-    // 1. 如果使用了网络背景图，通过 API 代理获取，彻底解决 CORS
-    if (bgImage && bgImage.startsWith('url(http')) {
-        setLoadingText("加载资源...");
-        try {
-            const url = bgImage.slice(4, -1).replace(/["']/g, ""); 
-            const base64Bg = await proxyImageLoad(url);
-            finalStyle.backgroundImage = `url(${base64Bg})`;
-        } catch (e) {
-            console.warn("Background load error, using gradient fallback");
-            finalStyle.backgroundImage = 'none';
-            finalStyle.background = bgGradient;
-        }
-    }
-
-    setLoadingText("渲染中...");
-    
-    // 2. 尝试生成 (包含重试逻辑)
-    let attempts = 0;
-    while (attempts < 2) {
-        try {
-            const dataUrl = await toPng(cardRef.current, { 
-                cacheBust: false, // 代理已处理缓存，关闭此项以避免二次请求
-                pixelRatio: 3, 
-                width: 340, 
-                height: cardRef.current.scrollHeight,
-                style: finalStyle 
-            });
-            if (dataUrl.length > 1000) return dataUrl;
-        } catch (e) {
-            console.warn(`Attempt ${attempts + 1} failed:`, e);
-        }
-        attempts++;
-        await new Promise(r => setTimeout(r, 500));
-    }
-    return null;
-  };
-
-  const handleDownload = async () => {
+  // 生成图片核心逻辑
+  const generateImage = async () => {
+    if (!cardRef.current) return;
     setLoading(true);
-    setLoadingText("准备中...");
+    setLoadingText("正在渲染图片...");
     
     try {
-      const dataUrl = await generateImage();
-      if (!dataUrl) throw new Error("生成失败");
+        // 确保 DOM 渲染完成
+        await new Promise(r => setTimeout(r, 100));
 
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const dataUrl = await toPng(cardRef.current, { 
+            cacheBust: false, // 关键修复：必须为 false，否则会破坏 Data URI
+            pixelRatio: 3, 
+            width: 340,    
+            height: Math.max(cardRef.current.scrollHeight, 540), 
+            style: {
+                transform: 'none', // 仅移除缩放，不覆盖背景
+                // 不要在这里覆盖 background 属性，相信 DOM 的渲染
+            }
+        });
 
-      // --- 移动端逻辑 ---
-      if (isMobile) {
-          // 优先尝试原生分享
-          if (navigator.share) {
-              try {
-                  const blob = await (await fetch(dataUrl)).blob();
-                  const file = new File([blob], `scripture-${Date.now()}.png`, { type: 'image/png' });
-                  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                      setLoadingText("调起分享...");
-                      await navigator.share({
-                          files: [file],
-                          title: '分享经文',
-                          text: '来自 Scripture AI 的经文卡片'
-                      });
-                      setLoading(false);
-                      return; 
-                  }
-              } catch (err) {
-                  console.warn("Share API failed", err);
-              }
-          }
-          // 移动端兜底：弹窗展示
-          setGeneratedImageUrl(dataUrl);
-      } 
-      // --- PC 端逻辑 ---
-      else {
-          // 恢复直接下载
-          const link = document.createElement("a");
-          link.download = `scripture-share-${Date.now()}.png`;
-          link.href = dataUrl;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-      }
+        setResultImg(dataUrl);
+        setStep('result');
 
     } catch (e) {
-      console.error("Critical error:", e);
-      alert("生成失败，请尝试简化样式或更换背景。");
+        console.error("生成失败:", e);
+        alert("生成失败，请尝试刷新重试。");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    const diffX = touchStartRef.current.x - e.changedTouches[0].clientX;
-    const diffY = touchStartRef.current.y - e.changedTouches[0].clientY;
-    if (Math.abs(diffX) > 50 && Math.abs(diffY) < 50) {
-        if (diffX > 0 && mobileTab === 'preview') setMobileTab('settings'); 
-        if (diffX < 0 && mobileTab === 'settings') setMobileTab('preview'); 
-    }
-    touchStartRef.current = null;
   };
 
   if (!isShareOpen || !shareData) return null;
 
-  const containerStyle = bgImage 
-    ? { backgroundImage: bgImage, backgroundSize: 'cover', backgroundPosition: 'center' }
+  // 最终背景样式 (应用在 DOM 上)
+  const containerStyle = safeBgImage 
+    ? { backgroundImage: `url(${safeBgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : { background: bgGradient };
 
   return (
     <Dialog open={isShareOpen} onOpenChange={(open) => !open && closeShareModal()}>
       <DialogContent className="sm:max-w-5xl bg-white dark:bg-slate-900 border-none p-0 overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[700px]">
         
-        {/* --- 结果预览 / 兜底保存层 --- */}
-        {generatedImageUrl && (
-            <div className="absolute inset-0 z-[60] bg-black/95 flex flex-col items-center justify-center p-6 backdrop-blur-sm animate-in fade-in duration-300">
-                <div className="relative w-full max-w-sm flex flex-col items-center h-full justify-center">
-                    <div className="w-full flex justify-end mb-4 absolute top-4 right-0 z-10">
-                        <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="text-white hover:bg-white/20 rounded-full px-4 border border-white/30 bg-black/20 backdrop-blur-md"
-                            onClick={() => setGeneratedImageUrl(null)}
-                        >
-                            <X className="w-4 h-4 mr-2" /> 关闭
+        {/* --- 结果页 (Result) --- */}
+        {step === 'result' && resultImg && (
+            <div className="absolute inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6 animate-in fade-in slide-in-from-bottom-10">
+                <div className="w-full max-w-sm flex flex-col h-full relative">
+                    <div className="flex justify-between items-center mb-4 shrink-0">
+                        <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" onClick={() => setStep('edit')}>
+                            <ChevronLeft className="w-5 h-5 mr-1" /> 返回编辑
+                        </Button>
+                        <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" onClick={closeShareModal}>
+                            <X className="w-5 h-5" />
                         </Button>
                     </div>
-                    
-                    <img 
-                        src={generatedImageUrl} 
-                        alt="Generated Card" 
-                        className="w-auto max-h-[70vh] shadow-2xl rounded-lg border border-white/10 object-contain" 
-                    />
-                    
-                    <div className="mt-6 text-center space-y-2 bg-white/10 p-4 rounded-xl backdrop-blur-md border border-white/5 w-full">
+
+                    <div className="flex-1 flex items-center justify-center overflow-hidden py-4">
+                        <img 
+                            src={resultImg} 
+                            alt="Result" 
+                            className="max-h-full w-auto object-contain shadow-2xl rounded-lg border border-white/10" 
+                        />
+                    </div>
+
+                    <div className="mt-4 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/5 shrink-0 text-center space-y-3">
                         <p className="text-white font-bold text-lg flex items-center justify-center gap-2 animate-pulse">
                             <Share2 className="w-5 h-5" />
-                            长按图片保存
+                            长按上方图片保存
                         </p>
-                        <p className="text-white/60 text-sm">生成的图片已就绪</p>
+                        <p className="text-white/50 text-xs">或截图分享给好友</p>
+                        
+                        {/* PC端提供下载按钮 */}
+                        <div className="hidden md:block pt-2">
+                             <Button 
+                                className="w-full bg-blue-600 hover:bg-blue-700" 
+                                onClick={() => {
+                                    const link = document.createElement("a");
+                                    link.download = `scripture-${Date.now()}.png`;
+                                    link.href = resultImg;
+                                    link.click();
+                                }}
+                             >
+                                <Download className="w-4 h-4 mr-2" /> 下载到本地
+                             </Button>
+                        </div>
                     </div>
                 </div>
             </div>
         )}
 
-        {/* 移动端 Tab 导航栏 */}
-        <div className="md:hidden flex items-center border-b dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
-            <button onClick={() => setMobileTab('preview')} className={cn("flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors relative", mobileTab === 'preview' ? "text-blue-600 dark:text-blue-400" : "text-slate-500")}>
-                <Eye className="w-4 h-4" /> 预览
-                {mobileTab === 'preview' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
-            </button>
-            <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-700" />
-            <button onClick={() => setMobileTab('settings')} className={cn("flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors relative", mobileTab === 'settings' ? "text-blue-600 dark:text-blue-400" : "text-slate-500")}>
-                <Settings2 className="w-4 h-4" /> 设置
-                {mobileTab === 'settings' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
-            </button>
-        </div>
-
-        {/* 主容器 */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        {/* --- 编辑页 (Edit) --- */}
+        <div className={cn("flex-1 flex flex-col md:flex-row overflow-hidden relative", step === 'result' ? 'invisible' : 'visible')}>
             
-            {/* 左侧：预览区域 */}
-            <div className={cn(
-                "bg-slate-100 dark:bg-black/50 items-center justify-center p-6 overflow-auto transition-all duration-300",
-                "md:flex md:flex-1 md:w-auto",
-                mobileTab === 'preview' ? "flex flex-1 w-full h-full" : "hidden"
-            )}>
-              <div className="transform md:scale-100 scale-90 origin-center transition-transform duration-300">
+            {/* 左侧：预览 */}
+            <div className="bg-slate-100 dark:bg-black/50 items-center justify-center p-6 overflow-auto flex-1 flex">
+              <div className="transform md:scale-100 scale-[0.7] origin-center transition-transform duration-300">
                 <div 
                     ref={cardRef}
                     className={cn(
@@ -368,11 +288,10 @@ export function ShareCard() {
                     )}
                     style={
                         (layoutMode === 'card' || layoutMode === 'split') 
-                        ? { background: layoutMode === 'split' ? '#fff' : bgImage ? containerStyle.backgroundImage : bgGradient, backgroundSize: 'cover', backgroundPosition: 'center' } 
+                        ? { background: layoutMode === 'split' ? '#fff' : safeBgImage ? containerStyle.backgroundImage : bgGradient, backgroundSize: 'cover', backgroundPosition: 'center' } 
                         : { ...containerStyle }
                     }
                 >
-                    {/* ... 装饰层保持不变 ... */}
                     {layoutMode === 'film' && (
                         <>
                             <div className="absolute top-0 left-0 right-0 h-[10%] bg-black z-10" />
@@ -399,7 +318,7 @@ export function ShareCard() {
                         fontFamily: fontFamily,
                         color: (layoutMode === 'card' || layoutMode === 'split') ? '#333' : textColor,
                         borderColor: (layoutMode === 'card' || layoutMode === 'split') ? '#333' : textColor,
-                        textShadow: (['classic', 'modern', 'minimal', 'frame'].includes(layoutMode) && bgImage) ? '0 1px 3px rgba(0,0,0,0.6)' : 'none'
+                        textShadow: (['classic', 'modern', 'minimal', 'frame'].includes(layoutMode) && safeBgImage) ? '0 1px 3px rgba(0,0,0,0.6)' : 'none'
                     }}
                     >
                         <div className={cn(
@@ -448,14 +367,10 @@ export function ShareCard() {
               </div>
             </div>
 
-            {/* 右侧：控制面板 */}
-            <div className={cn(
-                "bg-white dark:bg-slate-900 flex-col transition-all duration-300",
-                "md:w-96 md:border-l dark:border-slate-800 md:flex",
-                mobileTab === 'settings' ? "flex flex-1 w-full h-full" : "hidden"
-            )}>
-                <DialogHeader className="hidden md:block p-4 border-b dark:border-slate-800">
-                    <DialogTitle className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
+            {/* 右侧：设置 */}
+            <div className="bg-white dark:bg-slate-900 flex-col transition-all duration-300 w-full md:w-96 md:border-l dark:border-slate-800 flex h-[50vh] md:h-full">
+                <DialogHeader className="p-3 border-b dark:border-slate-800 shrink-0">
+                    <DialogTitle className="flex items-center gap-2 text-slate-700 dark:text-slate-200 text-sm md:text-base">
                         <ImageIcon className="w-5 h-5" /> 经文卡片定制
                     </DialogTitle>
                 </DialogHeader>
@@ -468,7 +383,6 @@ export function ShareCard() {
                             <TabsTrigger value="text">文字</TabsTrigger>
                         </TabsList>
 
-                        {/* ... (Tabs Content 保持不变) ... */}
                         <TabsContent value="layout" className="space-y-4">
                             <div className="grid grid-cols-2 gap-3">
                                 <LayoutButton mode="classic" current={layoutMode} set={handleLayoutChange} label="经典" icon={<Layout className="w-5 h-5"/>} />
@@ -489,7 +403,14 @@ export function ShareCard() {
                                 <label className="text-xs font-bold text-slate-500 mb-2 block">精选美图</label>
                                 <div className="grid grid-cols-3 gap-2">
                                     {UNSPLASH_PRESETS.map((url, i) => (
-                                        <button key={i} onClick={() => { setBgImage(`url(${url})`); setRecMainColor("#ffffff"); setRecInfoColor("#e5e5e5"); if (!['card', 'split'].includes(layoutMode)) { setTextColor('#ffffff'); setInfoColor('#e5e5e5'); } }} className={cn("w-full aspect-square rounded-md bg-cover bg-center border-2 hover:border-blue-500 hover:scale-105 transition-all shadow-sm", bgImage?.includes(url) ? "border-blue-500 ring-2 ring-blue-200" : "border-transparent")} style={{ backgroundImage: `url(${url})` }} />
+                                        <button 
+                                            key={i}
+                                            onClick={() => handleBgSelect(url)} 
+                                            className={cn("w-full aspect-square rounded-md bg-cover bg-center border-2 hover:border-blue-500 hover:scale-105 transition-all shadow-sm relative", selectedBgUrl === url ? "border-blue-500 ring-2 ring-blue-200" : "border-transparent")}
+                                            style={{ backgroundImage: `url(${url})` }}
+                                        >
+                                            {selectedBgUrl === url && loading && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><Loader2 className="w-4 h-4 animate-spin text-white"/></div>}
+                                        </button>
                                     ))}
                                 </div>
                             </div>
@@ -497,7 +418,7 @@ export function ShareCard() {
                                 <label className="text-xs font-bold text-slate-500 mb-2 block">简约渐变</label>
                                 <div className="grid grid-cols-4 gap-2">
                                     {GRADIENT_PRESETS.map((g, i) => (
-                                        <button key={i} onClick={() => { setBgImage(null); setBgGradient(g.bg); setRecMainColor(g.text); setRecInfoColor(g.info); if (!['card', 'split', 'poster', 'film'].includes(layoutMode)) { setTextColor(g.text); setInfoColor(g.info); } }} className={cn("w-full aspect-square rounded-full border shadow-sm hover:scale-110 transition-transform", bgGradient === g.bg && !bgImage && "ring-2 ring-blue-500 ring-offset-2")} style={{ background: g.bg }} title={g.name} />
+                                        <button key={i} onClick={() => { setSafeBgImage(null); setSelectedBgUrl(null); setBgGradient(g.bg); setRecMainColor(g.text); setRecInfoColor(g.info); if (!['card', 'split', 'poster', 'film'].includes(layoutMode)) { setTextColor(g.text); setInfoColor(g.info); } }} className={cn("w-full aspect-square rounded-full border shadow-sm hover:scale-110 transition-transform", bgGradient === g.bg && !safeBgImage && "ring-2 ring-blue-500 ring-offset-2")} style={{ background: g.bg }} title={g.name} />
                                     ))}
                                 </div>
                             </div>
@@ -564,16 +485,9 @@ export function ShareCard() {
                 </div>
 
                 <div className="p-4 border-t dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0">
-                    <Button onClick={handleDownload} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all hover:scale-[1.02]">
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : (
-                            <div className="flex items-center">
-                                <Share2 className="w-4 h-4 mr-2 md:hidden" /> 
-                                <Download className="w-4 h-4 mr-2 hidden md:block" />
-                                <span className="md:hidden">分享/保存图片</span>
-                                <span className="hidden md:inline">保存图片</span>
-                            </div>
-                        )}
-                        {loading && <span className="ml-2 text-xs opacity-80">{loadingText}</span>}
+                    <Button onClick={generateImage} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all hover:scale-[1.02]">
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ImageIcon className="w-4 h-4 mr-2" />}
+                        {loading ? loadingText : "生成分享图片"}
                     </Button>
                 </div>
             </div>
@@ -585,13 +499,7 @@ export function ShareCard() {
 
 function LayoutButton({ mode, current, set, label, icon }: any) {
     return (
-        <button 
-            onClick={() => set(mode)} 
-            className={cn(
-                "p-3 border rounded-lg hover:bg-slate-50 flex flex-col items-center gap-2 transition-all", 
-                current === mode && "border-blue-500 bg-blue-50/50 ring-1 ring-blue-500 text-blue-600"
-            )}
-        >
+        <button onClick={() => set(mode)} className={cn("p-3 border rounded-lg hover:bg-slate-50 flex flex-col items-center gap-2 transition-all", current === mode && "border-blue-500 bg-blue-50/50 ring-1 ring-blue-500 text-blue-600")}>
             <div className={cn("text-slate-500", current === mode && "text-blue-500")}>{icon}</div>
             <span className="text-xs font-medium">{label}</span>
         </button>
