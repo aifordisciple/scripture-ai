@@ -69,7 +69,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const { 
     fontSize, lineHeight, selectedVerses, toggleVerseSelection, 
     clearSelection, triggerAI, showEnglish, highlights, setHighlights,
-    setChapterSpeechText // [新增] 引入设置文本的方法
+    setChapterSpeechText 
   } = useBibleStore();
 
   const touchStartRef = useRef<{ x: number, y: number } | null>(null);
@@ -79,6 +79,8 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       setLoading(true);
       clearSelection();
       setIsMenuVisible(false);
+      setChapterSpeechText(""); // [新增] 加载新章节前清空语音文本
+      
       try {
         const [versesRes, highlightsRes] = await Promise.all([
           fetch(`/api/bible?book=${book}&chapter=${chapter}`),
@@ -91,7 +93,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         if (versesJson.data) {
             setVerses(versesJson.data);
             
-            // [新增] 同步当前章节文本到全局 Store，供 Sidebar/Header 播放
             const fullText = versesJson.data
                 .filter((v: any) => v.version === 'CUV')
                 .map((v: any) => v.content)
@@ -286,7 +287,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                 </div>
             ) : (
                 <>  
-                    {/* [修改] 标题区域：这里不再显示 AudioButton，改在 Header 显示 */}
                     <div className="flex items-center justify-center mb-8 relative">
                         <h1 className="text-3xl font-serif font-bold text-slate-800 dark:text-slate-100 select-none text-center">
                             {verses[0]?.bookName || book} 第 {chapter} 章

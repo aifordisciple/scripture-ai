@@ -1,7 +1,7 @@
 // app/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sidebar } from "@/components/bible/Sidebar";
 import { Reader } from "@/components/bible/Reader";
@@ -12,12 +12,14 @@ import { ShareCard } from "@/components/bible/ShareCard";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Sparkles, Plus, X, AlignJustify, Moon, Sun, Search, PanelLeft, Maximize, Minimize, Type } from "lucide-react";
+import { Menu, Settings, Languages, Sparkles, Plus, X, AlignJustify, Moon, Sun, Search, PanelLeft, Maximize, Minimize, Type, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AISidebar } from "@/components/bible/AISidebar";
 import { cn } from "@/lib/utils";
 import { MagicBall } from "@/components/bible/MagicBall"; 
-import { AudioButton } from "@/components/bible/AudioButton"; // [新增] 引入播放按钮
+import { HeaderPlayer } from "@/components/bible/HeaderPlayer"; 
+import { BIBLE_BOOKS } from "@/lib/constants"; 
+import { useAudioPlayer } from "@/hooks/use-audio-player"; // 引入 Hook
 
 export default function Home() {
   const router = useRouter();
@@ -36,10 +38,62 @@ export default function Home() {
     tabs, activeTabId, setActiveTab, addTab, closeTab, updateActiveTab,
     sidebarWidth,
     isDarkMode, toggleDarkMode,
-    chapterSpeechText // [新增] 获取当前章节文本
+    chapterSpeechText 
   } = useBibleStore();
 
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
+
+  // --- 播放器核心逻辑 ---
+  const autoPlayRef = useRef(false);
+  const prevTextRef = useRef(chapterSpeechText);
+
+  // 下一章跳转逻辑
+  const handleNextChapter = useCallback(() => {
+    if (activeTab.type !== 'read') return;
+    
+    const currentBookId = activeTab.book || 'Gen';
+    const currentChapter = parseInt(activeTab.chapter || '1');
+    const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === currentBookId);
+    if (currentBookIndex === -1) return;
+    const currentBookConfig = BIBLE_BOOKS[currentBookIndex];
+    
+    let nextBookId = currentBookId;
+    let nextChapter = currentChapter;
+
+    if (currentChapter < currentBookConfig.chapters) {
+        nextChapter = currentChapter + 1;
+    } else if (currentBookIndex < BIBLE_BOOKS.length - 1) {
+        const nextBook = BIBLE_BOOKS[currentBookIndex + 1];
+        nextBookId = nextBook.id;
+        nextChapter = 1;
+    } else {
+        return; 
+    }
+    router.push(`/?book=${nextBookId}&chapter=${nextChapter}`);
+  }, [activeTab, router]);
+
+  // 播放结束回调：标记自动播放并跳转
+  const onPlaybackFinished = useCallback(() => {
+      autoPlayRef.current = true;
+      handleNextChapter();
+  }, [handleNextChapter]);
+
+  // 初始化播放器 Hook
+  const player = useAudioPlayer(onPlaybackFinished);
+
+  // 监听文本变化，触发自动播放
+  useEffect(() => {
+    if (chapterSpeechText && autoPlayRef.current && chapterSpeechText !== prevTextRef.current) {
+        player.play(chapterSpeechText);
+        autoPlayRef.current = false;
+    }
+    // 如果文本被清空（加载中），停止当前播放
+    if (!chapterSpeechText) {
+        player.stop();
+    }
+    prevTextRef.current = chapterSpeechText;
+  }, [chapterSpeechText, player]);
+  // ---------------------
 
   useEffect(() => {
     if (isDarkMode) {
@@ -127,10 +181,26 @@ export default function Home() {
         <SheetContent side="bottom" className="dark:bg-slate-900 dark:border-slate-800 pb-10">
           <SheetHeader className="mb-4">
             <SheetTitle className="text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <Type className="w-5 h-5" /> 阅读设置
+              <Settings className="w-5 h-5" /> 阅读设置
             </SheetTitle>
           </SheetHeader>
           <div className="space-y-6">
+            
+            {/* [新增] 移动端完整播放器 (放在设置面板最上方) */}
+            {activeTab.type === 'read' && (
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                 <div className="flex items-center gap-2 mb-2 text-sm font-bold text-slate-700 dark:text-slate-300">
+                    <Headphones className="w-4 h-4" /> 语音朗读
+                 </div>
+                 <HeaderPlayer 
+                    player={player} 
+                    text={chapterSpeechText || ""} 
+                    mode="full"
+                    className="bg-white dark:bg-slate-900 border-none shadow-sm w-full"
+                 />
+              </div>
+            )}
+
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-slate-500">
                 <span>字号</span>
@@ -234,20 +304,30 @@ export default function Home() {
              </Button>
           </div>
 
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {/* 全屏按钮 */}
             <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="hidden sm:flex text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800" title={isFullscreen ? "退出全屏" : "全屏沉浸"}>
               {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </Button>
 
-            {/* [新增] 语音播放按钮: 仅在当前是阅读模式且有文本时显示 */}
-            {activeTab.type === 'read' && chapterSpeechText && (
-               <AudioButton 
-                 text={chapterSpeechText} 
-                 variant="ghost" 
-                 size="icon"
-                 className="text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800"
-               />
+            {/* [关键] 播放器控制区 */}
+            {activeTab.type === 'read' && (
+               <>
+                 {/* Desktop: 完整播放器 */}
+                 <HeaderPlayer 
+                   player={player}
+                   text={chapterSpeechText || ""} 
+                   className="hidden sm:flex" 
+                   mode="full"
+                 />
+                 {/* Mobile: 仅显示播放按钮 (点击设置可看完整版) */}
+                 <HeaderPlayer 
+                   player={player}
+                   text={chapterSpeechText || ""} 
+                   className="sm:hidden border-none bg-transparent p-0" 
+                   mode="minimal"
+                 />
+               </>
             )}
 
             <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800" title="切换主题">
