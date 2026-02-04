@@ -79,7 +79,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       setLoading(true);
       clearSelection();
       setIsMenuVisible(false);
-      setChapterSpeechText(""); // [新增] 加载新章节前清空语音文本
+      setChapterSpeechText(""); 
       
       try {
         const [versesRes, highlightsRes] = await Promise.all([
@@ -302,7 +302,13 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         if (!cuvVerse) return null;
                         const isSelected = selectedVerses.includes(verseNum);
                         
-                        const highlight = highlights.find(h => h.verse === verseNum);
+                        // [关键修复] 严谨匹配书卷、章、节
+                        const highlight = highlights.find(h => 
+                            h.verse === verseNum && 
+                            h.bookId === book && 
+                            h.chapter === parseInt(chapter)
+                        );
+                        
                         const highlightClass = highlight ? HIGHLIGHT_COLORS[highlight.color] : "";
 
                         return (

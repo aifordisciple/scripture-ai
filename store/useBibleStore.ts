@@ -66,6 +66,8 @@ interface BibleSlice {
   toggleDesktopSidebar: () => void;
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
+  isMobileSettingsOpen: boolean;
+  setMobileSettingsOpen: (open: boolean) => void;
 
   // --- AI 状态 ---
   isAiOpen: boolean; 
@@ -100,7 +102,7 @@ interface BibleSlice {
   removeHighlightLocally: (bookId: string, chapter: number, verse: number) => void;
 
   // --- 笔记系统 ---
-  notes: NoteData[]; // [新增] 本地笔记列表
+  notes: NoteData[];
   addNote: (note: NoteData) => void;
   updateNote: (id: string, content: string) => void;
   deleteNote: (id: string) => void;
@@ -154,6 +156,8 @@ export const useBibleStore = create<BibleState>()(
       toggleDesktopSidebar: () => set((state) => ({ isDesktopSidebarOpen: !state.isDesktopSidebarOpen })),
       sidebarWidth: 480,
       setSidebarWidth: (width) => set({ sidebarWidth: width }),
+      isMobileSettingsOpen: false,
+      setMobileSettingsOpen: (open) => set({ isMobileSettingsOpen: open }),
 
       // === AI ===
       isAiOpen: false,
@@ -247,11 +251,10 @@ export const useBibleStore = create<BibleState>()(
           updates.isDarkMode = data.settings.isDarkMode;
           updates.showEnglish = data.settings.showEnglish;
           
-          // 恢复上次阅读位置 (更新第一个标签页)
+          // 恢复上次阅读位置
           if (data.settings.lastBook && data.settings.lastChapter) {
              const tabs = get().tabs;
              if (tabs.length > 0 && tabs[0].type === 'read') {
-                 // 创建一个新的 tabs 数组引用
                  const newTabs = [...tabs];
                  newTabs[0] = { 
                     ...newTabs[0], 
@@ -264,7 +267,6 @@ export const useBibleStore = create<BibleState>()(
         }
         
         if (data.highlights) {
-          // 确保数据格式匹配
           updates.highlights = data.highlights.map((h: any) => ({
               bookId: h.bookId,
               chapter: h.chapter,
@@ -287,18 +289,20 @@ export const useBibleStore = create<BibleState>()(
       },
     }),
     {
-      name: 'bible-storage', // localStorage 中的 key
+      name: 'bible-storage', 
       storage: createJSONStorage(() => localStorage),
-      // 过滤不需要持久化的状态 (如弹窗打开状态)
+      // [关键修改] 在 partialize 中将 isAiOpen 设置为 false
+      // 这样每次刷新或重新加载页面时，AI 侧边栏默认是关闭的
       partialize: (state) => ({
         ...state,
         isAuthOpen: false,
         isShareOpen: false,
         isNoteOpen: false,
         isAiGenerating: false,
+        isMobileSettingsOpen: false,
+        isAiOpen: false, // <--- 强制不持久化开启状态
         aiRequestTrigger: null,
-        chapterSpeechText: "", // 语音文本太大且随章节变，不缓存
-        // 注意：tabs, highlights, notes, settings 都会被自动保存
+        chapterSpeechText: "", 
       }),
     }
   )

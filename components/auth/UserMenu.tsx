@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 export function UserMenu() {
   const { data: session, status } = useSession();
-  const { setAuthOpen, isDarkMode, toggleDarkMode, setAiOpen } = useBibleStore();
+  const { setAuthOpen, isDarkMode, toggleDarkMode, setAiOpen, setMobileSettingsOpen } = useBibleStore();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +66,14 @@ export function UserMenu() {
             <p className="text-xs text-slate-500 truncate">{session.user?.email}</p>
           </div>
 
-          <MenuItem icon={<Settings className="w-4 h-4" />} label="阅读设置" onClick={() => { setIsOpen(false); /* 触发设置面板逻辑，可通过 prop 或 store 传递 */ }} />
+          <MenuItem 
+            icon={<Settings className="w-4 h-4" />} 
+            label="阅读设置" 
+            onClick={() => { 
+                setIsOpen(false); 
+                setMobileSettingsOpen(true); 
+            }} 
+          />
           <MenuItem icon={isDarkMode ? <Sun className="w-4 h-4"/> : <Moon className="w-4 h-4"/>} label={isDarkMode ? "浅色模式" : "深色模式"} onClick={toggleDarkMode} />
           
           <div className="my-1 border-t dark:border-slate-800" />
