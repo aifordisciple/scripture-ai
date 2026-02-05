@@ -275,9 +275,6 @@ export function MagicBall() {
                 <Move className="w-5 h-5 text-blue-600 dark:text-white/90 animate-pulse" />
             ) : isAiFinishedButUnseen ? (
                 <MousePointerClick className="w-6 h-6 text-white drop-shadow-md animate-bounce-subtle" />
-            ) : isAiOpen ? (
-                // 侧边栏打开时显示 X
-                <X className="w-6 h-6 text-slate-500 dark:text-slate-400" />
             ) : isAiGenerating ? (
                 <Sparkles className="w-5 h-5 text-white animate-pulse drop-shadow-md" />
             ) : (
