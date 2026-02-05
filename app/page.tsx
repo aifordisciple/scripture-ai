@@ -12,7 +12,7 @@ import { ShareCard } from "@/components/bible/ShareCard";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Type, Headphones } from "lucide-react";
+import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AISidebar } from "@/components/bible/AISidebar";
 import { cn } from "@/lib/utils";
@@ -28,8 +28,6 @@ export default function Home() {
   const searchParams = useSearchParams();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  // [修复] 移除本地的 isMobileSettingsOpen 状态，改用 Store 中的全局状态
-  // const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false); 
   
   const { 
     fontSize, setFontSize, 
@@ -42,7 +40,6 @@ export default function Home() {
     sidebarWidth,
     isDarkMode, 
     chapterSpeechText,
-    // [修复] 从 Store 中解构出设置面板的状态和控制方法
     isMobileSettingsOpen,
     setMobileSettingsOpen
   } = useBibleStore();
@@ -100,12 +97,19 @@ export default function Home() {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
+  // [修复] 监听参数变化，翻页时滚动回顶部
   useEffect(() => {
     const book = searchParams.get("book");
     const chapter = searchParams.get("chapter");
     if (book && chapter && activeTab.type === 'read') {
       if (activeTab.book !== book || activeTab.chapter !== chapter) {
         updateActiveTab({ book, chapter });
+        
+        // 滚动到阅读容器顶部
+        const container = document.getElementById('reader-scroll-container');
+        if (container) {
+            container.scrollTo(0, 0);
+        }
       }
     }
   }, [searchParams, activeTab, updateActiveTab]);
@@ -148,6 +152,7 @@ export default function Home() {
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <NoteEditor />
       <ShareCard />
+      {/* 调整 MagicBall 层级在组件内部做，或者确保它在文档流下方 */}
       <MagicBall /> 
 
       {/* Desktop Sidebar */}
@@ -166,7 +171,6 @@ export default function Home() {
       </Sheet>
 
       {/* Mobile Settings Sheet */}
-      {/* [修复] open 和 onOpenChange 现在绑定到全局 Store 状态 */}
       <Sheet open={isMobileSettingsOpen} onOpenChange={setMobileSettingsOpen}>
         <SheetContent side="bottom" className="dark:bg-slate-900 dark:border-slate-800 pb-10">
           <SheetHeader className="mb-4">
@@ -256,7 +260,6 @@ export default function Home() {
             </div>
             
             {/* 移动端设置按钮 (Hidden but functional via UserMenu) */}
-            {/* [修复] 使用 Store 方法控制 */}
             <Button variant="ghost" size="icon" className="sm:hidden hidden" onClick={() => setMobileSettingsOpen(true)}>
               <Settings className="h-5 w-5 text-slate-500" />
             </Button>
@@ -264,7 +267,10 @@ export default function Home() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto scroll-smooth bg-white dark:bg-slate-950 transition-colors duration-300 pb-20 md:pb-0">
+        <div 
+            id="reader-scroll-container" // [修复] 添加 ID
+            className="flex-1 overflow-y-auto scroll-smooth bg-white dark:bg-slate-950 transition-colors duration-300 pb-20 md:pb-0"
+        >
           {activeTab.type === 'read' ? (
               <Reader key={activeTab.id} initialBook={activeTab.book || 'Gen'} initialChapter={activeTab.chapter || '1'} />
           ) : (

@@ -29,6 +29,10 @@ export function useAudioPlayer(onFinished?: () => void) {
     setIsPlaying(false);
     setIsLoading(false);
     setCurrentTime(0);
+    // 清除锁屏控制
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'none';
+    }
   }, []);
 
   const pause = useCallback(() => {
@@ -38,7 +42,6 @@ export function useAudioPlayer(onFinished?: () => void) {
     }
   }, []);
 
-  // [新增] 跳转进度
   const seek = useCallback((time: number) => {
     if (audioRef.current) {
       audioRef.current.currentTime = time;
@@ -46,7 +49,6 @@ export function useAudioPlayer(onFinished?: () => void) {
     }
   }, []);
 
-  // [新增] 设置倍速
   const setRate = useCallback((rate: number) => {
     if (audioRef.current) {
       audioRef.current.playbackRate = rate;
@@ -63,7 +65,6 @@ export function useAudioPlayer(onFinished?: () => void) {
         audioRef.current.pause();
         setIsPlaying(false);
       } else {
-        // 恢复播放时，确保倍速正确
         audioRef.current.playbackRate = playbackRate;
         audioRef.current.play().catch(console.error);
         setIsPlaying(true);
@@ -98,6 +99,26 @@ export function useAudioPlayer(onFinished?: () => void) {
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       
+      // [修复] 设置 Media Session (关键：允许锁屏播放)
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: "圣经朗读",
+            artist: "Scripture AI",
+            album: "Audio Bible",
+            // artwork: [{ src: '/icon.png', sizes: '512x512', type: 'image/png' }] // 可选：添加图标
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => {
+            audio.play();
+            setIsPlaying(true);
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+            audio.pause();
+            setIsPlaying(false);
+        });
+        // 可以在这里添加 nexttrack handler 来支持锁屏切歌，但这需要更复杂的逻辑传递
+      }
+
       // 绑定事件：获取时长
       audio.onloadedmetadata = () => {
         setDuration(audio.duration);
@@ -108,11 +129,11 @@ export function useAudioPlayer(onFinished?: () => void) {
         setCurrentTime(audio.currentTime);
       };
 
-      // [关键] 绑定事件：播放结束
+      // 绑定事件：播放结束
       audio.onended = () => {
         setIsPlaying(false);
         setCurrentTime(0);
-        if (onFinished) onFinished(); // 触发回调
+        if (onFinished) onFinished(); // 触发回调，自动播放下一章
       };
 
       audio.onerror = (e) => {
@@ -122,10 +143,14 @@ export function useAudioPlayer(onFinished?: () => void) {
       };
 
       audioRef.current = audio;
-      audio.playbackRate = playbackRate; // 应用当前倍速
+      audio.playbackRate = playbackRate; 
       
       await audio.play();
       setIsPlaying(true);
+      
+      if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'playing';
+      }
 
     } catch (error) {
       console.error('Playback Error:', error);
