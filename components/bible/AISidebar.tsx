@@ -1,17 +1,175 @@
 // components/bible/AISidebar.tsx
 "use client";
 
-import { useChat } from 'ai/react';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2 } from 'lucide-react';
+import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { AudioButton } from './AudioButton'; // [新增 import]
+import { AudioButton } from './AudioButton';
+import { useChat } from 'ai/react';
+import { motion, AnimatePresence } from "framer-motion";
 
+// --- 1. 子组件：高性能消息气泡 ---
+const MessageBubble = memo(({ role, content, isLatest }: { role: string, content: string, isLatest: boolean }) => {
+  const [copied, setCopied] = useState(false);
+
+  // [修复] 健壮的复制功能，兼容非 HTTPS 环境
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡，防止触发沉浸模式切换
+
+    const copyText = content;
+
+    // 方案 A: 现代 Clipboard API (仅限 HTTPS/localhost)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(copyText)
+        .then(() => showSuccess())
+        .catch((err) => {
+          console.warn("Clipboard API failed, trying fallback...", err);
+          fallbackCopy(copyText);
+        });
+    } else {
+      // 方案 B: 传统回退方案 (兼容 HTTP)
+      fallbackCopy(copyText);
+    }
+  };
+
+  const fallbackCopy = (text: string) => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      
+      // 确保 textarea 不可见且不影响布局
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      textArea.style.top = "0";
+      
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) showSuccess();
+    } catch (err) {
+      console.error("Fallback copy failed", err);
+    }
+  };
+
+  const showSuccess = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className={cn("flex group relative mb-4", role === 'user' ? "justify-end" : "justify-start")}>
+      <div className={cn(
+        "max-w-[95%] rounded-2xl px-5 py-4 shadow-sm border relative transition-all", 
+        role === 'user' 
+          ? "bg-blue-600 text-white border-blue-600 text-sm" 
+          : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200" 
+      )}>
+        {/* 角色标识 */}
+        <div className={cn(
+            "absolute -top-5 flex items-center gap-1 text-[10px] font-bold opacity-60 select-none",
+            role === 'user' ? "right-0 flex-row-reverse text-blue-500" : "left-0 text-slate-400"
+        )}>
+            {role === 'user' ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
+            <span>{role === 'user' ? "你" : "AI"}</span>
+        </div>
+
+        {role === 'user' ? (
+           <div className="whitespace-pre-wrap leading-relaxed">{content}</div>
+        ) : (
+          <>
+            <div className="prose prose-slate dark:prose-invert max-w-none break-words">
+              {typeof ReactMarkdown !== 'undefined' ? (
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      // 标题：增加左侧装饰条，字体更紧凑
+                      h3: ({node, ...props}) => (
+                        <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mt-6 mb-3 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700/50">
+                            <span className="w-1 h-4 bg-blue-500 rounded-full inline-block"></span>
+                            {props.children}
+                        </h3>
+                      ),
+                      h4: ({node, ...props}) => <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-4 mb-2 flex items-center gap-1" {...props}><ChevronRight className="w-3 h-3 text-blue-400" />{props.children}</h4>,
+                      
+                      // 正文：字体适中(text-sm/base)，行间距舒适，段间距缩小
+                      p: ({node, ...props}) => <p className="text-[15px] leading-7 text-slate-600 dark:text-slate-300 mb-3 last:mb-0 text-justify" {...props} />, 
+                      
+                      // 列表：更紧凑的间距
+                      ul: ({node, ...props}) => <ul className="my-2 space-y-1 pl-1" {...props} />,
+                      li: ({node, ...props}) => (
+                        <li className="text-[15px] leading-relaxed text-slate-600 dark:text-slate-300 flex items-start gap-2 pl-1" {...props}>
+                           <span className="text-blue-400 select-none mt-2 text-[6px] shrink-0">●</span> 
+                           <span className="flex-1">{props.children}</span>
+                        </li>
+                      ),
+                      
+                      // 强调：使用背景色高亮，而非单纯加粗
+                      strong: ({node, ...props}) => <strong className="font-semibold text-blue-900 dark:text-blue-100 bg-blue-50 dark:bg-blue-900/30 px-1 py-0.5 rounded mx-0.5 text-[14px]" {...props} />,
+                      
+                      // 引用块：精美卡片样式
+                      blockquote: ({node, ...props}) => (
+                        <blockquote className="relative border-l-4 border-blue-300 dark:border-blue-700 pl-4 py-2 my-4 bg-slate-50 dark:bg-slate-800/50 rounded-r-lg" {...props}>
+                            <Quote className="absolute top-2 right-2 w-4 h-4 text-slate-200 dark:text-slate-700" />
+                            <div className="italic text-slate-600 dark:text-slate-400 text-sm">{props.children}</div>
+                        </blockquote>
+                      ),
+                      // 代码块
+                      code: ({node, ...props}) => <code className="bg-slate-100 dark:bg-slate-800 text-red-500 dark:text-red-400 px-1.5 py-0.5 rounded text-xs font-mono border dark:border-slate-700" {...props} />,
+                    }}
+                  >
+                    {content}
+                  </ReactMarkdown>
+              ) : (
+                  <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">{content}</div>
+              )}
+            </div>
+            
+            {/* 底部工具栏：复制 + 朗读 */}
+            <div className="mt-4 pt-2 border-t border-slate-50 dark:border-slate-700/50 flex justify-between items-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 select-none">
+                <button 
+                    onClick={handleCopy}
+                    className={cn(
+                        "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
+                        copied 
+                            ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" 
+                            : "text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    )}
+                    title="复制内容"
+                >
+                    {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copied ? "已复制" : "复制"}
+                </button>
+                
+                {/* 朗读按钮也需阻止冒泡 */}
+                <div onClick={(e) => e.stopPropagation()}>
+                    <AudioButton text={content} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 h-7 px-2 text-[11px]" label="朗读" />
+                </div>
+            </div>
+          </>
+        )}
+
+        {/* 视觉优化：Gemini 风格的柔和光标 */}
+        {role === 'assistant' && isLatest && (
+             <span className="inline-block w-2.5 h-2.5 ml-1 bg-gradient-to-tr from-blue-400 to-purple-400 rounded-full animate-pulse align-baseline shadow-[0_0_10px_rgba(96,165,250,0.8)]" />
+        )}
+      </div>
+    </div>
+  );
+}, (prev, next) => prev.content === next.content && prev.isLatest === next.isLatest);
+
+MessageBubble.displayName = "MessageBubble";
+
+
+// --- 2. 主组件：AI Sidebar ---
 export function AISidebar() {
   const { 
     isAiOpen, setAiOpen, clearSelection, aiRequestTrigger,
@@ -21,35 +179,52 @@ export function AISidebar() {
   
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const [isImmersive, setIsImmersive] = useState(true);
+  const [isImmersive, setIsImmersive] = useState(false); 
   
   const lastProcessedTimeRef = useRef<number>(0);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const shouldAutoScrollRef = useRef(true);
 
-  const { messages, input, handleInputChange, handleSubmit, append, isLoading } = useChat({
+  // 初始化 useChat
+  const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages } = useChat({
     api: '/api/chat',
-    onError: (error) => console.error("🔥 AI Error:", error)
+    onError: (error) => {
+        console.error("🔥 AI Error:", error);
+        setAiGenerating(false);
+    },
+    onFinish: () => setAiGenerating(false)
   });
 
+  // 同步加载状态
   useEffect(() => {
     setAiGenerating(isLoading);
   }, [isLoading, setAiGenerating]);
 
+  // 智能自动滚动逻辑
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  useEffect(() => {
-    if (isAiOpen) {
-      setIsImmersive(true);
+    if (scrollRef.current && shouldAutoScrollRef.current) {
+        const div = scrollRef.current;
+        div.scrollTop = div.scrollHeight;
     }
-  }, [isAiOpen]);
+  }, [messages, isLoading]);
 
+  // 监听用户手动滚动
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+      const isAtBottom = distanceFromBottom <= 100;
+      shouldAutoScrollRef.current = isAtBottom;
+    }
+  };
+
+  // 监听外部触发
   useEffect(() => {
     if (!aiRequestTrigger) return;
     if (aiRequestTrigger.timestamp === lastProcessedTimeRef.current) return;
 
     lastProcessedTimeRef.current = aiRequestTrigger.timestamp;
+    shouldAutoScrollRef.current = true;
 
     const contextRequest = {
       bookName: aiRequestTrigger.ref.bookName,
@@ -65,30 +240,18 @@ export function AISidebar() {
     }, {
       body: { context: contextRequest }
     });
-    
-    setIsImmersive(true);
 
   }, [aiRequestTrigger, append]);
 
-  const startResizing = useCallback(() => {
-    setIsResizing(true);
-  }, []);
-
-  const stopResizing = useCallback(() => {
-    setIsResizing(false);
-  }, []);
-
-  const resize = useCallback(
-    (mouseMoveEvent: MouseEvent) => {
+  // --- 拖拽调整宽度逻辑 ---
+  const startResizing = useCallback(() => setIsResizing(true), []);
+  const stopResizing = useCallback(() => setIsResizing(false), []);
+  const resize = useCallback((e: MouseEvent) => {
       if (isResizing) {
-        const newWidth = document.body.clientWidth - mouseMoveEvent.clientX;
-        if (newWidth > 300 && newWidth < 1200) { 
-          setSidebarWidth(newWidth);
-        }
+        const newWidth = document.body.clientWidth - e.clientX;
+        if (newWidth > 300 && newWidth < 1200) setSidebarWidth(newWidth);
       }
-    },
-    [isResizing, setSidebarWidth]
-  );
+    }, [isResizing, setSidebarWidth]);
 
   useEffect(() => {
     if (isResizing) {
@@ -101,19 +264,23 @@ export function AISidebar() {
     };
   }, [isResizing, resize, stopResizing]);
 
+  // --- 快捷指令点击 ---
   const handleChipClick = (prompt: string) => {
-    if (isLoading || !aiRequestTrigger) return;
+    if (isLoading) return;
     
-    const contextRequest = {
-      bookName: aiRequestTrigger.ref.bookName,
-      chapter: aiRequestTrigger.ref.chapter,
-      verse: aiRequestTrigger.ref.verse,
-      selectedText: aiRequestTrigger.content,
-      contextText: aiRequestTrigger.context
-    };
+    shouldAutoScrollRef.current = true; 
 
-    append({ role: 'user', content: prompt }, { body: { context: contextRequest } });
-    setIsImmersive(true); 
+    const body = aiRequestTrigger ? {
+        context: {
+            bookName: aiRequestTrigger.ref.bookName,
+            chapter: aiRequestTrigger.ref.chapter,
+            verse: aiRequestTrigger.ref.verse,
+            selectedText: aiRequestTrigger.content,
+            contextText: aiRequestTrigger.context
+        }
+    } : {};
+
+    append({ role: 'user', content: prompt }, { body });
   };
 
   const getIcon = (id: string) => {
@@ -127,160 +294,150 @@ export function AISidebar() {
   };
 
   return (
-    <div 
+    <>
+      <AnimatePresence>
+        {isAiOpen && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setAiOpen(false)}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      <div 
         ref={sidebarRef}
-        style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties & { [key: string]: string }}
+        style={{ '--sidebar-width': `${sidebarWidth}px` } as any}
         className={cn(
-            "fixed inset-y-0 right-0 z-50 bg-white dark:bg-slate-900 shadow-2xl border-l dark:border-slate-800 flex flex-col",
+            "fixed inset-y-0 right-0 z-50 bg-white dark:bg-slate-900 shadow-2xl border-l dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out",
             "w-full md:w-[var(--sidebar-width)]",
             isAiOpen ? "translate-x-0" : "translate-x-full",
-            isResizing ? "transition-none" : "transition-transform duration-300 ease-in-out"
-        )}
-    >
-      
-      <div 
-        onMouseDown={startResizing}
-        className="hidden md:block absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-400/50 transition-colors z-50 group"
-      >
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-slate-200 dark:bg-slate-700 rounded group-hover:bg-blue-500 transition-colors" />
-      </div>
-
-      <div 
-        className={cn(
-          "flex items-center justify-between px-4 bg-slate-50 dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
-          isImmersive ? "h-0 opacity-0 border-none" : "h-14 opacity-100 border-b dark:border-slate-800"
+            isResizing && "transition-none"
         )}
       >
-        <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-bold select-none">
-          <Sparkles className="w-5 h-5" />
-          <span>AI 灵修伴侣</span>
+        <div 
+          onMouseDown={startResizing}
+          className="hidden md:block absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-400/50 transition-colors z-50 group"
+        >
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-slate-200 dark:bg-slate-700 rounded group-hover:bg-blue-500 transition-colors" />
         </div>
-        <Button variant="ghost" size="icon" onClick={() => {
-            setAiOpen(false); 
-            clearSelection(); 
-        }} className="dark:text-slate-400 dark:hover:bg-slate-800">
-          <X className="w-5 h-5" />
-        </Button>
-      </div>
 
-      <div 
-        className="flex-1 overflow-y-auto p-4 bg-slate-50/30 dark:bg-slate-950/30 min-h-0 space-y-6 cursor-pointer relative tap-highlight-transparent"
-        onClick={() => setIsImmersive(!isImmersive)} 
-      >
-        {messages.length === 0 && !isLoading && (
-            <div className="text-center text-slate-400 dark:text-slate-500 mt-10 text-sm select-none">
-                👋 选中经文，点击菜单即可开始。<br/>
-                或点击下方按钮生成全章摘要。
-            </div>
-        )}
-
-        {isImmersive && (
-             <div className="fixed top-6 left-1/2 -translate-x-1/2 md:left-auto md:right-[calc(var(--sidebar-width)/2)] md:translate-x-1/2 z-50 pointer-events-none animate-in fade-in duration-500">
-                 <div className="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
-                    <Minimize2 className="w-3 h-3" />
-                    轻触屏幕显示菜单
-                 </div>
-             </div>
-        )}
-
-        {messages.map((m) => (
-          <div key={m.id} className={cn("flex group relative", m.role === 'user' ? "justify-end" : "justify-start")}>
-            
-            <div className={cn(
-              "max-w-[95%] rounded-xl px-4 py-3 shadow-sm border relative", 
-              m.role === 'user' 
-                ? "bg-blue-600 text-white border-blue-600 text-base" 
-                : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-lg" 
-            )}>
-              {m.role === 'user' ? (
-                 <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
-              ) : (
-                <>
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      h3: ({node, ...props}) => <h3 className="text-lg font-bold text-blue-700 dark:text-blue-400 mt-6 mb-3 pb-1 border-b border-blue-100 dark:border-blue-900 flex items-center first:mt-0" {...props} />,
-                      h4: ({node, ...props}) => <h4 className="text-base font-bold text-slate-700 dark:text-slate-300 mt-4 mb-2" {...props} />,
-                      p: ({node, ...props}) => <p className="text-lg text-slate-700 dark:text-slate-300 leading-loose mb-4 last:mb-0 text-justify" {...props} />, 
-                      ul: ({node, ...props}) => <ul className="my-2 space-y-2 pl-1" {...props} />,
-                      li: ({node, ...props}) => (
-                        <li className="text-lg text-slate-700 dark:text-slate-300 leading-loose flex gap-2" {...props}>
-                           <span className="text-blue-300 dark:text-blue-500 select-none mt-3 text-[6px]">•</span> 
-                           <span className="flex-1">{props.children}</span>
-                        </li>
-                      ),
-                      strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white bg-yellow-50 dark:bg-blue-900/50 px-1 rounded mx-0.5" {...props} />,
-                      blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-slate-200 dark:border-slate-700 pl-3 italic text-slate-500 dark:text-slate-400 text-sm my-4 bg-slate-50 dark:bg-slate-900/50 py-2 pr-2 rounded-r" {...props} />,
-                    }}
-                  >
-                    {m.content}
-                  </ReactMarkdown>
-                  
-                  {/* [新增] AI 回复底部的朗读按钮 */}
-                  <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 flex justify-end">
-                      <AudioButton text={m.content} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 h-8 px-2" label="朗读" />
-                  </div>
-                </>
-              )}
-            </div>
+        {/* 1. Header */}
+        <div 
+          className={cn(
+            "flex items-center justify-between px-4 bg-slate-50 dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden border-b dark:border-slate-800",
+            isImmersive ? "h-0 opacity-0 border-none p-0" : "h-14 opacity-100 py-3"
+          )}
+        >
+          <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-bold select-none">
+            <Sparkles className="w-5 h-5" />
+            <span>AI 灵修伴侣</span>
           </div>
-        ))}
-
-        {isLoading && (
-          <div className="flex items-center gap-2 text-slate-400 text-sm p-2 animate-pulse">
-            <Sparkles className="w-4 h-4 animate-spin" />
-            <span>AI 正在深入思考...</span>
+          <div className="flex items-center gap-1">
+             <Button variant="ghost" size="icon" onClick={() => { if(confirm("清空历史?")) setMessages([]) }} title="清空">
+                <Eraser className="w-4 h-4 text-slate-400" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => { setAiOpen(false); clearSelection(); }} className="dark:text-slate-400 dark:hover:bg-slate-800">
+              <X className="w-5 h-5" />
+            </Button>
           </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+        </div>
 
-      <div 
-        className={cn(
-            "bg-white dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]",
-            isImmersive ? "max-h-0 opacity-0" : "max-h-[300px] opacity-100" 
-        )}
-      >
-          {!isLoading && messages.length > 0 && (
-            <div className="px-4 pb-2 flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-               <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-1">深度探索</div>
-               <div className="flex flex-wrap gap-2">
-                 {THEOLOGICAL_PROMPTS.map((t) => (
-                   <button
-                     key={t.id}
-                     onClick={() => handleChipClick(t.prompt)}
-                     className={cn(
-                       "flex items-center gap-1.5 px-3 py-2.5 rounded-full text-sm font-medium border dark:border-slate-700 transition-all active:scale-95 shadow-sm dark:bg-slate-800 dark:text-slate-200",
-                       t.color
-                     )}
-                   >
-                     {getIcon(t.id)}
-                     {t.label}
-                   </button>
-                 ))}
-               </div>
+        {/* 2. Messages Area */}
+        <div 
+          className="flex-1 overflow-y-auto p-4 bg-slate-50/50 dark:bg-slate-950/50 min-h-0 space-y-6 relative scroll-smooth"
+          ref={scrollRef}
+          onScroll={handleScroll} 
+          onClick={() => {
+              if (messages.length > 0) setIsImmersive(!isImmersive);
+          }} 
+        >
+          {messages.length === 0 && !isLoading ? (
+            <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-500 select-none opacity-60">
+                <Bot className="w-16 h-16 stroke-1 mb-4" />
+                <p className="text-sm">👋 选中经文，点击菜单即可开始。</p>
+            </div>
+          ) : (
+            <div className="flex flex-col pb-4">
+                {messages.map((m, index) => (
+                    <MessageBubble 
+                        key={m.id || index}
+                        role={m.role}
+                        content={m.content}
+                        isLatest={index === messages.length - 1 && isLoading}
+                    />
+                ))}
             </div>
           )}
 
-          <div className="p-4 safe-area-bottom">
-            <form onSubmit={handleSubmit} className="flex gap-2">
-              <input
-                className="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50 dark:bg-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-900"
-                value={input}
-                onChange={handleInputChange}
-                placeholder="追问..."
-              />
-              <Button type="submit" size="icon" disabled={isLoading} className="rounded-full w-12 h-12 shrink-0 bg-blue-600 hover:bg-blue-700">
-                <Send className="w-5 h-5" />
-              </Button>
-            </form>
-            <div className="mt-2 text-[10px] text-center text-slate-400 select-none">
-              ⚠️ AI 辅助仅供参考，请依靠圣灵与圣经原文。
+          {isImmersive && (
+             <div className="fixed top-6 left-1/2 -translate-x-1/2 md:left-auto md:right-[calc(var(--sidebar-width)/2)] md:translate-x-1/2 z-50 pointer-events-none animate-in fade-in duration-500">
+                 <div className="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
+                    <Minimize2 className="w-3 h-3" />
+                    轻触显示菜单
+                 </div>
+             </div>
+          )}
+        </div>
+
+        {/* 3. Input & Chips Area */}
+        <div 
+          className={cn(
+              "bg-white dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]",
+              isImmersive ? "max-h-0 opacity-0" : "max-h-[300px] opacity-100" 
+          )}
+        >
+            {!isLoading && messages.length > 0 && (
+              <div className="px-4 pb-2 flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-1">深度探索</div>
+                 <div className="flex flex-wrap gap-2">
+                   {THEOLOGICAL_PROMPTS.map((t) => (
+                     <button
+                       key={t.id}
+                       onClick={() => handleChipClick(t.prompt)}
+                       className={cn(
+                         "flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-slate-700 transition-all active:scale-95 shadow-sm dark:bg-slate-800 dark:text-slate-200 hover:brightness-95",
+                         t.color
+                       )}
+                     >
+                       {getIcon(t.id)}
+                       {t.label}
+                     </button>
+                   ))}
+                 </div>
+              </div>
+            )}
+
+            <div className="p-4 safe-area-bottom">
+              <form onSubmit={handleSubmit} className="flex gap-2 relative">
+                <input
+                  className="flex-1 px-4 py-3 pr-12 border border-slate-200 dark:border-slate-700 rounded-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50 dark:bg-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-900"
+                  value={input}
+                  onChange={handleInputChange}
+                  placeholder="追问..."
+                  disabled={isLoading}
+                />
+                
+                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                    {isLoading ? (
+                        <Button type="button" size="icon" variant="destructive" className="h-8 w-8 rounded-full" onClick={() => stop()}>
+                            <StopCircle className="w-4 h-4" />
+                        </Button>
+                    ) : (
+                        <Button type="submit" size="icon" disabled={!input.trim()} className="h-8 w-8 rounded-full bg-blue-600 hover:bg-blue-700">
+                            <Send className="w-4 h-4" />
+                        </Button>
+                    )}
+                </div>
+              </form>
+              <div className="mt-2 text-[10px] text-center text-slate-400 select-none">
+                ⚠️ AI 辅助仅供参考，请依靠圣灵与圣经原文。
+              </div>
             </div>
-          </div>
+        </div>
+        
+        {isResizing && <div className="fixed inset-0 z-[100] cursor-col-resize" />}
       </div>
-      
-      {isResizing && <div className="fixed inset-0 z-[100] cursor-col-resize" />}
-    </div>
+    </>
   );
 }

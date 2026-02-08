@@ -11,8 +11,13 @@ export function MagicBall() {
   const controls = useAnimation();
   const [showHint, setShowHint] = useState<string | null>(null);
   
+  // 默认位置
   const [position, setPosition] = useState({ bottom: 150, right: 30 });
+
+  // 状态：是否处于“自由移动模式”
   const [isRepositioning, setIsRepositioning] = useState(false);
+
+  // 状态：AI 已完成但用户尚未点击查看
   const [isAiFinishedButUnseen, setIsAiFinishedButUnseen] = useState(false);
   
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
@@ -28,6 +33,7 @@ export function MagicBall() {
   } = useBibleStore();
 
   // --- 待机呼吸动画 ---
+  // 当 AI 打开时，停止上下浮动呼吸，保持静止（满水状态已经很显眼了）
   useEffect(() => {
     if (!isAiGenerating && !isRepositioning && !isAiFinishedButUnseen && !isAiOpen) {
         controls.start({
@@ -42,9 +48,12 @@ export function MagicBall() {
 
   // --- 监听 AI 状态变化 ---
   useEffect(() => {
+    // 1. AI 生成完成的瞬间
     if (prevAiGenRef.current && !isAiGenerating) {
+        // 只有当侧边栏没打开时，才进入"待查看"模式
         if (!isAiOpen) {
             setIsAiFinishedButUnseen(true);
+            // 快乐抖动
             controls.start({
                 y: [0, -15, 0, -5, 0],
                 scale: [1, 1.1, 1],
@@ -55,9 +64,12 @@ export function MagicBall() {
             }
         }
     }
+
+    // 2. 如果 AI 界面被打开了，重置“待查看”状态
     if (isAiOpen) {
         setIsAiFinishedButUnseen(false);
     }
+
     prevAiGenRef.current = isAiGenerating;
   }, [isAiGenerating, isAiOpen, controls]);
 
@@ -98,14 +110,15 @@ export function MagicBall() {
   };
 
   const handleTap = (event: MouseEvent, info: TapInfo) => {
-    // [修改] 取消普通状态下的点击切换功能
-    // 只有当"AI完成且未读"这种特殊通知状态时，点击才有效（打开查看）
+    // 特殊状态点击：查看结果
     if (isAiFinishedButUnseen) {
         setAiOpen(true); 
         setIsAiFinishedButUnseen(false);
         controls.start({ scale: [1, 0.9, 1], transition: { duration: 0.2 } });
     } 
-    // [注意] 这里删除了 else { setAiOpen(!isAiOpen) }，所以普通点击不会有反应
+    // 普通状态点击：现在不做操作，因为左滑是打开，防止误触
+    // 如果您希望点击也能打开/关闭，可以取消注释下面这行：
+    // else { setAiOpen(!isAiOpen); }
   };
 
   const handleDrag = (event: any, info: PanInfo) => {
@@ -114,7 +127,7 @@ export function MagicBall() {
     const { x, y } = info.offset;
     const threshold = 40; 
     
-    // 显示对应的手势提示
+    // 显示手势提示
     if (x < -threshold) setShowHint("ai-toggle"); 
     else if (x > threshold) setShowHint(null); 
     else if (y < -threshold) setShowHint("menu-toggle");
@@ -139,15 +152,13 @@ export function MagicBall() {
     }
 
     // --- 模式 B: 功能触发 ---
-    const threshold = 80; // 稍微降低阈值，让滑动更容易触发
+    const threshold = 80; 
     const { x, y } = info.offset;
-
-    // 增加严格的方向判断，避免斜着拉时误触
     const isHorizontal = Math.abs(x) > Math.abs(y);
     const isVertical = Math.abs(y) > Math.abs(x);
 
     if (isHorizontal && x < -threshold) {
-        // [保留] 左滑：触发 AI 切换 (开/关)
+        // 左滑：切换 AI
         setAiOpen(!isAiOpen);
     } 
     else if (isVertical && y < -threshold) {
@@ -223,7 +234,6 @@ export function MagicBall() {
         drag
         dragElastic={isRepositioning ? 0 : 0.2}
         dragMomentum={false}
-        
         onPointerDown={handlePointerDown}
         onDragStart={handleDragStart} 
         onPointerUp={handlePointerUp}
@@ -231,7 +241,6 @@ export function MagicBall() {
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         animate={controls}
-        
         className={cn(
             "fixed z-[100] touch-none bg-transparent", 
             isRepositioning ? "cursor-move" : "cursor-grab"
@@ -241,33 +250,39 @@ export function MagicBall() {
         <div 
             className={cn(
                 "relative w-full h-full rounded-full overflow-hidden transition-all duration-500",
+                // 背景色：保持蓝色调，不仅限于暗色，而是通透感
+                "bg-gradient-to-br from-white/60 via-blue-50/50 to-blue-200/40",
+                "dark:from-slate-800/80 dark:via-slate-900/80 dark:to-black/80",
                 "backdrop-blur-xl border border-white/40 dark:border-white/10",
                 "shadow-[inset_0_4px_8px_rgba(255,255,255,0.9),_inset_0_-6px_6px_rgba(0,0,0,0.1),_0_8px_24px_rgba(0,0,0,0.2)]",
                 "dark:shadow-[inset_0_2px_6px_rgba(255,255,255,0.15),_inset_0_-6px_10px_rgba(0,0,0,0.5),_0_10px_30px_rgba(0,0,0,0.5)]",
-                // 动态背景颜色
-                isAiOpen 
-                    ? "bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-700 dark:via-slate-800 dark:to-slate-900" 
-                    : "bg-gradient-to-br from-white/60 via-blue-50/50 to-blue-200/40 dark:from-slate-800/80 dark:via-slate-900/80 dark:to-black/80",
                 // 状态 Ring
                 isRepositioning ? "ring-4 ring-blue-400/30 scale-110" : 
                 (isAiFinishedButUnseen ? "scale-105 ring-2 ring-purple-400/50 animate-pulse-subtle" : 
-                (isAiGenerating ? "ring-2 ring-blue-400/30" : "hover:scale-105"))
+                (isAiGenerating ? "ring-2 ring-blue-400/30" : 
+                (isAiOpen ? "ring-2 ring-blue-400/20 scale-105" : "hover:scale-105"))) 
             )}
         >
-          {/* 内部水波纹层 (仅在未打开侧边栏时显示动画) */}
-          {!isAiOpen && (
-              <div className={cn(
-                  "absolute inset-0 z-0 flex items-end justify-center pointer-events-none opacity-80 transition-all duration-500",
-                  isAiFinishedButUnseen ? "mix-blend-color-burn" : "mix-blend-multiply dark:mix-blend-overlay"
-                )}>
-                 <div className={cn(
-                     "w-[200%] h-[200%] rounded-[38%] absolute left-[-50%]",
-                     isAiFinishedButUnseen ? "bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 animate-gradient-spin" : "bg-gradient-to-t from-blue-500 to-cyan-300",
-                     isAiGenerating ? "animate-wave-rise" : 
-                     (isAiFinishedButUnseen ? "bottom-[-5%]" : "bottom-[-160%] transition-all duration-1000 ease-out")
-                 )} />
-              </div>
-          )}
+          {/* 内部水波纹层 */}
+          <div className={cn(
+              "absolute inset-0 z-0 flex items-end justify-center pointer-events-none opacity-80 transition-all duration-500",
+              (isAiFinishedButUnseen || isAiOpen) ? "mix-blend-color-burn" : "mix-blend-multiply dark:mix-blend-overlay"
+            )}>
+             <div className={cn(
+                 "w-[200%] h-[200%] rounded-[38%] absolute left-[-50%]",
+                 (isAiFinishedButUnseen) ? "bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 animate-gradient-spin" : 
+                 "bg-gradient-to-t from-blue-500 to-cyan-300",
+                 
+                 // [状态逻辑] 
+                 // Generating: 波浪起伏
+                 // Finished: 底部微波
+                 // Open: 满水状态 (-10%)
+                 // Default: 隐藏 (-160%)
+                 isAiGenerating ? "animate-wave-rise" : 
+                 (isAiFinishedButUnseen ? "bottom-[-5%]" : 
+                 (isAiOpen ? "bottom-[-10%] rotate-[120deg]" : "bottom-[-160%]")) + " transition-all duration-1000 ease-out"
+             )} />
+          </div>
 
           {/* 核心图标 */}
           <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
@@ -275,6 +290,9 @@ export function MagicBall() {
                 <Move className="w-5 h-5 text-blue-600 dark:text-white/90 animate-pulse" />
             ) : isAiFinishedButUnseen ? (
                 <MousePointerClick className="w-6 h-6 text-white drop-shadow-md animate-bounce-subtle" />
+            ) : isAiOpen ? (
+                // [修改] 打开状态显示白色的 Sparkles (满水状态)
+                <Sparkles className="w-5 h-5 text-white drop-shadow-md" />
             ) : isAiGenerating ? (
                 <Sparkles className="w-5 h-5 text-white animate-pulse drop-shadow-md" />
             ) : (

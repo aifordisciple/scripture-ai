@@ -1,33 +1,15 @@
+// app/api/search/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 
-// 1. 初始化模型配置
-function getModel() {
-  const provider = process.env.AI_PROVIDER || 'openai';
-
-  if (provider === 'ollama') {
-    const ollama = createOpenAI({
-      baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1',
-      apiKey: 'ollama', 
-    });
-    return ollama(process.env.OLLAMA_MODEL || 'llama3');
-  } 
-  
-  if (provider === 'deepseek') {
-    const deepseek = createOpenAI({
-      baseURL: 'https://api.deepseek.com',
-      apiKey: process.env.DEEPSEEK_API_KEY,
-    });
-    return deepseek('deepseek-chat');
-  }
-
-  const openai = createOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-  return openai('gpt-4o-mini');
-}
+// [修复 1] 统一模型配置 (与 Chat 接口保持一致)
+// 移除复杂的 getModel 判断，直接读取 .env 中的 OPENAI_BASE_URL
+const openai = createOpenAI({
+  baseURL: process.env.OPENAI_BASE_URL || 'http://localhost:11434/v1',
+  apiKey: process.env.OPENAI_API_KEY || 'ollama',
+});
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -40,7 +22,7 @@ export async function GET(request: Request) {
 
   try {
     if (mode === 'exact') {
-      // --- 精确搜索 ---
+      // --- 精确搜索 (保留原逻辑) ---
       const results = await prisma.bibleVerse.findMany({
         where: {
           content: {
@@ -55,15 +37,20 @@ export async function GET(request: Request) {
 
     } else {
       // --- AI 语义搜索 ---
+      console.log(`[Search] AI Searching for: ${query}`);
       
-      const model = getModel();
+      // [修复 2] 使用统一配置的模型实例
+      // 读取 .env 中的模型名，默认为 deepseek-r1:70b 或 qwen2.5
+      const modelName = process.env.OPENAI_API_MODEL || 'deepseek-r1:14b';
+      const model = openai(modelName);
 
+      // [优化] 减少请求数量到 10-20 条，避免本地模型生成太慢导致超时
       const prompt = `
         你是一个专业的圣经搜索引擎。
         用户输入了查询意图："${query}"。
         
         请分析用户的意图，并在圣经中寻找最相关的经文。
-        请列出 30 - 50 处最相关的经文引用，重要：至少30处。
+        请列出 10 - 20 处最相关的经文引用。
         
         **非常重要：你必须只返回一个纯 JSON 数组，不要包含任何 Markdown 标记、反引号或解释性文字。**
         
@@ -77,21 +64,38 @@ export async function GET(request: Request) {
         Gen, Exo, Lev, Num, Deu, Jos, Jdg, Rut, 1Sa, 2Sa, 1Ki, 2Ki, 1Ch, 2Ch, Ezr, Neh, Est, Job, Psa, Pro, Ecc, Sng, Isa, Jer, Lam, Eze, Dan, Hos, Jol, Amo, Oba, Jon, Mic, Nah, Hab, Zep, Hag, Zec, Mal, Mat, Mrk, Luk, Jhn, Act, Rom, 1Co, 2Co, Gal, Eph, Php, Col, 1Th, 2Th, 1Ti, 2Ti, Tit, Phm, Heb, Jas, 1Pe, 2Pe, 1Jn, 2Jn, 3Jn, Jud, Rev
       `;
 
+      // 使用 generateText
       const { text } = await generateText({
         model: model,
         prompt: prompt,
-        temperature: 0.1, 
+        temperature: 0.1, // 保持低温度以确保 JSON 格式稳定
       });
+
+      // --- [新增功能] 提取并打印思维链 (DeepSeek R1 等推理模型) ---
+      const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/);
+      if (thinkMatch) {
+        console.log("\n🧠 [AI Thought Process]:");
+        console.log(thinkMatch[1].trim());
+        console.log("------------------------\n");
+      } else {
+        console.log(`[Search] No <think> tags found or using standard model.`);
+      }
+
+      // [修改] 清理数据：先去除 <think> 块，再处理 Markdown
+      const textWithoutThink = text.replace(/<think>[\s\S]*?<\/think>/g, '');
 
       let rawReferences = [];
       try {
-        const cleanJson = text
+        // 清理 AI 可能输出的 Markdown 代码块标记
+        const cleanJson = textWithoutThink
           .replace(/```json/g, '')
           .replace(/```/g, '')
           .trim();
         rawReferences = JSON.parse(cleanJson);
       } catch (e) {
-        console.error("AI JSON Parse Error. Raw Output:", text);
+        console.error("AI JSON Parse Error.");
+        console.error("Raw Output (Cleaned):", textWithoutThink);
+        // 如果解析失败，返回空数组，避免前端一直转圈
         return NextResponse.json({ data: [] });
       }
 
@@ -99,26 +103,21 @@ export async function GET(request: Request) {
         return NextResponse.json({ data: [] });
       }
 
-      // --- 关键修复：数据清洗与展开 ---
-      // 将 "6-7" 这样的字符串范围拆解为多个单一查询条件
+      // --- 经文查找与数据展开 (保留原有的范围处理逻辑) ---
       const conditions: any[] = [];
       
       for (const ref of rawReferences) {
-        // 确保 chapter 是整数
         const chapter = parseInt(ref.chapter);
         if (isNaN(chapter)) continue;
 
-        // 处理 verse
-        const verseRaw = String(ref.verse); // 强制转字符串处理
+        const verseRaw = String(ref.verse);
         
         if (verseRaw.includes('-')) {
-          // 处理范围: "6-7" -> 6, 7
           const [startStr, endStr] = verseRaw.split('-');
           const start = parseInt(startStr);
           const end = parseInt(endStr);
           
           if (!isNaN(start) && !isNaN(end)) {
-            // 限制范围防止死循环，最多取10节
             const safeEnd = Math.min(end, start + 10); 
             for (let v = start; v <= safeEnd; v++) {
               conditions.push({
@@ -130,7 +129,6 @@ export async function GET(request: Request) {
             }
           }
         } else {
-          // 处理单节: 6 -> 6
           const verse = parseInt(verseRaw);
           if (!isNaN(verse)) {
             conditions.push({
@@ -147,23 +145,15 @@ export async function GET(request: Request) {
         return NextResponse.json({ data: [] });
       }
 
-      // 5. 查询数据库
       const dbResults = await prisma.bibleVerse.findMany({
         where: { OR: conditions }
       });
 
-      // 6. 重新排序：按照 AI 推荐的顺序（rawReferences）来排列
-      // 因为我们拆解了范围，所以这里做一个简单的映射：如果 AI 推荐了 Range，只要找到了其中任何一节，都算匹配
+      // 重新排序：严格按照 AI 推荐的顺序
       const sortedResults: any[] = [];
-      const addedIds = new Set(); // 防止重复
+      const addedIds = new Set();
 
-      // 遍历 AI 原始推荐
       for (const ref of rawReferences) {
-         // 在数据库结果中找匹配该推荐的所有经文
-         // (简单的做法是直接按顺序 push dbResults，但这会打乱 AI 的优先级)
-         // 这里我们尽量保持 AI 的顺序
-         
-         // 重新解析一遍范围来做匹配
          let targetVerses: number[] = [];
          const vRaw = String(ref.verse);
          if (vRaw.includes('-')) {
@@ -193,6 +183,7 @@ export async function GET(request: Request) {
     }
   } catch (error) {
     console.error("Search API Error:", error);
-    return NextResponse.json({ error: 'Search failed' }, { status: 500 });
+    // 返回空结果而不是 500 错误，防止前端报错
+    return NextResponse.json({ data: [] });
   }
 }
