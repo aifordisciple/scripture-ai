@@ -23,7 +23,6 @@ const UNSPLASH_PRESETS = [
   "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?q=80&w=1080&auto=format&fit=crop", 
   "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?q=80&w=1080&auto=format&fit=crop", 
   "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1080&auto=format&fit=crop", 
-  "https://images.unsplash.com/photo-1519681393798-2f61f2a55db8?q=80&w=1080&auto=format&fit=crop", 
   "https://images.unsplash.com/photo-1491466424936-e304919aada7?q=80&w=1080&auto=format&fit=crop", 
 ];
 

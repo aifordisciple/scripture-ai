@@ -10,6 +10,7 @@ import { FloatingMenu } from "./FloatingMenu";
 import { CHAPTER_SUMMARY_PROMPT, BIBLE_BOOKS } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 
+// ... (Interface 和常量定义保持不变)
 interface Verse {
   id: number;
   bookId: string;
@@ -66,10 +67,11 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [isMenuVisible, setIsMenuVisible] = useState(false);
 
+  // [修改] 解构 scrollToVerse 和 setScrollToVerse
   const { 
     fontSize, lineHeight, selectedVerses, toggleVerseSelection, 
     clearSelection, triggerAI, showEnglish, highlights, setHighlights,
-    setChapterSpeechText 
+    setChapterSpeechText, scrollToVerse, setScrollToVerse 
   } = useBibleStore();
 
   const touchStartRef = useRef<{ x: number, y: number } | null>(null);
@@ -110,10 +112,34 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     fetchData();
   }, [book, chapter, clearSelection, setHighlights, setChapterSpeechText]);
 
+  // [新增] 自动滚动效果
+  useEffect(() => {
+    // 只有当加载完成、有滚动目标且确实有经文时才滚动
+    if (!loading && scrollToVerse && verses.length > 0) {
+        // 稍微延时以确保 DOM 渲染完毕
+        setTimeout(() => {
+            const element = document.getElementById(`verse-${scrollToVerse}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // 可选：闪烁一下提示用户
+                element.classList.add("bg-blue-50/50", "dark:bg-blue-900/20", "transition-colors", "duration-1000");
+                setTimeout(() => {
+                    element.classList.remove("bg-blue-50/50", "dark:bg-blue-900/20");
+                }, 2000);
+
+                // 滚动完成后清除目标，避免后续干扰
+                setScrollToVerse(null);
+            }
+        }, 300);
+    }
+  }, [loading, scrollToVerse, verses, setScrollToVerse]);
+
   const navigateTo = (newBook: string, newChapter: number) => {
       router.push(`/?book=${newBook}&chapter=${newChapter}`);
   };
 
+  // ... (handleNextChapter, handlePrevChapter, handleTouchStart, handleTouchEnd 保持不变)
   const handleNextChapter = () => {
       setDirection(1);
       const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book);
@@ -302,7 +328,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         if (!cuvVerse) return null;
                         const isSelected = selectedVerses.includes(verseNum);
                         
-                        // [关键修复] 严谨匹配书卷、章、节
                         const highlight = highlights.find(h => 
                             h.verse === verseNum && 
                             h.bookId === book && 
@@ -313,6 +338,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
                         return (
                         <div
+                            id={`verse-${verseNum}`} // [新增] 添加 ID 锚点
                             key={cuvVerse.id}
                             onClick={(e) => handleVerseClick(cuvVerse, e)}
                             className={cn(

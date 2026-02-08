@@ -9,25 +9,21 @@ import { cn } from "@/lib/utils";
 interface SearchResultsProps {
   query: string;
   mode: 'exact' | 'ai';
-  // 新增 props 用于缓存
   cachedResults?: any[];
   onUpdateResults?: (results: any[]) => void;
 }
 
 export function SearchResults({ query, mode, cachedResults, onUpdateResults }: SearchResultsProps) {
-  // 如果有缓存，直接用缓存初始化；否则为空
   const [results, setResults] = useState<any[]>(cachedResults || []);
-  // 如果没有缓存，则 loading 初始为 true
   const [loading, setLoading] = useState(!cachedResults);
   
-  const { fontSize, lineHeight, addTab } = useBibleStore();
+  // [修改] 解构 setScrollToVerse
+  const { fontSize, lineHeight, addTab, setScrollToVerse } = useBibleStore();
   
-  // 使用 useRef 防止 useEffect 对 onUpdateResults 依赖导致的循环
   const onUpdateResultsRef = useRef(onUpdateResults);
   useEffect(() => { onUpdateResultsRef.current = onUpdateResults; }, [onUpdateResults]);
 
   useEffect(() => {
-    // 关键逻辑：如果已有缓存，直接跳过 API 请求
     if (cachedResults) {
         setResults(cachedResults);
         setLoading(false);
@@ -40,13 +36,8 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
         const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&mode=${mode}`);
         const json = await res.json();
         const data = json.data || [];
-        
         setResults(data);
-        
-        // 搜索完成后，保存到 Store
-        if (onUpdateResultsRef.current) {
-            onUpdateResultsRef.current(data);
-        }
+        if (onUpdateResultsRef.current) onUpdateResultsRef.current(data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -54,14 +45,17 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
       }
     }
     search();
-  }, [query, mode, cachedResults]); // 依赖项加入 cachedResults 确保切换时响应
+  }, [query, mode, cachedResults]);
 
-  const handleResultClick = (book: string, chapter: number) => {
+  // [修改] 增加 verse 参数
+  const handleResultClick = (book: string, chapter: number, verse: number) => {
     addTab({
         type: 'read',
         book: book,
         chapter: chapter.toString()
     });
+    // 设置要滚动的节
+    setScrollToVerse(verse);
   };
 
   if (loading) {
@@ -94,7 +88,8 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
             <div 
               key={verse.id} 
               className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer group border border-transparent hover:border-blue-200 dark:hover:border-blue-800"
-              onClick={() => handleResultClick(verse.bookId, verse.chapter)}
+              // [修改] 传递 verse.verse
+              onClick={() => handleResultClick(verse.bookId, verse.chapter, verse.verse)}
             >
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded">
