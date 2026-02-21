@@ -3,25 +3,30 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic"; // [新增] 引入动态加载模块
+
 import { Sidebar } from "@/components/bible/Sidebar";
 import { Reader } from "@/components/bible/Reader";
 import { SearchResults } from "@/components/bible/SearchResults";
-import { SearchDialog } from "@/components/bible/SearchDialog";
-import { NoteEditor } from "@/components/bible/NoteEditor"; 
-import { ShareCard } from "@/components/bible/ShareCard"; 
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AISidebar } from "@/components/bible/AISidebar";
 import { cn } from "@/lib/utils";
-import { MagicBall } from "@/components/bible/MagicBall"; 
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer"; 
 import { BIBLE_BOOKS } from "@/lib/constants"; 
 import { useAudioPlayer } from "@/hooks/use-audio-player"; 
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { UserMenu } from "@/components/auth/UserMenu";
+
+// --- [关键优化] 动态按需加载重型组件 (Code Splitting) ---
+// 这些组件不会在首屏阻塞渲染，大幅提升页面加载速度
+const AISidebar = dynamic(() => import("@/components/bible/AISidebar").then(mod => mod.AISidebar), { ssr: false });
+const MagicBall = dynamic(() => import("@/components/bible/MagicBall").then(mod => mod.MagicBall), { ssr: false });
+const SearchDialog = dynamic(() => import("@/components/bible/SearchDialog").then(mod => mod.SearchDialog), { ssr: false });
+const NoteEditor = dynamic(() => import("@/components/bible/NoteEditor").then(mod => mod.NoteEditor), { ssr: false });
+const ShareCard = dynamic(() => import("@/components/bible/ShareCard").then(mod => mod.ShareCard), { ssr: false });
+const AuthDialog = dynamic(() => import("@/components/auth/AuthDialog").then(mod => mod.AuthDialog), { ssr: false });
 
 export default function Home() {
   const router = useRouter();
@@ -97,15 +102,12 @@ export default function Home() {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // [修复] 监听参数变化，翻页时滚动回顶部
   useEffect(() => {
     const book = searchParams.get("book");
     const chapter = searchParams.get("chapter");
     if (book && chapter && activeTab.type === 'read') {
       if (activeTab.book !== book || activeTab.chapter !== chapter) {
         updateActiveTab({ book, chapter });
-        
-        // 滚动到阅读容器顶部
         const container = document.getElementById('reader-scroll-container');
         if (container) {
             container.scrollTo(0, 0);
@@ -148,11 +150,11 @@ export default function Home() {
 
   return (
     <main className="flex h-screen w-full overflow-hidden bg-white dark:bg-slate-950 relative transition-colors duration-300">
+      {/* 懒加载的弹窗组件 */}
       <AuthDialog />
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <NoteEditor />
       <ShareCard />
-      {/* 调整 MagicBall 层级在组件内部做，或者确保它在文档流下方 */}
       <MagicBall /> 
 
       {/* Desktop Sidebar */}
@@ -220,7 +222,6 @@ export default function Home() {
         {/* Header */}
         <header className="h-14 border-b flex items-center justify-between px-4 bg-white dark:bg-slate-950 dark:border-slate-800 z-10 sticky top-0 shrink-0 gap-2 transition-colors duration-300">
           
-          {/* Left Controls */}
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="ghost" size="icon" className="md:hidden dark:text-slate-200" onClick={() => toggleSidebar()}><Menu className="h-5 w-5" /></Button>
             <Button variant="ghost" size="icon" className={cn("hidden md:flex dark:text-slate-200", !isDesktopSidebarOpen && "text-slate-400")} onClick={toggleDesktopSidebar}><PanelLeft className="h-5 w-5" /></Button>
@@ -228,17 +229,14 @@ export default function Home() {
             <Button variant="ghost" size="icon" className="md:hidden dark:text-slate-200" onClick={() => setIsSearchOpen(true)}><Search className="h-5 w-5" /></Button>
           </div>
           
-          {/* 桌面端标签页 */}
           <div className="hidden md:flex flex-1 items-center overflow-x-auto no-scrollbar gap-1 px-2 mask-linear-fade">
              <TabList />
           </div>
 
-          {/* 移动端标题 */}
           <div className="md:hidden flex-1 text-center font-serif font-bold text-lg text-slate-800 dark:text-slate-200 truncate px-2">
              {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : "搜索"}
           </div>
 
-          {/* Right Controls */}
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="hidden sm:flex text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800" title="全屏"><Maximize className="h-4 w-4" /></Button>
 
@@ -249,17 +247,14 @@ export default function Home() {
                </>
             )}
 
-            {/* 用户菜单 */}
             <UserMenu />
 
-            {/* 桌面端工具 */}
             <div className="hidden sm:flex items-center gap-1">
                 <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="text-slate-500 dark:text-slate-400" title="行高"><AlignJustify className="h-4 w-4" /></Button>
                 <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold dark:text-slate-300"><Languages className="h-4 w-4" />{showEnglish ? "中/英" : "中"}</Button>
                 <div className="w-24 mx-2"><Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} /></div>
             </div>
             
-            {/* 移动端设置按钮 (Hidden but functional via UserMenu) */}
             <Button variant="ghost" size="icon" className="sm:hidden hidden" onClick={() => setMobileSettingsOpen(true)}>
               <Settings className="h-5 w-5 text-slate-500" />
             </Button>
@@ -268,7 +263,7 @@ export default function Home() {
 
         {/* Main Content */}
         <div 
-            id="reader-scroll-container" // [修复] 添加 ID
+            id="reader-scroll-container" 
             className="flex-1 overflow-y-auto scroll-smooth bg-white dark:bg-slate-950 transition-colors duration-300 pb-20 md:pb-0"
         >
           {activeTab.type === 'read' ? (
@@ -278,7 +273,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* 移动端底部标签栏 */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white dark:bg-slate-950 border-t dark:border-slate-800 flex items-center px-4 z-20 pb-safe">
             <TabList />
         </div>

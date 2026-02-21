@@ -1,0 +1,16 @@
+{
+  "name": "Scripture AI",
+  "short_name": "Scripture AI",
+  "description": "AI 驱动的圣经阅读与灵修助手",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/globe.svg", 
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

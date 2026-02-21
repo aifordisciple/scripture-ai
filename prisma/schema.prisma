@@ -1,31 +1,36 @@
 // prisma/schema.prisma
 
 generator client {
-  provider = "prisma-client-js"
-  // 关键：同时支持 Mac 本机开发 和 Linux (Docker) 部署
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+  previewFeatures = ["postgresqlExtensions"] // [新增 1] 开启 PostgreSQL 扩展支持
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector] // [新增 2] 声明使用 pgvector 扩展
 }
 
 // 定义圣经经文表
+
 model BibleVerse {
   id        Int    @id @default(autoincrement())
-  bookId    String @map("book_id") // 书卷简称 Gen
-  bookName  String @map("book_name") // 书卷全名 创世记
+  bookId    String @map("book_id")
+  bookName  String @map("book_name")
   chapter   Int
   verse     Int
   content   String
   version   String @default("CUV")
 
-  // 复合唯一索引
+  // [修改] 将 1536 改为 768，适配 nomic-embed-text
+  embedding Unsupported("vector(768)")?
+
   @@unique([bookId, chapter, verse, version])
-  // 映射表名
   @@map("bible_verses")
 }
+
+// ... 保持下方 User 相关模型不变 ...
 
 // --- 新增用户系统相关模型 ---
 
@@ -43,6 +48,7 @@ model User {
   highlights    Highlight[]
   notes         Note[]
   cards         ScriptureCard[]
+  chatMessages  ChatMessage[] // [新增] 关联聊天记录
 }
 
 model UserSetting {
@@ -104,3 +110,14 @@ model ScriptureCard {
   createdAt DateTime @default(now())
 }
 
+// [新增] AI 聊天记录表
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   // "user" | "assistant"
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}

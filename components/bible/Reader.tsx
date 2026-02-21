@@ -1,25 +1,19 @@
 // components/bible/Reader.tsx
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
 import { Loader2, BookOpenCheck, ChevronLeft, ChevronRight } from "lucide-react"; 
 import { FloatingMenu } from "./FloatingMenu";
-import { CHAPTER_SUMMARY_PROMPT, BIBLE_BOOKS } from "@/lib/constants";
+import { CHAPTER_SUMMARY_PROMPT } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 
-// ... (Interface 和常量定义保持不变)
-interface Verse {
-  id: number;
-  bookId: string;
-  bookName: string;
-  chapter: number;
-  verse: number;
-  content: string;
-  version: string;
-}
+// 引入我们刚刚提取的自定义 Hooks
+import { useBibleData, Verse } from "@/hooks/use-bible-data";
+import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
+import { useVerseMenu } from "@/hooks/use-verse-menu";
 
 interface ReaderProps {
   initialBook: string;
@@ -34,257 +28,65 @@ const HIGHLIGHT_COLORS: Record<string, string> = {
 };
 
 const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 100 : -100,
-    opacity: 0,
-    scale: 0.98
-  }),
-  center: {
-    zIndex: 1,
-    x: 0,
-    opacity: 1,
-    scale: 1
-  },
-  exit: (direction: number) => ({
-    zIndex: 0,
-    x: direction < 0 ? 100 : -100,
-    opacity: 0,
-    scale: 0.98
-  })
+  enter: (direction: number) => ({ x: direction > 0 ? 100 : -100, opacity: 0, scale: 0.98 }),
+  center: { zIndex: 1, x: 0, opacity: 1, scale: 1 },
+  exit: (direction: number) => ({ zIndex: 0, x: direction < 0 ? 100 : -100, opacity: 0, scale: 0.98 })
 };
 
 export function Reader({ initialBook, initialChapter }: ReaderProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  
   const book = searchParams.get("book") || initialBook;
   const chapter = searchParams.get("chapter") || initialChapter;
 
-  const [verses, setVerses] = useState<Verse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [direction, setDirection] = useState(0);
+  const { fontSize, lineHeight, selectedVerses, showEnglish, highlights, triggerAI, scrollToVerse, setScrollToVerse, clearSelection } = useBibleStore();
 
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  // 1. 数据获取 Hook
+  const { verses, loading } = useBibleData(book, chapter);
+  
+  // 2. 翻页导航 Hook
+  const { direction, handleNextChapter, handlePrevChapter, handleTouchStart, handleTouchEnd } = useSwipeNavigation(book, chapter);
+  
+  // 3. 经文交互 Hook
+  const { menuPosition, isMenuVisible, setIsMenuVisible, handleVerseClick, handleAIExplain, handleCopy } = useVerseMenu(verses);
 
-  // [修改] 解构 scrollToVerse 和 setScrollToVerse
-  const { 
-    fontSize, lineHeight, selectedVerses, toggleVerseSelection, 
-    clearSelection, triggerAI, showEnglish, highlights, setHighlights,
-    setChapterSpeechText, scrollToVerse, setScrollToVerse 
-  } = useBibleStore();
-
-  const touchStartRef = useRef<{ x: number, y: number } | null>(null);
-
+// --- 自动滚动逻辑 ---
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      clearSelection();
-      setIsMenuVisible(false);
-      setChapterSpeechText(""); 
-      
-      try {
-        const [versesRes, highlightsRes] = await Promise.all([
-          fetch(`/api/bible?book=${book}&chapter=${chapter}`),
-          fetch(`/api/highlight?bookId=${book}&chapter=${chapter}`)
-        ]);
-
-        const versesJson = await versesRes.json();
-        const highlightsJson = await highlightsRes.json();
-
-        if (versesJson.data) {
-            setVerses(versesJson.data);
-            
-            const fullText = versesJson.data
-                .filter((v: any) => v.version === 'CUV')
-                .map((v: any) => v.content)
-                .join(" ");
-            setChapterSpeechText(fullText);
-        }
-        if (highlightsJson.data) setHighlights(highlightsJson.data);
-
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, [book, chapter, clearSelection, setHighlights, setChapterSpeechText]);
-
-  // [新增] 自动滚动效果
-  useEffect(() => {
-    // 只有当加载完成、有滚动目标且确实有经文时才滚动
     if (!loading && scrollToVerse && verses.length > 0) {
-        // 稍微延时以确保 DOM 渲染完毕
         setTimeout(() => {
             const element = document.getElementById(`verse-${scrollToVerse}`);
             if (element) {
+                // 平滑滚动到屏幕中间
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // 添加呼吸灯动画类
+                element.classList.add("animate-highlight-pulse");
+                // 动画播放完毕后移除类
+                setTimeout(() => element.classList.remove("animate-highlight-pulse"), 2500);
                 
-                // 可选：闪烁一下提示用户
-                element.classList.add("bg-blue-50/50", "dark:bg-blue-900/20", "transition-colors", "duration-1000");
-                setTimeout(() => {
-                    element.classList.remove("bg-blue-50/50", "dark:bg-blue-900/20");
-                }, 2000);
-
-                // 滚动完成后清除目标，避免后续干扰
                 setScrollToVerse(null);
             }
-        }, 300);
+        }, 300); // 留出一点渲染时间
     }
   }, [loading, scrollToVerse, verses, setScrollToVerse]);
 
-  const navigateTo = (newBook: string, newChapter: number) => {
-      router.push(`/?book=${newBook}&chapter=${newChapter}`);
-  };
-
-  // ... (handleNextChapter, handlePrevChapter, handleTouchStart, handleTouchEnd 保持不变)
-  const handleNextChapter = () => {
-      setDirection(1);
-      const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book);
-      if (currentBookIndex === -1) return;
-      const currentBookConfig = BIBLE_BOOKS[currentBookIndex];
-      const currentChapterInt = parseInt(chapter);
-      if (currentChapterInt < currentBookConfig.chapters) {
-          navigateTo(book, currentChapterInt + 1);
-      } else if (currentBookIndex < BIBLE_BOOKS.length - 1) {
-          const nextBook = BIBLE_BOOKS[currentBookIndex + 1];
-          navigateTo(nextBook.id, 1);
-      }
-  };
-
-  const handlePrevChapter = () => {
-      setDirection(-1);
-      const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book);
-      if (currentBookIndex === -1) return;
-      const currentChapterInt = parseInt(chapter);
-      if (currentChapterInt > 1) {
-          navigateTo(book, currentChapterInt - 1);
-      } else if (currentBookIndex > 0) {
-          const prevBook = BIBLE_BOOKS[currentBookIndex - 1];
-          navigateTo(prevBook.id, prevBook.chapters);
-      }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-      touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-      if (!touchStartRef.current) return;
-      const diffX = touchStartRef.current.x - e.changedTouches[0].clientX;
-      const diffY = touchStartRef.current.y - e.changedTouches[0].clientY;
-      if (Math.abs(diffX) > 80 && Math.abs(diffY) < 60) {
-          if (diffX > 0) handleNextChapter(); else handlePrevChapter();
-      }
-      touchStartRef.current = null;
-  };
-
-  const handleVerseClick = (v: Verse, e: React.MouseEvent) => {
-    e.preventDefault(); e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); 
-    toggleVerseSelection(v.verse);
-    
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const menuWidth = 200; 
-    const screenWidth = window.innerWidth;
-    
-    let left = rect.left + rect.width / 2;
-    if (left - menuWidth / 2 < 10) left = menuWidth / 2 + 10;
-    if (left + menuWidth / 2 > screenWidth - 10) left = screenWidth - menuWidth / 2 - 10;
-
-    setMenuPosition({ 
-        top: rect.top - 10, 
-        left: left
+  // --- 准备渲染数据 ---
+  const { verseMap, renderList } = useMemo(() => {
+    const map = new Map<number, { CUV?: Verse, KJV?: Verse }>();
+    verses.forEach(v => {
+      if (!map.has(v.verse)) map.set(v.verse, {});
+      const entry = map.get(v.verse)!;
+      if (v.version === 'CUV') entry.CUV = v;
+      if (v.version === 'KJV') entry.KJV = v;
     });
-    setIsMenuVisible(true);
-  };
-
-  const handleAIExplain = () => {
-    if (selectedVerses.length === 0) return;
-    const selectedVerseObjects = verses.filter(v => selectedVerses.includes(v.verse));
-    if (selectedVerseObjects.length === 0) return;
-    const cuvVerses = selectedVerseObjects.filter(v => v.version === 'CUV');
-    if (cuvVerses.length === 0) return; 
-    const combinedContent = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
-    const minVerseIdx = verses.findIndex(v => v.verse === Math.min(...selectedVerses));
-    const maxVerseIdx = verses.findIndex(v => v.verse === Math.max(...selectedVerses));
-    const start = Math.max(0, minVerseIdx - 5);
-    const end = Math.min(verses.length, maxVerseIdx + 6);
-    const contextContent = verses.slice(start, end)
-        .filter(v => v.version === 'CUV')
-        .map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
-    const firstV = cuvVerses[0];
-    triggerAI("请详细解读这段经文，包含背景、逐节释经和现代应用。", combinedContent, contextContent, { 
-        bookName: firstV.bookName, chapter: firstV.chapter, verse: firstV.verse 
-    });
-    setIsMenuVisible(false);
-    clearSelection();
-  };
-
-  const handleCopy = async () => {
-    const selectedContent = verses
-      .filter(v => selectedVerses.includes(v.verse))
-      .sort((a, b) => a.verse - b.verse)
-      .reduce((acc, curr) => {
-        const existing = acc.find(item => item.verse === curr.verse);
-        if (!existing) { acc.push(curr); } 
-        else if (curr.version === 'CUV') { const index = acc.indexOf(existing); acc[index] = curr; }
-        return acc;
-      }, [] as Verse[])
-      .map(v => `${v.content} (${v.bookName} ${v.chapter}:${v.verse})`)
-      .join("\n");
-
-    if (!selectedContent) return;
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      try { await navigator.clipboard.writeText(selectedContent); return; } 
-      catch (err) { console.warn("Clipboard API failed, trying fallback...", err); }
-    }
-
-    try {
-      const textarea = document.createElement('textarea');
-      textarea.value = selectedContent;
-      textarea.setAttribute('readonly', '');
-      textarea.style.position = 'absolute';
-      textarea.style.left = '-9999px';
-      document.body.appendChild(textarea);
-      textarea.select();
-      textarea.setSelectionRange(0, 99999); 
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-    } catch (e) {
-      console.error("Fallback copy failed:", e);
-      alert("复制失败，请手动复制");
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = () => setIsMenuVisible(false);
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
-
-  const verseMap = new Map<number, { CUV?: Verse, KJV?: Verse }>();
-  verses.forEach(v => {
-    if (!verseMap.has(v.verse)) verseMap.set(v.verse, {});
-    const entry = verseMap.get(v.verse)!;
-    if (v.version === 'CUV') entry.CUV = v;
-    if (v.version === 'KJV') entry.KJV = v;
-  });
-  const renderList = Array.from(verseMap.keys()).sort((a, b) => a - b);
+    return { verseMap: map, renderList: Array.from(map.keys()).sort((a, b) => a - b) };
+  }, [verses]);
 
   return (
     <div className="w-full min-h-screen flex flex-row relative bg-white dark:bg-slate-950 transition-colors duration-300" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       
-      {/* 左侧导航区域 */}
+      {/* 左侧导航 */}
       <div className="hidden md:flex flex-1 self-stretch group items-start justify-center transition-colors">
-        <div 
-            className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer"
-            onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }} 
-            title="上一章"
-        >
-           <div className="bg-slate-100/50 dark:bg-slate-800/50 p-3 rounded-full shadow-sm backdrop-blur-sm text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-110 transition-all">
+        <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }} title="上一章">
+           <div className="bg-slate-100/50 dark:bg-slate-800/50 p-3 rounded-full shadow-sm backdrop-blur-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-110 transition-all">
               <ChevronLeft className="w-8 h-8" />
            </div>
         </div>
@@ -292,19 +94,13 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
       {/* 中间阅读区 */}
       <div className="w-full max-w-5xl px-4 py-8 md:px-8 pb-32 bg-white dark:bg-slate-950 shadow-sm min-h-screen z-0">
-        
         <AnimatePresence mode='wait' custom={direction} initial={false}>
           <motion.div
             key={`${book}-${chapter}`} 
             custom={direction}
             variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 }
-            }}
+            initial="enter" animate="center" exit="exit"
+            transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
             className="w-full"
           >
             {loading ? (
@@ -327,50 +123,49 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         
                         if (!cuvVerse) return null;
                         const isSelected = selectedVerses.includes(verseNum);
-                        
-                        const highlight = highlights.find(h => 
-                            h.verse === verseNum && 
-                            h.bookId === book && 
-                            h.chapter === parseInt(chapter)
-                        );
-                        
+                        const highlight = highlights.find(h => h.verse === verseNum && h.bookId === book && h.chapter === parseInt(chapter));
                         const highlightClass = highlight ? HIGHLIGHT_COLORS[highlight.color] : "";
 
                         return (
                         <div
-                            id={`verse-${verseNum}`} // [新增] 添加 ID 锚点
+                            id={`verse-${verseNum}`}
                             key={cuvVerse.id}
                             onClick={(e) => handleVerseClick(cuvVerse, e)}
                             className={cn(
-                            "relative flex items-start px-2 py-1.5 rounded cursor-pointer transition-all duration-200 group/verse border border-transparent",
-                            isSelected 
-                                ? "bg-blue-100 dark:bg-blue-900/60 border-blue-300 dark:border-blue-500 shadow-sm" 
-                                : highlightClass 
-                                ? `${highlightClass} border-transparent`
-                                : "hover:bg-slate-50 dark:hover:bg-slate-900"
+                                "relative flex items-start px-2 py-1.5 rounded cursor-pointer transition-all duration-200 group/verse border border-transparent",
+                                isSelected ? "bg-blue-100 dark:bg-blue-900/60 border-blue-300 dark:border-blue-500 shadow-sm" : 
+                                highlightClass ? `${highlightClass} border-transparent` : "hover:bg-slate-50 dark:hover:bg-slate-900"
                             )}
                         >
                             <span className={cn("font-bold mr-3 select-none shrink-0 mt-0.5", isSelected ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-600")} style={{ fontSize: fontSize * 0.6 }}>
-                            {verseNum}
+                                {verseNum}
                             </span>
                             
                             <div className="flex-1 min-w-0">
-                            <div className={cn("font-serif transition-colors text-justify", isSelected ? "text-slate-900 dark:text-slate-100 font-medium" : "text-slate-800 dark:text-slate-300")} style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}>
-                                {cuvVerse.content}
-                            </div>
-                            {showEnglish && kjvVerse && (
-                                <div className="mt-2 text-slate-500 dark:text-slate-500 font-sans tracking-wide" style={{ fontSize: `${fontSize * 0.85}px`, lineHeight: 1.5 }}>
-                                {kjvVerse.content}
+                                <div className={cn("font-serif transition-colors text-justify", isSelected ? "text-slate-900 dark:text-slate-100 font-medium" : "text-slate-800 dark:text-slate-300")} style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}>
+                                    {cuvVerse.content}
                                 </div>
-                            )}
+                                {showEnglish && kjvVerse && (
+                                    <div className="mt-2 text-slate-500 dark:text-slate-500 font-sans tracking-wide" style={{ fontSize: `${fontSize * 0.85}px`, lineHeight: 1.5 }}>
+                                        {kjvVerse.content}
+                                    </div>
+                                )}
                             </div>
                         </div>
                         );
                     })}
                     </div>
 
+                    {/* 全章摘要按钮 */}
                     <div className="mt-16 text-center">
-                    <button onClick={(e) => { e.stopPropagation(); const cuvVerses = verses.filter(v => v.version === 'CUV'); if (cuvVerses.length > 0) { const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n'); triggerAI(CHAPTER_SUMMARY_PROMPT, `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, fullContext, { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 }); } }} className="shadow-md inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full transition-colors font-medium text-sm">
+                    <button onClick={(e) => { 
+                        e.stopPropagation(); 
+                        const cuvVerses = verses.filter(v => v.version === 'CUV'); 
+                        if (cuvVerses.length > 0) { 
+                            const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n'); 
+                            triggerAI(CHAPTER_SUMMARY_PROMPT, `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, fullContext, { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 }); 
+                        } 
+                    }} className="shadow-md inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full transition-colors font-medium text-sm">
                         <BookOpenCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         生成第 {chapter} 章摘要
                     </button>
@@ -381,19 +176,16 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </AnimatePresence>
       </div>
 
-      {/* 右侧导航区域 */}
+      {/* 右侧导航 */}
       <div className="hidden md:flex flex-1 self-stretch group items-start justify-center transition-colors">
-        <div 
-            className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer"
-            onClick={(e) => { e.stopPropagation(); handleNextChapter(); }} 
-            title="下一章"
-        >
-           <div className="bg-slate-100/50 dark:bg-slate-800/50 p-3 rounded-full shadow-sm backdrop-blur-sm text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-110 transition-all">
+        <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleNextChapter(); }} title="下一章">
+           <div className="bg-slate-100/50 dark:bg-slate-800/50 p-3 rounded-full shadow-sm backdrop-blur-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-110 transition-all">
               <ChevronRight className="w-8 h-8" />
            </div>
         </div>
       </div>
 
+      {/* 浮动菜单 */}
       <FloatingMenu 
         visible={isMenuVisible && selectedVerses.length > 0} 
         position={menuPosition}

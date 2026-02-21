@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight } from 'lucide-react';
+import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, ChevronDown, Brain, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
@@ -16,14 +16,46 @@ import { motion, AnimatePresence } from "framer-motion";
 // --- 1. 子组件：高性能消息气泡 ---
 const MessageBubble = memo(({ role, content, isLatest }: { role: string, content: string, isLatest: boolean }) => {
   const [copied, setCopied] = useState(false);
+  const [isThoughtExpanded, setIsThoughtExpanded] = useState(true);
 
-  // [修复] 健壮的复制功能，兼容非 HTTPS 环境
+  // --- 解析思维链 (CoT) 逻辑 ---
+  const hasThinkStart = content.includes('<think>');
+  const hasThinkEnd = content.includes('</think>');
+  let thoughtText = '';
+  let mainText = content;
+  let isThinking = false;
+
+  if (hasThinkStart) {
+    if (hasThinkEnd) {
+        // 思考完成，提取完整思考过程
+        const match = content.match(/<think>([\s\S]*?)<\/think>/);
+        if (match) {
+            thoughtText = match[1].trim();
+            mainText = content.replace(/<think>([\s\S]*?)<\/think>/, '').trim();
+        }
+    } else {
+        // 正在思考中，提取阶段性思考过程
+        isThinking = true;
+        thoughtText = content.substring(content.indexOf('<think>') + 7).trim();
+        mainText = content.substring(0, content.indexOf('<think>')).trim();
+    }
+  }
+
+  // 监听思考状态：一旦完成思考，自动折叠面板
+  const prevIsThinking = useRef(isThinking);
+  useEffect(() => {
+      if (prevIsThinking.current === true && isThinking === false) {
+          setIsThoughtExpanded(false);
+      }
+      prevIsThinking.current = isThinking;
+  }, [isThinking]);
+
+  // --- 复制逻辑 ---
   const handleCopy = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡，防止触发沉浸模式切换
+    e.stopPropagation(); 
+    // 只复制最终结果，不复制思考过程
+    const copyText = mainText || content;
 
-    const copyText = content;
-
-    // 方案 A: 现代 Clipboard API (仅限 HTTPS/localhost)
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(copyText)
         .then(() => showSuccess())
@@ -32,7 +64,6 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
           fallbackCopy(copyText);
         });
     } else {
-      // 方案 B: 传统回退方案 (兼容 HTTP)
       fallbackCopy(copyText);
     }
   };
@@ -41,8 +72,6 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
     try {
       const textArea = document.createElement("textarea");
       textArea.value = text;
-      
-      // 确保 textarea 不可见且不影响布局
       textArea.style.position = "fixed";
       textArea.style.left = "-9999px";
       textArea.style.top = "0";
@@ -83,81 +112,115 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
         </div>
 
         {role === 'user' ? (
-           <div className="whitespace-pre-wrap leading-relaxed">{content}</div>
+           <div className="prose prose-sm dark:prose-invert max-w-none break-words text-white">
+             <ReactMarkdown 
+                components={{
+                    blockquote: ({node, ...props}) => <blockquote className="relative border-l-4 border-white/50 pl-3 py-1 my-2 bg-white/10 rounded-r-md italic text-white/90 text-xs" {...props} />,
+                    p: ({node, ...props}) => <p className="leading-relaxed mb-2 last:mb-0" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-bold text-white bg-white/20 px-1 py-0.5 rounded text-[13px]" {...props} />
+                }}
+             >
+                {content}
+             </ReactMarkdown>
+           </div>
         ) : (
           <>
-            <div className="prose prose-slate dark:prose-invert max-w-none break-words">
-              {typeof ReactMarkdown !== 'undefined' ? (
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      // 标题：增加左侧装饰条，字体更紧凑
-                      h3: ({node, ...props}) => (
-                        <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mt-6 mb-3 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700/50">
-                            <span className="w-1 h-4 bg-blue-500 rounded-full inline-block"></span>
-                            {props.children}
-                        </h3>
-                      ),
-                      h4: ({node, ...props}) => <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-4 mb-2 flex items-center gap-1" {...props}><ChevronRight className="w-3 h-3 text-blue-400" />{props.children}</h4>,
-                      
-                      // 正文：字体适中(text-sm/base)，行间距舒适，段间距缩小
-                      p: ({node, ...props}) => <p className="text-[15px] leading-7 text-slate-600 dark:text-slate-300 mb-3 last:mb-0 text-justify" {...props} />, 
-                      
-                      // 列表：更紧凑的间距
-                      ul: ({node, ...props}) => <ul className="my-2 space-y-1 pl-1" {...props} />,
-                      li: ({node, ...props}) => (
-                        <li className="text-[15px] leading-relaxed text-slate-600 dark:text-slate-300 flex items-start gap-2 pl-1" {...props}>
-                           <span className="text-blue-400 select-none mt-2 text-[6px] shrink-0">●</span> 
-                           <span className="flex-1">{props.children}</span>
-                        </li>
-                      ),
-                      
-                      // 强调：使用背景色高亮，而非单纯加粗
-                      strong: ({node, ...props}) => <strong className="font-semibold text-blue-900 dark:text-blue-100 bg-blue-50 dark:bg-blue-900/30 px-1 py-0.5 rounded mx-0.5 text-[14px]" {...props} />,
-                      
-                      // 引用块：精美卡片样式
-                      blockquote: ({node, ...props}) => (
-                        <blockquote className="relative border-l-4 border-blue-300 dark:border-blue-700 pl-4 py-2 my-4 bg-slate-50 dark:bg-slate-800/50 rounded-r-lg" {...props}>
-                            <Quote className="absolute top-2 right-2 w-4 h-4 text-slate-200 dark:text-slate-700" />
-                            <div className="italic text-slate-600 dark:text-slate-400 text-sm">{props.children}</div>
-                        </blockquote>
-                      ),
-                      // 代码块
-                      code: ({node, ...props}) => <code className="bg-slate-100 dark:bg-slate-800 text-red-500 dark:text-red-400 px-1.5 py-0.5 rounded text-xs font-mono border dark:border-slate-700" {...props} />,
-                    }}
-                  >
-                    {content}
-                  </ReactMarkdown>
-              ) : (
-                  <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">{content}</div>
-              )}
-            </div>
+            {/* [新增] 思考过程折叠面板 */}
+            {thoughtText && (
+              <div className="mb-4 border border-slate-200 dark:border-slate-700/60 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800/30">
+                <div 
+                  className="flex items-center gap-2 px-3 py-2 bg-slate-100/80 dark:bg-slate-800 cursor-pointer hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors select-none"
+                  onClick={() => setIsThoughtExpanded(!isThoughtExpanded)}
+                >
+                  {isThinking ? (
+                     <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                  ) : (
+                     <Brain className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                  )}
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
+                    {isThinking ? "深度思考中..." : "思考过程"}
+                  </span>
+                  {isThoughtExpanded ? (
+                     <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  ) : (
+                     <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                  )}
+                </div>
+                
+                {isThoughtExpanded && (
+                  <div className="p-3.5 text-[13px] leading-relaxed text-slate-500 dark:text-slate-400 max-h-64 overflow-y-auto whitespace-pre-wrap font-sans bg-slate-50 dark:bg-slate-900/30">
+                    {thoughtText}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 最终结果渲染区 */}
+            {mainText && (
+              <div className="prose prose-slate dark:prose-invert max-w-none break-words">
+                {typeof ReactMarkdown !== 'undefined' ? (
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h3: ({node, ...props}) => (
+                          <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mt-6 mb-3 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700/50">
+                              <span className="w-1 h-4 bg-blue-500 rounded-full inline-block"></span>
+                              {props.children}
+                          </h3>
+                        ),
+                        h4: ({node, ...props}) => <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-4 mb-2 flex items-center gap-1" {...props}><ChevronRight className="w-3 h-3 text-blue-400" />{props.children}</h4>,
+                        p: ({node, ...props}) => <p className="text-[15px] leading-7 text-slate-600 dark:text-slate-300 mb-3 last:mb-0 text-justify" {...props} />, 
+                        ul: ({node, ...props}) => <ul className="my-2 space-y-1 pl-1" {...props} />,
+                        li: ({node, ...props}) => (
+                          <li className="text-[15px] leading-relaxed text-slate-600 dark:text-slate-300 flex items-start gap-2 pl-1" {...props}>
+                             <span className="text-blue-400 select-none mt-2 text-[6px] shrink-0">●</span> 
+                             <span className="flex-1">{props.children}</span>
+                          </li>
+                        ),
+                        strong: ({node, ...props}) => <strong className="font-semibold text-blue-900 dark:text-blue-100 bg-blue-50 dark:bg-blue-900/30 px-1 py-0.5 rounded mx-0.5 text-[14px]" {...props} />,
+                        blockquote: ({node, ...props}) => (
+                          <blockquote className="relative border-l-4 border-blue-300 dark:border-blue-700 pl-4 py-2 my-4 bg-slate-50 dark:bg-slate-800/50 rounded-r-lg" {...props}>
+                              <Quote className="absolute top-2 right-2 w-4 h-4 text-slate-200 dark:text-slate-700" />
+                              <div className="italic text-slate-600 dark:text-slate-400 text-sm">{props.children}</div>
+                          </blockquote>
+                        ),
+                        code: ({node, ...props}) => <code className="bg-slate-100 dark:bg-slate-800 text-red-500 dark:text-red-400 px-1.5 py-0.5 rounded text-xs font-mono border dark:border-slate-700" {...props} />,
+                      }}
+                    >
+                      {mainText}
+                    </ReactMarkdown>
+                ) : (
+                    <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">{mainText}</div>
+                )}
+              </div>
+            )}
             
             {/* 底部工具栏：复制 + 朗读 */}
-            <div className="mt-4 pt-2 border-t border-slate-50 dark:border-slate-700/50 flex justify-between items-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 select-none">
-                <button 
-                    onClick={handleCopy}
-                    className={cn(
-                        "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
-                        copied 
-                            ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" 
-                            : "text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
-                    )}
-                    title="复制内容"
-                >
-                    {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                    {copied ? "已复制" : "复制"}
-                </button>
-                
-                {/* 朗读按钮也需阻止冒泡 */}
-                <div onClick={(e) => e.stopPropagation()}>
-                    <AudioButton text={content} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 h-7 px-2 text-[11px]" label="朗读" />
-                </div>
-            </div>
+            {(mainText || !isThinking) && (
+              <div className="mt-4 pt-2 border-t border-slate-50 dark:border-slate-700/50 flex justify-between items-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 select-none">
+                  <button 
+                      onClick={handleCopy}
+                      className={cn(
+                          "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
+                          copied 
+                              ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" 
+                              : "text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                      )}
+                      title="复制内容"
+                  >
+                      {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      {copied ? "已复制" : "复制"}
+                  </button>
+                  
+                  <div onClick={(e) => e.stopPropagation()}>
+                      <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 h-7 px-2 text-[11px]" label="朗读" />
+                  </div>
+              </div>
+            )}
           </>
         )}
 
-        {/* 视觉优化：Gemini 风格的柔和光标 */}
+        {/* 视觉优化：光标 */}
         {role === 'assistant' && isLatest && (
              <span className="inline-block w-2.5 h-2.5 ml-1 bg-gradient-to-tr from-blue-400 to-purple-400 rounded-full animate-pulse align-baseline shadow-[0_0_10px_rgba(96,165,250,0.8)]" />
         )}
@@ -167,7 +230,6 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
 }, (prev, next) => prev.content === next.content && prev.isLatest === next.isLatest);
 
 MessageBubble.displayName = "MessageBubble";
-
 
 // --- 2. 主组件：AI Sidebar ---
 export function AISidebar() {
@@ -185,9 +247,17 @@ export function AISidebar() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
 
-  // 初始化 useChat
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages } = useChat({
     api: '/api/chat',
+    body: {
+        context: aiRequestTrigger ? {
+            bookName: aiRequestTrigger.ref.bookName,
+            chapter: aiRequestTrigger.ref.chapter,
+            verse: aiRequestTrigger.ref.verse,
+            selectedText: aiRequestTrigger.content,
+            contextText: aiRequestTrigger.context
+        } : null
+    },
     onError: (error) => {
         console.error("🔥 AI Error:", error);
         setAiGenerating(false);
@@ -195,12 +265,33 @@ export function AISidebar() {
     onFinish: () => setAiGenerating(false)
   });
 
-  // 同步加载状态
+// [新增] 组件加载时获取历史记录
+  useEffect(() => {
+    fetch('/api/chat/history')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          // 将数据库记录转换为 AI SDK 需要的格式
+          setMessages(data.map((m: any) => ({ id: m.id, role: m.role, content: m.content })));
+        }
+      })
+      .catch(err => console.error("Failed to load chat history", err));
+  }, [setMessages]);
+
+
+  // 修改原来的清空按钮事件
+  const handleClearChat = async () => {
+    if(confirm("确定要清空所有灵修对话历史吗？")) {
+        setMessages([]);
+        await fetch('/api/chat/history', { method: 'DELETE' });
+    }
+  };
+
+
   useEffect(() => {
     setAiGenerating(isLoading);
   }, [isLoading, setAiGenerating]);
 
-  // 智能自动滚动逻辑
   useEffect(() => {
     if (scrollRef.current && shouldAutoScrollRef.current) {
         const div = scrollRef.current;
@@ -208,17 +299,14 @@ export function AISidebar() {
     }
   }, [messages, isLoading]);
 
-  // 监听用户手动滚动
   const handleScroll = () => {
     if (scrollRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-      const isAtBottom = distanceFromBottom <= 100;
-      shouldAutoScrollRef.current = isAtBottom;
+      shouldAutoScrollRef.current = distanceFromBottom <= 100;
     }
   };
 
-  // 监听外部触发
   useEffect(() => {
     if (!aiRequestTrigger) return;
     if (aiRequestTrigger.timestamp === lastProcessedTimeRef.current) return;
@@ -226,24 +314,23 @@ export function AISidebar() {
     lastProcessedTimeRef.current = aiRequestTrigger.timestamp;
     shouldAutoScrollRef.current = true;
 
-    const contextRequest = {
-      bookName: aiRequestTrigger.ref.bookName,
-      chapter: aiRequestTrigger.ref.chapter,
-      verse: aiRequestTrigger.ref.verse,
-      selectedText: aiRequestTrigger.content, 
-      contextText: aiRequestTrigger.context   
-    };
+    let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`;
+    if (aiRequestTrigger.ref.verse > 0) {
+        reference += `:${aiRequestTrigger.ref.verse}`;
+    } else {
+        reference += ` 章 (全章摘要)`;
+    }
+
+    const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n');
+    const enrichedPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**我的请求**：${aiRequestTrigger.prompt}`;
 
     append({
       role: 'user',
-      content: aiRequestTrigger.prompt,
-    }, {
-      body: { context: contextRequest }
+      content: enrichedPrompt,
     });
 
   }, [aiRequestTrigger, append]);
 
-  // --- 拖拽调整宽度逻辑 ---
   const startResizing = useCallback(() => setIsResizing(true), []);
   const stopResizing = useCallback(() => setIsResizing(false), []);
   const resize = useCallback((e: MouseEvent) => {
@@ -264,23 +351,22 @@ export function AISidebar() {
     };
   }, [isResizing, resize, stopResizing]);
 
-  // --- 快捷指令点击 ---
   const handleChipClick = (prompt: string) => {
     if (isLoading) return;
-    
     shouldAutoScrollRef.current = true; 
 
-    const body = aiRequestTrigger ? {
-        context: {
-            bookName: aiRequestTrigger.ref.bookName,
-            chapter: aiRequestTrigger.ref.chapter,
-            verse: aiRequestTrigger.ref.verse,
-            selectedText: aiRequestTrigger.content,
-            contextText: aiRequestTrigger.context
+    let finalPrompt = prompt;
+    
+    if (aiRequestTrigger && messages.length === 0) {
+        let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`;
+        if (aiRequestTrigger.ref.verse > 0) {
+            reference += `:${aiRequestTrigger.ref.verse}`;
         }
-    } : {};
+        const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n');
+        finalPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**我的请求**：${prompt}`;
+    }
 
-    append({ role: 'user', content: prompt }, { body });
+    append({ role: 'user', content: finalPrompt });
   };
 
   const getIcon = (id: string) => {
@@ -322,7 +408,6 @@ export function AISidebar() {
           <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-slate-200 dark:bg-slate-700 rounded group-hover:bg-blue-500 transition-colors" />
         </div>
 
-        {/* 1. Header */}
         <div 
           className={cn(
             "flex items-center justify-between px-4 bg-slate-50 dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden border-b dark:border-slate-800",
@@ -334,7 +419,7 @@ export function AISidebar() {
             <span>AI 灵修伴侣</span>
           </div>
           <div className="flex items-center gap-1">
-             <Button variant="ghost" size="icon" onClick={() => { if(confirm("清空历史?")) setMessages([]) }} title="清空">
+             <Button variant="ghost" size="icon" onClick={handleClearChat} title="清空">
                 <Eraser className="w-4 h-4 text-slate-400" />
             </Button>
             <Button variant="ghost" size="icon" onClick={() => { setAiOpen(false); clearSelection(); }} className="dark:text-slate-400 dark:hover:bg-slate-800">
@@ -343,7 +428,6 @@ export function AISidebar() {
           </div>
         </div>
 
-        {/* 2. Messages Area */}
         <div 
           className="flex-1 overflow-y-auto p-4 bg-slate-50/50 dark:bg-slate-950/50 min-h-0 space-y-6 relative scroll-smooth"
           ref={scrollRef}
@@ -380,7 +464,6 @@ export function AISidebar() {
           )}
         </div>
 
-        {/* 3. Input & Chips Area */}
         <div 
           className={cn(
               "bg-white dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]",

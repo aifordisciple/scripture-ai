@@ -18,6 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Scripture AI - 你的灵修伴侣",
   description: "AI 驱动的圣经阅读与灵修助手",
+  manifest: "/manifest.json", // [新增]
 };
 
 export const viewport: Viewport = {

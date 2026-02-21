@@ -2,6 +2,9 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { SYSTEM_PROMPT } from '@/lib/constants';
+import { getServerSession } from "next-auth"; // [新增]
+import { authOptions } from "@/lib/auth"; // [新增]
+import { prisma } from "@/lib/prisma"; // [新增]
 
 export const maxDuration = 60;
 
@@ -9,13 +12,26 @@ export async function POST(req: Request) {
   try {
     const { messages, context } = await req.json();
 
+// [新增] 获取当前登录用户
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+
+    // [新增] 保存用户的提问到数据库
+    if (userId) {
+       const lastUserMessage = messages[messages.length - 1];
+       if (lastUserMessage && lastUserMessage.role === 'user') {
+          await prisma.chatMessage.create({
+             data: { userId, role: 'user', content: lastUserMessage.content }
+          });
+       }
+    }
+
     console.log("----- 1. 收到前端请求 -----");
     
-    // --- 核心修改：构造分层的 Context Prompt ---
+    // --- 构造分层的 Context Prompt ---
     let userContext = "";
     
     if (context) {
-      // 兼容旧逻辑：如果前端没传 selectedText，回退到 content
       const focusText = context.selectedText || context.content; 
       const backgroundText = context.contextText || ""; 
 
@@ -62,13 +78,34 @@ ${backgroundText}
 
     console.log("----- 3. 开始流式传输 -----");
 
+    // [关键修复] 强制要求模型输出 <think> 标签
+    const enforceThinkingPrompt = `
+${SYSTEM_PROMPT}
+
+【⚠️ 强制输出格式指令】
+为了保证逻辑严密，在回答任何问题之前，你**必须**先进行深度思考，并严格将所有的思考过程放在 <think> 和 </think> 标签之间！
+必须严格遵循以下格式：
+<think>
+在这里写下你的分析、经文比对、神学推导等思考过程...
+</think>
+在这里写下你最终的优美排版回复...
+`;
+
     const result = await streamText({
       model: model,
-      system: SYSTEM_PROMPT,
+      system: enforceThinkingPrompt,
       messages: [
-        { role: 'system', content: userContext }, // 使用新的分层 Context
+        { role: 'system', content: userContext },
         ...messages,
       ],
+      // [新增] AI 流式输出完成后，保存 AI 的回答
+      onFinish: async ({ text }) => {
+         if (userId) {
+            await prisma.chatMessage.create({
+               data: { userId, role: 'assistant', content: text }
+            });
+         }
+      },
       onError: (error) => {
         console.error("❌ AI 生成出错 (Stream阶段):", error);
       }
