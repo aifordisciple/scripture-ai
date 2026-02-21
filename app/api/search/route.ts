@@ -41,7 +41,7 @@ export async function GET(request: Request) {
       
       // [修复 2] 使用统一配置的模型实例
       // 读取 .env 中的模型名，默认为 deepseek-r1:70b 或 qwen2.5
-      const modelName = process.env.OPENAI_API_MODEL || 'deepseek-r1:14b';
+      const modelName = process.env.OPENAI_API_MODEL || 'qwen3.5:cloud';
       const model = openai(modelName);
 
       // [优化] 减少请求数量到 10-20 条，避免本地模型生成太慢导致超时
