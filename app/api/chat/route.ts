@@ -2,21 +2,20 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { SYSTEM_PROMPT } from '@/lib/constants';
-import { getServerSession } from "next-auth"; // [新增]
-import { authOptions } from "@/lib/auth"; // [新增]
-import { prisma } from "@/lib/prisma"; // [新增]
+import { auth } from "@/lib/auth"; // [修改] 导入 v5 的 auth 函数
+import { prisma } from "@/lib/prisma";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
     const { messages, context } = await req.json();
-
-// [新增] 获取当前登录用户
-    const session = await getServerSession(authOptions);
+    
+    // [修改] 直接调用 auth() 获取当前登录用户会话
+    const session = await auth(); 
     const userId = session?.user?.id;
 
-    // [新增] 保存用户的提问到数据库
+    // 如果用户已登录，保存用户的提问到数据库
     if (userId) {
        const lastUserMessage = messages[messages.length - 1];
        if (lastUserMessage && lastUserMessage.role === 'user') {
@@ -26,11 +25,8 @@ export async function POST(req: Request) {
        }
     }
 
-    console.log("----- 1. 收到前端请求 -----");
-    
     // --- 构造分层的 Context Prompt ---
     let userContext = "";
-    
     if (context) {
       const focusText = context.selectedText || context.content; 
       const backgroundText = context.contextText || ""; 
@@ -53,42 +49,27 @@ ${backgroundText}
     const modelName = process.env.OLLAMA_MODEL || 'llama3'; 
     const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1';
 
-    console.log(`----- 2. 准备调用模型: ${provider} -----`);
-
     let model;
-
     if (provider === 'ollama') {
-      const ollama = createOpenAI({
-        baseURL: ollamaBaseUrl,
-        apiKey: 'ollama', 
-      });
+      const ollama = createOpenAI({ baseURL: ollamaBaseUrl, apiKey: 'ollama' });
       model = ollama(modelName);
     } else if (provider === 'deepseek') {
-       const deepseek = createOpenAI({
-         baseURL: 'https://api.deepseek.com/v1',
-         apiKey: process.env.DEEPSEEK_API_KEY,
-       });
+       const deepseek = createOpenAI({ baseURL: 'https://api.deepseek.com/v1', apiKey: process.env.DEEPSEEK_API_KEY });
        model = deepseek('deepseek-chat');
     } else {
-      const openai = createOpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
+      const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
       model = openai('gpt-4o-mini');
     }
 
-    console.log("----- 3. 开始流式传输 -----");
-
-    // [关键修复] 强制要求模型输出 <think> 标签
+    // 强制思考模式 Prompt
     const enforceThinkingPrompt = `
 ${SYSTEM_PROMPT}
 
 【⚠️ 强制输出格式指令】
 为了保证逻辑严密，在回答任何问题之前，你**必须**先进行深度思考，并严格将所有的思考过程放在 <think> 和 </think> 标签之间！
-必须严格遵循以下格式：
-<think>
-在这里写下你的分析、经文比对、神学推导等思考过程...
-</think>
-在这里写下你最终的优美排版回复...
+格式：
+<think>思考过程...</think>
+最终优美排版的回复...
 `;
 
     const result = await streamText({
@@ -98,16 +79,13 @@ ${SYSTEM_PROMPT}
         { role: 'system', content: userContext },
         ...messages,
       ],
-      // [新增] AI 流式输出完成后，保存 AI 的回答
+      // AI 流式输出完成后，保存回复到数据库
       onFinish: async ({ text }) => {
          if (userId) {
             await prisma.chatMessage.create({
                data: { userId, role: 'assistant', content: text }
             });
          }
-      },
-      onError: (error) => {
-        console.error("❌ AI 生成出错 (Stream阶段):", error);
       }
     });
 

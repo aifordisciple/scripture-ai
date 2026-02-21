@@ -1,11 +1,10 @@
 // app/api/chat/history/route.ts
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth'; // [修改]
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const session = await auth(); // [修改]
   if (!session?.user?.id) return NextResponse.json([]);
 
   const messages = await prisma.chatMessage.findMany({
@@ -17,7 +16,7 @@ export async function GET() {
 }
 
 export async function DELETE() {
-  const session = await getServerSession(authOptions);
+  const session = await auth(); // [修改]
   if (!session?.user?.id) return NextResponse.json({ success: false });
 
   await prisma.chatMessage.deleteMany({
