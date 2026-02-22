@@ -26,6 +26,7 @@ const SearchDialog = dynamic(() => import("@/components/bible/SearchDialog").the
 const NoteEditor = dynamic(() => import("@/components/bible/NoteEditor").then(mod => mod.NoteEditor), { ssr: false });
 const ShareCard = dynamic(() => import("@/components/bible/ShareCard").then(mod => mod.ShareCard), { ssr: false });
 const AuthDialog = dynamic(() => import("@/components/auth/AuthDialog").then(mod => mod.AuthDialog), { ssr: false });
+const DashboardDialog = dynamic(() => import("@/components/bible/DashboardDialog").then(mod => mod.DashboardDialog), { ssr: false });
 
 export default function Home() {
   const router = useRouter();
@@ -195,6 +196,7 @@ export default function Home() {
       <NoteEditor />
       <ShareCard />
       <MagicBall /> 
+      <DashboardDialog /> {/* [新增] 挂载个人看板 */}
 
       {/* Desktop Sidebar */}
       {isDesktopSidebarOpen && (

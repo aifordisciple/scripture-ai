@@ -53,6 +53,8 @@ export interface UISlice {
   shareData: { book: string; chapter: number; verses: number[] } | null;
   openShareModal: (book: string, chapter: number, verses: number[]) => void;
   closeShareModal: () => void;
+  isDashboardOpen: boolean;
+  setDashboardOpen: (open: boolean) => void;
 }
 
 export interface ReaderSlice {

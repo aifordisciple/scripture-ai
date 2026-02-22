@@ -20,6 +20,8 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
   shareData: null,
   openShareModal: (book, chapter, verses) => set({ isShareOpen: true, shareData: { book, chapter, verses } }),
   closeShareModal: () => set({ isShareOpen: false, shareData: null }),
+  isDashboardOpen: false,
+  setDashboardOpen: (open) => set({ isDashboardOpen: open }),
 });
 
 // ==========================================
