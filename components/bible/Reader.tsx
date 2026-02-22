@@ -19,7 +19,6 @@ interface ReaderProps {
   initialChapter: string;
 }
 
-// 优化高亮颜色，使其适配日间/夜间模式的柔和质感
 const HIGHLIGHT_COLORS: Record<string, string> = {
   yellow: "bg-yellow-100/80 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100",
   green: "bg-green-100/80 dark:bg-green-900/30 text-green-900 dark:text-green-100",
@@ -27,10 +26,11 @@ const HIGHLIGHT_COLORS: Record<string, string> = {
   red: "bg-red-100/80 dark:bg-red-900/30 text-red-900 dark:text-red-100",
 };
 
+// 优化后的滑动变体：完全的水平位移，纯粹的拉扯感
 const slideVariants = {
-  enter: (direction: number) => ({ x: direction > 0 ? 60 : -60, opacity: 0, scale: 0.98 }),
-  center: { zIndex: 1, x: 0, opacity: 1, scale: 1 },
-  exit: (direction: number) => ({ zIndex: 0, x: direction < 0 ? 60 : -60, opacity: 0, scale: 0.98 })
+  enter: (direction: number) => ({ x: direction > 0 ? '100%' : '-100%', opacity: 0 }),
+  center: { zIndex: 1, x: 0, opacity: 1 },
+  exit: (direction: number) => ({ zIndex: 0, x: direction < 0 ? '100%' : '-100%', opacity: 0 })
 };
 
 export function Reader({ initialBook, initialChapter }: ReaderProps) {
@@ -72,7 +72,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   return (
     <div className="w-full min-h-screen flex flex-row relative transition-colors duration-500" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       
-      {/* 左侧导航 - 毛玻璃按钮 */}
+      {/* 左侧导航 */}
       <div className="hidden md:flex flex-1 self-stretch group items-start justify-center">
         <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }} title="上一章">
            <div className="glass-panel p-3 rounded-full text-muted-foreground hover:text-foreground hover:scale-110 transition-all duration-300">
@@ -81,15 +81,15 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      {/* 中间阅读区 - 去除背景色，让全局背景透出来 */}
-      <div className="w-full max-w-4xl px-4 py-8 md:px-10 pb-32 min-h-screen z-0">
+      {/* 中间阅读区 - 增加 overflow-x-hidden */}
+      <div className="w-full max-w-5xl xl:max-w-6xl px-4 py-8 md:px-10 pb-32 min-h-screen z-0 overflow-x-hidden">
         <AnimatePresence mode='wait' custom={direction} initial={false}>
           <motion.div
             key={`${book}-${chapter}`} 
             custom={direction}
             variants={slideVariants}
             initial="enter" animate="center" exit="exit"
-            transition={{ x: { type: "spring", stiffness: 260, damping: 30 }, opacity: { duration: 0.2 } }}
+            transition={{ x: { type: "spring", stiffness: 350, damping: 35, mass: 0.8 }, opacity: { duration: 0.15 } }}
             className="w-full"
           >
             {loading ? (
@@ -180,7 +180,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      {/* 浮动菜单 */}
       <FloatingMenu 
         visible={isMenuVisible && selectedVerses.length > 0} 
         position={menuPosition}

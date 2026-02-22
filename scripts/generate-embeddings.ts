@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 
 // [关键修改] 配置为本地的 Ollama 接口
 const ollama = createOpenAI({
-  baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1',
+  baseURL: process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1',
   apiKey: 'ollama', // 本地运行不需要真实 key
 });
 

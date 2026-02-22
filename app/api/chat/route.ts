@@ -2,7 +2,7 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { SYSTEM_PROMPT } from '@/lib/constants';
-import { auth } from "@/lib/auth"; // [修改] 导入 v5 的 auth 函数
+import { auth } from "@/lib/auth"; 
 import { prisma } from "@/lib/prisma";
 
 export const maxDuration = 60;
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   try {
     const { messages, context } = await req.json();
     
-    // [修改] 直接调用 auth() 获取当前登录用户会话
+    // 获取当前登录用户会话
     const session = await auth(); 
     const userId = session?.user?.id;
 
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       userContext = `
 【当前任务】
 用户正在阅读《${context.bookName}》第 ${context.chapter} 章。
-请针对用户选中的经文进行解读。
+请针对用户选中的经文进行深入且严谨的解读。
 
 【🎯 用户选中的经文 (重点解读对象)】
 ${focusText}
@@ -47,7 +47,7 @@ ${backgroundText}
     // 获取配置
     const provider = process.env.AI_PROVIDER || 'openai';
     const modelName = process.env.OLLAMA_MODEL || 'llama3'; 
-    const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1';
+    const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1';
 
     let model;
     if (provider === 'ollama') {
@@ -57,24 +57,20 @@ ${backgroundText}
        const deepseek = createOpenAI({ baseURL: 'https://api.deepseek.com/v1', apiKey: process.env.DEEPSEEK_API_KEY });
        model = deepseek('deepseek-chat');
     } else {
-      const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      model = openai('gpt-4o-mini');
+      const openai = createOpenAI({ baseURL: process.env.OPENAI_BASE_URL, apiKey: process.env.OPENAI_API_KEY });
+      model = openai(process.env.OPENAI_MODEL || 'gpt-4o-mini');
     }
 
-    // 强制思考模式 Prompt
-    const enforceThinkingPrompt = `
+    // [修改] 移除了之前强制生成 <think> 的指令，只保留系统设定，防止模型产生标签幻觉
+    const standardPrompt = `
 ${SYSTEM_PROMPT}
 
-【⚠️ 强制输出格式指令】
-为了保证逻辑严密，在回答任何问题之前，你**必须**先进行深度思考，并严格将所有的思考过程放在 <think> 和 </think> 标签之间！
-格式：
-<think>思考过程...</think>
-最终优美排版的回复...
+请直接输出优美排版的最终回复，无需输出多余的思考过程标签。
 `;
 
     const result = await streamText({
       model: model,
-      system: enforceThinkingPrompt,
+      system: standardPrompt,
       messages: [
         { role: 'system', content: userContext },
         ...messages,

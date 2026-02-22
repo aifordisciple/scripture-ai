@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, ChevronDown, Brain, Loader2 } from 'lucide-react';
+import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
@@ -16,44 +16,28 @@ import { motion, AnimatePresence } from "framer-motion";
 // --- 1. 子组件：高性能消息气泡 ---
 const MessageBubble = memo(({ role, content, isLatest }: { role: string, content: string, isLatest: boolean }) => {
   const [copied, setCopied] = useState(false);
-  const [isThoughtExpanded, setIsThoughtExpanded] = useState(true);
 
-  // --- 解析思维链 (CoT) 逻辑 ---
-  const hasThinkStart = content.includes('<think>');
-  const hasThinkEnd = content.includes('</think>');
-  let thoughtText = '';
+  // --- 核心解析逻辑：彻底隐藏思考过程，仅保留状态提示 ---
   let mainText = content;
   let isThinking = false;
 
-  if (hasThinkStart) {
-    if (hasThinkEnd) {
-        // 思考完成，提取完整思考过程
-        const match = content.match(/<think>([\s\S]*?)<\/think>/);
-        if (match) {
-            thoughtText = match[1].trim();
-            mainText = content.replace(/<think>([\s\S]*?)<\/think>/, '').trim();
-        }
+  const thinkStart = content.indexOf('<think>');
+  if (thinkStart !== -1) {
+    const thinkEnd = content.indexOf('</think>');
+    if (thinkEnd !== -1) {
+      // 思考完成：完全剥离 <think>...</think> 及其内部的所有内容
+      mainText = (content.substring(0, thinkStart) + content.substring(thinkEnd + 8)).trim();
+      isThinking = false;
     } else {
-        // 正在思考中，提取阶段性思考过程
-        isThinking = true;
-        thoughtText = content.substring(content.indexOf('<think>') + 7).trim();
-        mainText = content.substring(0, content.indexOf('<think>')).trim();
+      // 正在思考中：隐藏 <think> 之后流出的所有过程内容
+      mainText = content.substring(0, thinkStart).trim();
+      isThinking = true;
     }
   }
-
-  // 监听思考状态：一旦完成思考，自动折叠面板
-  const prevIsThinking = useRef(isThinking);
-  useEffect(() => {
-      if (prevIsThinking.current === true && isThinking === false) {
-          setIsThoughtExpanded(false);
-      }
-      prevIsThinking.current = isThinking;
-  }, [isThinking]);
 
   // --- 复制逻辑 ---
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation(); 
-    // 只复制最终结果，不复制思考过程
     const copyText = mainText || content;
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -99,7 +83,7 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
       <div className={cn(
         "max-w-[95%] rounded-2xl px-5 py-4 shadow-sm border relative transition-all", 
         role === 'user' 
-          ? "bg-blue-600 text-white border-blue-600 text-sm" 
+          ? "bg-blue-600 text-white border-blue-600 text-[15px]" 
           : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200" 
       )}>
         {/* 角色标识 */}
@@ -125,33 +109,11 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
            </div>
         ) : (
           <>
-            {/* [新增] 思考过程折叠面板 */}
-            {thoughtText && (
-              <div className="mb-4 border border-slate-200 dark:border-slate-700/60 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800/30">
-                <div 
-                  className="flex items-center gap-2 px-3 py-2 bg-slate-100/80 dark:bg-slate-800 cursor-pointer hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors select-none"
-                  onClick={() => setIsThoughtExpanded(!isThoughtExpanded)}
-                >
-                  {isThinking ? (
-                     <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
-                  ) : (
-                     <Brain className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                  )}
-                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex-1">
-                    {isThinking ? "深度思考中..." : "思考过程"}
-                  </span>
-                  {isThoughtExpanded ? (
-                     <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                  ) : (
-                     <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                  )}
-                </div>
-                
-                {isThoughtExpanded && (
-                  <div className="p-3.5 text-[13px] leading-relaxed text-slate-500 dark:text-slate-400 max-h-64 overflow-y-auto whitespace-pre-wrap font-sans bg-slate-50 dark:bg-slate-900/30">
-                    {thoughtText}
-                  </div>
-                )}
+            {/* 正在思考时的动态提示 (只在 isThinking 为 true 时显示) */}
+            {isThinking && (
+              <div className="flex items-center gap-2 text-blue-500 mb-3 text-[13px] font-medium animate-pulse select-none">
+                 <Loader2 className="w-4 h-4 animate-spin" />
+                 <span>AI 正在深度解读中...</span>
               </div>
             )}
 
@@ -221,7 +183,7 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
         )}
 
         {/* 视觉优化：光标 */}
-        {role === 'assistant' && isLatest && (
+        {role === 'assistant' && isLatest && !isThinking && (
              <span className="inline-block w-2.5 h-2.5 ml-1 bg-gradient-to-tr from-blue-400 to-purple-400 rounded-full animate-pulse align-baseline shadow-[0_0_10px_rgba(96,165,250,0.8)]" />
         )}
       </div>

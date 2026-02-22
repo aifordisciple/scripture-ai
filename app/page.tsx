@@ -33,6 +33,10 @@ export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
+  // --- [新增] 滚动隐藏/显示导航栏状态 ---
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  
   const { 
     fontSize, setFontSize, 
     isSidebarOpen, toggleSidebar,
@@ -49,6 +53,25 @@ export default function Home() {
   } = useBibleStore();
 
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
+
+  // --- [新增] 监听滚动事件的核心逻辑 ---
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const currentScrollY = e.currentTarget.scrollTop;
+    const scrollThreshold = 15; // 触发阈值，避免过度敏感的抖动
+
+    if (currentScrollY <= 60) {
+      // 如果接近顶部，总是显示导航栏
+      setIsNavVisible(true);
+    } else if (currentScrollY > lastScrollY.current + scrollThreshold) {
+      // 向下滚动，隐藏导航栏
+      setIsNavVisible(false);
+    } else if (currentScrollY < lastScrollY.current - scrollThreshold) {
+      // 向上滚动，显示导航栏
+      setIsNavVisible(true);
+    }
+
+    lastScrollY.current = currentScrollY;
+  }, []);
 
   // 播放器逻辑
   const autoPlayRef = useRef(false);
@@ -243,9 +266,14 @@ export default function Home() {
         )}
       >
         
-        {/* Header - [升级] 悬浮毛玻璃导航栏 */}
-        <div className="absolute top-0 left-0 right-0 z-10 p-2 md:p-4 pointer-events-none">
-          <header className="h-14 flex items-center justify-between px-3 md:px-4 glass-panel rounded-2xl pointer-events-auto">
+        {/* Header - [修改] 增加过渡动画与滑动隐藏逻辑 */}
+        <div 
+          className={cn(
+            "absolute top-0 left-0 right-0 z-10 p-2 md:p-4 pointer-events-none transition-transform duration-300 ease-in-out",
+            isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
+          )}
+        >
+          <header className="h-14 flex items-center justify-between px-3 md:px-4 glass-panel rounded-2xl pointer-events-auto shadow-sm">
             
             <div className="flex items-center gap-1 shrink-0">
               <Button variant="ghost" size="icon" className="md:hidden text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full" onClick={() => toggleSidebar()}><Menu className="h-5 w-5" /></Button>
@@ -291,9 +319,10 @@ export default function Home() {
           </header>
         </div>
 
-        {/* Main Content Area */}
+        {/* Main Content Area - [修改] 增加 onScroll 监听 */}
         <div 
             id="reader-scroll-container" 
+            onScroll={handleScroll}
             className="flex-1 overflow-y-auto scroll-smooth pt-20 md:pt-24 pb-24 md:pb-10" // 增加顶部 padding 因为 header 是悬浮的
         >
           {activeTab.type === 'read' ? (
@@ -303,8 +332,13 @@ export default function Home() {
           )}
         </div>
 
-        {/* 移动端底部 Tab 栏 */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-20 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        {/* 移动端底部 Tab 栏 - [修改] 增加过渡动画与滑动隐藏逻辑 */}
+        <div 
+          className={cn(
+            "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-20 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out",
+            isNavVisible ? "translate-y-0" : "translate-y-[120%]"
+          )}
+        >
             <TabList />
         </div>
 

@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   try {
     const provider = process.env.AI_PROVIDER || 'openai';
     const modelName = process.env.OLLAMA_MODEL || 'llama3';
-    const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1';
+    const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1';
 
     // Ollama 实例用于生成向量或本地大模型搜索
     const ollama = createOpenAI({ baseURL: ollamaBaseUrl, apiKey: 'ollama' });
