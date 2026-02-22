@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Sparkles, TextSearch } from "lucide-react";
+import { Search, Sparkles, TextSearch, Radar } from "lucide-react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ interface SearchDialogProps {
 
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const [query, setQuery] = useState("");
-  const [mode, setMode] = useState<'exact' | 'ai'>('exact');
+  const [mode, setMode] = useState<'exact' | 'fuzzy' | 'ai'>('exact');
   const { addTab } = useBibleStore();
 
   const handleSearch = () => {
@@ -43,37 +43,53 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         </DialogHeader>
         
         <div className="flex flex-col gap-4 py-2">
-          {/* 模式选择 */}
-          <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+          {/* 模式选择 (已增加模糊匹配选项) */}
+          <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-lg gap-1">
             <button
               onClick={() => setMode('exact')}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-1.5 text-sm font-medium rounded-md transition-all",
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all",
                 mode === 'exact' 
                   ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm" 
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
               )}
             >
-              <TextSearch className="w-4 h-4" />
-              精确匹配
+              <TextSearch className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              精确
+            </button>
+            <button
+              onClick={() => setMode('fuzzy')}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all",
+                mode === 'fuzzy' 
+                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm" 
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
+              )}
+            >
+              <Radar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              模糊
             </button>
             <button
               onClick={() => setMode('ai')}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-1.5 text-sm font-medium rounded-md transition-all",
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all",
                 mode === 'ai' 
                   ? "bg-blue-600 text-white shadow-sm" 
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
               )}
             >
-              <Sparkles className="w-4 h-4" />
-              AI 智能搜
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              AI 推荐
             </button>
           </div>
 
           <div className="flex gap-2">
             <Input
-              placeholder={mode === 'exact' ? "输入词句，如：起初神创造..." : "输入意图，如：关于信心与软弱的经文"}
+              placeholder={
+                mode === 'exact' ? "输入词句，如：起初神创造..." : 
+                mode === 'fuzzy' ? "输入大致意思，如：心里有个洞填不满" :
+                "输入处境/意图，如：关于信心与软弱"
+              }
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -85,10 +101,10 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             </Button>
           </div>
           
-          <div className="text-xs text-slate-400">
-            {mode === 'exact' 
-              ? "提示：查找包含特定关键词的经文。" 
-              : "提示：AI 将理解您的自然语言，找到含义匹配的经文。"}
+          <div className="text-xs text-slate-400 min-h-[16px]">
+            {mode === 'exact' && "提示：查找包含特定关键词的经文。速度最快。"}
+            {mode === 'fuzzy' && "提示：基于向量模型，根据白话文或大致意思进行语义匹配。"}
+            {mode === 'ai' && "提示：AI 将深度理解您的处境并推荐相关经文。"}
           </div>
         </div>
       </DialogContent>

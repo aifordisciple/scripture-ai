@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
 
 interface SearchResultsProps {
   query: string;
-  mode: 'exact' | 'ai';
+  // 增加 'fuzzy' 模式
+  mode: 'exact' | 'ai' | 'fuzzy';
   cachedResults?: any[];
   onUpdateResults?: (results: any[]) => void;
 }
@@ -17,7 +18,6 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
   const [results, setResults] = useState<any[]>(cachedResults || []);
   const [loading, setLoading] = useState(!cachedResults);
   
-  // [修改] 解构 setScrollToVerse
   const { fontSize, lineHeight, addTab, setScrollToVerse } = useBibleStore();
   
   const onUpdateResultsRef = useRef(onUpdateResults);
@@ -47,14 +47,12 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
     search();
   }, [query, mode, cachedResults]);
 
-  // [修改] 增加 verse 参数
   const handleResultClick = (book: string, chapter: number, verse: number) => {
     addTab({
         type: 'read',
         book: book,
         chapter: chapter.toString()
     });
-    // 设置要滚动的节
     setScrollToVerse(verse);
   };
 
@@ -62,7 +60,11 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 gap-3">
         <Loader2 className="w-8 h-8 animate-spin" />
-        <p>{mode === 'ai' ? "AI 正在思考并查找相关经文..." : "正在搜索..."}</p>
+        <p>
+            {mode === 'ai' ? "AI 正在思考并查找相关经文..." : 
+             mode === 'fuzzy' ? "正在进行语义匹配..." : 
+             "正在搜索..."}
+        </p>
       </div>
     );
   }
@@ -74,7 +76,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
           🔍 搜索结果: "{query}"
         </h1>
         <p className="text-slate-500 text-sm mt-1">
-          模式: {mode === 'exact' ? '精确匹配' : 'AI 智能推荐'} • 找到 {results.length} 条结果
+          模式: {mode === 'exact' ? '精确匹配' : mode === 'fuzzy' ? '模糊语义搜索' : 'AI 智能推荐'} • 找到 {results.length} 条结果
         </p>
       </div>
 
@@ -88,7 +90,6 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
             <div 
               key={verse.id} 
               className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer group border border-transparent hover:border-blue-200 dark:hover:border-blue-800"
-              // [修改] 传递 verse.verse
               onClick={() => handleResultClick(verse.bookId, verse.chapter, verse.verse)}
             >
               <div className="flex justify-between items-center mb-2">

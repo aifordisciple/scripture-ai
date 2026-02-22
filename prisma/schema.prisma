@@ -23,8 +23,8 @@ model BibleVerse {
   content   String
   version   String @default("CUV")
 
-  // [修改] 将 1536 改为 768，适配 nomic-embed-text
-  embedding Unsupported("vector(768)")?
+  // [修改] 将 1536 改为 768，适配 bge-m3
+  embedding Unsupported("vector(1024)")?
 
   @@unique([bookId, chapter, verse, version])
   @@map("bible_verses")

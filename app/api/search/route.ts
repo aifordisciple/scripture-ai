@@ -1,73 +1,102 @@
 // app/api/search/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { embed } from 'ai'; // 注意这里改用 embed，专门用于生成向量
+import { generateObject, embed } from 'ai';
+import { z } from 'zod';
 import { createOpenAI } from '@ai-sdk/openai';
 
-// 配置本地 Ollama
-const ollama = createOpenAI({
-  baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1',
-  apiKey: 'ollama', 
-});
+export const maxDuration = 60;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('q');
-  const mode = searchParams.get('mode') || 'exact'; 
+  const mode = searchParams.get('mode') || 'exact'; // 'exact' | 'ai' | 'fuzzy'
 
   if (!query) {
     return NextResponse.json({ error: 'Missing query' }, { status: 400 });
   }
 
   try {
+    const provider = process.env.AI_PROVIDER || 'openai';
+    const modelName = process.env.OLLAMA_MODEL || 'llama3';
+    const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1';
+
+    // Ollama 实例用于生成向量或本地大模型搜索
+    const ollama = createOpenAI({ baseURL: ollamaBaseUrl, apiKey: 'ollama' });
+
+    let llmModel;
+    if (provider === 'ollama') {
+      llmModel = ollama(modelName);
+    } else if (provider === 'deepseek') {
+       const deepseek = createOpenAI({ baseURL: 'https://api.deepseek.com/v1', apiKey: process.env.DEEPSEEK_API_KEY });
+       llmModel = deepseek('deepseek-chat');
+    } else {
+      const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      llmModel = openai('gpt-4o-mini');
+    }
+
     if (mode === 'exact') {
-      // --- 精确搜索 (原逻辑保持不变) ---
+      // -----------------------------------------
+      // 1. 精确搜索 (包含指定词汇)
+      // -----------------------------------------
       const results = await prisma.bibleVerse.findMany({
-        where: {
-          content: { contains: query },
-          version: 'CUV' 
-        },
+        where: { content: { contains: query }, version: 'CUV' },
         take: 50,
         orderBy: { id: 'asc' }
       });
       return NextResponse.json({ data: results });
 
-    } else {
-      // --- AI 向量语义检索 (RAG 核心) ---
-      console.log(`[Search] Vector Searching for: "${query}"`);
-      const startTime = Date.now();
-      
-      // 1. 将用户的查询意图转化为 768 维的向量
+    } else if (mode === 'ai') {
+      // -----------------------------------------
+      // 2. AI 智能推荐 (大模型推理 + 数据库验真)
+      // -----------------------------------------
+      const { object } = await generateObject({
+        model: llmModel,
+        schema: z.object({
+          verses: z.array(z.object({
+            bookName: z.string(),
+            chapter: z.number(),
+            verse: z.number()
+          }))
+        }),
+        prompt: `作为一位精通《圣经》的助手，请根据查询：“${query}”，推荐最贴切的真实经文（15到30节）。必须准确无误地引用真实存在的书卷名、章和节。`
+      });
+
+      if (!object.verses || object.verses.length === 0) return NextResponse.json({ data: [] });
+
+      const orConditions = object.verses.map(v => ({
+          bookName: v.bookName, chapter: v.chapter, verse: v.verse, version: 'CUV'
+      }));
+
+      const results = await prisma.bibleVerse.findMany({ where: { OR: orConditions } });
+
+      const sortedResults = object.verses.map(v => 
+         results.find(r => r.bookName === v.bookName && r.chapter === v.chapter && r.verse === v.verse)
+      ).filter(Boolean);
+
+      return NextResponse.json({ data: sortedResults });
+
+    } else if (mode === 'fuzzy') {
+      // -----------------------------------------
+      // 3. 模糊搜索 (基于 BGE-M3 的高精度中文向量检索)
+      // -----------------------------------------
       const { embedding } = await embed({
-        model: ollama.embedding('nomic-embed-text'),
+        model: ollama.embedding('bge-m3'), // 使用最新的中文向量模型
         value: query,
       });
 
-      // 将数组转换为 pgvector 可识别的字符串格式: "[0.1, 0.2, ...]"
       const vectorString = `[${embedding.join(',')}]`;
 
-      // 2. 向量相似度检索 (Cosine Similarity)
-      // 使用 <=> 运算符计算余弦距离，距离越小代表语义越接近
       const results = await prisma.$queryRaw`
-        SELECT 
-          id, 
-          book_id as "bookId", 
-          book_name as "bookName", 
-          chapter, 
-          verse, 
-          content, 
-          version 
+        SELECT id, book_id as "bookId", book_name as "bookName", chapter, verse, content, version 
         FROM bible_verses 
         WHERE version = 'CUV'
         ORDER BY embedding <=> ${vectorString}::vector 
         LIMIT 20;
       `;
-
-      const endTime = Date.now();
-      console.log(`[Search] 检索完成，找到 ${Array.isArray(results) ? results.length : 0} 条经文，耗时: ${endTime - startTime}ms`);
-
       return NextResponse.json({ data: results });
     }
+    
   } catch (error) {
     console.error("Search API Error:", error);
     return NextResponse.json({ data: [] });

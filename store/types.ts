@@ -9,7 +9,8 @@ export interface Tab {
   book?: string; 
   chapter?: string; 
   query?: string;
-  searchMode?: 'exact' | 'ai';
+  // [修改] 增加 'fuzzy' 模式
+  searchMode?: 'exact' | 'ai' | 'fuzzy'; 
   results?: any[]; 
   scrollTop?: number;
 }

@@ -16,7 +16,7 @@ const ollama = createOpenAI({
 });
 
 async function main() {
-  console.log("🚀 开始使用 nomic-embed-text 生成经文向量...");
+  console.log("🚀 开始使用 bge-m3 生成经文向量...");
 
   // 每次处理 100 节（本地模型处理批量太大可能会爆显存或超时，100是个比较安全的数值）
   const batchSize = 100; 
@@ -45,9 +45,9 @@ async function main() {
     );
 
     try {
-      // 调用本地 Ollama 的 nomic-embed-text 模型
+      // 调用本地 Ollama 的 bge-m3 模型
       const { embeddings } = await embedMany({
-        model: ollama.embedding('nomic-embed-text'),
+        model: ollama.embedding('bge-m3'),
         values: textsToEmbed,
       });
 
