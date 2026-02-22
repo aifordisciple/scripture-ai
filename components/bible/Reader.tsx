@@ -162,7 +162,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         } 
                     }} className="group inline-flex items-center gap-2 px-6 py-3 glass-panel rounded-full hover:bg-white/90 dark:hover:bg-slate-800/90 text-foreground transition-all duration-300 font-medium text-sm shadow-sm hover:shadow-md">
                         <BookOpenCheck className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-                        阅读第 {chapter} 章精意
+                        第 {chapter} 章整章解读
                     </button>
                     </div>
                 </>
