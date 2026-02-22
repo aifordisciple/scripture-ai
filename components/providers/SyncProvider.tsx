@@ -34,8 +34,14 @@ export function SyncProvider() {
     if (!isLoadedRef.current) return; // 防止初始加载覆盖服务器数据
 
     const activeTab = tabs.find(t => t.id === activeTabId);
-    const lastBook = activeTab?.type === 'read' ? activeTab.book : null;
-    const lastChapter = activeTab?.type === 'read' ? parseInt(activeTab.chapter) : null;
+    
+    // [修复] 确保 book 和 chapter 为 undefined 时回退为 null
+    const lastBook = activeTab?.type === 'read' ? (activeTab.book ?? null) : null;
+    
+    // [修复] 确保 chapter 存在且为字符串时才调用 parseInt
+    const lastChapter = (activeTab?.type === 'read' && activeTab.chapter) 
+      ? parseInt(activeTab.chapter) 
+      : null;
 
     const timer = setTimeout(() => {
       fetch("/api/user/settings", {
@@ -53,7 +59,7 @@ export function SyncProvider() {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [session, fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs]); // 依赖项
+  }, [session, fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs]);
 
-  return null; // 不渲染任何 UI
+  return null;
 }

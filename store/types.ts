@@ -9,7 +9,6 @@ export interface Tab {
   book?: string; 
   chapter?: string; 
   query?: string;
-  // [修改] 增加 'fuzzy' 模式
   searchMode?: 'exact' | 'ai' | 'fuzzy'; 
   results?: any[]; 
   scrollTop?: number;
@@ -67,7 +66,8 @@ export interface ReaderSlice {
   toggleEnglish: () => void; 
   tabs: Tab[];
   activeTabId: string;
-  addTab: (params: { type: 'read' | 'search'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' }) => void;
+  // [修复] 在这里增加了 'fuzzy' 模式的支持
+  addTab: (params: { type: 'read' | 'search'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' | 'fuzzy' }) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
   updateActiveTab: (data: Partial<Tab>) => void;

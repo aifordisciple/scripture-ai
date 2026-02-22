@@ -2,20 +2,21 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation"; // [修复 1] 引入路由 Hook
+import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Book, ChevronRight, Search, X, Library } from "lucide-react";
 
 export function Sidebar() {
-  const router = useRouter(); // [修复 2] 初始化路由
+  const router = useRouter();
   const { tabs, activeTabId, updateActiveTab, isSidebarOpen, toggleSidebar } = useBibleStore();
   
   // 获取当前正在阅读的书卷和章节
+  // [修复 TS 报错] 使用 ?? null 将可能的 undefined 强制转换为 null
   const activeTab = tabs.find(t => t.id === activeTabId);
-  const currentBook = activeTab?.type === 'read' ? activeTab.book : null;
-  const currentChapter = activeTab?.type === 'read' ? activeTab.chapter : null;
+  const currentBook = activeTab?.type === 'read' ? (activeTab.book ?? null) : null;
+  const currentChapter = activeTab?.type === 'read' ? (activeTab.chapter ?? null) : null;
 
   const [expandedBook, setExpandedBook] = useState<string | null>(currentBook);
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,13 +40,9 @@ export function Sidebar() {
 
   // 处理章节点击
   const handleChapterClick = (bookId: string, chapter: number) => {
-    // 1. 更新全局状态的 Tab 记录
     updateActiveTab({ book: bookId, chapter: chapter.toString() });
-    
-    // 2. [修复关键] 推送新 URL，触发 Reader 组件重新拉取对应章节数据
     router.push(`/?book=${bookId}&chapter=${chapter}`);
     
-    // 3. 如果是在移动端（抽屉模式），点击后自动优雅关闭侧边栏
     if (isSidebarOpen) {
       toggleSidebar();
     }

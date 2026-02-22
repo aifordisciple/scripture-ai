@@ -1,18 +1,25 @@
 services:
   web:
     container_name: scripture-ai-web
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     restart: always
     ports:
       - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # [新增] 允许容器访问宿主机网络
+    # [方案 B] 强制让 Docker 读取项目根目录下的环境变量文件
+    env_file:
+      - .env.local
     environment:
-      # Docker 内部网络，直接使用服务名 db
+      # 这里的变量会覆盖 .env.local 中的同名变量
+      # 确保容器内部连接数据库使用的是服务名 'db' 而不是 'localhost'
       - DATABASE_URL=postgresql://user:password@db:5432/scripture_db
-      # 设置真实生产环境所需的各种 API Key (请在此处补充)
-      - NEXTAUTH_SECRET=your_super_secret_key_here
-      - NEXTAUTH_URL=http://localhost:3000
+      - AUTH_TRUST_HOST=true
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: pgvector/pgvector:pg16
@@ -23,6 +30,11 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: scripture_db
     ports:
-      - "5432:5432" 
+      - "5432:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d scripture_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

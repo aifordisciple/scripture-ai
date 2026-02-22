@@ -2,7 +2,8 @@
 import type { Config } from "tailwindcss"
 
 const config = {
-  darkMode: ["class"],
+  // [修改] 将 ["class"] 改为字符串 "class"，解决 TypeScript 报错
+  darkMode: "class",
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
