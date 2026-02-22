@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic"; // [新增] 引入动态加载模块
+import dynamic from "next/dynamic";
 
 import { Sidebar } from "@/components/bible/Sidebar";
 import { Reader } from "@/components/bible/Reader";
@@ -19,8 +19,7 @@ import { BIBLE_BOOKS } from "@/lib/constants";
 import { useAudioPlayer } from "@/hooks/use-audio-player"; 
 import { UserMenu } from "@/components/auth/UserMenu";
 
-// --- [关键优化] 动态按需加载重型组件 (Code Splitting) ---
-// 这些组件不会在首屏阻塞渲染，大幅提升页面加载速度
+// 动态按需加载
 const AISidebar = dynamic(() => import("@/components/bible/AISidebar").then(mod => mod.AISidebar), { ssr: false });
 const MagicBall = dynamic(() => import("@/components/bible/MagicBall").then(mod => mod.MagicBall), { ssr: false });
 const SearchDialog = dynamic(() => import("@/components/bible/SearchDialog").then(mod => mod.SearchDialog), { ssr: false });
@@ -51,7 +50,7 @@ export default function Home() {
 
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
 
-  // --- 播放器逻辑 ---
+  // 播放器逻辑
   const autoPlayRef = useRef(false);
   const prevTextRef = useRef(chapterSpeechText);
 
@@ -89,8 +88,8 @@ export default function Home() {
     if (!chapterSpeechText) { player.stop(); }
     prevTextRef.current = chapterSpeechText;
   }, [chapterSpeechText, player]);
-  // ---------------------
 
+  // 暗黑模式注入
   useEffect(() => {
     if (isDarkMode) { document.documentElement.classList.add('dark'); } 
     else { document.documentElement.classList.remove('dark'); }
@@ -109,9 +108,7 @@ export default function Home() {
       if (activeTab.book !== book || activeTab.chapter !== chapter) {
         updateActiveTab({ book, chapter });
         const container = document.getElementById('reader-scroll-container');
-        if (container) {
-            container.scrollTo(0, 0);
-        }
+        if (container) { container.scrollTo(0, 0); }
       }
     }
   }, [searchParams, activeTab, updateActiveTab]);
@@ -136,21 +133,40 @@ export default function Home() {
     else { if (document.exitFullscreen) { document.exitFullscreen(); } }
   };
 
+  // 优化过的 Tab 标签栏 UI
   const TabList = () => (
-    <div className="flex items-center gap-1 overflow-x-auto no-scrollbar w-full">
+    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full px-1">
         {tabs.map(tab => (
-        <div key={tab.id} onClick={() => handleSwitchTab(tab.id)} className={cn("flex items-center gap-1.5 px-3 py-2 md:py-1.5 rounded-lg md:rounded-t-lg text-sm md:text-xs font-medium cursor-pointer transition-all border md:border-b-2 md:border-x-0 md:border-t-0 whitespace-nowrap min-w-[100px] justify-between group shrink-0", activeTabId === tab.id ? "bg-blue-50 dark:bg-slate-800 border-blue-500 md:border-b-blue-500 text-blue-700 dark:text-blue-400" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 md:border-transparent text-slate-500 dark:text-slate-400")}>
-            <span className="max-w-[120px] truncate">{tab.type === 'read' ? `${tab.book} ${tab.chapter}` : `${tab.searchMode === 'ai' ? '✨' : '🔍'} ${tab.query}`}</span>
-            <X className={cn("w-3 h-3 hover:bg-red-100 hover:text-red-500 rounded-full transition-colors flex-shrink-0", activeTabId === tab.id ? "opacity-50 hover:opacity-100" : "opacity-0 group-hover:opacity-50")} onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }} />
+        <div 
+          key={tab.id} 
+          onClick={() => handleSwitchTab(tab.id)} 
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full md:rounded-lg text-sm md:text-xs font-medium cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group shrink-0", 
+            activeTabId === tab.id 
+              ? "bg-white dark:bg-slate-800 border-primary/20 text-primary shadow-sm" 
+              : "bg-transparent border-transparent text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5"
+          )}
+        >
+            <span className="max-w-[120px] truncate">
+              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}`}
+            </span>
+            <X 
+              className={cn(
+                "w-3.5 h-3.5 hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors flex-shrink-0 p-0.5", 
+                activeTabId === tab.id ? "opacity-60 hover:opacity-100" : "opacity-0 group-hover:opacity-60"
+              )} 
+              onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }} 
+            />
         </div>
         ))}
-        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500" onClick={handleAddTab}><Plus className="w-4 h-4" /></Button>
+        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5" onClick={handleAddTab}>
+          <Plus className="w-4 h-4" />
+        </Button>
     </div>
   );
 
   return (
-    <main className="flex h-screen w-full overflow-hidden bg-white dark:bg-slate-950 relative transition-colors duration-300">
-      {/* 懒加载的弹窗组件 */}
+    <main className="flex h-screen w-full overflow-hidden bg-background relative transition-colors duration-500">
       <AuthDialog />
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <NoteEditor />
@@ -159,14 +175,14 @@ export default function Home() {
 
       {/* Desktop Sidebar */}
       {isDesktopSidebarOpen && (
-        <aside className="hidden md:block w-72 h-full border-r dark:border-slate-800 shrink-0 transition-all duration-300">
+        <aside className="hidden md:block w-72 h-full border-r bg-card/50 backdrop-blur-md shrink-0 transition-all duration-300 z-20">
           <Sidebar />
         </aside>
       )}
 
       {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={toggleSidebar}>
-        <SheetContent side="left" className="p-0 w-80 dark:bg-slate-900 dark:border-slate-800">
+        <SheetContent side="left" className="p-0 w-80 bg-card border-r-0">
           <SheetTitle className="sr-only">圣经目录</SheetTitle>
           <Sidebar />
         </SheetContent>
@@ -174,35 +190,43 @@ export default function Home() {
 
       {/* Mobile Settings Sheet */}
       <Sheet open={isMobileSettingsOpen} onOpenChange={setMobileSettingsOpen}>
-        <SheetContent side="bottom" className="dark:bg-slate-900 dark:border-slate-800 pb-10">
+        <SheetContent side="bottom" className="bg-card border-t-0 pb-10 rounded-t-2xl">
           <SheetHeader className="mb-4">
-            <SheetTitle className="text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <Settings className="w-5 h-5" /> 阅读设置
+            <SheetTitle className="text-foreground flex items-center gap-2">
+              <Settings className="w-5 h-5 text-primary" /> 阅读设置
             </SheetTitle>
           </SheetHeader>
           <div className="space-y-6">
             {activeTab.type === 'read' && (
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
-                 <div className="flex items-center gap-2 mb-2 text-sm font-bold text-slate-700 dark:text-slate-300">
-                    <Headphones className="w-4 h-4" /> 语音朗读
+              <div className="bg-secondary/50 p-4 rounded-xl border border-border/50">
+                 <div className="flex items-center gap-2 mb-2 text-sm font-bold text-foreground">
+                    <Headphones className="w-4 h-4 text-primary" /> 语音朗读
                  </div>
-                 <HeaderPlayer player={player} text={chapterSpeechText || ""} mode="full" className="bg-white dark:bg-slate-900 border-none shadow-sm w-full" />
+                 <HeaderPlayer player={player} text={chapterSpeechText || ""} mode="full" className="bg-background border border-border shadow-sm w-full rounded-lg" />
               </div>
             )}
             <div className="space-y-2">
-              <div className="flex justify-between text-sm text-slate-500"><span>字号</span><span>{fontSize}px</span></div>
-              <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} />
+              <div className="flex justify-between text-sm text-muted-foreground font-medium"><span>字号大小</span><span>{fontSize}px</span></div>
+              <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} className="py-2" />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-500">行间距</span>
-              <Button variant="outline" size="sm" onClick={toggleLineHeight} className="min-w-[80px]">
-                {lineHeight === 1.6 && "紧凑"}{lineHeight === 1.8 && "标准"}{lineHeight > 1.8 && "宽松"}
-              </Button>
+              <span className="text-sm text-muted-foreground font-medium">行间距</span>
+              <div className="flex bg-secondary/50 p-1 rounded-lg">
+                {[1.6, 1.8, 2.2].map(lh => (
+                  <button 
+                    key={lh} 
+                    onClick={() => setLineHeight(lh)}
+                    className={cn("px-3 py-1 text-xs rounded-md transition-all", lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                  >
+                    {lh === 1.6 ? "紧凑" : lh === 1.8 ? "标准" : "宽松"}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-500">中英对照</span>
-              <Button variant={showEnglish ? "default" : "outline"} size="sm" onClick={toggleEnglish} className="min-w-[80px]">
-                {showEnglish ? "开启" : "关闭"}
+              <span className="text-sm text-muted-foreground font-medium">中英对照</span>
+              <Button variant={showEnglish ? "default" : "secondary"} size="sm" onClick={toggleEnglish} className="rounded-full px-4">
+                {showEnglish ? "已开启" : "已关闭"}
               </Button>
             </div>
           </div>
@@ -214,57 +238,63 @@ export default function Home() {
       <div 
         style={{ '--ai-offset': isAiOpen ? `${sidebarWidth}px` : '0px' } as any}
         className={cn(
-          "flex-1 flex flex-col h-full relative min-w-0 transition-[margin] duration-300 ease-in-out",
+          "flex-1 flex flex-col h-full relative min-w-0 transition-[margin] duration-500 cubic-bezier(0.32, 0.72, 0, 1)",
           "md:mr-[var(--ai-offset)]"
         )}
       >
         
-        {/* Header */}
-        <header className="h-14 border-b flex items-center justify-between px-4 bg-white dark:bg-slate-950 dark:border-slate-800 z-10 sticky top-0 shrink-0 gap-2 transition-colors duration-300">
-          
-          <div className="flex items-center gap-2 shrink-0">
-            <Button variant="ghost" size="icon" className="md:hidden dark:text-slate-200" onClick={() => toggleSidebar()}><Menu className="h-5 w-5" /></Button>
-            <Button variant="ghost" size="icon" className={cn("hidden md:flex dark:text-slate-200", !isDesktopSidebarOpen && "text-slate-400")} onClick={toggleDesktopSidebar}><PanelLeft className="h-5 w-5" /></Button>
-            <Button variant="outline" size="sm" className="gap-2 text-slate-500 dark:text-slate-400 dark:bg-slate-900 dark:border-slate-700 hidden md:flex" onClick={() => setIsSearchOpen(true)}><Search className="w-4 h-4" /><span className="text-xs">搜索...</span></Button>
-            <Button variant="ghost" size="icon" className="md:hidden dark:text-slate-200" onClick={() => setIsSearchOpen(true)}><Search className="h-5 w-5" /></Button>
-          </div>
-          
-          <div className="hidden md:flex flex-1 items-center overflow-x-auto no-scrollbar gap-1 px-2 mask-linear-fade">
-             <TabList />
-          </div>
-
-          <div className="md:hidden flex-1 text-center font-serif font-bold text-lg text-slate-800 dark:text-slate-200 truncate px-2">
-             {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : "搜索"}
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="hidden sm:flex text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800" title="全屏"><Maximize className="h-4 w-4" /></Button>
-
-            {activeTab.type === 'read' && (
-               <>
-                 <HeaderPlayer player={player} text={chapterSpeechText || ""} className="hidden sm:flex" mode="full" />
-                 <HeaderPlayer player={player} text={chapterSpeechText || ""} className="sm:hidden border-none bg-transparent p-0" mode="minimal" />
-               </>
-            )}
-
-            <UserMenu />
-
-            <div className="hidden sm:flex items-center gap-1">
-                <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="text-slate-500 dark:text-slate-400" title="行高"><AlignJustify className="h-4 w-4" /></Button>
-                <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold dark:text-slate-300"><Languages className="h-4 w-4" />{showEnglish ? "中/英" : "中"}</Button>
-                <div className="w-24 mx-2"><Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} /></div>
+        {/* Header - [升级] 悬浮毛玻璃导航栏 */}
+        <div className="absolute top-0 left-0 right-0 z-10 p-2 md:p-4 pointer-events-none">
+          <header className="h-14 flex items-center justify-between px-3 md:px-4 glass-panel rounded-2xl pointer-events-auto">
+            
+            <div className="flex items-center gap-1 shrink-0">
+              <Button variant="ghost" size="icon" className="md:hidden text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full" onClick={() => toggleSidebar()}><Menu className="h-5 w-5" /></Button>
+              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full hover:bg-black/5 dark:hover:bg-white/5", !isDesktopSidebarOpen ? "text-muted-foreground" : "text-primary")} onClick={toggleDesktopSidebar}><PanelLeft className="h-5 w-5" /></Button>
+              <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-secondary/60 hover:bg-secondary border-none ml-2" onClick={() => setIsSearchOpen(true)}><Search className="w-4 h-4 text-muted-foreground" /><span className="text-xs text-muted-foreground">搜索经文、问题...</span></Button>
+              <Button variant="ghost" size="icon" className="md:hidden text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full" onClick={() => setIsSearchOpen(true)}><Search className="h-5 w-5" /></Button>
             </div>
             
-            <Button variant="ghost" size="icon" className="sm:hidden hidden" onClick={() => setMobileSettingsOpen(true)}>
-              <Settings className="h-5 w-5 text-slate-500" />
-            </Button>
-          </div>
-        </header>
+            <div className="hidden md:flex flex-1 items-center overflow-hidden mx-4 mask-linear-fade pl-2">
+               <TabList />
+            </div>
 
-        {/* Main Content */}
+            <div className="md:hidden flex-1 text-center font-serif font-bold text-lg text-foreground truncate px-2 tracking-wide">
+               {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : "搜索结果"}
+            </div>
+
+            <div className="flex items-center gap-1 shrink-0">
+              <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="hidden sm:flex text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="全屏"><Maximize className="h-4 w-4" /></Button>
+
+              {activeTab.type === 'read' && (
+                 <>
+                   <HeaderPlayer player={player} text={chapterSpeechText || ""} className="hidden sm:flex bg-transparent border-none" mode="full" />
+                   <HeaderPlayer player={player} text={chapterSpeechText || ""} className="sm:hidden border-none bg-transparent p-0" mode="minimal" />
+                 </>
+              )}
+
+              <div className="mx-1 border-l h-5 border-border/50 hidden sm:block"></div>
+
+              <UserMenu />
+
+              <div className="hidden sm:flex items-center gap-1 pl-1">
+                  <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="调整行高"><AlignJustify className="h-4 w-4" /></Button>
+                  <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold rounded-full"><Languages className="h-4 w-4" />{showEnglish ? "中/英" : "中"}</Button>
+                  <div className="w-20 mx-2 group relative">
+                    <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} className="cursor-pointer" />
+                  </div>
+              </div>
+              
+              <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5" onClick={() => setMobileSettingsOpen(true)}>
+                <Settings className="h-5 w-5" />
+              </Button>
+            </div>
+          </header>
+        </div>
+
+        {/* Main Content Area */}
         <div 
             id="reader-scroll-container" 
-            className="flex-1 overflow-y-auto scroll-smooth bg-white dark:bg-slate-950 transition-colors duration-300 pb-20 md:pb-0"
+            className="flex-1 overflow-y-auto scroll-smooth pt-20 md:pt-24 pb-24 md:pb-10" // 增加顶部 padding 因为 header 是悬浮的
         >
           {activeTab.type === 'read' ? (
               <Reader key={activeTab.id} initialBook={activeTab.book || 'Gen'} initialChapter={activeTab.chapter || '1'} />
@@ -273,7 +303,8 @@ export default function Home() {
           )}
         </div>
 
-        <div className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white dark:bg-slate-950 border-t dark:border-slate-800 flex items-center px-4 z-20 pb-safe">
+        {/* 移动端底部 Tab 栏 */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-20 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
             <TabList />
         </div>
 

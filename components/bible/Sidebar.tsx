@@ -1,95 +1,185 @@
 // components/bible/Sidebar.tsx
 "use client";
 
-import { BIBLE_BOOKS } from "@/lib/constants";
-// import { ScrollArea } from "@/components/ui/scroll-area"; 
-import { cn } from "@/lib/utils";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation"; // [修复 1] 引入路由 Hook
 import { useBibleStore } from "@/store/useBibleStore";
-import { AudioButton } from "./AudioButton";
+import { BIBLE_BOOKS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import { Book, ChevronRight, Search, X, Library } from "lucide-react";
 
-export function Sidebar({ className }: { className?: string }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { toggleSidebar } = useBibleStore(); 
+export function Sidebar() {
+  const router = useRouter(); // [修复 2] 初始化路由
+  const { tabs, activeTabId, updateActiveTab, isSidebarOpen, toggleSidebar } = useBibleStore();
+  
+  // 获取当前正在阅读的书卷和章节
+  const activeTab = tabs.find(t => t.id === activeTabId);
+  const currentBook = activeTab?.type === 'read' ? activeTab.book : null;
+  const currentChapter = activeTab?.type === 'read' ? activeTab.chapter : null;
 
-  // 获取当前 URL 上的参数
-  const currentBookId = searchParams.get("book") || "Gen";
-  const currentChapter = Number(searchParams.get("chapter")) || 1;
+  const [expandedBook, setExpandedBook] = useState<string | null>(currentBook);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  // 用于滚动定位的 ref
+  const activeBookRef = useRef<HTMLDivElement>(null);
 
-  // 本地状态：控制哪个书卷是展开的
-  const [expandedBook, setExpandedBook] = useState<string | null>(currentBookId);
+  // 圣经分为旧约 (前39卷) 和新约 (后27卷)
+  const oldTestament = useMemo(() => BIBLE_BOOKS.slice(0, 39), []);
+  const newTestament = useMemo(() => BIBLE_BOOKS.slice(39), []);
 
-  // 当 URL 变化时（比如点击了下一章），自动展开对应的书卷
+  // 自动展开当前阅读的书卷，并尝试滚动到可视区域
   useEffect(() => {
-    setExpandedBook(currentBookId);
-  }, [currentBookId]);
+    if (currentBook && !expandedBook) {
+      setExpandedBook(currentBook);
+      setTimeout(() => {
+        activeBookRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [currentBook, expandedBook]);
 
   // 处理章节点击
   const handleChapterClick = (bookId: string, chapter: number) => {
+    // 1. 更新全局状态的 Tab 记录
+    updateActiveTab({ book: bookId, chapter: chapter.toString() });
+    
+    // 2. [修复关键] 推送新 URL，触发 Reader 组件重新拉取对应章节数据
     router.push(`/?book=${bookId}&chapter=${chapter}`);
-    // 移动端：关闭侧边栏
-    if (window.innerWidth < 768) {
-        toggleSidebar();
+    
+    // 3. 如果是在移动端（抽屉模式），点击后自动优雅关闭侧边栏
+    if (isSidebarOpen) {
+      toggleSidebar();
     }
   };
 
-  return (
-    <div className={cn(
-        "h-full flex flex-col border-r transition-colors duration-300", 
-        "bg-slate-50 dark:bg-slate-950 dark:border-slate-800", // 暗黑模式背景和边框
-        className
-    )}>
-      {/* 顶部标题：增加 flex-shrink-0 防止被压缩 */}
-      <div className={cn(
-          "p-4 font-bold text-xl border-b flex-shrink-0 transition-colors",
-          "bg-white dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100" // 标题暗黑模式
-      )}>
-        📖 圣经目录
-      </div>
-      
-      <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="p-4 space-y-2">
-          {BIBLE_BOOKS.map((book) => (
-            <div key={book.id} className="space-y-1">
-              {/* 书卷标题 */}
-              <button
-                onClick={() => setExpandedBook(expandedBook === book.id ? null : book.id)}
-                className={cn(
-                  "w-full text-left px-3 py-2 rounded-md font-medium transition-colors",
-                  "hover:bg-slate-200 dark:hover:bg-slate-800", // Hover 态
-                  currentBookId === book.id 
-                    ? "text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30" // 选中态：暗黑模式下用半透明蓝
-                    : "text-slate-700 dark:text-slate-300" // 默认态
-                )}
-              >
-                {book.name}
-              </button>
+  // 渲染书卷列表的通用函数
+  const renderBookList = (books: typeof BIBLE_BOOKS, title: string) => {
+     // 搜索过滤逻辑
+     const filtered = books.filter(b => 
+       b.name.includes(searchQuery) || b.id.toLowerCase().includes(searchQuery.toLowerCase())
+     );
+     
+     if (filtered.length === 0) return null;
 
-              {/* 章节网格 (仅当书卷展开时显示) */}
-              {expandedBook === book.id && (
-                <div className="grid grid-cols-5 gap-2 pl-2 pr-2 pb-2">
-                  {Array.from({ length: book.chapters }, (_, i) => i + 1).map((chapter) => (
-                    <button
-                      key={chapter}
-                      onClick={() => handleChapterClick(book.id, chapter)}
+     return (
+       <div className="mb-8">
+         <div className="flex items-center gap-2 px-6 mb-3 opacity-60">
+           <div className="h-[1px] flex-1 bg-border"></div>
+           <h3 className="text-[11px] font-bold text-foreground uppercase tracking-widest">{title}</h3>
+           <div className="h-[1px] flex-1 bg-border"></div>
+         </div>
+         
+         <div className="space-y-1.5 px-3">
+            {filtered.map(book => {
+              const isExpanded = expandedBook === book.id;
+              const isActiveBook = currentBook === book.id;
+
+              return (
+                <div 
+                  key={book.id} 
+                  className="flex flex-col"
+                  ref={isActiveBook ? activeBookRef : null}
+                >
+                  <button
+                    onClick={() => setExpandedBook(isExpanded ? null : book.id)}
+                    className={cn(
+                      "flex items-center justify-between w-full px-4 py-3 rounded-2xl transition-all duration-300 text-[15px]",
+                      isActiveBook 
+                        ? "bg-primary/10 dark:bg-primary/20 text-primary font-bold shadow-sm" 
+                        : "text-foreground/80 hover:bg-secondary hover:text-foreground"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Book className={cn("w-4 h-4", isActiveBook ? "text-primary" : "text-muted-foreground")} />
+                      <span className="tracking-wide">{book.name}</span>
+                    </div>
+                    <ChevronRight 
                       className={cn(
-                        "text-sm py-1 rounded border transition-colors",
-                        "hover:bg-slate-200 dark:hover:bg-slate-800", // Hover 态
-                        (currentBookId === book.id && currentChapter === chapter)
-                          ? "bg-blue-600 text-white border-blue-600 dark:bg-blue-600 dark:border-blue-600" // 选中章节
-                          : "bg-white text-slate-600 border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400" // 默认章节
-                      )}
-                    >
-                      {chapter}
-                    </button>
-                  ))}
+                        "w-4 h-4 transition-transform duration-300", 
+                        isExpanded ? "rotate-90 text-primary" : "text-muted-foreground/50",
+                        isActiveBook && !isExpanded && "text-primary/60"
+                      )} 
+                    />
+                  </button>
+                  
+                  {/* 章节网格平滑展开 */}
+                  <div 
+                    className={cn(
+                      "overflow-hidden transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)", 
+                      isExpanded ? "max-h-[800px] opacity-100 mt-2 mb-2" : "max-h-0 opacity-0 m-0"
+                    )}
+                  >
+                    <div className="grid grid-cols-5 gap-2 p-3 bg-secondary/40 dark:bg-black/20 rounded-2xl mx-1 border border-border/50">
+                      {Array.from({ length: book.chapters }, (_, i) => i + 1).map(chapter => {
+                         const isActiveChapter = isActiveBook && currentChapter === chapter.toString();
+                         return (
+                           <button
+                             key={chapter}
+                             onClick={() => handleChapterClick(book.id, chapter)}
+                             className={cn(
+                               "aspect-square flex items-center justify-center rounded-xl text-[13px] transition-all duration-300",
+                               isActiveChapter 
+                                 ? "bg-primary text-primary-foreground shadow-[0_4px_12px_rgba(59,130,246,0.3)] font-bold scale-105" 
+                                 : "bg-background/80 text-foreground/80 hover:bg-white dark:hover:bg-slate-800 hover:text-foreground hover:scale-110 hover:shadow-sm border border-border/60"
+                             )}
+                           >
+                             {chapter}
+                           </button>
+                         )
+                      })}
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
+              )
+            })}
+         </div>
+       </div>
+     );
+  }
+
+  return (
+    <div className="flex flex-col h-full bg-transparent">
+      
+      {/* 顶部标题与搜索栏 (毛玻璃悬浮效果) */}
+      <div className="pt-6 pb-4 px-4 shrink-0 glass-panel rounded-none border-x-0 border-t-0 z-10 sticky top-0">
+        <div className="flex items-center gap-2.5 mb-5 px-2">
+           <div className="p-1.5 bg-primary/10 rounded-lg">
+             <Library className="w-5 h-5 text-primary" />
+           </div>
+           <h2 className="text-xl font-serif font-bold text-foreground tracking-widest select-none">圣经目录</h2>
         </div>
+        
+        <div className="relative group">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+          <input 
+            type="text" 
+            placeholder="搜索卷名拼音或汉字..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-secondary/60 text-foreground text-sm rounded-2xl pl-10 pr-10 py-2.5 border border-border/50 focus:outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/60"
+          />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery("")} 
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground bg-secondary hover:bg-border rounded-full p-0.5 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 书卷列表滚动区 */}
+      <div className="flex-1 overflow-y-auto no-scrollbar pt-6 pb-28">
+         {renderBookList(oldTestament, "旧约全书")}
+         {renderBookList(newTestament, "新约全书")}
+         
+         {/* 底部留白插画或签名空间 */}
+         {searchQuery === "" && (
+            <div className="flex flex-col items-center justify-center opacity-30 mt-10 mb-8 pointer-events-none select-none">
+                <Library className="w-8 h-8 mb-2" />
+                <span className="text-[10px] font-serif tracking-[0.2em] uppercase">Scripture AI</span>
+            </div>
+         )}
       </div>
     </div>
   );
