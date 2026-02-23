@@ -34,12 +34,13 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
   tabs: [{ id: 'tab-1', type: 'read', book: 'Gen', chapter: '1' }],
   activeTabId: 'tab-1',
   addTab: ({ type, book = 'Gen', chapter = '1', query, searchMode }) => set((state) => {
-    const newId = `tab-${Date.now()}`;
-    const newTab: Tab = { id: newId, type };
-    if (type === 'read') { newTab.book = book; newTab.chapter = chapter; } 
-    else { newTab.query = query; newTab.searchMode = searchMode; }
-    return { tabs: [...state.tabs, newTab], activeTabId: newId };
-  }),
+      const newId = `tab-${Date.now()}`;
+      const newTab: Tab = { id: newId, type };
+      if (type === 'read') { newTab.book = book; newTab.chapter = chapter; } 
+      else if (type === 'search') { newTab.query = query; newTab.searchMode = searchMode; }
+      // dashboard 不需要额外参数
+      return { tabs: [...state.tabs, newTab], activeTabId: newId };
+    }),
   closeTab: (id) => set((state) => {
     if (state.tabs.length <= 1) return state; 
     const newTabs = state.tabs.filter(t => t.id !== id);

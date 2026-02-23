@@ -70,6 +70,91 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     }
   }, [book, chapter, loading, verses]);
 
+// [新增] 注册阅读器专属快捷键 (左右翻页、高亮、AI解读、取消选中)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 安全检查：防止在做笔记时触发
+      if (
+        e.target instanceof HTMLInputElement || 
+        e.target instanceof HTMLTextAreaElement || 
+        (e.target as HTMLElement).isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.ctrlKey || e.metaKey || e.altKey) return; 
+
+      const state = useBibleStore.getState();
+      const hasSelection = state.selectedVerses.length > 0;
+
+      switch (e.key) {
+        // --- 翻页快捷键 ---
+        case 'ArrowLeft':
+        case '[':
+          e.preventDefault();
+          handlePrevChapter();
+          break;
+        case 'ArrowRight':
+        case ']':
+          e.preventDefault();
+          handleNextChapter();
+          break;
+
+        // --- 选中状态下的快捷键 ---
+        case 'Escape':
+        case 'c':
+        case 'C':
+          if (hasSelection) {
+            e.preventDefault();
+            clearSelection();
+            setIsMenuVisible(false);
+          }
+          break;
+
+        case 'h':
+        case 'H':
+          if (hasSelection) {
+            e.preventDefault();
+            // 一键黄底高亮或取消高亮
+            state.selectedVerses.forEach(verseNum => {
+               const isHighlighted = state.highlights.some(h => h.bookId === book && h.chapter === parseInt(chapter) && h.verse === verseNum);
+               if (isHighlighted) {
+                   state.removeHighlightLocally(book, parseInt(chapter), verseNum);
+               } else {
+                   state.addHighlightLocally({ bookId: book, chapter: parseInt(chapter), verse: verseNum, color: 'yellow' });
+               }
+            });
+            clearSelection();
+            setIsMenuVisible(false);
+          }
+          break;
+
+        case 'a':
+        case 'A':
+          if (hasSelection) {
+            e.preventDefault();
+            // 一键唤起 AI 解读
+            const cuvVerses = verses.filter(v => v.version === 'CUV' && state.selectedVerses.includes(v.verse));
+            if (cuvVerses.length > 0) {
+               const content = cuvVerses.map(v => `[${v.verse}] ${v.content}`).join('\n');
+               const context = verses.filter(v => v.version === 'CUV').map(v => `[${v.verse}] ${v.content}`).join('\n');
+               const ref = { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: cuvVerses[0].verse };
+               
+               state.triggerAI("请深入解读以下经文。", content, context, ref);
+               state.setAiOpen(true);
+               clearSelection();
+               setIsMenuVisible(false);
+            }
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [book, chapter, verses, handlePrevChapter, handleNextChapter, clearSelection, setIsMenuVisible]);
+
+
   const { verseMap, renderList } = useMemo(() => {
     const map = new Map<number, { CUV?: Verse, KJV?: Verse }>();
     verses.forEach(v => {

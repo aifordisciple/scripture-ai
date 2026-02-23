@@ -5,7 +5,7 @@
 // --------------------------------------------------
 export interface Tab {
   id: string;
-  type: 'read' | 'search';
+  type: 'read' | 'search' | 'dashboard'; // [修改] 增加 'dashboard' 类型
   book?: string; 
   chapter?: string; 
   query?: string;
@@ -74,7 +74,7 @@ export interface ReaderSlice {
   toggleEnglish: () => void; 
   tabs: Tab[];
   activeTabId: string;
-  addTab: (params: { type: 'read' | 'search'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' | 'fuzzy' }) => void;
+  addTab: (params: { type: 'read' | 'search' | 'dashboard'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' | 'fuzzy' }) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
   updateActiveTab: (data: Partial<Tab>) => void;

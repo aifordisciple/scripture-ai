@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2 } from 'lucide-react';
+import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
@@ -14,10 +14,9 @@ import { useChat } from 'ai/react';
 import { motion, AnimatePresence } from "framer-motion";
 
 // --- 1. 子组件：高性能消息气泡 ---
-const MessageBubble = memo(({ role, content, isLatest }: { role: string, content: string, isLatest: boolean }) => {
+const MessageBubble = memo(({ role, content, isLatest, onRetry }: { role: string, content: string, isLatest: boolean, onRetry?: () => void }) => {
   const [copied, setCopied] = useState(false);
 
-  // --- 核心解析逻辑：彻底隐藏思考过程，仅保留状态提示 ---
   let mainText = content;
   let isThinking = false;
 
@@ -25,17 +24,14 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
   if (thinkStart !== -1) {
     const thinkEnd = content.indexOf('</think>');
     if (thinkEnd !== -1) {
-      // 思考完成：完全剥离 <think>...</think> 及其内部的所有内容
       mainText = (content.substring(0, thinkStart) + content.substring(thinkEnd + 8)).trim();
       isThinking = false;
     } else {
-      // 正在思考中：隐藏 <think> 之后流出的所有过程内容
       mainText = content.substring(0, thinkStart).trim();
       isThinking = true;
     }
   }
 
-  // --- 复制逻辑 ---
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation(); 
     const copyText = mainText || content;
@@ -59,14 +55,11 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
       textArea.style.position = "fixed";
       textArea.style.left = "-9999px";
       textArea.style.top = "0";
-      
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      
       const successful = document.execCommand('copy');
       document.body.removeChild(textArea);
-      
       if (successful) showSuccess();
     } catch (err) {
       console.error("Fallback copy failed", err);
@@ -86,7 +79,6 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
           ? "bg-blue-600 text-white border-blue-600 text-[15px]" 
           : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200" 
       )}>
-        {/* 角色标识 */}
         <div className={cn(
             "absolute -top-5 flex items-center gap-1 text-[10px] font-bold opacity-60 select-none",
             role === 'user' ? "right-0 flex-row-reverse text-blue-500" : "left-0 text-slate-400"
@@ -109,7 +101,6 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
            </div>
         ) : (
           <>
-            {/* 正在思考时的动态提示 (只在 isThinking 为 true 时显示) */}
             {isThinking && (
               <div className="flex items-center gap-2 text-blue-500 mb-3 text-[13px] font-medium animate-pulse select-none">
                  <Loader2 className="w-4 h-4 animate-spin" />
@@ -117,7 +108,6 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
               </div>
             )}
 
-            {/* 最终结果渲染区 */}
             {mainText && (
               <div className="prose prose-slate dark:prose-invert max-w-none break-words">
                 {typeof ReactMarkdown !== 'undefined' ? (
@@ -157,22 +147,36 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
               </div>
             )}
             
-            {/* 底部工具栏：复制 + 朗读 */}
+            {/* 底部工具栏：复制 + 重试 + 朗读 */}
             {(mainText || !isThinking) && (
               <div className="mt-4 pt-2 border-t border-slate-50 dark:border-slate-700/50 flex justify-between items-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 select-none">
-                  <button 
-                      onClick={handleCopy}
-                      className={cn(
-                          "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
-                          copied 
-                              ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" 
-                              : "text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  <div className="flex items-center gap-1">
+                      <button 
+                          onClick={handleCopy}
+                          className={cn(
+                              "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
+                              copied 
+                                  ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" 
+                                  : "text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                          )}
+                          title="复制内容"
+                      >
+                          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          {copied ? "已复制" : "复制"}
+                      </button>
+
+                      {/* [新增] 重试按钮 */}
+                      {onRetry && (
+                        <button 
+                            onClick={onRetry}
+                            className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            title="重新生成"
+                        >
+                            <RefreshCw className="w-3 h-3" />
+                            重试
+                        </button>
                       )}
-                      title="复制内容"
-                  >
-                      {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                      {copied ? "已复制" : "复制"}
-                  </button>
+                  </div>
                   
                   <div onClick={(e) => e.stopPropagation()}>
                       <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 h-7 px-2 text-[11px]" label="朗读" />
@@ -182,7 +186,6 @@ const MessageBubble = memo(({ role, content, isLatest }: { role: string, content
           </>
         )}
 
-        {/* 视觉优化：光标 */}
         {role === 'assistant' && isLatest && !isThinking && (
              <span className="inline-block w-2.5 h-2.5 ml-1 bg-gradient-to-tr from-blue-400 to-purple-400 rounded-full animate-pulse align-baseline shadow-[0_0_10px_rgba(96,165,250,0.8)]" />
         )}
@@ -209,7 +212,8 @@ export function AISidebar() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
 
-  const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages } = useChat({
+  // [修改] 解构出 error 和 reload
+  const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload } = useChat({
     api: '/api/chat',
     body: {
         context: aiRequestTrigger ? {
@@ -227,28 +231,64 @@ export function AISidebar() {
     onFinish: () => setAiGenerating(false)
   });
 
-// [新增] 组件加载时获取历史记录
+  // [新增] 屏幕防睡眠机制 (Wake Lock API)
+  useEffect(() => {
+    let wakeLock: any = null;
+
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator && isLoading) {
+          wakeLock = await (navigator as any).wakeLock.request('screen');
+        }
+      } catch (err) {
+        console.log("Wake Lock API not supported or denied by browser.");
+      }
+    };
+
+    const releaseWakeLock = async () => {
+      if (wakeLock) {
+        try { await wakeLock.release(); } catch (e) {}
+        wakeLock = null;
+      }
+    };
+
+    if (isLoading) {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+
+    // 页面可见性改变时自动恢复
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isLoading) {
+        requestWakeLock();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      releaseWakeLock();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isLoading]);
+
   useEffect(() => {
     fetch('/api/chat/history')
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {
-          // 将数据库记录转换为 AI SDK 需要的格式
           setMessages(data.map((m: any) => ({ id: m.id, role: m.role, content: m.content })));
         }
       })
       .catch(err => console.error("Failed to load chat history", err));
   }, [setMessages]);
 
-
-  // 修改原来的清空按钮事件
   const handleClearChat = async () => {
     if(confirm("确定要清空所有灵修对话历史吗？")) {
         setMessages([]);
         await fetch('/api/chat/history', { method: 'DELETE' });
     }
   };
-
 
   useEffect(() => {
     setAiGenerating(isLoading);
@@ -259,7 +299,7 @@ export function AISidebar() {
         const div = scrollRef.current;
         div.scrollTop = div.scrollHeight;
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, error]); // 加入 error 依赖
 
   const handleScroll = () => {
     if (scrollRef.current) {
@@ -405,14 +445,33 @@ export function AISidebar() {
             </div>
           ) : (
             <div className="flex flex-col pb-4">
-                {messages.map((m, index) => (
-                    <MessageBubble 
-                        key={m.id || index}
-                        role={m.role}
-                        content={m.content}
-                        isLatest={index === messages.length - 1 && isLoading}
-                    />
-                ))}
+                {messages.map((m, index) => {
+                    const isLatest = index === messages.length - 1;
+                    const isAssistant = m.role === 'assistant';
+                    return (
+                        <MessageBubble 
+                            key={m.id || index}
+                            role={m.role}
+                            content={m.content}
+                            isLatest={isLatest && isLoading}
+                            // [新增] 只在最后一条 AI 回复下方显示重试按钮
+                            onRetry={(!isLoading && isAssistant && isLatest) ? () => reload() : undefined}
+                        />
+                    );
+                })}
+
+                {/* [新增] 错误断联提示区 */}
+                {error && (
+                    <div className="flex flex-col items-center justify-center p-4 mt-2 mb-4 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/20">
+                        <AlertCircle className="w-6 h-6 text-red-500 mb-2 opacity-80" />
+                        <span className="text-xs text-red-600 dark:text-red-400 text-center mb-3">
+                            由于网络波动或熄屏，AI 生成已中断。<br/>请保持屏幕常亮并重新尝试。
+                        </span>
+                        <Button variant="outline" size="sm" onClick={() => reload()} className="h-8 text-xs rounded-full border-red-200 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30">
+                           <RefreshCw className="w-3 h-3 mr-1" /> 重新生成
+                        </Button>
+                    </div>
+                )}
             </div>
           )}
 

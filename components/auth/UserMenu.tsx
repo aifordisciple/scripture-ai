@@ -73,14 +73,20 @@ export function UserMenu() {
             <p className="text-xs text-slate-500 truncate mt-0.5">{session.user?.email}</p>
           </div>
 
-          {/* [新增] 个人数据看板入口，使用醒目样式 */}
+          {/* 个人数据看板入口 */}
           <div className="px-2 mb-2">
             <button 
-              onClick={() => { setIsOpen(false); setDashboardOpen(true); }}
+              onClick={() => { 
+                setIsOpen(false); 
+                const { tabs, setActiveTab, addTab } = useBibleStore.getState();
+                const existTab = tabs.find(t => t.type === 'dashboard');
+                if (existTab) setActiveTab(existTab.id);
+                else addTab({ type: 'dashboard' });
+              }}
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-colors"
             >
               <LayoutDashboard className="w-4 h-4" />
-              个人数据看板
+              个人数据看板 <span className="text-[10px] bg-blue-200 dark:bg-blue-800 px-1.5 py-0.5 rounded ml-auto text-blue-600 dark:text-blue-300">D</span>
             </button>
           </div>
 
