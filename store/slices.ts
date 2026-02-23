@@ -38,7 +38,7 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
       const newTab: Tab = { id: newId, type };
       if (type === 'read') { newTab.book = book; newTab.chapter = chapter; } 
       else if (type === 'search') { newTab.query = query; newTab.searchMode = searchMode; }
-      // dashboard 不需要额外参数
+      // dashboard 和 highlights 都不需要额外参数
       return { tabs: [...state.tabs, newTab], activeTabId: newId };
     }),
   closeTab: (id) => set((state) => {

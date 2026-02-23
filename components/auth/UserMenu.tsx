@@ -103,7 +103,17 @@ export function UserMenu() {
           
           <div className="my-1 border-t dark:border-slate-800" />
           
-          <MenuItem icon={<BookMarked className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />} label="我的高亮" onClick={() => alert("功能开发中...")} />
+          <MenuItem 
+            icon={<BookMarked className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />} 
+            label="我的高亮" 
+            onClick={() => { 
+              setIsOpen(false); 
+              const { tabs, setActiveTab, addTab } = useBibleStore.getState();
+              const existTab = tabs.find(t => t.type === 'highlights');
+              if (existTab) setActiveTab(existTab.id);
+              else addTab({ type: 'highlights' });
+            }} 
+          />
           <MenuItem icon={<FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />} label="我的笔记" onClick={() => alert("功能开发中...")} />
           <MenuItem icon={<ImageIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />} label="经文卡片" onClick={() => alert("功能开发中...")} />
           

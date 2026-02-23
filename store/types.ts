@@ -5,7 +5,7 @@
 // --------------------------------------------------
 export interface Tab {
   id: string;
-  type: 'read' | 'search' | 'dashboard'; // [修改] 增加 'dashboard' 类型
+  type: 'read' | 'search' | 'dashboard' | 'highlights'; // [修改] 增加 'highlights' 类型
   book?: string; 
   chapter?: string; 
   query?: string;

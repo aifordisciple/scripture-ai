@@ -27,6 +27,7 @@ const NoteEditor = dynamic(() => import("@/components/bible/NoteEditor").then(mo
 const ShareCard = dynamic(() => import("@/components/bible/ShareCard").then(mod => mod.ShareCard), { ssr: false });
 const AuthDialog = dynamic(() => import("@/components/auth/AuthDialog").then(mod => mod.AuthDialog), { ssr: false });
 const DashboardTab = dynamic(() => import("@/components/bible/DashboardTab").then(mod => mod.DashboardTab), { ssr: false });
+const HighlightsTab = dynamic(() => import("@/components/bible/HighlightsTab").then(mod => mod.HighlightsTab), { ssr: false });
 
 export default function Home() {
   const router = useRouter();
@@ -224,7 +225,7 @@ export default function Home() {
           )}
         >
             <span className="max-w-[120px] truncate">
-              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : '📊 数据看板'}
+              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? '📊 数据看板' : '🖍️ 我的高亮'}
             </span>
             <X 
               className={cn(
@@ -345,7 +346,7 @@ export default function Home() {
             </div>
 
             <div className="md:hidden flex-1 text-center font-serif font-bold text-lg text-foreground truncate px-2 tracking-wide">
-              {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : "数据看板"}
+              {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : "我的高亮"}
             </div>
 
             {/* 顶部工具栏右侧图标区域 */}
@@ -403,8 +404,10 @@ export default function Home() {
               <Reader key={activeTab.id} initialBook={activeTab.book || 'Gen'} initialChapter={activeTab.chapter || '1'} />
           ) : activeTab.type === 'search' ? (
               <SearchResults key={activeTab.id} query={activeTab.query || ''} mode={activeTab.searchMode || 'exact'} cachedResults={activeTab.results} onUpdateResults={(data) => updateActiveTab({ results: data })} />
-          ) : (
+          ) : activeTab.type === 'dashboard' ? (
               <DashboardTab key={activeTab.id} />
+          ) : (
+              <HighlightsTab key={activeTab.id} />
           )}
         </div>
 
