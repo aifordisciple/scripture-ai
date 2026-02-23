@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle, PenLine } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
@@ -14,8 +14,22 @@ import { useChat } from 'ai/react';
 import { motion, AnimatePresence } from "framer-motion";
 
 // --- 1. 子组件：高性能消息气泡 ---
-const MessageBubble = memo(({ role, content, isLatest, onRetry }: { role: string, content: string, isLatest: boolean, onRetry?: () => void }) => {
+const MessageBubble = memo(({ 
+  role, 
+  content, 
+  isLatest, 
+  onRetry,
+  // [新增] 传入用于保存笔记的上下文信息
+  onSaveToNote 
+}: { 
+  role: string; 
+  content: string; 
+  isLatest: boolean; 
+  onRetry?: () => void;
+  onSaveToNote?: (text: string) => void; 
+}) => {
   const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   let mainText = content;
   let isThinking = false;
@@ -38,17 +52,25 @@ const MessageBubble = memo(({ role, content, isLatest, onRetry }: { role: string
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(copyText)
-        .then(() => showSuccess())
+        .then(() => showSuccess(setCopied))
         .catch((err) => {
           console.warn("Clipboard API failed, trying fallback...", err);
-          fallbackCopy(copyText);
+          fallbackCopy(copyText, setCopied);
         });
     } else {
-      fallbackCopy(copyText);
+      fallbackCopy(copyText, setCopied);
     }
   };
 
-  const fallbackCopy = (text: string) => {
+  const handleSaveToNote = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onSaveToNote) {
+       onSaveToNote(mainText);
+       showSuccess(setSaved);
+    }
+  };
+
+  const fallbackCopy = (text: string, setSuccessState: Function) => {
     try {
       const textArea = document.createElement("textarea");
       textArea.value = text;
@@ -60,15 +82,15 @@ const MessageBubble = memo(({ role, content, isLatest, onRetry }: { role: string
       textArea.select();
       const successful = document.execCommand('copy');
       document.body.removeChild(textArea);
-      if (successful) showSuccess();
+      if (successful) showSuccess(setSuccessState);
     } catch (err) {
       console.error("Fallback copy failed", err);
     }
   };
 
-  const showSuccess = () => {
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const showSuccess = (setSuccessState: Function) => {
+    setSuccessState(true);
+    setTimeout(() => setSuccessState(false), 2000);
   };
 
   return (
@@ -147,7 +169,7 @@ const MessageBubble = memo(({ role, content, isLatest, onRetry }: { role: string
               </div>
             )}
             
-            {/* 底部工具栏：复制 + 重试 + 朗读 */}
+            {/* 底部工具栏：复制 + 笔记 + 重试 + 朗读 */}
             {(mainText || !isThinking) && (
               <div className="mt-4 pt-2 border-t border-slate-50 dark:border-slate-700/50 flex justify-between items-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 select-none">
                   <div className="flex items-center gap-1">
@@ -155,9 +177,7 @@ const MessageBubble = memo(({ role, content, isLatest, onRetry }: { role: string
                           onClick={handleCopy}
                           className={cn(
                               "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
-                              copied 
-                                  ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" 
-                                  : "text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                              copied ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
                           )}
                           title="复制内容"
                       >
@@ -165,7 +185,21 @@ const MessageBubble = memo(({ role, content, isLatest, onRetry }: { role: string
                           {copied ? "已复制" : "复制"}
                       </button>
 
-                      {/* [新增] 重试按钮 */}
+                      {/* [新增] 保存到笔记按钮 */}
+                      {onSaveToNote && (
+                        <button 
+                            onClick={handleSaveToNote}
+                            className={cn(
+                                "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
+                                saved ? "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" : "text-slate-400 hover:text-amber-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            )}
+                            title="存为笔记"
+                        >
+                            {saved ? <Check className="w-3 h-3" /> : <PenLine className="w-3 h-3" />}
+                            {saved ? "已添加" : "加笔记"}
+                        </button>
+                      )}
+
                       {onRetry && (
                         <button 
                             onClick={onRetry}
@@ -201,7 +235,7 @@ export function AISidebar() {
   const { 
     isAiOpen, setAiOpen, clearSelection, aiRequestTrigger,
     sidebarWidth, setSidebarWidth,
-    setAiGenerating
+    setAiGenerating, openNoteEditor, notes, updateNote
   } = useBibleStore();
   
   const [isResizing, setIsResizing] = useState(false);
@@ -212,7 +246,6 @@ export function AISidebar() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
 
-  // [修改] 解构出 error 和 reload
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload } = useChat({
     api: '/api/chat',
     body: {
@@ -231,45 +264,28 @@ export function AISidebar() {
     onFinish: () => setAiGenerating(false)
   });
 
-  // [新增] 屏幕防睡眠机制 (Wake Lock API)
+  // 屏幕防睡眠机制
   useEffect(() => {
     let wakeLock: any = null;
-
     const requestWakeLock = async () => {
       try {
         if ('wakeLock' in navigator && isLoading) {
           wakeLock = await (navigator as any).wakeLock.request('screen');
         }
-      } catch (err) {
-        console.log("Wake Lock API not supported or denied by browser.");
-      }
+      } catch (err) {}
     };
-
     const releaseWakeLock = async () => {
       if (wakeLock) {
         try { await wakeLock.release(); } catch (e) {}
         wakeLock = null;
       }
     };
+    if (isLoading) requestWakeLock();
+    else releaseWakeLock();
 
-    if (isLoading) {
-      requestWakeLock();
-    } else {
-      releaseWakeLock();
-    }
-
-    // 页面可见性改变时自动恢复
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && isLoading) {
-        requestWakeLock();
-      }
-    };
+    const handleVisibilityChange = () => { if (document.visibilityState === 'visible' && isLoading) requestWakeLock(); };
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      releaseWakeLock();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    return () => { releaseWakeLock(); document.removeEventListener('visibilitychange', handleVisibilityChange); };
   }, [isLoading]);
 
   useEffect(() => {
@@ -299,7 +315,7 @@ export function AISidebar() {
         const div = scrollRef.current;
         div.scrollTop = div.scrollHeight;
     }
-  }, [messages, isLoading, error]); // 加入 error 依赖
+  }, [messages, isLoading, error]);
 
   const handleScroll = () => {
     if (scrollRef.current) {
@@ -326,11 +342,7 @@ export function AISidebar() {
     const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n');
     const enrichedPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**我的请求**：${aiRequestTrigger.prompt}`;
 
-    append({
-      role: 'user',
-      content: enrichedPrompt,
-    });
-
+    append({ role: 'user', content: enrichedPrompt });
   }, [aiRequestTrigger, append]);
 
   const startResizing = useCallback(() => setIsResizing(true), []);
@@ -356,20 +368,51 @@ export function AISidebar() {
   const handleChipClick = (prompt: string) => {
     if (isLoading) return;
     shouldAutoScrollRef.current = true; 
-
     let finalPrompt = prompt;
-    
     if (aiRequestTrigger && messages.length === 0) {
         let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`;
-        if (aiRequestTrigger.ref.verse > 0) {
-            reference += `:${aiRequestTrigger.ref.verse}`;
-        }
+        if (aiRequestTrigger.ref.verse > 0) reference += `:${aiRequestTrigger.ref.verse}`;
         const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n');
         finalPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**我的请求**：${prompt}`;
     }
-
     append({ role: 'user', content: finalPrompt });
   };
+
+  // [新增] 处理将 AI 解读一键追加到笔记中的逻辑
+  const handleSaveToNote = useCallback((aiText: string) => {
+    if (!aiRequestTrigger) {
+      alert("请先在左侧经文中选中并触发一次对话，才能关联笔记哦！");
+      return;
+    }
+    
+    const { bookName, chapter, verse } = aiRequestTrigger.ref;
+    
+    // 打开笔记面板（此操作会自动去 store 找是否有对应的 existingNote）
+    openNoteEditor(bookName, chapter, verse);
+    
+    // 我们需要把内容追加进去
+    // 注意：这里的逻辑依赖于 NoteEditor.tsx 中对 zustand 状态的同步
+    // 为了防止覆写，我们最好构造一段漂亮的 Markdown
+    setTimeout(() => {
+      const appendContent = `\n\n---\n**✨ AI 启发 (${new Date().toLocaleDateString()})：**\n${aiText}`;
+      
+      const existingNote = useBibleStore.getState().notes.find(n => n.bookId === bookName && n.chapter === chapter && n.verse === verse);
+      
+      if (existingNote) {
+         // 如果已经有笔记了，直接更新 Zustand
+         useBibleStore.getState().updateNote(existingNote.id, existingNote.content + appendContent);
+      } else {
+         // 如果是全新的，由于 openNoteEditor 只设了 targetVerse，我们需要模拟新建并保存的过程
+         // 更好的做法是在 NoteEditor 里暴露一个追加事件，或者利用 zustand
+         const tempId = `temp-${Date.now()}`;
+         useBibleStore.getState().addNote({
+            id: tempId, bookId: bookName, chapter, verse, content: appendContent.trim()
+         });
+      }
+    }, 100); 
+
+  }, [aiRequestTrigger, openNoteEditor]);
+
 
   const getIcon = (id: string) => {
     switch (id) {
@@ -454,13 +497,13 @@ export function AISidebar() {
                             role={m.role}
                             content={m.content}
                             isLatest={isLatest && isLoading}
-                            // [新增] 只在最后一条 AI 回复下方显示重试按钮
                             onRetry={(!isLoading && isAssistant && isLatest) ? () => reload() : undefined}
+                            // [新增] 只有助手回复并且不为空时才显示保存笔记按钮
+                            onSaveToNote={(isAssistant && m.content.length > 0) ? handleSaveToNote : undefined}
                         />
                     );
                 })}
 
-                {/* [新增] 错误断联提示区 */}
                 {error && (
                     <div className="flex flex-col items-center justify-center p-4 mt-2 mb-4 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/20">
                         <AlertCircle className="w-6 h-6 text-red-500 mb-2 opacity-80" />

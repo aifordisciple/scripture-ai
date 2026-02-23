@@ -6,26 +6,29 @@ import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Loader2, Sparkles, Save, BookOpen } from "lucide-react";
-import { useSession } from "next-auth/react"; // [新增]
+import { useSession } from "next-auth/react";
 
 export function NoteEditor() {
-  const { isNoteOpen, closeNoteEditor, noteTargetVerse, addNote, notes } = useBibleStore();
-  const { data: session } = useSession(); // [新增]
+  const { isNoteOpen, closeNoteEditor, noteTargetVerse, addNote, updateNote, notes } = useBibleStore();
+  const { data: session } = useSession();
   const [content, setContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
-  // 查找当前是否已有笔记（用于编辑）
+  // 查找当前是否已有笔记
   const existingNote = noteTargetVerse 
     ? notes.find(n => n.bookId === noteTargetVerse.bookId && n.chapter === noteTargetVerse.chapter && n.verse === noteTargetVerse.verse)
     : null;
 
-  // 当打开新经文时，加载已有笔记或重置
+  // [修改] 依赖于 existingNote.content 的变化，实现实时双向绑定。
+  // 这意味着当我们在 AI 侧边栏点击"存入笔记"导致 Store 里的 content 变化时，这里也能实时看到！
   useEffect(() => {
-    if (isNoteOpen) {
-        setContent(existingNote?.content || "");
+    if (isNoteOpen && existingNote) {
+        setContent(existingNote.content);
+    } else if (isNoteOpen && !existingNote) {
+        setContent("");
     }
-  }, [isNoteOpen, noteTargetVerse, existingNote]);
+  }, [isNoteOpen, existingNote?.content]);
 
   const handleGeneratePrayer = async () => {
     if (!content.trim()) return;
@@ -51,24 +54,27 @@ export function NoteEditor() {
     setIsSaving(true);
     
     try {
-      const noteData = {
-        id: existingNote?.id || `temp-${Date.now()}`, // 如果是新建，生成临时ID
-        bookId: noteTargetVerse.bookId,
-        chapter: noteTargetVerse.chapter,
-        verse: noteTargetVerse.verse,
-        content: content
-      };
-
       // 1. 本地保存 (UI Optimistic Update)
-      addNote(noteData); // 注意：useBibleStore 需要支持 addNote/updateNote，这里简化为 addNote 覆盖
+      if (existingNote) {
+        updateNote(existingNote.id, content);
+      } else {
+        const tempId = `temp-${Date.now()}`;
+        addNote({
+            id: tempId,
+            bookId: noteTargetVerse.bookId,
+            chapter: noteTargetVerse.chapter,
+            verse: noteTargetVerse.verse,
+            content: content
+        });
+      }
 
-      // 2. [新增] 远程保存
+      // 2. 远程保存
       if (session?.user) {
         await fetch('/api/note', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            noteId: existingNote?.id, // 如果是编辑，传旧ID
+            noteId: existingNote?.id, 
             book: noteTargetVerse.bookId,
             chapter: noteTargetVerse.chapter,
             verse: noteTargetVerse.verse,
@@ -91,38 +97,43 @@ export function NoteEditor() {
 
   return (
     <Sheet open={isNoteOpen} onOpenChange={(open) => !open && closeNoteEditor()}>
-      <SheetContent className="w-full sm:max-w-md bg-white dark:bg-slate-950 flex flex-col h-full">
-        <SheetHeader className="mb-4">
-          <SheetTitle className="flex items-center gap-2">
+      <SheetContent className="w-full sm:max-w-md bg-white dark:bg-slate-950 flex flex-col h-full z-[100]">
+        <SheetHeader className="mb-4 shrink-0">
+          <SheetTitle className="flex items-center gap-2 text-xl">
             <BookOpen className="w-5 h-5 text-blue-600" />
             灵修笔记
           </SheetTitle>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">
             {noteTargetVerse.bookId} {noteTargetVerse.chapter}:{noteTargetVerse.verse}
           </p>
         </SheetHeader>
 
-        <div className="flex-1 flex flex-col gap-4 min-h-0">
+        <div className="flex-1 flex flex-col gap-4 min-h-0 relative">
+          {/* 加入一个提示角标 */}
+          <div className="absolute top-2 right-4 text-[10px] text-slate-400 pointer-events-none select-none">
+            支持 Markdown 格式
+          </div>
+          
           <textarea
-            className="flex-1 w-full p-4 rounded-lg border dark:border-slate-800 bg-slate-50 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 w-full p-4 pt-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 font-sans leading-relaxed text-[15px] text-slate-700 dark:text-slate-300 shadow-inner"
             placeholder="写下你的感动、思考或疑问..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
           
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-2 justify-end shrink-0 py-2">
             <Button 
               variant="outline" 
               onClick={handleGeneratePrayer}
               disabled={isGenerating || !content.trim()}
-              className="gap-2 border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-900 dark:text-purple-300 dark:hover:bg-purple-900/20"
+              className="gap-2 border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-900 dark:text-purple-300 dark:hover:bg-purple-900/20 rounded-full"
             >
               {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               生成祷告
             </Button>
-            <Button onClick={handleSave} disabled={isSaving} className="gap-2 bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleSave} disabled={isSaving || !content.trim()} className="gap-2 bg-blue-600 hover:bg-blue-700 rounded-full font-bold px-6">
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              保存
+              保存笔记
             </Button>
           </div>
         </div>
