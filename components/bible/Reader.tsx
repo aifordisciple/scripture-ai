@@ -58,6 +58,18 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     }
   }, [loading, scrollToVerse, verses, setScrollToVerse]);
 
+// [新增探针] 自动判定阅读有效性
+  // 逻辑：只要用户在一个加载完毕的章节停留超过 3.5 秒，就自动在 Store 记录 1 个互动权重。
+  useEffect(() => {
+    if (!loading && verses.length > 0) {
+        const timer = setTimeout(() => {
+            // 注意：因为只追加互动量，所以即使后续清空了高亮，阅读痕迹也永远存在
+            useBibleStore.getState().recordInteraction(book, parseInt(chapter), 1);
+        }, 30000); 
+        return () => clearTimeout(timer);
+    }
+  }, [book, chapter, loading, verses]);
+
   const { verseMap, renderList } = useMemo(() => {
     const map = new Map<number, { CUV?: Verse, KJV?: Verse }>();
     verses.forEach(v => {
@@ -152,17 +164,25 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                     </div>
 
                     {/* 全章摘要按钮 */}
-                    <div className="mt-20 text-center">
-                    <button onClick={(e) => { 
-                        e.stopPropagation(); 
-                        const cuvVerses = verses.filter(v => v.version === 'CUV'); 
-                        if (cuvVerses.length > 0) { 
-                            const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n'); 
-                            triggerAI(CHAPTER_SUMMARY_PROMPT, `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, fullContext, { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 }); 
-                        } 
-                    }} className="group inline-flex items-center gap-2 px-6 py-3 glass-panel rounded-full hover:bg-white/90 dark:hover:bg-slate-800/90 text-foreground transition-all duration-300 font-medium text-sm shadow-sm hover:shadow-md">
-                        <BookOpenCheck className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-                        第 {chapter} 章整章解读
+                    <div className="mt-20 text-center pb-4">
+                    <button 
+                        onClick={(e) => { 
+                            e.stopPropagation(); 
+                            const cuvVerses = verses.filter(v => v.version === 'CUV'); 
+                            if (cuvVerses.length > 0) { 
+                                const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n'); 
+                                triggerAI(CHAPTER_SUMMARY_PROMPT, `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, fullContext, { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 }); 
+                            } 
+                        }} 
+                        className={cn(
+                          "group inline-flex items-center gap-2.5 px-8 py-3.5 glass-panel rounded-full",
+                          "bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 text-foreground font-medium text-sm",
+                          // 核心动画类名：悬浮上浮投影放大，点击时回缩(scale-95)
+                          "transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1.5 active:scale-95 active:translate-y-0 active:shadow-sm"
+                        )}
+                    >
+                        <BookOpenCheck className="w-5 h-5 text-primary group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300" />
+                        阅读第 {chapter} 章精意
                     </button>
                     </div>
                 </>

@@ -292,9 +292,10 @@ export default function Home() {
                {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : "搜索结果"}
             </div>
 
+            {/* 顶部工具栏右侧图标区域 */}
             <div className="flex items-center gap-1 shrink-0">
-              <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="hidden sm:flex text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="全屏"><Maximize className="h-4 w-4" /></Button>
-
+              
+              {/* 1. 播放 */}
               {activeTab.type === 'read' && (
                  <>
                    <HeaderPlayer player={player} text={chapterSpeechText || ""} className="hidden sm:flex bg-transparent border-none" mode="full" />
@@ -302,18 +303,37 @@ export default function Home() {
                  </>
               )}
 
+              {/* 2. 全屏 */}
+              <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="hidden sm:flex text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="全屏">
+                <Maximize className="h-4 w-4" />
+              </Button>
+
               <div className="mx-1 border-l h-5 border-border/50 hidden sm:block"></div>
 
-              <UserMenu />
-
+              {/* 3, 4, 5: 行高、中英文、字体大小 */}
               <div className="hidden sm:flex items-center gap-1 pl-1">
-                  <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="调整行高"><AlignJustify className="h-4 w-4" /></Button>
-                  <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold rounded-full"><Languages className="h-4 w-4" />{showEnglish ? "中/英" : "中"}</Button>
-                  <div className="w-20 mx-2 group relative">
+                  <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="调整行高">
+                    <AlignJustify className="h-4 w-4" />
+                  </Button>
+                  
+                  <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold rounded-full">
+                    <Languages className="h-4 w-4" />{showEnglish ? "中/英" : "中"}
+                  </Button>
+                  
+                  <div className="w-20 mx-2 group relative flex items-center">
                     <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} className="cursor-pointer" />
                   </div>
               </div>
+
+              {/* 分割线 */}
+              <div className="mx-1 border-l h-5 border-border/50 hidden sm:block"></div>
+
+              {/* 6. 用户头像 */}
+              <div className="pl-1">
+                <UserMenu />
+              </div>
               
+              {/* 移动端设置入口 (保持在最右侧防误触) */}
               <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>

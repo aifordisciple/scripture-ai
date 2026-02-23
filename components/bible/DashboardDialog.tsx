@@ -11,46 +11,56 @@ import { useRouter } from "next/navigation";
 
 export function DashboardDialog() {
   const router = useRouter();
-  const { isDashboardOpen, setDashboardOpen, highlights, updateActiveTab, addTab, tabs, activeTabId, setActiveTab } = useBibleStore();
+  // [修改] 提取 notes 和 interactions 状态
+  const { isDashboardOpen, setDashboardOpen, highlights, notes, interactions, updateActiveTab, addTab, tabs, activeTabId, setActiveTab } = useBibleStore();
 
-  // 1. 聚合高亮数据生成热力图权重
+  // 1. [核心重构] 多维聚合权重生成热力图
   const heatmapData = useMemo(() => {
-    return highlights.map(h => ({
-      bookId: h.bookId,
-      chapter: h.chapter,
-      weight: 1 // 预留接口，未来可加入笔记字数作为 weight 权重
-    }));
-  }, [highlights]);
+    const map = new Map<string, number>();
 
-  // 2. [新增] 完美的路由跳转逻辑
+    // a. 累计高亮权重 (+1)
+    highlights.forEach(h => {
+       const key = `${h.bookId}-${h.chapter}`;
+       map.set(key, (map.get(key) || 0) + 1);
+    });
+
+    // b. 累计笔记权重 (+2) 笔记表明了更深度的思考
+    notes.forEach(n => {
+       const key = `${n.bookId}-${n.chapter}`;
+       map.set(key, (map.get(key) || 0) + 2); 
+    });
+
+    // c. 累计静默阅读/AI辅助等日常互动 (+1 每次)
+    interactions.forEach(i => {
+       const key = `${i.bookId}-${i.chapter}`;
+       map.set(key, (map.get(key) || 0) + i.count);
+    });
+
+    // 将 Map 转化为数组交给图表组件渲染
+    return Array.from(map.entries()).map(([key, weight]) => {
+      const [bookId, chapter] = key.split('-');
+      return { bookId, chapter: parseInt(chapter), weight };
+    });
+  }, [highlights, notes, interactions]);
+
   const handleCellClick = (bookId: string, chapter: number) => {
-    // 关闭看板
     setDashboardOpen(false);
-
-    // 更新 Tab 状态
     const currentTab = tabs.find(t => t.id === activeTabId);
     if (currentTab && currentTab.type === 'read') {
-       // 如果当前已经是阅读 Tab，直接更新
        updateActiveTab({ book: bookId, chapter: chapter.toString() });
     } else {
-       // 如果当前在搜索 Tab，找找有没有休眠的阅读 Tab，有就切过去，没有就新建
        const readTab = tabs.find(t => t.type === 'read');
-       if (readTab) {
-           setActiveTab(readTab.id);
-       } else {
-           addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
-       }
+       if (readTab) setActiveTab(readTab.id);
+       else addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
     }
-    
-    // 强制触发 Next.js 的路由重定向，让 Reader 重新拉取数据
     router.push(`/?book=${bookId}&chapter=${chapter}`);
   };
 
-  const totalInteractions = heatmapData.length;
+  // 简单计算总计交互次数
+  const totalInteractions = heatmapData.reduce((sum, item) => sum + item.weight, 0);
 
   return (
     <Dialog open={isDashboardOpen} onOpenChange={setDashboardOpen}>
-      {/* [修复] 增大 maxWidth 为 95vw 和 6xl，确保右侧《诗篇》等长书卷无需频繁滚动，并增加顶部内边距防裁切 */}
       <DialogContent className="max-w-[95vw] lg:max-w-5xl xl:max-w-[1200px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-background rounded-2xl">
         
         <DialogHeader className="p-5 md:p-6 pb-4 border-b dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0">
@@ -74,12 +84,11 @@ export function DashboardDialog() {
           <div className="flex gap-6 mt-4">
              <div className="flex flex-col">
                 <span className="text-3xl font-black text-foreground">{totalInteractions}</span>
-                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">总互动次数</span>
+                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">总互动权重</span>
              </div>
           </div>
         </DialogHeader>
 
-        {/* 主数据区增加滚动条，彻底解决最顶部创世记或最底部启示录被吃掉的问题 */}
         <div className="flex-1 overflow-y-auto px-2 md:px-6 pb-10 bg-white dark:bg-slate-950">
            <BibleHeatmap 
              data={heatmapData} 

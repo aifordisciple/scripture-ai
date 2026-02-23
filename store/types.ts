@@ -35,6 +35,13 @@ export interface VerseRef {
   verse: number;
 }
 
+// [新增] 专门用于持久化记录用户互动行为的接口
+export interface InteractionLog {
+  bookId: string;
+  chapter: number;
+  count: number;
+}
+
 // --------------------------------------------------
 // 2. 状态切片 (Slice) 接口
 // --------------------------------------------------
@@ -68,7 +75,6 @@ export interface ReaderSlice {
   toggleEnglish: () => void; 
   tabs: Tab[];
   activeTabId: string;
-  // [修复] 在这里增加了 'fuzzy' 模式的支持
   addTab: (params: { type: 'read' | 'search'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' | 'fuzzy' }) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
@@ -105,6 +111,10 @@ export interface UserDataSlice {
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
   setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[] }) => void;
+  
+  // [新增] 互动记录的数组与触发函数
+  interactions: InteractionLog[];
+  recordInteraction: (bookId: string, chapter: number, weight?: number) => void;
 }
 
 // --------------------------------------------------

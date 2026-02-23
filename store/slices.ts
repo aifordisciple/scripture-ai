@@ -79,7 +79,7 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set) =>
 });
 
 // ==========================================
-// 4. 用户数据 (高亮/笔记/选择) 切片
+// 4. 用户数据 (高亮/笔记/选择/互动) 切片
 // ==========================================
 export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice> = (set, get) => ({
   selectedVerses: [],
@@ -122,7 +122,6 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
       updates.lineHeight = data.settings.lineHeight;
       updates.isDarkMode = data.settings.isDarkMode;
       updates.showEnglish = data.settings.showEnglish;
-      
       if (data.settings.lastBook && data.settings.lastChapter) {
          const tabs = get().tabs;
          if (tabs.length > 0 && tabs[0].type === 'read') {
@@ -132,12 +131,21 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
          }
       }
     }
-    if (data.highlights) {
-      updates.highlights = data.highlights.map((h: any) => ({ bookId: h.bookId, chapter: h.chapter, verse: h.verse, color: h.color }));
-    }
-    if (data.notes) {
-      updates.notes = data.notes.map((n: any) => ({ id: n.id, bookId: n.bookId, chapter: n.chapter, verse: n.verse, content: n.content }));
-    }
+    if (data.highlights) updates.highlights = data.highlights;
+    if (data.notes) updates.notes = data.notes;
     set(updates);
   },
+
+  // [新增] 核心互动统计逻辑：如果已存在记录则递增权重，否则新建
+  interactions: [],
+  recordInteraction: (bookId, chapter, weight = 1) => set((state) => {
+    const existingIndex = state.interactions.findIndex(i => i.bookId === bookId && i.chapter === chapter);
+    if (existingIndex >= 0) {
+      const newInteractions = [...state.interactions];
+      newInteractions[existingIndex].count += weight;
+      return { interactions: newInteractions };
+    } else {
+      return { interactions: [...state.interactions, { bookId, chapter, count: weight }] };
+    }
+  }),
 });
