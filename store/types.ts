@@ -35,7 +35,6 @@ export interface VerseRef {
   verse: number;
 }
 
-// [新增] 专门用于持久化记录用户互动行为的接口
 export interface InteractionLog {
   bookId: string;
   chapter: number;
@@ -98,23 +97,31 @@ export interface UserDataSlice {
   selectedVerses: number[];
   toggleVerseSelection: (id: number) => void;
   clearSelection: () => void;
+  
   highlights: HighlightData[];
   setHighlights: (highlights: HighlightData[]) => void;
   addHighlightLocally: (h: HighlightData) => void;
   removeHighlightLocally: (bookId: string, chapter: number, verse: number) => void;
+  
   notes: NoteData[];
   addNote: (note: NoteData) => void;
   updateNote: (id: string, content: string) => void;
   deleteNote: (id: string) => void;
+  
   isNoteOpen: boolean;
   noteTargetVerse: { bookId: string, chapter: number, verse: number } | null;
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
+  
   setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[] }) => void;
   
-  // [新增] 互动记录的数组与触发函数
   interactions: InteractionLog[];
   recordInteraction: (bookId: string, chapter: number, weight?: number) => void;
+
+  // [新增] 专门用于看板清空数据的接口
+  clearAllHighlights: () => void;
+  clearAllNotes: () => void;
+  clearAllInteractions: () => void;
 }
 
 // --------------------------------------------------

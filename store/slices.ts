@@ -2,9 +2,6 @@
 import { StateCreator } from 'zustand';
 import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab } from './types';
 
-// ==========================================
-// 1. UI 界面状态切片
-// ==========================================
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
   isAuthOpen: false,
   setAuthOpen: (open) => set({ isAuthOpen: open }),
@@ -24,9 +21,6 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
   setDashboardOpen: (open) => set({ isDashboardOpen: open }),
 });
 
-// ==========================================
-// 2. 阅读器与标签页切片
-// ==========================================
 export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = (set) => ({
   fontSize: 18,
   setFontSize: (size) => set({ fontSize: size }),
@@ -64,9 +58,6 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
   setScrollToVerse: (verse) => set({ scrollToVerse: verse }),
 });
 
-// ==========================================
-// 3. AI 功能切片
-// ==========================================
 export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set) => ({
   isAiOpen: false,
   setAiOpen: (open) => set({ isAiOpen: open }),
@@ -78,9 +69,6 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set) =>
   }),
 });
 
-// ==========================================
-// 4. 用户数据 (高亮/笔记/选择/互动) 切片
-// ==========================================
 export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice> = (set, get) => ({
   selectedVerses: [],
   toggleVerseSelection: (id) => set((state) => {
@@ -136,7 +124,6 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
     set(updates);
   },
 
-  // [新增] 核心互动统计逻辑：如果已存在记录则递增权重，否则新建
   interactions: [],
   recordInteraction: (bookId, chapter, weight = 1) => set((state) => {
     const existingIndex = state.interactions.findIndex(i => i.bookId === bookId && i.chapter === chapter);
@@ -148,4 +135,9 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
       return { interactions: [...state.interactions, { bookId, chapter, count: weight }] };
     }
   }),
+
+  // [新增] 清空数据的具体实现
+  clearAllHighlights: () => set({ highlights: [] }),
+  clearAllNotes: () => set({ notes: [] }),
+  clearAllInteractions: () => set({ interactions: [] }),
 });
