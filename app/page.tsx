@@ -330,15 +330,27 @@ export default function Home() {
         >
           <header className="h-14 flex items-center justify-between px-3 md:px-4 glass-panel rounded-2xl pointer-events-auto shadow-sm">
             
-            <div className="flex items-center gap-1 shrink-0">
-              <Button variant="ghost" size="icon" className="md:hidden text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full" onClick={() => toggleSidebar()}><Menu className="h-5 w-5" /></Button>
-              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full hover:bg-black/5 dark:hover:bg-white/5", !isDesktopSidebarOpen ? "text-muted-foreground" : "text-primary")} onClick={toggleDesktopSidebar}><PanelLeft className="h-5 w-5" /></Button>
-              <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-secondary/60 hover:bg-secondary border-none ml-2" onClick={() => setIsSearchOpen(true)}>
-                  <Search className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">搜索经文、问题... ( / 或 Cmd+K )</span>
+            {/* Header 左侧区域：侧边栏控制与搜索 */}
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              {/* 移动端汉堡菜单 */}
+              <Button variant="ghost" size="icon" className="md:hidden text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full" onClick={() => toggleSidebar()}>
+                <Menu className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="hidden sm:flex text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="全屏 (F)">
-                  <Maximize className="h-4 w-4" />
+              
+              {/* 桌面端左侧面板开关 */}
+              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full hover:bg-black/5 dark:hover:bg-white/5", !isDesktopSidebarOpen ? "text-muted-foreground" : "text-primary")} onClick={toggleDesktopSidebar}>
+                <PanelLeft className="h-5 w-5" />
+              </Button>
+              
+              {/* 桌面端长条形搜索框 */}
+              <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-secondary/60 hover:bg-secondary border-none ml-1" onClick={() => setIsSearchOpen(true)}>
+                  <Search className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground pr-2">搜索经文、问题... ( / 或 Cmd+K )</span>
+              </Button>
+
+              {/* 移动端圆形搜索图标 (修复：确保 flex 显示) */}
+              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full" onClick={() => setIsSearchOpen(true)}>
+                <Search className="h-5 w-5" />
               </Button>
             </div>
             
