@@ -5,7 +5,7 @@
 // --------------------------------------------------
 export interface Tab {
   id: string;
-  type: 'read' | 'search' | 'dashboard' | 'highlights'; // [修改] 增加 'highlights' 类型
+  type: 'read' | 'search' | 'dashboard' | 'highlights';
   book?: string; 
   chapter?: string; 
   query?: string;
@@ -74,7 +74,8 @@ export interface ReaderSlice {
   toggleEnglish: () => void; 
   tabs: Tab[];
   activeTabId: string;
-  addTab: (params: { type: 'read' | 'search' | 'dashboard'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' | 'fuzzy' }) => void;
+  // [修复] 在这里补上 'highlights'
+  addTab: (params: { type: 'read' | 'search' | 'dashboard' | 'highlights'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' | 'fuzzy' }) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
   updateActiveTab: (data: Partial<Tab>) => void;
@@ -118,7 +119,6 @@ export interface UserDataSlice {
   interactions: InteractionLog[];
   recordInteraction: (bookId: string, chapter: number, weight?: number) => void;
 
-  // [新增] 专门用于看板清空数据的接口
   clearAllHighlights: () => void;
   clearAllNotes: () => void;
   clearAllInteractions: () => void;
