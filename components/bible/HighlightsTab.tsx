@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { Loader2, BookMarked, ChevronRight, Trash2 } from "lucide-react";
@@ -26,6 +27,7 @@ interface PopulatedHighlight {
 }
 
 export function HighlightsTab() {
+  const router = useRouter();
   const { highlights, removeHighlightLocally, tabs, addTab, setActiveTab, updateActiveTab } = useBibleStore();
   const [populatedHighlights, setPopulatedHighlights] = useState<PopulatedHighlight[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -95,6 +97,9 @@ export function HighlightsTab() {
     }
     // 设置阅读器滚动锚点
     useBibleStore.getState().setScrollToVerse(verse);
+
+    // 强制修改 URL，触发 Next.js 和 Reader 的跨章节数据抓取
+    router.push(`/?book=${bookId}&chapter=${chapter}`);
   };
 
   const handleRemove = (e: React.MouseEvent, bookId: string, chapter: number, verse: number) => {

@@ -308,6 +308,10 @@ export default function Home() {
                 {showEnglish ? "已开启" : "已关闭"}
               </Button>
             </div>
+            
+            <div className="pt-2">
+              <SyncSettings />
+            </div>
           </div>
           
           <div className="mt-8 mb-4">

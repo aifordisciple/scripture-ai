@@ -1,6 +1,7 @@
 // components/bible/DashboardTab.tsx
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { BibleHeatmap } from "@/components/bible/BibleHeatmap";
 import { useMemo, useState } from "react";
@@ -8,6 +9,7 @@ import { Download, Activity, Trash2, CheckSquare, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function DashboardTab() {
+  const router = useRouter();
   const { 
     highlights, notes, interactions, 
     updateActiveTab, addTab, tabs, setActiveTab,
@@ -74,11 +76,8 @@ export function DashboardTab() {
   }, [highlights, notes, interactions]);
 
   const handleCellClick = (bookId: string, chapter: number) => {
-    // 寻找存在的阅读 Tab 切换过去，如果没有就新建
     const readTab = tabs.find(t => t.type === 'read');
     if (readTab) {
-       updateActiveTab({ book: bookId, chapter: chapter.toString() }); // 这是没用的，因为当前 activeTab 是 dashboard
-       // 正确做法：先切换 tab，再更新目标 tab
        setActiveTab(readTab.id);
        useBibleStore.setState((state) => ({
            tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: bookId, chapter: chapter.toString() } : t)
@@ -86,6 +85,9 @@ export function DashboardTab() {
     } else {
        addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
     }
+
+    // 强制修改 URL
+    router.push(`/?book=${bookId}&chapter=${chapter}`);
   };
 
   const totalInteractions = heatmapData.reduce((sum, item) => sum + item.weight, 0);

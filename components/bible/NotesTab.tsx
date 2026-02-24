@@ -2,6 +2,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { BookOpen, Edit3, Trash2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 export function NotesTab() {
+  const router = useRouter();
   const { notes, deleteNote, openNoteEditor, tabs, addTab, setActiveTab, updateActiveTab } = useBibleStore();
   const { data: session } = useSession();
 
@@ -38,6 +40,9 @@ export function NotesTab() {
       addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
     }
     useBibleStore.getState().setScrollToVerse(verse);
+
+    // 强制修改 URL
+    router.push(`/?book=${bookId}&chapter=${chapter}`);
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
