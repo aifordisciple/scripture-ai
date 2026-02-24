@@ -54,7 +54,7 @@ export async function POST(req: Request) {
              lastBook: settings.lastBook || null,
              lastChapter: settings.lastChapter ? Number(settings.lastChapter) : null,
          };
-         await tx.userSettings.upsert({
+         await tx.userSetting.upsert({
              where: { userId: user.id },
              update: safeSettings,
              create: { ...safeSettings, userId: user.id }

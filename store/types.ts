@@ -129,7 +129,7 @@ export interface UserDataSlice {
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
   
-  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[] }) => void;
+  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[], interactions?: any[] }) => void;
   
   interactions: InteractionLog[];
   recordInteraction: (bookId: string, chapter: number, weight?: number) => void;
