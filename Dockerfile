@@ -26,6 +26,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # 构建前生成 Prisma Client (此时会根据 schema 生成 musl-openssl-3.0.x 引擎)
+RUN export PRISMA_ENGINES_MIRROR=https://npmmirror.com/mirrors/prisma
+RUN export PRISMA_BINARIES_MIRROR=https://npmmirror.com/mirrors/prisma
 RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED 1
