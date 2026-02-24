@@ -16,17 +16,30 @@ export async function GET() {
         settings: true,
         highlights: true,
         notes: true,
-        interactions: true // GET 时必须包含 interactions
+        interactions: true,
+        planProgress: true
       }
     });
 
     if (!user) return new NextResponse("User not found", { status: 404 });
 
+    let activePlan = null;
+    if (user.planProgress) {
+        try {
+            activePlan = {
+                planId: user.planProgress.planId,
+                startDate: user.planProgress.startDate.getTime(),
+                completedDays: JSON.parse(user.planProgress.completedDays || "[]")
+            };
+        } catch (e) { console.error("Failed to parse planProgress", e); }
+    }
+
     return NextResponse.json({
       settings: user.settings,
       highlights: user.highlights,
       notes: user.notes,
-      interactions: user.interactions
+      interactions: user.interactions,
+      activePlan
     });
   } catch (err) {
     console.error("GET Sync Error:", err);
@@ -42,7 +55,7 @@ export async function POST(req: Request) {
 
   try {
     const data = await req.json();
-    const { settings, highlights, notes, interactions } = data || {};
+    const { settings, highlights, notes, interactions, activePlan } = data || {};
 
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) return new NextResponse("User not found", { status: 404 });
@@ -114,6 +127,24 @@ export async function POST(req: Request) {
                   }))
               });
           }
+      }
+
+      // 5. 同步读经计划
+      if (activePlan !== undefined) {
+        if (activePlan === null) {
+          await tx.planProgress.deleteMany({ where: { userId: user.id } });
+        } else {
+          const safePlan = {
+            planId: String(activePlan.planId),
+            startDate: new Date(activePlan.startDate || Date.now()),
+            completedDays: JSON.stringify(activePlan.completedDays || [])
+          };
+          await tx.planProgress.upsert({
+            where: { userId: user.id },
+            update: safePlan,
+            create: { ...safePlan, userId: user.id }
+          });
+        }
       }
     });
 

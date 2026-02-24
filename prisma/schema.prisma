@@ -42,7 +42,7 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
   // 关联数据
   settings      UserSetting?
   highlights    Highlight[]
@@ -50,6 +50,7 @@ model User {
   cards         ScriptureCard[]
   chatMessages  ChatMessage[] // [新增] 关联聊天记录
   interactions  Interaction[] // [新增] 关联阅读记录
+  planProgress  PlanProgress? // [新增] 读经计划进度
 }
 
 model UserSetting {
@@ -139,4 +140,15 @@ model Interaction {
 
   @@unique([userId, bookId, chapter])
   @@index([userId, bookId, chapter])
+}
+
+// [新增] 读经计划进度表
+model PlanProgress {
+  id            String   @id @default(cuid())
+  userId        String   @unique // 限制每个用户同时只能有一个活跃的读经计划
+  planId        String
+  startDate     DateTime @default(now())
+  completedDays String   @default("[]") // 存储为 JSON 数组字符串，例如 "[1, 2, 3]"
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

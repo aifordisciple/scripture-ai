@@ -5,12 +5,12 @@
 // --------------------------------------------------
 export interface Tab {
   id: string;
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes';
-  book?: string; 
-  chapter?: string; 
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans';
+  book?: string;
+  chapter?: string;
   query?: string;
-  searchMode?: 'exact' | 'ai' | 'fuzzy'; 
-  results?: any[]; 
+  searchMode?: 'exact' | 'ai' | 'fuzzy';
+  results?: any[];
   scrollTop?: number;
 }
 
@@ -56,6 +56,12 @@ export interface InteractionLog {
   count: number;
 }
 
+export interface PlanProgress {
+  planId: string;
+  startDate: number;
+  completedDays: number[];
+}
+
 // --------------------------------------------------
 // 2. 状态切片 (Slice) 接口
 // --------------------------------------------------
@@ -89,8 +95,8 @@ export interface ReaderSlice {
   toggleEnglish: () => void; 
   tabs: Tab[];
   activeTabId: string;
-  // [修复] 在这里补上 'highlights' | 'notes'
-  addTab: (params: { type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' | 'fuzzy' }) => void;
+  // [修复] 在这里补上 'highlights' | 'notes' | 'plans'
+  addTab: (params: { type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' | 'fuzzy' }) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
   updateActiveTab: (data: Partial<Tab>) => void;
@@ -129,7 +135,7 @@ export interface UserDataSlice {
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
   
-  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[], interactions?: any[] }) => void;
+  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[], interactions?: any[], activePlan?: any }) => void;
   
   interactions: InteractionLog[];
   recordInteraction: (bookId: string, chapter: number, weight?: number) => void;
@@ -137,6 +143,12 @@ export interface UserDataSlice {
   clearAllHighlights: () => void;
   clearAllNotes: () => void;
   clearAllInteractions: () => void;
+
+  // [新增] 读经计划状态
+  activePlan: PlanProgress | null;
+  startPlan: (planId: string) => void;
+  markDayCompleted: (day: number) => void;
+  quitPlan: () => void;
 }
 
 // --------------------------------------------------

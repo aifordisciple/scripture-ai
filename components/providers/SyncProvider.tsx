@@ -7,10 +7,10 @@ import { useBibleStore } from "@/store/useBibleStore";
 
 export function SyncProvider() {
   const { data: session } = useSession();
-  const { 
-    setAllUserData, 
+  const {
+    setAllUserData,
     fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
-    highlights, notes, interactions,
+    highlights, notes, interactions, activePlan,
     syncMode, setSyncMode,
     lastSyncTime, setLastSyncTime,
     isSyncing, setIsSyncing,
@@ -88,6 +88,7 @@ export function SyncProvider() {
             chapter: i.chapter,
             count: i.count,
           })),
+          activePlan,
         }),
       });
 
@@ -108,10 +109,10 @@ export function SyncProvider() {
       setIsSyncing(false);
     }
   }, [
-    session, 
-    syncMode, 
+    session,
+    syncMode,
     fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
-    highlights, notes, interactions,
+    highlights, notes, interactions, activePlan,
     setAllUserData, setLastSyncTime, setIsSyncing, setSyncError,
   ]);
 

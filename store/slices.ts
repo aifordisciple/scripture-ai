@@ -129,9 +129,17 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
     if (data.notes) {
       updates.notes = data.notes.map((n: any) => ({ id: n.id, bookId: n.bookId, chapter: n.chapter, verse: n.verse, content: n.content }));
     }
-    // [新增] 处理从云端拉取下来的 interactions 进度记录
     if (data.interactions) {
       updates.interactions = data.interactions.map((i: any) => ({ bookId: i.bookId, chapter: i.chapter, count: i.count }));
+    }
+    if (data.activePlan) {
+      updates.activePlan = {
+        planId: data.activePlan.planId,
+        startDate: new Date(data.activePlan.startDate).getTime(),
+        completedDays: typeof data.activePlan.completedDays === 'string'
+            ? JSON.parse(data.activePlan.completedDays)
+            : (data.activePlan.completedDays || [])
+      };
     }
     set(updates);
   },
@@ -152,6 +160,18 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   clearAllHighlights: () => set({ highlights: [] }),
   clearAllNotes: () => set({ notes: [] }),
   clearAllInteractions: () => set({ interactions: [] }),
+
+  // [新增] 读经计划具体实现
+  activePlan: null,
+  startPlan: (planId) => set({ activePlan: { planId, startDate: Date.now(), completedDays: [] } }),
+  markDayCompleted: (day) => set((state) => {
+    if (!state.activePlan) return state;
+    const newDays = state.activePlan.completedDays.includes(day)
+      ? state.activePlan.completedDays.filter(d => d !== day)
+      : [...state.activePlan.completedDays, day].sort((a, b) => a - b);
+    return { activePlan: { ...state.activePlan, completedDays: newDays } };
+  }),
+  quitPlan: () => set({ activePlan: null }),
 });
 
 export const createSyncSlice: StateCreator<StoreState, [], [], SyncSlice> = (set) => ({

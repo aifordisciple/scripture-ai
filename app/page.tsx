@@ -30,6 +30,7 @@ const AuthDialog = dynamic(() => import("@/components/auth/AuthDialog").then(mod
 const DashboardTab = dynamic(() => import("@/components/bible/DashboardTab").then(mod => mod.DashboardTab), { ssr: false });
 const HighlightsTab = dynamic(() => import("@/components/bible/HighlightsTab").then(mod => mod.HighlightsTab), { ssr: false });
 const NotesTab = dynamic(() => import("@/components/bible/NotesTab").then(mod => mod.NotesTab), { ssr: false });
+const PlanTab = dynamic(() => import("@/components/bible/PlanTab").then(mod => mod.PlanTab), { ssr: false });
 
 export default function Home() {
   const router = useRouter();
@@ -227,7 +228,7 @@ export default function Home() {
           )}
         >
             <span className="max-w-[120px] truncate">
-              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? '📊 数据看板' : tab.type === 'highlights' ? '🖍️ 我的高亮' : '📝 我的笔记'}
+              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? '📊 数据看板' : tab.type === 'highlights' ? '🖍️ 我的高亮' : tab.type === 'notes' ? '📝 我的笔记' : '📅 读经计划'}
             </span>
             <X 
               className={cn(
@@ -373,7 +374,7 @@ export default function Home() {
             </div>
 
             <div className="md:hidden flex-1 text-center font-serif font-bold text-lg text-foreground truncate px-2 tracking-wide">
-              {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : "我的笔记"}
+              {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : "读经计划"}
             </div>
 
             {/* 顶部工具栏右侧图标区域 */}
@@ -435,8 +436,10 @@ export default function Home() {
               <DashboardTab key={activeTab.id} />
           ) : activeTab.type === 'highlights' ? (
               <HighlightsTab key={activeTab.id} />
-          ) : (
+          ) : activeTab.type === 'notes' ? (
               <NotesTab key={activeTab.id} />
+          ) : (
+              <PlanTab key={activeTab.id} />
           )}
         </div>
 
