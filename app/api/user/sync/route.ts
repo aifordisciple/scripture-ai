@@ -23,7 +23,8 @@ export async function GET() {
 
     if (!user) return new NextResponse("User not found", { status: 404 });
 
-    let activePlans = [];
+    // [修复] 显式声明变量类型为 any[]
+    let activePlans: any[] = [];
     if (user.planProgress && Array.isArray(user.planProgress)) {
         activePlans = user.planProgress.map((p: any) => ({
             planId: p.planId,
