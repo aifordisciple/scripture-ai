@@ -124,7 +124,6 @@ export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
-  // --- [新增] 滚动隐藏/显示导航栏状态 ---
   const [isNavVisible, setIsNavVisible] = useState(true);
   const lastScrollY = useRef(0);
   
@@ -145,26 +144,21 @@ export default function Home() {
 
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
 
-  // --- [新增] 监听滚动事件的核心逻辑 ---
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const currentScrollY = e.currentTarget.scrollTop;
-    const scrollThreshold = 15; // 触发阈值，避免过度敏感的抖动
+    const scrollThreshold = 15; 
 
     if (currentScrollY <= 60) {
-      // 如果接近顶部，总是显示导航栏
       setIsNavVisible(true);
     } else if (currentScrollY > lastScrollY.current + scrollThreshold) {
-      // 向下滚动，隐藏导航栏
       setIsNavVisible(false);
     } else if (currentScrollY < lastScrollY.current - scrollThreshold) {
-      // 向上滚动，显示导航栏
       setIsNavVisible(true);
     }
 
     lastScrollY.current = currentScrollY;
   }, []);
 
-  // 播放器逻辑
   const autoPlayRef = useRef(false);
   const prevTextRef = useRef(chapterSpeechText);
 
@@ -180,9 +174,9 @@ export default function Home() {
     if (currentChapter < currentBookConfig.chapters) {
         nextChapter = currentChapter + 1;
     } else if (currentBookIndex < BIBLE_BOOKS.length - 1) {
-        const nextBook = BIBLE_BOOKS[currentBookIndex + 1];
-        nextBookId = nextBook.id;
-        nextChapter = 1;
+       const nextBook = BIBLE_BOOKS[currentBookIndex + 1];
+       nextBookId = nextBook.id;
+       nextChapter = 1;
     } else { return; }
     router.push(`/?book=${nextBookId}&chapter=${nextChapter}`);
   }, [activeTab, router]);
@@ -203,7 +197,6 @@ export default function Home() {
     prevTextRef.current = chapterSpeechText;
   }, [chapterSpeechText, player]);
 
-  // 暗黑模式注入
   useEffect(() => {
     if (isDarkMode) { document.documentElement.classList.add('dark'); } 
     else { document.documentElement.classList.remove('dark'); }
@@ -227,10 +220,8 @@ export default function Home() {
     }
   }, [searchParams, activeTab, updateActiveTab]);
 
-// [新增] 注册全局快捷键
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // 安全检查：如果用户正在输入框或文本域内打字，则不触发快捷键
       if (
         e.target instanceof HTMLInputElement || 
         e.target instanceof HTMLTextAreaElement || 
@@ -239,17 +230,15 @@ export default function Home() {
         return;
       }
 
-      // 1. Cmd/Ctrl + K : 搜索经文
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsSearchOpen(true);
         return;
       }
 
-      // 过滤掉按住修饰键的情况，防止与浏览器自带快捷键冲突
       if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         switch (e.key.toLowerCase()) {
-          case 'f': // F: 全屏
+          case 'f':
             e.preventDefault();
             if (!document.fullscreenElement) {
               document.documentElement.requestFullscreen().catch(() => {});
@@ -257,16 +246,14 @@ export default function Home() {
               if (document.exitFullscreen) document.exitFullscreen();
             }
             break;
-            
-          case 'd': // D: 个人看板
+          case 'd':
             e.preventDefault();
             const { tabs, setActiveTab, addTab } = useBibleStore.getState();
             const existTab = tabs.find(t => t.type === 'dashboard');
             if (existTab) setActiveTab(existTab.id);
             else addTab({ type: 'dashboard' });
             break;
-            
-          case '/': // /: 搜索
+          case '/':
             e.preventDefault();
             setIsSearchOpen(true);
             break;
@@ -276,8 +263,7 @@ export default function Home() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []); // 依赖为空，内部状态通过 getState() 动态获取
-
+  }, []);
 
   const handleSwitchTab = (id: string) => {
     const tab = tabs.find(t => t.id === id);
@@ -299,32 +285,7 @@ export default function Home() {
     else { if (document.exitFullscreen) { document.exitFullscreen(); } }
   };
 
-   const toggleFullscreen = () => {
-     if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
-     else { if (document.exitFullscreen) { document.exitFullscreen(); } }
-   };
-
-   const handleSwitchTab = (id: string) => {
-     const tab = tabs.find(t => t.id === id);
-     if (tab) {
-       setActiveTab(id);
-       if (tab.type === 'read') { router.push(`/?book=${tab.book}&chapter=${tab.chapter}`); } 
-       else { router.push('/'); }
-     }
-   };
-
-   const handleAddTab = () => { addTab({ type: 'read', book: 'Gen', chapter: '1' }); };
-   const toggleLineHeight = () => {
-     if (lineHeight <= 1.6) setLineHeight(1.8);
-     else if (lineHeight <= 1.8) setLineHeight(2.2);
-     else setLineHeight(1.6);
-   };
-   const toggleFullscreen = () => {
-     if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
-     else { if (document.exitFullscreen) { document.exitFullscreen(); } }
-   };
-
-   return (
+  return (
     <main className="flex h-screen w-full overflow-hidden bg-background relative transition-colors duration-500">
       <AuthDialog />
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
@@ -415,7 +376,7 @@ export default function Home() {
         )}
       >
         
-        {/* Header - [修改] 增加过渡动画与滑动隐藏逻辑 */}
+        {/* Header */}
         <div 
           className={cn(
             "absolute top-0 left-0 right-0 z-10 p-2 md:p-4 pointer-events-none transition-transform duration-300 ease-in-out",
@@ -424,63 +385,54 @@ export default function Home() {
         >
           <header className="h-14 flex items-center justify-between px-3 md:px-4 glass-panel rounded-2xl pointer-events-auto shadow-sm">
             
-            {/* Header 左侧区域：侧边栏控制与搜索 */}
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-              {/* 移动端汉堡菜单 */}
               <Button variant="ghost" size="icon" className="md:hidden text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full" onClick={() => toggleSidebar()}>
                 <Menu className="h-5 w-5" />
               </Button>
               
-              {/* 桌面端左侧面板开关 */}
               <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full hover:bg-black/5 dark:hover:bg-white/5", !isDesktopSidebarOpen ? "text-muted-foreground" : "text-primary")} onClick={toggleDesktopSidebar}>
                 <PanelLeft className="h-5 w-5" />
               </Button>
               
-              {/* 桌面端长条形搜索框 */}
               <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-secondary/60 hover:bg-secondary border-none ml-1" onClick={() => setIsSearchOpen(true)}>
                   <Search className="w-4 h-4 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground pr-2">搜索经文、问题... ( / 或 Cmd+K )</span>
               </Button>
 
-              {/* 移动端圆形搜索图标 (修复：确保 flex 显示) */}
               <Button variant="ghost" size="icon" className="md:hidden flex text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full" onClick={() => setIsSearchOpen(true)}>
                 <Search className="h-5 w-5" />
               </Button>
             </div>
             
-            {/* [修改] 移除 overflow-hidden，让内部的 scroll 生效 */}
-            <div className="hidden md:flex flex-1 items-center mx-4 mask-linear-fade pl-2 min-w-0">
-             <TabList 
-               tabs={tabs} 
-               activeTabId={activeTabId} 
-               onSwitchTab={handleSwitchTab} 
-               onCloseTab={closeTab} 
-               onAddTab={handleAddTab} 
-             />
+            <div className="hidden md:flex flex-1 items-center overflow-hidden mx-4 mask-linear-fade pl-2 min-w-0">
+               <TabList 
+                 tabs={tabs} 
+                 activeTabId={activeTabId} 
+                 onSwitchTab={handleSwitchTab} 
+                 onCloseTab={closeTab} 
+                 onAddTab={handleAddTab} 
+               />
+            </div>
 
             <div className="md:hidden flex-1 text-center font-serif font-bold text-lg text-foreground truncate px-2 tracking-wide">
               {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : "读经计划"}
             </div>
 
-            {/* 顶部工具栏右侧图标区域 */}
             <div className="flex items-center gap-1 shrink-0">
               
-              {/* 1. 播放 */}
               {activeTab.type === 'read' && (
                  <>
-                   <HeaderPlayer player={player} text={chapterSpeechText || ""} className="hidden sm:flex bg-transparent border-none" mode="full" />
-                   <HeaderPlayer player={player} text={chapterSpeechText || ""} className="sm:hidden border-none bg-transparent p-0" mode="minimal" />
+                    <HeaderPlayer player={player} text={chapterSpeechText || ""} className="hidden sm:flex bg-transparent border-none" mode="full" />
+                    <HeaderPlayer player={player} text={chapterSpeechText || ""} className="sm:hidden border-none bg-transparent p-0" mode="minimal" />
                  </>
               )}
 
-              {/* 2. 全屏 */}
               <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="hidden sm:flex text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="全屏">
                 <Maximize className="h-4 w-4" />
               </Button>
 
               <div className="mx-1 border-l h-5 border-border/50 hidden sm:block"></div>
 
-              {/* 3, 4, 5: 行高、中英文、字体大小 */}
               <div className="hidden sm:flex items-center gap-1 pl-1">
                   <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="调整行高">
                     <AlignJustify className="h-4 w-4" />
@@ -495,15 +447,12 @@ export default function Home() {
                   </div>
               </div>
 
-              {/* 分割线 */}
               <div className="mx-1 border-l h-5 border-border/50 hidden sm:block"></div>
 
-              {/* 6. 用户头像 */}
               <div className="pl-1">
                 <UserMenu />
               </div>
               
-              {/* 移动端设置入口 (保持在最右侧防误触) */}
               <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>
@@ -511,7 +460,7 @@ export default function Home() {
           </header>
         </div>
 
-        {/* Main Content Area - [修改] 增加 onScroll 监听 */}
+        {/* Main Content Area */}
         <div id="reader-scroll-container" onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-smooth pt-20 md:pt-24 pb-24 md:pb-10">
           {activeTab.type === 'read' ? (
               <Reader key={activeTab.id} initialBook={activeTab.book || 'Gen'} initialChapter={activeTab.chapter || '1'} />
@@ -528,13 +477,13 @@ export default function Home() {
           )}
         </div>
 
-        {/* 移动端底部 Tab 栏 - [修改] 增加过渡动画与滑动隐藏逻辑 */}
+        {/* Mobile Tab Bar */}
         <div 
           className={cn(
             "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-20 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out",
             isNavVisible ? "translate-y-0" : "translate-y-[120%]"
           )}
-          >
+        >
             <TabList 
               tabs={tabs} 
               activeTabId={activeTabId} 
@@ -542,7 +491,7 @@ export default function Home() {
               onCloseTab={closeTab} 
               onAddTab={handleAddTab} 
             />
-          </div>
+        </div>
 
       </div>
     </main>
