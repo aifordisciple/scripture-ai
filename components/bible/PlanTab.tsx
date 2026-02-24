@@ -121,14 +121,14 @@ export function PlanTab() {
                <div className="flex items-start justify-between mb-4 pr-6">
                   <div>
                     <h3 className="text-lg font-bold text-foreground font-serif">{plan.title}</h3>
-                    <div className="flex items-center gap-2 mt-2">
-                       {plan.tags.map(tag => (
-                         <span key={tag} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-md font-medium">
-                           {tag}
-                         </span>
-                       ))}
-                       <span className="text-xs text-muted-foreground ml-1">{plan.durationDays} 天</span>
-                    </div>
+                     <div className="flex items-center gap-2 mt-2">
+                        {plan.tags?.map((tag: string) => (
+                          <span key={tag} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-md font-medium">
+                            {tag}
+                          </span>
+                        ))}
+                        <span className="text-xs text-muted-foreground ml-1">{plan.durationDays} 天</span>
+                     </div>
                   </div>
                </div>
                <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1 line-clamp-3">
@@ -178,57 +178,69 @@ export function PlanTab() {
          </div>
       </div>
 
-      <div className="space-y-4">
-        {currentPlanDetails.tasks.map((task) => {
-           const isCompleted = activePlan.completedDays.includes(task.day);
+       <div className="space-y-4">
+         {currentPlanDetails.tasks.map((task: any) => {
+            const isCompleted = activePlan.completedDays.includes(task.day);
 
-           return (
+            return (
              <div key={task.day} className={cn(
-                "flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-2xl border transition-all duration-300",
+                "flex flex-col gap-3 p-4 rounded-2xl border transition-all duration-300",
                 isCompleted
                   ? "bg-slate-50 border-slate-100 dark:bg-slate-900/50 dark:border-slate-800/50 opacity-60"
                   : "bg-white border-indigo-100 dark:bg-slate-900 dark:border-indigo-900/30 shadow-sm"
              )}>
-                <div className="flex items-center gap-4 md:w-32 shrink-0">
-                   <button
-                     onClick={() => markDayCompleted(task.day)}
-                     className="shrink-0 hover:scale-110 transition-transform focus:outline-none"
-                   >
-                     {isCompleted
-                        ? <CheckCircle2 className="w-7 h-7 text-indigo-500" />
-                        : <Circle className="w-7 h-7 text-slate-300 dark:text-slate-600 hover:text-indigo-400" />
-                     }
-                   </button>
-                   <span className="font-bold text-lg text-slate-700 dark:text-slate-200">
-                     第 {task.day} 天
-                   </span>
+                {/* 上半部分：打卡按钮、天数与经文列表 */}
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="flex items-center gap-4 md:w-32 shrink-0">
+                     <button
+                       onClick={() => markDayCompleted(task.day)}
+                       className="shrink-0 hover:scale-110 transition-transform focus:outline-none"
+                     >
+                       {isCompleted
+                          ? <CheckCircle2 className="w-7 h-7 text-indigo-500" />
+                          : <Circle className="w-7 h-7 text-slate-300 dark:text-slate-600 hover:text-indigo-400" />
+                       }
+                     </button>
+                     <span className="font-bold text-lg text-slate-700 dark:text-slate-200">
+                       第 {task.day} 天
+                     </span>
+                  </div>
+
+                  <div className="flex-1 flex flex-wrap gap-2">
+                     {task.readings.map((reading: any, idx: number) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleJump(reading.book, reading.chapter)}
+                          className={cn(
+                             "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border",
+                             isCompleted
+                               ? "bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-200/50"
+                               : "bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800/50 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
+                          )}
+                        >
+                           <BookOpen className="w-3.5 h-3.5" />
+                           {getBookName(reading.book)} {reading.chapter}
+                           <ArrowRight className="w-3 h-3 opacity-50 ml-1" />
+                        </button>
+                     ))}
+                  </div>
                 </div>
 
-                <div className="flex-1 flex flex-wrap gap-2">
-                   {task.readings.map((reading, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleJump(reading.book, reading.chapter)}
-                        className={cn(
-                           "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border",
-                           isCompleted
-                             ? "bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-200/50"
-                             : "bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800/50 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
-                        )}
-                      >
-                         <BookOpen className="w-3.5 h-3.5" />
-                         {getBookName(reading.book)} {reading.chapter}
-                         <ArrowRight className="w-3 h-3 opacity-50 ml-1" />
-                      </button>
-                   ))}
-                </div>
+                {/* 下半部分：[新增] AI 生成的每日导读/灵修摘要 */}
+                {task.devotional && (
+                   <div className="mt-1 md:ml-[9.5rem] bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded-xl border border-indigo-100/60 dark:border-indigo-800/30">
+                     <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-serif">
+                       {task.devotional}
+                     </p>
+                   </div>
+                )}
              </div>
-           );
-        })}
-      </div>
-      <div className="mt-8 text-center text-xs text-muted-foreground">
-        * 注：当前静态模板仅展示前几天作为示例。
-      </div>
+            );
+         })}
+       </div>
+       <div className="mt-8 text-center text-xs text-muted-foreground">
+         * 注：当前静态模板仅展示前几天作为示例。
+       </div>
     </div>
   );
 }

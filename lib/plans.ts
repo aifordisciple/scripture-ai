@@ -8,6 +8,7 @@ export interface PlanReadingTask {
 export interface PlanDay {
   day: number;
   readings: PlanReadingTask[];
+  devotional?: string; // [新增] 可选的每日灵修摘要
 }
 
 export interface ReadingPlan {

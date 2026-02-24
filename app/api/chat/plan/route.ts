@@ -1,9 +1,31 @@
 // app/api/chat/plan/route.ts
 import { generateText } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { createOpenAI } from '@ai-sdk/openai';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
+
+  // 复用模型配置逻辑
+  const provider = process.env.AI_PROVIDER || 'openai';
+  let model;
+  
+  if (provider === 'ollama') {
+    const ollama = createOpenAI({
+      baseURL: process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1',
+      apiKey: 'ollama', 
+    });
+    model = ollama(process.env.OLLAMA_MODEL || 'llama3');
+  } else if (provider === 'deepseek') {
+    const deepseek = createOpenAI({
+      baseURL: 'https://api.deepseek.com',
+      apiKey: process.env.DEEPSEEK_API_KEY,
+    });
+    model = deepseek('deepseek-chat');
+  } else {
+    const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    model = openai('gpt-4o-mini');
+  }
+
   try {
     const { prompt } = await req.json();
 
@@ -19,19 +41,23 @@ JSON 格式要求：
   "tasks": [
     {
       "day": 1,
+      "devotional": "一段优美、有启发性的灵修摘要，说明为什么为今天挑选了这些经文，以及它们如何回应用户的主题需求。",
       "readings": [
-        { "book": "Gen", "chapter": 1 }
+        { "book": "Gen", "chapter": 1 },
+        { "book": "Gen", "chapter": 2 }
       ]
     }
   ]
 }
-合法书卷ID必须是以下之一：
-Gen,Ex,Lev,Num,Deut,Jos,Judg,Ruth,1Sa,2Sa,1Ki,2Ki,1Chr,2Chr,Ezr,Neh,Esth,Job,Ps,Prov,Eccl,Song,Isa,Jer,Lam,Ezek,Dan,Hos,Joel,Amos,Obad,Jonah,Mic,Nah,Hab,Zeph,Hag,Zech,Mal,Mt,Mk,Lk,Jn,Act,Rom,1Cor,2Cor,Gal,Eph,Phil,Col,1Thess,2Thess,1Tim,2Tim,Tit,Phlm,Heb,Jas,1Pet,2Pet,1Jn,2Jn,3Jn,Jude,Rev。`;
+注意：每天可以安排一章或多章经文。
+合法书卷ID必须是以下之一（切勿使用其他缩写）：
+Gen,Exo,Lev,Num,Deu,Jos,Jdg,Rut,1Sa,2Sa,1Ki,2Ki,1Ch,2Ch,Ezr,Neh,Est,Job,Psa,Pro,Ecc,Sng,Isa,Jer,Lam,Eze,Dan,Hos,Jol,Amo,Oba,Jon,Mic,Nah,Hab,Zep,Hag,Zec,Mal,Mat,Mrk,Luk,Jhn,Act,Rom,1Co,2Co,Gal,Eph,Php,Col,1Th,2Th,1Ti,2Ti,Tit,Phm,Heb,Jas,1Pe,2Pe,1Jn,2Jn,3Jn,Jud,Rev。`;
 
     const { text } = await generateText({
-      model: openai('gpt-4o-mini'),
+      model: model,
       system: systemPrompt,
       prompt: prompt,
+      temperature: 0.7,
     });
 
     const jsonString = text.trim().replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();

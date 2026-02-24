@@ -17,7 +17,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 # 只要 package.json 不变，npm ci 就永远走缓存，瞬间完成
 RUN npm config set registry https://registry.npmmirror.com/ && \
-    npm ci
+    npm install --loglevel verbose
 
 # 3. Prisma 预生成阶段 (关键优化！)
 FROM deps AS prisma-builder
