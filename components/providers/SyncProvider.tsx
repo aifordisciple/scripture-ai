@@ -69,6 +69,7 @@ export function SyncProvider() {
             showEnglish,
             lastBook: currentBook,
             lastChapter: currentChapter,
+            customPlans: useBibleStore.getState().customPlans,
           },
           highlights: highlights.map(h => ({
             bookId: h.bookId,

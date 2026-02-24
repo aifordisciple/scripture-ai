@@ -70,6 +70,7 @@ export async function POST(req: Request) {
              showEnglish: Boolean(settings.showEnglish),
              lastBook: settings.lastBook || null,
              lastChapter: settings.lastChapter ? Number(settings.lastChapter) : null,
+             customPlans: settings.customPlans ? JSON.stringify(settings.customPlans) : "[]",
          };
          await tx.userSetting.upsert({
              where: { userId: user.id },

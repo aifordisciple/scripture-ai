@@ -1,22 +1,30 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { BIBLE_PLANS } from "@/lib/plans";
 import { BIBLE_BOOKS } from "@/lib/constants";
-import { Calendar, CheckCircle2, Circle, BookOpen, Trash2, ArrowRight, Target, PlayCircle } from "lucide-react";
+import { Calendar, CheckCircle2, Circle, BookOpen, Trash2, ArrowRight, Target, PlayCircle, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function PlanTab() {
   const router = useRouter();
-  const { activePlan, startPlan, markDayCompleted, quitPlan, tabs, addTab, setActiveTab } = useBibleStore();
+  const {
+    activePlan, startPlan, markDayCompleted, quitPlan, tabs, addTab, setActiveTab,
+    customPlans, addCustomPlan, deleteCustomPlan
+  } = useBibleStore();
+
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const allPlans = useMemo(() => [...(customPlans || []), ...BIBLE_PLANS], [customPlans]);
 
   const currentPlanDetails = useMemo(() => {
     if (!activePlan) return null;
-    return BIBLE_PLANS.find(p => p.id === activePlan.planId) || null;
-  }, [activePlan]);
+    return allPlans.find(p => p.id === activePlan.planId) || null;
+  }, [activePlan, allPlans]);
 
   const handleJump = (bookId: string, chapter: number) => {
     const readTab = tabs.find(t => t.type === 'read');
@@ -40,6 +48,26 @@ export function PlanTab() {
 
   const getBookName = (id: string) => BIBLE_BOOKS.find(b => b.id === id)?.name || id;
 
+  const handleGeneratePlan = async () => {
+    if (!aiPrompt.trim()) return;
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/chat/plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: aiPrompt })
+      });
+      const data = await res.json();
+      if (data.plan) {
+        addCustomPlan(data.plan);
+        setAiPrompt("");
+      } else {
+        alert("生成失败，请稍后重试");
+      }
+    } catch(e) { alert("网络错误"); }
+    finally { setIsGenerating(false); }
+  };
+
   if (!activePlan || !currentPlanDetails) {
     return (
       <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
@@ -53,10 +81,44 @@ export function PlanTab() {
           </div>
         </div>
 
+        {/* --- [新增] AI 定制区 --- */}
+        <div className="mb-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 md:p-8 shadow-lg text-white">
+          <h2 className="text-xl font-bold flex items-center gap-2 mb-3">
+            <Sparkles className="w-6 h-6 text-yellow-300" /> AI 专属计划定制
+          </h2>
+          <p className="text-indigo-100 text-sm mb-5">
+            告诉 AI 你的困惑或想了解的主题，为你生成专属灵修旅程。（如："我需要一个5天的释放焦虑计划"、"帮我排一个14天关于婚姻的经文"）
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              value={aiPrompt}
+              onChange={e => setAiPrompt(e.target.value)}
+              placeholder="输入你的需求..."
+              className="flex-1 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              disabled={isGenerating}
+              onKeyDown={(e) => e.key === 'Enter' && handleGeneratePlan()}
+            />
+            <Button
+              onClick={handleGeneratePlan}
+              disabled={isGenerating || !aiPrompt.trim()}
+              className="bg-white text-indigo-600 hover:bg-indigo-50 font-bold rounded-xl px-8 py-3 h-auto"
+            >
+              {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : "立即生成"}
+            </Button>
+          </div>
+        </div>
+
+        {/* 计划列表 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {BIBLE_PLANS.map((plan) => (
-            <div key={plan.id} className="flex flex-col bg-white dark:bg-slate-900 rounded-2xl p-6 border dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
-               <div className="flex items-start justify-between mb-4">
+          {allPlans.map((plan) => (
+            <div key={plan.id} className="flex flex-col bg-white dark:bg-slate-900 rounded-2xl p-6 border dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative group">
+               {/* 允许删除自定义计划 */}
+               {plan.id.startsWith('custom-') && (
+                 <button onClick={() => deleteCustomPlan(plan.id)} className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Trash2 className="w-4 h-4" />
+                 </button>
+               )}
+               <div className="flex items-start justify-between mb-4 pr-6">
                   <div>
                     <h3 className="text-lg font-bold text-foreground font-serif">{plan.title}</h3>
                     <div className="flex items-center gap-2 mt-2">
@@ -68,9 +130,8 @@ export function PlanTab() {
                        <span className="text-xs text-muted-foreground ml-1">{plan.durationDays} 天</span>
                     </div>
                   </div>
-                  <Target className="w-8 h-8 text-indigo-100 dark:text-indigo-900/50" />
                </div>
-               <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1">
+               <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1 line-clamp-3">
                  {plan.description}
                </p>
                <Button onClick={() => startPlan(plan.id)} className="w-full gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white">

@@ -124,6 +124,9 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
              updates.tabs = newTabs;
          }
       }
+      if (data.settings.customPlans) {
+          try { updates.customPlans = JSON.parse(data.settings.customPlans); } catch (e) {}
+      }
     }
     if (data.highlights) updates.highlights = data.highlights;
     if (data.notes) {
@@ -172,6 +175,11 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
     return { activePlan: { ...state.activePlan, completedDays: newDays } };
   }),
   quitPlan: () => set({ activePlan: null }),
+
+  // [新增] 自定义计划逻辑
+  customPlans: [],
+  addCustomPlan: (plan) => set((state) => ({ customPlans: [plan, ...state.customPlans] })),
+  deleteCustomPlan: (id) => set((state) => ({ customPlans: state.customPlans.filter(p => p.id !== id) })),
 });
 
 export const createSyncSlice: StateCreator<StoreState, [], [], SyncSlice> = (set) => ({

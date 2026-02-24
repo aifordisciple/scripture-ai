@@ -1,0 +1,51 @@
+# docker-compose.dev.yml
+services:
+  web:
+    container_name: scripture-ai-web-dev
+    image: node:20-alpine
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env.local
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/scripture_db
+      - AUTH_TRUST_HOST=true
+    volumes:
+      # 将本地代码映射进容器 (实现热更新)
+      - .:/app
+      # 隔离容器的依赖包缓存，防止与宿主机 Mac/Windows 冲突
+      - /app/node_modules
+      - /app/.next
+    # 容器启动时自动安装基础依赖并运行 dev
+    command: >
+      sh -c "sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories &&
+             apk add --no-cache python3 py3-pip openssl libc6-compat &&
+             pip3 install edge-tts --break-system-packages -i https://mirrors.aliyun.com/pypi/simple/ &&
+             npm config set registry https://registry.npmmirror.com/ &&
+             npm install &&
+             npx prisma generate &&
+             npm run dev"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: scripture-ai-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: scripture_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d scripture_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

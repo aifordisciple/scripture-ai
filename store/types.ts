@@ -135,7 +135,7 @@ export interface UserDataSlice {
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
   
-  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[], interactions?: any[], activePlan?: any }) => void;
+  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[], interactions?: any[], activePlan?: any, customPlans?: any[] }) => void;
   
   interactions: InteractionLog[];
   recordInteraction: (bookId: string, chapter: number, weight?: number) => void;
@@ -149,6 +149,11 @@ export interface UserDataSlice {
   startPlan: (planId: string) => void;
   markDayCompleted: (day: number) => void;
   quitPlan: () => void;
+
+  // [新增] 自定义计划
+  customPlans: any[];
+  addCustomPlan: (plan: any) => void;
+  deleteCustomPlan: (id: string) => void;
 }
 
 // --------------------------------------------------

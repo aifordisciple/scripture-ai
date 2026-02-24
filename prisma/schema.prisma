@@ -67,6 +67,9 @@ model UserSetting {
   // 进度记忆
   lastBook      String?
   lastChapter   Int?
+
+  // [新增] 保存 AI 定制的读经计划
+  customPlans   String? @db.Text
 }
 
 model Highlight {
