@@ -19,6 +19,20 @@ export interface HighlightData {
   chapter: number;
   verse: number;
   color: string;
+  updatedAt?: string;
+}
+
+export type SyncMode = 'merge' | 'overwrite';
+
+export interface SyncSlice {
+  syncMode: SyncMode;
+  setSyncMode: (mode: SyncMode) => void;
+  lastSyncTime: number | null;
+  setLastSyncTime: (time: number) => void;
+  isSyncing: boolean;
+  setIsSyncing: (syncing: boolean) => void;
+  syncError: string | null;
+  setSyncError: (error: string | null) => void;
 }
 
 export interface NoteData {
@@ -27,6 +41,7 @@ export interface NoteData {
   chapter: number;
   verse: number;
   content: string;
+  updatedAt?: string;
 }
 
 export interface VerseRef {
@@ -127,4 +142,4 @@ export interface UserDataSlice {
 // --------------------------------------------------
 // 3. 聚合总状态类型
 // --------------------------------------------------
-export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice;
+export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice;

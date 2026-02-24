@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice } from './types';
 
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
   isAuthOpen: false,
@@ -84,16 +84,21 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   highlights: [],
   setHighlights: (highlights) => set({ highlights }),
   addHighlightLocally: (h) => set((state) => ({
-    highlights: [...state.highlights.filter(i => !(i.bookId === h.bookId && i.chapter === h.chapter && i.verse === h.verse)), h]
+    highlights: [...state.highlights.filter(i => !(i.bookId === h.bookId && i.chapter === h.chapter && i.verse === h.verse)), { 
+      ...h, 
+      updatedAt: h.updatedAt || new Date().toISOString() 
+    }]
   })),
   removeHighlightLocally: (bookId, chapter, verse) => set((state) => ({
     highlights: state.highlights.filter(h => !(h.bookId === bookId && h.chapter === chapter && h.verse === verse))
   })),
 
   notes: [],
-  addNote: (note) => set((state) => ({ notes: [...state.notes, note] })),
+  addNote: (note) => set((state) => ({ 
+    notes: [...state.notes, { ...note, updatedAt: note.updatedAt || new Date().toISOString() }] 
+  })),
   updateNote: (id, content) => set((state) => ({
-    notes: state.notes.map(n => n.id === id ? { ...n, content } : n)
+    notes: state.notes.map(n => n.id === id ? { ...n, content, updatedAt: new Date().toISOString() } : n)
   })),
   deleteNote: (id) => set((state) => ({
     notes: state.notes.filter(n => n.id !== id)
@@ -141,4 +146,15 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   clearAllHighlights: () => set({ highlights: [] }),
   clearAllNotes: () => set({ notes: [] }),
   clearAllInteractions: () => set({ interactions: [] }),
+});
+
+export const createSyncSlice: StateCreator<StoreState, [], [], SyncSlice> = (set) => ({
+  syncMode: 'merge',
+  setSyncMode: (mode) => set({ syncMode: mode }),
+  lastSyncTime: null,
+  setLastSyncTime: (time) => set({ lastSyncTime: time }),
+  isSyncing: false,
+  setIsSyncing: (syncing) => set({ isSyncing: syncing }),
+  syncError: null,
+  setSyncError: (error) => set({ syncError: error }),
 });

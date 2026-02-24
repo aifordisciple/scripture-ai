@@ -6,7 +6,8 @@ import {
   createUISlice, 
   createReaderSlice, 
   createAISlice, 
-  createUserDataSlice 
+  createUserDataSlice,
+  createSyncSlice 
 } from './slices';
 
 // --------------------------------------------------
@@ -19,6 +20,7 @@ export const useBibleStore = create<StoreState>()(
       ...createReaderSlice(...a),
       ...createAISlice(...a),
       ...createUserDataSlice(...a),
+      ...createSyncSlice(...a),
     }),
     {
       name: 'bible-storage', 
@@ -35,6 +37,8 @@ export const useBibleStore = create<StoreState>()(
         aiRequestTrigger: null,
         chapterSpeechText: "", 
         scrollToVerse: null,
+        isSyncing: false,
+        syncError: null,
       }),
     }
   )

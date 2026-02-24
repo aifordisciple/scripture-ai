@@ -18,6 +18,7 @@ import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
 import { BIBLE_BOOKS } from "@/lib/constants"; 
 import { useAudioPlayer } from "@/hooks/use-audio-player"; 
 import { UserMenu } from "@/components/auth/UserMenu";
+import { SyncSettings } from "@/components/settings/SyncSettings";
 
 // 动态按需加载
 const AISidebar = dynamic(() => import("@/components/bible/AISidebar").then(mod => mod.AISidebar), { ssr: false });
@@ -307,6 +308,9 @@ export default function Home() {
                 {showEnglish ? "已开启" : "已关闭"}
               </Button>
             </div>
+            
+            {/* 数据同步设置 */}
+            <SyncSettings />
           </div>
         </SheetContent>
       </Sheet>

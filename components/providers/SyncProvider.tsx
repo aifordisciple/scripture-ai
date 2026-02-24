@@ -2,64 +2,143 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
 
 export function SyncProvider() {
   const { data: session } = useSession();
   const { 
     setAllUserData, 
-    fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs 
+    fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
+    highlights, notes,
+    syncMode, setSyncMode,
+    lastSyncTime, setLastSyncTime,
+    isSyncing, setIsSyncing,
+    syncError, setSyncError,
   } = useBibleStore();
 
   const isLoadedRef = useRef(false);
+  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 1. 登录后拉取数据
   useEffect(() => {
     if (session?.user && !isLoadedRef.current) {
+      setIsSyncing(true);
+      setSyncError(null);
+      
       fetch("/api/user/sync")
         .then((res) => res.json())
         .then((data) => {
           setAllUserData(data);
+          setLastSyncTime(Date.now());
           isLoadedRef.current = true;
-          console.log("User data synced");
+          console.log("User data synced from server");
         })
-        .catch((err) => console.error("Sync failed", err));
+        .catch((err) => {
+          console.error("Sync failed", err);
+          setSyncError("同步失败，请稍后重试");
+        })
+        .finally(() => {
+          setIsSyncing(false);
+        });
     }
-  }, [session, setAllUserData]);
+  }, [session, setAllUserData, setLastSyncTime, setIsSyncing, setSyncError]);
 
-  // 2. 监听设置变化并自动保存 (防抖 2秒)
-  useEffect(() => {
+  // 2. 手动同步函数（支持 merge/overwrite 模式）
+  const syncToServer = useCallback(async () => {
     if (!session?.user) return;
-    if (!isLoadedRef.current) return; // 防止初始加载覆盖服务器数据
-
+    
+    setIsSyncing(true);
+    setSyncError(null);
+    
     const activeTab = tabs.find(t => t.id === activeTabId);
-    
-    // [修复] 确保 book 和 chapter 为 undefined 时回退为 null
     const lastBook = activeTab?.type === 'read' ? (activeTab.book ?? null) : null;
-    
-    // [修复] 确保 chapter 存在且为字符串时才调用 parseInt
     const lastChapter = (activeTab?.type === 'read' && activeTab.chapter) 
       ? parseInt(activeTab.chapter) 
       : null;
 
-    const timer = setTimeout(() => {
-      fetch("/api/user/settings", {
+    try {
+      const res = await fetch("/api/user/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fontSize,
-          lineHeight,
-          isDarkMode,
-          showEnglish,
-          lastBook,
-          lastChapter
+          mode: syncMode,
+          settings: {
+            fontSize,
+            lineHeight,
+            isDarkMode,
+            showEnglish,
+            lastBook,
+            lastChapter,
+          },
+          highlights: highlights.map(h => ({
+            bookId: h.bookId,
+            chapter: h.chapter,
+            verse: h.verse,
+            color: h.color,
+            updatedAt: h.updatedAt,
+          })),
+          notes: notes.map(n => ({
+            id: n.id,
+            bookId: n.bookId,
+            chapter: n.chapter,
+            verse: n.verse,
+            content: n.content,
+            updatedAt: n.updatedAt,
+          })),
         }),
       });
-    }, 2000);
 
-    return () => clearTimeout(timer);
-  }, [session, fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs]);
+      if (!res.ok) throw new Error("Sync failed");
+
+      const data = await res.json();
+      
+      if (data.ok && data.data) {
+        // 更新本地状态为服务器返回的最新数据
+        setAllUserData(data.data);
+        setLastSyncTime(Date.now());
+        console.log(`Data synced to server (${syncMode} mode)`);
+      }
+    } catch (err) {
+      console.error("Sync to server failed", err);
+      setSyncError("同步到服务器失败");
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [
+    session, 
+    syncMode, 
+    fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
+    highlights, notes,
+    setAllUserData, setLastSyncTime, setIsSyncing, setSyncError,
+  ]);
+
+  // 3. 监听设置变化并自动保存 (防抖 3秒)
+  useEffect(() => {
+    if (!session?.user) return;
+    if (!isLoadedRef.current) return;
+
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+
+    saveTimerRef.current = setTimeout(() => {
+      syncToServer();
+    }, 3000);
+
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, [session, syncToServer]);
+
+  // 4. 暴露同步函数到全局（可选，用于手动触发）
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).__syncToServer = syncToServer;
+    }
+  }, [syncToServer]);
 
   return null;
 }

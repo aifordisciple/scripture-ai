@@ -79,6 +79,7 @@ model Highlight {
   content   String?  // 选中的经文内容快照
   
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, bookId, chapter])
 }
