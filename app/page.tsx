@@ -11,7 +11,7 @@ import { SearchResults } from "@/components/bible/SearchResults";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones } from "lucide-react";
+import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer"; 
@@ -31,6 +31,92 @@ const DashboardTab = dynamic(() => import("@/components/bible/DashboardTab").the
 const HighlightsTab = dynamic(() => import("@/components/bible/HighlightsTab").then(mod => mod.HighlightsTab), { ssr: false });
 const NotesTab = dynamic(() => import("@/components/bible/NotesTab").then(mod => mod.NotesTab), { ssr: false });
 const PlanTab = dynamic(() => import("@/components/bible/PlanTab").then(mod => mod.PlanTab), { ssr: false });
+
+// --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
+const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 1);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    const timer = setTimeout(checkScroll, 150);
+    return () => {
+      window.removeEventListener('resize', checkScroll);
+      clearTimeout(timer);
+    };
+  }, [tabs, checkScroll]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 200;
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+      setTimeout(checkScroll, 350);
+    }
+  };
+
+  return (
+    <div className="relative flex items-center w-full group overflow-hidden">
+      {canScrollLeft && (
+        <div className="absolute left-0 z-10 h-full flex items-center pr-4 bg-gradient-to-r from-background via-background to-transparent">
+          <button onClick={(e) => { e.stopPropagation(); scroll('left'); }} className="w-6 h-6 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border shadow-sm text-muted-foreground hover:text-foreground transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      <div
+        ref={scrollRef}
+        onScroll={checkScroll}
+        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full px-1 scroll-smooth"
+      >
+        {tabs.map((tab: any) => (
+          <div
+            key={tab.id}
+            onClick={() => onSwitchTab(tab.id)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full md:rounded-lg text-sm md:text-xs font-medium cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group/tab shrink-0",
+              activeTabId === tab.id
+                ? "bg-white dark:bg-slate-800 border-primary/20 text-primary shadow-sm"
+                : "bg-transparent border-transparent text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5"
+            )}
+          >
+            <span className="max-w-[120px] truncate select-none">
+              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? '📊 数据看板' : tab.type === 'highlights' ? '🖍️ 我的高亮' : tab.type === 'notes' ? '📝 我的笔记' : '📅 读经计划'}
+            </span>
+            <X
+              className={cn(
+                "w-3.5 h-3.5 hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors flex-shrink-0 p-0.5",
+                activeTabId === tab.id ? "opacity-60 hover:opacity-100" : "opacity-0 group-hover/tab:opacity-60"
+              )}
+              onClick={(e) => { e.stopPropagation(); onCloseTab(tab.id); }}
+            />
+          </div>
+        ))}
+        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 ml-1" onClick={onAddTab}>
+          <Plus className="w-4 h-4" />
+        </Button>
+      </div>
+
+      {canScrollRight && (
+        <div className="absolute right-0 z-10 h-full flex items-center pl-4 bg-gradient-to-l from-background via-background to-transparent">
+          <button onClick={(e) => { e.stopPropagation(); scroll('right'); }} className="w-6 h-6 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border shadow-sm text-muted-foreground hover:text-foreground transition-colors">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function Home() {
   const router = useRouter();
@@ -213,39 +299,32 @@ export default function Home() {
     else { if (document.exitFullscreen) { document.exitFullscreen(); } }
   };
 
-  // 优化过的 Tab 标签栏 UI
-  const TabList = () => (
-    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full px-1">
-        {tabs.map(tab => (
-        <div 
-          key={tab.id} 
-          onClick={() => handleSwitchTab(tab.id)} 
-          className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full md:rounded-lg text-sm md:text-xs font-medium cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group shrink-0", 
-            activeTabId === tab.id 
-              ? "bg-white dark:bg-slate-800 border-primary/20 text-primary shadow-sm" 
-              : "bg-transparent border-transparent text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5"
-          )}
-        >
-            <span className="max-w-[120px] truncate">
-              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? '📊 数据看板' : tab.type === 'highlights' ? '🖍️ 我的高亮' : tab.type === 'notes' ? '📝 我的笔记' : '📅 读经计划'}
-            </span>
-            <X 
-              className={cn(
-                "w-3.5 h-3.5 hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors flex-shrink-0 p-0.5", 
-                activeTabId === tab.id ? "opacity-60 hover:opacity-100" : "opacity-0 group-hover:opacity-60"
-              )} 
-              onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }} 
-            />
-        </div>
-        ))}
-        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5" onClick={handleAddTab}>
-          <Plus className="w-4 h-4" />
-        </Button>
-    </div>
-  );
+   const toggleFullscreen = () => {
+     if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
+     else { if (document.exitFullscreen) { document.exitFullscreen(); } }
+   };
 
-  return (
+   const handleSwitchTab = (id: string) => {
+     const tab = tabs.find(t => t.id === id);
+     if (tab) {
+       setActiveTab(id);
+       if (tab.type === 'read') { router.push(`/?book=${tab.book}&chapter=${tab.chapter}`); } 
+       else { router.push('/'); }
+     }
+   };
+
+   const handleAddTab = () => { addTab({ type: 'read', book: 'Gen', chapter: '1' }); };
+   const toggleLineHeight = () => {
+     if (lineHeight <= 1.6) setLineHeight(1.8);
+     else if (lineHeight <= 1.8) setLineHeight(2.2);
+     else setLineHeight(1.6);
+   };
+   const toggleFullscreen = () => {
+     if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
+     else { if (document.exitFullscreen) { document.exitFullscreen(); } }
+   };
+
+   return (
     <main className="flex h-screen w-full overflow-hidden bg-background relative transition-colors duration-500">
       <AuthDialog />
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
@@ -369,9 +448,15 @@ export default function Home() {
               </Button>
             </div>
             
-            <div className="hidden md:flex flex-1 items-center overflow-hidden mx-4 mask-linear-fade pl-2">
-               <TabList />
-            </div>
+            {/* [修改] 移除 overflow-hidden，让内部的 scroll 生效 */}
+            <div className="hidden md:flex flex-1 items-center mx-4 mask-linear-fade pl-2 min-w-0">
+             <TabList 
+               tabs={tabs} 
+               activeTabId={activeTabId} 
+               onSwitchTab={handleSwitchTab} 
+               onCloseTab={closeTab} 
+               onAddTab={handleAddTab} 
+             />
 
             <div className="md:hidden flex-1 text-center font-serif font-bold text-lg text-foreground truncate px-2 tracking-wide">
               {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : "读经计划"}
@@ -449,9 +534,15 @@ export default function Home() {
             "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-20 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out",
             isNavVisible ? "translate-y-0" : "translate-y-[120%]"
           )}
-        >
-            <TabList />
-        </div>
+          >
+            <TabList 
+              tabs={tabs} 
+              activeTabId={activeTabId} 
+              onSwitchTab={handleSwitchTab} 
+              onCloseTab={closeTab} 
+              onAddTab={handleAddTab} 
+            />
+          </div>
 
       </div>
     </main>

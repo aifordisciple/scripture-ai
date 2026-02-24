@@ -10,7 +10,7 @@ import { Book, ChevronRight, Search, X, Library } from "lucide-react";
 
 export function Sidebar() {
   const router = useRouter();
-  const { tabs, activeTabId, updateActiveTab, isSidebarOpen, toggleSidebar } = useBibleStore();
+  const { tabs, activeTabId, updateActiveTab, isSidebarOpen, toggleSidebar, setActiveTab, addTab } = useBibleStore();
   
   // 获取当前正在阅读的书卷和章节
   // [修复 TS 报错] 使用 ?? null 将可能的 undefined 强制转换为 null
@@ -40,7 +40,24 @@ export function Sidebar() {
 
   // 处理章节点击
   const handleChapterClick = (bookId: string, chapter: number) => {
-    updateActiveTab({ book: bookId, chapter: chapter.toString() });
+    // 寻找是否已经存在阅读 Tab
+    const readTab = tabs.find(t => t.type === 'read');
+    
+    if (readTab) {
+       // 如果有，就激活它并更新内容
+       setActiveTab(readTab.id);
+       useBibleStore.setState((state) => ({
+           tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: bookId, chapter: chapter.toString() } : t)
+       }));
+    } else {
+       // 如果没有，就新建一个阅读 Tab
+       addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
+    }
+    
+    // 清除可能存在的滚动锚点，确保跳到章节开头
+    useBibleStore.getState().setScrollToVerse(null);
+    
+    // 同步 URL
     router.push(`/?book=${bookId}&chapter=${chapter}`);
     
     if (isSidebarOpen) {
