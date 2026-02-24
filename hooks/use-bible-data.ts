@@ -17,13 +17,10 @@ export function useBibleData(book: string, chapter: string) {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // [修复] 移除了原有的 setHighlights，防止单章数据覆盖全局离线缓存
   const { clearSelection, setChapterSpeechText } = useBibleStore();
 
-  // 1. 获取当前章节数据
   useEffect(() => {
     async function fetchData() {
-      // 优化：如果内存中还没有数据才显示全局 loading
       if (verses.length === 0) setLoading(true);
       
       clearSelection();
@@ -31,24 +28,24 @@ export function useBibleData(book: string, chapter: string) {
       
       try {
         const versesRes = await fetch(`/api/bible?book=${book}&chapter=${chapter}`);
+        if (!versesRes.ok) throw new Error("API request failed");
+        
         const versesJson = await versesRes.json();
 
-        if (versesJson.data) {
+        if (versesJson.data && versesJson.data.length > 0) {
             setVerses(versesJson.data);
             const fullText = versesJson.data
                 .filter((v: Verse) => v.version === 'CUV')
                 .map((v: Verse) => v.content)
                 .join(" ");
             setChapterSpeechText(fullText);
+        } else {
+            console.warn(`No verses found for ${book} ${chapter}, Database might be empty.`);
+            setVerses([]);
         }
-        
-        // ⚠️ 核心修复区：
-        // 删除了 fetch(`/api/highlight`) 并 setHighlights 的逻辑。
-        // 因为用户的个人数据现在由 Zustand 本地持久化与 SyncProvider 全局接管，
-        // 这样 PWA 在离线状态下也能完美保留并展示历史高亮，不受网络请求干扰。
-
       } catch (error) {
         console.error("Failed to fetch bible data:", error);
+        setVerses([]);
       } finally {
         setLoading(false);
       }
@@ -57,9 +54,7 @@ export function useBibleData(book: string, chapter: string) {
     fetchData();
   }, [book, chapter, clearSelection, setChapterSpeechText]);
 
-  // 2. 静默预取下一章数据 (Prefetching)
   useEffect(() => {
-    // 延迟 2 秒执行预取，确保不抢占当前页面的网络和渲染资源
     const timer = setTimeout(() => {
       const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book);
       if (currentBookIndex === -1) return;
@@ -70,17 +65,15 @@ export function useBibleData(book: string, chapter: string) {
       let nextBookId = book;
       let nextChapter = currentChapterInt;
 
-      // 计算下一章的位置
       if (currentChapterInt < currentBookConfig.chapters) {
           nextChapter = currentChapterInt + 1;
       } else if (currentBookIndex < BIBLE_BOOKS.length - 1) {
           nextBookId = BIBLE_BOOKS[currentBookIndex + 1].id;
           nextChapter = 1;
       } else {
-          return; // 已是圣经最后一章
+          return;
       }
 
-      // [修复] 仅预取经文数据即可，减少不必要的 highlight API 请求
       fetch(`/api/bible?book=${nextBookId}&chapter=${nextChapter}`).catch(() => {});
 
     }, 2000);

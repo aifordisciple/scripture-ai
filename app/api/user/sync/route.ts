@@ -9,24 +9,29 @@ export async function GET() {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: {
-      settings: true,
-      highlights: true,
-      notes: true,
-      interactions: true // [修复] GET 时必须包含 interactions，否则换设备记录会丢失
-    }
-  });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        settings: true,
+        highlights: true,
+        notes: true,
+        interactions: true // GET 时必须包含 interactions
+      }
+    });
 
-  if (!user) return new NextResponse("User not found", { status: 404 });
+    if (!user) return new NextResponse("User not found", { status: 404 });
 
-  return NextResponse.json({
-    settings: user.settings,
-    highlights: user.highlights,
-    notes: user.notes,
-    interactions: user.interactions
-  });
+    return NextResponse.json({
+      settings: user.settings,
+      highlights: user.highlights,
+      notes: user.notes,
+      interactions: user.interactions
+    });
+  } catch (err) {
+    console.error("GET Sync Error:", err);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
@@ -37,7 +42,7 @@ export async function POST(req: Request) {
 
   try {
     const data = await req.json();
-    const { settings, highlights, notes, interactions } = data;
+    const { settings, highlights, notes, interactions } = data || {};
 
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) return new NextResponse("User not found", { status: 404 });
@@ -45,7 +50,6 @@ export async function POST(req: Request) {
     await prisma.$transaction(async (tx) => {
       // 1. 同步设置
       if (settings) {
-         // [修复] 强制清洗字段，防止前端传入非法属性导致 Prisma 报错，处理 NaN
          const safeSettings = {
              fontSize: Number(settings.fontSize) || 18,
              lineHeight: Number(settings.lineHeight) || 1.8,
@@ -62,49 +66,51 @@ export async function POST(req: Request) {
       }
 
       // 2. 同步高亮
-      if (highlights && Array.isArray(highlights)) {
+      if (Array.isArray(highlights)) {
           await tx.highlight.deleteMany({ where: { userId: user.id } });
-          if (highlights.length > 0) {
+          const validHighlights = highlights.filter(h => h && h.bookId);
+          if (validHighlights.length > 0) {
               await tx.highlight.createMany({
-                  // [修复] 显式映射字段，防止注入前端的额外 Key
-                  data: highlights.map((h: any) => ({
+                  data: validHighlights.map((h: any) => ({
                       userId: user.id,
-                      bookId: h.bookId,
-                      chapter: h.chapter,
-                      verse: h.verse,
-                      color: h.color
+                      bookId: String(h.bookId),
+                      chapter: Number(h.chapter) || 1,
+                      verse: Number(h.verse) || 1,
+                      color: String(h.color || 'yellow')
                   }))
               });
           }
       }
 
       // 3. 同步笔记
-      if (notes && Array.isArray(notes)) {
+      if (Array.isArray(notes)) {
           await tx.note.deleteMany({ where: { userId: user.id } });
-          if (notes.length > 0) {
+          const validNotes = notes.filter(n => n && n.bookId && n.id);
+          if (validNotes.length > 0) {
               await tx.note.createMany({
-                  data: notes.map((n: any) => ({
-                      id: n.id,
+                  data: validNotes.map((n: any) => ({
+                      id: String(n.id),
                       userId: user.id,
-                      bookId: n.bookId,
-                      chapter: n.chapter,
-                      verse: n.verse,
-                      content: n.content
+                      bookId: String(n.bookId),
+                      chapter: Number(n.chapter) || 1,
+                      verse: Number(n.verse) || 1,
+                      content: String(n.content || '')
                   }))
               });
           }
       }
 
       // 4. 同步阅读记录
-      if (interactions && Array.isArray(interactions)) {
+      if (Array.isArray(interactions)) {
           await tx.interaction.deleteMany({ where: { userId: user.id } });
-          if (interactions.length > 0) {
+          const validInteractions = interactions.filter(i => i && i.bookId);
+          if (validInteractions.length > 0) {
                await tx.interaction.createMany({
-                  data: interactions.map((i: any) => ({
+                  data: validInteractions.map((i: any) => ({
                       userId: user.id,
-                      bookId: i.bookId,
-                      chapter: i.chapter,
-                      count: i.count
+                      bookId: String(i.bookId),
+                      chapter: Number(i.chapter) || 1,
+                      count: Number(i.count) || 1
                   }))
               });
           }
