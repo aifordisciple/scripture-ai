@@ -23,15 +23,13 @@ export async function GET() {
 
     if (!user) return new NextResponse("User not found", { status: 404 });
 
-    let activePlan = null;
-    if (user.planProgress) {
-        try {
-            activePlan = {
-                planId: user.planProgress.planId,
-                startDate: user.planProgress.startDate.getTime(),
-                completedDays: JSON.parse(user.planProgress.completedDays || "[]")
-            };
-        } catch (e) { console.error("Failed to parse planProgress", e); }
+    let activePlans = [];
+    if (user.planProgress && Array.isArray(user.planProgress)) {
+        activePlans = user.planProgress.map((p: any) => ({
+            planId: p.planId,
+            startDate: p.startDate.getTime(),
+            completedDays: JSON.parse(p.completedDays || "[]")
+        }));
     }
 
     return NextResponse.json({
@@ -39,7 +37,7 @@ export async function GET() {
       highlights: user.highlights,
       notes: user.notes,
       interactions: user.interactions,
-      activePlan
+      activePlans
     });
   } catch (err) {
     console.error("GET Sync Error:", err);
@@ -55,7 +53,7 @@ export async function POST(req: Request) {
 
   try {
     const data = await req.json();
-    const { settings, highlights, notes, interactions, activePlan } = data || {};
+    const { settings, highlights, notes, interactions, activePlans } = data || {};
 
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) return new NextResponse("User not found", { status: 404 });
@@ -130,22 +128,19 @@ export async function POST(req: Request) {
           }
       }
 
-      // 5. 同步读经计划
-      if (activePlan !== undefined) {
-        if (activePlan === null) {
+      // 5. 同步读经计划 (多计划全量覆盖同步)
+      if (Array.isArray(activePlans)) {
           await tx.planProgress.deleteMany({ where: { userId: user.id } });
-        } else {
-          const safePlan = {
-            planId: String(activePlan.planId),
-            startDate: new Date(activePlan.startDate || Date.now()),
-            completedDays: JSON.stringify(activePlan.completedDays || [])
-          };
-          await tx.planProgress.upsert({
-            where: { userId: user.id },
-            update: safePlan,
-            create: { ...safePlan, userId: user.id }
-          });
-        }
+          if (activePlans.length > 0) {
+              await tx.planProgress.createMany({
+                  data: activePlans.map((p: any) => ({
+                      userId: user.id,
+                      planId: String(p.planId),
+                      startDate: new Date(p.startDate || Date.now()),
+                      completedDays: JSON.stringify(p.completedDays || [])
+                  }))
+              });
+          }
       }
     });
 

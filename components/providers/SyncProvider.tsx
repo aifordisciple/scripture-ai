@@ -10,7 +10,7 @@ export function SyncProvider() {
   const {
     setAllUserData,
     fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
-    highlights, notes, interactions, activePlan,
+    highlights, notes, interactions, activePlans,
     syncMode, setSyncMode,
     lastSyncTime, setLastSyncTime,
     isSyncing, setIsSyncing,
@@ -89,7 +89,7 @@ export function SyncProvider() {
             chapter: i.chapter,
             count: i.count,
           })),
-          activePlan,
+          activePlans,
         }),
       });
 
@@ -113,7 +113,7 @@ export function SyncProvider() {
     session,
     syncMode,
     fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
-    highlights, notes, interactions, activePlan,
+    highlights, notes, interactions, activePlans,
     setAllUserData, setLastSyncTime, setIsSyncing, setSyncError,
   ]);
 

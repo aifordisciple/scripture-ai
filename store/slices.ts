@@ -135,14 +135,12 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
     if (data.interactions) {
       updates.interactions = data.interactions.map((i: any) => ({ bookId: i.bookId, chapter: i.chapter, count: i.count }));
     }
-    if (data.activePlan) {
-      updates.activePlan = {
-        planId: data.activePlan.planId,
-        startDate: new Date(data.activePlan.startDate).getTime(),
-        completedDays: typeof data.activePlan.completedDays === 'string'
-            ? JSON.parse(data.activePlan.completedDays)
-            : (data.activePlan.completedDays || [])
-      };
+     if (data.activePlans) {
+      updates.activePlans = data.activePlans.map((p: any) => ({
+        planId: p.planId,
+        startDate: new Date(p.startDate).getTime(),
+        completedDays: typeof p.completedDays === 'string' ? JSON.parse(p.completedDays) : (p.completedDays || [])
+      }));
     }
     set(updates);
   },
@@ -164,17 +162,29 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   clearAllNotes: () => set({ notes: [] }),
   clearAllInteractions: () => set({ interactions: [] }),
 
-  // [新增] 读经计划具体实现
-  activePlan: null,
-  startPlan: (planId) => set({ activePlan: { planId, startDate: Date.now(), completedDays: [] } }),
-  markDayCompleted: (day) => set((state) => {
-    if (!state.activePlan) return state;
-    const newDays = state.activePlan.completedDays.includes(day)
-      ? state.activePlan.completedDays.filter(d => d !== day)
-      : [...state.activePlan.completedDays, day].sort((a, b) => a - b);
-    return { activePlan: { ...state.activePlan, completedDays: newDays } };
+  // [修改] 读经计划多任务逻辑
+  activePlans: [],
+  startPlan: (planId) => set((state) => {
+    if (state.activePlans.some(p => p.planId === planId)) return state; // 防止重复加入
+    return { activePlans: [...state.activePlans, { planId, startDate: Date.now(), completedDays: [] }] };
   }),
-  quitPlan: () => set({ activePlan: null }),
+  markDayCompleted: (planId, day) => set((state) => {
+    const plan = state.activePlans.find(p => p.planId === planId);
+    if (!plan) return state;
+
+    const newDays = plan.completedDays.includes(day)
+      ? plan.completedDays.filter(d => d !== day)
+      : [...plan.completedDays, day].sort((a, b) => a - b);
+
+    return {
+      activePlans: state.activePlans.map(p =>
+        p.planId === planId ? { ...p, completedDays: newDays } : p
+      )
+    };
+  }),
+  quitPlan: (planId) => set((state) => ({
+    activePlans: state.activePlans.filter(p => p.planId !== planId)
+  })),
 
   // [新增] 自定义计划逻辑
   customPlans: [],

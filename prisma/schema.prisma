@@ -50,7 +50,7 @@ model User {
   cards         ScriptureCard[]
   chatMessages  ChatMessage[] // [新增] 关联聊天记录
   interactions  Interaction[] // [新增] 关联阅读记录
-  planProgress  PlanProgress? // [新增] 读经计划进度
+  planProgress  PlanProgress[] // [修改] 之前是 PlanProgress?，现在改为数组
 }
 
 model UserSetting {
@@ -145,13 +145,15 @@ model Interaction {
   @@index([userId, bookId, chapter])
 }
 
-// [新增] 读经计划进度表
+// [修改] 读经计划记录表（支持多计划）
 model PlanProgress {
   id            String   @id @default(cuid())
-  userId        String   @unique // 限制每个用户同时只能有一个活跃的读经计划
+  userId        String   // [修改] 去掉了 @unique，允许一个用户有多个活跃计划
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   planId        String
   startDate     DateTime @default(now())
-  completedDays String   @default("[]") // 存储为 JSON 数组字符串，例如 "[1, 2, 3]"
+  completedDays String   @default("[]")
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, planId]) // [新增] 联合唯一约束，防止同一个计划被重复参加
 }

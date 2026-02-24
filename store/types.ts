@@ -135,20 +135,20 @@ export interface UserDataSlice {
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
   
-  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[], interactions?: any[], activePlan?: any, customPlans?: any[] }) => void;
-  
-  interactions: InteractionLog[];
-  recordInteraction: (bookId: string, chapter: number, weight?: number) => void;
+  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[], interactions?: any[], activePlans?: any[], customPlans?: any[] }) => void;
 
-  clearAllHighlights: () => void;
-  clearAllNotes: () => void;
-  clearAllInteractions: () => void;
+   interactions: InteractionLog[];
+   recordInteraction: (bookId: string, chapter: number, weight?: number) => void;
 
-  // [新增] 读经计划状态
-  activePlan: PlanProgress | null;
-  startPlan: (planId: string) => void;
-  markDayCompleted: (day: number) => void;
-  quitPlan: () => void;
+   clearAllHighlights: () => void;
+   clearAllNotes: () => void;
+   clearAllInteractions: () => void;
+
+   // [修改] 读经计划状态（支持多个）
+   activePlans: PlanProgress[];
+   startPlan: (planId: string) => void;
+   markDayCompleted: (planId: string, day: number) => void;
+   quitPlan: (planId: string) => void;
 
   // [新增] 自定义计划
   customPlans: any[];
