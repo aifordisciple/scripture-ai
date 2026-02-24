@@ -10,7 +10,7 @@ export function SyncProvider() {
   const { 
     setAllUserData, 
     fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
-    highlights, notes,
+    highlights, notes, interactions,
     syncMode, setSyncMode,
     lastSyncTime, setLastSyncTime,
     isSyncing, setIsSyncing,
@@ -52,10 +52,9 @@ export function SyncProvider() {
     setSyncError(null);
     
     const activeTab = tabs.find(t => t.id === activeTabId);
-    const lastBook = activeTab?.type === 'read' ? (activeTab.book ?? null) : null;
-    const lastChapter = (activeTab?.type === 'read' && activeTab.chapter) 
-      ? parseInt(activeTab.chapter) 
-      : null;
+    // [修复] 避免传递 undefined，避免 parseInt 产生 NaN
+    const currentBook = activeTab?.type === 'read' ? (activeTab.book || null) : null;
+    const currentChapter = activeTab?.type === 'read' && activeTab.chapter ? parseInt(activeTab.chapter) : null;
 
     try {
       const res = await fetch("/api/user/sync", {
@@ -68,15 +67,14 @@ export function SyncProvider() {
             lineHeight,
             isDarkMode,
             showEnglish,
-            lastBook,
-            lastChapter,
+            lastBook: currentBook,
+            lastChapter: currentChapter,
           },
           highlights: highlights.map(h => ({
             bookId: h.bookId,
             chapter: h.chapter,
             verse: h.verse,
             color: h.color,
-            updatedAt: h.updatedAt,
           })),
           notes: notes.map(n => ({
             id: n.id,
@@ -84,7 +82,11 @@ export function SyncProvider() {
             chapter: n.chapter,
             verse: n.verse,
             content: n.content,
-            updatedAt: n.updatedAt,
+          })),
+          interactions: interactions.map(i => ({
+            bookId: i.bookId,
+            chapter: i.chapter,
+            count: i.count,
           })),
         }),
       });
@@ -109,7 +111,7 @@ export function SyncProvider() {
     session, 
     syncMode, 
     fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
-    highlights, notes,
+    highlights, notes, interactions,
     setAllUserData, setLastSyncTime, setIsSyncing, setSyncError,
   ]);
 

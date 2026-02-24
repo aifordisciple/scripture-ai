@@ -49,6 +49,7 @@ model User {
   notes         Note[]
   cards         ScriptureCard[]
   chatMessages  ChatMessage[] // [新增] 关联聊天记录
+  interactions  Interaction[] // [新增] 关联阅读记录
 }
 
 model UserSetting {
@@ -121,4 +122,21 @@ model ChatMessage {
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
+}
+
+// [新增] 阅读记录表
+model Interaction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  bookId    String
+  chapter   Int
+  count     Int      @default(1) // 阅读次数
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, bookId, chapter])
+  @@index([userId, bookId, chapter])
 }

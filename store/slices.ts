@@ -126,7 +126,13 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
       }
     }
     if (data.highlights) updates.highlights = data.highlights;
-    if (data.notes) updates.notes = data.notes;
+    if (data.notes) {
+      updates.notes = data.notes.map((n: any) => ({ id: n.id, bookId: n.bookId, chapter: n.chapter, verse: n.verse, content: n.content }));
+    }
+    // [新增] 处理从云端拉取下来的 interactions 进度记录
+    if (data.interactions) {
+      updates.interactions = data.interactions.map((i: any) => ({ bookId: i.bookId, chapter: i.chapter, count: i.count }));
+    }
     set(updates);
   },
 

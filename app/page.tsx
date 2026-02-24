@@ -269,12 +269,15 @@ export default function Home() {
 
       {/* Mobile Settings Sheet */}
       <Sheet open={isMobileSettingsOpen} onOpenChange={setMobileSettingsOpen}>
-        <SheetContent side="bottom" className="bg-card border-t-0 pb-10 rounded-t-2xl">
+        {/* [修复] 增加 max-h 和 overflow-y-auto 防止内容过多溢出 */}
+        <SheetContent side="bottom" className="bg-card border-t-0 rounded-t-2xl max-h-[85vh] overflow-y-auto">
           <SheetHeader className="mb-4">
             <SheetTitle className="text-foreground flex items-center gap-2">
               <Settings className="w-5 h-5 text-primary" /> 阅读设置
             </SheetTitle>
           </SheetHeader>
+          
+          {/* 原有的设置项区块保持不变 */}
           <div className="space-y-6">
             {activeTab.type === 'read' && (
               <div className="bg-secondary/50 p-4 rounded-xl border border-border/50">
@@ -311,6 +314,13 @@ export default function Home() {
             
             {/* 数据同步设置 */}
             <SyncSettings />
+          </div>
+
+          {/* [新增] 显式的关闭按钮 */}
+          <div className="mt-8 pb-6">
+            <Button className="w-full rounded-full font-bold" onClick={() => setMobileSettingsOpen(false)}>
+              完成
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
