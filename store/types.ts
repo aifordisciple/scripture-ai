@@ -89,6 +89,10 @@ export interface UISlice {
   closeShareModal: () => void;
   isDashboardOpen: boolean;
   setDashboardOpen: (open: boolean) => void;
+
+  // [新增] 记住用户在读经计划页面当前查看的计划ID
+  viewingPlanId: string | null;
+  setViewingPlanId: (id: string | null) => void;
 }
 
 export interface ReaderSlice {

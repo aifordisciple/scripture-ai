@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { BIBLE_PLANS } from "@/lib/plans";
@@ -13,12 +13,12 @@ export function PlanTab() {
   const router = useRouter();
   const {
     activePlans, startPlan, toggleTaskCompleted, quitPlan, tabs, addTab, setActiveTab,
-    customPlans, addCustomPlan, deleteCustomPlan, catchUpPlan, setReadingPlanContext
+    customPlans, addCustomPlan, deleteCustomPlan, catchUpPlan, setReadingPlanContext, generateAiDevotional,
+    viewingPlanId, setViewingPlanId // [新增] 从 store 中取出
   } = useBibleStore();
 
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [viewingPlanId, setViewingPlanId] = useState<string | null>(null);
 
   const calculateLogicDay = (startDate: number) => {
     const startMidnight = new Date(startDate).setHours(0,0,0,0);
@@ -28,6 +28,34 @@ export function PlanTab() {
   };
 
   const allPlans = useMemo(() => [...(customPlans || []), ...BIBLE_PLANS], [customPlans]);
+
+  // [新增] 智能静默预加载：只要有进行中的计划，自动把今天的导读在后台生成好
+  const autoGenTriggered = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    activePlans.forEach(plan => {
+      // 这里的逻辑天数计算提取自之前的代码
+      const startMidnight = new Date(plan.startDate).setHours(0,0,0,0);
+      const todayMidnight = new Date().setHours(0,0,0,0);
+      const logicDay = Math.max(1, Math.round((todayMidnight - startMidnight) / 86400000) + 1);
+
+      const planDetails = allPlans.find(p => p.id === plan.planId);
+      if (!planDetails || plan.status === 'completed') return;
+
+      const dayTask = planDetails.tasks.find((t: any) => t.day === logicDay);
+      if (!dayTask || dayTask.devotional) return; // 如果本身自带导读就不生成
+
+      const savedDevo = plan.savedDevotionals?.[logicDay.toString()];
+      const cacheKey = `${plan.planId}-${logicDay}`;
+
+      // 如果今天还没有导读，并且没触发过生成，就在后台静默生成
+      if (!savedDevo && !autoGenTriggered.current.has(cacheKey)) {
+        autoGenTriggered.current.add(cacheKey);
+        useBibleStore.getState().generateAiDevotional(plan.planId, logicDay, planDetails.title, dayTask.readings)
+          .catch(() => autoGenTriggered.current.delete(cacheKey)); // 失败了允许重试
+      }
+    });
+  }, [activePlans, allPlans]);
 
   const handleJump = (bookId: string, chapter: number) => {
     const readTab = tabs.find(t => t.type === 'read');
@@ -221,29 +249,51 @@ export function PlanTab() {
                            </div>
                         </div>
                      </div>
-                     <div className="flex-1 flex flex-wrap gap-2">
-                        {task.readings.map((reading: any, idx: number) => {
-                           const taskKey = `reading-${idx}`;
-                           const isTaskCompleted = completedTasks.includes(taskKey);
-                           return (
-                           <button 
-                             key={idx} 
-                             onClick={() => {
-                               toggleTaskCompleted(viewingPlanId, task.day, taskKey);
-                               handleJump(reading.book, reading.chapter);
-                             }} 
+                      <div className="flex-1 flex flex-wrap gap-2">
+                         {task.readings.map((reading: any, idx: number) => {
+                            const taskKey = `reading-${idx}`;
+                            const isTaskCompleted = completedTasks.includes(taskKey);
+                            return (
+                           <div
+                             key={idx}
                              className={cn(
-                               "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border",
-                               isTaskCompleted 
-                                 ? "bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-200/50" 
-                                 : "bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800/50 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
+                               "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border group",
+                               isTaskCompleted
+                                 ? "bg-transparent border-slate-200 dark:border-slate-700 text-slate-500"
+                                 : "bg-indigo-50 border-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800/50 dark:text-indigo-300"
                              )}
                            >
-                              <BookOpen className="w-3.5 h-3.5" />
-                              {getBookName(reading.book)} {reading.chapter}
-                              <ArrowRight className="w-3 h-3 opacity-50 ml-1" />
-                           </button>
-                         )})}
+                              {/* 1. 独立的圆圈状态切换区 */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleTaskCompleted(viewingPlanId, task.day, taskKey);
+                                }}
+                                className="shrink-0 hover:scale-110 transition-transform focus:outline-none flex items-center justify-center"
+                              >
+                                {isTaskCompleted ? (
+                                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                ) : (
+                                  <Circle className="w-4 h-4 opacity-40 hover:opacity-100 hover:text-green-500 transition-colors" />
+                                )}
+                              </button>
+
+                              {/* 2. 独立的经文跳转区 */}
+                              <button
+                                onClick={() => {
+                                  // 逻辑修复：只有在未读时，点击跳转才自动打卡；如果已读，点击只跳转不取消
+                                  if (!isTaskCompleted) {
+                                    toggleTaskCompleted(viewingPlanId, task.day, taskKey);
+                                  }
+                                  handleJump(reading.book, reading.chapter);
+                                }}
+                                className="flex items-center hover:opacity-70 transition-opacity"
+                              >
+                                {getBookName(reading.book)} {reading.chapter}
+                                <ArrowRight className="w-3 h-3 opacity-50 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                              </button>
+                           </div>
+                          )})}
                      </div>
                     </div>
                      {/* 下半部分：动态 AI 导读渲染 */}
@@ -330,6 +380,30 @@ export function PlanTab() {
                 </div>
               );
             })}
+          </div>
+        </div>
+       )}
+
+      {/* 荣誉墙 (已完成的计划) */}
+      {archivedPlans.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+            <Medal className="w-5 h-5 text-yellow-500" /> 荣誉墙 ({archivedPlans.length})
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {archivedPlans.map((plan) => (
+              <div
+                key={plan!.id}
+                className="flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+                onClick={() => setViewingPlanId(plan!.id)}
+              >
+                 <Medal className="w-10 h-10 text-yellow-400 mb-2 drop-shadow-sm" />
+                 <h3 className="text-sm font-bold text-center font-serif text-slate-700 dark:text-slate-300 line-clamp-2 leading-snug">
+                   {plan!.title}
+                 </h3>
+                 <span className="text-[10px] text-muted-foreground mt-2 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">已完成</span>
+              </div>
+            ))}
           </div>
         </div>
       )}

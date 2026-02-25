@@ -20,6 +20,10 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
   closeShareModal: () => set({ isShareOpen: false, shareData: null }),
   isDashboardOpen: false,
   setDashboardOpen: (open) => set({ isDashboardOpen: open }),
+
+  // [新增] 记住当前查看的计划
+  viewingPlanId: null,
+  setViewingPlanId: (id) => set({ viewingPlanId: id }),
 });
 
 export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = (set) => ({
