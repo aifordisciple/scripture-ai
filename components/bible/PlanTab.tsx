@@ -181,27 +181,45 @@ export function PlanTab() {
         </div>
 
         <div className="space-y-4">
-          {planDetails.tasks.map((task: any) => {
+           {planDetails.tasks.map((task: any) => {
              const dayKey = task.day.toString();
              const completedTasks = activeData.completedTasks[dayKey] || [];
              const totalTasks = 1 + (task.readings?.length || 0);
              const completedCount = completedTasks.length;
              const isCompleted = completedCount >= totalTasks;
 
+             // [新增] 日期计算与状态判断
+             const taskDate = new Date(activeData.startDate);
+             taskDate.setHours(0,0,0,0);
+             taskDate.setDate(taskDate.getDate() + task.day - 1);
+             const isToday = task.day === currentLogicDay;
+             const isBehind = !isCompleted && task.day < currentLogicDay;
+             const dateStr = `${taskDate.getMonth() + 1}月${taskDate.getDate()}日`;
+
              return (
                <div key={task.day} className={cn(
                   "flex flex-col gap-3 p-4 rounded-2xl border transition-all duration-300",
-                  isCompleted ? "bg-slate-50 border-slate-100 dark:bg-slate-900/50 dark:border-slate-800/50 opacity-60" : "bg-white border-indigo-100 dark:bg-slate-900 dark:border-indigo-900/30 shadow-sm"
+                  isCompleted ? "bg-slate-50 border-slate-100 dark:bg-slate-900/50 dark:border-slate-800/50 opacity-60"
+                  : isToday ? "bg-indigo-50/50 border-indigo-300 dark:bg-indigo-900/30 dark:border-indigo-500/50 shadow-md ring-1 ring-indigo-500/20"
+                  : "bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 shadow-sm hover:border-indigo-200"
                )}>
                    <div className="flex flex-col md:flex-row md:items-center gap-4">
-                     <div className="flex items-center gap-4 md:w-32 shrink-0">
-                        <button 
-                          onClick={() => toggleTaskCompleted(viewingPlanId, task.day, 'devotional')} 
+                     <div className="flex items-center gap-4 md:w-36 shrink-0">
+                        <button
+                          onClick={() => toggleTaskCompleted(viewingPlanId, task.day, 'devotional')}
                           className="shrink-0 hover:scale-110 transition-transform focus:outline-none"
                         >
                           {completedTasks.includes('devotional') ? <CheckCircle2 className="w-7 h-7 text-indigo-500" /> : <Circle className="w-7 h-7 text-slate-300 dark:text-slate-600 hover:text-indigo-400" />}
                         </button>
-                        <span className="font-bold text-lg text-slate-700 dark:text-slate-200">第 {task.day} 天</span>
+                        <div className="flex flex-col">
+                           <span className="font-bold text-lg text-slate-700 dark:text-slate-200">第 {task.day} 天</span>
+                           <div className="flex items-center gap-1.5 mt-0.5">
+                             <span className={cn("text-xs font-medium", isToday ? "text-indigo-600 dark:text-indigo-400" : "text-slate-500 dark:text-slate-400")}>
+                               {isToday ? "今天" : dateStr}
+                             </span>
+                             {isBehind && <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-bold whitespace-nowrap">已落后</span>}
+                           </div>
+                        </div>
                      </div>
                      <div className="flex-1 flex flex-wrap gap-2">
                         {task.readings.map((reading: any, idx: number) => {
