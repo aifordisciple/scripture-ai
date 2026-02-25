@@ -11,7 +11,7 @@ import { SearchResults } from "@/components/bible/SearchResults";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight } from "lucide-react";
+import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer"; 
@@ -139,7 +139,8 @@ export default function Home() {
     isDarkMode, 
     chapterSpeechText,
     isMobileSettingsOpen,
-    setMobileSettingsOpen
+    setMobileSettingsOpen,
+    streakCount
   } = useBibleStore();
 
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
@@ -449,9 +450,17 @@ export default function Home() {
 
               <div className="mx-1 border-l h-5 border-border/50 hidden sm:block"></div>
 
-              <div className="pl-1">
-                <UserMenu />
-              </div>
+              {/* 火苗动效 */}
+              {streakCount > 0 && (
+                <div className="flex items-center gap-1 px-2 py-1 bg-orange-50 dark:bg-orange-950/30 rounded-full border border-orange-100 dark:border-orange-900/50 animate-in zoom-in duration-500">
+                  <Flame className="w-4 h-4 text-orange-500 fill-orange-500 animate-pulse" />
+                  <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{streakCount}</span>
+                </div>
+              )}
+
+               <div className="pl-1">
+                 <UserMenu />
+               </div>
               
               <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />

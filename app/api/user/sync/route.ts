@@ -17,7 +17,8 @@ export async function GET() {
         highlights: true,
         notes: true,
         interactions: true,
-        planProgress: true
+        planProgress: true,
+        badges: true
       }
     });
 
@@ -29,7 +30,8 @@ export async function GET() {
         activePlans = user.planProgress.map((p: any) => ({
             planId: p.planId,
             startDate: p.startDate.getTime(),
-            completedDays: JSON.parse(p.completedDays || "[]")
+            completedTasks: JSON.parse(p.completedTasks || "{}"),
+            savedDevotionals: JSON.parse(p.savedDevotionals || "{}")
         }));
     }
 
@@ -38,7 +40,10 @@ export async function GET() {
       highlights: user.highlights,
       notes: user.notes,
       interactions: user.interactions,
-      activePlans
+      activePlans,
+      streakCount: user.streakCount,
+      lastActiveDate: user.lastActiveDate?.getTime() || null,
+      badges: user.badges?.map(b => ({ type: b.type, earnedAt: b.earnedAt.getTime() })) || []
     });
   } catch (err) {
     console.error("GET Sync Error:", err);
@@ -54,7 +59,7 @@ export async function POST(req: Request) {
 
   try {
     const data = await req.json();
-    const { settings, highlights, notes, interactions, activePlans } = data || {};
+    const { settings, highlights, notes, interactions, activePlans, streakCount, lastActiveDate, badges } = data || {};
 
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) return new NextResponse("User not found", { status: 404 });
@@ -129,21 +134,46 @@ export async function POST(req: Request) {
           }
       }
 
-      // 5. 同步读经计划 (多计划全量覆盖同步)
-      if (Array.isArray(activePlans)) {
-          await tx.planProgress.deleteMany({ where: { userId: user.id } });
-          if (activePlans.length > 0) {
-              await tx.planProgress.createMany({
-                  data: activePlans.map((p: any) => ({
-                      userId: user.id,
-                      planId: String(p.planId),
-                      startDate: new Date(p.startDate || Date.now()),
-                      completedDays: JSON.stringify(p.completedDays || [])
-                  }))
-              });
-          }
-      }
-    });
+        // 5. 同步读经计划 (多计划全量覆盖同步)
+        if (Array.isArray(activePlans)) {
+            await tx.planProgress.deleteMany({ where: { userId: user.id } });
+            if (activePlans.length > 0) {
+                await tx.planProgress.createMany({
+                    data: activePlans.map((p: any) => ({
+                        userId: user.id,
+                        planId: String(p.planId),
+                        startDate: new Date(p.startDate || Date.now()),
+                        completedTasks: JSON.stringify(p.completedTasks || {}),
+                        savedDevotionals: JSON.stringify(p.savedDevotionals || {})
+                    }))
+                });
+            }
+        }
+
+       // 6. 同步火苗统计
+       await tx.user.update({
+         where: { id: user.id },
+         data: {
+           streakCount: streakCount || 0,
+           lastActiveDate: lastActiveDate ? new Date(lastActiveDate) : null
+         }
+       });
+
+       // 7. 同步勋章
+       if (Array.isArray(badges)) {
+         for (const badge of badges) {
+           await tx.badge.upsert({
+             where: { userId_type: { userId: user.id, type: badge.type } },
+             update: { earnedAt: new Date(badge.earnedAt) },
+             create: {
+               userId: user.id,
+               type: badge.type,
+               earnedAt: new Date(badge.earnedAt)
+             }
+           });
+         }
+       }
+     });
 
     return NextResponse.json({ success: true });
 

@@ -5,20 +5,21 @@ import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { BIBLE_PLANS } from "@/lib/plans";
 import { BIBLE_BOOKS } from "@/lib/constants";
-import { Calendar, CheckCircle2, Circle, BookOpen, Trash2, ArrowRight, Target, PlayCircle, Sparkles, Loader2, Medal, ChevronLeft } from "lucide-react";
+import { Calendar, CheckCircle2, Circle, BookOpen, Trash2, ArrowRight, Target, PlayCircle, Sparkles, Loader2, Medal, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function PlanTab() {
   const router = useRouter();
   const {
-    activePlans, startPlan, markDayCompleted, quitPlan, tabs, addTab, setActiveTab,
-    customPlans, addCustomPlan, deleteCustomPlan
+    activePlans, startPlan, toggleTaskCompleted, quitPlan, tabs, addTab, setActiveTab,
+    customPlans, addCustomPlan, deleteCustomPlan, catchUpPlan, setReadingPlanContext, generateAiDevotional
   } = useBibleStore();
 
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [viewingPlanId, setViewingPlanId] = useState<string | null>(null);
+  const [generatingDevos, setGeneratingDevos] = useState<Record<string, boolean>>({});
 
   const allPlans = useMemo(() => [...(customPlans || []), ...BIBLE_PLANS], [customPlans]);
 
@@ -54,6 +55,18 @@ export function PlanTab() {
     finally { setIsGenerating(false); }
   };
 
+  const handleGenerateDevo = async (planId: string, day: number, title: string, readings: any[]) => {
+    const key = `${planId}-${day}`;
+    setGeneratingDevos(prev => ({ ...prev, [key]: true }));
+    try {
+      await useBibleStore.getState().generateAiDevotional(planId, day, title, readings);
+    } catch (e) {
+      alert("生成导读失败，请稍后再试");
+    } finally {
+      setGeneratingDevos(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
   const getBookName = (id: string) => BIBLE_BOOKS.find(b => b.id === id)?.name || id;
 
   // -------------------------
@@ -68,10 +81,21 @@ export function PlanTab() {
         return null;
     }
 
-    const completedCount = activeData.completedDays.length;
+    // 计算当前逻辑天数
+    const currentLogicDay = Math.ceil((Date.now() - activeData.startDate) / (24 * 60 * 60 * 1000)) || 1;
+    
+    // 计算完成进度
+    const completedDaysCount = Object.keys(activeData.completedTasks).filter(day => {
+      const tasks = activeData.completedTasks[day] || [];
+      const dayPlan = planDetails.tasks.find((t: any) => t.day === parseInt(day));
+      if (!dayPlan) return false;
+      const totalTasks = 1 + (dayPlan.readings?.length || 0); // devotional + readings
+      return tasks.length >= totalTasks;
+    }).length;
+    
     const totalDays = planDetails.durationDays;
-    const progressPercent = Math.round((completedCount / totalDays) * 100);
-    const isTotallyCompleted = completedCount >= totalDays;
+    const progressPercent = Math.round((completedDaysCount / totalDays) * 100);
+    const isTotallyCompleted = completedDaysCount >= totalDays;
 
     return (
       <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
@@ -103,41 +127,124 @@ export function PlanTab() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border dark:border-slate-800 shadow-sm mb-8">
            <div className="flex justify-between text-sm font-medium mb-2">
               <span className="text-slate-600 dark:text-slate-300">整体进度</span>
-              <span className="text-indigo-600 dark:text-indigo-400 font-bold">{progressPercent}% ({completedCount}/{totalDays})</span>
+              <span className="text-indigo-600 dark:text-indigo-400 font-bold">{progressPercent}% ({completedDaysCount}/{totalDays})</span>
            </div>
            <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
               <div className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }} />
            </div>
         </div>
 
+        {/* 今日快速操作 */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-8">
+          <Button 
+            className="flex-1 h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg gap-2 shadow-lg shadow-indigo-200"
+            onClick={() => {
+                const day = currentLogicDay;
+                const dayPlan = planDetails.tasks.find((t: any) => t.day === day);
+                const tasks = dayPlan?.readings || [];
+                const completed = activeData.completedTasks[day.toString()] || [];
+                const firstUnfinishedIdx = tasks.findIndex((_: any, i: number) => !completed.includes(`reading-${i}`));
+                
+                if (tasks[firstUnfinishedIdx]) {
+                    const r = tasks[firstUnfinishedIdx];
+                    setReadingPlanContext({ planId: viewingPlanId, day, taskIndex: firstUnfinishedIdx });
+                    handleJump(r.book, r.chapter);
+                } else if (dayPlan) {
+                    // 如果所有阅读都完成了，跳到第一章
+                    if (tasks[0]) {
+                        handleJump(tasks[0].book, tasks[0].chapter);
+                    }
+                }
+            }}
+          >
+            <PlayCircle className="w-6 h-6" /> 继续今日阅读
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="h-14 rounded-2xl border-2 border-indigo-100 text-indigo-600 font-bold px-6"
+            onClick={() => {
+              catchUpPlan(viewingPlanId);
+            }}
+          >
+            追赶进度
+          </Button>
+        </div>
+
         <div className="space-y-4">
           {planDetails.tasks.map((task: any) => {
-             const isCompleted = activeData.completedDays.includes(task.day);
+             const dayKey = task.day.toString();
+             const completedTasks = activeData.completedTasks[dayKey] || [];
+             const totalTasks = 1 + (task.readings?.length || 0);
+             const completedCount = completedTasks.length;
+             const isCompleted = completedCount >= totalTasks;
+
              return (
                <div key={task.day} className={cn(
                   "flex flex-col gap-3 p-4 rounded-2xl border transition-all duration-300",
                   isCompleted ? "bg-slate-50 border-slate-100 dark:bg-slate-900/50 dark:border-slate-800/50 opacity-60" : "bg-white border-indigo-100 dark:bg-slate-900 dark:border-indigo-900/30 shadow-sm"
                )}>
-                  <div className="flex flex-col md:flex-row md:items-center gap-4">
-                    <div className="flex items-center gap-4 md:w-32 shrink-0">
-                       <button onClick={() => markDayCompleted(viewingPlanId, task.day)} className="shrink-0 hover:scale-110 transition-transform focus:outline-none">
-                         {isCompleted ? <CheckCircle2 className="w-7 h-7 text-indigo-500" /> : <Circle className="w-7 h-7 text-slate-300 dark:text-slate-600 hover:text-indigo-400" />}
-                       </button>
-                       <span className="font-bold text-lg text-slate-700 dark:text-slate-200">第 {task.day} 天</span>
-                    </div>
-                    <div className="flex-1 flex flex-wrap gap-2">
-                       {task.readings.map((reading: any, idx: number) => (
-                          <button key={idx} onClick={() => handleJump(reading.book, reading.chapter)} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border", isCompleted ? "bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-200/50" : "bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800/50 dark:text-indigo-300 dark:hover:bg-indigo-900/40")}>
-                             <BookOpen className="w-3.5 h-3.5" />{getBookName(reading.book)} {reading.chapter}<ArrowRight className="w-3 h-3 opacity-50 ml-1" />
-                          </button>
-                       ))}
-                    </div>
-                  </div>
-                  {task.devotional && (
-                     <div className="mt-1 md:ml-[9.5rem] bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded-xl border border-indigo-100/60 dark:border-indigo-800/30">
-                       <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-serif">{task.devotional}</p>
+                   <div className="flex flex-col md:flex-row md:items-center gap-4">
+                     <div className="flex items-center gap-4 md:w-32 shrink-0">
+                        <button 
+                          onClick={() => toggleTaskCompleted(viewingPlanId, task.day, 'devotional')} 
+                          className="shrink-0 hover:scale-110 transition-transform focus:outline-none"
+                        >
+                          {completedTasks.includes('devotional') ? <CheckCircle2 className="w-7 h-7 text-indigo-500" /> : <Circle className="w-7 h-7 text-slate-300 dark:text-slate-600 hover:text-indigo-400" />}
+                        </button>
+                        <span className="font-bold text-lg text-slate-700 dark:text-slate-200">第 {task.day} 天</span>
                      </div>
-                  )}
+                     <div className="flex-1 flex flex-wrap gap-2">
+                        {task.readings.map((reading: any, idx: number) => {
+                           const taskKey = `reading-${idx}`;
+                           const isTaskCompleted = completedTasks.includes(taskKey);
+                           return (
+                           <button 
+                             key={idx} 
+                             onClick={() => {
+                               toggleTaskCompleted(viewingPlanId, task.day, taskKey);
+                               handleJump(reading.book, reading.chapter);
+                             }} 
+                             className={cn(
+                               "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border",
+                               isTaskCompleted 
+                                 ? "bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-200/50" 
+                                 : "bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800/50 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
+                             )}
+                           >
+                              <BookOpen className="w-3.5 h-3.5" />
+                              {getBookName(reading.book)} {reading.chapter}
+                              <ArrowRight className="w-3 h-3 opacity-50 ml-1" />
+                           </button>
+                         )})}
+                     </div>
+                   </div>
+                    {/* 下半部分：动态 AI 导读渲染 */}
+                    {(task.devotional || activeData.savedDevotionals?.[task.day]) ? (
+                       <div className="mt-1 md:ml-[9.5rem] bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded-xl border border-indigo-100/60 dark:border-indigo-800/30 relative">
+                         <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-serif whitespace-pre-wrap">
+                           {task.devotional || activeData.savedDevotionals?.[task.day]}
+                         </p>
+                         {/* AI 生成标记 */}
+                         {!task.devotional && <Sparkles className="w-4 h-4 text-indigo-400 absolute top-2 right-2 opacity-30" />}
+                       </div>
+                    ) : (
+                       <div className="mt-1 md:ml-[9.5rem]">
+                         <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleGenerateDevo(viewingPlanId, task.day, planDetails.title, task.readings)}
+                            disabled={generatingDevos[`${viewingPlanId}-${task.day}`]}
+                            className="text-xs text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg px-2"
+                         >
+                            {generatingDevos[`${viewingPlanId}-${task.day}`] 
+                                ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> 
+                                : <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                            }
+                            ✨ 使用 AI 为今天生成导读
+                         </Button>
+                       </div>
+                    )}
                </div>
              );
           })}
@@ -172,12 +279,18 @@ export function PlanTab() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {myPlans.map((plan) => {
               const activeData = activePlans.find(p => p.planId === plan.id)!;
-              const isTotallyCompleted = activeData.completedDays.length >= plan.durationDays;
-              const progressPercent = Math.round((activeData.completedDays.length / plan.durationDays) * 100);
+              const completedDaysCount = Object.keys(activeData.completedTasks).filter(day => {
+                const tasks = activeData.completedTasks[day] || [];
+                const dayPlan = plan.tasks.find((t: any) => t.day === parseInt(day));
+                if (!dayPlan) return false;
+                const totalTasks = 1 + (dayPlan.readings?.length || 0);
+                return tasks.length >= totalTasks;
+              }).length;
+              const progressPercent = Math.round((completedDaysCount / plan.durationDays) * 100);
+              const isTotallyCompleted = completedDaysCount >= plan.durationDays;
 
               return (
                 <div key={plan.id} className="relative flex flex-col bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-indigo-100 dark:border-indigo-900 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden" onClick={() => setViewingPlanId(plan.id)}>
-                   {/* 荣誉奖牌 */}
                    {isTotallyCompleted && (
                      <div className="absolute -top-3 -right-3 bg-gradient-to-br from-yellow-300 to-yellow-500 p-4 rounded-full shadow-lg border-4 border-white dark:border-slate-900 transform rotate-12">
                         <Medal className="w-7 h-7 text-white" />

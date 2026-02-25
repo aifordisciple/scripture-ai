@@ -7,10 +7,10 @@ import { useBibleStore } from "@/store/useBibleStore";
 
 export function SyncProvider() {
   const { data: session } = useSession();
-  const {
-    setAllUserData,
+  const { 
+    setAllUserData, 
     fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
-    highlights, notes, interactions, activePlans,
+    highlights, notes, interactions, activePlans, streakCount, lastActiveDate, badges,
     syncMode, setSyncMode,
     lastSyncTime, setLastSyncTime,
     isSyncing, setIsSyncing,
@@ -33,6 +33,8 @@ export function SyncProvider() {
           setLastSyncTime(Date.now());
           isLoadedRef.current = true;
           console.log("User data synced from server");
+          // 检查勋章解锁
+          useBibleStore.getState().checkAndUnlockBadges();
         })
         .catch((err) => {
           console.error("Sync failed", err);
@@ -84,16 +86,19 @@ export function SyncProvider() {
             verse: n.verse,
             content: n.content,
           })),
-          interactions: interactions.map(i => ({
-            bookId: i.bookId,
-            chapter: i.chapter,
-            count: i.count,
-          })),
-          activePlans,
-        }),
-      });
+           interactions: interactions.map(i => ({
+             bookId: i.bookId,
+             chapter: i.chapter,
+             count: i.count,
+           })),
+           activePlans,
+           streakCount,
+           lastActiveDate,
+           badges,
+         }),
+       });
 
-      if (!res.ok) throw new Error("Sync failed");
+       if (!res.ok) throw new Error("Sync failed");
 
       const data = await res.json();
       
@@ -110,12 +115,12 @@ export function SyncProvider() {
       setIsSyncing(false);
     }
   }, [
-    session,
-    syncMode,
-    fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
-    highlights, notes, interactions, activePlans,
-    setAllUserData, setLastSyncTime, setIsSyncing, setSyncError,
-  ]);
+     session,
+     syncMode,
+     fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
+     highlights, notes, interactions, activePlans, streakCount, lastActiveDate, badges,
+     setAllUserData, setLastSyncTime, setIsSyncing, setSyncError,
+   ]);
 
   // 3. 监听设置变化并自动保存 (防抖 3秒)
   useEffect(() => {

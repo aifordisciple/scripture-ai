@@ -1,6 +1,7 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
 import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice } from './types';
+import { BIBLE_PLANS } from '@/lib/plans';
 
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
   isAuthOpen: false,
@@ -135,13 +136,16 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
     if (data.interactions) {
       updates.interactions = data.interactions.map((i: any) => ({ bookId: i.bookId, chapter: i.chapter, count: i.count }));
     }
-     if (data.activePlans) {
+      if (data.activePlans) {
       updates.activePlans = data.activePlans.map((p: any) => ({
         planId: p.planId,
         startDate: new Date(p.startDate).getTime(),
-        completedDays: typeof p.completedDays === 'string' ? JSON.parse(p.completedDays) : (p.completedDays || [])
+        completedTasks: typeof p.completedTasks === 'string' ? JSON.parse(p.completedTasks) : (p.completedTasks || {})
       }));
     }
+    if (data.streakCount !== undefined) updates.streakCount = data.streakCount;
+    if (data.lastActiveDate !== undefined) updates.lastActiveDate = data.lastActiveDate;
+    if (data.badges) updates.badges = data.badges;
     set(updates);
   },
 
@@ -165,21 +169,51 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   // [修改] 读经计划多任务逻辑
   activePlans: [],
   startPlan: (planId) => set((state) => {
-    if (state.activePlans.some(p => p.planId === planId)) return state; // 防止重复加入
-    return { activePlans: [...state.activePlans, { planId, startDate: Date.now(), completedDays: [] }] };
+    if (state.activePlans.some(p => p.planId === planId)) return state;
+    return { activePlans: [...state.activePlans, { planId, startDate: Date.now(), completedTasks: {} }] };
   }),
-  markDayCompleted: (planId, day) => set((state) => {
+  toggleTaskCompleted: (planId, day, taskId) => set((state) => {
     const plan = state.activePlans.find(p => p.planId === planId);
     if (!plan) return state;
 
-    const newDays = plan.completedDays.includes(day)
-      ? plan.completedDays.filter(d => d !== day)
-      : [...plan.completedDays, day].sort((a, b) => a - b);
+    const dayKey = day.toString();
+    const currentTasks = plan.completedTasks[dayKey] || [];
+
+    const newTasks = currentTasks.includes(taskId)
+      ? currentTasks.filter(id => id !== taskId)
+      : [...currentTasks, taskId].sort((a, b) => a - b);
+
+    // 更新火苗
+    const now = new Date();
+    const todayStr = now.toDateString();
+    const lastDate = state.lastActiveDate ? new Date(state.lastActiveDate) : null;
+    let newStreakCount = state.streakCount;
+    let newLastActiveDate = state.lastActiveDate;
+
+    if (lastDate?.toDateString() !== todayStr) {
+      if (!lastDate) {
+        newStreakCount = 1;
+      } else {
+        const diffTime = now.getTime() - lastDate.getTime();
+        const diffDays = diffTime / (1000 * 3600 * 24);
+        if (diffDays <= 1.5) {
+          newStreakCount += 1;
+        } else {
+          newStreakCount = 1;
+        }
+      }
+      newLastActiveDate = now.getTime();
+    }
+
+    // 延迟检查勋章
+    setTimeout(() => get().checkAndUnlockBadges(), 100);
 
     return {
       activePlans: state.activePlans.map(p =>
-        p.planId === planId ? { ...p, completedDays: newDays } : p
-      )
+        p.planId === planId ? { ...p, completedTasks: { ...p.completedTasks, [dayKey]: newTasks } } : p
+      ),
+      streakCount: newStreakCount,
+      lastActiveDate: newLastActiveDate
     };
   }),
   quitPlan: (planId) => set((state) => ({
@@ -190,6 +224,114 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   customPlans: [],
   addCustomPlan: (plan) => set((state) => ({ customPlans: [plan, ...state.customPlans] })),
   deleteCustomPlan: (id) => set((state) => ({ customPlans: state.customPlans.filter(p => p.id !== id) })),
+
+  // [新增] 连读火苗与统计逻辑
+  streakCount: 0,
+  lastActiveDate: null,
+
+  // [新增] 读经计划上下文
+  readingPlanContext: null,
+  setReadingPlanContext: (ctx) => set({ readingPlanContext: ctx }),
+
+  // [新增] 追赶进度
+  catchUpPlan: (planId) => set((state) => {
+    const plan = state.activePlans.find(p => p.planId === planId);
+    if (!plan) return state;
+
+    const allDays = Object.keys(plan.completedTasks).map(Number).sort((a, b) => a - b);
+    const lastCompletedDay = allDays.length > 0 ? Math.max(...allDays) : 0;
+    const nextDay = lastCompletedDay + 1;
+
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const newStartDate = Date.now() - ((nextDay - 1) * msPerDay);
+
+    return {
+      activePlans: state.activePlans.map(p =>
+        p.planId === planId ? { ...p, startDate: newStartDate } : p
+      )
+    };
+  }),
+  updateStreak: () => set((state) => {
+    const now = new Date();
+    const todayStr = now.toDateString();
+    const lastDate = state.lastActiveDate ? new Date(state.lastActiveDate) : null;
+
+    if (lastDate?.toDateString() === todayStr) return state;
+
+    let newCount = state.streakCount;
+    if (!lastDate) {
+      newCount = 1;
+    } else {
+      const diffTime = now.getTime() - lastDate.getTime();
+      const diffDays = diffTime / (1000 * 3600 * 24);
+
+      if (diffDays <= 1.5) {
+        newCount += 1;
+      } else {
+        newCount = 1;
+      }
+    }
+
+    return { streakCount: newCount, lastActiveDate: now.getTime() };
+  }),
+
+  // [新增] 勋章功能
+  badges: [],
+  saveGeneratedDevotional: (planId, day, content) => set((state) => ({
+    activePlans: state.activePlans.map(p =>
+        p.planId === planId ? { ...p, generatedDevotionals: { ...p.generatedDevotionals, [`day-${day}`]: content } } : p
+    )
+  })),
+  checkAndUnlockBadges: () => set((state) => {
+    const newBadges: string[] = [];
+
+    if (state.streakCount >= 3) newBadges.push("STREAK_3");
+    if (state.streakCount >= 7) newBadges.push("STREAK_7");
+    if (state.streakCount >= 30) newBadges.push("STREAK_30");
+
+    state.activePlans.forEach(plan => {
+      const totalDays = BIBLE_PLANS.find(p => p.id === plan.planId)?.durationDays || 0;
+      if (totalDays > 0 && Object.keys(plan.completedTasks).length >= totalDays) {
+        newBadges.push(`PLAN_DONE_${plan.planId}`);
+      }
+    });
+
+    const toUnlock = newBadges.filter(type => !state.badges.find(b => b.type === type));
+
+    if (toUnlock.length > 0) {
+      const newlyEarned = toUnlock.map(type => ({ type, earnedAt: Date.now() }));
+      set((s) => ({ badges: [...s.badges, ...newlyEarned] }));
+
+       if (typeof window !== 'undefined') {
+         window.dispatchEvent(new CustomEvent('badge-earned', { detail: toUnlock[0] }));
+       }
+     }
+   }),
+
+   // [新增] AI 灵修导读生成
+   generateAiDevotional: async (planId, day, planTitle, readings) => {
+     const res = await fetch("/api/chat/devotional", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ planTitle, day, readings })
+     });
+     const data = await res.json();
+     if (data.devotional) {
+       set((state) => ({
+         activePlans: state.activePlans.map(p => {
+           if (p.planId === planId) {
+             return {
+               ...p,
+               savedDevotionals: { ...(p.savedDevotionals || {}), [day.toString()]: data.devotional }
+             };
+           }
+           return p;
+         })
+       }));
+     } else {
+       throw new Error("No devotional returned");
+     }
+   },
 });
 
 export const createSyncSlice: StateCreator<StoreState, [], [], SyncSlice> = (set) => ({

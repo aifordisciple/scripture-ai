@@ -5,12 +5,14 @@ import { useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
-import { Loader2, BookOpenCheck, ChevronLeft, ChevronRight } from "lucide-react"; 
+import { Loader2, BookOpenCheck, ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { FloatingMenu } from "./FloatingMenu";
+import { Button } from "@/components/ui/button";
 import { CHAPTER_SUMMARY_PROMPT } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useBibleData, Verse } from "@/hooks/use-bible-data";
+import { BIBLE_PLANS } from "@/lib/plans";
 import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import { useVerseMenu } from "@/hooks/use-verse-menu";
 
@@ -38,7 +40,10 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const book = searchParams.get("book") || initialBook;
   const chapter = searchParams.get("chapter") || initialChapter;
 
-  const { fontSize, lineHeight, selectedVerses, showEnglish, highlights, triggerAI, scrollToVerse, setScrollToVerse, clearSelection } = useBibleStore();
+  const { 
+    fontSize, lineHeight, selectedVerses, showEnglish, highlights, triggerAI, scrollToVerse, setScrollToVerse, clearSelection,
+    readingPlanContext, toggleTaskCompleted, activePlans, setReadingPlanContext, tabs, setActiveTab, updateActiveTab
+  } = useBibleStore();
 
   const { verses, loading } = useBibleData(book, chapter);
   const { direction, handleNextChapter, handlePrevChapter, handleTouchStart, handleTouchEnd } = useSwipeNavigation(book, chapter);
@@ -295,6 +300,44 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         currentChapter={parseInt(chapter)}
         onCopy={handleCopy}
       />
+
+      {/* 底部悬浮打卡条 */}
+      {readingPlanContext && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90%] max-w-md">
+          <div className="glass-panel p-4 rounded-2xl shadow-2xl border-primary/20 flex items-center justify-between animate-in fade-in slide-in-from-bottom-4">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">读经计划进行中</span>
+              <span className="text-sm font-bold truncate">第 {readingPlanContext.day} 天任务</span>
+            </div>
+            <Button 
+              size="sm" 
+              className="rounded-full bg-primary font-bold px-4"
+              onClick={() => {
+                const { planId, day, taskIndex } = readingPlanContext;
+                toggleTaskCompleted(planId, day, `reading-${taskIndex}`);
+                
+                const customPlans = useBibleStore.getState().customPlans || [];
+                const allPlans = [...customPlans, ...BIBLE_PLANS];
+                const details = allPlans.find((p: any) => p.id === planId);
+                const tasks = details?.tasks?.find((t: any) => t.day === day)?.readings || [];
+                
+                if (tasks[taskIndex + 1]) {
+                  setReadingPlanContext({ ...readingPlanContext, taskIndex: taskIndex + 1 });
+                  const next = tasks[taskIndex + 1];
+                  updateActiveTab({ book: next.book, chapter: next.chapter.toString() });
+                  setScrollToVerse(null);
+                } else {
+                  setReadingPlanContext(null);
+                  const plansTab = tabs.find(t => t.type === 'plans');
+                  if (plansTab) setActiveTab(plansTab.id);
+                }
+              }}
+            >
+              标记完成并继续 <ChevronRightIcon className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

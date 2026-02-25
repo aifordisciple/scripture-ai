@@ -56,10 +56,16 @@ export interface InteractionLog {
   count: number;
 }
 
+export interface Badge {
+  type: string;
+  earnedAt: number;
+}
+
 export interface PlanProgress {
   planId: string;
   startDate: number;
-  completedDays: number[];
+  completedTasks: Record<string, string[]>;
+  savedDevotionals?: Record<string, string>;
 }
 
 // --------------------------------------------------
@@ -119,41 +125,53 @@ export interface UserDataSlice {
   selectedVerses: number[];
   toggleVerseSelection: (id: number) => void;
   clearSelection: () => void;
-  
+
   highlights: HighlightData[];
   setHighlights: (highlights: HighlightData[]) => void;
   addHighlightLocally: (h: HighlightData) => void;
   removeHighlightLocally: (bookId: string, chapter: number, verse: number) => void;
-  
+
   notes: NoteData[];
   addNote: (note: NoteData) => void;
   updateNote: (id: string, content: string) => void;
   deleteNote: (id: string) => void;
-  
+
   isNoteOpen: boolean;
   noteTargetVerse: { bookId: string, chapter: number, verse: number } | null;
   openNoteEditor: (bookId: string, chapter: number, verse: number) => void;
   closeNoteEditor: () => void;
-  
-  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[], interactions?: any[], activePlans?: any[], customPlans?: any[] }) => void;
 
-   interactions: InteractionLog[];
-   recordInteraction: (bookId: string, chapter: number, weight?: number) => void;
+  setAllUserData: (data: { settings?: any, highlights?: any[], notes?: any[], interactions?: any[], activePlans?: any[], customPlans?: any[], streakCount?: number, lastActiveDate?: number | null, badges?: Badge[] }) => void;
 
-   clearAllHighlights: () => void;
-   clearAllNotes: () => void;
-   clearAllInteractions: () => void;
+  interactions: InteractionLog[];
+  recordInteraction: (bookId: string, chapter: number, weight?: number) => void;
 
-   // [修改] 读经计划状态（支持多个）
-   activePlans: PlanProgress[];
-   startPlan: (planId: string) => void;
-   markDayCompleted: (planId: string, day: number) => void;
-   quitPlan: (planId: string) => void;
+  clearAllHighlights: () => void;
+  clearAllNotes: () => void;
+  clearAllInteractions: () => void;
 
-  // [新增] 自定义计划
-  customPlans: any[];
-  addCustomPlan: (plan: any) => void;
-  deleteCustomPlan: (id: string) => void;
+  // [新增] 读经计划状态（支持多计划、火苗与颗粒度）
+  activePlans: PlanProgress[];
+  startPlan: (planId: string) => void;
+  toggleTaskCompleted: (planId: string, day: number, taskId: string) => void; // 修改方法名以反映“任务级”概念
+  quitPlan: (planId: string) => void;
+
+  // [新增] 火苗与统计
+  streakCount: number;
+  lastActiveDate: number | null;
+
+  // [新增] 追赶进度与阅读上下文
+  catchUpPlan: (planId: string) => void;
+  readingPlanContext: { planId: string; day: number; taskIndex: number } | null;
+  setReadingPlanContext: (ctx: { planId: string; day: number; taskIndex: number } | null) => void;
+  updateStreak: () => void;
+
+  // [新增] 勋章系统
+  badges: Badge[];
+  checkAndUnlockBadges: () => void;
+
+  // [新增] AI 灵修导读生成
+  generateAiDevotional: (planId: string, day: number, planTitle: string, readings: any[]) => Promise<void>;
 }
 
 // --------------------------------------------------

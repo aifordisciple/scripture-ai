@@ -6,7 +6,7 @@ generator client {
   previewFeatures = ["postgresqlExtensions"] // [新增 1] 开启 PostgreSQL 扩展支持
 }
 
-datasource db {
+ datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   extensions = [vector] // [新增 2] 声明使用 pgvector 扩展
@@ -51,19 +51,24 @@ model User {
   chatMessages  ChatMessage[] // [新增] 关联聊天记录
   interactions  Interaction[] // [新增] 关联阅读记录
   planProgress  PlanProgress[] // [修改] 之前是 PlanProgress?，现在改为数组
+
+  // [新增] 火苗统计与勋章系统
+  streakCount   Int       @default(0)
+  lastActiveDate DateTime?
+  badges         Badge[]
 }
 
 model UserSetting {
   id            String  @id @default(cuid())
   userId        String  @unique
   user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   // 阅读器设置
   fontSize      Int     @default(20)
   lineHeight    Float   @default(1.8)
   isDarkMode    Boolean @default(false)
   showEnglish   Boolean @default(true)
-  
+
   // 进度记忆
   lastBook      String?
   lastChapter   Int?
@@ -76,13 +81,13 @@ model Highlight {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   bookId    String
   chapter   Int
   verse     Int
   color     String   // "yellow", "green", "blue", "red"
   content   String?  // 选中的经文内容快照
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -93,12 +98,12 @@ model Note {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   bookId    String
   chapter   Int
   verse     Int
   content   String   @db.Text
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -109,10 +114,10 @@ model ScriptureCard {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   imageUrl  String   @db.Text // 图片的 Base64 或 URL
   note      String?  // 备注
-  
+
   createdAt DateTime @default(now())
 }
 
@@ -120,7 +125,7 @@ model ScriptureCard {
 model ChatMessage {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade])
   role      String   // "user" | "assistant"
   content   String   @db.Text
   createdAt DateTime @default(now())
@@ -133,11 +138,11 @@ model Interaction {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   bookId    String
   chapter   Int
   count     Int      @default(1) // 阅读次数
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -145,15 +150,33 @@ model Interaction {
   @@index([userId, bookId, chapter])
 }
 
-// [修改] 读经计划记录表（支持多计划）
+// [修改] 读经计划进度表（支持多计划、颗粒度任务）
 model PlanProgress {
   id            String   @id @default(cuid())
-  userId        String   // [修改] 去掉了 @unique，允许一个用户有多个活跃计划
+  userId        String
+
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   planId        String
   startDate     DateTime @default(now())
-  completedDays String   @default("[]")
 
-  @@unique([userId, planId]) // [新增] 联合唯一约束，防止同一个计划被重复参加
+  // [新增] 从 completedDays 升级为 completedTasks
+  completedTasks String   @default("{}")
+  // 格式如：{"1": ["devotional", "reading-0"], "2": ["reading-0"]}
+  // [新增] 存储 AI 实时生成的灵修导读
+  savedDevotionals String @default("{}")
+
+  @@unique([userId, planId])
+}
+
+// [新增] 勋章表
+model Badge {
+  id        String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      String   // "STREAK_7", "STREAK_30", "PLAN_COMPLETE", "BIBLE_EXPLORER"
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, type])
 }
