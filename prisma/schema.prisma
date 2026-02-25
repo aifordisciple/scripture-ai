@@ -125,7 +125,7 @@ model ScriptureCard {
 model ChatMessage {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   role      String   // "user" | "assistant"
   content   String   @db.Text
   createdAt DateTime @default(now())

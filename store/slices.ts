@@ -181,7 +181,7 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
 
     const newTasks = currentTasks.includes(taskId)
       ? currentTasks.filter(id => id !== taskId)
-      : [...currentTasks, taskId].sort((a, b) => a - b);
+      : [...currentTasks, taskId].sort();
 
     // 更新火苗
     const now = new Date();
@@ -277,12 +277,13 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
 
   // [新增] 勋章功能
   badges: [],
-  saveGeneratedDevotional: (planId, day, content) => set((state) => ({
+  saveGeneratedDevotional: (planId: string, day: number, content: string) => set((state) => ({
     activePlans: state.activePlans.map(p =>
-        p.planId === planId ? { ...p, generatedDevotionals: { ...p.generatedDevotionals, [`day-${day}`]: content } } : p
+        p.planId === planId ? { ...p, savedDevotionals: { ...p.savedDevotionals, [day.toString()]: content } } : p
     )
   })),
-  checkAndUnlockBadges: () => set((state) => {
+  checkAndUnlockBadges: () => {
+    const state = get();
     const newBadges: string[] = [];
 
     if (state.streakCount >= 3) newBadges.push("STREAK_3");
@@ -300,13 +301,13 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
 
     if (toUnlock.length > 0) {
       const newlyEarned = toUnlock.map(type => ({ type, earnedAt: Date.now() }));
-      set((s) => ({ badges: [...s.badges, ...newlyEarned] }));
+      set({ badges: [...state.badges, ...newlyEarned] });
 
        if (typeof window !== 'undefined') {
          window.dispatchEvent(new CustomEvent('badge-earned', { detail: toUnlock[0] }));
        }
      }
-   }),
+   },
 
    // [新增] AI 灵修导读生成
    generateAiDevotional: async (planId, day, planTitle, readings) => {

@@ -3,9 +3,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
-import dynamic from "next/dynamic";
-
-const BadgePopup = dynamic(() => import("@/components/bible/BadgePopup").then(mod => mod.BadgePopup), { ssr: false });
+import { BadgePopup } from "@/components/bible/BadgePopup";
 
 export const metadata: Metadata = {
   title: "Scripture AI - 你的灵修伴侣",

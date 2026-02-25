@@ -35,7 +35,8 @@ WORKDIR /app
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NEXT_PUBLIC_IGNORE_BUILD_ERRORS true
-RUN npm run build
+RUN npx prisma generate && \
+    npm run build
 
 # 5. 运行阶段
 FROM base AS runner

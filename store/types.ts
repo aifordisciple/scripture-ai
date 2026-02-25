@@ -151,6 +151,10 @@ export interface UserDataSlice {
   clearAllInteractions: () => void;
 
   // [新增] 读经计划状态（支持多计划、火苗与颗粒度）
+  // [修复] 补回自定义计划的类型声明
+  customPlans: any[];
+  addCustomPlan: (plan: any) => void;
+  deleteCustomPlan: (id: string) => void;
   activePlans: PlanProgress[];
   startPlan: (planId: string) => void;
   toggleTaskCompleted: (planId: string, day: number, taskId: string) => void; // 修改方法名以反映“任务级”概念
