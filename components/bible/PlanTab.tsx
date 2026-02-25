@@ -29,32 +29,58 @@ export function PlanTab() {
 
   const allPlans = useMemo(() => [...(customPlans || []), ...BIBLE_PLANS], [customPlans]);
 
-  // [新增] 智能静默预加载：只要有进行中的计划，自动把今天的导读在后台生成好
-  const autoGenTriggered = useRef<Set<string>>(new Set());
+  // [新增] 智能全局静默队列：自动把所有天数的导读全部生成出来
+  const bgTaskRunning = useRef(false);
 
   useEffect(() => {
-    activePlans.forEach(plan => {
-      // 这里的逻辑天数计算提取自之前的代码
-      const startMidnight = new Date(plan.startDate).setHours(0,0,0,0);
-      const todayMidnight = new Date().setHours(0,0,0,0);
-      const logicDay = Math.max(1, Math.round((todayMidnight - startMidnight) / 86400000) + 1);
+    if (bgTaskRunning.current) return;
 
-      const planDetails = allPlans.find(p => p.id === plan.planId);
-      if (!planDetails || plan.status === 'completed') return;
+    const runQueue = async () => {
+      bgTaskRunning.current = true;
+      let hasMore = true;
 
-      const dayTask = planDetails.tasks.find((t: any) => t.day === logicDay);
-      if (!dayTask || dayTask.devotional) return; // 如果本身自带导读就不生成
+      while (hasMore && bgTaskRunning.current) {
+        const state = useBibleStore.getState();
+        let targetTask = null;
 
-      const savedDevo = plan.savedDevotionals?.[logicDay.toString()];
-      const cacheKey = `${plan.planId}-${logicDay}`;
+        // 遍历寻找缺失导读的任务（从第一天开始找，直到找遍整个计划）
+        for (const plan of state.activePlans) {
+          if (plan.status === 'completed') continue;
+          const planDetails = allPlans.find(p => p.id === plan.planId);
+          if (!planDetails) continue;
 
-      // 如果今天还没有导读，并且没触发过生成，就在后台静默生成
-      if (!savedDevo && !autoGenTriggered.current.has(cacheKey)) {
-        autoGenTriggered.current.add(cacheKey);
-        useBibleStore.getState().generateAiDevotional(plan.planId, logicDay, planDetails.title, dayTask.readings)
-          .catch(() => autoGenTriggered.current.delete(cacheKey)); // 失败了允许重试
+          for (const task of planDetails.tasks) {
+             if (task.devotional) continue; // 系统自带了导读
+             if (plan.savedDevotionals?.[task.day.toString()]) continue; // 之前已经生成过了
+
+             // 找到了一个缺失导读的"天"，将其作为当前目标
+             targetTask = { planId: plan.planId, day: task.day, planTitle: planDetails.title, readings: task.readings };
+             break;
+          }
+          if (targetTask) break; // 每次只锁死一个任务
+        }
+
+        if (targetTask) {
+          try {
+            await state.generateAiDevotional(targetTask.planId, targetTask.day, targetTask.planTitle, targetTask.readings);
+            // 成功后，休息 3 秒再生成下一天，绝对安全，防止 AI 接口并发报错
+            await new Promise(resolve => setTimeout(resolve, 3000));
+          } catch (error) {
+            // 如果遇到网络问题或接口限流，休息 10 秒后自动重试
+            await new Promise(resolve => setTimeout(resolve, 10000));
+          }
+        } else {
+          hasMore = false; // 太棒了！所有的计划、所有的天数都已经全部生成完毕！
+        }
       }
-    });
+      bgTaskRunning.current = false;
+    };
+
+    runQueue();
+
+    return () => {
+      bgTaskRunning.current = false; // 如果用户离开此页面，安全中止后台任务
+    };
   }, [activePlans, allPlans]);
 
   const handleJump = (bookId: string, chapter: number) => {
