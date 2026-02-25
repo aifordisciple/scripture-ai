@@ -145,6 +145,9 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
         planId: p.planId,
         startDate: new Date(p.startDate).getTime(),
         completedTasks: typeof p.completedTasks === 'string' ? JSON.parse(p.completedTasks) : (p.completedTasks || {}),
+        // [修复] 补上从云端同步的 AI 导读数据
+        savedDevotionals: typeof p.savedDevotionals === 'string' ? JSON.parse(p.savedDevotionals) : (p.savedDevotionals || {}),
+        // [修复] 补上荣誉墙的归档状态
         status: p.status || 'active'
       }));
     }
