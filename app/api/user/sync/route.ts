@@ -31,7 +31,8 @@ export async function GET() {
             planId: p.planId,
             startDate: p.startDate.getTime(),
             completedTasks: JSON.parse(p.completedTasks || "{}"),
-            savedDevotionals: JSON.parse(p.savedDevotionals || "{}")
+            savedDevotionals: JSON.parse(p.savedDevotionals || "{}"),
+            status: p.status || 'active'
         }));
     }
 
@@ -144,7 +145,8 @@ export async function POST(req: Request) {
                         planId: String(p.planId),
                         startDate: new Date(p.startDate || Date.now()),
                         completedTasks: JSON.stringify(p.completedTasks || {}),
-                        savedDevotionals: JSON.stringify(p.savedDevotionals || {})
+                        savedDevotionals: JSON.stringify(p.savedDevotionals || {}),
+                        status: p.status || 'active'
                     }))
                 });
             }

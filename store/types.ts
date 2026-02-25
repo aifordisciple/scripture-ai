@@ -64,6 +64,7 @@ export interface Badge {
 export interface PlanProgress {
   planId: string;
   startDate: number;
+  status?: 'active' | 'completed';
   completedTasks: Record<string, string[]>;
   savedDevotionals?: Record<string, string>;
 }
@@ -157,17 +158,31 @@ export interface UserDataSlice {
   deleteCustomPlan: (id: string) => void;
   activePlans: PlanProgress[];
   startPlan: (planId: string) => void;
-  toggleTaskCompleted: (planId: string, day: number, taskId: string) => void; // 修改方法名以反映“任务级”概念
+  toggleTaskCompleted: (planId: string, day: number, taskId: string) => void; // 修改方法名以反映"任务级"概念
   quitPlan: (planId: string) => void;
+  archivePlan: (planId: string) => void;
 
   // [新增] 火苗与统计
   streakCount: number;
   lastActiveDate: number | null;
 
-  // [新增] 追赶进度与阅读上下文
+  // [修改] 追赶进度与流式阅读上下文
   catchUpPlan: (planId: string) => void;
-  readingPlanContext: { planId: string; day: number; taskIndex: number } | null;
-  setReadingPlanContext: (ctx: { planId: string; day: number; taskIndex: number } | null) => void;
+  
+  readingPlanContext: {
+    planId: string;
+    planTitle: string;
+    day: number;
+    stepIndex: number;
+    steps: {
+      type: 'devotional' | 'reading' | 'completion';
+      taskId: string;
+      book?: string;
+      chapter?: number;
+      content?: string;
+    }[]
+  } | null;
+  setReadingPlanContext: (ctx: any) => void;
   updateStreak: () => void;
 
   // [新增] 勋章系统

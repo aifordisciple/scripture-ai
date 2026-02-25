@@ -140,7 +140,8 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
       updates.activePlans = data.activePlans.map((p: any) => ({
         planId: p.planId,
         startDate: new Date(p.startDate).getTime(),
-        completedTasks: typeof p.completedTasks === 'string' ? JSON.parse(p.completedTasks) : (p.completedTasks || {})
+        completedTasks: typeof p.completedTasks === 'string' ? JSON.parse(p.completedTasks) : (p.completedTasks || {}),
+        status: p.status || 'active'
       }));
     }
     if (data.streakCount !== undefined) updates.streakCount = data.streakCount;
@@ -170,8 +171,11 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   activePlans: [],
   startPlan: (planId) => set((state) => {
     if (state.activePlans.some(p => p.planId === planId)) return state;
-    return { activePlans: [...state.activePlans, { planId, startDate: Date.now(), completedTasks: {} }] };
+    return { activePlans: [...state.activePlans, { planId, startDate: Date.now(), status: 'active', completedTasks: {} }] };
   }),
+  archivePlan: (planId) => set((state) => ({
+    activePlans: state.activePlans.map(p => p.planId === planId ? { ...p, status: 'completed' } : p)
+  })),
   toggleTaskCompleted: (planId, day, taskId) => set((state) => {
     const plan = state.activePlans.find(p => p.planId === planId);
     if (!plan) return state;
@@ -238,12 +242,12 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
     const plan = state.activePlans.find(p => p.planId === planId);
     if (!plan) return state;
 
-    const allDays = Object.keys(plan.completedTasks).map(Number).sort((a, b) => a - b);
+    const allDays = Object.keys(plan.completedTasks).map(Number).sort((a,b) => a-b);
     const lastCompletedDay = allDays.length > 0 ? Math.max(...allDays) : 0;
     const nextDay = lastCompletedDay + 1;
 
-    const msPerDay = 24 * 60 * 60 * 1000;
-    const newStartDate = Date.now() - ((nextDay - 1) * msPerDay);
+    const todayMidnight = new Date().setHours(0,0,0,0);
+    const newStartDate = todayMidnight - (nextDay - 1) * 86400000;
 
     return {
       activePlans: state.activePlans.map(p =>
@@ -262,11 +266,13 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
     if (!lastDate) {
       newCount = 1;
     } else {
-      const diffTime = now.getTime() - lastDate.getTime();
-      const diffDays = diffTime / (1000 * 3600 * 24);
+      const todayMidnight = new Date(now).setHours(0,0,0,0);
+      const lastMidnight = new Date(lastDate).setHours(0,0,0,0);
+      const diffDays = Math.round((todayMidnight - lastMidnight) / 86400000);
 
-      if (diffDays <= 1.5) {
+      if (diffDays === 1) {
         newCount += 1;
+      } else if (diffDays === 0) {
       } else {
         newCount = 1;
       }

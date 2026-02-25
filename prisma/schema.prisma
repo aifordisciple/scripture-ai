@@ -166,6 +166,9 @@ model PlanProgress {
   // [新增] 存储 AI 实时生成的灵修导读
   savedDevotionals String @default("{}")
 
+  // [新增] 状态字段：'active' (进行中) 或 'completed' (已归档)
+  status        String   @default("active")
+
   @@unique([userId, planId])
 }
 

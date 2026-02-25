@@ -31,6 +31,7 @@ const DashboardTab = dynamic(() => import("@/components/bible/DashboardTab").the
 const HighlightsTab = dynamic(() => import("@/components/bible/HighlightsTab").then(mod => mod.HighlightsTab), { ssr: false });
 const NotesTab = dynamic(() => import("@/components/bible/NotesTab").then(mod => mod.NotesTab), { ssr: false });
 const PlanTab = dynamic(() => import("@/components/bible/PlanTab").then(mod => mod.PlanTab), { ssr: false });
+const PlanDailyFlow = dynamic(() => import("@/components/bible/PlanDailyFlow").then(mod => mod.PlanDailyFlow), { ssr: false });
 
 // --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
 const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
@@ -501,6 +502,9 @@ export default function Home() {
               onAddTab={handleAddTab} 
             />
         </div>
+
+        {/* 沉浸式读经计划控制器 */}
+        <PlanDailyFlow />
 
       </div>
     </main>
