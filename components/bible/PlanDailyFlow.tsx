@@ -122,6 +122,12 @@ export function PlanDailyFlow() {
   // 视图 B：经文阅读时的底部悬浮导航条
   if (step.type === 'reading') {
      const bookName = BIBLE_BOOKS.find(b => b.id === step.book)?.name || step.book;
+     
+     // [新增] 动态计算当天的经文阅读进度
+     const readingSteps = ctx.steps.filter((s: any) => s.type === 'reading');
+     const totalReadings = readingSteps.length;
+     const currentReadingIndex = readingSteps.findIndex((s: any) => s.taskId === step.taskId) + 1;
+
      return (
        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-md animate-in slide-in-from-bottom-8 duration-500">
          <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-4 rounded-3xl shadow-2xl border border-indigo-500/20 flex items-center justify-between">
@@ -130,6 +136,7 @@ export function PlanDailyFlow() {
              <span className="text-sm font-bold text-foreground">
                {bookName} {step.chapter}章
              </span>
+             <span className="text-xs text-muted-foreground mt-1">进度 {currentReadingIndex}/{totalReadings}</span>
            </div>
            <Button
              onClick={handleNext}
