@@ -48,6 +48,13 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const { direction, handleNextChapter, handlePrevChapter, handleTouchStart, handleTouchEnd } = useSwipeNavigation(book, chapter);
   const { menuPosition, isMenuVisible, setIsMenuVisible, handleVerseClick, handleAIExplain, handleCopy } = useVerseMenu(verses);
 
+  // [新增] 当书卷或章节发生变化时，强制窗口瞬间滚动回顶部
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+    }
+  }, [book, chapter]);
+
   useEffect(() => {
     if (!loading && scrollToVerse && verses.length > 0) {
         setTimeout(() => {
