@@ -18,7 +18,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
   const [results, setResults] = useState<any[]>(cachedResults || []);
   const [loading, setLoading] = useState(!cachedResults);
   
-  const { fontSize, lineHeight, addTab, setScrollToVerse } = useBibleStore();
+  const { fontSize, lineHeight, tabs, addTab, setActiveTab, setScrollToVerse } = useBibleStore();
   
   const onUpdateResultsRef = useRef(onUpdateResults);
   useEffect(() => { onUpdateResultsRef.current = onUpdateResults; }, [onUpdateResults]);
@@ -47,12 +47,26 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
     search();
   }, [query, mode, cachedResults]);
 
-  const handleResultClick = (book: string, chapter: number, verse: number) => {
-    addTab({
-        type: 'read',
-        book: book,
-        chapter: chapter.toString()
-    });
+  const handleResultClick = (bookId: string, chapter: number, verse: number) => {
+    // 1. 查找是否已经存在专用的阅读标签页 (type === 'read')
+    const readTab = tabs.find((t: any) => t.type === 'read');
+
+    if (readTab) {
+       // 2. 如果存在，先激活它，然后更新它的书卷和章节数据
+       setActiveTab(readTab.id);
+       useBibleStore.setState((state) => ({
+           tabs: state.tabs.map((t: any) =>
+               t.id === readTab.id
+                   ? { ...t, book: bookId, chapter: chapter.toString() }
+                   : t
+           )
+       }));
+    } else {
+       // 3. 只有在极少数情况下（比如用户把阅读页关了），才新建一个标签页
+       addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
+    }
+
+    // 4. 精准打击：命令阅读器滚动到对应的经文节数
     setScrollToVerse(verse);
   };
 
