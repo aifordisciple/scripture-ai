@@ -1,5 +1,6 @@
 // hooks/use-audio-player.ts
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useBibleStore } from '@/store/useBibleStore';
 
 export function useAudioPlayer(onFinished?: () => void) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -133,6 +134,14 @@ export function useAudioPlayer(onFinished?: () => void) {
       audio.onended = () => {
         setIsPlaying(false);
         setCurrentTime(0);
+        
+        // [新增] 拦截：如果处于计划流中，按照计划步骤前进
+        const { readingPlanContext, advancePlanStep } = useBibleStore.getState();
+        if (readingPlanContext) {
+            advancePlanStep();
+            return;
+        }
+        
         if (onFinished) onFinished(); // 触发回调，自动播放下一章
       };
 

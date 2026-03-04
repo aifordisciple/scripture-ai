@@ -1,0 +1,629 @@
+npm warn Unknown user config "install". This will stop working in the next major version of npm.
+
+> scripture-ai@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.5.5:3000
+- Environments: .env.local, .env
+
+✓ Starting...
+✓ Ready in 388ms
+⚠ Cross origin request detected from 113.44.66.210 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET / 200 in 531ms (compile: 363ms, render: 169ms)
+ GET /?book=1Ki&chapter=8 200 in 677ms (compile: 529ms, render: 148ms)
+ GET /api/bible?book=1Ki&chapter=8 200 in 86ms (compile: 54ms, render: 32ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 14ms (compile: 4ms, render: 10ms)
+ GET /?book=Psa&chapter=7 200 in 27ms (compile: 6ms, render: 21ms)
+ GET /api/bible?book=Psa&chapter=7 200 in 14ms (compile: 3ms, render: 11ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 23.2s (compile: 48ms, render: 23.2s)
+ GET /?book=Lev&chapter=18 200 in 21ms (compile: 5ms, render: 16ms)
+ GET /api/bible?book=Lev&chapter=18 200 in 14ms (compile: 4ms, render: 10ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 19.6s (compile: 4ms, render: 19.6s)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 26.6s (compile: 5ms, render: 26.6s)
+✓ Compiled in 508ms
+✓ Compiled in 59ms
+✓ Compiled in 57ms
+ GET / 200 in 69ms (compile: 51ms, render: 18ms)
+ GET /?book=Lev&chapter=18 200 in 8ms (compile: 1045µs, render: 6ms)
+ GET / 200 in 99ms (compile: 4ms, render: 96ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 51ms (compile: 3ms, render: 48ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 18.4s (compile: 3ms, render: 18.4s)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 22.9s (compile: 4ms, render: 22.9s)
+✓ Compiled in 61ms
+✓ Compiled in 49ms
+ GET / 200 in 72ms (compile: 48ms, render: 24ms)
+ GET /?book=Lev&chapter=18 200 in 8ms (compile: 901µs, render: 7ms)
+✓ Compiled in 55ms
+✓ Compiled in 52ms
+ GET /?book=Lev&chapter=18 200 in 15ms (compile: 3ms, render: 12ms)
+ GET / 200 in 14ms (compile: 2ms, render: 12ms)
+ GET / 200 in 102ms (compile: 4ms, render: 98ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 26ms (compile: 3ms, render: 23ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 58s (compile: 51ms, render: 58s)
+ GET / 200 in 55ms (compile: 6ms, render: 48ms)
+npm warn Unknown user config "install". This will stop working in the next major version of npm.
+
+> scripture-ai@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.5.5:3000
+- Environments: .env.local, .env
+
+✓ Starting...
+✓ Ready in 514ms
+⚠ Cross origin request detected from 113.44.66.210 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET /?book=Ecc&chapter=5 200 in 952ms (compile: 791ms, render: 161ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 124ms (compile: 71ms, render: 53ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 33ms (compile: 13ms, render: 20ms)
+ GET /api/auth/session 200 in 494ms (compile: 488ms, render: 6ms)
+ GET /api/auth/session 200 in 35ms (compile: 7ms, render: 28ms)
+ GET /api/user/sync 200 in 50ms (compile: 32ms, render: 18ms)
+ GET /api/user/sync 200 in 10ms (compile: 819µs, render: 9ms)
+ GET / 200 in 64ms (compile: 9ms, render: 56ms)
+ GET /api/auth/session 200 in 53ms (compile: 13ms, render: 41ms)
+ POST /api/user/settings 200 in 48ms (compile: 30ms, render: 18ms)
+ GET /api/auth/session 200 in 4ms (compile: 839µs, render: 3ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 34ms (compile: 14ms, render: 21ms)
+ GET /api/auth/session 200 in 18ms (compile: 7ms, render: 11ms)
+ GET /api/highlight?bookId=Gen&chapter=1 200 in 44ms (compile: 8ms, render: 36ms)
+ GET /api/bible?book=Jdg&chapter=2 200 in 5ms (compile: 1420µs, render: 4ms)
+ GET /api/highlight?bookId=Jdg&chapter=2 200 in 16ms (compile: 877µs, render: 15ms)
+ GET /api/bible?book=Jdg&chapter=2 200 in 4ms (compile: 673µs, render: 4ms)
+ GET /api/auth/session 200 in 4ms (compile: 557µs, render: 3ms)
+ GET /api/user/sync 200 in 10ms (compile: 666µs, render: 9ms)
+ GET /api/highlight?bookId=Jdg&chapter=2 200 in 7ms (compile: 498µs, render: 6ms)
+ GET /?book=Ecc&chapter=5 200 in 27ms (compile: 1182µs, render: 26ms)
+ POST /api/user/settings 200 in 13ms (compile: 764µs, render: 12ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 18ms (compile: 4ms, render: 14ms)
+ GET /api/auth/session 200 in 16ms (compile: 7ms, render: 9ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 30ms (compile: 4ms, render: 26ms)
+ GET /api/auth/session 200 in 4ms (compile: 611µs, render: 3ms)
+ GET /api/user/sync 200 in 9ms (compile: 764µs, render: 9ms)
+ GET / 200 in 29ms (compile: 7ms, render: 22ms)
+ GET /?book=Ecc&chapter=5 200 in 31ms (compile: 6ms, render: 26ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 17ms (compile: 3ms, render: 14ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 15ms (compile: 4ms, render: 11ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 22ms (compile: 3ms, render: 19ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 14ms (compile: 4ms, render: 11ms)
+ POST /api/user/settings 200 in 33ms (compile: 4ms, render: 29ms)
+ GET / 200 in 26ms (compile: 7ms, render: 20ms)
+ POST /api/user/settings 200 in 37ms (compile: 5ms, render: 32ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 11ms (compile: 3ms, render: 8ms)
+ GET /?book=Ecc&chapter=5 200 in 42ms (compile: 6ms, render: 36ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 20ms (compile: 6ms, render: 15ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 9ms (compile: 3ms, render: 6ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 16ms (compile: 2ms, render: 14ms)
+ GET / 200 in 27ms (compile: 5ms, render: 22ms)
+ GET / 200 in 27ms (compile: 7ms, render: 20ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 23ms (compile: 11ms, render: 12ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 35ms (compile: 5ms, render: 30ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 12ms (compile: 3ms, render: 8ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 22ms (compile: 3ms, render: 19ms)
+ POST /api/user/settings 200 in 36ms (compile: 7ms, render: 29ms)
+[Search] AI Searching for: 关于梦的经文
+ POST /api/user/settings 200 in 16ms (compile: 1338µs, render: 15ms)
+ GET /api/auth/session 200 in 20ms (compile: 9ms, render: 10ms)
+ GET /api/auth/session 200 in 5ms (compile: 1030µs, render: 4ms)
+ GET /api/auth/session 200 in 19ms (compile: 9ms, render: 11ms)
+ POST /api/user/settings 200 in 15ms (compile: 1379µs, render: 14ms)
+ GET /api/auth/session 200 in 4ms (compile: 909µs, render: 3ms)
+ POST /api/user/settings 200 in 26ms (compile: 4ms, render: 23ms)
+ GET /api/auth/session 200 in 18ms (compile: 8ms, render: 10ms)
+ GET /api/auth/session 200 in 5ms (compile: 1104µs, render: 4ms)
+ GET /api/auth/session 200 in 15ms (compile: 7ms, render: 8ms)
+ GET /api/auth/session 200 in 5ms (compile: 1056µs, render: 4ms)
+ GET /api/auth/session 200 in 18ms (compile: 8ms, render: 9ms)
+ GET /api/auth/session 200 in 5ms (compile: 1075µs, render: 4ms)
+ GET /api/auth/session 200 in 23ms (compile: 12ms, render: 11ms)
+ GET /api/auth/session 200 in 5ms (compile: 1187µs, render: 4ms)
+[Search] No <think> tags found or using standard model.
+AI JSON Parse Error.
+Raw Output (Cleaned): [
+  {"bookId": "Gen", "chapter": 37, "verse": 9},
+  {"bookId": "Gen", "chapter": 41, "verse": 1-16},
+  {"bookId": "Exo", "chapter": 20, "verse": 5},
+  {"bookId": "Num", "chapter": 12, "verse": 17},
+  {"bookId": "Jos", "chapter": 8, "verse": 13-14},
+  {"bookId": "Jdg", "chapter": 6, "verse": 15-17},
+  {"bookId": "Rut", "chapter": 2, "verse": 19-20},
+  {"bookId": "1Sa", "chapter": 16, "verse": 4-13},
+  {"bookId": "2Sa", "chapter": 7, "verse": 14},
+  {"bookId": "1Ki", "chapter": 3, "verse": 5-15},
+  {"bookId": "2Ki", "chapter": 9, "verse": 10},
+  {"bookId": "Est", "chapter": 7, "verse": 1-8},
+  {"bookId": "Job", "chapter": 4, "verse": 13-16},
+  {"bookId": "Psa", "chapter": 90, "verse": 2},
+  {"bookId": "Pro", "chapter": 29, "verse": 17},
+  {"bookId": "Ecc", "chapter": 5, "verse": 3},
+  {"bookId": "Isa", "chapter": 29, "verse": 8},
+  {"bookId": "Jer", "chapter": 20, "verse": 7-16},
+  {"bookId": "Dan", "chapter": 2, "verse": 1-49},
+  {"bookId": "Mat", "chapter": 1, "verse": 23},
+  {"bookId": "Mat", "chapter": 28, "verse": 17-20},
+  {"bookId": "Mrk", "chapter": 16, "verse": 4},
+  {"bookId": "Luk", "chapter": 24, "verse": 4-12}
+]
+ GET /api/search?q=%E5%85%B3%E4%BA%8E%E6%A2%A6%E7%9A%84%E7%BB%8F%E6%96%87&mode=ai 200 in 15.0s (compile: 64ms, render: 15.0s)
+[Search] AI Searching for: 关于梦的经文
+ GET /api/auth/session 200 in 20ms (compile: 10ms, render: 11ms)
+ GET /api/auth/session 200 in 4ms (compile: 989µs, render: 3ms)
+ GET /api/auth/session 200 in 18ms (compile: 8ms, render: 10ms)
+ GET /api/auth/session 200 in 5ms (compile: 1227µs, render: 4ms)
+ POST /api/user/settings 200 in 30ms (compile: 4ms, render: 26ms)
+ GET / 200 in 25ms (compile: 5ms, render: 20ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 13ms (compile: 3ms, render: 10ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 9ms (compile: 3ms, render: 7ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 26ms (compile: 3ms, render: 22ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 20ms (compile: 3ms, render: 17ms)
+ POST /api/user/settings 200 in 29ms (compile: 4ms, render: 25ms)
+[Search] No <think> tags found or using standard model.
+AI JSON Parse Error.
+Raw Output (Cleaned): [
+  {"bookId": "Gen", "chapter": 28, "verse": 12},
+  {"bookId": "Gen", "chapter": 37, "verse": 5},
+  {"bookId": "Num", "chapter": 12, "verse": 6},
+  {"bookId": "Deu", "chapter": 13, "verse": 1},
+  {"bookId": "Jos", "chapter": 5, "verse": 14},
+  {"bookId": "Jdg", "chapter": 6, "verse": 12},
+  {"bookId": "1Sa", "chapter": 28, "verse": 17},
+  {"bookId": "Mat", "chapter": 1:15, "verse": 1},
+  {"bookId": "Mat", "chapter": 2:9, "verse": 12},
+  {"bookId": "Mat", "chapter": 28, "verse": 19},
+  {"bookId": "Jhn", "chapter": 20, "verse": 9},
+  {"bookId": "Act", "chapter": 2:17, "verse": 26},
+  {"bookId": "Rev", "chapter": 1:10, "verse": 19}
+]
+ GET /api/search?q=%E5%85%B3%E4%BA%8E%E6%A2%A6%E7%9A%84%E7%BB%8F%E6%96%87&mode=ai 200 in 13.1s (compile: 5ms, render: 13.1s)
+ POST /api/user/settings 200 in 33ms (compile: 5ms, render: 28ms)
+[Search] AI Searching for: 关于做梦的经文
+ POST /api/user/settings 200 in 32ms (compile: 5ms, render: 27ms)
+[Search] No <think> tags found or using standard model.
+AI JSON Parse Error.
+Raw Output (Cleaned): [
+  {"bookId": "Gen", "chapter": 28, "verse": 12},
+  {"bookId": "Gen", "chapter": 37, "verse": 5},
+  {"bookId": "Exo", "chapter": 34, "verse": 20},
+  {"bookId": "Num", "chapter": 12, "verse": 6},
+  {"bookId": "Jos", "chapter": 5, "verse": 13},
+  {"bookId": "Jdg", "chapter": 6, "verse": 17},
+  {"bookId": "1Sa", "chapter": 28, "verse": 12},
+  {"bookId": "Mat", "chapter": 1:12, "verse": 12},
+  {"bookId": "Mat", "chapter": 2:19, "verse": 28},
+  {"bookId": "Jhn", "chapter": 3, "verse": 16}
+]
+ GET /api/search?q=%E5%85%B3%E4%BA%8E%E5%81%9A%E6%A2%A6%E7%9A%84%E7%BB%8F%E6%96%87&mode=ai 200 in 10.6s (compile: 5ms, render: 10.6s)
+[Search] AI Searching for: 关于做梦的经文
+ POST /api/user/settings 200 in 26ms (compile: 3ms, render: 23ms)
+[Search] No <think> tags found or using standard model.
+ GET /api/search?q=%E5%85%B3%E4%BA%8E%E5%81%9A%E6%A2%A6%E7%9A%84%E7%BB%8F%E6%96%87&mode=ai 200 in 12.9s (compile: 5ms, render: 12.9s)
+ POST /api/user/settings 200 in 38ms (compile: 5ms, render: 33ms)
+ GET /api/auth/session 200 in 26ms (compile: 12ms, render: 14ms)
+ GET /api/auth/session 200 in 4ms (compile: 724µs, render: 3ms)
+ POST /api/user/settings 200 in 51ms (compile: 4ms, render: 48ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 21ms (compile: 4ms, render: 17ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 26ms (compile: 3ms, render: 22ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 12ms (compile: 4ms, render: 8ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 26ms (compile: 5ms, render: 21ms)
+ POST /api/user/settings 200 in 37ms (compile: 5ms, render: 32ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 23.9s (compile: 51ms, render: 23.9s)
+ GET /api/auth/session 200 in 29ms (compile: 13ms, render: 16ms)
+ GET /api/auth/session 200 in 4ms (compile: 807µs, render: 3ms)
+ POST /api/user/settings 200 in 29ms (compile: 2ms, render: 27ms)
+ GET /api/auth/session 200 in 19ms (compile: 8ms, render: 11ms)
+ GET /api/auth/session 200 in 5ms (compile: 1127µs, render: 4ms)
+ POST /api/user/settings 200 in 33ms (compile: 4ms, render: 29ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 19.6s (compile: 4ms, render: 19.6s)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 31.6s (compile: 5ms, render: 31.5s)
+✓ Compiled in 176ms
+✓ Compiled in 89ms
+ GET / 200 in 50ms (compile: 38ms, render: 12ms)
+ GET /api/auth/session 200 in 24ms (compile: 10ms, render: 14ms)
+ GET /api/auth/session 200 in 4ms (compile: 779µs, render: 3ms)
+ POST /api/user/settings 200 in 14ms (compile: 1050µs, render: 13ms)
+ GET / 200 in 139ms (compile: 6ms, render: 133ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 21ms (compile: 6ms, render: 15ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 15ms (compile: 10ms, render: 5ms)
+ GET /api/auth/session 200 in 20ms (compile: 7ms, render: 12ms)
+ GET /api/highlight?bookId=Gen&chapter=1 200 in 45ms (compile: 13ms, render: 32ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 42ms (compile: 11ms, render: 31ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 6ms (compile: 709µs, render: 5ms)
+ GET /api/auth/session 200 in 4ms (compile: 540µs, render: 3ms)
+ GET /api/user/sync 200 in 13ms (compile: 711µs, render: 12ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 6ms (compile: 603µs, render: 5ms)
+ POST /api/user/settings 200 in 40ms (compile: 5ms, render: 35ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ GET /api/auth/session 200 in 21ms (compile: 9ms, render: 11ms)
+ GET /api/auth/session 200 in 6ms (compile: 1224µs, render: 5ms)
+ POST /api/user/settings 200 in 27ms (compile: 3ms, render: 24ms)
+ POST /api/chat 200 in 26.0s (compile: 4ms, render: 26.0s)
+ POST /api/tts 200 in 15.8s (compile: 51ms, render: 15.7s)
+ GET /api/auth/session 200 in 25ms (compile: 11ms, render: 14ms)
+ GET /api/auth/session 200 in 4ms (compile: 786µs, render: 3ms)
+ POST /api/user/settings 200 in 35ms (compile: 5ms, render: 30ms)
+ GET /api/auth/session 200 in 22ms (compile: 10ms, render: 12ms)
+ GET /api/auth/session 200 in 3ms (compile: 674µs, render: 3ms)
+ POST /api/user/settings 200 in 37ms (compile: 5ms, render: 32ms)
+ GET / 200 in 76ms (compile: 5ms, render: 71ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 18ms (compile: 5ms, render: 13ms)
+ GET /api/auth/session 200 in 18ms (compile: 7ms, render: 11ms)
+ GET /api/highlight?bookId=Gen&chapter=1 200 in 32ms (compile: 3ms, render: 29ms)
+ GET /api/bible?book=Jdg&chapter=2 200 in 7ms (compile: 3ms, render: 4ms)
+ GET /api/highlight?bookId=Jdg&chapter=2 200 in 10ms (compile: 1373µs, render: 9ms)
+ GET /api/highlight?bookId=Jdg&chapter=2 200 in 8ms (compile: 744µs, render: 7ms)
+ GET /api/bible?book=Jdg&chapter=2 200 in 4ms (compile: 540µs, render: 3ms)
+ GET /api/user/sync 200 in 9ms (compile: 640µs, render: 9ms)
+ GET /api/auth/session 200 in 3ms (compile: 614µs, render: 3ms)
+ GET /api/user/sync 200 in 10ms (compile: 818µs, render: 9ms)
+ GET / 200 in 28ms (compile: 7ms, render: 21ms)
+ GET /api/bible?book=Jdg&chapter=2 200 in 18ms (compile: 4ms, render: 13ms)
+ GET /api/highlight?bookId=Jdg&chapter=2 200 in 30ms (compile: 11ms, render: 19ms)
+ GET /api/bible?book=Jdg&chapter=2 200 in 12ms (compile: 3ms, render: 9ms)
+ GET /api/highlight?bookId=Jdg&chapter=2 200 in 17ms (compile: 3ms, render: 15ms)
+ GET /?book=Heb&chapter=9 200 in 26ms (compile: 6ms, render: 19ms)
+ GET /api/bible?book=Heb&chapter=9 200 in 16ms (compile: 7ms, render: 9ms)
+ GET /api/highlight?bookId=Heb&chapter=9 200 in 19ms (compile: 3ms, render: 17ms)
+ GET /api/bible?book=Heb&chapter=9 200 in 14ms (compile: 3ms, render: 10ms)
+ GET /api/highlight?bookId=Heb&chapter=9 200 in 27ms (compile: 8ms, render: 19ms)
+ GET /api/highlight?bookId=Heb&chapter=9 200 in 20ms (compile: 3ms, render: 17ms)
+ GET /api/bible?book=Heb&chapter=9 200 in 11ms (compile: 5ms, render: 6ms)
+ GET /api/highlight?bookId=Heb&chapter=9 200 in 15ms (compile: 3ms, render: 12ms)
+ GET /api/bible?book=Heb&chapter=9 200 in 6ms (compile: 1534µs, render: 5ms)
+ GET /api/bible?book=Heb&chapter=9 200 in 13ms (compile: 3ms, render: 10ms)
+ GET /api/highlight?bookId=Heb&chapter=9 200 in 36ms (compile: 5ms, render: 31ms)
+ GET /api/bible?book=Heb&chapter=9 200 in 16ms (compile: 3ms, render: 13ms)
+ GET /api/highlight?bookId=Heb&chapter=9 200 in 20ms (compile: 3ms, render: 17ms)
+ POST /api/user/settings 200 in 30ms (compile: 3ms, render: 26ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 17.3s (compile: 4ms, render: 17.3s)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 25.0s (compile: 6ms, render: 25.0s)
+✓ Compiled in 96ms
+✓ Compiled in 84ms
+ GET / 200 in 59ms (compile: 45ms, render: 15ms)
+ GET /api/auth/session 200 in 25ms (compile: 10ms, render: 15ms)
+ GET /api/auth/session 200 in 4ms (compile: 718µs, render: 3ms)
+ POST /api/user/settings 200 in 33ms (compile: 1151µs, render: 32ms)
+ POST /api/tts 200 in 14.5s (compile: 781µs, render: 14.5s)
+ GET /api/auth/session 200 in 22ms (compile: 11ms, render: 12ms)
+ GET /api/auth/session 200 in 3ms (compile: 723µs, render: 3ms)
+ POST /api/user/settings 200 in 36ms (compile: 4ms, render: 32ms)
+ GET / 200 in 31ms (compile: 7ms, render: 24ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 24ms (compile: 6ms, render: 18ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 27ms (compile: 4ms, render: 24ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 9ms (compile: 2ms, render: 7ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 21ms (compile: 3ms, render: 18ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 34ms (compile: 24ms, render: 10ms)
+ GET /?book=Ecc&chapter=5 200 in 40ms (compile: 7ms, render: 33ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 16ms (compile: 2ms, render: 14ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 11ms (compile: 2ms, render: 8ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 14ms (compile: 2ms, render: 11ms)
+ POST /api/user/settings 200 in 33ms (compile: 5ms, render: 28ms)
+✓ Compiled in 83ms
+ GET /?book=Ecc&chapter=5 200 in 52ms (compile: 39ms, render: 13ms)
+✓ Compiled in 64ms
+✓ Compiled in 65ms
+ GET /?book=Ecc&chapter=5 200 in 22ms (compile: 5ms, render: 17ms)
+ GET /api/auth/session 200 in 28ms (compile: 11ms, render: 16ms)
+ GET /api/auth/session 200 in 3ms (compile: 686µs, render: 3ms)
+ POST /api/user/settings 200 in 35ms (compile: 4ms, render: 31ms)
+ GET /?book=Ecc&chapter=5 200 in 146ms (compile: 6ms, render: 140ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 20ms (compile: 8ms, render: 13ms)
+ GET /api/auth/session 200 in 15ms (compile: 7ms, render: 7ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 41ms (compile: 13ms, render: 28ms)
+ GET /api/user/sync 200 in 14ms (compile: 710µs, render: 13ms)
+ GET /api/auth/session 200 in 3ms (compile: 593µs, render: 3ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/user/settings 200 in 27ms (compile: 2ms, render: 25ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 11ms (compile: 1798µs, render: 9ms)
+ GET /?book=Ecc&chapter=5 200 in 38ms (compile: 6ms, render: 32ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 12ms (compile: 1655µs, render: 10ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 9ms (compile: 1862µs, render: 7ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 14ms (compile: 1708µs, render: 12ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 15ms (compile: 4ms, render: 12ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 26ms (compile: 8ms, render: 18ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 6ms (compile: 1073µs, render: 5ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 10ms (compile: 3ms, render: 8ms)
+ POST /api/user/settings 200 in 26ms (compile: 3ms, render: 23ms)
+ POST /api/chat 200 in 26.7s (compile: 5ms, render: 26.7s)
+ POST /api/tts 200 in 15.8s (compile: 6ms, render: 15.8s)
+ GET /api/auth/session 200 in 26ms (compile: 12ms, render: 14ms)
+ GET /api/auth/session 200 in 4ms (compile: 749µs, render: 4ms)
+ POST /api/user/settings 200 in 37ms (compile: 5ms, render: 32ms)
+ GET /api/auth/session 200 in 24ms (compile: 14ms, render: 11ms)
+ GET /api/auth/session 200 in 4ms (compile: 884µs, render: 3ms)
+ POST /api/user/settings 200 in 35ms (compile: 6ms, render: 29ms)
+ GET /api/auth/session 200 in 24ms (compile: 10ms, render: 14ms)
+ GET /api/auth/session 200 in 4ms (compile: 882µs, render: 3ms)
+ POST /api/user/settings 200 in 37ms (compile: 5ms, render: 33ms)
+ GET /api/search?q=%E5%88%9B%E9%80%A0&mode=exact 200 in 35ms (compile: 3ms, render: 32ms)
+ GET /api/search?q=%E5%88%9B%E9%80%A0&mode=exact 200 in 31ms (compile: 3ms, render: 28ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 17ms (compile: 5ms, render: 12ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 22ms (compile: 6ms, render: 16ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 16ms (compile: 3ms, render: 13ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 20ms (compile: 3ms, render: 18ms)
+ POST /api/user/settings 200 in 37ms (compile: 5ms, render: 32ms)
+ GET / 200 in 29ms (compile: 6ms, render: 23ms)
+ POST /api/user/settings 200 in 35ms (compile: 4ms, render: 31ms)
+ GET /api/bible?book=2Ki&chapter=19 200 in 12ms (compile: 4ms, render: 8ms)
+ GET /api/highlight?bookId=2Ki&chapter=19 200 in 16ms (compile: 1790µs, render: 14ms)
+ GET /api/bible?book=2Ki&chapter=19 200 in 9ms (compile: 2ms, render: 7ms)
+ GET /api/highlight?bookId=2Ki&chapter=19 200 in 19ms (compile: 3ms, render: 17ms)
+ POST /api/user/settings 200 in 31ms (compile: 4ms, render: 27ms)
+ GET / 200 in 28ms (compile: 7ms, render: 20ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 10ms (compile: 3ms, render: 8ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 54ms (compile: 4ms, render: 50ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 12ms (compile: 2ms, render: 10ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 10ms (compile: 1041µs, render: 9ms)
+ POST /api/user/settings 200 in 38ms (compile: 5ms, render: 33ms)
+ GET / 200 in 19ms (compile: 4ms, render: 15ms)
+ GET /?book=2Ch&chapter=2 200 in 41ms (compile: 7ms, render: 34ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 14ms (compile: 6ms, render: 8ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 18ms (compile: 3ms, render: 15ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 9ms (compile: 3ms, render: 6ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 14ms (compile: 2ms, render: 12ms)
+ POST /api/user/settings 200 in 22ms (compile: 3ms, render: 19ms)
+ GET / 200 in 26ms (compile: 6ms, render: 20ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 33ms (compile: 26ms, render: 7ms)
+ GET /?book=2Ch&chapter=2 200 in 38ms (compile: 7ms, render: 31ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 42ms (compile: 23ms, render: 20ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 17ms (compile: 3ms, render: 15ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 8ms (compile: 2ms, render: 6ms)
+ GET /api/auth/session 200 in 28ms (compile: 9ms, render: 19ms)
+ POST /api/user/settings 200 in 25ms (compile: 2ms, render: 23ms)
+ GET /api/auth/session 200 in 3ms (compile: 670µs, render: 3ms)
+ POST /api/user/settings 200 in 25ms (compile: 1886µs, render: 24ms)
+ GET /?book=2Ch&chapter=2 200 in 30ms (compile: 6ms, render: 24ms)
+ GET /?book=2Ch&chapter=2 200 in 25ms (compile: 8ms, render: 17ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 11ms (compile: 3ms, render: 8ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 32ms (compile: 4ms, render: 28ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 13ms (compile: 4ms, render: 9ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 33ms (compile: 5ms, render: 28ms)
+ GET /?book=2Ch&chapter=2 200 in 20ms (compile: 4ms, render: 16ms)
+ POST /api/user/settings 200 in 33ms (compile: 5ms, render: 28ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 15ms (compile: 4ms, render: 11ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 21ms (compile: 4ms, render: 17ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 11ms (compile: 3ms, render: 8ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 18ms (compile: 2ms, render: 16ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 9ms (compile: 1570µs, render: 7ms)
+ GET /?book=Ecc&chapter=5 200 in 37ms (compile: 7ms, render: 30ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 18ms (compile: 5ms, render: 13ms)
+ GET /api/bible?book=2Ch&chapter=2 200 in 13ms (compile: 2ms, render: 11ms)
+ GET /api/highlight?bookId=2Ch&chapter=2 200 in 18ms (compile: 3ms, render: 15ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 4ms (compile: 778µs, render: 3ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 12ms (compile: 1037µs, render: 11ms)
+ GET / 200 in 27ms (compile: 5ms, render: 22ms)
+ GET / 200 in 22ms (compile: 5ms, render: 17ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 16ms (compile: 3ms, render: 13ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 29ms (compile: 10ms, render: 19ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 17ms (compile: 5ms, render: 12ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 17ms (compile: 3ms, render: 14ms)
+ GET /?book=Ecc&chapter=5 200 in 27ms (compile: 6ms, render: 22ms)
+ POST /api/user/settings 200 in 32ms (compile: 4ms, render: 27ms)
+ GET /api/auth/session 200 in 24ms (compile: 11ms, render: 13ms)
+ GET /api/auth/session 200 in 4ms (compile: 1020µs, render: 3ms)
+ POST /api/user/settings 200 in 36ms (compile: 5ms, render: 31ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 17ms (compile: 5ms, render: 12ms)
+Proxy error: TypeError: fetch failed
+    at async GET (app/api/proxy/route.ts:9:22)
+   7 |
+   8 |   try {
+>  9 |     const response = await fetch(url);
+     |                      ^
+  10 |     if (!response.ok) throw new Error('Fetch failed');
+  11 |     
+  12 |     const blob = await response.blob(); {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 151.101.78.208:443, 2a04:4e42:7b::720:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+ GET /api/proxy?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1491466424936-e304919aada7%3Fq%3D80%26w%3D1080%26auto%3Dformat%26fit%3Dcrop 500 in 10.7s (compile: 51ms, render: 10.6s)
+ GET /api/auth/session 200 in 30ms (compile: 16ms, render: 15ms)
+ GET /api/auth/session 200 in 21ms (compile: 10ms, render: 11ms)
+ POST /api/user/settings 200 in 65ms (compile: 4ms, render: 61ms)
+ GET /api/auth/session 200 in 22ms (compile: 9ms, render: 13ms)
+ GET /api/auth/session 200 in 4ms (compile: 705µs, render: 3ms)
+ POST /api/user/settings 200 in 33ms (compile: 5ms, render: 28ms)
+ GET /api/auth/session 200 in 22ms (compile: 9ms, render: 13ms)
+ GET /api/auth/session 200 in 3ms (compile: 637µs, render: 3ms)
+ GET /?book=Heb&chapter=9 200 in 76ms (compile: 7ms, render: 69ms)
+ GET /api/bible?book=Heb&chapter=9 200 in 21ms (compile: 3ms, render: 18ms)
+ GET /api/auth/session 200 in 22ms (compile: 7ms, render: 16ms)
+ GET /api/highlight?bookId=Heb&chapter=9 200 in 15ms (compile: 1867µs, render: 13ms)
+ GET /api/bible?book=Heb&chapter=9 200 in 5ms (compile: 906µs, render: 4ms)
+ GET /api/highlight?bookId=Heb&chapter=9 200 in 8ms (compile: 815µs, render: 8ms)
+ GET /api/bible?book=Heb&chapter=9 200 in 5ms (compile: 1568µs, render: 3ms)
+ GET /api/highlight?bookId=Heb&chapter=9 200 in 7ms (compile: 682µs, render: 7ms)
+ GET /api/user/sync 200 in 13ms (compile: 749µs, render: 13ms)
+ GET /api/auth/session 200 in 5ms (compile: 1106µs, render: 3ms)
+ POST /api/user/settings 200 in 36ms (compile: 4ms, render: 32ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 19.1s (compile: 6ms, render: 19.1s)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 30.0s (compile: 6ms, render: 30.0s)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+ POST / 404 in 184ms (compile: 7ms, render: 177ms)
+ GET /?book=1Sa&chapter=16 200 in 78ms (compile: 11ms, render: 67ms)
+ GET /?book=1Sa&chapter=16 200 in 57ms (compile: 7ms, render: 50ms)
+ GET /api/highlight?bookId=1Sa&chapter=16 200 in 12ms (compile: 3ms, render: 8ms)
+ GET /api/bible?book=1Sa&chapter=16 200 in 44ms (compile: 4ms, render: 40ms)
+ GET /api/auth/session 200 in 16ms (compile: 7ms, render: 8ms)
+ GET /api/auth/session 200 in 2ms (compile: 757µs, render: 1314µs)
+ GET /?book=1Sa&chapter=16 200 in 30ms (compile: 5ms, render: 24ms)
+ GET /?book=1Sa&chapter=16 200 in 26ms (compile: 6ms, render: 20ms)
+ POST /api/tts 200 in 12.5s (compile: 6ms, render: 12.5s)
+ GET /api/auth/session 200 in 24ms (compile: 9ms, render: 15ms)
+ GET /api/auth/session 200 in 4ms (compile: 732µs, render: 3ms)
+ POST /api/user/settings 200 in 41ms (compile: 5ms, render: 37ms)
+ GET /api/proxy?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1491466424936-e304919aada7%3Fq%3D80%26w%3D1080%26auto%3Dformat%26fit%3Dcrop 200 in 749ms (compile: 4ms, render: 745ms)
+ GET /api/proxy?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1504608524841-42fe6f032b4b%3Fq%3D80%26w%3D1080%26auto%3Dformat%26fit%3Dcrop 200 in 1953ms (compile: 4ms, render: 1950ms)
+ GET /api/proxy?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1518173946687-a4c8892bbd9f%3Fq%3D80%26w%3D1080%26auto%3Dformat%26fit%3Dcrop 200 in 1330ms (compile: 4ms, render: 1326ms)
+ GET /api/proxy?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1470071459604-3b5ec3a7fe05%3Fq%3D80%26w%3D1080%26auto%3Dformat%26fit%3Dcrop 200 in 2.3s (compile: 4ms, render: 2.3s)
+ GET /api/proxy?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1433086966358-54859d0ed716%3Fq%3D80%26w%3D1080%26auto%3Dformat%26fit%3Dcrop 200 in 10.6s (compile: 4ms, render: 10.6s)
+ GET /api/proxy?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1419242902214-272b3f66ee7a%3Fq%3D80%26w%3D1080%26auto%3Dformat%26fit%3Dcrop 200 in 977ms (compile: 5ms, render: 972ms)
+Proxy error: Error: Fetch failed
+    at GET (app/api/proxy/route.ts:10:29)
+   8 |   try {
+   9 |     const response = await fetch(url);
+> 10 |     if (!response.ok) throw new Error('Fetch failed');
+     |                             ^
+  11 |     
+  12 |     const blob = await response.blob();
+  13 |     const headers = new Headers();
+ GET /api/proxy?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1519681393798-2f61f2a55db8%3Fq%3D80%26w%3D1080%26auto%3Dformat%26fit%3Dcrop 500 in 713ms (compile: 7ms, render: 706ms)
+Proxy error: Error: Fetch failed
+    at GET (app/api/proxy/route.ts:10:29)
+   8 |   try {
+   9 |     const response = await fetch(url);
+> 10 |     if (!response.ok) throw new Error('Fetch failed');
+     |                             ^
+  11 |     
+  12 |     const blob = await response.blob();
+  13 |     const headers = new Headers();
+ GET /api/proxy?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1519681393798-2f61f2a55db8%3Fq%3D80%26w%3D1080%26auto%3Dformat%26fit%3Dcrop 500 in 179ms (compile: 5ms, render: 174ms)
+ GET /api/auth/session 200 in 29ms (compile: 11ms, render: 17ms)
+ GET /api/auth/session 200 in 4ms (compile: 804µs, render: 3ms)
+ POST /api/user/settings 200 in 26ms (compile: 3ms, render: 23ms)
+ GET /api/auth/session 200 in 27ms (compile: 10ms, render: 17ms)
+ GET /api/auth/session 200 in 3ms (compile: 754µs, render: 3ms)
+ POST /api/user/settings 200 in 35ms (compile: 4ms, render: 31ms)
+ GET /?book=Ecc&chapter=5 200 in 56ms (compile: 7ms, render: 49ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 21ms (compile: 4ms, render: 17ms)
+ GET /api/auth/session 200 in 13ms (compile: 6ms, render: 8ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 34ms (compile: 4ms, render: 30ms)
+ GET /api/user/sync 200 in 13ms (compile: 680µs, render: 12ms)
+ GET /api/auth/session 200 in 3ms (compile: 515µs, render: 2ms)
+ POST /api/user/settings 200 in 34ms (compile: 5ms, render: 29ms)
+----- 1. 收到前端请求 -----
+----- 2. 准备调用模型: ollama -----
+----- 3. 开始流式传输 -----
+ POST /api/chat 200 in 26.6s (compile: 8ms, render: 26.6s)
+ GET /api/auth/session 200 in 25ms (compile: 11ms, render: 14ms)
+ GET /api/auth/session 200 in 4ms (compile: 824µs, render: 3ms)
+ POST /api/user/settings 200 in 34ms (compile: 5ms, render: 30ms)
+✓ Compiled in 147ms
+✓ Compiled in 59ms
+ GET /?book=Ecc&chapter=5 200 in 50ms (compile: 37ms, render: 13ms)
+✓ Compiled in 98ms
+ GET /?book=Ecc&chapter=5 200 in 112ms (compile: 24ms, render: 88ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 21ms (compile: 4ms, render: 17ms)
+ GET /api/auth/session 200 in 13ms (compile: 6ms, render: 7ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 29ms (compile: 6ms, render: 23ms)
+ GET /api/user/sync 200 in 20ms (compile: 3ms, render: 18ms)
+ GET /api/auth/session 200 in 7ms (compile: 1679µs, render: 6ms)
+ POST /api/user/settings 200 in 13ms (compile: 910µs, render: 12ms)
+✓ Compiled in 92ms
+✓ Compiled in 65ms
+ GET /?book=Ecc&chapter=5 200 in 67ms (compile: 50ms, render: 17ms)
+✓ Compiled in 102ms
+✓ Compiled in 71ms
+ GET /?book=Ecc&chapter=5 200 in 65ms (compile: 50ms, render: 15ms)
+ GET /api/auth/session 200 in 26ms (compile: 10ms, render: 16ms)
+ GET /api/auth/session 200 in 4ms (compile: 908µs, render: 3ms)
+ POST /api/user/settings 200 in 10ms (compile: 870µs, render: 10ms)
+ GET /?book=Ecc&chapter=5 200 in 124ms (compile: 6ms, render: 118ms)
+ GET /api/auth/session 200 in 28ms (compile: 9ms, render: 19ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 11ms (compile: 3ms, render: 9ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 64ms (compile: 5ms, render: 59ms)
+ GET /api/auth/session 200 in 6ms (compile: 800µs, render: 5ms)
+ GET /api/user/sync 200 in 12ms (compile: 649µs, render: 12ms)
+ GET /api/user/sync 200 in 11ms (compile: 823µs, render: 10ms)
+ POST /api/user/settings 200 in 16ms (compile: 1020µs, render: 14ms)
+ GET /api/search?q=%E5%88%9B%E9%80%A0&mode=exact 200 in 51ms (compile: 5ms, render: 46ms)
+ GET /api/search?q=%E5%88%9B%E9%80%A0&mode=exact 200 in 35ms (compile: 5ms, render: 31ms)
+ POST /api/user/settings 200 in 41ms (compile: 7ms, render: 34ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 16ms (compile: 4ms, render: 12ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 29ms (compile: 10ms, render: 19ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 14ms (compile: 4ms, render: 11ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 23ms (compile: 4ms, render: 20ms)
+ POST /api/user/settings 200 in 33ms (compile: 6ms, render: 27ms)
+ GET / 200 in 29ms (compile: 7ms, render: 22ms)
+ GET /api/bible?book=Isa&chapter=27 200 in 21ms (compile: 5ms, render: 16ms)
+ GET /api/highlight?bookId=Isa&chapter=27 200 in 30ms (compile: 10ms, render: 19ms)
+ GET /api/bible?book=Isa&chapter=27 200 in 9ms (compile: 2ms, render: 7ms)
+ GET /api/highlight?bookId=Isa&chapter=27 200 in 16ms (compile: 2ms, render: 14ms)
+ POST /api/user/settings 200 in 31ms (compile: 4ms, render: 26ms)
+ GET / 200 in 27ms (compile: 6ms, render: 20ms)
+ POST /api/user/settings 200 in 28ms (compile: 3ms, render: 25ms)
+ GET /api/bible?book=Isa&chapter=37 200 in 19ms (compile: 6ms, render: 13ms)
+ GET /api/highlight?bookId=Isa&chapter=37 200 in 20ms (compile: 3ms, render: 18ms)
+ GET /api/bible?book=Isa&chapter=37 200 in 12ms (compile: 3ms, render: 9ms)
+ GET /api/highlight?bookId=Isa&chapter=37 200 in 14ms (compile: 3ms, render: 11ms)
+ POST /api/user/settings 200 in 34ms (compile: 5ms, render: 29ms)
+ GET /api/bible?book=Isa&chapter=27 200 in 20ms (compile: 8ms, render: 12ms)
+ GET /api/highlight?bookId=Isa&chapter=27 200 in 34ms (compile: 13ms, render: 21ms)
+ GET /api/bible?book=Isa&chapter=27 200 in 12ms (compile: 3ms, render: 9ms)
+ GET /api/highlight?bookId=Isa&chapter=27 200 in 19ms (compile: 3ms, render: 16ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 15ms (compile: 4ms, render: 10ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 19ms (compile: 3ms, render: 16ms)
+ GET /api/bible?book=Ecc&chapter=5 200 in 11ms (compile: 2ms, render: 8ms)
+ GET /api/highlight?bookId=Ecc&chapter=5 200 in 23ms (compile: 3ms, render: 20ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 10ms (compile: 2ms, render: 8ms)
+ GET /api/highlight?bookId=Gen&chapter=1 200 in 30ms (compile: 4ms, render: 26ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 13ms (compile: 3ms, render: 9ms)
+ GET /api/highlight?bookId=Gen&chapter=1 200 in 19ms (compile: 3ms, render: 16ms)
+ POST /api/user/settings 200 in 32ms (compile: 5ms, render: 28ms)
+ GET /?book=Gen&chapter=1 200 in 28ms (compile: 6ms, render: 21ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 19ms (compile: 4ms, render: 15ms)
+ GET /api/highlight?bookId=Gen&chapter=1 200 in 22ms (compile: 3ms, render: 19ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 13ms (compile: 3ms, render: 10ms)
+ GET /api/highlight?bookId=Gen&chapter=1 200 in 21ms (compile: 3ms, render: 18ms)
+ POST /api/user/settings 200 in 24ms (compile: 4ms, render: 20ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 16ms (compile: 4ms, render: 13ms)
+ GET /api/highlight?bookId=Gen&chapter=1 200 in 29ms (compile: 10ms, render: 20ms)
+ GET /api/bible?book=Gen&chapter=1 200 in 13ms (compile: 3ms, render: 10ms)
+ GET /api/highlight?bookId=Gen&chapter=1 200 in 20ms (compile: 2ms, render: 17ms)
+ POST /api/user/settings 200 in 31ms (compile: 5ms, render: 27ms)
+ GET / 200 in 62ms (compile: 7ms, render: 55ms)
+ GET / 200 in 55ms (compile: 6ms, render: 48ms)
+ GET / 200 in 49ms (compile: 7ms, render: 42ms)
+ GET /api/auth/session 200 in 20ms (compile: 11ms, render: 10ms)
+ GET /api/auth/session 200 in 4ms (compile: 972µs, render: 3ms)
+ POST /api/user/settings 200 in 66ms (compile: 5ms, render: 61ms)

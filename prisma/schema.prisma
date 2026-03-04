@@ -56,6 +56,15 @@ model User {
   streakCount   Int       @default(0)
   lastActiveDate DateTime?
   badges         Badge[]
+
+  // [新增] 提醒与通知
+  reminders    Reminder[]
+  notificationTokens NotificationToken[]
+  // [新增] 记忆卡片
+  memoryCards  MemoryCard[]
+  
+  // [新增] API 密钥
+  apiKeys     ApiKey[]
 }
 
 model UserSetting {
@@ -180,6 +189,185 @@ model Badge {
 
   type      String   // "STREAK_7", "STREAK_30", "PLAN_COMPLETE", "BIBLE_EXPLORER"
   earnedAt DateTime @default(now())
-
   @@unique([userId, type])
+}
+
+// [新增] 提醒模型
+model Reminder {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  time      String              // "08:00" format (HH:mm)
+  planId    String?             // Optional: link to reading plan
+  enabled   Boolean @default(true)
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, time])
+  @@index([userId])
+}
+
+// [新增] 设备通知令牌
+model NotificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  token     String   @unique    // FCM device token
+  platform  String              // "android" | "ios"
+  createdAt DateTime @default(now())
+  @@index([userId])
+}
+
+// [新增] 艾宾浩斯记忆系统
+model MemoryCard {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  bookId     String   // 经文书卷ID
+  chapter     Int      // 章节
+  verse       Int?     // 节(可选)
+  content     String   // 经文内容
+  reference   String   // 引用 (如: 约3:16)
+  
+  // 艾宾浩斯曲线参数
+  easeFactor  Float    @default(2.5)  // 难度因子
+  interval    Int      @default(1)      // 当前间隔(天)
+  repetitions Int      @default(0)      // 复习次数
+  nextReview  DateTime @default(now()) // 下次复习时间
+  lastReview  DateTime?                // 最后复习时间
+  
+  // 记忆状态
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // 关系
+  reviewLogs ReviewLog[]
+  
+  @@unique([userId, bookId, chapter, verse])
+  @@index([userId, nextReview])
+}
+
+enum MemoryStatus {
+  LEARNING   // 学习中
+  REVIEW     // 复习中
+  MASTERED   // 已掌握
+  PAUSED     // 已暂停
+}
+
+// 复习记录
+model ReviewLog {
+  id          String   @id @default(cuid())
+  cardId      String
+  card        MemoryCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  
+  quality     Int      // 回忆质量 0-5 (0=忘记, 5=完美)
+  responseMs  Int?     // 响应时间(毫秒)
+  reviewedAt  DateTime @default(now())
+  @@index([cardId])
+}
+
+// [新增] API 密钥管理 (开放平台)
+model ApiKey {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String   // 密钥名称
+  key         String   @unique // API 密钥 (哈希存储)
+  prefix      String   // 密钥前缀 (用于显示)
+  
+  // 权限控制
+  permissions String[] // ["read:bible", "write:notes", ...]
+  rateLimit   Int      @default(1000) // 每小时请求限制
+  
+  // 使用统计
+  usedCount   Int      @default(0)
+  lastUsedAt  DateTime?
+  
+  // 状态
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+// [新增] 教会/小组系统
+model Church {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  
+  // 管理员
+  ownerId     String
+  
+  // 设置
+  isPublic    Boolean  @default(false) // 是否公开发现
+  allowJoin   Boolean  @default(true)  // 是否允许加入
+  
+  // 成员
+  members     ChurchMember[]
+  
+  // 小组读经计划
+  groupPlans  GroupPlan[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ChurchMember {
+  id        String   @id @default(cuid())
+  churchId  String
+  church    Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  userId    String
+  
+  role      MemberRole @default(MEMBER) // OWNER, ADMIN, MEMBER
+  
+  joinedAt  DateTime @default(now())
+  
+  @@unique([churchId, userId])
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+// 小组读经计划
+model GroupPlan {
+  id          String   @id @default(cuid())
+  churchId    String
+  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  
+  // 计划配置
+  startDate   DateTime
+  endDate     DateTime?
+  dailyChapters String[] // 每日章节列表
+  
+  // 成员进度
+  progress    GroupPlanProgress[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GroupPlanProgress {
+  id          String   @id @default(cuid())
+  planId      String
+  plan        GroupPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  userId      String
+  
+  date        DateTime
+  chaptersRead Int     @default(0)
+  completed    Boolean @default(false)
+  
+  @@unique([planId, userId, date])
 }

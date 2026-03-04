@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { BIBLE_BOOKS } from '@/lib/constants';
+import { useBibleStore } from '@/store/useBibleStore';
 
 export function useSwipeNavigation(book: string, chapter: string) {
   const router = useRouter();
@@ -14,6 +15,14 @@ export function useSwipeNavigation(book: string, chapter: string) {
 
   const handleNextChapter = () => {
     setDirection(1);
+    
+    // [新增] 拦截：如果处于计划流中，按照计划步骤前进
+    const { readingPlanContext, advancePlanStep } = useBibleStore.getState();
+    if (readingPlanContext) {
+        advancePlanStep();
+        return;
+    }
+
     const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book);
     if (currentBookIndex === -1) return;
     const currentBookConfig = BIBLE_BOOKS[currentBookIndex];
@@ -29,6 +38,14 @@ export function useSwipeNavigation(book: string, chapter: string) {
 
   const handlePrevChapter = () => {
     setDirection(-1);
+    
+    // [新增] 拦截：如果处于计划流中，按照计划步骤后退
+    const { readingPlanContext, previousPlanStep } = useBibleStore.getState();
+    if (readingPlanContext) {
+        previousPlanStep();
+        return;
+    }
+
     const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book);
     if (currentBookIndex === -1) return;
     const currentChapterInt = parseInt(chapter);

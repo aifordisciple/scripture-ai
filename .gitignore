@@ -42,3 +42,6 @@ next-env.d.ts
 
 .vscode/
 sftp.json
+
+pgdata/
+/public

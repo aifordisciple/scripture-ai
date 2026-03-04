@@ -1,0 +1,23 @@
+{
+  "name": "@scripture-ai/core",
+  "version": "1.0.0",
+  "description": "Shared core business logic for Scripture AI",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "bible",
+    "scripture",
+    "ai",
+    "christian"
+  ],
+  "license": "MIT"
+}

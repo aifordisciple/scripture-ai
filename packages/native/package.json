@@ -1,0 +1,24 @@
+{
+  "name": "@scripture-ai/native",
+  "version": "1.0.0",
+  "description": "Native platform capabilities for Scripture AI",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "bible",
+    "scripture",
+    "native",
+    "notifications",
+    "audio"
+  ],
+  "license": "MIT"
+}

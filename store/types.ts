@@ -187,6 +187,8 @@ export interface UserDataSlice {
     }[]
   } | null;
   setReadingPlanContext: (ctx: any) => void;
+  advancePlanStep: () => void;
+  previousPlanStep: () => void;
   updateStreak: () => void;
 
   // [新增] 勋章系统

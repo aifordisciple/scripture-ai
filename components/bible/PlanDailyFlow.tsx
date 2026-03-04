@@ -10,7 +10,7 @@ export function PlanDailyFlow() {
   const {
     readingPlanContext: ctx,
     setReadingPlanContext,
-    toggleTaskCompleted,
+    advancePlanStep,
     activePlans,
     generateAiDevotional,
     tabs,
@@ -64,19 +64,8 @@ export function PlanDailyFlow() {
 
   if (!ctx || !step || !activeData) return null;
 
-  // 统一的"下一步"处理逻辑
-  const handleNext = () => {
-    if (step.taskId !== 'completion') {
-       toggleTaskCompleted(ctx.planId, ctx.day, step.taskId);
-    }
-    if (ctx.stepIndex < ctx.steps.length - 1) {
-       setReadingPlanContext({ ...ctx, stepIndex: ctx.stepIndex + 1 });
-    } else {
-       setReadingPlanContext(null); // 流水线结束，返回计划大厅
-       const planTab = tabs.find(t => t.type === 'plans');
-       if (planTab) setActiveTab(planTab.id);
-    }
-  };
+  // 统一的"下一步"处理逻辑交给全局 Store 接管
+  const handleNext = () => advancePlanStep();
 
   // 视图 A：全屏灵修导读
   if (step.type === 'devotional') {

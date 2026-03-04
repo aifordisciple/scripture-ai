@@ -244,6 +244,42 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   readingPlanContext: null,
   setReadingPlanContext: (ctx) => set({ readingPlanContext: ctx }),
 
+  // [新增] 前进到计划的下一步
+  advancePlanStep: () => {
+    const state = get();
+    const ctx = state.readingPlanContext;
+    if (!ctx) return;
+    const step = ctx.steps[ctx.stepIndex];
+
+    // 1. 自动打卡当前步骤（防重复触发）
+    if (step.taskId !== 'completion') {
+       const plan = state.activePlans.find(p => p.planId === ctx.planId);
+       const currentTasks = plan?.completedTasks[ctx.day.toString()] || [];
+       if (!currentTasks.includes(step.taskId)) {
+           state.toggleTaskCompleted(ctx.planId, ctx.day, step.taskId);
+       }
+    }
+
+    // 2. 推进进度
+    if (ctx.stepIndex < ctx.steps.length - 1) {
+        set({ readingPlanContext: { ...ctx, stepIndex: ctx.stepIndex + 1 } });
+    } else {
+        set({ readingPlanContext: null }); // 结束流
+        const planTab = state.tabs.find(t => t.type === 'plans');
+        if (planTab) state.setActiveTab(planTab.id);
+    }
+  },
+
+  // [新增] 后退到计划的上一步
+  previousPlanStep: () => {
+    const state = get();
+    const ctx = state.readingPlanContext;
+    if (!ctx) return;
+    if (ctx.stepIndex > 0) {
+        set({ readingPlanContext: { ...ctx, stepIndex: ctx.stepIndex - 1 } });
+    }
+  },
+
   // [新增] 追赶进度
   catchUpPlan: (planId) => set((state) => {
     const plan = state.activePlans.find(p => p.planId === planId);
