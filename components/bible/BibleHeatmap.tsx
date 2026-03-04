@@ -97,7 +97,14 @@ export function BibleHeatmap({
       <div className="flex flex-col select-none" style={{ gap: `${cellGap}px` }}>
         {BIBLE_BOOKS.map((book) => (
           <div key={book.id} className="flex items-center">
-            {/* [修复] 使用 book.name (中文)，并加宽容器防止被截断 */}
+            {/* [修复] 取消 truncate，使用固定大宽度与 nowrap，确保所有中文字符完整对齐 */}
+            <div 
+               className="w-20 md:w-24 shrink-0 text-[10px] md:text-xs text-muted-foreground font-medium whitespace-nowrap mr-2 text-right tracking-wider hover:text-foreground transition-colors cursor-default flex items-center justify-end"
+               style={{ height: `${cellSize}px` }} 
+               title={book.name}
+            >
+              {book.name}
+            </div>
             <div 
                className="w-16 md:w-20 text-[11px] md:text-xs text-muted-foreground font-medium truncate mr-2 text-right tracking-widest hover:text-foreground transition-colors cursor-default"
                title={book.name}

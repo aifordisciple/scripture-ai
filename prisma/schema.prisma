@@ -65,6 +65,8 @@ model User {
   
   // [新增] API 密钥
   apiKeys     ApiKey[]
+  // [新增] 每日活动流水
+  activityLogs ActivityLog[]
 }
 
 model UserSetting {
@@ -370,4 +372,21 @@ model GroupPlanProgress {
   completed    Boolean @default(false)
   
   @@unique([planId, userId, date])
+}
+
+// 每日灵修活动流水表
+// 用于支持仪表盘的折线图、柱状图及动态时间范围查询
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  date        DateTime @default(now()) @db.Date
+  actionType  String
+  duration    Int      @default(0)
+  metadata    String?  @db.Text
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId, date])
 }
