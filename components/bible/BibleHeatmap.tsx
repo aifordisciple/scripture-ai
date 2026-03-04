@@ -77,7 +77,7 @@ export function BibleHeatmap({
     let yPos = rect.top - containerRect.top - 8;
     let isBelow = false;
     
-    // [修复] 边缘防溢出：如果处于容器顶部（如创世记），则将提示框向下翻转显示
+    // 边缘防溢出：如果处于容器顶部（如创世记），则将提示框向下翻转显示
     if (yPos < 20) {
         yPos = rect.top - containerRect.top + cellSize + 12;
         isBelow = true;
@@ -97,7 +97,7 @@ export function BibleHeatmap({
       <div className="flex flex-col select-none" style={{ gap: `${cellGap}px` }}>
         {BIBLE_BOOKS.map((book) => (
           <div key={book.id} className="flex items-center">
-            {/* [修复] 取消 truncate，使用固定大宽度与 nowrap，确保所有中文字符完整对齐 */}
+            {/* 书卷中文名称 - 唯一渲染 */}
             <div 
                className="w-20 md:w-24 shrink-0 text-[10px] md:text-xs text-muted-foreground font-medium whitespace-nowrap mr-2 text-right tracking-wider hover:text-foreground transition-colors cursor-default flex items-center justify-end"
                style={{ height: `${cellSize}px` }} 
@@ -105,12 +105,8 @@ export function BibleHeatmap({
             >
               {book.name}
             </div>
-            <div 
-               className="w-16 md:w-20 text-[11px] md:text-xs text-muted-foreground font-medium truncate mr-2 text-right tracking-widest hover:text-foreground transition-colors cursor-default"
-               title={book.name}
-            >
-              {book.name}
-            </div>
+            
+            {/* 热力图小方块 */}
             <div className="flex" style={{ gap: `${cellGap}px` }}>
               {Array.from({ length: book.chapters }, (_, i) => i + 1).map(chapter => {
                 const weight = dataMap.get(`${book.id}-${chapter}`) || 0;
@@ -124,7 +120,7 @@ export function BibleHeatmap({
                     className={cn(
                       "rounded-[2px] cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-foreground/50",
                       colorClass,
-                      weight > 0 ? "hover:scale-125 hover:z-10 shadow-sm" : "" // 有数据的方块悬浮放大
+                      weight > 0 ? "hover:scale-125 hover:z-10 shadow-sm" : ""
                     )}
                     onMouseEnter={(e) => handleMouseEnter(e, book.name, chapter, weight)}
                     onMouseLeave={() => setTooltip(prev => ({ ...prev, visible: false }))}
