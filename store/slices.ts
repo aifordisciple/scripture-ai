@@ -382,6 +382,17 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
        throw new Error("No devotional returned");
      }
    },
+
+  // API configuration
+  apiConfig: {
+    provider: 'openai',
+    baseUrl: 'https://api.openai.com/v1',
+    apiKey: '',
+    model: 'gpt-4o-mini',
+  },
+  setApiConfig: (config) => set((state) => ({
+    apiConfig: { ...state.apiConfig, ...config }
+  })),
 });
 
 export const createSyncSlice: StateCreator<StoreState, [], [], SyncSlice> = (set) => ({

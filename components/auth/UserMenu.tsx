@@ -4,7 +4,8 @@
 import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar } from "lucide-react";
+import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit } from "lucide-react";
+import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ export function UserMenu() {
   } = useBibleStore();
   
   const [isOpen, setIsOpen] = useState(false);
+  const [apiSettingsOpen, setApiSettingsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // 点击外部关闭菜单
@@ -96,6 +98,11 @@ export function UserMenu() {
             onClick={() => { setIsOpen(false); setMobileSettingsOpen(true); }} 
           />
           <MenuItem 
+            icon={<BrainCircuit className="w-4 h-4 text-indigo-500" />} 
+            label="AI 模型与接口设置" 
+            onClick={() => { setIsOpen(false); setApiSettingsOpen(true); }} 
+          />
+          <MenuItem 
             icon={isDarkMode ? <Sun className="w-4 h-4"/> : <Moon className="w-4 h-4"/>} 
             label={isDarkMode ? "浅色模式" : "深色模式"} 
             onClick={toggleDarkMode} 
@@ -154,6 +161,8 @@ export function UserMenu() {
           />
         </div>
       )}
+      
+      <ApiSettingsDialog open={apiSettingsOpen} onOpenChange={setApiSettingsOpen} />
     </div>
   );
 }

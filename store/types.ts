@@ -61,6 +61,14 @@ export interface Badge {
   earnedAt: number;
 }
 
+
+// API configuration
+export interface ApiConfig {
+  provider: 'openai' | 'ollama' | 'deepseek' | 'custom';
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+}
 export interface PlanProgress {
   planId: string;
   startDate: number;
@@ -197,6 +205,10 @@ export interface UserDataSlice {
 
   // [新增] AI 灵修导读生成
   generateAiDevotional: (planId: string, day: number, planTitle: string, readings: any[]) => Promise<void>;
+
+  // API configuration
+  apiConfig: ApiConfig;
+  setApiConfig: (config: Partial<ApiConfig>) => void;
 }
 
 // --------------------------------------------------

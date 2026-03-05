@@ -246,9 +246,11 @@ export function AISidebar() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
 
+  const { apiConfig } = useBibleStore();
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload } = useChat({
     api: '/api/chat',
     body: {
+        apiConfig: apiConfig,
         context: aiRequestTrigger ? {
             bookName: aiRequestTrigger.ref.bookName,
             chapter: aiRequestTrigger.ref.chapter,
