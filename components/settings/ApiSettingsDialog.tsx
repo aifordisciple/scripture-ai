@@ -14,10 +14,21 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
   const { status } = useSession();
   const isLoggedIn = status === "authenticated";
 
-  const [localConfig, setLocalConfig] = useState(apiConfig);
+  const [localConfig, setLocalConfig] = useState<{
+    provider: 'openai' | 'ollama' | 'deepseek' | 'custom';
+    baseUrl: string;
+    apiKey: string;
+    model: string;
+  }>({
+    provider: 'openai',
+    baseUrl: 'https://api.openai.com/v1',
+    apiKey: '',
+    model: 'gpt-4o-mini',
+  });
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncedToCloud, setSyncedToCloud] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const loadSettingsFromCloud = useCallback(async () => {
     try {
@@ -66,15 +77,22 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
   }, [isLoggedIn, localConfig]);
 
   useEffect(() => {
-    if (open) {
-      setLocalConfig(apiConfig);
+    if (open && !isInitialized) {
+      setLocalConfig({ ...apiConfig });
+      setIsInitialized(true);
       setSyncedToCloud(false);
       
       if (isLoggedIn) {
         loadSettingsFromCloud();
       }
     }
-  }, [open, apiConfig, isLoggedIn, loadSettingsFromCloud]);
+  }, [open, isLoggedIn, isInitialized, apiConfig, loadSettingsFromCloud]);
+
+  useEffect(() => {
+    if (!open) {
+      setIsInitialized(false);
+    }
+  }, [open]);
 
   const handleSave = async () => {
     setApiConfig(localConfig);
@@ -102,6 +120,8 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
   };
 
   const isOllama = localConfig.provider === 'ollama';
+  const isDeepseek = localConfig.provider === 'deepseek';
+  const isOpenai = localConfig.provider === 'openai' || localConfig.provider === 'custom';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -142,13 +162,13 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
         </div>
 
         <div className="flex gap-2 my-2 flex-wrap">
-          <Button variant={localConfig.provider === 'openai' ? 'default' : 'outline'} size="sm" onClick={() => setPreset('openai')} className="flex-1 rounded-full">
+          <Button variant={isOpenai ? 'default' : 'outline'} size="sm" onClick={() => setPreset('openai')} className="flex-1 rounded-full">
             OpenAI
           </Button>
-          <Button variant={localConfig.provider === 'deepseek' ? 'default' : 'outline'} size="sm" onClick={() => setPreset('deepseek')} className="flex-1 rounded-full">
+          <Button variant={isDeepseek ? 'default' : 'outline'} size="sm" onClick={() => setPreset('deepseek')} className="flex-1 rounded-full">
             DeepSeek
           </Button>
-          <Button variant={localConfig.provider === 'ollama' ? 'default' : 'outline'} size="sm" onClick={() => setPreset('ollama')} className="flex-1 rounded-full text-emerald-600 border-emerald-200 hover:bg-emerald-50">
+          <Button variant={isOllama ? 'default' : 'outline'} size="sm" onClick={() => setPreset('ollama')} className="flex-1 rounded-full text-emerald-600 border-emerald-200 hover:bg-emerald-50">
             本地 Ollama
           </Button>
         </div>
