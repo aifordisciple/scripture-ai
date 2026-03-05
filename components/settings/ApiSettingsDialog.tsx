@@ -1,25 +1,91 @@
 // components/settings/ApiSettingsDialog.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useBibleStore } from "@/store/useBibleStore";
-import { Cpu, Server, Key, BrainCircuit, CheckCircle2 } from "lucide-react";
+import { Cpu, Server, Key, BrainCircuit, CheckCircle2, Cloud, CloudOff } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { apiConfig, setApiConfig } = useBibleStore();
+  const { status } = useSession();
+  const isLoggedIn = status === "authenticated";
 
   const [localConfig, setLocalConfig] = useState(apiConfig);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncedToCloud, setSyncedToCloud] = useState(false);
+
+  const loadSettingsFromCloud = useCallback(async () => {
+    try {
+      const res = await fetch('/api/user/settings');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.apiProvider || data.apiBaseUrl || data.apiModel) {
+          const cloudConfig = {
+            provider: (data.apiProvider || 'openai') as 'openai' | 'ollama' | 'deepseek' | 'custom',
+            baseUrl: data.apiBaseUrl || '',
+            apiKey: data.apiKey || '',
+            model: data.apiModel || '',
+          };
+          setLocalConfig(cloudConfig);
+          setApiConfig(cloudConfig);
+          setSyncedToCloud(true);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load settings from cloud:', error);
+    }
+  }, [setApiConfig]);
+
+  const saveSettingsToCloud = useCallback(async () => {
+    if (!isLoggedIn) return false;
+    
+    setIsSyncing(true);
+    try {
+      const res = await fetch('/api/user/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiProvider: localConfig.provider,
+          apiBaseUrl: localConfig.baseUrl,
+          apiKey: localConfig.apiKey,
+          apiModel: localConfig.model,
+        }),
+      });
+      setIsSyncing(false);
+      return res.ok;
+    } catch (error) {
+      setIsSyncing(false);
+      console.error('Failed to save settings to cloud:', error);
+      return false;
+    }
+  }, [isLoggedIn, localConfig]);
 
   useEffect(() => {
-    if (open) setLocalConfig(apiConfig);
-  }, [open, apiConfig]);
+    if (open) {
+      setLocalConfig(apiConfig);
+      setSyncedToCloud(false);
+      
+      if (isLoggedIn) {
+        loadSettingsFromCloud();
+      }
+    }
+  }, [open, apiConfig, isLoggedIn, loadSettingsFromCloud]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setApiConfig(localConfig);
+    
+    if (isLoggedIn) {
+      const saved = await saveSettingsToCloud();
+      if (saved) {
+        setSyncedToCloud(true);
+      }
+    }
+    
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
     onOpenChange(false);
@@ -59,9 +125,20 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
             </div>
             <span>当前生效: {apiConfig.provider === 'ollama' ? '本地 Ollama' : '第三方 API'}</span>
           </div>
-          <span className="bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700 shadow-sm font-mono tracking-tight">
-            {apiConfig.model || '未知模型'}
-          </span>
+          <div className="flex items-center gap-2">
+            {isLoggedIn && (
+              <span className="flex items-center gap-1 text-xs">
+                {syncedToCloud ? (
+                  <><Cloud className="w-3 h-3 text-emerald-500" /> 已同步</>
+                ) : (
+                  <><CloudOff className="w-3 h-3 text-slate-400" /> 本地</>
+                )}
+              </span>
+            )}
+            <span className="bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700 shadow-sm font-mono tracking-tight">
+              {apiConfig.model || '未知模型'}
+            </span>
+          </div>
         </div>
 
         <div className="flex gap-2 my-2 flex-wrap">
@@ -105,9 +182,16 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
 
         <div className="flex justify-end gap-3 mt-4">
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-full">取消</Button>
-          <Button onClick={handleSave} className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md gap-1">
-            {showSuccess && <CheckCircle2 className="w-4 h-4" />}
-            {showSuccess ? "已应用" : "应用并热加载"}
+          <Button onClick={handleSave} disabled={isSyncing} className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md gap-1">
+            {showSuccess ? (
+              <><CheckCircle2 className="w-4 h-4" /> 已应用</>
+            ) : isSyncing ? (
+              <><Cloud className="w-4 h-4 animate-pulse" /> 同步中...</>
+            ) : isLoggedIn ? (
+              <>应用并同步云端</>
+            ) : (
+              <>应用并热加载</>
+            )}
           </Button>
         </div>
       </DialogContent>

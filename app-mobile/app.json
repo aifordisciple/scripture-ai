@@ -10,6 +10,9 @@
     },
     "ios": {
       "bundleIdentifier": "com.freecare.scriptureaimobile"
-    }
+    },
+    "plugins": [
+      "expo-asset"
+    ]
   }
 }

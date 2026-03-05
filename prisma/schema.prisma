@@ -86,6 +86,12 @@ model UserSetting {
 
   // [新增] 保存 AI 定制的读经计划
   customPlans   String? @db.Text
+
+  // [新增] AI API 配置
+  apiProvider   String?  @default("openai")
+  apiBaseUrl    String?
+  apiKey        String?
+  apiModel      String?
 }
 
 model Highlight {

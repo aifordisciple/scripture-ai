@@ -3,6 +3,22 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.email) return new NextResponse("Unauthorized", { status: 401 });
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    if (!user) return new NextResponse("User not found", { status: 404 });
+
+    const settings = await prisma.userSetting.findUnique({ where: { userId: user.id } });
+    return NextResponse.json(settings);
+  } catch (error) {
+    console.error("Settings GET error:", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.email) return new NextResponse("Unauthorized", { status: 401 });
@@ -19,6 +35,11 @@ export async function POST(req: Request) {
         showEnglish: Boolean(data.showEnglish),
         lastBook: data.lastBook || null,
         lastChapter: data.lastChapter ? Number(data.lastChapter) : null,
+        // API 配置
+        apiProvider: data.apiProvider || 'openai',
+        apiBaseUrl: data.apiBaseUrl || null,
+        apiKey: data.apiKey || null,
+        apiModel: data.apiModel || null,
     };
 
     const userSettings = await prisma.userSetting.upsert({
