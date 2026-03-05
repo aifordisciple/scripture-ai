@@ -180,7 +180,8 @@
 /* 适配 iOS 刘海/底部安全区 */
 .pb-safe { 
   padding-bottom: env(safe-area-inset-bottom); 
-HY|}
+}
+
 
 /* =========================================
    自定义全局精美滚动条 (Modern Scrollbar)
