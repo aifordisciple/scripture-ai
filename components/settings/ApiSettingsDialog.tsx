@@ -49,6 +49,20 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
             配置本地或第三方的 AI 驱动源。保存后即刻生效。
           </DialogDescription>
         </DialogHeader>
+        
+        {/* [新增] 醒目展示当前正在生效的全局配置 */}
+        <div className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 p-3 rounded-xl text-sm font-medium flex items-center justify-between mt-2 mb-4 border border-indigo-100 dark:border-indigo-800/50">
+          <div className="flex items-center gap-2">
+            <div className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </div>
+            <span>当前生效: {apiConfig.provider === 'ollama' ? '本地 Ollama' : '第三方 API'}</span>
+          </div>
+          <span className="bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700 shadow-sm font-mono tracking-tight">
+            {apiConfig.model || '未知模型'}
+          </span>
+        </div>
 
         <div className="flex gap-2 my-2 flex-wrap">
           <Button variant={localConfig.provider === 'openai' ? 'default' : 'outline'} size="sm" onClick={() => setPreset('openai')} className="flex-1 rounded-full">

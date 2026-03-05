@@ -89,16 +89,101 @@ scripture-ai/
 ## COMMANDS
 
 ```bash
+# Development & Build
 npm run dev          # Development server (port 3000)
 npm run build        # Production build
+npm run start        # Start production server
 npm run lint         # ESLint check
 
+# Database
 npx prisma generate  # Generate Prisma client
 npx prisma db push   # Push schema to database
 
-node scripts/seed_full.js      # Seed CUV Bible
-node scripts/seed_full_kjv.js  # Seed KJV Bible
+# Seeding
+node scripts/seed_full.js      # Seed CUV Bible (Chinese)
+node scripts/seed_full_kjv.js  # Seed KJV Bible (English)
+
+# Testing (no test framework currently configured)
+# To add tests: npm install -D vitest @vitest/ui
 ```
+
+## CODE STYLE
+
+### TypeScript
+- **Strict mode enabled** - No `any`, no `@ts-ignore`, no type assertions
+- Use explicit types for function parameters and return values
+- Use `interface` for objects, `type` for unions/aliases
+- Prefer `null` over `undefined` for optional values
+
+### Imports
+- Use path alias `@/` for all imports (configured in tsconfig.json)
+- Order: external libs → internal components → hooks → utils → types
+- Use named exports, avoid default exports except for Next.js pages
+```typescript
+// Good
+import { useState } from "react";
+import { useBibleStore } from "@/store/useBibleStore";
+import { cn } from "@/lib/utils";
+
+// Avoid
+import React, { useState } from "react";
+```
+
+### Naming
+| Type | Convention | Example |
+|------|------------|---------|
+| Components | PascalCase | `Reader.tsx`, `AISidebar.tsx` |
+| Hooks | kebab-case | `use-audio-player.ts` |
+| API routes | lowercase | `app/api/chat/route.ts` |
+| Store | camelCase | `useBibleStore.ts` |
+| Types/Interfaces | PascalCase | `ReaderSlice`, `Verse` |
+| Constants | PascalCase | `BIBLE_BOOKS`, `HIGHLIGHT_COLORS` |
+
+### Component Patterns
+- Use `"use client"` directive for client components
+- Use `next/dynamic` with `{ ssr: false }` for heavy components
+- Destructure props with explicit types in interface
+```typescript
+interface ReaderProps {
+  initialBook: string;
+  initialChapter: string;
+}
+
+export function Reader({ initialBook, initialChapter }: ReaderProps) {
+  // ...
+}
+```
+
+### Styling
+- Use Tailwind CSS with utility classes
+- Use `cn()` helper for conditional classes: `cn("base-class", condition && "conditional-class")`
+- Dark mode via `dark:` prefix and `isDarkMode` from store
+
+### Error Handling
+- Use try/catch with async/await for API calls
+- Return typed responses from API routes
+- Display user-friendly error messages in Chinese
+```typescript
+try {
+  const result = await fetch('/api/endpoint');
+  if (!result.ok) throw new Error('Failed to fetch');
+  return result.json();
+} catch (error) {
+  console.error(error);
+  return { error: '操作失败，请稍后重试' };
+}
+```
+
+### State Management
+- Use Zustand with Redux-like slices in `store/slices.ts`
+- Each slice: `createXxxSlice: StateCreator<StoreState, [], [], XxxSlice>`
+- Access store via `useBibleStore()` hook
+- Use `useBibleStore.getState()` for direct access (avoid in render)
+
+### API Routes
+- Use Next.js App Router: `app/api/[route]/route.ts`
+- Return `Response.json()` with proper status codes
+- Validate input with Zod schemas
 
 ## NOTES
 
@@ -108,6 +193,7 @@ node scripts/seed_full_kjv.js  # Seed KJV Bible
 - **TTS:** Requires Python + edge-tts (`pip install edge-tts`)
 - **Docker:** Multi-stage build, standalone output mode
 - **No CI/CD:** Manual deployment only (no GitHub Actions)
+- **No tests:** Currently no test framework configured
 
 ## 核心开发与部署工作流规范
 
