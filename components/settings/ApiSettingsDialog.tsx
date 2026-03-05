@@ -111,7 +111,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
 
   const setPreset = (provider: 'openai' | 'ollama' | 'deepseek') => {
     if (provider === 'ollama') {
-      setLocalConfig({ provider: 'ollama', baseUrl: 'http://localhost:11434/v1', apiKey: 'ollama', model: 'llama3' });
+      setLocalConfig({ provider: 'ollama', baseUrl: 'http://host.docker.internal:11434/v1', apiKey: 'ollama', model: 'llama3' });
     } else if (provider === 'deepseek') {
       setLocalConfig({ provider: 'deepseek', baseUrl: 'https://api.deepseek.com/v1', apiKey: '', model: 'deepseek-chat' });
     } else {
@@ -179,7 +179,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
               <Server className="w-4 h-4 text-slate-500" />
               接口地址 (Base URL)
             </label>
-            <Input value={localConfig.baseUrl} onChange={e => setLocalConfig({...localConfig, baseUrl: e.target.value})} className="bg-slate-50" placeholder={isOllama ? "http://localhost:11434/v1" : "https://api.openai.com/v1"} />
+            <Input value={localConfig.baseUrl} onChange={e => setLocalConfig({...localConfig, baseUrl: e.target.value})} className="bg-slate-50" placeholder={isOllama ? "http://host.docker.internal:11434/v1" : "https://api.openai.com/v1"} />
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium flex items-center gap-1">
