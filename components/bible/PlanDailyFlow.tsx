@@ -1,24 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Sparkles, CheckCircle2, Loader2, PartyPopper } from "lucide-react";
+import { ChevronRight, Sparkles, CheckCircle2, PartyPopper } from "lucide-react";
 import { BIBLE_BOOKS } from "@/lib/constants";
 
 export function PlanDailyFlow() {
   const {
     readingPlanContext: ctx,
-    setReadingPlanContext,
     advancePlanStep,
     activePlans,
-    generateAiDevotional,
     tabs,
     addTab,
     setActiveTab
   } = useBibleStore();
-
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const activeData = activePlans.find(p => p.planId === ctx?.planId);
   const step = ctx?.steps[ctx.stepIndex];
@@ -38,30 +34,6 @@ export function PlanDailyFlow() {
     }
   }, [ctx?.stepIndex]);
 
-  // 2. 智能静默 AI：当发现灵修内容为空时，自动在后台生成
-  useEffect(() => {
-    if (ctx && step?.type === 'devotional' && !step.content) {
-      const saved = activeData?.savedDevotionals?.[ctx.day.toString()];
-      if (saved) {
-         const newSteps = [...ctx.steps];
-         newSteps[ctx.stepIndex].content = saved;
-         setReadingPlanContext({ ...ctx, steps: newSteps });
-      } else if (!isGenerating) {
-         setIsGenerating(true);
-         const readings = ctx.steps.filter(s => s.type === 'reading').map(s => ({ book: s.book, chapter: s.chapter }));
-         generateAiDevotional(ctx.planId, ctx.day, ctx.planTitle, readings).then(() => {
-            const freshSaved = useBibleStore.getState().activePlans.find(p => p.planId === ctx.planId)?.savedDevotionals?.[ctx.day.toString()];
-            if (freshSaved) {
-               const newSteps = [...ctx.steps];
-               newSteps[ctx.stepIndex].content = freshSaved;
-               setReadingPlanContext({ ...ctx, steps: newSteps });
-            }
-            setIsGenerating(false);
-         }).catch(() => setIsGenerating(false));
-      }
-    }
-  }, [ctx?.stepIndex]);
-
   if (!ctx || !step || !activeData) return null;
 
   // 统一的"下一步"处理逻辑交给全局 Store 接管
@@ -77,30 +49,16 @@ export function PlanDailyFlow() {
                 <span className="text-sm font-bold uppercase tracking-widest text-indigo-500">第 {ctx.day} 天 • 灵修导读</span>
              </div>
              <div className="flex-1 overflow-y-auto no-scrollbar pb-32">
-                {step.content ? (
-                   <p className="text-lg md:text-xl text-foreground/90 leading-relaxed font-serif whitespace-pre-wrap animate-in slide-in-from-bottom-4 duration-700">
-                     {step.content}
-                   </p>
-                ) : (
-                   <div className="space-y-4 animate-pulse">
-                     <div className="h-4 bg-secondary rounded w-3/4"></div>
-                     <div className="h-4 bg-secondary rounded w-full"></div>
-                     <div className="h-4 bg-secondary rounded w-5/6"></div>
-                     <div className="h-4 bg-secondary rounded w-full"></div>
-                     <div className="flex items-center gap-2 mt-8 text-indigo-500/60">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">AI 正在为你准备专属导读...</span>
-                     </div>
-                   </div>
-                )}
+                 <p className="text-lg md:text-xl text-foreground/90 leading-relaxed font-serif whitespace-pre-wrap animate-in slide-in-from-bottom-4 duration-700">
+                   {step.content || "愿神的话语成为你脚前的灯，路上的光。安静心，开始今天的经文阅读吧。"}
+                 </p>
              </div>
              <div className="pb-12 pt-6 bg-gradient-to-t from-background via-background to-transparent sticky bottom-0">
                 <Button
                   onClick={handleNext}
-                  disabled={!step.content && isGenerating}
                   className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-xl shadow-indigo-600/20"
                 >
-                  {(!step.content && isGenerating) ? "生成中..." : "阅读今日经文"} <ChevronRight className="w-5 h-5 ml-1" />
+                  阅读今日经文 <ChevronRight className="w-5 h-5 ml-1" />
                 </Button>
              </div>
           </div>

@@ -9,7 +9,7 @@ export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
-    const { messages, context, apiConfig } = await req.json();
+    const { messages, context } = await req.json();
     
     // 获取当前登录用户会话
     const session = await auth(); 
@@ -44,21 +44,14 @@ ${backgroundText}
 `;
     }
 
-    // 获取配置 - 支持用户自定义 API 配置
+    // 获取配置
     const provider = process.env.AI_PROVIDER || 'openai';
-    const modelName = process.env.OLLAMA_MODEL || 'llama3';
+    const modelName = process.env.OLLAMA_MODEL || 'qwen3.5:9b'; 
     const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1';
 
     let model;
-    if (apiConfig && apiConfig.baseUrl && apiConfig.model) {
-      // 用户自定义配置优先
-      const customClient = createOpenAI({
-        baseURL: apiConfig.baseUrl,
-        apiKey: apiConfig.apiKey || 'user-provided-key',
-      });
-      model = customClient(apiConfig.model);
-    } else if (provider === 'ollama') {
-      const ollama = createOpenAI({ baseURL: ollamaBaseUrl, apiKey: 'ollama' });
+    if (provider === 'ollama') {
+      const ollama = createOpenAI({ baseURL: ollamaBaseUrl, apiKey: '' });
       model = ollama(modelName);
     } else if (provider === 'deepseek') {
        const deepseek = createOpenAI({ baseURL: 'https://api.deepseek.com/v1', apiKey: process.env.DEEPSEEK_API_KEY });

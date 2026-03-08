@@ -73,12 +73,12 @@ export async function POST(req: Request) {
 
     // Get AI config
     const provider = process.env.AI_PROVIDER || 'openai';
-    const modelName = process.env.OLLAMA_MODEL || 'llama3'; 
+    const modelName = process.env.OLLAMA_MODEL || 'qwen3.5:9b'; 
     const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1';
 
     let model;
     if (provider === 'ollama') {
-      const ollama = createOpenAI({ baseURL: ollamaBaseUrl, apiKey: 'ollama' });
+      const ollama = createOpenAI({ baseURL: ollamaBaseUrl, apiKey: '' });
       model = ollama(modelName);
     } else if (provider === 'deepseek') {
        const deepseek = createOpenAI({ baseURL: 'https://api.deepseek.com/v1', apiKey: process.env.DEEPSEEK_API_KEY });

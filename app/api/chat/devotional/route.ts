@@ -9,9 +9,9 @@ export async function POST(req: Request) {
   if (provider === 'ollama') {
     const ollama = createOpenAI({
       baseURL: process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1',
-      apiKey: 'ollama', 
+      apiKey: '', 
     });
-    model = ollama(process.env.OLLAMA_MODEL || 'llama3');
+    model = ollama(process.env.OLLAMA_MODEL || 'qwen3.5:9b');
   } else if (provider === 'deepseek') {
     const deepseek = createOpenAI({
       baseURL: 'https://api.deepseek.com',

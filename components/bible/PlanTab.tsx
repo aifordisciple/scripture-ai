@@ -434,15 +434,48 @@ export function PlanTab() {
         </div>
       )}
 
-      {/* AI 定制区 */}
-      <div className="mb-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 md:p-8 shadow-lg text-white">
-        <h2 className="text-xl font-bold flex items-center gap-2 mb-3"><Sparkles className="w-6 h-6 text-yellow-300" /> AI 专属计划定制</h2>
-        <p className="text-indigo-100 text-sm mb-5">告诉 AI 你的困惑或想了解的主题，为你生成专属灵修旅程。</p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input value={aiPrompt} onChange={e => setAiPrompt(e.target.value)} placeholder="输入你的需求..." disabled={isGenerating} onKeyDown={(e) => e.key === 'Enter' && handleGeneratePlan()} className="flex-1 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-yellow-400" />
-          <Button onClick={handleGeneratePlan} disabled={isGenerating || !aiPrompt.trim()} className="bg-white text-indigo-600 hover:bg-indigo-50 font-bold rounded-xl px-8 py-3 h-auto">
-            {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : "立即生成"}
-          </Button>
+{/* AI 定制区 */}
+      <div className="mb-10 relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-[2rem] p-6 md:p-8 shadow-2xl border border-blue-400/30">
+        
+        {/* 装饰性背景光晕 (增加蓝宝石的通透折射感) */}
+        <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-cyan-300/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[20rem] h-[20rem] bg-indigo-300/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
+
+        <div className="relative z-10">
+          <h2 className="text-2xl font-black flex items-center gap-3 mb-3 text-white tracking-tight">
+            <div className="p-2 bg-white/20 rounded-xl border border-white/30 backdrop-blur-sm shadow-inner">
+               <Sparkles className="w-5 h-5 text-cyan-100" /> 
+            </div>
+            AI 专属灵修定制
+          </h2>
+          <p className="text-blue-50/90 text-sm md:text-base mb-8 max-w-2xl leading-relaxed font-medium">
+            告诉 AI 你目前正面临的挑战、想深入了解的主题，或是心中的困惑。它将为你量身打造一段专属的读经旅程。
+          </p>
+          
+          {/* 输入框与按钮的包裹层 (高透玻璃态) */}
+          <div className="bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20 flex flex-col sm:flex-row gap-3 shadow-inner">
+            <input 
+              value={aiPrompt} 
+              onChange={e => setAiPrompt(e.target.value)} 
+              placeholder="例如：最近工作压力很大，总是感到焦虑..." 
+              disabled={isGenerating} 
+              onKeyDown={(e) => e.key === 'Enter' && handleGeneratePlan()} 
+              // 保持纯白输入框的超高辨识度
+              className="flex-1 bg-white dark:bg-slate-800 rounded-xl px-5 py-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-300/50 text-base shadow-sm transition-all" 
+            />
+            <Button 
+              onClick={handleGeneratePlan} 
+              disabled={isGenerating || !aiPrompt.trim()} 
+              // 按钮改为白底蓝字，与蓝宝石背景形成清爽的强对比
+              className="bg-white hover:bg-blue-50 text-blue-700 font-bold rounded-xl px-8 py-4 h-auto shadow-lg shadow-blue-900/20 transition-all sm:w-auto w-full group border border-white"
+            >
+              {isGenerating ? (
+                <><Loader2 className="w-5 h-5 animate-spin mr-2 text-blue-500" /> 正在定制...</>
+              ) : (
+                <>立即生成 <Sparkles className="w-4 h-4 ml-2 opacity-50 group-hover:opacity-100 transition-opacity text-blue-500" /></>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
