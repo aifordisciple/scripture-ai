@@ -62,11 +62,15 @@ model User {
   notificationTokens NotificationToken[]
   // [新增] 记忆卡片
   memoryCards  MemoryCard[]
-  
+
   // [新增] API 密钥
   apiKeys     ApiKey[]
   // [新增] 每日活动流水
   activityLogs ActivityLog[]
+
+  // [新增] 教会/小组关系
+  ownedChurches Church[] @relation("ChurchOwner")
+  churchMemberships ChurchMember[]
 }
 
 model UserSetting {
@@ -312,6 +316,7 @@ model Church {
 
   // 管理员
   ownerId     String
+  owner       User     @relation("ChurchOwner", fields: [ownerId], references: [id])
 
   // 设置
   isPublic    Boolean  @default(false) // 是否公开发现
@@ -338,11 +343,12 @@ model ChurchMember {
   churchId  String
   church    Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
   userId    String
-  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   role      MemberRole @default(MEMBER) // OWNER, ADMIN, MEMBER
-  
+
   joinedAt  DateTime @default(now())
-  
+
   @@unique([churchId, userId])
 }
 
