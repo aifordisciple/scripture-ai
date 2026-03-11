@@ -82,7 +82,8 @@ export async function POST(req: Request) {
         }
       },
       include: {
-        members: { include: { user: { select: { id: true, name: true, email: true } } } }
+        members: { include: { user: { select: { id: true, name: true, email: true } } } },
+        _count: { select: { members: true, groupPlans: true } }
       }
     });
 

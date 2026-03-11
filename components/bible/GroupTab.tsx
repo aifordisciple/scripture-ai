@@ -86,13 +86,24 @@ export function GroupTab() {
 
   const fetchGroups = async () => {
     try {
-      const res = await fetch("/api/church");
-      const data = await res.json();
-      if (data.churches) {
-        setMyGroups(data.churches);
+      // Fetch my groups
+      const myRes = await fetch("/api/church?type=my");
+      const myData = await myRes.json();
+      if (myData.churches) {
+        // Transform to Membership format
+        const memberships: Membership[] = myData.churches.map((c: any) => ({
+          churchId: c.id,
+          role: c.members?.[0]?.role || 'MEMBER',
+          church: c
+        }));
+        setMyGroups(memberships);
       }
-      if (data.public) {
-        setPublicGroups(data.public);
+
+      // Fetch public groups
+      const publicRes = await fetch("/api/church?type=public");
+      const publicData = await publicRes.json();
+      if (publicData.churches) {
+        setPublicGroups(publicData.churches);
       }
     } catch (error) {
       console.error("Failed to fetch groups:", error);
@@ -128,7 +139,9 @@ export function GroupTab() {
         })
       });
       const data = await res.json();
-      if (data.church) {
+      if (data.error) {
+        alert(data.error);
+      } else if (data.church) {
         setMyGroups(prev => [{
           churchId: data.church.id,
           role: "OWNER",
@@ -140,6 +153,7 @@ export function GroupTab() {
       }
     } catch (error) {
       console.error("Failed to create group:", error);
+      alert("创建小组失败，请稍后重试");
     } finally {
       setCreating(false);
     }
