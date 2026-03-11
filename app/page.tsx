@@ -33,6 +33,7 @@ const NotesTab = dynamic(() => import("@/components/bible/NotesTab").then(mod =>
 const PlanTab = dynamic(() => import("@/components/bible/PlanTab").then(mod => mod.PlanTab), { ssr: false });
 const PlanDailyFlow = dynamic(() => import("@/components/bible/PlanDailyFlow").then(mod => mod.PlanDailyFlow), { ssr: false });
 const CrossRefTab = dynamic(() => import("@/components/bible/CrossRefTab").then(mod => mod.CrossRefTab), { ssr: false });
+const GroupTab = dynamic(() => import("@/components/bible/GroupTab").then(mod => mod.GroupTab), { ssr: false });
 
 // --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
 const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
@@ -93,7 +94,7 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             )}
           >
             <span className="max-w-[120px] truncate select-none">
-              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? '📊 数据看板' : tab.type === 'highlights' ? '🖍️ 我的高亮' : tab.type === 'notes' ? '📝 我的笔记' : tab.type === 'cross-ref' ? '🔗 经文串珠' : '📅 读经计划'}
+              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? '📊 数据看板' : tab.type === 'highlights' ? '🖍️ 我的高亮' : tab.type === 'notes' ? '📝 我的笔记' : tab.type === 'cross-ref' ? '🔗 经文串珠' : tab.type === 'group' ? '👥 小组读经' : '📅 读经计划'}
             </span>
             <X
               className={cn(
@@ -430,7 +431,7 @@ export default function Home() {
             </div>
 
             <div className="md:hidden flex-1 text-center font-serif font-bold text-lg text-foreground truncate px-2 tracking-wide">
-              {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : "读经计划"}
+              {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : activeTab.type === 'group' ? "小组读经" : "读经计划"}
             </div>
 
             <div className="flex items-center gap-1 shrink-0">
@@ -497,6 +498,8 @@ export default function Home() {
               <NotesTab key={activeTab.id} />
           ) : activeTab.type === 'cross-ref' ? (
               <CrossRefTab key={activeTab.id} sourceVerse={activeTab.crossRefSource!} />
+          ) : activeTab.type === 'group' ? (
+              <GroupTab key={activeTab.id} />
           ) : (
               <PlanTab key={activeTab.id} />
           )}

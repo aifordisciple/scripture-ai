@@ -1,0 +1,441 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useBibleStore } from "@/store/useBibleStore";
+import {
+  Users, Plus, ChevronLeft, Settings, Crown, Calendar,
+  BookOpen, Trophy, MessageCircle, Ticket, Loader2
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { GroupCard } from "@/components/group/GroupCard";
+import { Leaderboard } from "@/components/group/Leaderboard";
+import { GroupChat } from "@/components/group/GroupChat";
+import { InviteCodeManager } from "@/components/group/InviteCodeManager";
+import { JoinByInviteDialog } from "@/components/group/JoinByInviteDialog";
+import { ChallengeProgress } from "@/components/group/ChallengeProgress";
+
+interface Church {
+  id: string;
+  name: string;
+  description?: string | null;
+  isPublic: boolean;
+  ownerId: string;
+  _count?: {
+    members?: number;
+    groupPlans?: number;
+  };
+}
+
+interface Membership {
+  churchId: string;
+  role: string;
+  church: Church;
+}
+
+interface GroupPlan {
+  id: string;
+  name: string;
+  description?: string | null;
+  mode: string;
+  challengeConfig?: string | null;
+  dailyChapters: string[];
+  startDate: Date | string;
+  endDate?: Date | string | null;
+  _count?: {
+    progress?: number;
+    leaderboard?: number;
+  };
+}
+
+export function GroupTab() {
+  const router = useRouter();
+  const { streakCount } = useBibleStore();
+
+  const [myGroups, setMyGroups] = useState<Membership[]>([]);
+  const [publicGroups, setPublicGroups] = useState<Church[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedGroup, setSelectedGroup] = useState<Membership | null>(null);
+  const [groupPlans, setGroupPlans] = useState<GroupPlan[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<GroupPlan | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupDesc, setNewGroupDesc] = useState("");
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  useEffect(() => {
+    if (selectedGroup) {
+      fetchGroupPlans(selectedGroup.churchId);
+    }
+  }, [selectedGroup]);
+
+  const fetchGroups = async () => {
+    try {
+      const res = await fetch("/api/church");
+      const data = await res.json();
+      if (data.churches) {
+        setMyGroups(data.churches);
+      }
+      if (data.public) {
+        setPublicGroups(data.public);
+      }
+    } catch (error) {
+      console.error("Failed to fetch groups:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchGroupPlans = async (churchId: string) => {
+    try {
+      const res = await fetch(`/api/church/${churchId}/plan`);
+      const data = await res.json();
+      if (data.plans) {
+        setGroupPlans(data.plans);
+      }
+    } catch (error) {
+      console.error("Failed to fetch plans:", error);
+    }
+  };
+
+  const createGroup = async () => {
+    if (!newGroupName.trim()) return;
+
+    setCreating(true);
+    try {
+      const res = await fetch("/api/church", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newGroupName,
+          description: newGroupDesc,
+          isPublic: false
+        })
+      });
+      const data = await res.json();
+      if (data.church) {
+        setMyGroups(prev => [{
+          churchId: data.church.id,
+          role: "OWNER",
+          church: data.church
+        }, ...prev]);
+        setCreateOpen(false);
+        setNewGroupName("");
+        setNewGroupDesc("");
+      }
+    } catch (error) {
+      console.error("Failed to create group:", error);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const joinGroup = async (churchId: string) => {
+    try {
+      const res = await fetch(`/api/church/${churchId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "join" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchGroups();
+      } else {
+        alert(data.error || "加入失败");
+      }
+    } catch (error) {
+      console.error("Failed to join group:", error);
+    }
+  };
+
+  const leaveGroup = async (churchId: string) => {
+    if (!confirm("确定要离开这个小组吗？")) return;
+    try {
+      const res = await fetch(`/api/church/${churchId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "leave" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedGroup(null);
+        fetchGroups();
+      }
+    } catch (error) {
+      console.error("Failed to leave group:", error);
+    }
+  };
+
+  // Group detail view
+  if (selectedGroup) {
+    const isAdmin = selectedGroup.role === "OWNER" || selectedGroup.role === "ADMIN";
+
+    return (
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
+        <button
+          onClick={() => {
+            setSelectedGroup(null);
+            setSelectedPlan(null);
+            setGroupPlans([]);
+          }}
+          className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm font-medium"
+        >
+          <ChevronLeft className="w-4 h-4" /> 返回小组列表
+        </button>
+
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold mb-2">
+              <Users className="w-5 h-5" />
+              <span className="text-sm uppercase tracking-widest">
+                {isAdmin ? "管理小组" : "我的小组"}
+              </span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground font-serif">
+              {selectedGroup.church.name}
+            </h1>
+            {selectedGroup.church.description && (
+              <p className="text-muted-foreground mt-2">
+                {selectedGroup.church.description}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            {selectedGroup.role !== "OWNER" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => leaveGroup(selectedGroup.churchId)}
+                className="text-red-500 hover:text-red-600"
+              >
+                退出小组
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <Tabs defaultValue="plans" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="plans" className="gap-2">
+              <Calendar className="w-4 h-4" /> 读经计划
+            </TabsTrigger>
+            <TabsTrigger value="leaderboard" className="gap-2">
+              <Trophy className="w-4 h-4" /> 排行榜
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="gap-2">
+              <MessageCircle className="w-4 h-4" /> 交流
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="plans" className="space-y-4">
+            {isAdmin && (
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" /> 创建读经计划
+              </Button>
+            )}
+            {groupPlans.length === 0 ? (
+              <div className="text-center text-muted-foreground py-12">
+                <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>暂无读经计划</p>
+                {isAdmin && <p className="text-sm mt-2">点击上方按钮创建第一个计划</p>}
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {groupPlans.map((plan) => (
+                  <ChallengeProgress
+                    key={plan.id}
+                    plan={plan}
+                    progress={{
+                      completedDays: 0,
+                      streakDays: streakCount,
+                      chaptersRead: 0
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="leaderboard">
+            {selectedPlan ? (
+              <Leaderboard
+                churchId={selectedGroup.churchId}
+                planId={selectedPlan.id}
+              />
+            ) : groupPlans.length > 0 ? (
+              <div className="space-y-4">
+                <p className="text-muted-foreground">选择一个计划查看排行榜：</p>
+                {groupPlans.map((plan) => (
+                  <Button
+                    key={plan.id}
+                    variant="outline"
+                    onClick={() => setSelectedPlan(plan)}
+                    className="w-full justify-start"
+                  >
+                    {plan.name}
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-12">
+                <Trophy className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>暂无排行数据</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="chat">
+            <GroupChat churchId={selectedGroup.churchId} />
+          </TabsContent>
+        </Tabs>
+
+        {isAdmin && (
+          <div className="mt-8 pt-8 border-t">
+            <InviteCodeManager
+              churchId={selectedGroup.churchId}
+              isAdmin={isAdmin}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Main list view
+  return (
+    <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
+        <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+          <Users className="w-6 h-6" />
+        </div>
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">家庭/小组读经</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            与家人、朋友一起读经，互相鼓励，共同成长。
+          </p>
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex flex-wrap gap-3 mb-8">
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="w-4 h-4" /> 创建小组
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>创建家庭/小组</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>小组名称</Label>
+                <Input
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  placeholder="例如：家庭读经小组"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>简介（可选）</Label>
+                <Input
+                  value={newGroupDesc}
+                  onChange={(e) => setNewGroupDesc(e.target.value)}
+                  placeholder="小组介绍..."
+                />
+              </div>
+              <Button
+                onClick={createGroup}
+                disabled={creating || !newGroupName.trim()}
+                className="w-full"
+              >
+                {creating ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
+                创建小组
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <JoinByInviteDialog />
+      </div>
+
+      {loading ? (
+        <div className="text-center text-muted-foreground py-12">
+          <Loader2 className="w-8 h-8 mx-auto animate-spin" />
+        </div>
+      ) : (
+        <>
+          {/* My Groups */}
+          {myGroups.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-lg font-bold text-foreground mb-4">
+                我的小组 ({myGroups.length})
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {myGroups.map((membership) => (
+                  <GroupCard
+                    key={membership.churchId}
+                    church={{
+                      ...membership.church,
+                      _count: membership.church._count || { members: 0, groupPlans: 0 }
+                    }}
+                    isMember={true}
+                    memberRole={membership.role}
+                    onClick={() => setSelectedGroup(membership)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Public Groups */}
+          {publicGroups.length > 0 && (
+            <div>
+              <h2 className="text-lg font-bold text-foreground mb-4">
+                发现公开小组
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {publicGroups.map((church) => (
+                  <GroupCard
+                    key={church.id}
+                    church={{
+                      ...church,
+                      _count: church._count || { members: 0, groupPlans: 0 }
+                    }}
+                    onClick={() => joinGroup(church.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {myGroups.length === 0 && publicGroups.length === 0 && (
+            <div className="text-center text-muted-foreground py-16">
+              <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium mb-2">还没有加入任何小组</p>
+              <p className="text-sm">创建一个新小组，或通过邀请码加入已有的小组</p>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

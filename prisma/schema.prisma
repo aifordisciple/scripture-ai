@@ -309,20 +309,26 @@ model Church {
   id          String   @id @default(cuid())
   name        String
   description String?
-  
+
   // 管理员
   ownerId     String
-  
+
   // 设置
   isPublic    Boolean  @default(false) // 是否公开发现
   allowJoin   Boolean  @default(true)  // 是否允许加入
-  
+
   // 成员
   members     ChurchMember[]
-  
+
   // 小组读经计划
   groupPlans  GroupPlan[]
-  
+
+  // [新增] 邀请码
+  inviteCodes InviteCode[]
+
+  // [新增] 小组聊天
+  chatMessages GroupChatMessage[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -351,18 +357,25 @@ model GroupPlan {
   id          String   @id @default(cuid())
   churchId    String
   church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
-  
+
   name        String
   description String?
-  
+
   // 计划配置
   startDate   DateTime
   endDate     DateTime?
   dailyChapters String[] // 每日章节列表
-  
+
+  // [新增] 挑战模式
+  mode            String   @default("NORMAL") // NORMAL, CHALLENGE
+  challengeConfig String?  @db.Text // JSON: { targetDays, rewardTitle, rewardBadge }
+
   // 成员进度
   progress    GroupPlanProgress[]
-  
+
+  // [新增] 排行榜
+  leaderboard LeaderboardEntry[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -431,4 +444,50 @@ model VerseConnection {
   @@unique([sourceBookId, sourceChapter, sourceVerse, targetBookId, targetChapter, targetVerse, type])
   @@index([sourceBookId, sourceChapter, sourceVerse])
   @@map("verse_connections")
+}
+
+// [新增] 邀请码模型
+model InviteCode {
+  id        String   @id @default(cuid())
+  code      String   @unique // 6位短码
+  churchId  String
+  church    Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  createdBy String
+  maxUses   Int      @default(0) // 0=无限制
+  usedCount Int      @default(0)
+  expiresAt DateTime?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([code])
+}
+
+// [新增] 排行榜条目模型
+model LeaderboardEntry {
+  id            String   @id @default(cuid())
+  planId        String
+  plan          GroupPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  userId        String
+  score         Int      @default(0)
+  chaptersRead  Int      @default(0)
+  streakDays    Int      @default(0)
+  completedDays Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  @@unique([planId, userId])
+  @@index([planId, score(sort: Desc)])
+}
+
+// [新增] 小组聊天消息模型
+model GroupChatMessage {
+  id        String   @id @default(cuid())
+  churchId  String
+  church    Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  userId    String
+  content   String   @db.Text
+  type      String   @default("TEXT") // TEXT, SHARE_VERSE, SYSTEM
+  metadata  String?  @db.Text // JSON: { bookId, chapter, verse, content }
+  createdAt DateTime @default(now())
+
+  @@index([churchId, createdAt(sort: Desc)])
 }

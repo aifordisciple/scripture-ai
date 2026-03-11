@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { Book, ChevronRight, Search, X, Library } from "lucide-react";
+import { Book, ChevronRight, Search, X, Library, Users } from "lucide-react";
 
 export function Sidebar() {
   const router = useRouter();
@@ -189,10 +189,38 @@ export function Sidebar() {
          
          {/* 底部留白插画或签名空间 */}
          {searchQuery === "" && (
-            <div className="flex flex-col items-center justify-center opacity-30 mt-10 mb-8 pointer-events-none select-none">
+            <>
+            {/* 小组读经快捷入口 */}
+            <div className="mx-3 mb-4">
+              <button
+                onClick={() => {
+                  const groupTab = tabs.find(t => t.type === 'group');
+                  if (groupTab) {
+                    setActiveTab(groupTab.id);
+                  } else {
+                    addTab({ type: 'group' });
+                  }
+                  if (isSidebarOpen) toggleSidebar();
+                  router.push('/');
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-2xl border border-indigo-100 dark:border-indigo-900 hover:shadow-md transition-all group"
+              >
+                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-xl">
+                  <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-bold text-sm text-foreground">家庭/小组读经</p>
+                  <p className="text-xs text-muted-foreground">与家人朋友一起读经</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+
+            <div className="flex flex-col items-center justify-center opacity-30 mt-4 mb-8 pointer-events-none select-none">
                 <Library className="w-8 h-8 mb-2" />
                 <span className="text-[10px] font-serif tracking-[0.2em] uppercase">Scripture AI</span>
             </div>
+            </>
          )}
       </div>
     </div>

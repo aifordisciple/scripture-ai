@@ -44,7 +44,7 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
       if (type === 'read') { newTab.book = book; newTab.chapter = chapter; }
       else if (type === 'search') { newTab.query = query; newTab.searchMode = searchMode; }
       else if (type === 'cross-ref' && crossRefSource) { newTab.crossRefSource = crossRefSource; }
-      // dashboard、highlights 和 notes 都不需要额外参数
+      // dashboard、highlights、notes、plans、group 都不需要额外参数
       return { tabs: [...state.tabs, newTab], activeTabId: newId };
     }),
   closeTab: (id) => set((state) => {

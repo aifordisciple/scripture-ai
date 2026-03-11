@@ -5,7 +5,7 @@
 // --------------------------------------------------
 export interface Tab {
   id: string;
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref';
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group';
   book?: string;
   chapter?: string;
   query?: string;
@@ -135,9 +135,9 @@ export interface ReaderSlice {
   toggleEnglish: () => void; 
   tabs: Tab[];
   activeTabId: string;
-  // [修复] 在这里补上 'highlights' | 'notes' | 'plans' | 'cross-ref'
+  // [修复] 在这里补上 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group'
   addTab: (params: {
-    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref';
+    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group';
     book?: string;
     chapter?: string;
     query?: string;

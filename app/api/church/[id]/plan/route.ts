@@ -22,7 +22,7 @@ export async function GET(req: Request, { params }: RouteParams) {
         progress: userId ? {
           where: { userId }
         } : false,
-        _count: { select: { progress: true } }
+        _count: { select: { progress: true, leaderboard: true } }
       },
       orderBy: { startDate: 'desc' }
     });
@@ -45,8 +45,8 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     // Check membership
     const membership = await prisma.churchMember.findFirst({
-      where: { 
-        churchId, 
+      where: {
+        churchId,
         userId: session.user.id,
         role: { in: ['OWNER', 'ADMIN'] }
       }
@@ -56,11 +56,11 @@ export async function POST(req: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'Only admins can create group plans' }, { status: 403 });
     }
 
-    const { name, description, startDate, endDate, dailyChapters } = await req.json();
+    const { name, description, startDate, endDate, dailyChapters, mode, challengeConfig } = await req.json();
 
     if (!name || !startDate || !dailyChapters?.length) {
-      return NextResponse.json({ 
-        error: 'Missing required fields: name, startDate, dailyChapters' 
+      return NextResponse.json({
+        error: 'Missing required fields: name, startDate, dailyChapters'
       }, { status: 400 });
     }
 
@@ -71,7 +71,9 @@ export async function POST(req: Request, { params }: RouteParams) {
         description,
         startDate: new Date(startDate),
         endDate: endDate ? new Date(endDate) : null,
-        dailyChapters
+        dailyChapters,
+        mode: mode || 'NORMAL',
+        challengeConfig: challengeConfig ? JSON.stringify(challengeConfig) : null
       }
     });
 
