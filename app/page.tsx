@@ -34,6 +34,7 @@ const PlanTab = dynamic(() => import("@/components/bible/PlanTab").then(mod => m
 const PlanDailyFlow = dynamic(() => import("@/components/bible/PlanDailyFlow").then(mod => mod.PlanDailyFlow), { ssr: false });
 const CrossRefTab = dynamic(() => import("@/components/bible/CrossRefTab").then(mod => mod.CrossRefTab), { ssr: false });
 const GroupTab = dynamic(() => import("@/components/bible/GroupTab").then(mod => mod.GroupTab), { ssr: false });
+const GroupPlanDailyFlow = dynamic(() => import("@/components/group/GroupPlanDailyFlow").then(mod => mod.GroupPlanDailyFlow), { ssr: false });
 
 // --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
 const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
@@ -523,6 +524,9 @@ export default function Home() {
 
         {/* 沉浸式读经计划控制器 */}
         <PlanDailyFlow />
+
+        {/* 小组读经计划控制器 */}
+        <GroupPlanDailyFlow />
 
       </div>
     </main>

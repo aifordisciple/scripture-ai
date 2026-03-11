@@ -26,7 +26,6 @@ import { InviteCodeManager } from "@/components/group/InviteCodeManager";
 import { JoinByInviteDialog } from "@/components/group/JoinByInviteDialog";
 import { GroupPlanDetail } from "@/components/group/GroupPlanDetail";
 import { GroupPlanCreateDialog } from "@/components/group/GroupPlanCreateDialog";
-import { GroupPlanDailyFlow } from "@/components/group/GroupPlanDailyFlow";
 
 interface Church {
   id: string;
@@ -66,7 +65,6 @@ interface GroupPlan {
 
 export function GroupTab() {
   const router = useRouter();
-  const { groupPlanContext } = useBibleStore();
 
   const [myGroups, setMyGroups] = useState<Membership[]>([]);
   const [publicGroups, setPublicGroups] = useState<Church[]>([]);
@@ -203,11 +201,6 @@ export function GroupTab() {
   const handlePlanCreated = (plan: GroupPlan) => {
     setGroupPlans(prev => [plan, ...prev]);
   };
-
-  // Render group plan daily flow if active
-  if (groupPlanContext) {
-    return <GroupPlanDailyFlow />;
-  }
 
   // Render plan detail if selected
   if (selectedPlan && selectedGroup) {
