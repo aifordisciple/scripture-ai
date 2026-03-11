@@ -159,11 +159,29 @@ export async function POST(req: Request, { params }: RouteParams) {
       temperature: 0.7,
     });
 
-    // Clean response
+    // Clean response - remove think tags and other AI artifacts
     let devotional = text.trim();
+
+    // Remove MiniMax thinking blocks (<?,  Or  Or  Or  Or  Or  Or  Or  Or  tags)
+    devotional = devotional.replace(/<tool_call>[\s\S]*?<\/think>/gi, '');
+    devotional = devotional.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+    devotional = devotional.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
+    // Remove thinking content at the beginning (MiniMax M2.5 specific)
+    devotional = devotional.replace(/^ purported_thinking[\s\S]*?(?=\S)/i, '');
+    devotional = devotional.replace(/^Thinking[\s\S]*?(?=\S)/i, '');
+
+    // Remove thinking tags like  ...
+    devotional = devotional.replace(/##\s*思考[\s\S]*?(?=\S)/i, '');
+    devotional = devotional.replace(/##\s*思考过程[\s\S]*?(?=\S)/i, '');
+
+    // Remove thinking tags - MiniMax specific
+    devotional = devotional.replace(/\n\n---+\n\n[\s\S]*?(?=\S)/, '');
 
     // Remove markdown code blocks if any
     devotional = devotional.replace(/^```text\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+
+    // Final trim
+    devotional = devotional.trim();
 
     // Save to sharedDevotionals
     sharedDevotionals[day.toString()] = devotional;

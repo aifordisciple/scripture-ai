@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   ChevronLeft, ChevronRight, Play, Sparkles, BookOpen,
   Target, Trophy, Flame, Calendar, Users, Loader2, RefreshCw,
-  CheckCircle2, Circle, ExternalLink
+  CheckCircle2, Circle, ExternalLink, AlertCircle, FastForward
 } from "lucide-react";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -57,12 +57,37 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
   const [generatingDevotional, setGeneratingDevotional] = useState(false);
   const [sharedDevotionals, setSharedDevotionals] = useState<Record<string, string>>({});
   const [togglingTask, setTogglingTask] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   // Calculate current day based on start date
   const startDate = new Date(plan.startDate);
   const today = new Date();
   const daysPassed = Math.max(0, Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
   const currentDay = Math.min(daysPassed + 1, tasks.length || plan.dailyChapters.length);
+
+  // Calculate overdue days (days before current day that are not completed)
+  const getOverdueDays = () => {
+    const overdue: number[] = [];
+    for (let day = 1; day < currentDay; day++) {
+      const dayTasks = progress.completedTasks[day.toString()] || [];
+      const task = tasks.find(t => t.day === day);
+      if (task) {
+        const hasDevotional = sharedDevotionals[day.toString()] || task.devotional;
+        const devotionalCompleted = !hasDevotional || dayTasks.includes('devotional');
+        const readingsCompleted = task.readings.every((_, i) => dayTasks.includes(`reading-${i}`));
+        if (!devotionalCompleted || !readingsCompleted) {
+          overdue.push(day);
+        }
+      }
+    }
+    return overdue;
+  };
+
+  const overdueDays = getOverdueDays();
+  const hasOverdue = overdueDays.length > 0;
+
+  // Determine which day to show/use
+  const displayDay = selectedDay || currentDay;
 
   useEffect(() => {
     fetchProgress();
@@ -242,8 +267,8 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
 
   const currentReadings = getCurrentDayReadings();
 
-  // Get today's devotional
-  const todayDevotional = sharedDevotionals[currentDay.toString()] || tasks.find(t => t.day === currentDay)?.devotional;
+  // Get display day's devotional
+  const todayDevotional = sharedDevotionals[displayDay.toString()] || tasks.find(t => t.day === displayDay)?.devotional;
 
   return (
     <div className="space-y-6">
@@ -338,11 +363,86 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
               ) : (
                 <Play className="w-5 h-5" />
               )}
-              {generatingDevotional ? "生成导读中..." : "继续今日阅读"}
+              {generatingDevotional ? "生成导读中..." : selectedDay ? `阅读第 ${selectedDay} 天` : "继续今日阅读"}
             </Button>
           )}
         </CardContent>
       </Card>
+
+      {/* Overdue Tasks Warning */}
+      {hasOverdue && !selectedDay && (
+        <Card className="border-orange-200 dark:border-orange-800 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20">
+          <CardContent className="pt-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-medium text-orange-700 dark:text-orange-300">
+                  有 {overdueDays.length} 天的任务未完成
+                </p>
+                <p className="text-sm text-orange-600/70 dark:text-orange-400/70 mt-1">
+                  你可以补做错过的任务，进度会同步更新。
+                </p>
+                <div className="flex flex-wrap gap-1 mt-3">
+                  {overdueDays.slice(0, 5).map(day => (
+                    <Button
+                      key={day}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedDay(day)}
+                      className="text-xs"
+                    >
+                      第 {day} 天
+                    </Button>
+                  ))}
+                  {overdueDays.length > 5 && (
+                    <span className="text-xs text-muted-foreground self-center">
+                      +{overdueDays.length - 5} 更多
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Day selector when viewing a specific day */}
+      {selectedDay && (
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedDay(null)}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" /> 返回今日
+                </Button>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedDay(Math.max(1, selectedDay - 1))}
+                  disabled={selectedDay <= 1}
+                >
+                  上一 天
+                </Button>
+                <span className="text-sm font-medium px-2">第 {selectedDay} 天</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedDay(Math.min(tasks.length || plan.dailyChapters.length, selectedDay + 1))}
+                  disabled={selectedDay >= (tasks.length || plan.dailyChapters.length)}
+                >
+                  下一天
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Today's Devotional */}
       {todayDevotional && (
@@ -350,7 +450,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-indigo-500" />
-              今日灵修导读
+              {selectedDay ? `第 ${selectedDay} 天灵修导读` : "今日灵修导读"}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -366,7 +466,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <BookOpen className="w-5 h-5" />
-            今日经文
+            {selectedDay ? `第 ${selectedDay} 天经文` : "今日经文"}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
@@ -374,8 +474,8 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
             {currentReadings.map((reading, index) => {
               const bookName = BIBLE_BOOKS.find(b => b.id === reading.book)?.name || reading.book;
               const taskId = `reading-${index}`;
-              const isCompleted = progress.completedTasks[currentDay.toString()]?.includes(taskId);
-              const isToggling = togglingTask === `${currentDay}-${taskId}`;
+              const isCompleted = progress.completedTasks[displayDay.toString()]?.includes(taskId);
+              const isToggling = togglingTask === `${displayDay}-${taskId}`;
 
               return (
                 <div
@@ -386,7 +486,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                       ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
                       : "bg-muted/30 border-border"
                   )}
-                  onClick={() => toggleTask(currentDay, taskId, isCompleted)}
+                  onClick={() => toggleTask(displayDay, taskId, isCompleted)}
                 >
                   <div className="flex-shrink-0">
                     {isToggling ? (
