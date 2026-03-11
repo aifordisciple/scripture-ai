@@ -74,6 +74,14 @@ export function GroupTab() {
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
 
+  // 创建读经计划状态
+  const [createPlanOpen, setCreatePlanOpen] = useState(false);
+  const [creatingPlan, setCreatingPlan] = useState(false);
+  const [newPlanName, setNewPlanName] = useState("");
+  const [newPlanDesc, setNewPlanDesc] = useState("");
+  const [newPlanDays, setNewPlanDays] = useState(7);
+  const [newPlanMode, setNewPlanMode] = useState<"NORMAL" | "CHALLENGE">("NORMAL");
+
   useEffect(() => {
     fetchGroups();
   }, []);
@@ -195,6 +203,53 @@ export function GroupTab() {
     }
   };
 
+  // 创建读经计划
+  const createPlan = async () => {
+    if (!selectedGroup || !newPlanName.trim()) return;
+
+    setCreatingPlan(true);
+    try {
+      // 生成每日章节（简单示例：每天读1章）
+      const dailyChapters = [];
+      for (let i = 0; i < newPlanDays; i++) {
+        dailyChapters.push(`Gen-${i + 1}`); // 默认从创世记开始
+      }
+
+      const res = await fetch(`/api/church/${selectedGroup.churchId}/plan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newPlanName,
+          description: newPlanDesc,
+          startDate: new Date().toISOString(),
+          dailyChapters,
+          mode: newPlanMode,
+          challengeConfig: newPlanMode === "CHALLENGE" ? {
+            targetDays: newPlanDays,
+            rewardTitle: "完成挑战",
+            rewardBadge: "挑战者"
+          } : null
+        })
+      });
+      const data = await res.json();
+      if (data.error) {
+        alert(data.error);
+      } else if (data.plan) {
+        setGroupPlans(prev => [data.plan, ...prev]);
+        setCreatePlanOpen(false);
+        setNewPlanName("");
+        setNewPlanDesc("");
+        setNewPlanDays(7);
+        setNewPlanMode("NORMAL");
+      }
+    } catch (error) {
+      console.error("Failed to create plan:", error);
+      alert("创建计划失败，请稍后重试");
+    } finally {
+      setCreatingPlan(false);
+    }
+  };
+
   // Group detail view
   if (selectedGroup) {
     const isAdmin = selectedGroup.role === "OWNER" || selectedGroup.role === "ADMIN";
@@ -258,9 +313,75 @@ export function GroupTab() {
 
           <TabsContent value="plans" className="space-y-4">
             {isAdmin && (
-              <Button className="gap-2">
-                <Plus className="w-4 h-4" /> 创建读经计划
-              </Button>
+              <Dialog open={createPlanOpen} onOpenChange={setCreatePlanOpen}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <Plus className="w-4 h-4" /> 创建读经计划
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>创建读经计划</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <Label>计划名称</Label>
+                      <Input
+                        value={newPlanName}
+                        onChange={(e) => setNewPlanName(e.target.value)}
+                        placeholder="例如：创世记读经计划"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>简介（可选）</Label>
+                      <Input
+                        value={newPlanDesc}
+                        onChange={(e) => setNewPlanDesc(e.target.value)}
+                        placeholder="计划介绍..."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>计划天数</Label>
+                      <Input
+                        type="number"
+                        value={newPlanDays}
+                        onChange={(e) => setNewPlanDays(parseInt(e.target.value) || 7)}
+                        min={1}
+                        max={365}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>模式</Label>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={newPlanMode === "NORMAL" ? "default" : "outline"}
+                          onClick={() => setNewPlanMode("NORMAL")}
+                          className="flex-1"
+                        >
+                          普通模式
+                        </Button>
+                        <Button
+                          variant={newPlanMode === "CHALLENGE" ? "default" : "outline"}
+                          onClick={() => setNewPlanMode("CHALLENGE")}
+                          className="flex-1"
+                        >
+                          挑战模式
+                        </Button>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={createPlan}
+                      disabled={creatingPlan || !newPlanName.trim()}
+                      className="w-full"
+                    >
+                      {creatingPlan ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      ) : null}
+                      创建计划
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             )}
             {groupPlans.length === 0 ? (
               <div className="text-center text-muted-foreground py-12">
