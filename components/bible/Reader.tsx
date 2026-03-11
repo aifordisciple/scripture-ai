@@ -1,7 +1,7 @@
 // components/bible/Reader.tsx
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
@@ -37,11 +37,23 @@ const slideVariants = {
 
 export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const searchParams = useSearchParams();
-  const book = searchParams.get("book") || initialBook;
-  const chapter = searchParams.get("chapter") || initialChapter;
+
+  // 使用 ref 追踪 initial 值的变化，确保外部更新时能响应
+  const prevInitialRef = useRef({ book: initialBook, chapter: initialChapter });
+  const [book, setBook] = useState(() => searchParams.get("book") || initialBook);
+  const [chapter, setChapter] = useState(() => searchParams.get("chapter") || initialChapter);
+
+  // 当 initialBook 或 initialChapter 变化时，更新内部状态
+  useEffect(() => {
+    if (initialBook !== prevInitialRef.current.book || initialChapter !== prevInitialRef.current.chapter) {
+      setBook(initialBook);
+      setChapter(initialChapter);
+      prevInitialRef.current = { book: initialBook, chapter: initialChapter };
+    }
+  }, [initialBook, initialChapter]);
 
   const {
-    fontSize, lineHeight, selectedVerses, showEnglish, highlights, triggerAI, scrollToVerse, setScrollToVerse, clearSelection
+    fontSize, lineHeight, selectedVerses, showEnglish, highlights, enqueueAI, scrollToVerse, setScrollToVerse, clearSelection, setBook: setStoreBook, setChapter: setStoreChapter, addTab
   } = useBibleStore();
 
   const { verses, loading } = useBibleData(book, chapter);
@@ -152,7 +164,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                const context = verses.filter(v => v.version === 'CUV').map(v => `[${v.verse}] ${v.content}`).join('\n');
                const ref = { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: cuvVerses[0].verse };
                
-               state.triggerAI("请深入解读以下经文。", content, context, ref);
+               state.enqueueAI("请深入解读以下经文。", content, context, ref);
                state.setAiOpen(true);
                clearSelection();
                setIsMenuVisible(false);
@@ -177,6 +189,31 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     });
     return { verseMap: map, renderList: Array.from(map.keys()).sort((a, b) => a - b) };
   }, [verses]);
+
+  // [新增] 处理经文串珠 - 在新标签页打开
+  const handleCrossRef = useCallback(() => {
+    if (selectedVerses.length === 0) return;
+
+    const cuvVerses = verses.filter(v => v.version === 'CUV' && selectedVerses.includes(v.verse));
+    if (cuvVerses.length === 0) return;
+
+    const firstVerse = cuvVerses[0];
+    const content = cuvVerses.map(v => v.content).join('');
+
+    // 在新标签页打开串珠
+    addTab({
+      type: 'cross-ref',
+      crossRefSource: {
+        bookId: firstVerse.bookId,
+        bookName: firstVerse.bookName,
+        chapter: firstVerse.chapter,
+        verse: firstVerse.verse,
+        content,
+      },
+    });
+    setIsMenuVisible(false);
+    clearSelection();
+  }, [selectedVerses, verses, addTab, setIsMenuVisible, clearSelection]);
 
   return (
     <div className="w-full min-h-screen flex flex-row relative transition-colors duration-500" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
@@ -262,14 +299,14 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
                     {/* 全章摘要按钮 */}
                     <div className="mt-20 text-center pb-4">
-                    <button 
-                        onClick={(e) => { 
-                            e.stopPropagation(); 
-                            const cuvVerses = verses.filter(v => v.version === 'CUV'); 
-                            if (cuvVerses.length > 0) { 
-                                const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n'); 
-                                triggerAI(CHAPTER_SUMMARY_PROMPT, `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, fullContext, { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 }); 
-                            } 
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            const cuvVerses = verses.filter(v => v.version === 'CUV');
+                            if (cuvVerses.length > 0) {
+                                const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
+                                enqueueAI(CHAPTER_SUMMARY_PROMPT, `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, fullContext, { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 });
+                            }
                         }} 
                         className={cn(
                           "group inline-flex items-center gap-2.5 px-8 py-3.5 glass-panel rounded-full",
@@ -297,8 +334,8 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         </div>
       </div>
 
-      <FloatingMenu 
-        visible={isMenuVisible && selectedVerses.length > 0} 
+      <FloatingMenu
+        visible={isMenuVisible && selectedVerses.length > 0}
         position={menuPosition}
         selectedCount={selectedVerses.length}
         onClose={() => { setIsMenuVisible(false); clearSelection(); }}
@@ -306,6 +343,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         currentBook={book}
         currentChapter={parseInt(chapter)}
         onCopy={handleCopy}
+        onCrossRef={handleCrossRef}
       />
     </div>
   );

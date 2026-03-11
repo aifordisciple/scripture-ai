@@ -153,11 +153,11 @@ export function UserMenu() {
           
           <div className="my-1 border-t dark:border-slate-800" />
           
-          <MenuItem 
-            icon={<LogOut className="w-4 h-4" />} 
-            label="退出登录" 
-            onClick={() => signOut()} 
-            className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg" 
+          <MenuItem
+            icon={<LogOut className="w-4 h-4" />}
+            label="退出登录"
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
           />
         </div>
       )}

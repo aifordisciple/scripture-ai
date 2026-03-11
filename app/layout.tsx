@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
 import { BadgePopup } from "@/components/bible/BadgePopup";
+import { AIQueueIndicator } from "@/components/bible/AIQueueIndicator";
 
 export const metadata: Metadata = {
   title: "Scripture AI - 你的灵修伴侣",
@@ -38,6 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
            <SyncProvider />
            {/* 勋章获得弹窗 */}
            <BadgePopup />
+           {/* AI 解读队列指示器 */}
+           <AIQueueIndicator />
         </AuthProvider>
       </body>
     </html>

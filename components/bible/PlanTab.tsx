@@ -14,7 +14,7 @@ export function PlanTab() {
   const {
     activePlans, startPlan, toggleTaskCompleted, quitPlan, tabs, addTab, setActiveTab,
     customPlans, addCustomPlan, deleteCustomPlan, catchUpPlan, setReadingPlanContext, generateAiDevotional,
-    viewingPlanId, setViewingPlanId // [新增] 从 store 中取出
+    viewingPlanId, setViewingPlanId, apiConfig // [新增] 取出 apiConfig
   } = useBibleStore();
 
   const [aiPrompt, setAiPrompt] = useState("");
@@ -104,7 +104,7 @@ export function PlanTab() {
       const res = await fetch("/api/chat/plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: aiPrompt })
+        body: JSON.stringify({ prompt: aiPrompt, apiConfig }) // [修复] 传递 apiConfig
       });
       const data = await res.json();
       if (data.plan) {
@@ -377,7 +377,21 @@ export function PlanTab() {
               const isTotallyCompleted = completedDaysCount >= plan.durationDays;
 
               return (
-                <div key={plan.id} className="relative flex flex-col bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-indigo-100 dark:border-indigo-900 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden" onClick={() => setViewingPlanId(plan.id)}>
+                <div key={plan.id} className="relative flex flex-col bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-indigo-100 dark:border-indigo-900 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group" onClick={() => setViewingPlanId(plan.id)}>
+                   {/* 自定义计划删除按钮 */}
+                   {plan.id.startsWith('custom-') && (
+                     <button
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         if (confirm('确定要删除此计划吗？这将同时清除所有打卡记录。')) {
+                           deleteCustomPlan(plan.id);
+                         }
+                       }}
+                       className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                     >
+                       <Trash2 className="w-4 h-4" />
+                     </button>
+                   )}
                    {isTotallyCompleted && (
                      <div className="absolute -top-3 -right-3 bg-gradient-to-br from-yellow-300 to-yellow-500 p-4 rounded-full shadow-lg border-4 border-white dark:border-slate-900 transform rotate-12">
                         <Medal className="w-7 h-7 text-white" />
@@ -420,9 +434,23 @@ export function PlanTab() {
             {archivedPlans.map((plan) => (
               <div
                 key={plan!.id}
-                className="flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+                className="relative flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 opacity-80 hover:opacity-100 transition-opacity cursor-pointer group"
                 onClick={() => setViewingPlanId(plan!.id)}
               >
+                 {/* 自定义计划删除按钮 */}
+                 {plan!.id.startsWith('custom-') && (
+                   <button
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       if (confirm('确定要删除此计划吗？')) {
+                         deleteCustomPlan(plan!.id);
+                       }
+                     }}
+                     className="absolute top-2 right-2 p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                   >
+                     <Trash2 className="w-3.5 h-3.5" />
+                   </button>
+                 )}
                  <Medal className="w-10 h-10 text-yellow-400 mb-2 drop-shadow-sm" />
                  <h3 className="text-sm font-bold text-center font-serif text-slate-700 dark:text-slate-300 line-clamp-2 leading-snug">
                    {plan!.title}

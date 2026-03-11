@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Copy, X, PenLine, Share2 } from "lucide-react";
+import { Sparkles, Copy, X, PenLine, Share2, GitBranch } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useSession } from "next-auth/react";
@@ -13,9 +13,10 @@ interface FloatingMenuProps {
   onClose: () => void;
   onExplain: () => void;
   selectedCount: number;
-  currentBook: string; 
+  currentBook: string;
   currentChapter: number;
   onCopy: () => void;
+  onCrossRef?: () => void;
 }
 
 const COLORS = [
@@ -26,7 +27,7 @@ const COLORS = [
   { id: 'none', bg: 'bg-slate-100', border: 'border-slate-300', icon: true } 
 ];
 
-export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy }: FloatingMenuProps) {
+export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onCrossRef }: FloatingMenuProps) {
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
   const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection } = useBibleStore();
@@ -130,13 +131,24 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
       </div>
 
       {/* 2. [修改] 醒目的 AI 解读按钮 */}
-      <button 
+      <button
         onClick={onExplain}
         className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
       >
         <Sparkles className="w-4 h-4 fill-current animate-pulse" />
         <span className="font-bold text-sm">AI 深度解读</span>
       </button>
+
+      {/* 2.5 [新增] 经文串珠按钮 */}
+      {onCrossRef && (
+        <button
+          onClick={onCrossRef}
+          className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
+        >
+          <GitBranch className="w-4 h-4" />
+          <span className="font-bold text-sm">经文串珠</span>
+        </button>
+      )}
 
       {/* 3. 次要操作区 (笔记、分享、复制) */}
       <div className="grid grid-cols-3 gap-1 pt-1 border-t dark:border-slate-800">

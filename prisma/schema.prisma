@@ -386,7 +386,7 @@ model ActivityLog {
   id          String   @id @default(cuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   date        DateTime @default(now()) @db.Date
   actionType  String
   duration    Int      @default(0)
@@ -395,4 +395,40 @@ model ActivityLog {
   createdAt   DateTime @default(now())
 
   @@index([userId, date])
+}
+
+// 经文串珠关联类型枚举
+enum ConnectionType {
+  THEMATIC      // 主题相关
+  QUOTATION     // 引用关系 (OT quoted in NT)
+  PARALLEL      // 平行经文 (synoptic parallels)
+  PROPHECY      // 预言应验
+  ILLUSTRATION  // 例证关系
+}
+
+// 经文串珠关联模型
+model VerseConnection {
+  id            String   @id @default(cuid())
+
+  // 源经文
+  sourceBookId  String
+  sourceChapter Int
+  sourceVerse   Int
+
+  // 目标经文
+  targetBookId  String
+  targetChapter Int
+  targetVerse   Int
+
+  // 关联元数据
+  type          ConnectionType
+  strength      Float    // 0.0 - 1.0
+  description   String?  // 关联说明
+  source        String   // "precomputed" | "vector" | "ai"
+
+  createdAt     DateTime @default(now())
+
+  @@unique([sourceBookId, sourceChapter, sourceVerse, targetBookId, targetChapter, targetVerse, type])
+  @@index([sourceBookId, sourceChapter, sourceVerse])
+  @@map("verse_connections")
 }

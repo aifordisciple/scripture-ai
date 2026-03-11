@@ -7,7 +7,7 @@ export function useVerseMenu(verses: Verse[]) {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [isMenuVisible, setIsMenuVisible] = useState(false);
 
-  const { selectedVerses, toggleVerseSelection, clearSelection, triggerAI } = useBibleStore();
+  const { selectedVerses, toggleVerseSelection, clearSelection, enqueueAI } = useBibleStore();
 
   // 点击空白处关闭菜单
   useEffect(() => {
@@ -57,8 +57,8 @@ export function useVerseMenu(verses: Verse[]) {
         .map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
         
     const firstV = cuvVerses[0];
-    triggerAI("请详细解读这段经文，包含背景、逐节释经和现代应用。", combinedContent, contextContent, { 
-        bookName: firstV.bookName, chapter: firstV.chapter, verse: firstV.verse 
+    enqueueAI("请详细解读这段经文，包含背景、逐节释经和现代应用。", combinedContent, contextContent, {
+        bookName: firstV.bookName, chapter: firstV.chapter, verse: firstV.verse
     });
     
     setIsMenuVisible(false);

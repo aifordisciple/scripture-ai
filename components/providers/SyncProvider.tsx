@@ -7,14 +7,15 @@ import { useBibleStore } from "@/store/useBibleStore";
 
 export function SyncProvider() {
   const { data: session } = useSession();
-  const { 
-    setAllUserData, 
+  const {
+    setAllUserData,
     fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
     highlights, notes, interactions, activePlans, streakCount, lastActiveDate, badges,
     syncMode, setSyncMode,
     lastSyncTime, setLastSyncTime,
     isSyncing, setIsSyncing,
     syncError, setSyncError,
+    customPlans, // [修复] 从 store 中解构 customPlans
   } = useBibleStore();
 
   const isLoadedRef = useRef(false);
@@ -71,7 +72,7 @@ export function SyncProvider() {
             showEnglish,
             lastBook: currentBook,
             lastChapter: currentChapter,
-            customPlans: useBibleStore.getState().customPlans,
+            customPlans, // [修复] 使用解构的 customPlans 变量
           },
           highlights: highlights.map(h => ({
             bookId: h.bookId,
@@ -118,7 +119,7 @@ export function SyncProvider() {
      session,
      syncMode,
      fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
-     highlights, notes, interactions, activePlans, streakCount, lastActiveDate, badges,
+     highlights, notes, interactions, activePlans, streakCount, lastActiveDate, badges, customPlans,
      setAllUserData, setLastSyncTime, setIsSyncing, setSyncError,
    ]);
 

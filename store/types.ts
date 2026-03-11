@@ -5,13 +5,21 @@
 // --------------------------------------------------
 export interface Tab {
   id: string;
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans';
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref';
   book?: string;
   chapter?: string;
   query?: string;
   searchMode?: 'exact' | 'ai' | 'fuzzy';
   results?: any[];
   scrollTop?: number;
+  // Cross-ref specific
+  crossRefSource?: {
+    bookId: string;
+    bookName: string;
+    chapter: number;
+    verse: number;
+    content: string;
+  };
 }
 
 export interface HighlightData {
@@ -50,6 +58,18 @@ export interface VerseRef {
   verse: number;
 }
 
+// AI 队列请求项
+export interface AIQueueItem {
+  id: string;
+  prompt: string;
+  content: string;
+  context: string;
+  ref: VerseRef;
+  timestamp: number;
+  status: 'pending' | 'processing' | 'completed' | 'cancelled' | 'error';
+  error?: string;
+}
+
 export interface InteractionLog {
   bookId: string;
   chapter: number;
@@ -63,8 +83,9 @@ export interface Badge {
 
 
 // API configuration
+// Simplified: local (Ollama) or cloud (OpenAI-compatible API)
 export interface ApiConfig {
-  provider: 'openai' | 'ollama' | 'deepseek' | 'custom';
+  provider: 'local' | 'cloud';
   baseUrl: string;
   apiKey: string;
   model: string;
@@ -114,8 +135,21 @@ export interface ReaderSlice {
   toggleEnglish: () => void; 
   tabs: Tab[];
   activeTabId: string;
-  // [修复] 在这里补上 'highlights' | 'notes' | 'plans'
-  addTab: (params: { type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans'; book?: string; chapter?: string; query?: string; searchMode?: 'exact' | 'ai' | 'fuzzy' }) => void;
+  // [修复] 在这里补上 'highlights' | 'notes' | 'plans' | 'cross-ref'
+  addTab: (params: {
+    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref';
+    book?: string;
+    chapter?: string;
+    query?: string;
+    searchMode?: 'exact' | 'ai' | 'fuzzy';
+    crossRefSource?: {
+      bookId: string;
+      bookName: string;
+      chapter: number;
+      verse: number;
+      content: string;
+    };
+  }) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
   updateActiveTab: (data: Partial<Tab>) => void;
@@ -126,11 +160,23 @@ export interface ReaderSlice {
 }
 
 export interface AISlice {
-  isAiOpen: boolean; 
+  isAiOpen: boolean;
   setAiOpen: (open: boolean) => void;
   isAiGenerating: boolean;
   setAiGenerating: (isGenerating: boolean) => void;
+  // 队列相关
+  currentAiRequest: AIQueueItem | null;
+  aiQueue: AIQueueItem[];
+  enqueueAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
+  cancelAIRequest: (id: string) => void;
+  clearAIQueue: () => void;
+  startProcessingNext: () => void;
+  completeCurrentRequest: () => void;
+  failCurrentRequest: (error?: string) => void;
+  // 兼容旧接口（标记为废弃但仍保留）
+  /** @deprecated Use enqueueAI instead */
   aiRequestTrigger: { prompt: string; content: string; context: string; ref: VerseRef; timestamp: number; } | null;
+  /** @deprecated Use enqueueAI instead */
   triggerAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
 }
 

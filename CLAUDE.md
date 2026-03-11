@@ -102,6 +102,7 @@ The Zustand store has 5 slices:
 - Hooks: kebab-case (`use-audio-player.ts`)
 - API routes: lowercase (`app/api/chat/route.ts`)
 - No `as any` or `@ts-ignore` - strict TypeScript
+- After code changes, run `docker-compose up -d --build` to redeploy
 
 ## Environment Variables
 
@@ -125,3 +126,15 @@ cd android
 ```
 
 APK location: `app-mobile/android/app/build/outputs/apk/debug/app-debug.apk`
+
+
+# 核心开发与部署工作流规范
+
+你当前运行在一个由 Git 进行版本控制，并使用 Docker Compose 进行服务编排的 Mac 服务器项目中。对于收到的任何开发任务，你必须严格遵循以下步骤：
+
+1. **执行开发**：完成用户要求的代码编写或编辑任务。
+2. **状态验证**：每次代码修改完成后，你必须先执行`docker-compose down && docker-compose up -d --build`重启docker服务，如有报错则返回进行修复。
+3. **自动部署**：上一步状态验证通过后，你必须调用项目根目录下的 `./auto_deploy.sh` 脚本来完成后续动作。
+   - 必须使用 `-s` 参数传递简要的修改总结（如 "feat: 增加用户登录接口"）。
+   - 必须使用 `-d` 参数传递详细的修改说明（Comments），解释修改了哪些逻辑及原因。
+   - 示例命令：`./auto_deploy.sh -s "fix: 修复数据库连接超时" -d "调整了 db_config.js 中的 timeout 参数，从 3000ms 增加到 5000ms，以适应当前网络环境。"`，注意：该脚本已内置 `git add .`、`git commit`的完整逻辑，你只需调用该脚本并传入准确的参数即可。

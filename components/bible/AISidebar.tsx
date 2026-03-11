@@ -232,10 +232,12 @@ MessageBubble.displayName = "MessageBubble";
 
 // --- 2. 主组件：AI Sidebar ---
 export function AISidebar() {
-  const { 
+  const {
     isAiOpen, setAiOpen, clearSelection, aiRequestTrigger,
     sidebarWidth, setSidebarWidth,
-    setAiGenerating, openNoteEditor, notes, updateNote
+    setAiGenerating, openNoteEditor, notes, updateNote,
+    // 队列相关
+    currentAiRequest, aiQueue, completeCurrentRequest, failCurrentRequest, cancelAIRequest
   } = useBibleStore();
   
   const [isResizing, setIsResizing] = useState(false);
@@ -262,8 +264,12 @@ export function AISidebar() {
     onError: (error) => {
         console.error("🔥 AI Error:", error);
         setAiGenerating(false);
+        failCurrentRequest(error.message || 'AI 生成失败');
     },
-    onFinish: () => setAiGenerating(false)
+    onFinish: () => {
+        setAiGenerating(false);
+        completeCurrentRequest();
+    }
   });
 
   // 屏幕防睡眠机制
@@ -464,6 +470,13 @@ export function AISidebar() {
           <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-bold select-none">
             <Sparkles className="w-5 h-5" />
             <span>AI 灵修伴侣</span>
+            {/* 队列状态指示 */}
+            {(currentAiRequest || aiQueue.length > 0) && (
+              <span className="ml-2 text-xs font-normal bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full">
+                {currentAiRequest?.status === 'processing' && '处理中'}
+                {aiQueue.length > 0 && ` · ${aiQueue.length} 排队`}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1">
              <Button variant="ghost" size="icon" onClick={handleClearChat} title="清空">

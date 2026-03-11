@@ -1,31 +1,21 @@
+// app/api/chat/devotional/route.ts
 import { generateText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
 import { NextResponse } from 'next/server';
+import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 
 export async function POST(req: Request) {
-  const provider = process.env.AI_PROVIDER || 'openai';
-  let model;
-  
-  if (provider === 'ollama') {
-    const ollama = createOpenAI({
-      baseURL: process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1',
-      apiKey: '', 
-    });
-    model = ollama(process.env.OLLAMA_MODEL || 'qwen3.5:9b');
-  } else if (provider === 'deepseek') {
-    const deepseek = createOpenAI({
-      baseURL: 'https://api.deepseek.com',
-      apiKey: process.env.DEEPSEEK_API_KEY,
-    });
-    model = deepseek('deepseek-chat');
-  } else {
-    const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    model = openai('gpt-4o-mini');
-  }
+  const { apiConfig, body } = await extractApiConfig(req);
+  const { planTitle, day, readings } = body as {
+    planTitle?: string;
+    day?: number;
+    readings?: Array<{ book: string; chapter: number }>;
+  };
 
   try {
-    const { planTitle, day, readings } = await req.json();
-    const readingsStr = readings.map((r: any) => `${r.book} ${r.chapter}章`).join('，');
+    // 使用集中式 AI 客户端
+    const model = await getAIModel(apiConfig);
+
+    const readingsStr = readings?.map((r) => `${r.book} ${r.chapter}章`).join('，') || '';
 
     const systemPrompt = `你是一位充满属灵洞察力、温暖且专业的牧者。
 用户正在进行名为【${planTitle}】的读经计划，今天是第 ${day} 天。
@@ -45,7 +35,24 @@ export async function POST(req: Request) {
       temperature: 0.7,
     });
 
-    return NextResponse.json({ devotional: text.trim() });
+    // 清理文本：移除 Markdown 标记和 AI 思考标签
+    let cleanText = text.trim();
+
+    // 移除 <think>...</think> 标签（某些 AI 模型会返回）
+    cleanText = cleanText.replace(/<think>[\s\S]*?<\/think>/gi, '');
+    cleanText = cleanText.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+
+    // 移除常见的 Markdown 标记
+    cleanText = cleanText.replace(/\*\*(.+?)\*\*/g, '$1'); // 粗体
+    cleanText = cleanText.replace(/\*(.+?)\*/g, '$1'); // 斜体
+    cleanText = cleanText.replace(/^#{1,6}\s*/gm, ''); // 标题
+    cleanText = cleanText.replace(/`(.+?)`/g, '$1'); // 行内代码
+    cleanText = cleanText.replace(/```[\s\S]*?```/g, ''); // 代码块
+
+    // 清理多余空行
+    cleanText = cleanText.replace(/\n{3,}/g, '\n\n').trim();
+
+    return NextResponse.json({ devotional: cleanText });
   } catch (e) {
     console.error("AI Devotional Error:", e);
     return NextResponse.json({ error: "Failed to generate devotional" }, { status: 500 });

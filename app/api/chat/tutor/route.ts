@@ -1,10 +1,9 @@
 // app/api/chat/tutor/route.ts
 // AI Tutor - Socratic method Bible study assistant
 
-import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
-import { auth } from "@/lib/auth"; 
-import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 
 export const maxDuration = 60;
 
@@ -66,27 +65,19 @@ const TUTOR_PROMPT = `
 
 export async function POST(req: Request) {
   try {
-    const { question, verseRef, verseContent, conversationHistory } = await req.json();
-    
-    const session = await auth(); 
+    const { apiConfig, body } = await extractApiConfig(req);
+    const { question, verseRef, verseContent, conversationHistory } = body as {
+      question?: string;
+      verseRef?: string;
+      verseContent?: string;
+      conversationHistory?: Array<{ role: string; content: string }>;
+    };
+
+    const session = await auth();
     const userId = session?.user?.id;
 
-    // Get AI config
-    const provider = process.env.AI_PROVIDER || 'openai';
-    const modelName = process.env.OLLAMA_MODEL || 'qwen3.5:9b'; 
-    const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1';
-
-    let model;
-    if (provider === 'ollama') {
-      const ollama = createOpenAI({ baseURL: ollamaBaseUrl, apiKey: '' });
-      model = ollama(modelName);
-    } else if (provider === 'deepseek') {
-       const deepseek = createOpenAI({ baseURL: 'https://api.deepseek.com/v1', apiKey: process.env.DEEPSEEK_API_KEY });
-       model = deepseek('deepseek-chat');
-    } else {
-      const openai = createOpenAI({ baseURL: process.env.OPENAI_BASE_URL, apiKey: process.env.OPENAI_API_KEY });
-      model = openai(process.env.OPENAI_MODEL || 'gpt-4o-mini');
-    }
+    // 使用集中式 AI 客户端
+    const model = await getAIModel(apiConfig, userId);
 
     // Build conversation context
     const systemPrompt = TUTOR_PROMPT
@@ -101,16 +92,16 @@ export async function POST(req: Request) {
     // Add conversation history (last 4 messages for context)
     if (conversationHistory && conversationHistory.length > 0) {
       const recentHistory = conversationHistory.slice(-4);
-      recentHistory.forEach((msg: { role: string; content: string }) => {
+      recentHistory.forEach((msg) => {
         messages.push({ role: msg.role as 'user' | 'assistant', content: msg.content });
       });
     }
 
     // Add current question
-    messages.push({ 
-      role: 'user' as const, 
-      content: verseContent ? 
-        `问题: ${question}\n相关经文: ${verseRef}\n${verseContent}` : 
+    messages.push({
+      role: 'user' as const,
+      content: verseContent ?
+        `问题: ${question}\n相关经文: ${verseRef}\n${verseContent}` :
         `问题: ${question}`
     });
 

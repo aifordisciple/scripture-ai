@@ -131,6 +131,88 @@ node scripts/seed_full.js
 
 ---
 
+## 📊 功能完成度
+
+| 模块 | 功能 | 完成度 | 备注 |
+|------|------|:------:|------|
+| 📖 圣经阅读 | CUV/KJV双语、章节导航、手势操作 | ✅ 95% | 核心功能完善 |
+| 🤖 AI功能 | 解读、导师、祷告、讲道、查经 | ✅ 90% | 8个AI端点 |
+| 🔍 搜索 | 精确、AI语义、向量模糊 | ✅ 85% | pgvector支持 |
+| 📝 用户数据 | 高亮、笔记、计划、同步 | ✅ 90% | 云端同步 |
+| 👥 社交 | 好友、帖子、评论、点赞 | 🔶 70% | 需激活 |
+| ⛪ 教会系统 | 教会管理、小组计划 | 🔶 60% | 基础功能 |
+| 🧠 记忆系统 | SM-2算法艾宾浩斯 | 🔶 75% | 需增强提醒 |
+| 🎧 TTS | 语音朗读、多语种 | ✅ 80% | edge-tts |
+| 🖼️ 分享卡片 | 10+模板、自定义背景 | ✅ 90% | 功能完整 |
+| 📊 数据看板 | 热力图、勋章、统计 | ✅ 85% | 可视化完善 |
+| 📱 移动端 | Expo应用、离线阅读 | 🔶 50% | MVP阶段 |
+
+> ✅ 完成 > 80% | 🔶 进行中 50-80% | ⚠️ 规划中 < 50%
+
+---
+
+## 🔌 API 端点 (34个)
+
+### 圣经核心
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/bible` | GET | 获取经文（书卷、章节、版本） |
+| `/api/search` | GET/POST | 搜索经文（精确/AI/向量三种模式） |
+| `/api/versions` | GET/POST | 圣经版本管理 |
+| `/api/versions/import` | POST | 导入新版本 |
+
+### AI对话 (8个)
+| 端点 | 说明 |
+|------|------|
+| `/api/chat` | 主对话（流式响应） |
+| `/api/chat/tutor` | 苏格拉底式导师 |
+| `/api/chat/devotional` | 灵修导读生成 |
+| `/api/chat/prayer` | 祷告文生成 |
+| `/api/chat/sermon` | 讲道大纲生成 |
+| `/api/chat/study-guide` | 查经材料生成 |
+| `/api/chat/plan` | 自定义读经计划 |
+| `/api/chat/history` | 对话历史管理 |
+
+### 用户数据
+| 端点 | 说明 |
+|------|------|
+| `/api/highlight` | 高亮管理（CRUD） |
+| `/api/note` | 笔记管理 |
+| `/api/user/sync` | 全量数据同步 |
+| `/api/user/settings` | 用户设置（含API配置） |
+| `/api/user/dashboard` | 仪表盘统计数据 |
+
+### 社交功能
+| 端点 | 说明 |
+|------|------|
+| `/api/friends` | 好友系统（添加/接受/删除） |
+| `/api/posts` | 社区动态（CRUD） |
+| `/api/posts/like` | 点赞 |
+| `/api/posts/comment` | 评论 |
+
+### 教会系统
+| 端点 | 说明 |
+|------|------|
+| `/api/church` | 教会管理 |
+| `/api/church/[id]` | 单个教会操作 |
+| `/api/church/[id]/plan` | 小组读经计划 |
+
+### 记忆与提醒
+| 端点 | 说明 |
+|------|------|
+| `/api/memory` | 记忆卡片（SM-2算法） |
+| `/api/reminder` | 读经提醒 |
+
+### 工具
+| 端点 | 说明 |
+|------|------|
+| `/api/tts` | 语音合成 |
+| `/api/card-theme` | 卡片主题AI生成 |
+| `/api/proxy` | 资源代理（带缓存） |
+| `/api/docs` | OpenAPI文档 |
+
+---
+
 ## ⚙️ 环境变量
 
 | 变量 | 说明 | 示例 |
@@ -141,6 +223,102 @@ node scripts/seed_full.js
 | `OPENAI_BASE_URL` | API 端点 | `https://api.openai.com/v1` |
 | `AI_PROVIDER` | AI 提供商 | `openai` / `deepseek` / `ollama` |
 | `DEEPSEEK_API_KEY` | DeepSeek Key | (可选) |
+
+---
+
+## 🔧 配置示例
+
+### .env 完整配置
+
+```bash
+# 数据库 (必须)
+DATABASE_URL="postgresql://postgres:password@localhost:5432/scripture_ai"
+
+# 认证 (必须)
+AUTH_SECRET="your-secret-key-here"  # 生成: openssl rand -base64 32
+
+# AI 提供商选择
+AI_PROVIDER="cloud"  # 可选: openai, deepseek, ollama, cloud
+
+# OpenAI/云端配置
+OPENAI_API_KEY="sk-..."
+OPENAI_BASE_URL="https://api.openai.com/v1"
+OPENAI_MODEL="gpt-4o-mini"
+
+# DeepSeek 配置 (可选)
+DEEPSEEK_API_KEY="sk-..."
+
+# Ollama 本地模型配置
+OLLAMA_BASE_URL="http://localhost:11434/v1"
+OLLAMA_MODEL="qwen2.5:latest"
+```
+
+### Docker 生产部署
+
+```yaml
+# docker-compose.yml
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/scripture_ai
+      - AUTH_SECRET=${AUTH_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: pgvector/pgvector:pg16
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+```
+
+---
+
+## ❓ 常见问题
+
+### Q: 如何切换AI提供商？
+A: 有两种方式：
+1. 在用户设置中配置（优先级更高）
+2. 设置环境变量 `AI_PROVIDER`
+优先级：用户设置 > 环境变量默认值
+
+### Q: 如何添加新的圣经版本？
+A: 使用 `/api/versions/import` 端点导入，数据格式参考 `scripts/seed_full.js`
+
+### Q: 移动端如何构建？
+A:
+```bash
+cd app-mobile
+npm run prebuild        # 生成原生代码
+cd android && ./gradlew assembleDebug  # Android APK
+# 或使用 EAS 云构建
+eas build --platform android
+```
+
+### Q: 数据如何迁移？
+A: 使用 `/api/user/sync` 端点：
+- `GET` 导出完整用户数据
+- `POST` 导入数据（会合并现有数据）
+
+### Q: 如何配置本地AI？
+A: 安装Ollama后运行：
+```bash
+ollama pull qwen2.5
+OLLAMA_BASE_URL=http://localhost:11434/v1 OLLAMA_MODEL=qwen2.5 npm run dev
+```
 
 ---
 

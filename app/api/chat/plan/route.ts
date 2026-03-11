@@ -1,36 +1,20 @@
 // app/api/chat/plan/route.ts
 import { generateText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
 import { NextResponse } from 'next/server';
+import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 
 export async function POST(req: Request) {
-
-  // 复用模型配置逻辑
-  const provider = process.env.AI_PROVIDER || 'openai';
-  let model;
-  
-  if (provider === 'ollama') {
-    const ollama = createOpenAI({
-      baseURL: process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1',
-      apiKey: '', 
-    });
-    model = ollama(process.env.OLLAMA_MODEL || 'qwen3.5:9b');
-  } else if (provider === 'deepseek') {
-    const deepseek = createOpenAI({
-      baseURL: 'https://api.deepseek.com',
-      apiKey: process.env.DEEPSEEK_API_KEY,
-    });
-    model = deepseek('deepseek-chat');
-  } else {
-    const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    model = openai('gpt-4o-mini');
-  }
+  const { apiConfig, body } = await extractApiConfig(req);
+  const { prompt } = body as { prompt?: string };
 
   try {
-    const { prompt } = await req.json();
+    // 使用集中式 AI 客户端
+    const model = await getAIModel(apiConfig);
 
     const systemPrompt = `你是一位专业的圣经学者和牧者。请根据用户的需求，生成一个专属的读经计划。
-请严格返回 JSON 格式，不要包含任何 Markdown 标记（如 \`\`\`json ）。
+
+【重要】直接返回 JSON 对象，不要有任何思考过程、解释或 Markdown 标记。直接以 { 开始，以 } 结束。
+
 JSON 格式要求：
 {
   "id": "custom-随机字母",
@@ -56,11 +40,39 @@ Gen,Exo,Lev,Num,Deu,Jos,Jdg,Rut,1Sa,2Sa,1Ki,2Ki,1Ch,2Ch,Ezr,Neh,Est,Job,Psa,Pro,
     const { text } = await generateText({
       model: model,
       system: systemPrompt,
-      prompt: prompt,
+      prompt: prompt || '',
       temperature: 0.7,
     });
 
-    const jsonString = text.trim().replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
+    // Clean response: remove MiniMax thinking tags and markdown
+    let jsonString = text;
+
+    // Remove MiniMax thinking blocks (<?,  Or  Or Or Or Or Or  Or  tags)
+    jsonString = jsonString.replace(/<think>[\s\S]*?<\/think>/gi, '');
+    jsonString = jsonString.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+    jsonString = jsonString.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
+    // Remove thinking content at the beginning (MiniMax M2.5 specific)
+    jsonString = jsonString.replace(/^ purported_thinking[\s\S]*?(?=\{)/i, '');
+    jsonString = jsonString.replace(/^Thinking[\s\S]*?(?=\{)/i, '');
+
+    // Remove thinking tags like  ...
+    jsonString = jsonString.replace(/##\s*思考[\s\S]*?(?=\{)/i, '');
+    jsonString = jsonString.replace(/##\s*思考过程[\s\S]*?(?=\{)/i, '');
+
+    // Remove thinking tags - MiniMax specific
+    jsonString = jsonString.replace(/\n\n---+\n\n[\s\S]*?(?=\{)/, '');
+
+    // Remove markdown code blocks
+    jsonString = jsonString.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+
+    // Try to find JSON object in the response
+    const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonString = jsonMatch[0];
+    }
+
+    console.log('[Plan] Cleaned JSON length:', jsonString.length);
+
     const plan = JSON.parse(jsonString);
 
     return NextResponse.json({ plan });

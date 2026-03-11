@@ -37,8 +37,12 @@ echo ">>> 2. 执行 Git 提交..."
 # 使用两个 -m 参数，Git 会自动将第一个作为标题，第二个作为正文（Comments）
 git commit -m "$SUMMARY" -m "$DETAILS"
 
-echo ">>> 3. 更新 Docker 服务..."
-docker-compose down
-docker-compose up -d --build
+BRANCH_NAME="main"
+REMOTE_URL="git@github.com:aifordisciple/scripture-ai.git"
+
+echo "正在推送到远程仓库..."
+git push -u origin "$BRANCH_NAME"
+
+echo "✅ 远程推送完成！"
 
 echo ">>> 部署流程执行完毕！"

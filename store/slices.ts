@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
 
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
@@ -38,11 +38,12 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
   
   tabs: [{ id: 'tab-1', type: 'read', book: 'Gen', chapter: '1' }],
   activeTabId: 'tab-1',
-  addTab: ({ type, book = 'Gen', chapter = '1', query, searchMode }) => set((state) => {
+  addTab: ({ type, book = 'Gen', chapter = '1', query, searchMode, crossRefSource }) => set((state) => {
       const newId = `tab-${Date.now()}`;
       const newTab: Tab = { id: newId, type };
-      if (type === 'read') { newTab.book = book; newTab.chapter = chapter; } 
+      if (type === 'read') { newTab.book = book; newTab.chapter = chapter; }
       else if (type === 'search') { newTab.query = query; newTab.searchMode = searchMode; }
+      else if (type === 'cross-ref' && crossRefSource) { newTab.crossRefSource = crossRefSource; }
       // dashboard、highlights 和 notes 都不需要额外参数
       return { tabs: [...state.tabs, newTab], activeTabId: newId };
     }),
@@ -64,15 +65,117 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
   setScrollToVerse: (verse) => set({ scrollToVerse: verse }),
 });
 
-export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set) => ({
+export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, get) => ({
   isAiOpen: false,
   setAiOpen: (open) => set({ isAiOpen: open }),
   isAiGenerating: false,
   setAiGenerating: (isAiGenerating) => set({ isAiGenerating }),
+
+  // 队列状态
+  currentAiRequest: null,
+  aiQueue: [],
+
+  // 入队方法：如果无当前任务则立即开始，否则加入队列
+  enqueueAI: (prompt, content, context, ref) => {
+    const newItem: AIQueueItem = {
+      id: `ai-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      prompt,
+      content,
+      context,
+      ref,
+      timestamp: Date.now(),
+      status: 'pending'
+    };
+
+    const { currentAiRequest } = get();
+
+    // 无当前任务，立即开始处理
+    if (!currentAiRequest || currentAiRequest.status === 'completed' || currentAiRequest.status === 'error') {
+      set({
+        currentAiRequest: { ...newItem, status: 'processing' },
+        aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() } // 兼容旧代码
+      });
+    } else {
+      // 有任务进行中，加入队列
+      set({ aiQueue: [...get().aiQueue, newItem] });
+    }
+  },
+
+  // 取消请求
+  cancelAIRequest: (id) => {
+    const { currentAiRequest, aiQueue } = get();
+
+    if (currentAiRequest?.id === id) {
+      // 取消当前处理的请求，开始下一个
+      set({
+        currentAiRequest: { ...currentAiRequest, status: 'cancelled' },
+        isAiGenerating: false
+      });
+      // 延迟触发下一个
+      setTimeout(() => get().startProcessingNext(), 100);
+    } else {
+      // 从队列中移除
+      set({ aiQueue: aiQueue.filter(item => item.id !== id) });
+    }
+  },
+
+  // 清空队列
+  clearAIQueue: () => set({ aiQueue: [] }),
+
+  // 开始处理下一个请求
+  startProcessingNext: () => {
+    const { aiQueue } = get();
+
+    if (aiQueue.length === 0) {
+      set({ currentAiRequest: null });
+      return;
+    }
+
+    const [nextItem, ...remainingQueue] = aiQueue;
+    set({
+      currentAiRequest: { ...nextItem, status: 'processing' },
+      aiQueue: remainingQueue,
+      aiRequestTrigger: {
+        prompt: nextItem.prompt,
+        content: nextItem.content,
+        context: nextItem.context,
+        ref: nextItem.ref,
+        timestamp: Date.now()
+      }
+    });
+  },
+
+  // 完成当前请求
+  completeCurrentRequest: () => {
+    const { currentAiRequest } = get();
+    if (currentAiRequest) {
+      set({
+        currentAiRequest: { ...currentAiRequest, status: 'completed' },
+        isAiGenerating: false
+      });
+      // 自动开始下一个
+      setTimeout(() => get().startProcessingNext(), 500);
+    }
+  },
+
+  // 失败处理
+  failCurrentRequest: (error) => {
+    const { currentAiRequest } = get();
+    if (currentAiRequest) {
+      set({
+        currentAiRequest: { ...currentAiRequest, status: 'error', error },
+        isAiGenerating: false
+      });
+      // 延迟后开始下一个
+      setTimeout(() => get().startProcessingNext(), 1000);
+    }
+  },
+
+  // 兼容旧接口
   aiRequestTrigger: null,
-  triggerAI: (prompt, content, context, ref) => set({
-    aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() }
-  }),
+  triggerAI: (prompt, content, context, ref) => {
+    get().enqueueAI(prompt, content, context, ref);
+  },
 });
 
 export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice> = (set, get) => ({
@@ -234,7 +337,11 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   // [新增] 自定义计划逻辑
   customPlans: [],
   addCustomPlan: (plan) => set((state) => ({ customPlans: [plan, ...state.customPlans] })),
-  deleteCustomPlan: (id) => set((state) => ({ customPlans: state.customPlans.filter(p => p.id !== id) })),
+  deleteCustomPlan: (id) => set((state) => ({
+    customPlans: state.customPlans.filter(p => p.id !== id),
+    // 同时清除 activePlans 中对应的记录
+    activePlans: state.activePlans.filter(p => p.planId !== id)
+  })),
 
   // [新增] 连读火苗与统计逻辑
   streakCount: 0,
@@ -360,10 +467,12 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
 
    // [新增] AI 灵修导读生成
    generateAiDevotional: async (planId, day, planTitle, readings) => {
+     // [修复] 从 store 获取当前 apiConfig
+     const { apiConfig } = useBibleStore.getState();
      const res = await fetch("/api/chat/devotional", {
        method: "POST",
        headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({ planTitle, day, readings })
+       body: JSON.stringify({ planTitle, day, readings, apiConfig }) // [修复] 传递 apiConfig
      });
      const data = await res.json();
      if (data.devotional) {
@@ -383,12 +492,12 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
      }
    },
 
-  // API configuration
+  // API configuration - Default to cloud MiniMax
   apiConfig: {
-    provider: 'openai',
-    baseUrl: 'https://api.openai.com/v1',
+    provider: 'cloud',
+    baseUrl: 'https://api.minimaxi.com/v1',
     apiKey: '',
-    model: 'gpt-4o-mini',
+    model: 'MiniMax-M2.5',
   },
   setApiConfig: (config) => set((state) => ({
     apiConfig: { ...state.apiConfig, ...config }

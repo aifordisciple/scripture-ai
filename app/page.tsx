@@ -32,6 +32,7 @@ const HighlightsTab = dynamic(() => import("@/components/bible/HighlightsTab").t
 const NotesTab = dynamic(() => import("@/components/bible/NotesTab").then(mod => mod.NotesTab), { ssr: false });
 const PlanTab = dynamic(() => import("@/components/bible/PlanTab").then(mod => mod.PlanTab), { ssr: false });
 const PlanDailyFlow = dynamic(() => import("@/components/bible/PlanDailyFlow").then(mod => mod.PlanDailyFlow), { ssr: false });
+const CrossRefTab = dynamic(() => import("@/components/bible/CrossRefTab").then(mod => mod.CrossRefTab), { ssr: false });
 
 // --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
 const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
@@ -92,7 +93,7 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             )}
           >
             <span className="max-w-[120px] truncate select-none">
-              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? '📊 数据看板' : tab.type === 'highlights' ? '🖍️ 我的高亮' : tab.type === 'notes' ? '📝 我的笔记' : '📅 读经计划'}
+              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? '📊 数据看板' : tab.type === 'highlights' ? '🖍️ 我的高亮' : tab.type === 'notes' ? '📝 我的笔记' : tab.type === 'cross-ref' ? '🔗 经文串珠' : '📅 读经计划'}
             </span>
             <X
               className={cn(
@@ -127,22 +128,34 @@ export default function Home() {
   
   const [isNavVisible, setIsNavVisible] = useState(true);
   const lastScrollY = useRef(0);
-  
-  const { 
-    fontSize, setFontSize, 
+
+  const {
+    fontSize, setFontSize,
     isSidebarOpen, toggleSidebar,
     isDesktopSidebarOpen, toggleDesktopSidebar,
-    isAiOpen, setAiOpen, 
+    isAiOpen, setAiOpen,
     showEnglish, toggleEnglish,
-    lineHeight, setLineHeight, 
+    lineHeight, setLineHeight,
     tabs, activeTabId, setActiveTab, addTab, closeTab, updateActiveTab,
     sidebarWidth,
-    isDarkMode, 
+    isDarkMode,
     chapterSpeechText,
     isMobileSettingsOpen,
     setMobileSettingsOpen,
     streakCount
   } = useBibleStore();
+
+  // 用于追踪 activeTabId 变化，以重置滚动检测状态
+  const prevActiveTabIdRef = useRef(activeTabId);
+
+  // 当 activeTabId 变化时，重置 lastScrollY 以确保菜单栏滚动检测正常工作
+  useEffect(() => {
+    if (activeTabId !== prevActiveTabIdRef.current) {
+      lastScrollY.current = 0;
+      setIsNavVisible(true);
+      prevActiveTabIdRef.current = activeTabId;
+    }
+  }, [activeTabId]);
 
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
 
@@ -417,7 +430,7 @@ export default function Home() {
             </div>
 
             <div className="md:hidden flex-1 text-center font-serif font-bold text-lg text-foreground truncate px-2 tracking-wide">
-              {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : "读经计划"}
+              {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : "读经计划"}
             </div>
 
             <div className="flex items-center gap-1 shrink-0">
@@ -482,6 +495,8 @@ export default function Home() {
               <HighlightsTab key={activeTab.id} />
           ) : activeTab.type === 'notes' ? (
               <NotesTab key={activeTab.id} />
+          ) : activeTab.type === 'cross-ref' ? (
+              <CrossRefTab key={activeTab.id} sourceVerse={activeTab.crossRefSource!} />
           ) : (
               <PlanTab key={activeTab.id} />
           )}

@@ -4,7 +4,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useAnimation, PanInfo, TapInfo } from "framer-motion";
 import { useBibleStore } from "@/store/useBibleStore";
-import { Sparkles, Maximize, Minimize, PanelLeft, Bot, X, Move, MousePointerClick, Loader2 } from "lucide-react";
+import { Sparkles, Maximize, Minimize, PanelLeft, Bot, X, Move, MousePointerClick } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function MagicBall() {
@@ -187,8 +187,8 @@ export function MagicBall() {
         {/* 1. AI 完成后的点击提醒 */}
         <div className={cn(
             "absolute right-[60px] whitespace-nowrap transition-all duration-500 ease-out-back",
-            isAiFinishedButUnseen 
-                ? "translate-x-0 opacity-100 scale-100" 
+            isAiFinishedButUnseen
+                ? "translate-x-0 opacity-100 scale-100"
                 : "translate-x-10 opacity-0 scale-50 pointer-events-none"
         )}>
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm animate-pulse-subtle">
@@ -197,20 +197,7 @@ export function MagicBall() {
             <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-purple-600"></div>
         </div>
 
-        {/* 2. AI 生成中的等待提醒 */}
-        <div className={cn(
-            "absolute right-[60px] whitespace-nowrap transition-all duration-500 ease-out-back",
-            (isAiGenerating && !isAiOpen)
-                ? "translate-x-0 opacity-100 scale-100" 
-                : "translate-x-10 opacity-0 scale-50 pointer-events-none"
-        )}>
-            <div className="bg-white/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-full shadow-xl flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20 dark:border-slate-700">
-                <Loader2 className="w-3 h-3 animate-spin text-blue-600" /> 
-                正在生成解读...
-            </div>
-        </div>
-
-        {/* 3. 手势提示图标 */}
+        {/* 2. 手势提示图标 */}
         {!isAiFinishedButUnseen && (
             <>
                 <div className={cn("absolute transition-all duration-300 ease-out", showHint === "ai-toggle" ? "-translate-x-28 opacity-100 scale-100" : "translate-x-0 opacity-0 scale-50")}>

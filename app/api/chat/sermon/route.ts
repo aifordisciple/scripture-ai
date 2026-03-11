@@ -1,9 +1,9 @@
 // app/api/chat/sermon/route.ts
 // AI Sermon Outline Generator - Create sermon outlines from Bible passages
 
-import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
-import { auth } from "@/lib/auth"; 
+import { auth } from "@/lib/auth";
+import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 
 export const maxDuration = 60;
 
@@ -46,26 +46,20 @@ const SERMON_PROMPT = `
 
 export async function POST(req: Request) {
   try {
-    const { verseRef, bookName, chapter, verses, title, style = 'expository' } = await req.json();
-    
-    const session = await auth(); 
+    const { apiConfig, body } = await extractApiConfig(req);
+    const { verseRef, bookName, chapter, verses, title, style = 'expository' } = body as {
+      verseRef?: string;
+      bookName?: string;
+      chapter?: number;
+      verses?: string;
+      title?: string;
+      style?: string;
+    };
 
-    // Get AI config
-    const provider = process.env.AI_PROVIDER || 'openai';
-    const modelName = process.env.OLLAMA_MODEL || 'qwen3.5:9b'; 
-    const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434/v1';
+    const session = await auth();
 
-    let model;
-    if (provider === 'ollama') {
-      const ollama = createOpenAI({ baseURL: ollamaBaseUrl, apiKey: '' });
-      model = ollama(modelName);
-    } else if (provider === 'deepseek') {
-       const deepseek = createOpenAI({ baseURL: 'https://api.deepseek.com/v1', apiKey: process.env.DEEPSEEK_API_KEY });
-       model = deepseek('deepseek-chat');
-    } else {
-      const openai = createOpenAI({ baseURL: process.env.OPENAI_BASE_URL, apiKey: process.env.OPENAI_API_KEY });
-      model = openai(process.env.OPENAI_MODEL || 'gpt-4o-mini');
-    }
+    // 使用集中式 AI 客户端
+    const model = await getAIModel(apiConfig, session?.user?.id);
 
     // Build prompt
     let prompt = SERMON_PROMPT
