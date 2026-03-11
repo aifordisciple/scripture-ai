@@ -260,4 +260,34 @@ export interface UserDataSlice {
 // --------------------------------------------------
 // 3. 聚合总状态类型
 // --------------------------------------------------
-export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice;
+export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice;
+
+// --------------------------------------------------
+// 4. 小组读经计划状态 (GroupSlice)
+// --------------------------------------------------
+export interface GroupPlanContext {
+  churchId: string;
+  planId: string;
+  planName: string;
+  day: number;
+  stepIndex: number;
+  steps: {
+    type: 'devotional' | 'reading' | 'completion';
+    taskId: string;
+    book?: string;
+    chapter?: number;
+    content?: string;
+  }[];
+}
+
+export interface GroupSlice {
+  // 小组阅读上下文
+  groupPlanContext: GroupPlanContext | null;
+
+  // 方法
+  setGroupPlanContext: (ctx: GroupPlanContext | null) => void;
+  advanceGroupPlanStep: () => void;
+  previousGroupPlanStep: () => void;
+  toggleGroupTaskCompleted: (churchId: string, planId: string, day: number, taskId: string, action?: 'complete' | 'uncomplete') => Promise<void>;
+  startGroupPlanFlow: (churchId: string, planId: string, planName: string, tasks: any[], day: number) => void;
+}

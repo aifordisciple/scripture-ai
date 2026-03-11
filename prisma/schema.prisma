@@ -370,7 +370,18 @@ model GroupPlan {
   // 计划配置
   startDate   DateTime
   endDate     DateTime?
-  dailyChapters String[] // 每日章节列表
+
+  // [升级] 结构化任务（保留 dailyChapters 兼容旧数据）
+  dailyChapters String[] // 每日章节列表（旧格式，保留兼容）
+
+  // [新增] 结构化任务格式
+  tasks       String?  @db.Text // JSON: [{ day, devotional?, readings: [{ book, chapter }] }]
+
+  // [新增] 共享灵修导读
+  sharedDevotionals String @default("{}") @db.Text
+
+  // [新增] 计划来源
+  source      String   @default("MANUAL") // MANUAL, AI_GENERATED, TEMPLATE
 
   // [新增] 挑战模式
   mode            String   @default("NORMAL") // NORMAL, CHALLENGE
@@ -391,11 +402,21 @@ model GroupPlanProgress {
   planId      String
   plan        GroupPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
   userId      String
-  
+
   date        DateTime
   chaptersRead Int     @default(0)
-  completed    Boolean @default(false)
-  
+
+  // [重构] 细粒度任务打卡
+  completedTasks String @default("{}")  // JSON: { "1": ["devotional", "reading-0"] }
+
+  // [新增] 状态管理
+  status         String  @default("active")  // active, completed, paused
+  lastActiveDate DateTime?
+
+  // [新增] 连续天数统计
+  streakDays    Int      @default(0)
+  completedDays Int      @default(0)
+
   @@unique([planId, userId, date])
 }
 

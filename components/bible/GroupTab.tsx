@@ -24,7 +24,9 @@ import { Leaderboard } from "@/components/group/Leaderboard";
 import { GroupChat } from "@/components/group/GroupChat";
 import { InviteCodeManager } from "@/components/group/InviteCodeManager";
 import { JoinByInviteDialog } from "@/components/group/JoinByInviteDialog";
-import { ChallengeProgress } from "@/components/group/ChallengeProgress";
+import { GroupPlanDetail } from "@/components/group/GroupPlanDetail";
+import { GroupPlanCreateDialog } from "@/components/group/GroupPlanCreateDialog";
+import { GroupPlanDailyFlow } from "@/components/group/GroupPlanDailyFlow";
 
 interface Church {
   id: string;
@@ -51,6 +53,9 @@ interface GroupPlan {
   mode: string;
   challengeConfig?: string | null;
   dailyChapters: string[];
+  tasks?: string | null;
+  sharedDevotionals?: string | null;
+  source?: string;
   startDate: Date | string;
   endDate?: Date | string | null;
   _count?: {
@@ -61,7 +66,7 @@ interface GroupPlan {
 
 export function GroupTab() {
   const router = useRouter();
-  const { streakCount } = useBibleStore();
+  const { groupPlanContext } = useBibleStore();
 
   const [myGroups, setMyGroups] = useState<Membership[]>([]);
   const [publicGroups, setPublicGroups] = useState<Church[]>([]);
@@ -73,14 +78,6 @@ export function GroupTab() {
   const [creating, setCreating] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
-
-  // 创建读经计划状态
-  const [createPlanOpen, setCreatePlanOpen] = useState(false);
-  const [creatingPlan, setCreatingPlan] = useState(false);
-  const [newPlanName, setNewPlanName] = useState("");
-  const [newPlanDesc, setNewPlanDesc] = useState("");
-  const [newPlanDays, setNewPlanDays] = useState(7);
-  const [newPlanMode, setNewPlanMode] = useState<"NORMAL" | "CHALLENGE">("NORMAL");
 
   useEffect(() => {
     fetchGroups();
@@ -203,52 +200,28 @@ export function GroupTab() {
     }
   };
 
-  // 创建读经计划
-  const createPlan = async () => {
-    if (!selectedGroup || !newPlanName.trim()) return;
-
-    setCreatingPlan(true);
-    try {
-      // 生成每日章节（简单示例：每天读1章）
-      const dailyChapters = [];
-      for (let i = 0; i < newPlanDays; i++) {
-        dailyChapters.push(`Gen-${i + 1}`); // 默认从创世记开始
-      }
-
-      const res = await fetch(`/api/church/${selectedGroup.churchId}/plan`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: newPlanName,
-          description: newPlanDesc,
-          startDate: new Date().toISOString(),
-          dailyChapters,
-          mode: newPlanMode,
-          challengeConfig: newPlanMode === "CHALLENGE" ? {
-            targetDays: newPlanDays,
-            rewardTitle: "完成挑战",
-            rewardBadge: "挑战者"
-          } : null
-        })
-      });
-      const data = await res.json();
-      if (data.error) {
-        alert(data.error);
-      } else if (data.plan) {
-        setGroupPlans(prev => [data.plan, ...prev]);
-        setCreatePlanOpen(false);
-        setNewPlanName("");
-        setNewPlanDesc("");
-        setNewPlanDays(7);
-        setNewPlanMode("NORMAL");
-      }
-    } catch (error) {
-      console.error("Failed to create plan:", error);
-      alert("创建计划失败，请稍后重试");
-    } finally {
-      setCreatingPlan(false);
-    }
+  const handlePlanCreated = (plan: GroupPlan) => {
+    setGroupPlans(prev => [plan, ...prev]);
   };
+
+  // Render group plan daily flow if active
+  if (groupPlanContext) {
+    return <GroupPlanDailyFlow />;
+  }
+
+  // Render plan detail if selected
+  if (selectedPlan && selectedGroup) {
+    return (
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
+        <GroupPlanDetail
+          churchId={selectedGroup.churchId}
+          plan={selectedPlan}
+          onBack={() => setSelectedPlan(null)}
+          isAdmin={selectedGroup.role === "OWNER" || selectedGroup.role === "ADMIN"}
+        />
+      </div>
+    );
+  }
 
   // Group detail view
   if (selectedGroup) {
@@ -313,75 +286,10 @@ export function GroupTab() {
 
           <TabsContent value="plans" className="space-y-4">
             {isAdmin && (
-              <Dialog open={createPlanOpen} onOpenChange={setCreatePlanOpen}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2">
-                    <Plus className="w-4 h-4" /> 创建读经计划
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>创建读经计划</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 pt-4">
-                    <div className="space-y-2">
-                      <Label>计划名称</Label>
-                      <Input
-                        value={newPlanName}
-                        onChange={(e) => setNewPlanName(e.target.value)}
-                        placeholder="例如：创世记读经计划"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>简介（可选）</Label>
-                      <Input
-                        value={newPlanDesc}
-                        onChange={(e) => setNewPlanDesc(e.target.value)}
-                        placeholder="计划介绍..."
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>计划天数</Label>
-                      <Input
-                        type="number"
-                        value={newPlanDays}
-                        onChange={(e) => setNewPlanDays(parseInt(e.target.value) || 7)}
-                        min={1}
-                        max={365}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>模式</Label>
-                      <div className="flex gap-2">
-                        <Button
-                          variant={newPlanMode === "NORMAL" ? "default" : "outline"}
-                          onClick={() => setNewPlanMode("NORMAL")}
-                          className="flex-1"
-                        >
-                          普通模式
-                        </Button>
-                        <Button
-                          variant={newPlanMode === "CHALLENGE" ? "default" : "outline"}
-                          onClick={() => setNewPlanMode("CHALLENGE")}
-                          className="flex-1"
-                        >
-                          挑战模式
-                        </Button>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={createPlan}
-                      disabled={creatingPlan || !newPlanName.trim()}
-                      className="w-full"
-                    >
-                      {creatingPlan ? (
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      ) : null}
-                      创建计划
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <GroupPlanCreateDialog
+                churchId={selectedGroup.churchId}
+                onSuccess={handlePlanCreated}
+              />
             )}
             {groupPlans.length === 0 ? (
               <div className="text-center text-muted-foreground py-12">
@@ -392,27 +300,55 @@ export function GroupTab() {
             ) : (
               <div className="grid gap-4">
                 {groupPlans.map((plan) => (
-                  <ChallengeProgress
+                  <div
                     key={plan.id}
-                    plan={plan}
-                    progress={{
-                      completedDays: 0,
-                      streakDays: streakCount,
-                      chaptersRead: 0
-                    }}
-                  />
+                    onClick={() => setSelectedPlan(plan)}
+                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                  >
+                    <div className={cn(
+                      "p-4 rounded-xl border",
+                      plan.mode === "CHALLENGE"
+                        ? "border-orange-200 dark:border-orange-800 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20"
+                        : "border-border bg-card"
+                    )}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {plan.mode === "CHALLENGE" ? (
+                            <Trophy className="w-5 h-5 text-orange-500" />
+                          ) : (
+                            <Calendar className="w-5 h-5 text-indigo-500" />
+                          )}
+                          <span className="font-bold">{plan.name}</span>
+                        </div>
+                        {plan.source === "AI_GENERATED" && (
+                          <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full">
+                            AI 生成
+                          </span>
+                        )}
+                      </div>
+                      {plan.description && (
+                        <p className="text-sm text-muted-foreground mb-3">{plan.description}</p>
+                      )}
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>{plan.tasks ? JSON.parse(plan.tasks).length : plan.dailyChapters.length} 天</span>
+                        <span>•</span>
+                        <span>{plan._count?.progress || 0} 人参与</span>
+                        {plan.mode === "CHALLENGE" && (
+                          <>
+                            <span>•</span>
+                            <span className="text-orange-600 dark:text-orange-400 font-medium">挑战模式</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="leaderboard">
-            {selectedPlan ? (
-              <Leaderboard
-                churchId={selectedGroup.churchId}
-                planId={selectedPlan.id}
-              />
-            ) : groupPlans.length > 0 ? (
+            {groupPlans.length > 0 ? (
               <div className="space-y-4">
                 <p className="text-muted-foreground">选择一个计划查看排行榜：</p>
                 {groupPlans.map((plan) => (

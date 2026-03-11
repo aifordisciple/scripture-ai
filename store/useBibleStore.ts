@@ -2,12 +2,13 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { StoreState } from './types';
-import { 
-  createUISlice, 
-  createReaderSlice, 
-  createAISlice, 
+import {
+  createUISlice,
+  createReaderSlice,
+  createAISlice,
   createUserDataSlice,
-  createSyncSlice 
+  createSyncSlice,
+  createGroupSlice
 } from './slices';
 
 // --------------------------------------------------
@@ -21,9 +22,10 @@ export const useBibleStore = create<StoreState>()(
       ...createAISlice(...a),
       ...createUserDataSlice(...a),
       ...createSyncSlice(...a),
+      ...createGroupSlice(...a),
     }),
     {
-      name: 'bible-storage', 
+      name: 'bible-storage',
       storage: createJSONStorage(() => localStorage),
       // 控制哪些状态不要保存到 localStorage 中
       partialize: (state) => ({
@@ -33,12 +35,13 @@ export const useBibleStore = create<StoreState>()(
         isNoteOpen: false,
         isAiGenerating: false,
         isMobileSettingsOpen: false,
-        isAiOpen: false, 
+        isAiOpen: false,
         aiRequestTrigger: null,
-        chapterSpeechText: "", 
+        chapterSpeechText: "",
         scrollToVerse: null,
         isSyncing: false,
         syncError: null,
+        groupPlanContext: null, // 不持久化小组计划上下文
       }),
     }
   )

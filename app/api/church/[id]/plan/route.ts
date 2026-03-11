@@ -56,7 +56,18 @@ export async function POST(req: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'Only admins can create group plans' }, { status: 403 });
     }
 
-    const { name, description, startDate, endDate, dailyChapters, mode, challengeConfig } = await req.json();
+    const {
+      name,
+      description,
+      startDate,
+      endDate,
+      dailyChapters,
+      tasks,
+      sharedDevotionals,
+      source,
+      mode,
+      challengeConfig
+    } = await req.json();
 
     if (!name || !startDate || !dailyChapters?.length) {
       return NextResponse.json({
@@ -72,10 +83,34 @@ export async function POST(req: Request, { params }: RouteParams) {
         startDate: new Date(startDate),
         endDate: endDate ? new Date(endDate) : null,
         dailyChapters,
+        tasks: tasks || null,
+        sharedDevotionals: sharedDevotionals || '{}',
+        source: source || 'MANUAL',
         mode: mode || 'NORMAL',
         challengeConfig: challengeConfig ? JSON.stringify(challengeConfig) : null
       }
     });
+
+    // Create initial leaderboard entries for all members
+    const members = await prisma.churchMember.findMany({
+      where: { churchId },
+      select: { userId: true }
+    });
+
+    for (const member of members) {
+      await prisma.leaderboardEntry.create({
+        data: {
+          planId: plan.id,
+          userId: member.userId,
+          score: 0,
+          chaptersRead: 0,
+          streakDays: 0,
+          completedDays: 0
+        }
+      }).catch(() => {
+        // Ignore duplicate errors
+      });
+    }
 
     return NextResponse.json({ plan }, { status: 201 });
   } catch (error) {

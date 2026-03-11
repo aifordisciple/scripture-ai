@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
 
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
@@ -513,4 +513,124 @@ export const createSyncSlice: StateCreator<StoreState, [], [], SyncSlice> = (set
   setIsSyncing: (syncing) => set({ isSyncing: syncing }),
   syncError: null,
   setSyncError: (error) => set({ syncError: error }),
+});
+
+// [新增] 小组读经计划状态
+export const createGroupSlice: StateCreator<StoreState, [], [], GroupSlice> = (set, get) => ({
+  groupPlanContext: null,
+
+  setGroupPlanContext: (ctx) => set({ groupPlanContext: ctx }),
+
+  advanceGroupPlanStep: () => {
+    const state = get();
+    const ctx = state.groupPlanContext;
+    if (!ctx) return;
+
+    const step = ctx.steps[ctx.stepIndex];
+
+    // 1. 自动打卡当前步骤（防重复触发）
+    if (step.taskId !== 'completion') {
+      state.toggleGroupTaskCompleted(
+        ctx.churchId,
+        ctx.planId,
+        ctx.day,
+        step.taskId,
+        'complete'
+      );
+    }
+
+    // 2. 推进进度
+    if (ctx.stepIndex < ctx.steps.length - 1) {
+      set({ groupPlanContext: { ...ctx, stepIndex: ctx.stepIndex + 1 } });
+    } else {
+      // 结束流，返回小组页面
+      set({ groupPlanContext: null });
+      const groupTab = state.tabs.find(t => t.type === 'group');
+      if (groupTab) state.setActiveTab(groupTab.id);
+    }
+  },
+
+  previousGroupPlanStep: () => {
+    const state = get();
+    const ctx = state.groupPlanContext;
+    if (!ctx) return;
+
+    if (ctx.stepIndex > 0) {
+      set({ groupPlanContext: { ...ctx, stepIndex: ctx.stepIndex - 1 } });
+    }
+  },
+
+  toggleGroupTaskCompleted: async (churchId, planId, day, taskId, action = 'complete') => {
+    try {
+      const res = await fetch(`/api/church/${churchId}/plan/${planId}/progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ day, taskId, action })
+      });
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.error('Toggle group task error:', error);
+      throw error;
+    }
+  },
+
+  startGroupPlanFlow: (churchId, planId, planName, tasks, day) => {
+    const state = get();
+    const task = tasks.find((t: any) => t.day === day);
+    if (!task) return;
+
+    // 构建步骤数组
+    const steps: GroupPlanContext['steps'] = [];
+
+    // 步骤1：灵修导读
+    if (task.devotional) {
+      steps.push({
+        type: 'devotional',
+        taskId: 'devotional',
+        content: task.devotional
+      });
+    }
+
+    // 步骤2-N：经文阅读
+    task.readings.forEach((reading: any, index: number) => {
+      steps.push({
+        type: 'reading',
+        taskId: `reading-${index}`,
+        book: reading.book,
+        chapter: reading.chapter
+      });
+    });
+
+    // 最后一步：完成庆祝
+    steps.push({
+      type: 'completion',
+      taskId: 'completion'
+    });
+
+    set({
+      groupPlanContext: {
+        churchId,
+        planId,
+        planName,
+        day,
+        stepIndex: 0,
+        steps
+      }
+    });
+
+    // 如果第一步是灵修导读，保持在当前页面
+    // 如果第一步是阅读，切换到阅读 Tab
+    if (steps[0].type === 'reading' && steps[0].book && steps[0].chapter) {
+      const readTab = state.tabs.find(t => t.type === 'read');
+      if (readTab) {
+        state.setActiveTab(readTab.id);
+        useBibleStore.setState((s) => ({
+          tabs: s.tabs.map(t => t.id === readTab.id ? { ...t, book: steps[0].book, chapter: steps[0].chapter!.toString() } : t)
+        }));
+      } else {
+        state.addTab({ type: 'read', book: steps[0].book, chapter: steps[0].chapter.toString() });
+      }
+    }
+  }
 });
