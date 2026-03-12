@@ -30,15 +30,15 @@ export function GroupCard({ church, isMember, memberRole, onClick }: GroupCardPr
     <Card
       className={cn(
         "cursor-pointer transition-all hover:shadow-md",
-        isMember && "border-indigo-200 dark:border-indigo-800"
+        isMember && "border-primary/50"
       )}
       onClick={onClick}
     >
       <CardContent className="p-5">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-              <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Users className="w-5 h-5 text-primary" />
             </div>
             <div>
               <h3 className="font-bold text-foreground">{church.name}</h3>
@@ -58,7 +58,7 @@ export function GroupCard({ church, isMember, memberRole, onClick }: GroupCardPr
                   </Badge>
                 )}
                 {memberRole === 'ADMIN' && (
-                  <Badge className="text-xs bg-indigo-500">管理员</Badge>
+                  <Badge className="text-xs bg-primary">管理员</Badge>
                 )}
               </div>
             </div>

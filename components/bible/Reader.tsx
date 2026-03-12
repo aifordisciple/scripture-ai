@@ -310,7 +310,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         }} 
                         className={cn(
                           "group inline-flex items-center gap-2.5 px-8 py-3.5 glass-panel rounded-full",
-                          "bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 text-foreground font-medium text-sm",
+                          "bg-card/60 hover:bg-card text-foreground font-medium text-sm",
                           // 核心动画类名：悬浮上浮投影放大，点击时回缩(scale-95)
                           "transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1.5 active:scale-95 active:translate-y-0 active:shadow-sm"
                         )}

@@ -44,12 +44,45 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* 阴影系统 */
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+  --shadow-inner: var(--shadow-inner);
+  --shadow-primary: var(--shadow-primary);
+  --shadow-destructive: var(--shadow-destructive);
+
+  /* 动画时长 */
+  --duration-fast: var(--duration-fast);
+  --duration-normal: var(--duration-normal);
+  --duration-slow: var(--duration-slow);
+
+  /* 缓动函数 */
+  --ease-default: var(--ease-default);
+  --ease-in: var(--ease-in);
+  --ease-out: var(--ease-out);
+  --ease-in-out: var(--ease-in-out);
+  --ease-spring: var(--ease-spring);
+
+  /* 层级系统 */
+  --z-dropdown: var(--z-dropdown);
+  --z-sticky: var(--z-sticky);
+  --z-fixed: var(--z-fixed);
+  --z-modal-backdrop: var(--z-modal-backdrop);
+  --z-modal: var(--z-modal);
+  --z-popover: var(--z-popover);
+  --z-tooltip: var(--z-tooltip);
+  --z-toast: var(--z-toast);
 }
 
 :root {
   --radius: 0.625rem;
   /* 亮色模式：柔和护眼羊皮纸色调 (#FBF9F6 质感) */
-  --background: oklch(0.98 0.006 86); 
+  --background: oklch(0.98 0.006 86);
   --foreground: oklch(0.21 0.034 264);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.21 0.034 264);
@@ -67,13 +100,13 @@
   --border: oklch(0.92 0.01 86);
   --input: oklch(0.92 0.01 86);
   --ring: oklch(0.55 0.15 260);
-  
+
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  
+
   --sidebar: oklch(0.98 0.006 86);
   --sidebar-foreground: oklch(0.21 0.034 264);
   --sidebar-primary: oklch(0.55 0.15 260);
@@ -82,43 +115,99 @@
   --sidebar-accent-foreground: oklch(0.21 0.034 264);
   --sidebar-border: oklch(0.92 0.01 86);
   --sidebar-ring: oklch(0.55 0.15 260);
+
+  /* === 间距系统 === */
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;   /* 4px */
+  --spacing-2: 0.5rem;    /* 8px */
+  --spacing-3: 0.75rem;   /* 12px */
+  --spacing-4: 1rem;      /* 16px */
+  --spacing-5: 1.25rem;   /* 20px */
+  --spacing-6: 1.5rem;    /* 24px */
+  --spacing-8: 2rem;      /* 32px */
+  --spacing-10: 2.5rem;   /* 40px */
+  --spacing-12: 3rem;     /* 48px */
+  --spacing-16: 4rem;     /* 64px */
+  --spacing-20: 5rem;     /* 80px */
+
+  /* === 阴影系统 === */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  /* 彩色阴影（用于强调元素） */
+  --shadow-primary: 0 0 15px oklch(0.55 0.15 260 / 0.4);
+  --shadow-destructive: 0 0 15px oklch(0.577 0.245 27.325 / 0.4);
+
+  /* === 动画系统 === */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* === 层级系统 (z-index) === */
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-fixed: 200;
+  --z-modal-backdrop: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-tooltip: 600;
+  --z-toast: 700;
 }
 
 .dark {
   /* 暗色模式：深邃的午夜蓝，降低对比度防刺眼 */
-  --background: oklch(0.16 0.03 265); 
-  --foreground: oklch(0.96 0.007 247);
+  --background: oklch(0.16 0.03 265);
+  --foreground: oklch(0.98 0.005 247);  /* 更亮的文字 */
   --card: oklch(0.20 0.03 265);
-  --card-foreground: oklch(0.96 0.007 247);
+  --card-foreground: oklch(0.98 0.005 247);
   --popover: oklch(0.20 0.03 265);
-  --popover-foreground: oklch(0.96 0.007 247);
+  --popover-foreground: oklch(0.98 0.005 247);
   --primary: oklch(0.70 0.14 260);
   --primary-foreground: oklch(0.16 0.03 265);
   --secondary: oklch(0.24 0.03 265);
-  --secondary-foreground: oklch(0.96 0.007 247);
+  --secondary-foreground: oklch(0.98 0.005 247);
   --muted: oklch(0.24 0.03 265);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.24 0.03 265);
-  --accent-foreground: oklch(0.96 0.007 247);
+  --muted-foreground: oklch(0.75 0.02 265);  /* 更清晰的次要文字 */
+  --accent: oklch(0.30 0.04 265);  /* 增强交互元素可见性 */
+  --accent-foreground: oklch(0.98 0.005 247);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(0.28 0.03 265);
   --input: oklch(0.28 0.03 265);
   --ring: oklch(0.70 0.14 260);
-  
+
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  
+
   --sidebar: oklch(0.16 0.03 265);
-  --sidebar-foreground: oklch(0.96 0.007 247);
+  --sidebar-foreground: oklch(0.98 0.005 247);
   --sidebar-primary: oklch(0.70 0.14 260);
   --sidebar-primary-foreground: oklch(0.16 0.03 265);
   --sidebar-accent: oklch(0.24 0.03 265);
-  --sidebar-accent-foreground: oklch(0.96 0.007 247);
+  --sidebar-accent-foreground: oklch(0.98 0.005 247);
   --sidebar-border: oklch(0.28 0.03 265);
   --sidebar-ring: oklch(0.70 0.14 260);
+
+  /* 深色模式阴影调整 */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
 }
 
 @layer base {
@@ -235,4 +324,140 @@
   background: rgba(100, 116, 139, 0.8);
   border: 1px solid transparent;
   background-clip: padding-box;
+}
+
+/* =========================================
+   统一动画系统 (Unified Animation System)
+   ========================================= */
+
+/* 淡入淡出动画 */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* 滑入动画 */
+@keyframes slide-in-from-top {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-in-from-bottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-in-from-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-in-from-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* 缩放动画 */
+@keyframes scale-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes scale-out {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.95); opacity: 0; }
+}
+
+/* 弹跳动画 */
+@keyframes bounce-in {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 闪烁动画（用于加载状态） */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* 常用动画工具类 */
+.animate-fade-in {
+  animation: fade-in var(--duration-normal) var(--ease-out);
+}
+
+.animate-fade-out {
+  animation: fade-out var(--duration-normal) var(--ease-in);
+}
+
+.animate-slide-up {
+  animation: slide-in-from-bottom var(--duration-normal) var(--ease-out);
+}
+
+.animate-slide-down {
+  animation: slide-in-from-top var(--duration-normal) var(--ease-out);
+}
+
+.animate-slide-left {
+  animation: slide-in-from-right var(--duration-normal) var(--ease-out);
+}
+
+.animate-slide-right {
+  animation: slide-in-from-left var(--duration-normal) var(--ease-out);
+}
+
+.animate-scale-in {
+  animation: scale-in var(--duration-fast) var(--ease-spring);
+}
+
+.animate-scale-out {
+  animation: scale-out var(--duration-fast) var(--ease-default);
+}
+
+.animate-bounce-in {
+  animation: bounce-in var(--duration-slow) var(--ease-spring);
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* 过渡工具类 */
+.transition-fast {
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.transition-normal {
+  transition: all var(--duration-normal) var(--ease-default);
+}
+
+.transition-slow {
+  transition: all var(--duration-slow) var(--ease-default);
+}
+
+.transition-colors-fast {
+  transition: color var(--duration-fast) var(--ease-default),
+              background-color var(--duration-fast) var(--ease-default),
+              border-color var(--duration-fast) var(--ease-default);
+}
+
+.transition-transform-fast {
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.transition-transform-normal {
+  transition: transform var(--duration-normal) var(--ease-spring);
 }

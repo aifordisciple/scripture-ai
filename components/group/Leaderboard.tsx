@@ -56,7 +56,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
       case 1:
         return <Crown className="w-5 h-5 text-yellow-500" />;
       case 2:
-        return <Medal className="w-5 h-5 text-slate-400" />;
+        return <Medal className="w-5 h-5 text-muted-foreground" />;
       case 3:
         return <Medal className="w-5 h-5 text-amber-600" />;
       default:
@@ -69,7 +69,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
       case 1:
         return "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-200 dark:border-yellow-800";
       case 2:
-        return "bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-gray-800/50 border-slate-200 dark:border-slate-700";
+        return "bg-gradient-to-r from-muted/50 to-muted border-border";
       case 3:
         return "bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800";
       default:
@@ -121,9 +121,9 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
         <CardContent className="pt-0 space-y-2">
           {/* My position (if not in top 3) */}
           {myEntry && myEntry.rank > 3 && (
-            <div className="mb-3 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800">
+            <div className="mb-3 p-3 rounded-lg bg-primary/10 border border-primary/30">
               <div className="flex items-center gap-3">
-                <span className="w-6 h-6 flex items-center justify-center text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                <span className="w-6 h-6 flex items-center justify-center text-sm font-bold text-primary">
                   {myEntry.rank}
                 </span>
                 <div className="flex-1">
@@ -144,7 +144,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-lg border transition-colors",
                   getRankBg(entry.rank),
-                  entry.userId === currentUserId && "ring-2 ring-indigo-500"
+                  entry.userId === currentUserId && "ring-2 ring-primary"
                 )}
               >
                 {getRankIcon(entry.rank)}
@@ -159,7 +159,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-indigo-600 dark:text-indigo-400">
+                  <p className="font-bold text-primary">
                     {entry.score}
                   </p>
                   <p className="text-xs text-muted-foreground">分</p>
