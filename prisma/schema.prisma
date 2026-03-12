@@ -74,6 +74,12 @@ model User {
   ownedChurches Church[] @relation("ChurchOwner")
   churchMemberships ChurchMember[]
 
+  // [新增] 小组计划进度
+  groupPlanProgress GroupPlanProgress[]
+
+  // [新增] 排行榜条目
+  leaderboardEntries LeaderboardEntry[]
+
   // [新增] 点赞和评论
   likes    Like[]
   comments Comment[]
@@ -427,6 +433,7 @@ model GroupPlanProgress {
   planId      String
   plan        GroupPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
   userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   date        DateTime
   chaptersRead Int     @default(0)
@@ -520,6 +527,7 @@ model LeaderboardEntry {
   planId        String
   plan          GroupPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
   userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   score         Int      @default(0)
   chaptersRead  Int      @default(0)
   streakDays    Int      @default(0)
