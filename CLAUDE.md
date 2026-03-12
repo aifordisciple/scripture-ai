@@ -115,18 +115,7 @@ The Zustand store has 5 slices:
 | `OPENAI_BASE_URL` | Custom API endpoint |
 | `DEEPSEEK_API_KEY` | DeepSeek API key (optional) |
 
-## Mobile App
-
-Expo-based React Native app in `app-mobile/` directory. Build APK with:
-```bash
-cd app-mobile
-npm run prebuild
-cd android
-./gradlew assembleDebug
-```
-
-APK location: `app-mobile/android/app/build/outputs/apk/debug/app-debug.apk`
-
+---
 
 # 核心开发与部署工作流规范
 

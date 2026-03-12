@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import {
   Users, Plus, ChevronLeft, Settings, Crown, Calendar,
-  BookOpen, Trophy, MessageCircle, Ticket, Loader2
+  BookOpen, Trophy, MessageCircle, Ticket, Loader2, UserCog
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,8 @@ import { InviteCodeManager } from "@/components/group/InviteCodeManager";
 import { JoinByInviteDialog } from "@/components/group/JoinByInviteDialog";
 import { GroupPlanDetail } from "@/components/group/GroupPlanDetail";
 import { GroupPlanCreateDialog } from "@/components/group/GroupPlanCreateDialog";
+import { MemberManager } from "@/components/group/MemberManager";
+import { AnnouncementManager } from "@/components/group/AnnouncementManager";
 
 interface Church {
   id: string;
@@ -265,7 +267,7 @@ export function GroupTab() {
         </div>
 
         <Tabs defaultValue="plans" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="plans" className="gap-2">
               <Calendar className="w-4 h-4" /> 读经计划
             </TabsTrigger>
@@ -275,6 +277,11 @@ export function GroupTab() {
             <TabsTrigger value="chat" className="gap-2">
               <MessageCircle className="w-4 h-4" /> 交流
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="manage" className="gap-2">
+                <UserCog className="w-4 h-4" /> 管理
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="plans" className="space-y-4">
@@ -366,16 +373,26 @@ export function GroupTab() {
           <TabsContent value="chat">
             <GroupChat churchId={selectedGroup.churchId} />
           </TabsContent>
-        </Tabs>
 
-        {isAdmin && (
-          <div className="mt-8 pt-8 border-t">
-            <InviteCodeManager
-              churchId={selectedGroup.churchId}
-              isAdmin={isAdmin}
-            />
-          </div>
-        )}
+          {isAdmin && (
+            <TabsContent value="manage" className="space-y-6">
+              <AnnouncementManager churchId={selectedGroup.churchId} isAdmin={isAdmin} />
+              <MemberManager
+                churchId={selectedGroup.churchId}
+                isOwner={selectedGroup.role === "OWNER"}
+                isAdmin={isAdmin}
+                onGroupDisbanded={() => {
+                  setSelectedGroup(null);
+                  fetchGroups();
+                }}
+              />
+              <InviteCodeManager
+                churchId={selectedGroup.churchId}
+                isAdmin={isAdmin}
+              />
+            </TabsContent>
+          )}
+        </Tabs>
       </div>
     );
   }

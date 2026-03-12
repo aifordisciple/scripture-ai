@@ -118,3 +118,123 @@ export async function POST(req: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Failed to create plan' }, { status: 500 });
   }
 }
+
+// PUT - Update group plan
+export async function PUT(req: Request, { params }: RouteParams) {
+  try {
+    const { id: churchId } = await params;
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check admin membership
+    const membership = await prisma.churchMember.findFirst({
+      where: {
+        churchId,
+        userId: session.user.id,
+        role: { in: ['OWNER', 'ADMIN'] }
+      }
+    });
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Only admins can update group plans' }, { status: 403 });
+    }
+
+    const {
+      planId,
+      name,
+      description,
+      startDate,
+      endDate,
+      dailyChapters,
+      tasks,
+      mode,
+      challengeConfig
+    } = await req.json();
+
+    if (!planId) {
+      return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 });
+    }
+
+    // Verify the plan belongs to this church
+    const existingPlan = await prisma.groupPlan.findFirst({
+      where: { id: planId, churchId }
+    });
+
+    if (!existingPlan) {
+      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+    }
+
+    // Build update data
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (startDate !== undefined) updateData.startDate = new Date(startDate);
+    if (endDate !== undefined) updateData.endDate = endDate ? new Date(endDate) : null;
+    if (dailyChapters !== undefined) updateData.dailyChapters = dailyChapters;
+    if (tasks !== undefined) updateData.tasks = tasks;
+    if (mode !== undefined) updateData.mode = mode;
+    if (challengeConfig !== undefined) updateData.challengeConfig = challengeConfig ? JSON.stringify(challengeConfig) : null;
+
+    const plan = await prisma.groupPlan.update({
+      where: { id: planId },
+      data: updateData
+    });
+
+    return NextResponse.json({ plan });
+  } catch (error) {
+    console.error('Update group plan error:', error);
+    return NextResponse.json({ error: 'Failed to update plan' }, { status: 500 });
+  }
+}
+
+// DELETE - Delete group plan
+export async function DELETE(req: Request, { params }: RouteParams) {
+  try {
+    const { id: churchId } = await params;
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check admin membership
+    const membership = await prisma.churchMember.findFirst({
+      where: {
+        churchId,
+        userId: session.user.id,
+        role: { in: ['OWNER', 'ADMIN'] }
+      }
+    });
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Only admins can delete group plans' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const planId = searchParams.get('planId');
+
+    if (!planId) {
+      return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 });
+    }
+
+    // Verify the plan belongs to this church
+    const existingPlan = await prisma.groupPlan.findFirst({
+      where: { id: planId, churchId }
+    });
+
+    if (!existingPlan) {
+      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+    }
+
+    // Delete the plan (cascade will handle related records)
+    await prisma.groupPlan.delete({
+      where: { id: planId }
+    });
+
+    return NextResponse.json({ success: true, message: 'Plan deleted successfully' });
+  } catch (error) {
+    console.error('Delete group plan error:', error);
+    return NextResponse.json({ error: 'Failed to delete plan' }, { status: 500 });
+  }
+}

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { GroupPlanEditDialog } from "@/components/group/GroupPlanEditDialog";
 
 interface GroupPlanDetailProps {
   churchId: string;
@@ -298,11 +299,25 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
             <p className="text-muted-foreground mt-2">{plan.description}</p>
           )}
         </div>
-        {plan.source === "AI_GENERATED" && (
-          <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded-full">
-            AI 生成
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {plan.source === "AI_GENERATED" && (
+            <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded-full">
+              AI 生成
+            </span>
+          )}
+          {isAdmin && (
+            <GroupPlanEditDialog
+              churchId={churchId}
+              plan={plan}
+              onUpdate={(updatedPlan) => {
+                // Update the plan in parent component
+                // This is a simplified approach - in real app, you might want to lift state up
+                window.location.reload();
+              }}
+              onDelete={onBack}
+            />
+          )}
+        </div>
       </div>
 
       {/* Main Progress Card */}

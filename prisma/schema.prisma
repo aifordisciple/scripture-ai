@@ -334,6 +334,9 @@ model Church {
   // [新增] 小组聊天
   chatMessages GroupChatMessage[]
 
+  // [新增] 小组公告
+  announcements GroupAnnouncement[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -515,6 +518,21 @@ model GroupChatMessage {
   type      String   @default("TEXT") // TEXT, SHARE_VERSE, SYSTEM
   metadata  String?  @db.Text // JSON: { bookId, chapter, verse, content }
   createdAt DateTime @default(now())
+
+  @@index([churchId, createdAt(sort: Desc)])
+}
+
+// [新增] 小组公告模型
+model GroupAnnouncement {
+  id        String   @id @default(cuid())
+  churchId  String
+  church    Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  title     String
+  content   String   @db.Text
+  pinned    Boolean  @default(false)
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([churchId, createdAt(sort: Desc)])
 }

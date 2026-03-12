@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
+import { BIBLE_BOOKS } from "@/lib/constants";
 
 interface GroupPlanCreateDialogProps {
   churchId: string;
@@ -108,6 +109,9 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
   const [manualDesc, setManualDesc] = useState("");
   const [manualDays, setManualDays] = useState(7);
   const [manualMode, setManualMode] = useState<"NORMAL" | "CHALLENGE">("NORMAL");
+  const [manualStartBook, setManualStartBook] = useState("Gen");
+  const [manualStartChapter, setManualStartChapter] = useState(1);
+  const [manualChaptersPerDay, setManualChaptersPerDay] = useState(1);
 
   const createWithAI = async () => {
     if (!aiPrompt.trim()) return;
@@ -192,10 +196,39 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
 
     setCreating(true);
     try {
-      // Build daily chapters (simple example: Genesis chapters)
-      const dailyChapters = [];
-      for (let i = 0; i < manualDays; i++) {
-        dailyChapters.push(`Gen-${i + 1}`);
+      // Get the selected book info
+      const selectedBook = BIBLE_BOOKS.find(b => b.id === manualStartBook);
+      if (!selectedBook) {
+        alert("请选择有效的书卷");
+        setCreating(false);
+        return;
+      }
+
+      // Build daily chapters starting from selected book and chapter
+      const dailyChapters: string[] = [];
+      let currentBook = selectedBook;
+      let currentBookId = manualStartBook;
+      let currentChapter = manualStartChapter;
+      const totalChaptersPerDay = manualChaptersPerDay;
+
+      for (let day = 0; day < manualDays; day++) {
+        const dayChapters: string[] = [];
+        for (let c = 0; c < totalChaptersPerDay; c++) {
+          dayChapters.push(`${currentBookId}-${currentChapter}`);
+          currentChapter++;
+
+          // Move to next book if current book is finished
+          const bookInfo = BIBLE_BOOKS.find(b => b.id === currentBookId);
+          if (bookInfo && currentChapter > bookInfo.chapters) {
+            const currentIndex = BIBLE_BOOKS.findIndex(b => b.id === currentBookId);
+            if (currentIndex < BIBLE_BOOKS.length - 1) {
+              const nextBook = BIBLE_BOOKS[currentIndex + 1];
+              currentBookId = nextBook.id;
+              currentChapter = 1;
+            }
+          }
+        }
+        dailyChapters.push(dayChapters.join(','));
       }
 
       const tasks = dailyChapters.map((chaptersStr, index) => {
@@ -250,6 +283,9 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
     setManualDesc("");
     setManualDays(7);
     setManualMode("NORMAL");
+    setManualStartBook("Gen");
+    setManualStartChapter(1);
+    setManualChaptersPerDay(1);
     setActiveTab("ai");
   };
 
@@ -393,6 +429,53 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                 placeholder="计划介绍..."
               />
             </div>
+
+            {/* Book and Chapter Selection */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-2">
+                <Label>起始书卷</Label>
+                <select
+                  value={manualStartBook}
+                  onChange={(e) => {
+                    setManualStartBook(e.target.value);
+                    setManualStartChapter(1);
+                  }}
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  {BIBLE_BOOKS.map((book) => (
+                    <option key={book.id} value={book.id}>
+                      {book.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>起始章节</Label>
+                <Input
+                  type="number"
+                  value={manualStartChapter}
+                  onChange={(e) => {
+                    const book = BIBLE_BOOKS.find(b => b.id === manualStartBook);
+                    const maxChapter = book?.chapters || 1;
+                    const value = parseInt(e.target.value) || 1;
+                    setManualStartChapter(Math.max(1, Math.min(value, maxChapter)));
+                  }}
+                  min={1}
+                  max={BIBLE_BOOKS.find(b => b.id === manualStartBook)?.chapters || 1}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>每日章节</Label>
+                <Input
+                  type="number"
+                  value={manualChaptersPerDay}
+                  onChange={(e) => setManualChaptersPerDay(Math.max(1, parseInt(e.target.value) || 1))}
+                  min={1}
+                  max={10}
+                />
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>计划天数</Label>
@@ -427,7 +510,8 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              注：手动创建将默认从创世记开始，后续可在计划详情中调整。
+              从 {BIBLE_BOOKS.find(b => b.id === manualStartBook)?.name} 第 {manualStartChapter} 章开始，
+              每日阅读 {manualChaptersPerDay} 章，共 {manualDays} 天。
             </p>
             <Button
               onClick={createManual}
