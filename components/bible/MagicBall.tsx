@@ -15,9 +15,13 @@ import { QuickAction } from "@/store/types";
 interface MagicBallProps {
   /** 打开书卷选择器的回调 */
   onOpenBookPicker?: () => void;
+  /** 书卷选择器是否打开（用于上滑时判断是打开还是关闭） */
+  isBookPickerOpen?: boolean;
+  /** 关闭书卷选择器的回调 */
+  onCloseBookPicker?: () => void;
 }
 
-export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
+export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicker }: MagicBallProps) {
   const controls = useAnimation();
   const [showHint, setShowHint] = useState<string | null>(null);
 
@@ -329,9 +333,14 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
       setIsQueuePanelOpen(false);
     }
     else if (isVertical && y < -threshold) {
-      // 上滑：打开经文选择器（移动端）或切换目录（桌面端）
-      if (onOpenBookPicker) {
-        onOpenBookPicker();
+      // 上滑：切换经文选择器（移动端）或切换目录（桌面端）
+      if (onOpenBookPicker || onCloseBookPicker) {
+        // 如果 BookPicker 已打开，则关闭；否则打开
+        if (isBookPickerOpen && onCloseBookPicker) {
+          onCloseBookPicker();
+        } else if (onOpenBookPicker) {
+          onOpenBookPicker();
+        }
       } else {
         toggleSidebar();
       }
