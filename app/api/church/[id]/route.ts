@@ -204,6 +204,26 @@ export async function POST(req: Request, { params }: RouteParams) {
       return NextResponse.json({ success: true, message: 'Group disbanded successfully' });
     }
 
+    // Update group settings (owner only)
+    if (action === 'updateSettings') {
+      if (currentUserMembership.role !== 'OWNER') {
+        return NextResponse.json({ error: 'Only owner can update settings' }, { status: 403 });
+      }
+
+      const { themeColor, logoUrl, fontFamily } = body;
+
+      await prisma.church.update({
+        where: { id },
+        data: {
+          themeColor: themeColor || '#6366f1',
+          logoUrl: logoUrl || null,
+          fontFamily: fontFamily || 'serif'
+        }
+      });
+
+      return NextResponse.json({ success: true, message: 'Settings updated successfully' });
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Church action error:', error);

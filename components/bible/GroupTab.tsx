@@ -30,6 +30,9 @@ import { MemberManager } from "@/components/group/MemberManager";
 import { AnnouncementManager } from "@/components/group/AnnouncementManager";
 import { GroupStats } from "@/components/group/GroupStats";
 import { GroupBadgeGallery } from "@/components/group/GroupBadgeGallery";
+import { GroupSettings } from "@/components/group/GroupSettings";
+import { MemberProfile } from "@/components/group/MemberProfile";
+import { SharedNotes } from "@/components/group/SharedNotes";
 
 interface Church {
   id: string;
@@ -389,7 +392,17 @@ export function GroupTab() {
 
           {isAdmin && (
             <TabsContent value="manage" className="space-y-6">
+              <GroupSettings
+                churchId={selectedGroup.churchId}
+                isOwner={selectedGroup.role === "OWNER"}
+                currentSettings={{
+                  themeColor: selectedGroup.church.themeColor,
+                  logoUrl: selectedGroup.church.logoUrl,
+                  fontFamily: selectedGroup.church.fontFamily
+                }}
+              />
               <AnnouncementManager churchId={selectedGroup.churchId} isAdmin={isAdmin} />
+              <SharedNotes churchId={selectedGroup.churchId} />
               <MemberManager
                 churchId={selectedGroup.churchId}
                 isOwner={selectedGroup.role === "OWNER"}

@@ -131,10 +131,15 @@ model Note {
   verse     Int
   content   String   @db.Text
 
+  // [新增] 分享到小组
+  isPublic  Boolean  @default(false) // 是否公开
+  sharedTo  String?  // 分享到的小组ID (churchId)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId, bookId, chapter])
+  @@index([sharedTo, isPublic])
 }
 
 model ScriptureCard {
@@ -328,6 +333,11 @@ model Church {
   isPublic    Boolean  @default(false) // 是否公开发现
   allowJoin   Boolean  @default(true)  // 是否允许加入
 
+  // [新增] 个性化设置
+  themeColor  String?  @default("#6366f1") // 主题色
+  logoUrl     String?  // 小组Logo URL
+  fontFamily  String?  @default("serif") // 字体样式
+
   // 成员
   members     ChurchMember[]
 
@@ -395,6 +405,12 @@ model GroupPlan {
   // [新增] 挑战模式
   mode            String   @default("NORMAL") // NORMAL, CHALLENGE
   challengeConfig String?  @db.Text // JSON: { targetDays, rewardTitle, rewardBadge }
+
+  // [新增] 计划高级设置
+  status      String   @default("active") // active, paused, completed
+  skipWeekends Boolean @default(false) // 跳过周末
+  pausedAt    DateTime? // 暂停时间
+  copiedFrom  String?   // 复制来源计划ID
 
   // 成员进度
   progress    GroupPlanProgress[]

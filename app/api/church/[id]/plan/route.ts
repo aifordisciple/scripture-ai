@@ -150,7 +150,10 @@ export async function PUT(req: Request, { params }: RouteParams) {
       dailyChapters,
       tasks,
       mode,
-      challengeConfig
+      challengeConfig,
+      status,
+      skipWeekends,
+      action
     } = await req.json();
 
     if (!planId) {
@@ -166,6 +169,71 @@ export async function PUT(req: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
     }
 
+    // Handle pause/resume actions
+    if (action === 'pause') {
+      const plan = await prisma.groupPlan.update({
+        where: { id: planId },
+        data: {
+          status: 'paused',
+          pausedAt: new Date()
+        }
+      });
+      return NextResponse.json({ plan, message: '计划已暂停' });
+    }
+
+    if (action === 'resume') {
+      const plan = await prisma.groupPlan.update({
+        where: { id: planId },
+        data: {
+          status: 'active',
+          pausedAt: null
+        }
+      });
+      return NextResponse.json({ plan, message: '计划已恢复' });
+    }
+
+    if (action === 'copy') {
+      // Create a copy of the plan
+      const newPlan = await prisma.groupPlan.create({
+        data: {
+          churchId,
+          name: `${existingPlan.name} (副本)`,
+          description: existingPlan.description,
+          startDate: new Date(),
+          dailyChapters: existingPlan.dailyChapters,
+          tasks: existingPlan.tasks,
+          sharedDevotionals: '{}',
+          source: existingPlan.source,
+          mode: existingPlan.mode,
+          challengeConfig: existingPlan.challengeConfig,
+          skipWeekends: existingPlan.skipWeekends,
+          copiedFrom: planId,
+          status: 'active'
+        }
+      });
+
+      // Create leaderboard entries for all members
+      const members = await prisma.churchMember.findMany({
+        where: { churchId },
+        select: { userId: true }
+      });
+
+      for (const member of members) {
+        await prisma.leaderboardEntry.create({
+          data: {
+            planId: newPlan.id,
+            userId: member.userId,
+            score: 0,
+            chaptersRead: 0,
+            streakDays: 0,
+            completedDays: 0
+          }
+        }).catch(() => {});
+      }
+
+      return NextResponse.json({ plan: newPlan, message: '计划已复制' }, { status: 201 });
+    }
+
     // Build update data
     const updateData: any = {};
     if (name !== undefined) updateData.name = name;
@@ -176,6 +244,8 @@ export async function PUT(req: Request, { params }: RouteParams) {
     if (tasks !== undefined) updateData.tasks = tasks;
     if (mode !== undefined) updateData.mode = mode;
     if (challengeConfig !== undefined) updateData.challengeConfig = challengeConfig ? JSON.stringify(challengeConfig) : null;
+    if (status !== undefined) updateData.status = status;
+    if (skipWeekends !== undefined) updateData.skipWeekends = skipWeekends;
 
     const plan = await prisma.groupPlan.update({
       where: { id: planId },
