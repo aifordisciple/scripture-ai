@@ -41,7 +41,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showAiSubmenu, setShowAiSubmenu] = useState(false);
-  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection, enqueueAI, setAiOpen } = useBibleStore();
+  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection } = useBibleStore();
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -108,14 +108,12 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
     }
   };
 
-  // 处理 AI 模式选择
+  // 处理 AI 模式选择 - 直接调用 onExplain 并关闭菜单
   const handleAiOption = (option: typeof AI_OPTIONS[0]) => {
-    // 使用默认的解读逻辑，但使用特定的 prompt
-    onExplain();
-    // 可以通过 store 传递 prompt
-    // enqueueAI(option.prompt, content, context, ref);
     setShowAiSubmenu(false);
     onClose();
+    // 调用默认的解读逻辑
+    onExplain();
   };
 
   if (!render) return null;
@@ -152,20 +150,38 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         </div>
       </div>
 
-      {/* 2. [修改] 可展开的 AI 解读按钮 */}
+      {/* 2. [修改] AI 解读按钮 - 点击主按钮直接解读，下拉箭头展开更多选项 */}
       <div className="relative">
-        <button
-          onClick={() => setShowAiSubmenu(!showAiSubmenu)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
-        >
-          <Sparkles className="w-4 h-4 fill-current animate-pulse" />
-          <span className="font-bold text-sm">AI 解读</span>
-          {showAiSubmenu ? (
-            <ChevronUp className="w-4 h-4 ml-auto mr-1" />
-          ) : (
-            <ChevronDown className="w-4 h-4 ml-auto mr-1" />
-          )}
-        </button>
+        <div className="flex gap-1">
+          {/* 主按钮 - 点击直接解读 */}
+          <button
+            onClick={() => {
+              onClose();
+              onExplain();
+            }}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
+          >
+            <Sparkles className="w-4 h-4 fill-current animate-pulse" />
+            <span className="font-bold text-sm">AI 深度解读</span>
+          </button>
+          {/* 下拉箭头按钮 */}
+          <button
+            onClick={() => setShowAiSubmenu(!showAiSubmenu)}
+            className={cn(
+              "px-2 py-2.5 rounded-xl shadow-md transition-all active:scale-95",
+              "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700",
+              "text-white",
+              "border-l border-white/20"
+            )}
+            title="更多 AI 模式"
+          >
+            {showAiSubmenu ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </button>
+        </div>
 
         {/* AI 子菜单 */}
         <AnimatePresence>
@@ -199,6 +215,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
                 <button
                   onClick={() => {
                     setShowAiSubmenu(false);
+                    onClose();
                     onExplain();
                   }}
                   className={cn(
