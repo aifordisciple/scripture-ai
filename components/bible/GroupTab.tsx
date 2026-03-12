@@ -480,7 +480,7 @@ export function GroupTab() {
             </div>
           </DialogContent>
         </Dialog>
-        <JoinByInviteDialog />
+        <JoinByInviteDialog onSuccess={fetchGroups} />
       </div>
 
       {loading ? (

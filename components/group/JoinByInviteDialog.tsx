@@ -13,14 +13,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 
-export function JoinByInviteDialog() {
+interface JoinByInviteDialogProps {
+  onSuccess?: () => void;
+}
+
+export function JoinByInviteDialog({ onSuccess }: JoinByInviteDialogProps) {
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   const handleJoin = async () => {
     if (!code.trim() || code.length !== 6) {
@@ -44,8 +46,8 @@ export function JoinByInviteDialog() {
       } else if (data.success) {
         setOpen(false);
         setCode("");
-        // Refresh to show joined group
-        router.refresh();
+        // Call success callback to refresh group list
+        onSuccess?.();
       }
     } catch (error) {
       setError("网络错误，请稍后重试");
