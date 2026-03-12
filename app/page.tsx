@@ -11,7 +11,7 @@ import { SearchResults } from "@/components/bible/SearchResults";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame } from "lucide-react";
+import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer"; 
@@ -473,6 +473,24 @@ export default function Home() {
                   <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{streakCount}</span>
                 </div>
               )}
+
+              {/* 小组读经入口 */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  const groupTab = tabs.find(t => t.type === 'group');
+                  if (groupTab) {
+                    setActiveTab(groupTab.id);
+                  } else {
+                    addTab({ type: 'group' });
+                  }
+                }}
+                className="rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 transition-colors"
+                title="小组读经"
+              >
+                <Users className="h-5 w-5" />
+              </Button>
 
                <div className="pl-1">
                  <UserMenu />
