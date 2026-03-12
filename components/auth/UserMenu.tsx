@@ -4,19 +4,20 @@
 import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit } from "lucide-react";
+import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export function UserMenu() {
   const { data: session, status } = useSession();
-  const { 
-    setAuthOpen, 
-    isDarkMode, 
-    toggleDarkMode, 
+  const {
+    setAuthOpen,
+    isDarkMode,
+    toggleDarkMode,
     setMobileSettingsOpen,
-    setDashboardOpen // [新增] 引入看板开关方法
+    setDashboardOpen, // [新增] 引入看板开关方法
+    streakCount // 连续阅读天数
   } = useBibleStore();
   
   const [isOpen, setIsOpen] = useState(false);
@@ -77,9 +78,9 @@ export function UserMenu() {
 
           {/* 个人数据看板入口 */}
           <div className="px-2 mb-2">
-            <button 
-              onClick={() => { 
-                setIsOpen(false); 
+            <button
+              onClick={() => {
+                setIsOpen(false);
                 const { tabs, setActiveTab, addTab } = useBibleStore.getState();
                 const existTab = tabs.find(t => t.type === 'dashboard');
                 if (existTab) setActiveTab(existTab.id);
@@ -88,7 +89,15 @@ export function UserMenu() {
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-colors"
             >
               <LayoutDashboard className="w-4 h-4" />
-              个人数据看板 <span className="text-[10px] bg-blue-200 dark:bg-blue-800 px-1.5 py-0.5 rounded ml-auto text-blue-600 dark:text-blue-300">D</span>
+              <span className="flex-1 text-left">个人数据看板</span>
+              {/* 火焰徽章 - 显示连续阅读天数 */}
+              {streakCount > 0 && (
+                <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-100 dark:bg-orange-900/40 rounded-full">
+                  <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
+                  <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{streakCount}</span>
+                </div>
+              )}
+              <span className="text-[10px] bg-blue-200 dark:bg-blue-800 px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-300">D</span>
             </button>
           </div>
 

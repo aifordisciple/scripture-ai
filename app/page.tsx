@@ -461,7 +461,7 @@ export default function Home() {
                   }
                 }}
                 className={cn(
-                  "inline-flex items-center gap-1 font-serif font-bold text-base text-foreground tracking-wide max-w-full",
+                  "inline-flex items-center font-serif font-bold text-base text-foreground tracking-wide max-w-full",
                   activeTab.type === 'read' && "hover:text-primary transition-colors"
                 )}
               >
@@ -470,9 +470,6 @@ export default function Home() {
                     <>{activeTab.book} {activeTab.chapter}</>
                   ) : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : activeTab.type === 'group' ? "小组读经" : "读经计划"}
                 </span>
-                {activeTab.type === 'read' && (
-                  <BookOpen className="w-3.5 h-3.5 opacity-40 shrink-0" />
-                )}
               </button>
             </div>
 
@@ -536,14 +533,23 @@ export default function Home() {
 
             {/* 移动端右侧：精简工具栏 */}
             <div className="flex sm:hidden items-center gap-0.5 shrink-0">
-
-              {/* 火苗徽章 - 移动端紧凑版 */}
-              {streakCount > 0 && (
-                <div className="flex items-center px-1.5 py-0.5 bg-orange-50 dark:bg-orange-950/30 rounded-full">
-                  <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
-                  <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 ml-0.5">{streakCount}</span>
-                </div>
-              )}
+              {/* 小组读经入口 */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  const groupTab = tabs.find(t => t.type === 'group');
+                  if (groupTab) {
+                    setActiveTab(groupTab.id);
+                  } else {
+                    addTab({ type: 'group' });
+                  }
+                }}
+                className="rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 h-9 w-9"
+                title="小组读经"
+              >
+                <Users className="h-5 w-5" />
+              </Button>
 
               <UserMenu />
 
