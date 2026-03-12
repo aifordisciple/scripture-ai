@@ -11,14 +11,16 @@ import { SearchResults } from "@/components/bible/SearchResults";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users } from "lucide-react";
+import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { HeaderPlayer } from "@/components/bible/HeaderPlayer"; 
-import { BIBLE_BOOKS } from "@/lib/constants"; 
-import { useAudioPlayer } from "@/hooks/use-audio-player"; 
+import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
+import { BIBLE_BOOKS } from "@/lib/constants";
+import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { SyncSettings } from "@/components/settings/SyncSettings";
+import { BookPicker } from "@/components/bible/BookPicker";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 
 // 动态按需加载
 const AISidebar = dynamic(() => import("@/components/bible/AISidebar").then(mod => mod.AISidebar), { ssr: false });
@@ -127,6 +129,7 @@ export default function Home() {
   const searchParams = useSearchParams();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isBookPickerOpen, setIsBookPickerOpen] = useState(false);
   
   const [isNavVisible, setIsNavVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -292,6 +295,12 @@ export default function Home() {
   };
 
   const handleAddTab = () => { addTab({ type: 'read', book: 'Gen', chapter: '1' }); };
+
+  // 处理 BookPicker 选择
+  const handleBookPickerSelect = useCallback((bookId: string, chapter: number) => {
+    router.push(`/?book=${bookId}&chapter=${chapter}`);
+  }, [router]);
+
   const toggleLineHeight = () => {
     if (lineHeight <= 1.6) setLineHeight(1.8);
     else if (lineHeight <= 1.8) setLineHeight(2.2);
@@ -308,7 +317,17 @@ export default function Home() {
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <NoteEditor />
       <ShareCard />
-      <MagicBall /> 
+      <MagicBall />
+      <InstallPrompt />
+
+      {/* Mobile BookPicker - 移动端经文选择器 */}
+      <BookPicker
+        open={isBookPickerOpen}
+        onOpenChange={setIsBookPickerOpen}
+        currentBook={activeTab.type === 'read' ? activeTab.book : undefined}
+        currentChapter={activeTab.type === 'read' ? activeTab.chapter : undefined}
+        onSelect={handleBookPickerSelect}
+      /> 
 
       {/* Desktop Sidebar */}
       {isDesktopSidebarOpen && (
@@ -431,8 +450,25 @@ export default function Home() {
                />
             </div>
 
-            <div className="md:hidden flex-1 text-center font-serif font-bold text-lg text-foreground truncate px-2 tracking-wide">
-              {activeTab.type === 'read' ? `${activeTab.book} ${activeTab.chapter}` : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : activeTab.type === 'group' ? "小组读经" : "读经计划"}
+            <div className="md:hidden flex-1 text-center">
+              <button
+                onClick={() => {
+                  if (activeTab.type === 'read') {
+                    setIsBookPickerOpen(true);
+                  }
+                }}
+                className={cn(
+                  "inline-flex items-center gap-1.5 font-serif font-bold text-lg text-foreground tracking-wide",
+                  activeTab.type === 'read' && "hover:text-primary transition-colors"
+                )}
+              >
+                {activeTab.type === 'read' ? (
+                  <>
+                    {activeTab.book} {activeTab.chapter}
+                    <BookOpen className="w-4 h-4 opacity-50" />
+                  </>
+                ) : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : activeTab.type === 'group' ? "小组读经" : "读经计划"}
+              </button>
             </div>
 
             <div className="flex items-center gap-1 shrink-0">

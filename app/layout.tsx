@@ -7,24 +7,50 @@ import { BadgePopup } from "@/components/bible/BadgePopup";
 
 export const metadata: Metadata = {
   title: "Scripture AI - 你的灵修伴侣",
-  description: "AI 驱动的圣经阅读与灵修助手",
+  description: "AI 驱动的圣经阅读与灵修助手，支持中英对照、语音朗读、高亮笔记、读经计划等功能",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Scripture AI"
+    title: "Scripture AI",
+    startupImage: [
+      "/icon-512x512.png",
+    ],
   },
   icons: {
-    apple: "/icon-192x192.png",
-  }
+    icon: [
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Scripture AI",
+    title: "Scripture AI - 你的灵修伴侣",
+    description: "AI 驱动的圣经阅读与灵修助手",
+  },
+  twitter: {
+    card: "summary",
+    title: "Scripture AI - 你的灵修伴侣",
+    description: "AI 驱动的圣经阅读与灵修助手",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false, 
-  themeColor: "#0f172a"
+  userScalable: false,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,26 +1,66 @@
 {
-  "name": "Scripture AI",
+  "name": "Scripture AI - 圣经阅读与灵修助手",
   "short_name": "Scripture AI",
-  "description": "AI 驱动的圣经阅读与灵修助手",
+  "description": "AI驱动的圣经阅读与灵修助手，支持中英对照、语音朗读、高亮笔记、读经计划等功能",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#0f172a",
+  "categories": ["lifestyle", "education", "books"],
+  "lang": "zh-CN",
+  "dir": "ltr",
   "icons": [
-    {
-      "src": "/globe.svg", 
-      "sizes": "192x192",
-      "type": "image/svg+xml"
-    },
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "今日读经",
+      "short_name": "读经",
+      "description": "查看今日读经计划",
+      "url": "/?action=daily-reading",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "搜索经文",
+      "short_name": "搜索",
+      "description": "搜索圣经经文",
+      "url": "/?action=search",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "我的高亮",
+      "short_name": "高亮",
+      "description": "查看我的高亮经文",
+      "url": "/?action=highlights",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

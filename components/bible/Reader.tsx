@@ -10,6 +10,7 @@ import { FloatingMenu } from "./FloatingMenu";
 import { Button } from "@/components/ui/button";
 import { CHAPTER_SUMMARY_PROMPT } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
+import { ReaderSkeleton } from "@/components/skeletons/ReaderSkeleton";
 
 import { useBibleData, Verse } from "@/hooks/use-bible-data";
 import { BIBLE_PLANS } from "@/lib/plans";
@@ -239,9 +240,11 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             className="w-full"
           >
             {loading ? (
-                <div className="flex h-[60vh] items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/50" />
-                </div>
+                <ReaderSkeleton
+                  verseCount={20}
+                  showEnglish={showEnglish}
+                  fontSize={fontSize}
+                />
             ) : (
                 <>  
                     <div className="flex items-center justify-center mb-10 md:mb-16 relative mt-4">
