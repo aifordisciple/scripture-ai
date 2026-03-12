@@ -19,6 +19,7 @@ interface FloatingMenuProps {
   currentChapter: number;
   onCopy: () => void;
   onCrossRef?: () => void;
+  showAbove?: boolean; // 菜单显示在选中元素上方还是下方
 }
 
 const COLORS = [
@@ -37,7 +38,7 @@ const AI_OPTIONS = [
   { id: 'prayer', label: '祷告回应', prompt: THEOLOGICAL_PROMPTS[4].prompt },
 ];
 
-export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onCrossRef }: FloatingMenuProps) {
+export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onCrossRef, showAbove = true }: FloatingMenuProps) {
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showAiSubmenu, setShowAiSubmenu] = useState(false);
@@ -146,6 +147,16 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
 
   if (!render) return null;
 
+  // 根据位置决定 transform
+  const transformStyle = showAbove
+    ? "translate(-50%, -100%) translateY(-12px)"
+    : "translate(-50%, 12px)";
+
+  // 箭头位置
+  const arrowClass = showAbove
+    ? "absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white dark:border-t-slate-900 drop-shadow-sm"
+    : "absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-white dark:border-b-slate-900 drop-shadow-sm";
+
   return (
     <div
       ref={menuRef}
@@ -156,7 +167,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
       style={{
         top: position.top,
         left: position.left,
-        transform: "translate(-50%, -100%) translateY(-12px)"
+        transform: transformStyle
       }}
       onClick={handleMenuClick}
       onMouseDown={handleMenuClick}
@@ -181,7 +192,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         </div>
       </div>
 
-      {/* 2. [修改] AI 解读按钮 - 点击主按钮直接解读，下拉箭头展开更多选项 */}
+      {/* 2. AI 解读按钮 - 点击主按钮直接解读，下拉箭头展开更多选项 */}
       <div className="relative">
         <div className="flex gap-1">
           {/* 主按钮 - 点击直接解读 */}
@@ -270,21 +281,8 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         </AnimatePresence>
       </div>
 
-      {/* 2.5 [新增] 经文串珠按钮 */}
-      {onCrossRef && (
-        <button
-          onClick={(e) => { handleMenuClick(e); onCrossRef(); }}
-          onMouseDown={handleMenuClick}
-          onPointerDown={handleMenuClick}
-          className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
-        >
-          <GitBranch className="w-4 h-4" />
-          <span className="font-bold text-sm">经文串珠</span>
-        </button>
-      )}
-
-      {/* 3. 次要操作区 (笔记、分享、复制) */}
-      <div className="grid grid-cols-3 gap-1 pt-1 border-t dark:border-slate-800">
+      {/* 3. 次要操作区 (笔记、分享、串珠、复制) - 4列 */}
+      <div className="grid grid-cols-4 gap-1 pt-1 border-t dark:border-slate-800">
         <button
           onClick={(e) => { handleMenuClick(e); handleNote(); }}
           onMouseDown={handleMenuClick}
@@ -305,6 +303,18 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           <span className="text-[10px] text-slate-500">分享</span>
         </button>
 
+        {onCrossRef && (
+          <button
+            onClick={(e) => { handleMenuClick(e); onCrossRef(); }}
+            onMouseDown={handleMenuClick}
+            onPointerDown={handleMenuClick}
+            className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <GitBranch className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
+            <span className="text-[10px] text-slate-500">串珠</span>
+          </button>
+        )}
+
         <button
           onClick={(e) => { handleMenuClick(e); handleCopyClick(); }}
           onMouseDown={handleMenuClick}
@@ -319,7 +329,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
       </div>
 
       {/* 小箭头 */}
-      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white dark:border-t-slate-900 drop-shadow-sm" />
+      <div className={arrowClass} />
     </div>
   );
 }

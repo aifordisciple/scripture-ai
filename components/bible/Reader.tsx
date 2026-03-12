@@ -59,7 +59,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
   const { verses, loading } = useBibleData(book, chapter);
   const { direction, handleNextChapter, handlePrevChapter, handleTouchStart, handleTouchEnd } = useSwipeNavigation(book, chapter);
-  const { menuPosition, isMenuVisible, setIsMenuVisible, handleVerseClick, handleAIExplain, handleCopy } = useVerseMenu(verses);
+  const { menuPosition, isMenuVisible, setIsMenuVisible, handleVerseClick, handleAIExplain, handleCopy, showAbove } = useVerseMenu(verses);
 
   // [新增] 当书卷或章节在内部状态发生变化时，强制真实的滚动容器瞬间回到顶部
   useEffect(() => {
@@ -412,6 +412,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         currentChapter={parseInt(chapter)}
         onCopy={handleCopy}
         onCrossRef={handleCrossRef}
+        showAbove={showAbove}
       />
     </div>
   );

@@ -317,7 +317,7 @@ export default function Home() {
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <NoteEditor />
       <ShareCard />
-      <MagicBall onOpenBookPicker={() => setIsBookPickerOpen(true)} />
+      <MagicBall onOpenBookPicker={() => setIsBookPickerOpen(true)} hidden={isBookPickerOpen} />
       <InstallPrompt />
 
       {/* Mobile BookPicker - 移动端经文选择器 */}

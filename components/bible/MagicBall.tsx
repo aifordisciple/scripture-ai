@@ -15,9 +15,11 @@ import { QuickAction } from "@/store/types";
 interface MagicBallProps {
   /** 打开书卷选择器的回调 */
   onOpenBookPicker?: () => void;
+  /** 是否隐藏（当全屏对话框打开时） */
+  hidden?: boolean;
 }
 
-export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
+export function MagicBall({ onOpenBookPicker, hidden }: MagicBallProps) {
   const controls = useAnimation();
   const [showHint, setShowHint] = useState<string | null>(null);
 
@@ -271,11 +273,11 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
       setIsAiFinishedButUnseen(false);
       controls.start({ scale: [1, 0.9, 1], transition: { duration: 0.2 } });
     }
-    // 有队列内容时：切换队列面板
-    else if (hasQueueContent) {
-      setIsQueuePanelOpen(!isQueuePanelOpen);
-      controls.start({ scale: [1, 0.9, 1], transition: { duration: 0.2 } });
-    }
+    // 有队列内容时：不再弹出队列面板，直接打开 AI 侧边栏
+    // else if (hasQueueContent) {
+    //   setIsQueuePanelOpen(!isQueuePanelOpen);
+    //   controls.start({ scale: [1, 0.9, 1], transition: { duration: 0.2 } });
+    // }
     // 无队列时普通点击：不做操作（防止误触）
   };
 
@@ -352,6 +354,9 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
 
   // 关闭队列面板
   const closeQueuePanel = () => setIsQueuePanelOpen(false);
+
+  // 当 BookPicker 等全屏对话框打开时隐藏
+  if (hidden) return null;
 
   return (
     <>

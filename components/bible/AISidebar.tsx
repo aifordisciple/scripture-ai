@@ -623,7 +623,7 @@ export function AISidebar() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute top-full left-0 mt-1 w-72 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-50 max-h-80 overflow-y-auto"
+                    className="fixed top-20 left-4 w-72 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-[200] max-h-80 overflow-y-auto"
                   >
                     <div className="p-2 border-b dark:border-slate-700">
                       <button
@@ -709,7 +709,7 @@ export function AISidebar() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute top-full right-0 mt-1 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-50 overflow-hidden"
+                    className="fixed top-20 right-20 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-[200] overflow-hidden"
                   >
                     {[
                       { mode: 'general' as const, icon: Sparkles, label: '标准解读', color: 'text-slate-600' },

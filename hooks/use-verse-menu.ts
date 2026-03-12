@@ -6,6 +6,7 @@ import { Verse } from './use-bible-data';
 export function useVerseMenu(verses: Verse[]) {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [showAbove, setShowAbove] = useState(true); // 菜单显示在选中元素上方还是下方
 
   const { selectedVerses, toggleVerseSelection, clearSelection, enqueueAI } = useBibleStore();
 
@@ -22,19 +23,30 @@ export function useVerseMenu(verses: Verse[]) {
   }, [verses]);
 
   const handleVerseClick = (v: Verse, e: React.MouseEvent) => {
-    e.preventDefault(); e.stopPropagation(); e.nativeEvent.stopImmediatePropagation(); 
+    e.preventDefault(); e.stopPropagation(); e.nativeEvent.stopImmediatePropagation();
     toggleVerseSelection(v.verse);
-    
+
     // 计算浮动菜单位置
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const menuWidth = 200; 
+    const menuWidth = 200;
+    const menuHeight = 280; // 估计菜单高度
     const screenWidth = window.innerWidth;
-    
+    const screenHeight = window.innerHeight;
+
     let left = rect.left + rect.width / 2;
     if (left - menuWidth / 2 < 10) left = menuWidth / 2 + 10;
     if (left + menuWidth / 2 > screenWidth - 10) left = screenWidth - menuWidth / 2 - 10;
 
-    setMenuPosition({ top: rect.top - 10, left });
+    // 判断菜单应该显示在上方还是下方
+    // 如果上方空间不足（小于菜单高度 + 20px 边距），则显示在下方
+    const shouldShowAbove = rect.top >= menuHeight + 20;
+    setShowAbove(shouldShowAbove);
+
+    // 设置菜单位置
+    // 如果显示在上方，top 设置为元素顶部；如果显示在下方，top 设置为元素底部
+    const top = shouldShowAbove ? rect.top - 10 : rect.bottom + 10;
+
+    setMenuPosition({ top, left });
     setIsMenuVisible(true);
   };
 
@@ -43,10 +55,10 @@ export function useVerseMenu(verses: Verse[]) {
     const selectedVerseObjects = verses.filter(v => selectedVerses.includes(v.verse));
     if (selectedVerseObjects.length === 0) return;
     const cuvVerses = selectedVerseObjects.filter(v => v.version === 'CUV');
-    if (cuvVerses.length === 0) return; 
+    if (cuvVerses.length === 0) return;
 
     const combinedContent = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
-    
+
     // 获取上下文 (前后各5节)
     const minVerseIdx = verses.findIndex(v => v.verse === Math.min(...selectedVerses));
     const maxVerseIdx = verses.findIndex(v => v.verse === Math.max(...selectedVerses));
@@ -55,12 +67,12 @@ export function useVerseMenu(verses: Verse[]) {
     const contextContent = verses.slice(start, end)
         .filter(v => v.version === 'CUV')
         .map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
-        
+
     const firstV = cuvVerses[0];
     enqueueAI("请详细解读这段经文，包含背景、逐节释经和现代应用。", combinedContent, contextContent, {
         bookName: firstV.bookName, chapter: firstV.chapter, verse: firstV.verse
     });
-    
+
     setIsMenuVisible(false);
     clearSelection();
   };
@@ -71,7 +83,7 @@ export function useVerseMenu(verses: Verse[]) {
       .sort((a, b) => a.verse - b.verse)
       .reduce((acc, curr) => {
         const existing = acc.find(item => item.verse === curr.verse);
-        if (!existing) { acc.push(curr); } 
+        if (!existing) { acc.push(curr); }
         else if (curr.version === 'CUV') { const index = acc.indexOf(existing); acc[index] = curr; }
         return acc;
       }, [] as Verse[])
@@ -81,11 +93,11 @@ export function useVerseMenu(verses: Verse[]) {
     if (!selectedContent) return;
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      try { 
-          await navigator.clipboard.writeText(selectedContent); 
-          return; 
-      } catch (err) { 
-          console.warn("Clipboard API failed, trying fallback...", err); 
+      try {
+          await navigator.clipboard.writeText(selectedContent);
+          return;
+      } catch (err) {
+          console.warn("Clipboard API failed, trying fallback...", err);
       }
     }
 
@@ -97,7 +109,7 @@ export function useVerseMenu(verses: Verse[]) {
       textarea.style.left = '-9999px';
       document.body.appendChild(textarea);
       textarea.select();
-      textarea.setSelectionRange(0, 99999); 
+      textarea.setSelectionRange(0, 99999);
       document.execCommand('copy');
       document.body.removeChild(textarea);
     } catch (e) {
@@ -106,5 +118,5 @@ export function useVerseMenu(verses: Verse[]) {
     }
   };
 
-  return { menuPosition, isMenuVisible, setIsMenuVisible, handleVerseClick, handleAIExplain, handleCopy };
+  return { menuPosition, isMenuVisible, setIsMenuVisible, handleVerseClick, handleAIExplain, handleCopy, showAbove };
 }
