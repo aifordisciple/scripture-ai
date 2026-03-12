@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import {
   Users, Plus, ChevronLeft, Settings, Crown, Calendar,
-  BookOpen, Trophy, MessageCircle, Ticket, Loader2, UserCog
+  BookOpen, Trophy, MessageCircle, Ticket, Loader2, UserCog, BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,8 @@ import { GroupPlanDetail } from "@/components/group/GroupPlanDetail";
 import { GroupPlanCreateDialog } from "@/components/group/GroupPlanCreateDialog";
 import { MemberManager } from "@/components/group/MemberManager";
 import { AnnouncementManager } from "@/components/group/AnnouncementManager";
+import { GroupStats } from "@/components/group/GroupStats";
+import { GroupBadgeGallery } from "@/components/group/GroupBadgeGallery";
 
 interface Church {
   id: string;
@@ -267,7 +269,7 @@ export function GroupTab() {
         </div>
 
         <Tabs defaultValue="plans" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="plans" className="gap-2">
               <Calendar className="w-4 h-4" /> 读经计划
             </TabsTrigger>
@@ -276,6 +278,9 @@ export function GroupTab() {
             </TabsTrigger>
             <TabsTrigger value="chat" className="gap-2">
               <MessageCircle className="w-4 h-4" /> 交流
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="gap-2">
+              <BarChart3 className="w-4 h-4" /> 统计
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="manage" className="gap-2">
@@ -372,6 +377,14 @@ export function GroupTab() {
 
           <TabsContent value="chat">
             <GroupChat churchId={selectedGroup.churchId} />
+          </TabsContent>
+
+          <TabsContent value="stats" className="space-y-6">
+            <GroupStats
+              churchId={selectedGroup.churchId}
+              plans={groupPlans}
+            />
+            <GroupBadgeGallery churchId={selectedGroup.churchId} />
           </TabsContent>
 
           {isAdmin && (

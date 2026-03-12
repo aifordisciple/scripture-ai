@@ -1,0 +1,257 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Bell, Check, CheckCheck, Trash2, Loader2, MessageCircle,
+  Trophy, Calendar, Users, AlertCircle
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  content: string | null;
+  read: boolean;
+  metadata: string | null;
+  createdAt: string;
+}
+
+interface NotificationCenterProps {
+  onNotificationClick?: (notification: Notification) => void;
+}
+
+const NOTIFICATION_ICONS: Record<string, any> = {
+  NEW_MESSAGE: MessageCircle,
+  TASK_REMINDER: Calendar,
+  BADGE_EARNED: Trophy,
+  PLAN_UPDATE: Calendar,
+  MEMBER_JOIN: Users,
+  ANNOUNCEMENT: AlertCircle,
+  DEFAULT: Bell
+};
+
+export function NotificationCenter({ onNotificationClick }: NotificationCenterProps) {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch("/api/notification?limit=20");
+      const data = await res.json();
+      if (data.notifications) {
+        setNotifications(data.notifications);
+        setUnreadCount(data.unreadCount || 0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const markAsRead = async (notificationIds: string[]) => {
+    try {
+      await fetch("/api/notification", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationIds })
+      });
+      setNotifications(prev =>
+        prev.map(n => notificationIds.includes(n.id) ? { ...n, read: true } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - notificationIds.length));
+    } catch (error) {
+      console.error("Failed to mark as read:", error);
+    }
+  };
+
+  const markAllRead = async () => {
+    try {
+      await fetch("/api/notification", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markAllRead: true })
+      });
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Failed to mark all as read:", error);
+    }
+  };
+
+  const deleteNotification = async (id: string) => {
+    try {
+      await fetch(`/api/notification?id=${id}`, { method: "DELETE" });
+      setNotifications(prev => prev.filter(n => n.id !== id));
+      const notification = notifications.find(n => n.id === id);
+      if (notification && !notification.read) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+    }
+  };
+
+  const handleNotificationClick = (notification: Notification) => {
+    if (!notification.read) {
+      markAsRead([notification.id]);
+    }
+    onNotificationClick?.(notification);
+    setOpen(false);
+  };
+
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "刚刚";
+    if (diffMins < 60) return `${diffMins}分钟前`;
+    if (diffHours < 24) return `${diffHours}小时前`;
+    if (diffDays < 7) return `${diffDays}天前`;
+    return date.toLocaleDateString("zh-CN");
+  };
+
+  const getIcon = (type: string) => {
+    return NOTIFICATION_ICONS[type] || NOTIFICATION_ICONS.DEFAULT;
+  };
+
+  const getIconColor = (type: string) => {
+    switch (type) {
+      case "BADGE_EARNED":
+        return "text-amber-500 bg-amber-100 dark:bg-amber-900/30";
+      case "NEW_MESSAGE":
+        return "text-indigo-500 bg-indigo-100 dark:bg-indigo-900/30";
+      case "TASK_REMINDER":
+        return "text-orange-500 bg-orange-100 dark:bg-orange-900/30";
+      case "ANNOUNCEMENT":
+        return "text-red-500 bg-red-100 dark:bg-red-900/30";
+      default:
+        return "text-gray-500 bg-gray-100 dark:bg-gray-800";
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="w-5 h-5" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              通知
+            </span>
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={markAllRead}
+                className="text-xs text-muted-foreground"
+              >
+                <CheckCheck className="w-4 h-4 mr-1" />
+                全部已读
+              </Button>
+            )}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-y-auto -mx-6 px-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Bell className="w-10 h-10 mx-auto mb-3 opacity-50" />
+              <p className="text-sm">暂无通知</p>
+            </div>
+          ) : (
+            <div className="space-y-2 pb-4">
+              {notifications.map((notification) => {
+                const Icon = getIcon(notification.type);
+                return (
+                  <div
+                    key={notification.id}
+                    onClick={() => handleNotificationClick(notification)}
+                    className={cn(
+                      "flex gap-3 p-3 rounded-lg cursor-pointer transition-colors",
+                      notification.read
+                        ? "bg-muted/30 hover:bg-muted/50"
+                        : "bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
+                    )}
+                  >
+                    <div className={cn("w-9 h-9 rounded-full flex items-center justify-center shrink-0", getIconColor(notification.type))}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className={cn(
+                          "text-sm font-medium",
+                          !notification.read && "text-foreground"
+                        )}>
+                          {notification.title}
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-6 h-6 shrink-0 opacity-0 group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification(notification.id);
+                          }}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      {notification.content && (
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                          {notification.content}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {formatTime(notification.createdAt)}
+                      </p>
+                    </div>
+                    {!notification.read && (
+                      <div className="w-2 h-2 rounded-full bg-indigo-500 shrink-0 mt-2" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

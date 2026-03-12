@@ -60,6 +60,8 @@ model User {
   // [新增] 提醒与通知
   reminders    Reminder[]
   notificationTokens NotificationToken[]
+  // [新增] 站内通知
+  notifications Notification[]
   // [新增] 记忆卡片
   memoryCards  MemoryCard[]
 
@@ -71,6 +73,10 @@ model User {
   // [新增] 教会/小组关系
   ownedChurches Church[] @relation("ChurchOwner")
   churchMemberships ChurchMember[]
+
+  // [新增] 点赞和评论
+  likes    Like[]
+  comments Comment[]
 }
 
 model UserSetting {
@@ -535,4 +541,48 @@ model GroupAnnouncement {
   updatedAt DateTime @updatedAt
 
   @@index([churchId, createdAt(sort: Desc)])
+}
+
+// [新增] 站内通知模型
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // NEW_MESSAGE, TASK_REMINDER, BADGE_EARNED, PLAN_UPDATE, MEMBER_JOIN, etc.
+  title     String
+  content   String?  @db.Text
+  read      Boolean  @default(false)
+  metadata  String?  @db.Text // JSON: { churchId, planId, senderId, etc. }
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+// [新增] 点赞模型
+model Like {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType String   // CHAT_MESSAGE, PROGRESS, NOTE, ANNOUNCEMENT
+  targetId   String
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+}
+
+// [新增] 评论模型
+model Comment {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType String   // CHAT_MESSAGE, PROGRESS, NOTE, ANNOUNCEMENT
+  targetId   String
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([targetType, targetId])
+  @@index([userId])
 }
