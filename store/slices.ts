@@ -543,10 +543,8 @@ export const createGroupSlice: StateCreator<StoreState, [], [], GroupSlice> = (s
     if (ctx.stepIndex < ctx.steps.length - 1) {
       set({ groupPlanContext: { ...ctx, stepIndex: ctx.stepIndex + 1 } });
     } else {
-      // 结束流，返回小组页面
+      // 结束流，保持在当前阅读页面（用户刚读完的经文），不自动跳回小组页面
       set({ groupPlanContext: null });
-      const groupTab = state.tabs.find(t => t.type === 'group');
-      if (groupTab) state.setActiveTab(groupTab.id);
     }
   },
 
