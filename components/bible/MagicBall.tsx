@@ -15,11 +15,9 @@ import { QuickAction } from "@/store/types";
 interface MagicBallProps {
   /** 打开书卷选择器的回调 */
   onOpenBookPicker?: () => void;
-  /** 是否隐藏（当全屏对话框打开时） */
-  hidden?: boolean;
 }
 
-export function MagicBall({ onOpenBookPicker, hidden }: MagicBallProps) {
+export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
   const controls = useAnimation();
   const [showHint, setShowHint] = useState<string | null>(null);
 
@@ -354,9 +352,6 @@ export function MagicBall({ onOpenBookPicker, hidden }: MagicBallProps) {
 
   // 关闭队列面板
   const closeQueuePanel = () => setIsQueuePanelOpen(false);
-
-  // 当 BookPicker 等全屏对话框打开时隐藏
-  if (hidden) return null;
 
   return (
     <>
