@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
 
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
@@ -176,6 +176,46 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
   triggerAI: (prompt, content, context, ref) => {
     get().enqueueAI(prompt, content, context, ref);
   },
+
+  // [新增] 会话管理
+  currentSessionId: null,
+  setCurrentSessionId: (id) => set({ currentSessionId: id }),
+  sessions: [],
+  setSessions: (sessions) => set({ sessions }),
+  addSession: (session) => set((state) => ({ sessions: [session, ...state.sessions] })),
+  updateSession: (id, data) => set((state) => ({
+    sessions: state.sessions.map(s => s.id === id ? { ...s, ...data } : s)
+  })),
+  deleteSession: (id) => set((state) => ({
+    sessions: state.sessions.filter(s => s.id !== id),
+    currentSessionId: state.currentSessionId === id ? null : state.currentSessionId
+  })),
+
+  // [新增] AI 模式
+  aiMode: 'general',
+  setAiMode: (mode) => set({ aiMode: mode }),
+
+  // [新增] AI 风格设置
+  aiStyleSettings: {
+    aiDetail: 'balanced',
+    aiDepth: 'intermediate',
+    aiTone: 'modern'
+  },
+  setAiStyleSettings: (settings) => set((state) => ({
+    aiStyleSettings: { ...state.aiStyleSettings, ...settings }
+  })),
+
+  // [新增] 自定义提示词
+  customPrompts: [],
+  setCustomPrompts: (prompts) => set({ customPrompts: prompts }),
+  addCustomPrompt: (prompt) => set((state) => ({ customPrompts: [...state.customPrompts, prompt] })),
+  deleteCustomPrompt: (id) => set((state) => ({ customPrompts: state.customPrompts.filter(p => p.id !== id) })),
+
+  // [新增] 收藏的 AI 解读
+  savedInsights: [],
+  setSavedInsights: (insights) => set({ savedInsights: insights }),
+  addSavedInsight: (insight) => set((state) => ({ savedInsights: [insight, ...state.savedInsights] })),
+  deleteSavedInsight: (id) => set((state) => ({ savedInsights: state.savedInsights.filter(i => i.id !== id) })),
 });
 
 export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice> = (set, get) => ({

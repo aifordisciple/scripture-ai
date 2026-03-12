@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
-import { Loader2, BookOpenCheck, ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon } from "lucide-react";
+import { Loader2, BookOpenCheck, ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon, Sparkles } from "lucide-react";
 import { FloatingMenu } from "./FloatingMenu";
 import { Button } from "@/components/ui/button";
 import { CHAPTER_SUMMARY_PROMPT } from "@/lib/constants";
@@ -271,20 +271,20 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                             onClick={(e) => handleVerseClick(cuvVerse, e)}
                             className={cn(
                                 "relative flex items-start px-3 md:px-5 py-2.5 rounded-2xl cursor-pointer transition-all duration-300 group/verse",
-                                isSelected ? "bg-primary/10 dark:bg-primary/20 shadow-[inset_4px_0_0_0_hsl(var(--primary))]" : 
+                                isSelected ? "bg-primary/10 dark:bg-primary/20 shadow-[inset_4px_0_0_0_hsl(var(--primary))]" :
                                 highlightClass ? `${highlightClass}` : "hover:bg-black/5 dark:hover:bg-white/5"
                             )}
                         >
-                            <span 
-                              className={cn("font-sans font-semibold mr-4 select-none shrink-0 mt-[0.3em] transition-opacity duration-300", isSelected ? "text-primary opacity-100" : "text-foreground/30 group-hover/verse:text-foreground/50")} 
+                            <span
+                              className={cn("font-sans font-semibold mr-4 select-none shrink-0 mt-[0.3em] transition-opacity duration-300", isSelected ? "text-primary opacity-100" : "text-foreground/30 group-hover/verse:text-foreground/50")}
                               style={{ fontSize: fontSize * 0.55 }}
                             >
                                 {verseNum}
                             </span>
-                            
+
                             <div className="flex-1 min-w-0">
-                                <div 
-                                  className={cn("font-serif tracking-wide transition-colors text-justify", isSelected ? "text-foreground font-medium" : "text-foreground/90")} 
+                                <div
+                                  className={cn("font-serif tracking-wide transition-colors text-justify", isSelected ? "text-foreground font-medium" : "text-foreground/90")}
                                   style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
                                 >
                                     {cuvVerse.content}
@@ -295,6 +295,22 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                                     </div>
                                 )}
                             </div>
+
+                            {/* [新增] AI 解读快捷按钮 - 悬浮显示 */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const content = cuvVerse.content;
+                                    const context = verses.filter(v => v.version === 'CUV').map(v => `[${v.verse}] ${v.content}`).join('\n');
+                                    const ref = { bookName: cuvVerse.bookName, chapter: cuvVerse.chapter, verse: cuvVerse.verse };
+                                    enqueueAI("请深入解读以下经文。", content, context, ref);
+                                    useBibleStore.getState().setAiOpen(true);
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/verse:opacity-100 transition-all duration-200 p-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-500 dark:text-blue-400 hover:scale-110 active:scale-95"
+                                title="AI 解读此节经文"
+                            >
+                                <Sparkles className="w-3.5 h-3.5" />
+                            </button>
                         </div>
                         );
                     })}

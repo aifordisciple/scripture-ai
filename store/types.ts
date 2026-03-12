@@ -90,6 +90,48 @@ export interface ApiConfig {
   apiKey: string;
   model: string;
 }
+
+// [新增] AI 风格设置
+export interface AIStyleSettings {
+  aiDetail: 'concise' | 'balanced' | 'detailed';
+  aiDepth: 'beginner' | 'intermediate' | 'academic';
+  aiTone: 'modern' | 'traditional';
+}
+
+// [新增] AI 会话
+export interface ChatSession {
+  id: string;
+  bookId?: string;
+  chapter?: number;
+  startVerse?: number;
+  endVerse?: number;
+  title?: string;
+  mode: 'general' | 'tutor' | 'sermon' | 'study-guide';
+  createdAt: string;
+  updatedAt: string;
+}
+
+// [新增] 自定义提示词
+export interface CustomPrompt {
+  id: string;
+  label: string;
+  prompt: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+// [新增] AI 解读收藏
+export interface SavedInsight {
+  id: string;
+  messageId: string;
+  bookId: string;
+  chapter: number;
+  verse?: number;
+  title?: string;
+  tags: string[];
+  createdAt: string;
+}
+
 export interface PlanProgress {
   planId: string;
   startDate: number;
@@ -178,6 +220,30 @@ export interface AISlice {
   aiRequestTrigger: { prompt: string; content: string; context: string; ref: VerseRef; timestamp: number; } | null;
   /** @deprecated Use enqueueAI instead */
   triggerAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
+  // [新增] 会话管理
+  currentSessionId: string | null;
+  setCurrentSessionId: (id: string | null) => void;
+  sessions: ChatSession[];
+  setSessions: (sessions: ChatSession[]) => void;
+  addSession: (session: ChatSession) => void;
+  updateSession: (id: string, data: Partial<ChatSession>) => void;
+  deleteSession: (id: string) => void;
+  // [新增] AI 模式
+  aiMode: 'general' | 'tutor' | 'sermon' | 'study-guide';
+  setAiMode: (mode: 'general' | 'tutor' | 'sermon' | 'study-guide') => void;
+  // [新增] AI 风格设置
+  aiStyleSettings: AIStyleSettings;
+  setAiStyleSettings: (settings: Partial<AIStyleSettings>) => void;
+  // [新增] 自定义提示词
+  customPrompts: CustomPrompt[];
+  setCustomPrompts: (prompts: CustomPrompt[]) => void;
+  addCustomPrompt: (prompt: CustomPrompt) => void;
+  deleteCustomPrompt: (id: string) => void;
+  // [新增] 收藏的 AI 解读
+  savedInsights: SavedInsight[];
+  setSavedInsights: (insights: SavedInsight[]) => void;
+  addSavedInsight: (insight: SavedInsight) => void;
+  deleteSavedInsight: (id: string) => void;
 }
 
 export interface UserDataSlice {

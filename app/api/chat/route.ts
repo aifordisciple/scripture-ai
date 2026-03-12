@@ -10,7 +10,13 @@ export const maxDuration = 60;
 export async function POST(req: Request) {
   try {
     const { apiConfig, body } = await extractApiConfig(req);
-    const { messages, context } = body as { messages?: Array<{role: string; content: string}>; context?: any };
+    const { messages, context, sessionId, verseRef, verseContent } = body as {
+      messages?: Array<{role: string; content: string}>;
+      context?: any;
+      sessionId?: string;
+      verseRef?: string;
+      verseContent?: string;
+    };
 
     if (!messages) {
       return new Response(JSON.stringify({ error: 'Missing messages' }), { status: 400 });
@@ -25,7 +31,14 @@ export async function POST(req: Request) {
        const lastUserMessage = messages[messages.length - 1];
        if (lastUserMessage && lastUserMessage.role === 'user') {
           await prisma.chatMessage.create({
-             data: { userId, role: 'user', content: lastUserMessage.content }
+             data: {
+               userId,
+               role: 'user',
+               content: lastUserMessage.content,
+               sessionId: sessionId || null,
+               verseRef: verseRef || null,
+               verseContent: verseContent || null,
+             }
           });
        }
     }
@@ -65,7 +78,14 @@ ${backgroundText}
       onFinish: async ({ text }) => {
          if (userId) {
             await prisma.chatMessage.create({
-               data: { userId, role: 'assistant', content: text }
+               data: {
+                 userId,
+                 role: 'assistant',
+                 content: text,
+                 sessionId: sessionId || null,
+                 verseRef: verseRef || null,
+                 verseContent: verseContent || null,
+               }
             });
          }
       }

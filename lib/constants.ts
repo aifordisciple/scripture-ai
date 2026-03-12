@@ -187,6 +187,28 @@ export const THEOLOGICAL_PROMPTS = [
     label: "👶 儿童/初信讲解",
     prompt: "请用最简单、生动的语言（适合 10 岁儿童或初信者）解释这段经文的核心意思。可以使用生活中的比喻来帮助理解。",
     color: "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100"
+  },
+  // [新增] 高级 AI 模式入口
+  {
+    id: 'tutor',
+    label: "👨‍🏫 苏格拉底导师",
+    prompt: "请采用苏格拉底式提问法，引导我深入思考这段经文。不要直接给出答案，而是通过提问帮助我发现真理。每次只问一个问题，等待我的回应。",
+    color: "bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100",
+    mode: 'tutor' as const
+  },
+  {
+    id: 'sermon',
+    label: "📋 讲章生成",
+    prompt: "请基于这段经文，生成一份讲章大纲。包含：引言、2-3个主要论点（每点包含经文分析、例证和应用）、结语。适合主日讲道使用。",
+    color: "bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100",
+    mode: 'sermon' as const
+  },
+  {
+    id: 'study-guide',
+    label: "📖 查经材料",
+    prompt: "请为小组查经生成一份讨论材料。包含：破冰问题、观察性问题、解释性问题、应用性问题，以及结束祷告指引。",
+    color: "bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100",
+    mode: 'study-guide' as const
   }
 ];
 

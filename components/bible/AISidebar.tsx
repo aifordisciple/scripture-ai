@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle, PenLine } from 'lucide-react';
+import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle, PenLine, MessageSquare, Plus, History, Bookmark, Share2, ChevronDown, Trash2, GraduationCap, FileText, BookMarked } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
@@ -12,24 +12,34 @@ import remarkGfm from 'remark-gfm';
 import { AudioButton } from './AudioButton';
 import { useChat } from 'ai/react';
 import { motion, AnimatePresence } from "framer-motion";
+import type { ChatSession } from '@/store/types';
 
 // --- 1. 子组件：高性能消息气泡 ---
-const MessageBubble = memo(({ 
-  role, 
-  content, 
-  isLatest, 
+const MessageBubble = memo(({
+  role,
+  content,
+  isLatest,
   onRetry,
   // [新增] 传入用于保存笔记的上下文信息
-  onSaveToNote 
-}: { 
-  role: string; 
-  content: string; 
-  isLatest: boolean; 
+  onSaveToNote,
+  // [新增] 收藏功能
+  onSaveInsight,
+  isSaved,
+  // [新增] 分享功能
+  onShare
+}: {
+  role: string;
+  content: string;
+  isLatest: boolean;
   onRetry?: () => void;
-  onSaveToNote?: (text: string) => void; 
+  onSaveToNote?: (text: string) => void;
+  onSaveInsight?: () => void;
+  isSaved?: boolean;
+  onShare?: () => void;
 }) => {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [bookmarked, setBookmarked] = useState(isSaved);
 
   let mainText = content;
   let isThinking = false;
@@ -169,11 +179,11 @@ const MessageBubble = memo(({
               </div>
             )}
             
-            {/* 底部工具栏：复制 + 笔记 + 重试 + 朗读 */}
+            {/* 底部工具栏：复制 + 笔记 + 收藏 + 重试 + 朗读 */}
             {(mainText || !isThinking) && (
               <div className="mt-4 pt-2 border-t border-slate-50 dark:border-slate-700/50 flex justify-between items-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 select-none">
-                  <div className="flex items-center gap-1">
-                      <button 
+                  <div className="flex items-center gap-1 flex-wrap">
+                      <button
                           onClick={handleCopy}
                           className={cn(
                               "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
@@ -187,7 +197,7 @@ const MessageBubble = memo(({
 
                       {/* [新增] 保存到笔记按钮 */}
                       {onSaveToNote && (
-                        <button 
+                        <button
                             onClick={handleSaveToNote}
                             className={cn(
                                 "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
@@ -196,12 +206,39 @@ const MessageBubble = memo(({
                             title="存为笔记"
                         >
                             {saved ? <Check className="w-3 h-3" /> : <PenLine className="w-3 h-3" />}
-                            {saved ? "已添加" : "加笔记"}
+                            {saved ? "已添加" : "笔记"}
+                        </button>
+                      )}
+
+                      {/* [新增] 收藏按钮 */}
+                      {onSaveInsight && (
+                        <button
+                            onClick={() => { onSaveInsight(); setBookmarked(true); }}
+                            className={cn(
+                                "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
+                                bookmarked ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            )}
+                            title="收藏解读"
+                        >
+                            <Bookmark className={cn("w-3 h-3", bookmarked && "fill-current")} />
+                            {bookmarked ? "已收藏" : "收藏"}
+                        </button>
+                      )}
+
+                      {/* [新增] 分享按钮 */}
+                      {onShare && (
+                        <button
+                            onClick={onShare}
+                            className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md text-slate-400 hover:text-teal-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            title="分享到小组"
+                        >
+                            <Share2 className="w-3 h-3" />
+                            分享
                         </button>
                       )}
 
                       {onRetry && (
-                        <button 
+                        <button
                             onClick={onRetry}
                             className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
                             title="重新生成"
@@ -211,7 +248,7 @@ const MessageBubble = memo(({
                         </button>
                       )}
                   </div>
-                  
+
                   <div onClick={(e) => e.stopPropagation()}>
                       <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 h-7 px-2 text-[11px]" label="朗读" />
                   </div>
@@ -237,8 +274,18 @@ export function AISidebar() {
     sidebarWidth, setSidebarWidth,
     setAiGenerating, openNoteEditor, notes, updateNote,
     // 队列相关
-    currentAiRequest, aiQueue, completeCurrentRequest, failCurrentRequest, cancelAIRequest
+    currentAiRequest, aiQueue, completeCurrentRequest, failCurrentRequest, cancelAIRequest,
+    // [新增] 会话管理
+    currentSessionId, setCurrentSessionId, sessions, setSessions, addSession, deleteSession,
+    // [新增] AI 模式
+    aiMode, setAiMode,
+    // [新增] 收藏
+    savedInsights, addSavedInsight, deleteSavedInsight
   } = useBibleStore();
+
+  // [新增] 会话相关状态
+  const [showSessionList, setShowSessionList] = useState(false);
+  const [showModeSelector, setShowModeSelector] = useState(false);
   
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -306,6 +353,94 @@ export function AISidebar() {
       })
       .catch(err => console.error("Failed to load chat history", err));
   }, [setMessages]);
+
+  // [新增] 加载会话列表
+  useEffect(() => {
+    fetch('/api/chat/session')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setSessions(data);
+        }
+      })
+      .catch(err => console.error("Failed to load sessions", err));
+  }, [setSessions]);
+
+  // [新增] 创建新会话
+  const handleNewSession = useCallback(async () => {
+    if (!aiRequestTrigger) {
+      // 没有经文上下文时创建空会话
+      const res = await fetch('/api/chat/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: aiMode }),
+      });
+      const session = await res.json();
+      addSession(session);
+      setCurrentSessionId(session.id);
+      setMessages([]);
+      return;
+    }
+
+    // 有经文上下文时创建关联会话
+    const res = await fetch('/api/chat/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        bookId: aiRequestTrigger.ref.bookName,
+        chapter: aiRequestTrigger.ref.chapter,
+        startVerse: aiRequestTrigger.ref.verse > 0 ? aiRequestTrigger.ref.verse : undefined,
+        mode: aiMode,
+      }),
+    });
+    const session = await res.json();
+    addSession(session);
+    setCurrentSessionId(session.id);
+  }, [aiRequestTrigger, aiMode, addSession, setCurrentSessionId, setMessages]);
+
+  // [新增] 切换会话
+  const handleSelectSession = useCallback(async (session: ChatSession) => {
+    setCurrentSessionId(session.id);
+    // 加载该会话的消息
+    const res = await fetch(`/api/chat/history?sessionId=${session.id}`);
+    const messages = await res.json();
+    if (Array.isArray(messages)) {
+      setMessages(messages.map((m: any) => ({ id: m.id, role: m.role, content: m.content })));
+    }
+    setShowSessionList(false);
+  }, [setCurrentSessionId, setMessages]);
+
+  // [新增] 删除会话
+  const handleDeleteSession = useCallback(async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm('确定要删除这个会话吗？')) return;
+
+    await fetch(`/api/chat/session?id=${sessionId}`, { method: 'DELETE' });
+    deleteSession(sessionId);
+    if (currentSessionId === sessionId) {
+      setCurrentSessionId(null);
+      setMessages([]);
+    }
+  }, [currentSessionId, deleteSession, setCurrentSessionId, setMessages]);
+
+  // [新增] 收藏消息
+  const handleSaveInsight = useCallback(async (messageId: string, content: string) => {
+    if (!aiRequestTrigger) return;
+
+    const res = await fetch('/api/insights', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messageId,
+        bookId: aiRequestTrigger.ref.bookName,
+        chapter: aiRequestTrigger.ref.chapter,
+        verse: aiRequestTrigger.ref.verse > 0 ? aiRequestTrigger.ref.verse : undefined,
+        title: content.substring(0, 50) + '...',
+      }),
+    });
+    const insight = await res.json();
+    addSavedInsight(insight);
+  }, [aiRequestTrigger, addSavedInsight]);
 
   const handleClearChat = async () => {
     if(confirm("确定要清空所有灵修对话历史吗？")) {
@@ -461,25 +596,147 @@ export function AISidebar() {
           <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-slate-200 dark:bg-slate-700 rounded group-hover:bg-blue-500 transition-colors" />
         </div>
 
-        <div 
+        <div
           className={cn(
             "flex items-center justify-between px-4 bg-slate-50 dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden border-b dark:border-slate-800",
             isImmersive ? "h-0 opacity-0 border-none p-0" : "h-14 opacity-100 py-3"
           )}
         >
-          <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-bold select-none">
-            <Sparkles className="w-5 h-5" />
-            <span>AI 灵修伴侣</span>
+          <div className="flex items-center gap-2">
+            {/* [新增] 会话选择器 */}
+            <div className="relative">
+              <button
+                onClick={() => setShowSessionList(!showSessionList)}
+                className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 font-bold select-none hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-lg transition-colors"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span className="text-sm max-w-[120px] truncate">
+                  {sessions.find(s => s.id === currentSessionId)?.title || '新对话'}
+                </span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+
+              {/* 会话列表下拉 */}
+              <AnimatePresence>
+                {showSessionList && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full left-0 mt-1 w-72 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-50 max-h-80 overflow-y-auto"
+                  >
+                    <div className="p-2 border-b dark:border-slate-700">
+                      <button
+                        onClick={handleNewSession}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                        新建对话
+                      </button>
+                    </div>
+                    <div className="p-1">
+                      {sessions.length === 0 ? (
+                        <div className="px-3 py-4 text-center text-slate-400 text-sm">暂无历史对话</div>
+                      ) : (
+                        sessions.map(session => (
+                          <div
+                            key={session.id}
+                            onClick={() => handleSelectSession(session)}
+                            className={cn(
+                              "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors group",
+                              currentSessionId === session.id
+                                ? "bg-blue-50 dark:bg-blue-900/30"
+                                : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                            )}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium truncate">{session.title || '未命名对话'}</div>
+                              <div className="text-xs text-slate-400">
+                                {new Date(session.updatedAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                            <button
+                              onClick={(e) => handleDeleteSession(session.id, e)}
+                              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-all"
+                            >
+                              <Trash2 className="w-3 h-3 text-red-500" />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* 队列状态指示 */}
             {(currentAiRequest || aiQueue.length > 0) && (
-              <span className="ml-2 text-xs font-normal bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-normal bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full">
                 {currentAiRequest?.status === 'processing' && '处理中'}
                 {aiQueue.length > 0 && ` · ${aiQueue.length} 排队`}
               </span>
             )}
           </div>
           <div className="flex items-center gap-1">
-             <Button variant="ghost" size="icon" onClick={handleClearChat} title="清空">
+            {/* [新增] AI 模式选择 */}
+            <div className="relative">
+              <button
+                onClick={() => setShowModeSelector(!showModeSelector)}
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors",
+                  aiMode === 'general' ? "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" : "",
+                  aiMode === 'tutor' ? "text-violet-600 bg-violet-50 dark:bg-violet-900/20" : "",
+                  aiMode === 'sermon' ? "text-orange-600 bg-orange-50 dark:bg-orange-900/20" : "",
+                  aiMode === 'study-guide' ? "text-teal-600 bg-teal-50 dark:bg-teal-900/20" : ""
+                )}
+              >
+                {aiMode === 'tutor' && <GraduationCap className="w-3.5 h-3.5" />}
+                {aiMode === 'sermon' && <FileText className="w-3.5 h-3.5" />}
+                {aiMode === 'study-guide' && <BookMarked className="w-3.5 h-3.5" />}
+                {aiMode === 'general' && <Sparkles className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">
+                  {aiMode === 'general' && '标准'}
+                  {aiMode === 'tutor' && '导师'}
+                  {aiMode === 'sermon' && '讲章'}
+                  {aiMode === 'study-guide' && '查经'}
+                </span>
+              </button>
+
+              <AnimatePresence>
+                {showModeSelector && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full right-0 mt-1 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-50 overflow-hidden"
+                  >
+                    {[
+                      { mode: 'general' as const, icon: Sparkles, label: '标准解读', color: 'text-slate-600' },
+                      { mode: 'tutor' as const, icon: GraduationCap, label: '苏格拉底导师', color: 'text-violet-600' },
+                      { mode: 'sermon' as const, icon: FileText, label: '讲章生成', color: 'text-orange-600' },
+                      { mode: 'study-guide' as const, icon: BookMarked, label: '查经材料', color: 'text-teal-600' },
+                    ].map(item => (
+                      <button
+                        key={item.mode}
+                        onClick={() => { setAiMode(item.mode); setShowModeSelector(false); }}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-3 py-2.5 text-sm transition-colors",
+                          aiMode === item.mode
+                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600"
+                            : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                        )}
+                      >
+                        <item.icon className={cn("w-4 h-4", item.color)} />
+                        {item.label}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <Button variant="ghost" size="icon" onClick={handleClearChat} title="清空">
                 <Eraser className="w-4 h-4 text-slate-400" />
             </Button>
             <Button variant="ghost" size="icon" onClick={() => { setAiOpen(false); clearSelection(); }} className="dark:text-slate-400 dark:hover:bg-slate-800">
@@ -506,15 +763,24 @@ export function AISidebar() {
                 {messages.map((m, index) => {
                     const isLatest = index === messages.length - 1;
                     const isAssistant = m.role === 'assistant';
+                    const messageId = m.id || `msg-${index}`;
                     return (
-                        <MessageBubble 
-                            key={m.id || index}
+                        <MessageBubble
+                            key={messageId}
                             role={m.role}
                             content={m.content}
                             isLatest={isLatest && isLoading}
                             onRetry={(!isLoading && isAssistant && isLatest) ? () => reload() : undefined}
                             // [新增] 只有助手回复并且不为空时才显示保存笔记按钮
                             onSaveToNote={(isAssistant && m.content.length > 0) ? handleSaveToNote : undefined}
+                            // [新增] 收藏功能
+                            onSaveInsight={(isAssistant && m.content.length > 0 && aiRequestTrigger) ? () => handleSaveInsight(messageId, m.content) : undefined}
+                            isSaved={savedInsights.some(i => i.messageId === messageId)}
+                            // [新增] 分享功能
+                            onShare={(isAssistant && m.content.length > 0) ? () => {
+                              // TODO: 实现分享到小组功能
+                              alert('分享功能开发中...');
+                            } : undefined}
                         />
                     );
                 })}
@@ -551,9 +817,19 @@ export function AISidebar() {
         >
             {!isLoading && messages.length > 0 && (
               <div className="px-4 pb-2 flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-1">深度探索</div>
+                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-1">
+                   {aiMode === 'tutor' ? '苏格拉底式引导' :
+                    aiMode === 'sermon' ? '讲章工具' :
+                    aiMode === 'study-guide' ? '查经工具' : '深度探索'}
+                 </div>
                  <div className="flex flex-wrap gap-2">
-                   {THEOLOGICAL_PROMPTS.map((t) => (
+                   {THEOLOGICAL_PROMPTS.filter(t => {
+                     // 根据模式过滤显示的提示词
+                     if (aiMode === 'tutor') return t.id === 'tutor';
+                     if (aiMode === 'sermon') return t.id === 'sermon';
+                     if (aiMode === 'study-guide') return t.id === 'study-guide';
+                     return !t.mode; // 标准模式显示基础提示词
+                   }).map((t) => (
                      <button
                        key={t.id}
                        onClick={() => handleChipClick(t.prompt)}
