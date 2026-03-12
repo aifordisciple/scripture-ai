@@ -64,7 +64,7 @@ const COLORS = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'];
 export function GroupStats({ churchId, plans }: GroupStatsProps) {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [selectedPlan, setSelectedPlan] = useState<string>("all");
   const [daysRange, setDaysRange] = useState("30");
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (selectedPlan) params.append("planId", selectedPlan);
+      if (selectedPlan && selectedPlan !== "all") params.append("planId", selectedPlan);
       params.append("days", daysRange);
 
       const res = await fetch(`/api/church/${churchId}/stats?${params.toString()}`);
@@ -146,7 +146,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                 <SelectValue placeholder="全部计划" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">全部计划</SelectItem>
+                <SelectItem value="all">全部计划</SelectItem>
                 {plans.map(plan => (
                   <SelectItem key={plan.id} value={plan.id}>
                     {plan.name}
