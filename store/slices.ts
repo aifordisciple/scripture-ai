@@ -1,7 +1,8 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
+import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
   isAuthOpen: false,
@@ -216,6 +217,45 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
   setSavedInsights: (insights) => set({ savedInsights: insights }),
   addSavedInsight: (insight) => set((state) => ({ savedInsights: [insight, ...state.savedInsights] })),
   deleteSavedInsight: (id) => set((state) => ({ savedInsights: state.savedInsights.filter(i => i.id !== id) })),
+
+  // [新增] 快捷动作 - 从 THEOLOGICAL_PROMPTS 初始化
+  quickActions: THEOLOGICAL_PROMPTS.slice(0, 6).map((p, index) => ({
+    id: p.id,
+    label: p.label,
+    prompt: p.prompt,
+    mode: p.mode,
+    priority: index,
+    category: ['detail', 'original', 'application', 'prayer'].includes(p.id) ? 'selected' :
+              ['context'].includes(p.id) ? 'reading' : undefined
+  })) as QuickAction[],
+  activeQuickAction: null,
+  setActiveQuickAction: (action) => set({ activeQuickAction: action }),
+
+  // [新增] 引导状态
+  onboardingStep: null,
+  setOnboardingStep: (step) => set({ onboardingStep: step }),
+  hasCompletedOnboarding: typeof window !== 'undefined' ? localStorage.getItem('magicBall_onboarding_complete') === 'true' : false,
+  setHasCompletedOnboarding: (completed) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('magicBall_onboarding_complete', String(completed));
+    }
+    set({ hasCompletedOnboarding: completed });
+  },
+
+  // [新增] Magic Ball 位置 - 从 localStorage 初始化
+  magicBallPosition: typeof window !== 'undefined' ? (() => {
+    try {
+      const saved = localStorage.getItem('magicBall_position');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return { bottom: 150, right: 30 };
+  })() : { bottom: 150, right: 30 },
+  setMagicBallPosition: (position) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('magicBall_position', JSON.stringify(position));
+    }
+    set({ magicBallPosition: position });
+  },
 });
 
 export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice> = (set, get) => ({

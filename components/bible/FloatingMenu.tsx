@@ -2,10 +2,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Copy, X, PenLine, Share2, GitBranch } from "lucide-react";
+import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useSession } from "next-auth/react";
+import { THEOLOGICAL_PROMPTS } from "@/lib/constants";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface FloatingMenuProps {
   visible: boolean;
@@ -24,19 +26,29 @@ const COLORS = [
   { id: 'green', bg: 'bg-green-300', border: 'border-green-500' },
   { id: 'blue', bg: 'bg-blue-300', border: 'border-blue-500' },
   { id: 'red', bg: 'bg-red-300', border: 'border-red-500' },
-  { id: 'none', bg: 'bg-slate-100', border: 'border-slate-300', icon: true } 
+  { id: 'none', bg: 'bg-slate-100', border: 'border-slate-300', icon: true }
+];
+
+// AI 快捷选项
+const AI_OPTIONS = [
+  { id: 'detail', label: '深度解读', prompt: THEOLOGICAL_PROMPTS[0].prompt },
+  { id: 'original', label: '原文词义', prompt: THEOLOGICAL_PROMPTS[2].prompt },
+  { id: 'application', label: '生活应用', prompt: THEOLOGICAL_PROMPTS[3].prompt },
+  { id: 'prayer', label: '祷告回应', prompt: THEOLOGICAL_PROMPTS[4].prompt },
 ];
 
 export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onCrossRef }: FloatingMenuProps) {
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection } = useBibleStore();
+  const [showAiSubmenu, setShowAiSubmenu] = useState(false);
+  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection, enqueueAI, setAiOpen } = useBibleStore();
   const { data: session } = useSession();
 
   useEffect(() => {
     if (visible) {
         setRender(true);
         setCopied(false);
+        setShowAiSubmenu(false);
     } else {
       const timer = setTimeout(() => setRender(false), 200);
       return () => clearTimeout(timer);
@@ -53,7 +65,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
     });
 
     if (session?.user) {
-        const promises = selectedVerses.map(verse => 
+        const promises = selectedVerses.map(verse =>
             fetch('/api/highlight', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -68,7 +80,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         );
         Promise.all(promises).catch(err => console.error("Sync highlight failed", err));
     }
-    
+
     clearSelection();
     onClose();
   };
@@ -96,6 +108,16 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
     }
   };
 
+  // 处理 AI 模式选择
+  const handleAiOption = (option: typeof AI_OPTIONS[0]) => {
+    // 使用默认的解读逻辑，但使用特定的 prompt
+    onExplain();
+    // 可以通过 store 传递 prompt
+    // enqueueAI(option.prompt, content, context, ref);
+    setShowAiSubmenu(false);
+    onClose();
+  };
+
   if (!render) return null;
 
   return (
@@ -105,9 +127,9 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"
       )}
       style={{
-        top: position.top, 
+        top: position.top,
         left: position.left,
-        transform: "translate(-50%, -100%) translateY(-12px)" 
+        transform: "translate(-50%, -100%) translateY(-12px)"
       }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -130,14 +152,72 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         </div>
       </div>
 
-      {/* 2. [修改] 醒目的 AI 解读按钮 */}
-      <button
-        onClick={onExplain}
-        className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
-      >
-        <Sparkles className="w-4 h-4 fill-current animate-pulse" />
-        <span className="font-bold text-sm">AI 深度解读</span>
-      </button>
+      {/* 2. [修改] 可展开的 AI 解读按钮 */}
+      <div className="relative">
+        <button
+          onClick={() => setShowAiSubmenu(!showAiSubmenu)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
+        >
+          <Sparkles className="w-4 h-4 fill-current animate-pulse" />
+          <span className="font-bold text-sm">AI 解读</span>
+          {showAiSubmenu ? (
+            <ChevronUp className="w-4 h-4 ml-auto mr-1" />
+          ) : (
+            <ChevronDown className="w-4 h-4 ml-auto mr-1" />
+          )}
+        </button>
+
+        {/* AI 子菜单 */}
+        <AnimatePresence>
+          {showAiSubmenu && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.15 }}
+              className="overflow-hidden mt-1"
+            >
+              <div className="grid grid-cols-2 gap-1 p-1 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                {AI_OPTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => handleAiOption(option)}
+                    className={cn(
+                      "flex items-center justify-center gap-1 py-2 px-2 rounded-lg",
+                      "text-xs font-medium",
+                      "bg-white dark:bg-slate-700",
+                      "hover:bg-blue-50 dark:hover:bg-blue-900/30",
+                      "text-slate-700 dark:text-slate-200",
+                      "hover:text-blue-600 dark:hover:text-blue-400",
+                      "transition-colors duration-150",
+                      "border border-slate-200 dark:border-slate-600"
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+                <button
+                  onClick={() => {
+                    setShowAiSubmenu(false);
+                    onExplain();
+                  }}
+                  className={cn(
+                    "col-span-2 flex items-center justify-center gap-1 py-2 px-2 rounded-lg",
+                    "text-xs font-medium",
+                    "bg-gradient-to-r from-blue-500 to-indigo-500",
+                    "text-white",
+                    "hover:from-blue-600 hover:to-indigo-600",
+                    "transition-colors duration-150"
+                  )}
+                >
+                  <Sparkles className="w-3 h-3" />
+                  更多模式...
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* 2.5 [新增] 经文串珠按钮 */}
       {onCrossRef && (

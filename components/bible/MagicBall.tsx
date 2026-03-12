@@ -1,7 +1,7 @@
 // components/bible/MagicBall.tsx
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, useAnimation, PanInfo, TapInfo, AnimatePresence } from "framer-motion";
 import { useBibleStore } from "@/store/useBibleStore";
 import {
@@ -9,6 +9,8 @@ import {
   ListOrdered, Loader2, BookOpen, AlertCircle, BookOpenCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RadialMenu } from "./RadialMenu";
+import { QuickAction } from "@/store/types";
 
 interface MagicBallProps {
   /** 打开书卷选择器的回调 */
@@ -19,8 +21,14 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
   const controls = useAnimation();
   const [showHint, setShowHint] = useState<string | null>(null);
 
-  // 默认位置
-  const [position, setPosition] = useState({ bottom: 150, right: 30 });
+  // 从 store 获取位置（支持持久化）
+  const {
+    magicBallPosition,
+    setMagicBallPosition,
+  } = useBibleStore();
+
+  // 使用 store 中的位置作为初始值
+  const [position, setPosition] = useState(magicBallPosition);
 
   // 状态：是否处于"自由移动模式"
   const [isRepositioning, setIsRepositioning] = useState(false);
@@ -31,7 +39,14 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
   // 队列面板展开状态
   const [isQueuePanelOpen, setIsQueuePanelOpen] = useState(false);
 
+  // 径向菜单展开状态
+  const [isRadialMenuOpen, setIsRadialMenuOpen] = useState(false);
+
+  // 上下文感知的快捷动作
+  const [contextActions, setContextActions] = useState<QuickAction[]>([]);
+
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const radialMenuTimer = useRef<NodeJS.Timeout | null>(null);
   const isDraggingRef = useRef(false);
   const prevAiGenRef = useRef(false);
 
@@ -44,13 +59,40 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
     // 队列相关
     currentAiRequest,
     aiQueue,
-    cancelAIRequest
+    cancelAIRequest,
+    // 快捷动作相关
+    quickActions,
+    activeQuickAction,
+    setActiveQuickAction,
+    enqueueAI,
+    // 引导相关
+    hasCompletedOnboarding,
+    // 选中的经文
+    selectedVerses,
+    // 读经计划
+    activePlans,
   } = useBibleStore();
 
   // 计算队列状态
   const hasQueueContent = currentAiRequest || aiQueue.length > 0;
   const queueCount = aiQueue.length;
   const isProcessing = currentAiRequest?.status === 'processing';
+
+  // 更新上下文感知的快捷动作
+  useEffect(() => {
+    const actions = quickActions.slice(0, 6);
+    setContextActions(actions);
+  }, [quickActions, selectedVerses, activePlans, currentAiRequest]);
+
+  // 同步位置到 store（延迟保存，避免频繁写入）
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (position.bottom !== magicBallPosition.bottom || position.right !== magicBallPosition.right) {
+        setMagicBallPosition(position);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [position, setMagicBallPosition, magicBallPosition]);
 
   // 获取经文引用简短显示
   const getShortRef = (ref: { bookName: string; chapter: number; verse: number }) => {
@@ -66,9 +108,63 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
     return prompt.slice(0, maxLen) + '...';
   };
 
+  // 处理快捷动作选择
+  const handleQuickActionSelect = useCallback((action: QuickAction) => {
+    setActiveQuickAction(action);
+
+    // 获取当前阅读上下文
+    const state = useBibleStore.getState();
+    const tabs = state.tabs;
+    const activeTab = tabs.find(t => t.id === state.activeTabId);
+
+    if (!activeTab || activeTab.type !== 'read') return;
+
+    const bookId = activeTab.book || 'Gen';
+    const chapter = parseInt(activeTab.chapter || '1');
+
+    // 构建 AI 请求
+    const ref = {
+      bookName: bookId, // 简化处理，实际应该从 Bible 数据获取
+      chapter,
+      verse: selectedVerses[0] || 1
+    };
+
+    // 如果有选中经文，使用选中的内容
+    if (selectedVerses.length > 0) {
+      // 这里需要从 Reader 获取经文内容，暂时使用简化逻辑
+      enqueueAI(
+        action.prompt,
+        `用户选中的经文: ${selectedVerses.join(', ')}节`,
+        `书卷: ${bookId}, 章节: ${chapter}`,
+        ref
+      );
+    } else {
+      // 使用当前章节作为上下文
+      enqueueAI(
+        action.prompt,
+        `章节内容`,
+        `书卷: ${bookId}, 章节: ${chapter}`,
+        { ...ref, verse: 0 }
+      );
+    }
+
+    // 设置 AI 模式（如果快捷动作指定了模式）
+    if (action.mode) {
+      state.setAiMode(action.mode);
+    }
+
+    // 打开 AI 侧边栏
+    setAiOpen(true);
+
+    // 触觉反馈
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate([30, 50, 30]);
+    }
+  }, [selectedVerses, enqueueAI, setAiOpen, setActiveQuickAction]);
+
   // --- 待机呼吸动画 ---
   useEffect(() => {
-    if (!isAiGenerating && !isRepositioning && !isAiFinishedButUnseen && !isAiOpen && !isQueuePanelOpen) {
+    if (!isAiGenerating && !isRepositioning && !isAiFinishedButUnseen && !isAiOpen && !isQueuePanelOpen && !isRadialMenuOpen) {
       controls.start({
         y: [0, -6, 0],
         transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }
@@ -77,7 +173,7 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
       controls.stop();
       controls.set({ y: 0 });
     }
-  }, [isAiGenerating, isRepositioning, isAiFinishedButUnseen, isAiOpen, isQueuePanelOpen, controls]);
+  }, [isAiGenerating, isRepositioning, isAiFinishedButUnseen, isAiOpen, isQueuePanelOpen, isRadialMenuOpen, controls]);
 
   // --- 监听 AI 状态变化 ---
   useEffect(() => {
@@ -118,14 +214,26 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
 
   const handlePointerDown = () => {
     isDraggingRef.current = false;
+
+    // 长按触发位置调整模式
     longPressTimer.current = setTimeout(() => {
       if (!isDraggingRef.current) {
         setIsRepositioning(true);
-        setIsQueuePanelOpen(false); // 关闭队列面板
+        setIsQueuePanelOpen(false);
+        setIsRadialMenuOpen(false);
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(100);
         controls.start({ scale: 1.1, y: 0 });
       }
     }, 600);
+
+    // 中等时长触发径向菜单 (0.4s)
+    radialMenuTimer.current = setTimeout(() => {
+      if (!isDraggingRef.current && !isRepositioning) {
+        setIsRadialMenuOpen(true);
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([30, 50, 30]);
+        controls.start({ scale: 1.05 });
+      }
+    }, 400);
   };
 
   const handleDragStart = () => {
@@ -134,6 +242,12 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
+    if (radialMenuTimer.current) {
+      clearTimeout(radialMenuTimer.current);
+      radialMenuTimer.current = null;
+    }
+    // 关闭径向菜单
+    setIsRadialMenuOpen(false);
   };
 
   const handlePointerUp = () => {
@@ -141,9 +255,16 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
+    if (radialMenuTimer.current) {
+      clearTimeout(radialMenuTimer.current);
+      radialMenuTimer.current = null;
+    }
   };
 
   const handleTap = (event: MouseEvent, info: TapInfo) => {
+    // 如果径向菜单打开，不做处理
+    if (isRadialMenuOpen) return;
+
     // 特殊状态点击：查看结果
     if (isAiFinishedButUnseen) {
       setAiOpen(true);
@@ -161,6 +282,11 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
   const handleDrag = (event: any, info: PanInfo) => {
     if (isRepositioning) return;
 
+    // 关闭径向菜单
+    if (isRadialMenuOpen) {
+      setIsRadialMenuOpen(false);
+    }
+
     const { x, y } = info.offset;
     const threshold = 40;
 
@@ -173,6 +299,9 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
   };
 
   const handleDragEnd = async (event: any, info: PanInfo) => {
+    // 关闭径向菜单
+    setIsRadialMenuOpen(false);
+
     // --- 模式 A: 位置修改完成 ---
     if (isRepositioning) {
       const newRight = position.right - info.offset.x;
@@ -226,6 +355,15 @@ export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
 
   return (
     <>
+      {/* 径向菜单 */}
+      <RadialMenu
+        isOpen={isRadialMenuOpen}
+        actions={contextActions}
+        onSelect={handleQuickActionSelect}
+        onClose={() => setIsRadialMenuOpen(false)}
+        position={position}
+      />
+
       {/* 队列详情面板 */}
       <AnimatePresence>
         {isQueuePanelOpen && (

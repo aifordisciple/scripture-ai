@@ -100,14 +100,14 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       // 安全检查：防止在做笔记时触发
       if (
-        e.target instanceof HTMLInputElement || 
-        e.target instanceof HTMLTextAreaElement || 
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
         (e.target as HTMLElement).isContentEditable
       ) {
         return;
       }
 
-      if (e.ctrlKey || e.metaKey || e.altKey) return; 
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
 
       const state = useBibleStore.getState();
       const hasSelection = state.selectedVerses.length > 0;
@@ -157,20 +157,69 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         case 'a':
         case 'A':
           if (hasSelection) {
-            e.preventDefault();
-            // 一键唤起 AI 解读
-            const cuvVerses = verses.filter(v => v.version === 'CUV' && state.selectedVerses.includes(v.verse));
-            if (cuvVerses.length > 0) {
-               const content = cuvVerses.map(v => `[${v.verse}] ${v.content}`).join('\n');
-               const context = verses.filter(v => v.version === 'CUV').map(v => `[${v.verse}] ${v.content}`).join('\n');
-               const ref = { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: cuvVerses[0].verse };
-               
-               state.enqueueAI("请深入解读以下经文。", content, context, ref);
-               state.setAiOpen(true);
-               clearSelection();
-               setIsMenuVisible(false);
+            // Shift+A 打开 AI 模式选择器（保持选择状态）
+            if (e.shiftKey) {
+              e.preventDefault();
+              // 打开 AI 侧边栏并显示模式选择
+              state.setAiOpen(true);
+              // 触觉反馈
+              if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                navigator.vibrate(30);
+              }
+            } else {
+              e.preventDefault();
+              // 一键唤起 AI 解读
+              const cuvVerses = verses.filter(v => v.version === 'CUV' && state.selectedVerses.includes(v.verse));
+              if (cuvVerses.length > 0) {
+                 const content = cuvVerses.map(v => `[${v.verse}] ${v.content}`).join('\n');
+                 const context = verses.filter(v => v.version === 'CUV').map(v => `[${v.verse}] ${v.content}`).join('\n');
+                 const ref = { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: cuvVerses[0].verse };
+
+                 state.enqueueAI("请深入解读以下经文。", content, context, ref);
+                 state.setAiOpen(true);
+                 clearSelection();
+                 setIsMenuVisible(false);
+              }
             }
           }
+          break;
+
+        case 'p':
+        case 'P':
+          if (hasSelection) {
+            e.preventDefault();
+            // 祷告生成
+            const cuvVerses = verses.filter(v => v.version === 'CUV' && state.selectedVerses.includes(v.verse));
+            if (cuvVerses.length > 0) {
+              const content = cuvVerses.map(v => `[${v.verse}] ${v.content}`).join('\n');
+              const context = verses.filter(v => v.version === 'CUV').map(v => `[${v.verse}] ${v.content}`).join('\n');
+              const ref = { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: cuvVerses[0].verse };
+
+              state.enqueueAI("请基于这段经文的感动，为我写一篇祷告文。祷告应包含：对他属性的赞美、对罪的悔改、对恩典的感谢以及具体的祈求。语气要真诚、亲切。", content, context, ref);
+              state.setAiOpen(true);
+              clearSelection();
+              setIsMenuVisible(false);
+            }
+          }
+          break;
+
+        case 's':
+        case 'S':
+          e.preventDefault();
+          // 章节摘要
+          const cuvVersesForSummary = verses.filter(v => v.version === 'CUV');
+          if (cuvVersesForSummary.length > 0) {
+            const fullContext = cuvVersesForSummary.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
+            state.enqueueAI(CHAPTER_SUMMARY_PROMPT, `【${cuvVersesForSummary[0].bookName} 第 ${cuvVersesForSummary[0].chapter} 章】全章`, fullContext, { bookName: cuvVersesForSummary[0].bookName, chapter: cuvVersesForSummary[0].chapter, verse: 0 });
+            state.setAiOpen(true);
+          }
+          break;
+
+        case '?':
+          e.preventDefault();
+          // 快速提问模式 - 打开 AI 侧边栏并聚焦输入框
+          state.setAiOpen(true);
+          // 可以通过状态传递一个标志，让 AI 侧边栏自动聚焦输入框
           break;
       }
     };

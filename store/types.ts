@@ -132,6 +132,17 @@ export interface SavedInsight {
   createdAt: string;
 }
 
+// [新增] 快捷动作配置
+export interface QuickAction {
+  id: string;
+  label: string;
+  icon?: string;
+  prompt: string;
+  mode?: 'general' | 'tutor' | 'sermon' | 'study-guide';
+  priority: number;
+  category?: 'selected' | 'reading' | 'plan' | 'completed';
+}
+
 export interface PlanProgress {
   planId: string;
   startDate: number;
@@ -244,6 +255,18 @@ export interface AISlice {
   setSavedInsights: (insights: SavedInsight[]) => void;
   addSavedInsight: (insight: SavedInsight) => void;
   deleteSavedInsight: (id: string) => void;
+  // [新增] 快捷动作
+  quickActions: QuickAction[];
+  activeQuickAction: QuickAction | null;
+  setActiveQuickAction: (action: QuickAction | null) => void;
+  // [新增] 引导状态
+  onboardingStep: number | null;
+  setOnboardingStep: (step: number | null) => void;
+  hasCompletedOnboarding: boolean;
+  setHasCompletedOnboarding: (completed: boolean) => void;
+  // [新增] Magic Ball 位置
+  magicBallPosition: { bottom: number; right: number };
+  setMagicBallPosition: (position: { bottom: number; right: number }) => void;
 }
 
 export interface UserDataSlice {
