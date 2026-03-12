@@ -17,15 +17,15 @@ export async function GET(req: Request, { params }: RouteParams) {
     const userId = session?.user?.id;
 
     // Check membership
-    if (userId) {
-      const membership = await prisma.churchMember.findFirst({
-        where: { churchId, userId }
-      });
-      if (!membership) {
-        return NextResponse.json({ error: 'Not a member' }, { status: 403 });
-      }
-    } else {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const membership = await prisma.churchMember.findFirst({
+      where: { churchId, userId }
+    });
+    if (!membership) {
+      return NextResponse.json({ error: 'Not a member' }, { status: 403 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -86,9 +86,12 @@ export async function GET(req: Request, { params }: RouteParams) {
       });
     }
 
-    // Get progress data
+    // Get progress data - only for plans in this church
+    const planIds = church.groupPlans.map(p => p.id);
     const progressData = await prisma.groupPlanProgress.findMany({
-      where: planId ? { planId } : {},
+      where: planId
+        ? { planId }
+        : { planId: { in: planIds } },
       include: {
         user: { select: { id: true, name: true } }
       }
