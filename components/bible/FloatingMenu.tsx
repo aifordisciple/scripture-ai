@@ -1,7 +1,7 @@
 // components/bible/FloatingMenu.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
@@ -41,6 +41,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showAiSubmenu, setShowAiSubmenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection } = useBibleStore();
   const { data: session } = useSession();
 
@@ -54,6 +55,13 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
       return () => clearTimeout(timer);
     }
   }, [visible]);
+
+  // 阻止菜单内部的点击事件冒泡到 document
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+  };
 
   const handleHighlight = async (color: string) => {
     selectedVerses.forEach(verse => {
@@ -109,10 +117,30 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
   };
 
   // 处理 AI 模式选择 - 直接调用 onExplain 并关闭菜单
-  const handleAiOption = (option: typeof AI_OPTIONS[0]) => {
+  const handleAiOption = (option: typeof AI_OPTIONS[0], e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
     setShowAiSubmenu(false);
     onClose();
     // 调用默认的解读逻辑
+    onExplain();
+  };
+
+  // 切换 AI 子菜单
+  const handleToggleSubmenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    setShowAiSubmenu(!showAiSubmenu);
+  };
+
+  // 主按钮点击
+  const handleMainExplain = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    onClose();
     onExplain();
   };
 
@@ -120,6 +148,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
 
   return (
     <div
+      ref={menuRef}
       className={cn(
         "fixed z-50 flex flex-col gap-2 p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl transition-all duration-200 ease-out origin-bottom border border-slate-100 dark:border-slate-800 w-[240px]",
         visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"
@@ -129,7 +158,9 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         left: position.left,
         transform: "translate(-50%, -100%) translateY(-12px)"
       }}
-      onClick={(e) => e.stopPropagation()}
+      onClick={handleMenuClick}
+      onMouseDown={handleMenuClick}
+      onPointerDown={handleMenuClick}
     >
       {/* 1. 颜色选择区 */}
       <div className="flex items-center justify-between px-1">
@@ -138,7 +169,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             {COLORS.map((c) => (
             <button
                 key={c.id}
-                onClick={() => handleHighlight(c.id)}
+                onClick={(e) => { handleMenuClick(e); handleHighlight(c.id); }}
                 className={cn(
                 "w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center",
                 c.bg, c.border
@@ -155,10 +186,9 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         <div className="flex gap-1">
           {/* 主按钮 - 点击直接解读 */}
           <button
-            onClick={() => {
-              onClose();
-              onExplain();
-            }}
+            onClick={handleMainExplain}
+            onMouseDown={handleMenuClick}
+            onPointerDown={handleMenuClick}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
           >
             <Sparkles className="w-4 h-4 fill-current animate-pulse" />
@@ -166,7 +196,9 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           </button>
           {/* 下拉箭头按钮 */}
           <button
-            onClick={() => setShowAiSubmenu(!showAiSubmenu)}
+            onClick={handleToggleSubmenu}
+            onMouseDown={handleMenuClick}
+            onPointerDown={handleMenuClick}
             className={cn(
               "px-2 py-2.5 rounded-xl shadow-md transition-all active:scale-95",
               "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700",
@@ -192,12 +224,16 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.15 }}
               className="overflow-hidden mt-1"
+              onClick={handleMenuClick}
+              onMouseDown={handleMenuClick}
             >
               <div className="grid grid-cols-2 gap-1 p-1 bg-slate-50 dark:bg-slate-800 rounded-xl">
                 {AI_OPTIONS.map((option) => (
                   <button
                     key={option.id}
-                    onClick={() => handleAiOption(option)}
+                    onClick={(e) => handleAiOption(option, e)}
+                    onMouseDown={handleMenuClick}
+                    onPointerDown={handleMenuClick}
                     className={cn(
                       "flex items-center justify-center gap-1 py-2 px-2 rounded-lg",
                       "text-xs font-medium",
@@ -213,11 +249,9 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
                   </button>
                 ))}
                 <button
-                  onClick={() => {
-                    setShowAiSubmenu(false);
-                    onClose();
-                    onExplain();
-                  }}
+                  onClick={(e) => handleAiOption(AI_OPTIONS[0], e)}
+                  onMouseDown={handleMenuClick}
+                  onPointerDown={handleMenuClick}
                   className={cn(
                     "col-span-2 flex items-center justify-center gap-1 py-2 px-2 rounded-lg",
                     "text-xs font-medium",
@@ -239,7 +273,9 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
       {/* 2.5 [新增] 经文串珠按钮 */}
       {onCrossRef && (
         <button
-          onClick={onCrossRef}
+          onClick={(e) => { handleMenuClick(e); onCrossRef(); }}
+          onMouseDown={handleMenuClick}
+          onPointerDown={handleMenuClick}
           className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
         >
           <GitBranch className="w-4 h-4" />
@@ -249,17 +285,32 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
 
       {/* 3. 次要操作区 (笔记、分享、复制) */}
       <div className="grid grid-cols-3 gap-1 pt-1 border-t dark:border-slate-800">
-        <button onClick={handleNote} className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+        <button
+          onClick={(e) => { handleMenuClick(e); handleNote(); }}
+          onMouseDown={handleMenuClick}
+          onPointerDown={handleMenuClick}
+          className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+        >
           <PenLine className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
           <span className="text-[10px] text-slate-500">笔记</span>
         </button>
 
-        <button onClick={handleShare} className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+        <button
+          onClick={(e) => { handleMenuClick(e); handleShare(); }}
+          onMouseDown={handleMenuClick}
+          onPointerDown={handleMenuClick}
+          className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+        >
           <Share2 className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
           <span className="text-[10px] text-slate-500">分享</span>
         </button>
 
-        <button onClick={handleCopyClick} className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+        <button
+          onClick={(e) => { handleMenuClick(e); handleCopyClick(); }}
+          onMouseDown={handleMenuClick}
+          onPointerDown={handleMenuClick}
+          className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+        >
           <Copy className={cn("w-4 h-4 mb-1", copied ? "text-green-600" : "text-slate-500 dark:text-slate-400")} />
           <span className={cn("text-[10px]", copied ? "text-green-600 font-bold" : "text-slate-500")}>
             {copied ? "已复制" : "复制"}
