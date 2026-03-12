@@ -74,9 +74,11 @@ export async function GET(req: Request, { params }: RouteParams) {
       }
     });
 
-    // Get leaderboard entries if planId provided
+    // Get leaderboard entries
+    const planIds = church.groupPlans.map(p => p.id);
     let leaderboardData: any[] = [];
     if (planId) {
+      // Specific plan
       leaderboardData = await prisma.leaderboardEntry.findMany({
         where: { planId },
         include: {
@@ -84,10 +86,17 @@ export async function GET(req: Request, { params }: RouteParams) {
         },
         orderBy: { score: 'desc' }
       });
+    } else if (planIds.length > 0) {
+      // All plans - aggregate by user
+      leaderboardData = await prisma.leaderboardEntry.findMany({
+        where: { planId: { in: planIds } },
+        include: {
+          user: { select: { id: true, name: true, image: true } }
+        }
+      });
     }
 
     // Get progress data - only for plans in this church
-    const planIds = church.groupPlans.map(p => p.id);
     const progressData = await prisma.groupPlanProgress.findMany({
       where: planId
         ? { planId }
@@ -141,6 +150,24 @@ export async function GET(req: Request, { params }: RouteParams) {
       ? Math.round(progressData.reduce((sum, p) => sum + p.completedDays, 0) / progressData.length)
       : 0;
 
+    // Aggregate leaderboard by user when viewing all plans
+    let aggregatedLeaderboard = leaderboardData;
+    if (!planId && leaderboardData.length > 0) {
+      const userMap = new Map<string, any>();
+      leaderboardData.forEach(entry => {
+        const existing = userMap.get(entry.userId);
+        if (existing) {
+          existing.score += entry.score;
+          existing.chaptersRead += entry.chaptersRead;
+          existing.streakDays = Math.max(existing.streakDays, entry.streakDays);
+          existing.completedDays += entry.completedDays;
+        } else {
+          userMap.set(entry.userId, { ...entry });
+        }
+      });
+      aggregatedLeaderboard = Array.from(userMap.values()).sort((a, b) => b.score - a.score);
+    }
+
     const stats = {
       groupInfo: {
         name: church.name,
@@ -157,7 +184,7 @@ export async function GET(req: Request, { params }: RouteParams) {
         new Date(a.date).getTime() - new Date(b.date).getTime()
       ),
       memberStats: memberStats.sort((a, b) => b.activeDays - a.activeDays),
-      leaderboard: leaderboardData.slice(0, 10)
+      leaderboard: aggregatedLeaderboard.slice(0, 10)
     };
 
     return NextResponse.json({ stats });
