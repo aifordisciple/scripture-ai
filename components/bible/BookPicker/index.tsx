@@ -101,7 +101,7 @@ export function BookPicker({
         </div>
 
         {/* 主内容区 - 书卷网格 + 章节网格 */}
-        <div className="flex-1 overflow-y-auto p-4 pb-safe" style={{ height: 'calc(100vh - 120px)' }}>
+        <div className="flex-1 overflow-y-auto p-4 pb-32" style={{ height: 'calc(100vh - 120px)' }}>
           <AnimatePresence mode="wait">
             <motion.div
               key={testament}
