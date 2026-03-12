@@ -6,11 +6,16 @@ import { motion, useAnimation, PanInfo, TapInfo, AnimatePresence } from "framer-
 import { useBibleStore } from "@/store/useBibleStore";
 import {
   Sparkles, Maximize, Minimize, PanelLeft, Bot, X, Move, MousePointerClick,
-  ListOrdered, Loader2, BookOpen, AlertCircle
+  ListOrdered, Loader2, BookOpen, AlertCircle, BookOpenCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function MagicBall() {
+interface MagicBallProps {
+  /** 打开书卷选择器的回调 */
+  onOpenBookPicker?: () => void;
+}
+
+export function MagicBall({ onOpenBookPicker }: MagicBallProps) {
   const controls = useAnimation();
   const [showHint, setShowHint] = useState<string | null>(null);
 
@@ -195,8 +200,12 @@ export function MagicBall() {
       setIsQueuePanelOpen(false);
     }
     else if (isVertical && y < -threshold) {
-      // 上滑：切换目录
-      toggleSidebar();
+      // 上滑：打开经文选择器（移动端）或切换目录（桌面端）
+      if (onOpenBookPicker) {
+        onOpenBookPicker();
+      } else {
+        toggleSidebar();
+      }
       setIsQueuePanelOpen(false);
     }
     else if (isVertical && y > threshold) {
@@ -390,7 +399,9 @@ export function MagicBall() {
               )}
             </div>
             <div className={cn("absolute transition-all duration-300 ease-out", showHint === "menu-toggle" ? "-translate-y-24 opacity-100 scale-100" : "translate-y-0 opacity-0 scale-50")}>
-              <div className="bg-slate-700/80 text-white p-2.5 rounded-full shadow-xl backdrop-blur-md border border-white/20">{isSidebarOpen ? <X className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />}</div>
+              <div className="bg-primary/90 text-white p-2.5 rounded-full shadow-xl backdrop-blur-md border border-white/20">
+                {onOpenBookPicker ? <BookOpenCheck className="w-5 h-5" /> : (isSidebarOpen ? <X className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />)}
+              </div>
             </div>
             <div className={cn("absolute transition-all duration-300 ease-out", (showHint === "fullscreen" || showHint === "exit-fullscreen") ? "translate-y-24 opacity-100 scale-100" : "translate-y-0 opacity-0 scale-50")}>
               <div className="bg-slate-700/80 text-white p-2.5 rounded-full shadow-xl backdrop-blur-md border border-white/20">{showHint === "exit-fullscreen" ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}</div>

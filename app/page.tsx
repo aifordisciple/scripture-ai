@@ -317,7 +317,7 @@ export default function Home() {
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <NoteEditor />
       <ShareCard />
-      <MagicBall />
+      <MagicBall onOpenBookPicker={() => setIsBookPickerOpen(true)} />
       <InstallPrompt />
 
       {/* Mobile BookPicker - 移动端经文选择器 */}
@@ -419,38 +419,41 @@ export default function Home() {
             isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
-          <header className="h-14 flex items-center justify-between px-3 md:px-4 glass-panel rounded-2xl pointer-events-auto shadow-sm">
-            
-            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-              <Button variant="ghost" size="icon" className="md:hidden text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full" onClick={() => toggleSidebar()}>
+          <header className="h-14 flex items-center justify-between px-2 md:px-4 glass-panel rounded-2xl pointer-events-auto shadow-sm">
+
+            {/* 左侧：菜单 + 搜索 */}
+            <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
+              <Button variant="ghost" size="icon" className="md:hidden text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full h-9 w-9" onClick={() => toggleSidebar()}>
                 <Menu className="h-5 w-5" />
               </Button>
-              
+
               <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full hover:bg-black/5 dark:hover:bg-white/5", !isDesktopSidebarOpen ? "text-muted-foreground" : "text-primary")} onClick={toggleDesktopSidebar}>
                 <PanelLeft className="h-5 w-5" />
               </Button>
-              
+
               <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-secondary/60 hover:bg-secondary border-none ml-1" onClick={() => setIsSearchOpen(true)}>
                   <Search className="w-4 h-4 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground pr-2">搜索经文、问题... ( / 或 Cmd+K )</span>
               </Button>
 
-              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full" onClick={() => setIsSearchOpen(true)}>
+              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full h-9 w-9" onClick={() => setIsSearchOpen(true)}>
                 <Search className="h-5 w-5" />
               </Button>
             </div>
-            
+
+            {/* 桌面端 Tab 列表 */}
             <div className="hidden md:flex flex-1 items-center overflow-hidden mx-4 mask-linear-fade pl-2 min-w-0">
-               <TabList 
-                 tabs={tabs} 
-                 activeTabId={activeTabId} 
-                 onSwitchTab={handleSwitchTab} 
-                 onCloseTab={closeTab} 
-                 onAddTab={handleAddTab} 
+               <TabList
+                 tabs={tabs}
+                 activeTabId={activeTabId}
+                 onSwitchTab={handleSwitchTab}
+                 onCloseTab={closeTab}
+                 onAddTab={handleAddTab}
                />
             </div>
 
-            <div className="md:hidden flex-1 text-center">
+            {/* 移动端中间：书卷章节选择器 */}
+            <div className="md:hidden flex-1 text-center min-w-0 px-1">
               <button
                 onClick={() => {
                   if (activeTab.type === 'read') {
@@ -458,59 +461,57 @@ export default function Home() {
                   }
                 }}
                 className={cn(
-                  "inline-flex items-center gap-1.5 font-serif font-bold text-lg text-foreground tracking-wide",
+                  "inline-flex items-center gap-1 font-serif font-bold text-base text-foreground tracking-wide max-w-full",
                   activeTab.type === 'read' && "hover:text-primary transition-colors"
                 )}
               >
-                {activeTab.type === 'read' ? (
-                  <>
-                    {activeTab.book} {activeTab.chapter}
-                    <BookOpen className="w-4 h-4 opacity-50" />
-                  </>
-                ) : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : activeTab.type === 'group' ? "小组读经" : "读经计划"}
+                <span className="truncate">
+                  {activeTab.type === 'read' ? (
+                    <>{activeTab.book} {activeTab.chapter}</>
+                  ) : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : activeTab.type === 'group' ? "小组读经" : "读经计划"}
+                </span>
+                {activeTab.type === 'read' && (
+                  <BookOpen className="w-3.5 h-3.5 opacity-40 shrink-0" />
+                )}
               </button>
             </div>
 
-            <div className="flex items-center gap-1 shrink-0">
-              
+            {/* 桌面端右侧工具栏 */}
+            <div className="hidden sm:flex items-center gap-1 shrink-0">
+
               {activeTab.type === 'read' && (
-                 <>
-                    <HeaderPlayer player={player} text={chapterSpeechText || ""} className="hidden sm:flex bg-transparent border-none" mode="full" />
-                    <HeaderPlayer player={player} text={chapterSpeechText || ""} className="sm:hidden border-none bg-transparent p-0" mode="minimal" />
-                 </>
+                 <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="full" />
               )}
 
-              <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="hidden sm:flex text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="全屏">
+              <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="全屏">
                 <Maximize className="h-4 w-4" />
               </Button>
 
-              <div className="mx-1 border-l h-5 border-border/50 hidden sm:block"></div>
+              <div className="mx-1 border-l h-5 border-border/50"></div>
 
-              <div className="hidden sm:flex items-center gap-1 pl-1">
-                  <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="调整行高">
-                    <AlignJustify className="h-4 w-4" />
-                  </Button>
-                  
-                  <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold rounded-full">
-                    <Languages className="h-4 w-4" />{showEnglish ? "中/英" : "中"}
-                  </Button>
-                  
-                  <div className="w-20 mx-2 group relative flex items-center">
-                    <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} className="cursor-pointer" />
-                  </div>
+              <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="调整行高">
+                <AlignJustify className="h-4 w-4" />
+              </Button>
+
+              <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold rounded-full">
+                <Languages className="h-4 w-4" />{showEnglish ? "中/英" : "中"}
+              </Button>
+
+              <div className="w-20 mx-2 group relative flex items-center">
+                <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} className="cursor-pointer" />
               </div>
 
-              <div className="mx-1 border-l h-5 border-border/50 hidden sm:block"></div>
+              <div className="mx-1 border-l h-5 border-border/50"></div>
 
-              {/* 火苗动效 */}
+              {/* 火苗动效 - 桌面端 */}
               {streakCount > 0 && (
-                <div className="flex items-center gap-1 px-2 py-1 bg-orange-50 dark:bg-orange-950/30 rounded-full border border-orange-100 dark:border-orange-900/50 animate-in zoom-in duration-500">
+                <div className="flex items-center gap-1 px-2 py-1 bg-orange-50 dark:bg-orange-950/30 rounded-full border border-orange-100 dark:border-orange-900/50">
                   <Flame className="w-4 h-4 text-orange-500 fill-orange-500 animate-pulse" />
                   <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{streakCount}</span>
                 </div>
               )}
 
-              {/* 小组读经入口 */}
+              {/* 小组读经入口 - 桌面端 */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -531,8 +532,22 @@ export default function Home() {
                <div className="pl-1">
                  <UserMenu />
                </div>
-              
-              <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5" onClick={() => setMobileSettingsOpen(true)}>
+            </div>
+
+            {/* 移动端右侧：精简工具栏 */}
+            <div className="flex sm:hidden items-center gap-0.5 shrink-0">
+
+              {/* 火苗徽章 - 移动端紧凑版 */}
+              {streakCount > 0 && (
+                <div className="flex items-center px-1.5 py-0.5 bg-orange-50 dark:bg-orange-950/30 rounded-full">
+                  <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
+                  <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 ml-0.5">{streakCount}</span>
+                </div>
+              )}
+
+              <UserMenu />
+
+              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 h-9 w-9" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>
             </div>
