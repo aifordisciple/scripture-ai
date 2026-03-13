@@ -265,16 +265,34 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     clearSelection();
   }, [selectedVerses, verses, addTab, setIsMenuVisible, clearSelection]);
 
-  // [新增] 处理查看地图 - 打开Atlas面板
-  const handleAtlas = useCallback(() => {
+  // [新增] 处理查看地图 - 打开Atlas面板并提取地点
+  const handleAtlas = useCallback(async () => {
     if (selectedVerses.length === 0) return;
 
-    // 打开Atlas面板
-    addTab({ type: 'atlas' });
+    const cuvVerses = verses.filter(v => v.version === 'CUV' && selectedVerses.includes(v.verse));
+    if (cuvVerses.length === 0) return;
+
+    const firstVerse = cuvVerses[0];
+    const verseContent = cuvVerses.map(v => v.content).join(' ');
+    const verseStart = Math.min(...selectedVerses);
+    const verseEnd = Math.max(...selectedVerses);
+
+    // 打开Atlas面板，传递经文信息
+    addTab({
+      type: 'atlas',
+      atlasData: {
+        bookId: firstVerse.bookId,
+        chapter: firstVerse.chapter,
+        verseStart,
+        verseEnd,
+        verseContent,
+        bookName: firstVerse.bookName,
+      },
+    });
     setAtlasPanelOpen(true);
     setIsMenuVisible(false);
     clearSelection();
-  }, [selectedVerses, addTab, setAtlasPanelOpen, setIsMenuVisible, clearSelection]);
+  }, [selectedVerses, verses, addTab, setAtlasPanelOpen, setIsMenuVisible, clearSelection]);
 
   // [新增] 处理查看主题网络 - 打开ThemeGraph面板
   const handleThemeGraph = useCallback(() => {

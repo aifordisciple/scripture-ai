@@ -25,6 +25,13 @@ export interface Tab {
     locationId?: string;
     year?: number;
     journeyId?: string;
+    // 经文上下文，用于 AI 提取地点
+    bookId?: string;
+    bookName?: string;
+    chapter?: number;
+    verseStart?: number;
+    verseEnd?: number;
+    verseContent?: string;
   };
   // Theme-graph specific
   themeGraphData?: {

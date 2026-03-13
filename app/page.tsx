@@ -584,7 +584,16 @@ export default function Home() {
               <GroupTab key={activeTab.id} />
           ) : activeTab.type === 'atlas' ? (
               <div key={activeTab.id} className="h-[calc(100vh-8rem)]">
-                <AtlasPanel />
+                <AtlasPanel
+                  verseContext={activeTab.atlasData?.bookId ? {
+                    bookId: activeTab.atlasData.bookId,
+                    bookName: activeTab.atlasData.bookName,
+                    chapter: activeTab.atlasData.chapter!,
+                    verseStart: activeTab.atlasData.verseStart!,
+                    verseEnd: activeTab.atlasData.verseEnd!,
+                    verseContent: activeTab.atlasData.verseContent!,
+                  } : undefined}
+                />
               </div>
           ) : activeTab.type === 'theme-graph' ? (
               <div key={activeTab.id} className="h-[calc(100vh-8rem)]">

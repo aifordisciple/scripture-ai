@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useBibleStore } from '@/store/useBibleStore';
-import { X, Map, Clock, Route, Search } from 'lucide-react';
+import { X, Map, Clock, Route, Search, Loader2, MapPin } from 'lucide-react';
 import LocationCard from './LocationCard';
 import TimelineSlider from './TimelineSlider';
 import JourneyPlayer from './JourneyPlayer';
@@ -23,9 +23,18 @@ interface AtlasPanelProps {
   onClose?: () => void;
   initialLocationId?: string;
   initialYear?: number;
+  // 经文信息，用于 AI 提取地点
+  verseContext?: {
+    bookId: string;
+    bookName?: string;
+    chapter: number;
+    verseStart: number;
+    verseEnd: number;
+    verseContent: string;
+  };
 }
 
-export default function AtlasPanel({ onClose, initialLocationId, initialYear }: AtlasPanelProps) {
+export default function AtlasPanel({ onClose, initialLocationId, initialYear, verseContext }: AtlasPanelProps) {
   const {
     atlasPanelTab,
     setAtlasPanelTab,
@@ -38,9 +47,13 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
     activeJourneyId,
     isAtlasPanelOpen,
     setAtlasPanelOpen,
+    apiConfig,
   } = useBibleStore();
 
   const [isMobile, setIsMobile] = useState(false);
+  const [extractingLocations, setExtractingLocations] = useState(false);
+  const [extractedLocations, setExtractedLocations] = useState<any[]>([]);
+  const [extractionError, setExtractionError] = useState<string | null>(null);
 
   // 检测移动端
   useEffect(() => {
@@ -59,6 +72,52 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
       setTimelineYear(initialYear);
     }
   }, [initialLocationId, initialYear]);
+
+  // 当有经文上下文时，调用 AI 提取地点
+  useEffect(() => {
+    if (!verseContext?.verseContent) return;
+
+    async function extractLocations() {
+      setExtractingLocations(true);
+      setExtractionError(null);
+
+      try {
+        const res = await fetch('/api/atlas/ai-extract', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookId: verseContext.bookId,
+            chapter: verseContext.chapter,
+            verseStart: verseContext.verseStart,
+            verseEnd: verseContext.verseEnd,
+            verseContent: verseContext.verseContent,
+            apiConfig,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error('提取地点失败');
+        }
+
+        const data = await res.json();
+        setExtractedLocations(data.locations || []);
+
+        // 如果提取到地点，自动选中第一个
+        if (data.locations && data.locations.length > 0) {
+          const firstLocation = data.locations[0];
+          setSelectedLocation(firstLocation);
+          setSelectedLocationId(firstLocation.id);
+        }
+      } catch (error: any) {
+        console.error('Failed to extract locations:', error);
+        setExtractionError(error.message || '提取地点失败');
+      } finally {
+        setExtractingLocations(false);
+      }
+    }
+
+    extractLocations();
+  }, [verseContext, apiConfig]);
 
   const handleClose = useCallback(() => {
     setAtlasPanelOpen(false);
@@ -83,6 +142,53 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
           <X className="w-5 h-5" />
         </button>
       </div>
+
+      {/* 经文信息提示 */}
+      {verseContext && (
+        <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800">
+          <div className="text-sm text-indigo-700 dark:text-indigo-300">
+            📖 {verseContext.bookName} {verseContext.chapter}:{verseContext.verseStart}
+            {verseContext.verseEnd !== verseContext.verseStart && `-${verseContext.verseEnd}`}
+          </div>
+        </div>
+      )}
+
+      {/* AI 提取状态 */}
+      {extractingLocations && (
+        <div className="px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800 flex items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
+          <span className="text-sm text-amber-700 dark:text-amber-300">正在从经文中提取地点...</span>
+        </div>
+      )}
+
+      {/* 提取错误提示 */}
+      {extractionError && (
+        <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 border-b border-red-100 dark:border-red-800">
+          <span className="text-sm text-red-700 dark:text-red-300">⚠️ {extractionError}</span>
+        </div>
+      )}
+
+      {/* 提取到的地点列表 */}
+      {extractedLocations.length > 0 && !extractingLocations && (
+        <div className="px-4 py-2 bg-green-50 dark:bg-green-900/20 border-b border-green-100 dark:border-green-800">
+          <div className="text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            识别到 {extractedLocations.length} 个地点：
+            {extractedLocations.map((loc, idx) => (
+              <button
+                key={loc.id}
+                onClick={() => {
+                  setSelectedLocation(loc);
+                  setSelectedLocationId(loc.id);
+                }}
+                className="px-2 py-0.5 bg-green-100 dark:bg-green-800 rounded text-xs hover:bg-green-200 dark:hover:bg-green-700 transition-colors"
+              >
+                {loc.nameZh}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 搜索栏 */}
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
