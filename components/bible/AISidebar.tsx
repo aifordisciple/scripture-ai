@@ -106,22 +106,22 @@ const MessageBubble = memo(({
   return (
     <div className={cn("flex group relative mb-4", role === 'user' ? "justify-end" : "justify-start")}>
       <div className={cn(
-        "max-w-[95%] rounded-2xl px-5 py-4 shadow-sm border relative transition-all", 
-        role === 'user' 
-          ? "bg-blue-600 text-white border-blue-600 text-[15px]" 
-          : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200" 
+        "relative transition-all",
+        role === 'user'
+          ? "max-w-[90%] rounded-2xl px-4 py-3 shadow-sm bg-blue-600 text-white text-[15px]"
+          : "w-full" // AI 消息全宽，无背景框
       )}>
-        <div className={cn(
-            "absolute -top-5 flex items-center gap-1 text-[10px] font-bold opacity-60 select-none",
-            role === 'user' ? "right-0 flex-row-reverse text-blue-500" : "left-0 text-slate-400"
-        )}>
-            {role === 'user' ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
-            <span>{role === 'user' ? "你" : "AI"}</span>
-        </div>
+        {/* 用户消息显示用户标识在右上角 */}
+        {role === 'user' && (
+          <div className="absolute -top-5 right-0 flex items-center gap-1 text-[10px] font-bold opacity-60 select-none text-blue-500 flex-row-reverse">
+            <User className="w-3 h-3" />
+            <span>你</span>
+          </div>
+        )}
 
         {role === 'user' ? (
            <div className="prose prose-sm dark:prose-invert max-w-none break-words text-white">
-             <ReactMarkdown 
+             <ReactMarkdown
                 components={{
                     blockquote: ({node, ...props}) => <blockquote className="relative border-l-4 border-white/50 pl-3 py-1 my-2 bg-white/10 rounded-r-md italic text-white/90 text-xs" {...props} />,
                     p: ({node, ...props}) => <p className="leading-relaxed mb-2 last:mb-0" {...props} />,
@@ -133,6 +133,12 @@ const MessageBubble = memo(({
            </div>
         ) : (
           <>
+            {/* AI 标识 */}
+            <div className="flex items-center gap-1.5 mb-3 text-slate-400 dark:text-slate-500 select-none">
+              <Bot className="w-3.5 h-3.5" />
+              <span className="text-[11px] font-medium">AI</span>
+            </div>
+
             {isThinking && (
               <div className="flex items-center gap-2 text-blue-500 mb-3 text-[13px] font-medium animate-pulse select-none">
                  <Loader2 className="w-4 h-4 animate-spin" />
@@ -143,7 +149,7 @@ const MessageBubble = memo(({
             {mainText && (
               <div className="prose prose-slate dark:prose-invert max-w-none break-words">
                 {typeof ReactMarkdown !== 'undefined' ? (
-                    <ReactMarkdown 
+                    <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
                         h3: ({node, ...props}) => (
@@ -153,11 +159,11 @@ const MessageBubble = memo(({
                           </h3>
                         ),
                         h4: ({node, ...props}) => <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-4 mb-2 flex items-center gap-1" {...props}><ChevronRight className="w-3 h-3 text-blue-400" />{props.children}</h4>,
-                        p: ({node, ...props}) => <p className="text-[15px] leading-7 text-slate-600 dark:text-slate-300 mb-3 last:mb-0 text-justify" {...props} />, 
+                        p: ({node, ...props}) => <p className="text-[15px] leading-7 text-slate-600 dark:text-slate-300 mb-3 last:mb-0 text-justify" {...props} />,
                         ul: ({node, ...props}) => <ul className="my-2 space-y-1 pl-1" {...props} />,
                         li: ({node, ...props}) => (
                           <li className="text-[15px] leading-relaxed text-slate-600 dark:text-slate-300 flex items-start gap-2 pl-1" {...props}>
-                             <span className="text-blue-400 select-none mt-2 text-[6px] shrink-0">●</span> 
+                             <span className="text-blue-400 select-none mt-2 text-[6px] shrink-0">●</span>
                              <span className="flex-1">{props.children}</span>
                           </li>
                         ),
@@ -178,10 +184,10 @@ const MessageBubble = memo(({
                 )}
               </div>
             )}
-            
+
             {/* 底部工具栏：复制 + 笔记 + 收藏 + 重试 + 朗读 */}
             {(mainText || !isThinking) && (
-              <div className="mt-4 pt-2 border-t border-slate-50 dark:border-slate-700/50 flex justify-between items-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 select-none">
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center opacity-100 select-none">
                   <div className="flex items-center gap-1 flex-wrap">
                       <button
                           onClick={handleCopy}
