@@ -74,16 +74,27 @@ interface GroupPlan {
 export function GroupTab() {
   const router = useRouter();
 
+  // 从全局 store 获取选择状态（用于跨标签页保持）
+  const { selectedGroupForPlan, selectedPlanId, setSelectedGroupForPlan, setSelectedPlanId } = useBibleStore();
+
   const [myGroups, setMyGroups] = useState<Membership[]>([]);
   const [publicGroups, setPublicGroups] = useState<Church[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedGroup, setSelectedGroup] = useState<Membership | null>(null);
   const [groupPlans, setGroupPlans] = useState<GroupPlan[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<GroupPlan | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
+
+  // 从全局 store 恢复选中的小组和计划
+  const selectedGroup = selectedGroupForPlan ? {
+    churchId: selectedGroupForPlan.churchId,
+    role: selectedGroupForPlan.role,
+    church: selectedGroupForPlan.church
+  } as Membership : null;
+
+  // 根据 selectedPlanId 从 groupPlans 中找到对应的计划
+  const selectedPlan = selectedPlanId ? groupPlans.find(p => p.id === selectedPlanId) || null : null;
 
   useEffect(() => {
     fetchGroups();
@@ -198,7 +209,7 @@ export function GroupTab() {
       });
       const data = await res.json();
       if (data.success) {
-        setSelectedGroup(null);
+        setSelectedGroupForPlan(null);
         fetchGroups();
       }
     } catch (error) {
@@ -217,7 +228,7 @@ export function GroupTab() {
         <GroupPlanDetail
           churchId={selectedGroup.churchId}
           plan={selectedPlan}
-          onBack={() => setSelectedPlan(null)}
+          onBack={() => setSelectedPlanId(null)}
           isAdmin={selectedGroup.role === "OWNER" || selectedGroup.role === "ADMIN"}
         />
       </div>
@@ -232,8 +243,8 @@ export function GroupTab() {
       <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
         <button
           onClick={() => {
-            setSelectedGroup(null);
-            setSelectedPlan(null);
+            setSelectedGroupForPlan(null);
+            setSelectedPlanId(null);
             setGroupPlans([]);
           }}
           className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm font-medium"
@@ -314,7 +325,7 @@ export function GroupTab() {
                 {groupPlans.map((plan) => (
                   <div
                     key={plan.id}
-                    onClick={() => setSelectedPlan(plan)}
+                    onClick={() => setSelectedPlanId(plan.id)}
                     className="cursor-pointer hover:shadow-lg transition-shadow"
                   >
                     <div className={cn(
@@ -371,7 +382,7 @@ export function GroupTab() {
                   <Button
                     key={plan.id}
                     variant="outline"
-                    onClick={() => setSelectedPlan(plan)}
+                    onClick={() => setSelectedPlanId(plan.id)}
                     className="w-full justify-start"
                   >
                     {plan.name}
@@ -416,7 +427,7 @@ export function GroupTab() {
                 isOwner={selectedGroup.role === "OWNER"}
                 isAdmin={isAdmin}
                 onGroupDisbanded={() => {
-                  setSelectedGroup(null);
+                  setSelectedGroupForPlan(null);
                   fetchGroups();
                 }}
               />
@@ -513,7 +524,7 @@ export function GroupTab() {
                     }}
                     isMember={true}
                     memberRole={membership.role}
-                    onClick={() => setSelectedGroup(membership)}
+                    onClick={() => setSelectedGroupForPlan({ churchId: membership.churchId, role: membership.role, church: membership.church })}
                   />
                 ))}
               </div>

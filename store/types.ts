@@ -376,6 +376,12 @@ export interface GroupSlice {
   // 小组阅读上下文
   groupPlanContext: GroupPlanContext | null;
 
+  // 小组计划选择状态（用于跨标签页保持）
+  selectedGroupForPlan: { churchId: string; role: string; church: any } | null;
+  selectedPlanId: string | null;
+  setSelectedGroupForPlan: (group: { churchId: string; role: string; church: any } | null) => void;
+  setSelectedPlanId: (planId: string | null) => void;
+
   // 方法
   setGroupPlanContext: (ctx: GroupPlanContext | null) => void;
   advanceGroupPlanStep: () => void;

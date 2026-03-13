@@ -618,6 +618,12 @@ export const createSyncSlice: StateCreator<StoreState, [], [], SyncSlice> = (set
 export const createGroupSlice: StateCreator<StoreState, [], [], GroupSlice> = (set, get) => ({
   groupPlanContext: null,
 
+  // 小组计划选择状态（用于跨标签页保持）
+  selectedGroupForPlan: null,
+  selectedPlanId: null,
+  setSelectedGroupForPlan: (group) => set({ selectedGroupForPlan: group }),
+  setSelectedPlanId: (planId) => set({ selectedPlanId: planId }),
+
   setGroupPlanContext: (ctx) => set({ groupPlanContext: ctx }),
 
   advanceGroupPlanStep: () => {
