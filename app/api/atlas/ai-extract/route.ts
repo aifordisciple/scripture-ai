@@ -51,14 +51,17 @@ export async function POST(request: NextRequest) {
     // 调用AI提取地点
     const prompt = EXTRACT_LOCATION_PROMPT.replace('{verseContent}', verseContent);
 
-    // 获取API配置
+    // 获取API配置 - 优先使用前端传递的 apiConfig，其次使用环境变量
     const baseUrl = apiConfig?.baseUrl || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
     const apiKey = apiConfig?.apiKey || process.env.OPENAI_API_KEY;
-    const model = apiConfig?.model || 'gpt-3.5-turbo';
+    const model = apiConfig?.model || process.env.AI_MODEL || 'MiniMax-M2.5';
 
     if (!apiKey) {
-      return NextResponse.json({ error: 'No API key configured' }, { status: 500 });
+      console.error('No API key configured');
+      return NextResponse.json({ error: 'No API key configured', locations: [] }, { status: 200 });
     }
+
+    console.log(`Calling AI API: ${baseUrl} with model ${model}`);
 
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
@@ -77,12 +80,14 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('AI API error:', errorData);
-      return NextResponse.json({ error: 'AI API error' }, { status: 500 });
+      console.error('AI API error:', response.status, errorData);
+      return NextResponse.json({ error: 'AI API error', locations: [] }, { status: 200 });
     }
 
     const aiResponse = await response.json();
     const content = aiResponse.choices?.[0]?.message?.content || '[]';
+
+    console.log('AI response:', content.substring(0, 200));
 
     // 解析AI返回的JSON
     let extractedLocations: any[] = [];
@@ -113,16 +118,19 @@ export async function POST(request: NextRequest) {
 
       if (location) {
         // 创建经文-地点关联
-        const verseLocation = await prisma.bibleVerseLocation.create({
-          data: {
-            locationId: location.id,
-            bookId,
-            chapter,
-            verse: verseStart || 1,
-            mentionType: 'MENTIONED',
-          },
-          include: { location: true },
-        });
+        try {
+          await prisma.bibleVerseLocation.create({
+            data: {
+              locationId: location.id,
+              bookId,
+              chapter,
+              verse: verseStart || 1,
+              mentionType: 'MENTIONED',
+            },
+          });
+        } catch (e) {
+          // 忽略重复创建错误
+        }
 
         results.push({
           ...location,
@@ -138,6 +146,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error extracting locations:', error);
-    return NextResponse.json({ error: 'Failed to extract locations' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to extract locations', locations: [] }, { status: 200 });
   }
 }
