@@ -60,11 +60,12 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
             const progressRes = await fetch(`/api/church/${church.id}/plan/${plan.id}/progress`);
             const progressData = await progressRes.json();
 
-            // Calculate current day
-            const startDate = new Date(plan.startDate);
-            const today = new Date();
-            const daysPassed = Math.max(0, Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
-            const currentDay = daysPassed + 1;
+            // Calculate current day (using midnight for accurate calculation)
+            const startDateObj = new Date(plan.startDate);
+            const startMidnight = startDateObj.setHours(0, 0, 0, 0);
+            const todayMidnight = new Date().setHours(0, 0, 0, 0);
+            const diffDays = Math.round((todayMidnight - startMidnight) / 86400000);
+            const currentDay = Math.max(1, diffDays + 1);
 
             // Parse tasks
             let tasks: any[] = [];

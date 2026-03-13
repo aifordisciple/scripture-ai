@@ -60,11 +60,24 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
   const [togglingTask, setTogglingTask] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
-  // Calculate current day based on start date
-  const startDate = new Date(plan.startDate);
-  const today = new Date();
-  const daysPassed = Math.max(0, Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
-  const currentDay = Math.min(daysPassed + 1, tasks.length || plan.dailyChapters.length);
+  // Calculate current day based on start date (using midnight for accurate calculation)
+  const calculateCurrentDay = () => {
+    const startDateObj = new Date(plan.startDate);
+    const startMidnight = startDateObj.setHours(0, 0, 0, 0);
+    const todayMidnight = new Date().setHours(0, 0, 0, 0);
+    const diffDays = Math.round((todayMidnight - startMidnight) / 86400000);
+    return Math.max(1, diffDays + 1);
+  };
+
+  const currentDay = Math.min(calculateCurrentDay(), tasks.length || plan.dailyChapters.length);
+
+  // Helper function to get date string for a task day
+  const getTaskDate = (day: number) => {
+    const startDateObj = new Date(plan.startDate);
+    startDateObj.setHours(0, 0, 0, 0);
+    startDateObj.setDate(startDateObj.getDate() + day - 1);
+    return `${startDateObj.getMonth() + 1}月${startDateObj.getDate()}日`;
+  };
 
   // Calculate overdue days (days before current day that are not completed)
   const getOverdueDays = () => {
@@ -554,6 +567,8 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                 const readingsCompleted = task.readings.every((_, i) => dayTasks.includes(`reading-${i}`));
                 const allCompleted = (devotionalContent ? devotionalCompleted : true) && readingsCompleted;
                 const isCurrentDay = task.day === currentDay;
+                const isBehind = !allCompleted && task.day < currentDay;
+                const taskDate = getTaskDate(task.day);
 
                 return (
                   <div
@@ -570,8 +585,17 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="font-bold">第 {task.day} 天</span>
+                        <span className={cn(
+                          "text-xs",
+                          isCurrentDay ? "text-indigo-600 dark:text-indigo-400 font-medium" : "text-muted-foreground"
+                        )}>
+                          {isCurrentDay ? "今天" : taskDate}
+                        </span>
                         {isCurrentDay && (
                           <span className="text-xs bg-indigo-500 text-white px-1.5 py-0.5 rounded">今日</span>
+                        )}
+                        {isBehind && !isCurrentDay && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-bold">已落后</span>
                         )}
                       </div>
                       {allCompleted && (
