@@ -262,13 +262,13 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('ai_fontSize');
-        if (saved && ['small', 'medium', 'large'].includes(saved)) {
-          return saved as 'small' | 'medium' | 'large';
+        if (saved && ['small', 'medium', 'large', 'xlarge'].includes(saved)) {
+          return saved as 'small' | 'medium' | 'large' | 'xlarge';
         }
       } catch (e) {}
     }
     return 'medium';
-  })() as 'small' | 'medium' | 'large',
+  })() as 'small' | 'medium' | 'large' | 'xlarge',
   setAiFontSize: (size) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('ai_fontSize', size);

@@ -268,8 +268,8 @@ export interface AISlice {
   magicBallPosition: { bottom: number; right: number };
   setMagicBallPosition: (position: { bottom: number; right: number }) => void;
   // [新增] AI 字体大小
-  aiFontSize: 'small' | 'medium' | 'large';
-  setAiFontSize: (size: 'small' | 'medium' | 'large') => void;
+  aiFontSize: 'small' | 'medium' | 'large' | 'xlarge';
+  setAiFontSize: (size: 'small' | 'medium' | 'large' | 'xlarge') => void;
 }
 
 export interface UserDataSlice {

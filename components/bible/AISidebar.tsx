@@ -38,7 +38,7 @@ const MessageBubble = memo(({
   onSaveInsight?: () => void;
   isSaved?: boolean;
   onShare?: () => void;
-  fontSize?: 'small' | 'medium' | 'large';
+  fontSize?: 'small' | 'medium' | 'large' | 'xlarge';
 }) => {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -153,7 +153,8 @@ const MessageBubble = memo(({
               <div className={cn(
                 "prose prose-slate dark:prose-invert max-w-none break-words",
                 fontSize === 'small' && "prose-sm",
-                fontSize === 'large' && "prose-lg"
+                fontSize === 'large' && "prose-lg",
+                fontSize === 'xlarge' && "prose-xl"
               )}>
                 {typeof ReactMarkdown !== 'undefined' ? (
                     <ReactMarkdown
@@ -162,7 +163,7 @@ const MessageBubble = memo(({
                         h3: ({node, ...props}) => (
                           <h3 className={cn(
                             "font-bold text-slate-800 dark:text-slate-100 mt-6 mb-3 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700/50",
-                            fontSize === 'small' ? "text-sm" : fontSize === 'large' ? "text-lg" : "text-base"
+                            fontSize === 'small' ? "text-sm" : fontSize === 'large' ? "text-lg" : fontSize === 'xlarge' ? "text-xl" : "text-base"
                           )}>
                               <span className="w-1 h-4 bg-blue-500 rounded-full inline-block"></span>
                               {props.children}
@@ -170,17 +171,17 @@ const MessageBubble = memo(({
                         ),
                         h4: ({node, ...props}) => <h4 className={cn(
                           "font-bold text-slate-700 dark:text-slate-300 mt-4 mb-2 flex items-center gap-1",
-                          fontSize === 'small' ? "text-xs" : fontSize === 'large' ? "text-base" : "text-sm"
+                          fontSize === 'small' ? "text-xs" : fontSize === 'large' ? "text-base" : fontSize === 'xlarge' ? "text-lg" : "text-sm"
                         )} {...props}><ChevronRight className="w-3 h-3 text-blue-400" />{props.children}</h4>,
                         p: ({node, ...props}) => <p className={cn(
                           "leading-7 text-slate-600 dark:text-slate-300 mb-3 last:mb-0 text-justify",
-                          fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[17px]" : "text-[15px]"
+                          fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[17px]" : fontSize === 'xlarge' ? "text-[19px]" : "text-[15px]"
                         )} {...props} />,
                         ul: ({node, ...props}) => <ul className="my-2 space-y-1 pl-1" {...props} />,
                         li: ({node, ...props}) => (
                           <li className={cn(
                             "leading-relaxed text-slate-600 dark:text-slate-300 flex items-start gap-2 pl-1",
-                            fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[17px]" : "text-[15px]"
+                            fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[17px]" : fontSize === 'xlarge' ? "text-[19px]" : "text-[15px]"
                           )} {...props}>
                              <span className="text-blue-400 select-none mt-2 text-[6px] shrink-0">●</span>
                              <span className="flex-1">{props.children}</span>
@@ -188,14 +189,14 @@ const MessageBubble = memo(({
                         ),
                         strong: ({node, ...props}) => <strong className={cn(
                           "font-semibold text-blue-900 dark:text-blue-100 bg-blue-50 dark:bg-blue-900/30 px-1 py-0.5 rounded mx-0.5",
-                          fontSize === 'small' ? "text-[12px]" : fontSize === 'large' ? "text-[16px]" : "text-[14px]"
+                          fontSize === 'small' ? "text-[12px]" : fontSize === 'large' ? "text-[16px]" : fontSize === 'xlarge' ? "text-[18px]" : "text-[14px]"
                         )} {...props} />,
                         blockquote: ({node, ...props}) => (
                           <blockquote className="relative border-l-4 border-blue-300 dark:border-blue-700 pl-4 py-2 my-4 bg-slate-50 dark:bg-slate-800/50 rounded-r-lg" {...props}>
                               <Quote className="absolute top-2 right-2 w-4 h-4 text-slate-200 dark:text-slate-700" />
                               <div className={cn(
                                 "italic text-slate-600 dark:text-slate-400",
-                                fontSize === 'small' ? "text-xs" : fontSize === 'large' ? "text-base" : "text-sm"
+                                fontSize === 'small' ? "text-xs" : fontSize === 'large' ? "text-base" : fontSize === 'xlarge' ? "text-lg" : "text-sm"
                               )}>{props.children}</div>
                           </blockquote>
                         ),
@@ -207,7 +208,7 @@ const MessageBubble = memo(({
                 ) : (
                     <div className={cn(
                       "whitespace-pre-wrap leading-relaxed text-slate-700 dark:text-slate-300",
-                      fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[17px]" : "text-[15px]"
+                      fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[17px]" : fontSize === 'xlarge' ? "text-[19px]" : "text-[15px]"
                     )}>{mainText}</div>
                 )}
               </div>
@@ -781,7 +782,8 @@ export function AISidebar() {
                   "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors",
                   aiFontSize === 'medium' ? "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" : "",
                   aiFontSize === 'small' ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "",
-                  aiFontSize === 'large' ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : ""
+                  aiFontSize === 'large' ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "",
+                  aiFontSize === 'xlarge' ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : ""
                 )}
                 title="调整字体大小"
               >
@@ -800,6 +802,7 @@ export function AISidebar() {
                       { size: 'small' as const, label: '小', preview: 'text-xs' },
                       { size: 'medium' as const, label: '中', preview: 'text-sm' },
                       { size: 'large' as const, label: '大', preview: 'text-base' },
+                      { size: 'xlarge' as const, label: '超大', preview: 'text-lg' },
                     ].map(item => (
                       <button
                         key={item.size}
