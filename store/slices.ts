@@ -782,6 +782,10 @@ export const createAtlasSlice: StateCreator<StoreState, [], [], AtlasSlice> = (s
   setAtlasPanelOpen: (open) => set({ isAtlasPanelOpen: open }),
   atlasPanelTab: 'map',
   setAtlasPanelTab: (tab) => set({ atlasPanelTab: tab }),
+
+  // 经文上下文 - 用于AI提取地点
+  atlasVerseContext: null,
+  setAtlasVerseContext: (context) => set({ atlasVerseContext: context }),
 });
 
 // [新增] 主题网络图状态

@@ -51,6 +51,7 @@ export const useBibleStore = create<StoreState>()(
         selectedLocation: null,
         isAtlasPanelOpen: false,
         locationSearchResults: [],
+        atlasVerseContext: null,
         // ThemeGraph 状态不持久化
         selectedThemeId: null,
         selectedTheme: null,

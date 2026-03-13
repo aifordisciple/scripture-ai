@@ -23,18 +23,10 @@ interface AtlasPanelProps {
   onClose?: () => void;
   initialLocationId?: string;
   initialYear?: number;
-  // 经文信息，用于 AI 提取地点
-  verseContext?: {
-    bookId: string;
-    bookName?: string;
-    chapter: number;
-    verseStart: number;
-    verseEnd: number;
-    verseContent: string;
-  };
+  // 移除 verseContext prop，改为从 store 读取
 }
 
-export default function AtlasPanel({ onClose, initialLocationId, initialYear, verseContext }: AtlasPanelProps) {
+export default function AtlasPanel({ onClose, initialLocationId, initialYear }: AtlasPanelProps) {
   const {
     atlasPanelTab,
     setAtlasPanelTab,
@@ -49,12 +41,17 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
     setAtlasPanelOpen,
     setMapCenter,
     apiConfig,
+    // 从 store 读取经文上下文
+    atlasVerseContext,
   } = useBibleStore();
 
   const [isMobile, setIsMobile] = useState(false);
   const [extractingLocations, setExtractingLocations] = useState(false);
   const [extractedLocations, setExtractedLocations] = useState<any[]>([]);
   const [extractionError, setExtractionError] = useState<string | null>(null);
+
+  // 使用 store 中的 atlasVerseContext 代替 prop
+  const verseContext = atlasVerseContext;
 
   // 检测移动端
   useEffect(() => {

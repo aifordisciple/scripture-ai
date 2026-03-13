@@ -54,7 +54,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }, [initialBook, initialChapter]);
 
   const {
-    fontSize, lineHeight, selectedVerses, showEnglish, highlights, enqueueAI, scrollToVerse, setScrollToVerse, clearSelection, setBook: setStoreBook, setChapter: setStoreChapter, addTab, setAtlasPanelOpen, setThemeGraphPanelOpen
+    fontSize, lineHeight, selectedVerses, showEnglish, highlights, enqueueAI, scrollToVerse, setScrollToVerse, clearSelection, setBook: setStoreBook, setChapter: setStoreChapter, addTab, setAtlasPanelOpen, setThemeGraphPanelOpen, setAtlasVerseContext
   } = useBibleStore();
 
   const { verses, loading } = useBibleData(book, chapter);
@@ -266,7 +266,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }, [selectedVerses, verses, addTab, setIsMenuVisible, clearSelection]);
 
   // [新增] 处理查看地图 - 打开Atlas面板并提取地点
-  const handleAtlas = useCallback(async () => {
+  const handleAtlas = useCallback(() => {
     if (selectedVerses.length === 0) return;
 
     const cuvVerses = verses.filter(v => v.version === 'CUV' && selectedVerses.includes(v.verse));
@@ -277,22 +277,22 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     const verseStart = Math.min(...selectedVerses);
     const verseEnd = Math.max(...selectedVerses);
 
-    // 打开Atlas面板，传递经文信息
-    addTab({
-      type: 'atlas',
-      atlasData: {
-        bookId: firstVerse.bookId,
-        chapter: firstVerse.chapter,
-        verseStart,
-        verseEnd,
-        verseContent,
-        bookName: firstVerse.bookName,
-      },
+    // 设置经文上下文到 store
+    setAtlasVerseContext({
+      bookId: firstVerse.bookId,
+      bookName: firstVerse.bookName,
+      chapter: firstVerse.chapter,
+      verseStart,
+      verseEnd,
+      verseContent,
     });
+
+    // 打开Atlas面板
+    addTab({ type: 'atlas' });
     setAtlasPanelOpen(true);
     setIsMenuVisible(false);
     clearSelection();
-  }, [selectedVerses, verses, addTab, setAtlasPanelOpen, setIsMenuVisible, clearSelection]);
+  }, [selectedVerses, verses, addTab, setAtlasPanelOpen, setIsMenuVisible, clearSelection, setAtlasVerseContext]);
 
   // [新增] 处理查看主题网络 - 打开ThemeGraph面板
   const handleThemeGraph = useCallback(() => {

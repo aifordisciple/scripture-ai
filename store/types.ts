@@ -471,6 +471,17 @@ export interface AtlasSlice {
   setAtlasPanelOpen: (open: boolean) => void;
   atlasPanelTab: 'map' | 'timeline' | 'journey';
   setAtlasPanelTab: (tab: 'map' | 'timeline' | 'journey') => void;
+
+  // 经文上下文 - 用于AI提取地点
+  atlasVerseContext: {
+    bookId: string;
+    bookName: string;
+    chapter: number;
+    verseStart: number;
+    verseEnd: number;
+    verseContent: string;
+  } | null;
+  setAtlasVerseContext: (context: AtlasSlice['atlasVerseContext']) => void;
 }
 
 // --------------------------------------------------
