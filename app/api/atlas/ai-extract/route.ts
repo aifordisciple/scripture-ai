@@ -56,6 +56,26 @@ export async function POST(request: NextRequest) {
     const apiKey = apiConfig?.apiKey || process.env.OPENAI_API_KEY;
     const model = apiConfig?.model || process.env.AI_MODEL || 'MiniMax-M2.5';
 
+    // 日志：显示配置来源
+    console.log('AI Extract - Config source:', {
+      userConfig: apiConfig ? {
+        provider: apiConfig.provider,
+        baseUrl: apiConfig.baseUrl,
+        hasApiKey: !!apiConfig.apiKey,
+        model: apiConfig.model,
+      } : 'none',
+      envConfig: {
+        baseUrl: process.env.OPENAI_BASE_URL,
+        hasApiKey: !!process.env.OPENAI_API_KEY,
+        model: process.env.AI_MODEL,
+      },
+      actualConfig: {
+        baseUrl,
+        hasApiKey: !!apiKey,
+        model,
+      }
+    });
+
     if (!apiKey) {
       console.error('No API key configured');
       return NextResponse.json({ error: 'No API key configured', locations: [] }, { status: 200 });

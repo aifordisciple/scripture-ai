@@ -81,6 +81,15 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
       setExtractingLocations(true);
       setExtractionError(null);
 
+      // 获取完整的 apiConfig，确保包含 apiKey
+      const currentApiConfig = useBibleStore.getState().apiConfig;
+      console.log('AtlasPanel - apiConfig:', {
+        provider: currentApiConfig.provider,
+        baseUrl: currentApiConfig.baseUrl,
+        hasApiKey: !!currentApiConfig.apiKey,
+        model: currentApiConfig.model,
+      });
+
       try {
         const res = await fetch('/api/atlas/ai-extract', {
           method: 'POST',
@@ -91,7 +100,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
             verseStart: verseContext.verseStart,
             verseEnd: verseContext.verseEnd,
             verseContent: verseContext.verseContent,
-            apiConfig,
+            apiConfig: currentApiConfig,
           }),
         });
 

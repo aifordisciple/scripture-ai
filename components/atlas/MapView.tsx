@@ -133,11 +133,12 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
     >
       <MapController center={currentCenter} zoom={currentZoom} />
 
+      {/* 使用中国可访问的地图瓦片 - GeoQ智图 */}
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution='&copy; <a href="https://www.geoq.cn">GeoQ</a> 智图'
         url={isDarkMode
-          ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-          : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          ? 'https://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetGray/MapServer/tile/{z}/{y}/{x}'
+          : 'https://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer/tile/{z}/{y}/{x}'
         }
       />
 
