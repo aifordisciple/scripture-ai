@@ -256,6 +256,25 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
     }
     set({ magicBallPosition: position });
   },
+
+  // [新增] AI 字体大小
+  aiFontSize: (() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('ai_fontSize');
+        if (saved && ['small', 'medium', 'large'].includes(saved)) {
+          return saved as 'small' | 'medium' | 'large';
+        }
+      } catch (e) {}
+    }
+    return 'medium';
+  })() as 'small' | 'medium' | 'large',
+  setAiFontSize: (size) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('ai_fontSize', size);
+    }
+    set({ aiFontSize: size });
+  },
 });
 
 export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice> = (set, get) => ({

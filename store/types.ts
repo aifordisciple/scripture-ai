@@ -267,6 +267,9 @@ export interface AISlice {
   // [新增] Magic Ball 位置
   magicBallPosition: { bottom: number; right: number };
   setMagicBallPosition: (position: { bottom: number; right: number }) => void;
+  // [新增] AI 字体大小
+  aiFontSize: 'small' | 'medium' | 'large';
+  setAiFontSize: (size: 'small' | 'medium' | 'large') => void;
 }
 
 export interface UserDataSlice {
