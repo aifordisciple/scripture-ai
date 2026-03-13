@@ -14,6 +14,43 @@ const EXTRACT_LOCATION_PROMPT = `你是一个圣经地理专家。从以下经�
 经文：
 {verseContent}`;
 
+// 备用方案：直接从数据库匹配地点名称
+async function matchLocationsFromDatabase(verseContent: string) {
+  // 获取所有地点
+  const allLocations = await prisma.bibleLocation.findMany({
+    select: {
+      id: true,
+      nameZh: true,
+      nameEn: true,
+      aliases: true,
+      latitude: true,
+      longitude: true,
+      region: true,
+      description: true,
+      significance: true,
+    },
+  });
+
+  const matchedLocations: any[] = [];
+
+  for (const location of allLocations) {
+    // 检查经文中是否包含地点名称或别名
+    if (verseContent.includes(location.nameZh)) {
+      matchedLocations.push({
+        ...location,
+        context: `经文中提到了「${location.nameZh}」`,
+      });
+    } else if (location.aliases.some((alias) => verseContent.includes(alias))) {
+      matchedLocations.push({
+        ...location,
+        context: `经文中提到了「${location.nameZh}」`,
+      });
+    }
+  }
+
+  return matchedLocations;
+}
+
 // POST /api/atlas/ai-extract - AI从经文中提取地点信息
 export async function POST(request: NextRequest) {
   try {
@@ -166,6 +203,38 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error extracting locations:', error);
-    return NextResponse.json({ error: 'Failed to extract locations', locations: [] }, { status: 200 });
+
+    // 备用方案：直接从数据库匹配地点名称
+    console.log('Falling back to database matching...');
+    try {
+      const matchedLocations = await matchLocationsFromDatabase(verseContent);
+      console.log(`Database matching found ${matchedLocations.length} locations`);
+
+      // 缓存匹配结果
+      for (const location of matchedLocations) {
+        try {
+          await prisma.bibleVerseLocation.create({
+            data: {
+              locationId: location.id,
+              bookId,
+              chapter,
+              verse: verseStart || 1,
+              mentionType: 'MENTIONED',
+            },
+          });
+        } catch (e) {
+          // 忽略重复创建错误
+        }
+      }
+
+      return NextResponse.json({
+        locations: matchedLocations,
+        cached: false,
+        fallback: true,
+      });
+    } catch (fallbackError) {
+      console.error('Fallback matching also failed:', fallbackError);
+      return NextResponse.json({ error: 'Failed to extract locations', locations: [] }, { status: 200 });
+    }
   }
 }

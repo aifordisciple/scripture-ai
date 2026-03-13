@@ -133,13 +133,11 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
     >
       <MapController center={currentCenter} zoom={currentZoom} />
 
-      {/* 使用中国可访问的地图瓦片 - GeoQ智图 */}
+      {/* 使用高德地图瓦片 - 中国可用 */}
       <TileLayer
-        attribution='&copy; <a href="https://www.geoq.cn">GeoQ</a> 智图'
-        url={isDarkMode
-          ? 'https://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetGray/MapServer/tile/{z}/{y}/{x}'
-          : 'https://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer/tile/{z}/{y}/{x}'
-        }
+        attribution='&copy; <a href="https://www.amap.com">高德地图</a>'
+        url="https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}"
+        subdomains={['1', '2', '3', '4']}
       />
 
       {/* 地点标记 */}
