@@ -816,13 +816,18 @@ export function AISidebar() {
           )}
         >
             {!isLoading && messages.length > 0 && (
-              <div className="px-4 pb-2 flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-1">
+              <div className="px-4 pb-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-1 mb-2">
                    {aiMode === 'tutor' ? '苏格拉底式引导' :
                     aiMode === 'sermon' ? '讲章工具' :
                     aiMode === 'study-guide' ? '查经工具' : '深度探索'}
                  </div>
-                 <div className="flex flex-wrap gap-2">
+                 {/* 水平滚动容器，隐藏滚动条 */}
+                 <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1">
+                   <style jsx>{`
+                     .scrollbar-hide::-webkit-scrollbar { display: none; }
+                     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+                   `}</style>
                    {THEOLOGICAL_PROMPTS.filter(t => {
                      // 根据模式过滤显示的提示词
                      if (aiMode === 'tutor') return t.id === 'tutor';
@@ -834,7 +839,7 @@ export function AISidebar() {
                        key={t.id}
                        onClick={() => handleChipClick(t.prompt)}
                        className={cn(
-                         "flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-slate-700 transition-all active:scale-95 shadow-sm dark:bg-slate-800 dark:text-slate-200 hover:brightness-95",
+                         "flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-slate-700 transition-all active:scale-95 shadow-sm dark:bg-slate-800 dark:text-slate-200 hover:brightness-95 whitespace-nowrap shrink-0",
                          t.color
                        )}
                      >
