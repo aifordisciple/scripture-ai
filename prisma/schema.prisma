@@ -743,3 +743,155 @@ model GroupBadge {
 
   @@unique([churchId, type])
 }
+
+// ==================================================
+// 圣经地图与时间线功能模型
+// ==================================================
+
+// 地理位置模型
+model BibleLocation {
+  id            String   @id @default(cuid())
+  nameZh        String   // 中文名称
+  nameEn        String   // 英文名称
+  nameOriginal  String?  // 原文名称
+  aliases       String[] // 别名
+
+  latitude      Float    // 纬度
+  longitude     Float    // 经度
+  region        String?  // 区域（加利利、犹大等）
+  modernCountry String?  // 现代国家
+
+  description   String?  @db.Text
+  significance  String?  @db.Text // 圣经意义
+
+  verseMentions BibleVerseLocation[]
+  events        BibleEvent[]
+  journeys      JourneyStop[]
+
+  @@index([nameZh])
+  @@map("bible_locations")
+}
+
+// 经文-地点关联
+model BibleVerseLocation {
+  id          String @id @default(cuid())
+  locationId  String
+  location    BibleLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  bookId      String
+  chapter     Int
+  verse       Int
+  mentionType String // MENTIONED, EVENT_OCCURRED, JOURNEY_POINT
+
+  @@unique([locationId, bookId, chapter, verse])
+  @@index([bookId, chapter])
+  @@map("bible_verse_locations")
+}
+
+// 圣经事件模型
+model BibleEvent {
+  id          String   @id @default(cuid())
+  titleZh     String
+  titleEn     String?
+  description String   @db.Text
+
+  yearStart   Int?     // 开始年份（负数=BC）
+  yearEnd     Int?
+  yearApprox  Boolean  @default(false)
+  periodLabel String?  // 时期标签
+
+  locationId  String?
+  location    BibleLocation? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  bookId      String?
+  chapterStart Int?
+  chapterEnd   Int?
+
+  category    String   // RELIGIOUS, POLITICAL, MILITARY, MIRACLE
+  testament   String   // OLD, NEW, INTERTESTAMENTAL
+
+  @@index([yearStart])
+  @@map("bible_events")
+}
+
+// 旅程模型
+model BibleJourney {
+  id          String   @id @default(cuid())
+  titleZh     String
+  personId    String?
+  yearStart   Int?
+  yearEnd     Int?
+  journeyType String   // MISSIONARY, EXODUS, MIGRATION
+  stops       JourneyStop[]
+  @@map("bible_journeys")
+}
+
+model JourneyStop {
+  id         String @id @default(cuid())
+  journeyId  String
+  journey    BibleJourney @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  locationId String
+  location   BibleLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  order      Int
+  verseRef   String?
+  @@index([journeyId, order])
+  @@map("journey_stops")
+}
+
+// ==================================================
+// 主题网络图功能模型
+// ==================================================
+
+// 主题模型
+model BibleTheme {
+  id              String   @id @default(cuid())
+  nameZh          String
+  nameEn          String?
+  aliases         String[]
+  category        String   // THEOLOGICAL, ETHICAL, HISTORICAL, PROPHETIC
+  summary         String?  @db.Text
+  description     String?  @db.Text
+  keyVerses       String[]
+
+  verseCount      Int      @default(0)
+  connectionCount Int      @default(0)
+
+  verseLinks      ThemeVerseLink[]
+  connections     ThemeConnection[] @relation("ThemeLinks")
+  relatedThemes   ThemeConnection[] @relation("ThemeRelated")
+
+  @@unique([nameZh])
+  @@index([category])
+  @@map("bible_themes")
+}
+
+// 主题-经文关联
+model ThemeVerseLink {
+  id         String   @id @default(cuid())
+  themeId    String
+  theme      BibleTheme @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  bookId     String
+  chapter    Int
+  verseStart Int
+  verseEnd   Int?
+  relevance  Float    @default(1.0)
+  linkType   String   // PRIMARY, SECONDARY, MENTIONED
+  source     String   @default("MANUAL") // MANUAL, AI
+
+  @@unique([themeId, bookId, chapter, verseStart])
+  @@index([bookId, chapter])
+  @@map("theme_verse_links")
+}
+
+// 主题间关联
+model ThemeConnection {
+  id              String   @id @default(cuid())
+  themeId         String
+  theme           BibleTheme @relation("ThemeLinks", fields: [themeId], references: [id], onDelete: Cascade)
+  relatedThemeId  String
+  relatedTheme    BibleTheme @relation("ThemeRelated", fields: [relatedThemeId], references: [id], onDelete: Cascade)
+  connectionType  String   // PARENT, CHILD, RELATED, CONTRAST, FULFILLS
+  strength        Float    @default(0.5)
+
+  @@unique([themeId, relatedThemeId])
+  @@map("theme_connections")
+}

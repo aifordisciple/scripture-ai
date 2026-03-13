@@ -5,7 +5,7 @@
 // --------------------------------------------------
 export interface Tab {
   id: string;
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group';
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph';
   book?: string;
   chapter?: string;
   query?: string;
@@ -19,6 +19,17 @@ export interface Tab {
     chapter: number;
     verse: number;
     content: string;
+  };
+  // Atlas specific
+  atlasData?: {
+    locationId?: string;
+    year?: number;
+    journeyId?: string;
+  };
+  // Theme-graph specific
+  themeGraphData?: {
+    themeId?: string;
+    searchTerm?: string;
   };
 }
 
@@ -190,7 +201,7 @@ export interface ReaderSlice {
   activeTabId: string;
   // [修复] 在这里补上 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group'
   addTab: (params: {
-    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group';
+    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph';
     book?: string;
     chapter?: string;
     query?: string;
@@ -352,7 +363,7 @@ export interface UserDataSlice {
 // --------------------------------------------------
 // 3. 聚合总状态类型
 // --------------------------------------------------
-export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice;
+export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & ThemeGraphSlice;
 
 // --------------------------------------------------
 // 4. 小组读经计划状态 (GroupSlice)
@@ -388,4 +399,142 @@ export interface GroupSlice {
   previousGroupPlanStep: () => void;
   toggleGroupTaskCompleted: (churchId: string, planId: string, day: number, taskId: string, action?: 'complete' | 'uncomplete') => Promise<void>;
   startGroupPlanFlow: (churchId: string, planId: string, planName: string, tasks: any[], day: number) => void;
+}
+
+// --------------------------------------------------
+// 5. 圣经地图与时间线状态 (AtlasSlice)
+// --------------------------------------------------
+
+export interface BibleLocationData {
+  id: string;
+  nameZh: string;
+  nameEn: string;
+  latitude: number;
+  longitude: number;
+  region?: string;
+  description?: string;
+}
+
+export interface BibleEventData {
+  id: string;
+  titleZh: string;
+  yearStart?: number;
+  yearEnd?: number;
+  locationId?: string;
+  category: string;
+}
+
+export interface AtlasSlice {
+  // 当前选中的地点
+  selectedLocationId: string | null;
+  setSelectedLocationId: (id: string | null) => void;
+
+  // 地点详情
+  selectedLocation: BibleLocationData | null;
+  setSelectedLocation: (location: BibleLocationData | null) => void;
+
+  // 时间线状态
+  timelineYear: number;
+  setTimelineYear: (year: number) => void;
+  timelineRange: [number, number];
+  setTimelineRange: (range: [number, number]) => void;
+
+  // 旅程播放
+  activeJourneyId: string | null;
+  setActiveJourneyId: (id: string | null) => void;
+  journeyStep: number;
+  setJourneyStep: (step: number) => void;
+  isPlayingJourney: boolean;
+  setIsPlayingJourney: (playing: boolean) => void;
+
+  // 地图视图状态
+  mapCenter: [number, number];
+  setMapCenter: (center: [number, number]) => void;
+  mapZoom: number;
+  setMapZoom: (zoom: number) => void;
+
+  // 地点搜索
+  locationSearchQuery: string;
+  setLocationSearchQuery: (query: string) => void;
+  locationSearchResults: BibleLocationData[];
+  setLocationSearchResults: (results: BibleLocationData[]) => void;
+
+  // 面板状态
+  isAtlasPanelOpen: boolean;
+  setAtlasPanelOpen: (open: boolean) => void;
+  atlasPanelTab: 'map' | 'timeline' | 'journey';
+  setAtlasPanelTab: (tab: 'map' | 'timeline' | 'journey') => void;
+}
+
+// --------------------------------------------------
+// 6. 主题网络图状态 (ThemeGraphSlice)
+// --------------------------------------------------
+
+export interface BibleThemeData {
+  id: string;
+  nameZh: string;
+  nameEn?: string;
+  category: string;
+  summary?: string;
+  verseCount: number;
+}
+
+export interface ThemeNode {
+  id: string;
+  name: string;
+  category: string;
+  verseCount: number;
+  x?: number;
+  y?: number;
+}
+
+export interface ThemeEdge {
+  source: string;
+  target: string;
+  type: string;
+  strength: number;
+}
+
+export interface ThemeGraphData {
+  nodes: ThemeNode[];
+  edges: ThemeEdge[];
+}
+
+export interface ThemeGraphSlice {
+  // 当前选中的主题
+  selectedThemeId: string | null;
+  setSelectedThemeId: (id: string | null) => void;
+
+  // 主题详情
+  selectedTheme: BibleThemeData | null;
+  setSelectedTheme: (theme: BibleThemeData | null) => void;
+
+  // 图谱数据
+  graphData: ThemeGraphData;
+  setGraphData: (data: ThemeGraphData) => void;
+
+  // 图谱配置
+  graphDepth: number;
+  setGraphDepth: (depth: number) => void;
+  themeCategoryFilter: string[];
+  setThemeCategoryFilter: (categories: string[]) => void;
+
+  // 主题搜索
+  themeSearchQuery: string;
+  setThemeSearchQuery: (query: string) => void;
+  themeSearchResults: BibleThemeData[];
+  setThemeSearchResults: (results: BibleThemeData[]) => void;
+
+  // 收藏的主题
+  savedThemes: string[];
+  addSavedTheme: (themeId: string) => void;
+  removeSavedTheme: (themeId: string) => void;
+
+  // 面板状态
+  isThemeGraphPanelOpen: boolean;
+  setThemeGraphPanelOpen: (open: boolean) => void;
+
+  // 图谱视图模式
+  graphViewMode: 'network' | 'timeline' | 'list';
+  setGraphViewMode: (mode: 'network' | 'timeline' | 'list') => void;
 }

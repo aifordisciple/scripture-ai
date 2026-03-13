@@ -8,7 +8,9 @@ import {
   createAISlice,
   createUserDataSlice,
   createSyncSlice,
-  createGroupSlice
+  createGroupSlice,
+  createAtlasSlice,
+  createThemeGraphSlice
 } from './slices';
 
 // --------------------------------------------------
@@ -23,6 +25,8 @@ export const useBibleStore = create<StoreState>()(
       ...createUserDataSlice(...a),
       ...createSyncSlice(...a),
       ...createGroupSlice(...a),
+      ...createAtlasSlice(...a),
+      ...createThemeGraphSlice(...a),
     }),
     {
       name: 'bible-storage',
@@ -42,6 +46,17 @@ export const useBibleStore = create<StoreState>()(
         isSyncing: false,
         syncError: null,
         groupPlanContext: null, // 不持久化小组计划上下文
+        // Atlas 状态不持久化
+        selectedLocationId: null,
+        selectedLocation: null,
+        isAtlasPanelOpen: false,
+        locationSearchResults: [],
+        // ThemeGraph 状态不持久化
+        selectedThemeId: null,
+        selectedTheme: null,
+        graphData: { nodes: [], edges: [] },
+        themeSearchResults: [],
+        isThemeGraphPanelOpen: false,
       }),
     }
   )

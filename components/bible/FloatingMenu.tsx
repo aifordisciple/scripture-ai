@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp, Map, Network } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useSession } from "next-auth/react";
@@ -19,6 +19,8 @@ interface FloatingMenuProps {
   currentChapter: number;
   onCopy: () => void;
   onCrossRef?: () => void;
+  onAtlas?: () => void;
+  onThemeGraph?: () => void;
   showAbove?: boolean; // 菜单显示在选中元素上方还是下方
 }
 
@@ -38,7 +40,7 @@ const AI_OPTIONS = [
   { id: 'prayer', label: '祷告回应', prompt: THEOLOGICAL_PROMPTS[4].prompt },
 ];
 
-export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onCrossRef, showAbove = true }: FloatingMenuProps) {
+export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onCrossRef, onAtlas, onThemeGraph, showAbove = true }: FloatingMenuProps) {
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showAiSubmenu, setShowAiSubmenu] = useState(false);
@@ -281,8 +283,8 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         </AnimatePresence>
       </div>
 
-      {/* 3. 次要操作区 (笔记、分享、串珠、复制) - 4列 */}
-      <div className="grid grid-cols-4 gap-1 pt-1 border-t dark:border-slate-800">
+      {/* 3. 次要操作区 (笔记、分享、串珠、地图、主题、复制) - 6列 */}
+      <div className="grid grid-cols-6 gap-1 pt-1 border-t dark:border-slate-800">
         <button
           onClick={(e) => { handleMenuClick(e); handleNote(); }}
           onMouseDown={handleMenuClick}
@@ -312,6 +314,30 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           >
             <GitBranch className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
             <span className="text-[10px] text-slate-500">串珠</span>
+          </button>
+        )}
+
+        {onAtlas && (
+          <button
+            onClick={(e) => { handleMenuClick(e); onAtlas(); }}
+            onMouseDown={handleMenuClick}
+            onPointerDown={handleMenuClick}
+            className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <Map className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mb-1" />
+            <span className="text-[10px] text-slate-500">地图</span>
+          </button>
+        )}
+
+        {onThemeGraph && (
+          <button
+            onClick={(e) => { handleMenuClick(e); onThemeGraph(); }}
+            onMouseDown={handleMenuClick}
+            onPointerDown={handleMenuClick}
+            className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <Network className="w-4 h-4 text-emerald-500 dark:text-emerald-400 mb-1" />
+            <span className="text-[10px] text-slate-500">主题</span>
           </button>
         )}
 

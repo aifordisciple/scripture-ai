@@ -54,7 +54,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }, [initialBook, initialChapter]);
 
   const {
-    fontSize, lineHeight, selectedVerses, showEnglish, highlights, enqueueAI, scrollToVerse, setScrollToVerse, clearSelection, setBook: setStoreBook, setChapter: setStoreChapter, addTab
+    fontSize, lineHeight, selectedVerses, showEnglish, highlights, enqueueAI, scrollToVerse, setScrollToVerse, clearSelection, setBook: setStoreBook, setChapter: setStoreChapter, addTab, setAtlasPanelOpen, setThemeGraphPanelOpen
   } = useBibleStore();
 
   const { verses, loading } = useBibleData(book, chapter);
@@ -265,6 +265,28 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     clearSelection();
   }, [selectedVerses, verses, addTab, setIsMenuVisible, clearSelection]);
 
+  // [新增] 处理查看地图 - 打开Atlas面板
+  const handleAtlas = useCallback(() => {
+    if (selectedVerses.length === 0) return;
+
+    // 打开Atlas面板
+    addTab({ type: 'atlas' });
+    setAtlasPanelOpen(true);
+    setIsMenuVisible(false);
+    clearSelection();
+  }, [selectedVerses, addTab, setAtlasPanelOpen, setIsMenuVisible, clearSelection]);
+
+  // [新增] 处理查看主题网络 - 打开ThemeGraph面板
+  const handleThemeGraph = useCallback(() => {
+    if (selectedVerses.length === 0) return;
+
+    // 打开ThemeGraph面板
+    addTab({ type: 'theme-graph' });
+    setThemeGraphPanelOpen(true);
+    setIsMenuVisible(false);
+    clearSelection();
+  }, [selectedVerses, addTab, setThemeGraphPanelOpen, setIsMenuVisible, clearSelection]);
+
   return (
     <div className="w-full min-h-screen flex flex-row relative transition-colors duration-500" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       
@@ -412,6 +434,8 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         currentChapter={parseInt(chapter)}
         onCopy={handleCopy}
         onCrossRef={handleCrossRef}
+        onAtlas={handleAtlas}
+        onThemeGraph={handleThemeGraph}
         showAbove={showAbove}
       />
     </div>

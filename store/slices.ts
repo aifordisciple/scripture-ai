@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, ThemeGraphSlice, ThemeGraphData } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 
@@ -45,6 +45,8 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
       if (type === 'read') { newTab.book = book; newTab.chapter = chapter; }
       else if (type === 'search') { newTab.query = query; newTab.searchMode = searchMode; }
       else if (type === 'cross-ref' && crossRefSource) { newTab.crossRefSource = crossRefSource; }
+      else if (type === 'atlas') { newTab.atlasData = {}; }
+      else if (type === 'theme-graph') { newTab.themeGraphData = {}; }
       // dashboard、highlights、notes、plans、group 都不需要额外参数
       return { tabs: [...state.tabs, newTab], activeTabId: newId };
     }),
@@ -737,4 +739,91 @@ export const createGroupSlice: StateCreator<StoreState, [], [], GroupSlice> = (s
       }
     }
   }
+});
+
+// [新增] 圣经地图与时间线状态
+export const createAtlasSlice: StateCreator<StoreState, [], [], AtlasSlice> = (set, get) => ({
+  // 当前选中的地点
+  selectedLocationId: null,
+  setSelectedLocationId: (id) => set({ selectedLocationId: id }),
+
+  // 地点详情
+  selectedLocation: null,
+  setSelectedLocation: (location) => set({ selectedLocation: location }),
+
+  // 时间线状态 (默认显示公元前1000年到公元100年)
+  timelineYear: 0,
+  setTimelineYear: (year) => set({ timelineYear: year }),
+  timelineRange: [-2000, 100],
+  setTimelineRange: (range) => set({ timelineRange: range }),
+
+  // 旅程播放
+  activeJourneyId: null,
+  setActiveJourneyId: (id) => set({ activeJourneyId: id }),
+  journeyStep: 0,
+  setJourneyStep: (step) => set({ journeyStep: step }),
+  isPlayingJourney: false,
+  setIsPlayingJourney: (playing) => set({ isPlayingJourney: playing }),
+
+  // 地图视图状态 (默认以耶路撒冷为中心)
+  mapCenter: [31.7683, 35.2137],
+  setMapCenter: (center) => set({ mapCenter: center }),
+  mapZoom: 8,
+  setMapZoom: (zoom) => set({ mapZoom: zoom }),
+
+  // 地点搜索
+  locationSearchQuery: '',
+  setLocationSearchQuery: (query) => set({ locationSearchQuery: query }),
+  locationSearchResults: [],
+  setLocationSearchResults: (results) => set({ locationSearchResults: results }),
+
+  // 面板状态
+  isAtlasPanelOpen: false,
+  setAtlasPanelOpen: (open) => set({ isAtlasPanelOpen: open }),
+  atlasPanelTab: 'map',
+  setAtlasPanelTab: (tab) => set({ atlasPanelTab: tab }),
+});
+
+// [新增] 主题网络图状态
+export const createThemeGraphSlice: StateCreator<StoreState, [], [], ThemeGraphSlice> = (set, get) => ({
+  // 当前选中的主题
+  selectedThemeId: null,
+  setSelectedThemeId: (id) => set({ selectedThemeId: id }),
+
+  // 主题详情
+  selectedTheme: null,
+  setSelectedTheme: (theme) => set({ selectedTheme: theme }),
+
+  // 图谱数据
+  graphData: { nodes: [], edges: [] },
+  setGraphData: (data) => set({ graphData: data }),
+
+  // 图谱配置
+  graphDepth: 2,
+  setGraphDepth: (depth) => set({ graphDepth: depth }),
+  themeCategoryFilter: [],
+  setThemeCategoryFilter: (categories) => set({ themeCategoryFilter: categories }),
+
+  // 主题搜索
+  themeSearchQuery: '',
+  setThemeSearchQuery: (query) => set({ themeSearchQuery: query }),
+  themeSearchResults: [],
+  setThemeSearchResults: (results) => set({ themeSearchResults: results }),
+
+  // 收藏的主题
+  savedThemes: [],
+  addSavedTheme: (themeId) => set((state) => ({
+    savedThemes: state.savedThemes.includes(themeId) ? state.savedThemes : [...state.savedThemes, themeId]
+  })),
+  removeSavedTheme: (themeId) => set((state) => ({
+    savedThemes: state.savedThemes.filter(id => id !== themeId)
+  })),
+
+  // 面板状态
+  isThemeGraphPanelOpen: false,
+  setThemeGraphPanelOpen: (open) => set({ isThemeGraphPanelOpen: open }),
+
+  // 图谱视图模式
+  graphViewMode: 'network',
+  setGraphViewMode: (mode) => set({ graphViewMode: mode }),
 });
