@@ -251,10 +251,11 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
   const goToChapter = (book: string, chapter: number) => {
     const readTab = tabs.find(t => t.type === 'read');
     if (readTab) {
-      setActiveTab(readTab.id);
+      // 先更新 tab 数据，再切换 activeTab，确保 Reader 组件收到最新的 book 和 chapter
       useBibleStore.setState((state) => ({
         tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book, chapter: chapter.toString() } : t)
       }));
+      setActiveTab(readTab.id);
     } else {
       addTab({ type: 'read', book, chapter: chapter.toString() });
     }

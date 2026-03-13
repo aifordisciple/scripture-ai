@@ -95,8 +95,15 @@ export function DashboardDialog() {
        updateActiveTab({ book: bookId, chapter: chapter.toString() });
     } else {
        const readTab = tabs.find(t => t.type === 'read');
-       if (readTab) setActiveTab(readTab.id);
-       else addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
+       if (readTab) {
+         // 先更新 tab 数据，再切换 activeTab
+         useBibleStore.setState((state) => ({
+           tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: bookId, chapter: chapter.toString() } : t)
+         }));
+         setActiveTab(readTab.id);
+       } else {
+         addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
+       }
     }
     router.push(`/?book=${bookId}&chapter=${chapter}`);
   };

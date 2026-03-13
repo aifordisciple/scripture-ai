@@ -59,8 +59,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
     const readTab = tabs.find((t: any) => t.type === 'read');
 
     if (readTab) {
-       // 3. 如果存在，先激活它，然后更新它的书卷和章节数据
-       setActiveTab(readTab.id);
+       // 3. 如果存在，先更新书卷和章节数据，再激活标签页
        useBibleStore.setState((state) => ({
            tabs: state.tabs.map((t: any) =>
                t.id === readTab.id
@@ -68,6 +67,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
                    : t
            )
        }));
+       setActiveTab(readTab.id);
     } else {
        // 4. 只有在极少数情况下（比如用户把阅读页关了），才新建一个标签页
        addTab({ type: 'read', book: bookId, chapter: chapter.toString() });

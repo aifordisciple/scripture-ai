@@ -88,10 +88,11 @@ export function HighlightsTab() {
   const handleJump = (bookId: string, chapter: number, verse: number) => {
     const readTab = tabs.find(t => t.type === 'read');
     if (readTab) {
-      setActiveTab(readTab.id);
+      // 先更新 tab 数据，再切换 activeTab
       useBibleStore.setState((state) => ({
         tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: bookId, chapter: chapter.toString() } : t)
       }));
+      setActiveTab(readTab.id);
     } else {
       addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
     }

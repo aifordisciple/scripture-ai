@@ -85,8 +85,15 @@ export default function DashboardPage() {
        updateActiveTab({ book: bookId, chapter: chapter.toString() });
     } else {
        const readTab = tabs.find(t => t.type === 'read');
-       if (readTab) setActiveTab(readTab.id);
-       else addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
+       if (readTab) {
+         // 先更新 tab 数据，再切换 activeTab
+         useBibleStore.setState((state) => ({
+           tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: bookId, chapter: chapter.toString() } : t)
+         }));
+         setActiveTab(readTab.id);
+       } else {
+         addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
+       }
     }
     // 跳转回主页对应章节
     router.push(`/?book=${bookId}&chapter=${chapter}`);

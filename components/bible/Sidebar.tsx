@@ -42,21 +42,21 @@ export function Sidebar() {
   const handleChapterClick = (bookId: string, chapter: number) => {
     // 寻找是否已经存在阅读 Tab
     const readTab = tabs.find(t => t.type === 'read');
-    
+
     if (readTab) {
-       // 如果有，就激活它并更新内容
-       setActiveTab(readTab.id);
+       // 如果有，先更新内容，再激活
        useBibleStore.setState((state) => ({
            tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: bookId, chapter: chapter.toString() } : t)
        }));
+       setActiveTab(readTab.id);
     } else {
        // 如果没有，就新建一个阅读 Tab
        addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
     }
-    
+
     // 清除可能存在的滚动锚点，确保跳到章节开头
     useBibleStore.getState().setScrollToVerse(null);
-    
+
     // 同步 URL
     router.push(`/?book=${bookId}&chapter=${chapter}`);
     

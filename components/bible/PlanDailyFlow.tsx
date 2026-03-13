@@ -24,10 +24,11 @@ export function PlanDailyFlow() {
     if (ctx && step?.type === 'reading' && step.book && step.chapter) {
       const readTab = tabs.find(t => t.type === 'read');
       if (readTab) {
-        setActiveTab(readTab.id);
+        // 先更新 tab 数据，再切换 activeTab
         useBibleStore.setState((state) => ({
           tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: step.book, chapter: step.chapter!.toString() } : t)
         }));
+        setActiveTab(readTab.id);
       } else {
         addTab({ type: 'read', book: step.book, chapter: step.chapter.toString() });
       }

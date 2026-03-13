@@ -721,10 +721,11 @@ export const createGroupSlice: StateCreator<StoreState, [], [], GroupSlice> = (s
     if (steps[0].type === 'reading' && steps[0].book && steps[0].chapter) {
       const readTab = state.tabs.find(t => t.type === 'read');
       if (readTab) {
-        state.setActiveTab(readTab.id);
+        // 先更新 tab 数据，再切换 activeTab
         useBibleStore.setState((s) => ({
           tabs: s.tabs.map(t => t.id === readTab.id ? { ...t, book: steps[0].book, chapter: steps[0].chapter!.toString() } : t)
         }));
+        state.setActiveTab(readTab.id);
       } else {
         state.addTab({ type: 'read', book: steps[0].book, chapter: steps[0].chapter.toString() });
       }
