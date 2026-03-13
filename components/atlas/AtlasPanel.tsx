@@ -78,6 +78,8 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
   useEffect(() => {
     if (!verseContext?.verseContent) return;
 
+    console.log('AtlasPanel - verseContext:', verseContext);
+
     async function extractLocations() {
       setExtractingLocations(true);
       setExtractionError(null);
@@ -110,11 +112,13 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
         }
 
         const data = await res.json();
+        console.log('AtlasPanel - extracted locations:', data.locations);
         setExtractedLocations(data.locations || []);
 
         // 如果提取到地点，自动选中第一个并定位地图
         if (data.locations && data.locations.length > 0) {
           const firstLocation = data.locations[0];
+          console.log('AtlasPanel - setting first location:', firstLocation.nameZh, firstLocation.latitude, firstLocation.longitude);
           setSelectedLocation(firstLocation);
           setSelectedLocationId(firstLocation.id);
           // 移动地图中心到第一个地点
@@ -232,7 +236,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
       </div>
 
       {/* 内容区域 */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         {atlasPanelTab === 'map' && (
           <div className="h-full relative">
             <MapView
@@ -242,9 +246,9 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
                 setSelectedLocationId(loc.id);
               }}
             />
-            {/* 地点信息卡片 */}
+            {/* 地点信息卡片 - 确保在地图之上 */}
             {selectedLocation && (
-              <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-[1000]">
+              <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-[9999]" style={{ zIndex: 9999 }}>
                 <LocationCard
                   location={selectedLocation}
                   onClose={() => {

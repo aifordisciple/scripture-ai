@@ -100,8 +100,12 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
 
   // 优先使用 mapCenter（由外部更新），其次使用选中的地点
   const currentCenter: [number, number] = mapCenter;
-
   const currentZoom = selectedLocation ? 12 : mapZoom;
+
+  // 调试日志
+  useEffect(() => {
+    console.log('MapView - mapCenter:', mapCenter, 'selectedLocationId:', selectedLocationId, 'zoom:', currentZoom);
+  }, [mapCenter, selectedLocationId, currentZoom]);
 
   // 创建自定义图标
   const createIcon = (isSelected: boolean) => {

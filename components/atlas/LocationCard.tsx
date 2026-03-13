@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { X, MapPin, ExternalLink } from 'lucide-react';
 import { useBibleStore } from '@/store/useBibleStore';
 
@@ -20,7 +21,7 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
   const { isDarkMode } = useBibleStore();
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[9999]">
       {/* 头部 */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
         <div className="flex items-center gap-2">
@@ -136,6 +137,3 @@ function LocationVerses({ locationId }: { locationId: string }) {
     </div>
   );
 }
-
-// 需要导入 useState
-import { useState, useEffect } from 'react';
