@@ -47,6 +47,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
     activeJourneyId,
     isAtlasPanelOpen,
     setAtlasPanelOpen,
+    setMapCenter,
     apiConfig,
   } = useBibleStore();
 
@@ -111,11 +112,13 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
         const data = await res.json();
         setExtractedLocations(data.locations || []);
 
-        // 如果提取到地点，自动选中第一个
+        // 如果提取到地点，自动选中第一个并定位地图
         if (data.locations && data.locations.length > 0) {
           const firstLocation = data.locations[0];
           setSelectedLocation(firstLocation);
           setSelectedLocationId(firstLocation.id);
+          // 移动地图中心到第一个地点
+          setMapCenter([firstLocation.latitude, firstLocation.longitude]);
         }
       } catch (error: any) {
         console.error('Failed to extract locations:', error);
@@ -189,6 +192,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
                 onClick={() => {
                   setSelectedLocation(loc);
                   setSelectedLocationId(loc.id);
+                  setMapCenter([loc.latitude, loc.longitude]);
                 }}
                 className="px-2 py-0.5 bg-green-100 dark:bg-green-800 rounded text-xs hover:bg-green-200 dark:hover:bg-green-700 transition-colors"
               >
@@ -204,6 +208,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
         <LocationSearch onSelectLocation={(loc) => {
           setSelectedLocation(loc);
           setSelectedLocationId(loc.id);
+          setMapCenter([loc.latitude, loc.longitude]);
           setAtlasPanelTab('map');
         }} />
       </div>
@@ -239,7 +244,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear, ve
             />
             {/* 地点信息卡片 */}
             {selectedLocation && (
-              <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80">
+              <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-[1000]">
                 <LocationCard
                   location={selectedLocation}
                   onClose={() => {

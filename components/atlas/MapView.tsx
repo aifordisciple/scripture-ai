@@ -98,9 +98,8 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
     return locations.find(l => l.id === selectedLocationId);
   }, [locations, selectedLocationId]);
 
-  const currentCenter: [number, number] = selectedLocation
-    ? [selectedLocation.latitude, selectedLocation.longitude]
-    : mapCenter;
+  // 优先使用 mapCenter（由外部更新），其次使用选中的地点
+  const currentCenter: [number, number] = mapCenter;
 
   const currentZoom = selectedLocation ? 12 : mapZoom;
 
