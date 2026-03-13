@@ -22,7 +22,7 @@ const KEY_EVENTS = [
 ];
 
 export default function TimelineSlider({ year, onYearChange }: TimelineSliderProps) {
-  const { timelineRange, isDarkMode } = useBibleStore();
+  const { timelineRange } = useBibleStore();
   const [isPlaying, setIsPlaying] = useState(false);
 
   const [minYear, maxYear] = timelineRange;
@@ -143,20 +143,30 @@ function EventList({ year, range }: { year: number; range: number }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     async function fetchEvents() {
       try {
         const yearStart = year - range;
         const yearEnd = year + range;
         const res = await fetch(`/api/atlas/events?yearStart=${yearStart}&yearEnd=${yearEnd}`);
         const data = await res.json();
-        setEvents(data.events || []);
+        if (mounted) {
+          setEvents(data.events || []);
+        }
       } catch (error) {
         console.error('Failed to fetch events:', error);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
     fetchEvents();
+
+    return () => {
+      mounted = false;
+    };
   }, [year, range]);
 
   if (loading) {

@@ -27,7 +27,6 @@ interface AtlasPanelProps {
 
 export default function AtlasPanel({ onClose, initialLocationId, initialYear }: AtlasPanelProps) {
   const {
-    isDarkMode,
     atlasPanelTab,
     setAtlasPanelTab,
     selectedLocationId,
@@ -73,7 +72,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
   ] as const;
 
   return (
-    <div className={`flex flex-col h-full bg-white dark:bg-gray-900 ${isDarkMode ? 'dark' : ''}`}>
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
       {/* 头部 */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">圣经地图与时间线</h2>

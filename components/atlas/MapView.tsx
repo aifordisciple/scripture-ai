@@ -54,7 +54,6 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
     mapZoom,
     setMapZoom,
     timelineYear,
-    timelineRange,
   } = useBibleStore();
 
   const [locations, setLocations] = useState<Location[]>([]);
