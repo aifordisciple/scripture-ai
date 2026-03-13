@@ -1,8 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, MapPin, ExternalLink } from 'lucide-react';
+import { X, MapPin, ExternalLink, BookOpen } from 'lucide-react';
 import { useBibleStore } from '@/store/useBibleStore';
+
+interface VerseLocation {
+  bookId: string;
+  chapter: number;
+  verse: number;
+}
 
 interface LocationCardProps {
   location: {
@@ -18,7 +24,44 @@ interface LocationCardProps {
 }
 
 export default function LocationCard({ location, onClose }: LocationCardProps) {
-  const { isDarkMode } = useBibleStore();
+  const { isDarkMode, setBook, setChapter, setAtlasPanelOpen, setActiveTab, tabs } = useBibleStore();
+  const [verseLocations, setVerseLocations] = useState<VerseLocation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 获取相关经文
+  useEffect(() => {
+    async function fetchVerses() {
+      try {
+        const res = await fetch(`/api/atlas/verse-locations?locationId=${location.id}`);
+        const data = await res.json();
+        setVerseLocations(data.verseLocations?.slice(0, 5) || []);
+      } catch (error) {
+        console.error('Failed to fetch verses:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchVerses();
+  }, [location.id]);
+
+  // 查看相关经文 - 跳转到第一个相关经文
+  const handleViewVerses = () => {
+    if (verseLocations.length === 0) return;
+
+    const firstVerse = verseLocations[0];
+    setBook(firstVerse.bookId);
+    setChapter(firstVerse.chapter);
+
+    // 切换到阅读标签页（如果没有则创建）
+    const readTab = tabs.find(t => t.type === 'read');
+    if (readTab) {
+      setActiveTab(readTab.id);
+    }
+
+    // 关闭地图面板
+    setAtlasPanelOpen(false);
+    onClose();
+  };
 
   return (
     <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[9999]">
@@ -75,64 +118,43 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
         )}
 
         {/* 相关经文 */}
-        <LocationVerses locationId={location.id} />
+        {loading ? (
+          <div className="text-xs text-gray-400">加载相关经文...</div>
+        ) : verseLocations.length > 0 && (
+          <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+            <div className="text-xs text-gray-400 mb-2">相关经文</div>
+            <div className="flex flex-wrap gap-1">
+              {verseLocations.map((vl, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setBook(vl.bookId);
+                    setChapter(vl.chapter);
+                    const readTab = tabs.find(t => t.type === 'read');
+                    if (readTab) setActiveTab(readTab.id);
+                    setAtlasPanelOpen(false);
+                    onClose();
+                  }}
+                  className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs rounded cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  {vl.bookId} {vl.chapter}:{vl.verse}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 底部操作 */}
       <div className="flex gap-2 p-4 pt-0">
         <button
-          onClick={() => {
-            // TODO: 在阅读器中打开相关经文
-          }}
-          className="flex-1 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+          onClick={handleViewVerses}
+          disabled={verseLocations.length === 0}
+          className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
+          <BookOpen className="w-4 h-4" />
           查看相关经文
         </button>
-      </div>
-    </div>
-  );
-}
-
-// 地点相关经文组件
-function LocationVerses({ locationId }: { locationId: string }) {
-  const [verseLocations, setVerseLocations] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchVerses() {
-      try {
-        const res = await fetch(`/api/atlas/verse-locations?locationId=${locationId}`);
-        const data = await res.json();
-        setVerseLocations(data.verseLocations?.slice(0, 5) || []);
-      } catch (error) {
-        console.error('Failed to fetch verses:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchVerses();
-  }, [locationId]);
-
-  if (loading) {
-    return <div className="text-xs text-gray-400">加载相关经文...</div>;
-  }
-
-  if (verseLocations.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-      <div className="text-xs text-gray-400 mb-2">相关经文</div>
-      <div className="flex flex-wrap gap-1">
-        {verseLocations.map((vl, index) => (
-          <span
-            key={index}
-            className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-          >
-            {vl.bookId} {vl.chapter}:{vl.verse}
-          </span>
-        ))}
       </div>
     </div>
   );
