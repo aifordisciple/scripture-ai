@@ -269,17 +269,11 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     // 如果径向菜单打开，不做处理
     if (isRadialMenuOpen) return;
 
-    // 特殊状态点击：查看结果
-    if (isAiFinishedButUnseen) {
-      setAiOpen(true);
-      setIsAiFinishedButUnseen(false);
+    // 有队列内容或有解读待查看时：弹出队列面板
+    if (hasQueueContent || isAiFinishedButUnseen) {
+      setIsQueuePanelOpen(!isQueuePanelOpen);
       controls.start({ scale: [1, 0.9, 1], transition: { duration: 0.2 } });
     }
-    // 有队列内容时：不再弹出队列面板，直接打开 AI 侧边栏
-    // else if (hasQueueContent) {
-    //   setIsQueuePanelOpen(!isQueuePanelOpen);
-    //   controls.start({ scale: [1, 0.9, 1], transition: { duration: 0.2 } });
-    // }
     // 无队列时普通点击：不做操作（防止误触）
   };
 
@@ -403,6 +397,28 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {/* 已完成的解读（待查看） */}
+            {isAiFinishedButUnseen && !currentAiRequest && (
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
+                    <BookOpenCheck className="w-3.5 h-3.5" />
+                    解读已完成
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    setAiOpen(true);
+                    setIsAiFinishedButUnseen(false);
+                    setIsQueuePanelOpen(false);
+                  }}
+                  className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white text-sm font-medium shadow-sm transition-all hover:shadow-md"
+                >
+                  点击查看解读
+                </button>
+              </div>
+            )}
 
             {/* 当前处理中 */}
             {currentAiRequest && (
