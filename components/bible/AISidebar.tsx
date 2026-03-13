@@ -298,7 +298,7 @@ const MessageBubble = memo(({
       </div>
     </div>
   );
-}, (prev, next) => prev.content === next.content && prev.isLatest === next.isLatest);
+}, (prev, next) => prev.content === next.content && prev.isLatest === next.isLatest && prev.fontSize === next.fontSize);
 
 MessageBubble.displayName = "MessageBubble";
 
