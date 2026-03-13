@@ -8,6 +8,7 @@ import LocationCard from './LocationCard';
 import TimelineSlider from './TimelineSlider';
 import JourneyPlayer from './JourneyPlayer';
 import LocationSearch from './LocationSearch';
+import LocationVersesView from './LocationVersesView';
 
 // 动态导入地图组件（不支持SSR）
 const MapView = dynamic(() => import('./MapView'), {
@@ -43,6 +44,9 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
     apiConfig,
     // 从 store 读取经文上下文
     atlasVerseContext,
+    // 查看地点相关经文状态
+    viewingLocationVerses,
+    setViewingLocationVerses,
   } = useBibleStore();
 
   const [isMobile, setIsMobile] = useState(false);
@@ -234,7 +238,14 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
 
       {/* 内容区域 */}
       <div className="flex-1 overflow-hidden relative">
-        {atlasPanelTab === 'map' && (
+        {/* 查看地点相关经文视图 */}
+        {viewingLocationVerses ? (
+          <LocationVersesView
+            locationId={viewingLocationVerses.locationId}
+            locationName={viewingLocationVerses.locationName}
+            onBack={() => setViewingLocationVerses(null)}
+          />
+        ) : atlasPanelTab === 'map' ? (
           <div className="h-full relative">
             <MapView
               selectedLocationId={selectedLocationId}
@@ -256,25 +267,21 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
               </div>
             )}
           </div>
-        )}
-
-        {atlasPanelTab === 'timeline' && (
+        ) : atlasPanelTab === 'timeline' ? (
           <div className="h-full flex flex-col">
             <TimelineSlider
               year={timelineYear}
               onYearChange={setTimelineYear}
             />
           </div>
-        )}
-
-        {atlasPanelTab === 'journey' && (
+        ) : atlasPanelTab === 'journey' ? (
           <div className="h-full">
             <JourneyPlayer
               journeyId={activeJourneyId}
               onSelectJourney={setSelectedLocationId}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

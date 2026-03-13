@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { BIBLE_BOOKS } from '@/lib/constants';
+
+// 根据 bookId 获取中文书名
+function getBookName(bookId: string): string {
+  const book = BIBLE_BOOKS.find(b => b.id === bookId);
+  return book?.name || bookId;
+}
 
 // GET /api/atlas/verse-locations - 获取经文关联的地点
 export async function GET(request: NextRequest) {
@@ -24,7 +31,13 @@ export async function GET(request: NextRequest) {
         ],
       });
 
-      return NextResponse.json({ verseLocations });
+      // 添加 bookName
+      const result = verseLocations.map(vl => ({
+        ...vl,
+        bookName: getBookName(vl.bookId),
+      }));
+
+      return NextResponse.json({ verseLocations: result });
     }
 
     if (bookId && chapter) {
@@ -45,7 +58,13 @@ export async function GET(request: NextRequest) {
         },
       });
 
-      return NextResponse.json({ verseLocations });
+      // 添加 bookName
+      const result = verseLocations.map(vl => ({
+        ...vl,
+        bookName: getBookName(vl.bookId),
+      }));
+
+      return NextResponse.json({ verseLocations: result });
     }
 
     return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });

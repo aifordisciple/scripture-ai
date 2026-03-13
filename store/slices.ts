@@ -786,6 +786,10 @@ export const createAtlasSlice: StateCreator<StoreState, [], [], AtlasSlice> = (s
   // 经文上下文 - 用于AI提取地点
   atlasVerseContext: null,
   setAtlasVerseContext: (context) => set({ atlasVerseContext: context }),
+
+  // 查看地点相关经文
+  viewingLocationVerses: null,
+  setViewingLocationVerses: (data) => set({ viewingLocationVerses: data }),
 });
 
 // [新增] 主题网络图状态

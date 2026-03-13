@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, MapPin, ExternalLink, BookOpen } from 'lucide-react';
+import { X, MapPin, BookOpen, ChevronRight } from 'lucide-react';
 import { useBibleStore } from '@/store/useBibleStore';
 
 interface VerseLocation {
   bookId: string;
+  bookName: string;
   chapter: number;
   verse: number;
 }
@@ -24,7 +25,7 @@ interface LocationCardProps {
 }
 
 export default function LocationCard({ location, onClose }: LocationCardProps) {
-  const { isDarkMode, setBook, setChapter, setAtlasPanelOpen, setActiveTab, tabs } = useBibleStore();
+  const { isDarkMode, setBook, setChapter, setAtlasPanelOpen, setActiveTab, tabs, setViewingLocationVerses } = useBibleStore();
   const [verseLocations, setVerseLocations] = useState<VerseLocation[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,23 +45,12 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
     fetchVerses();
   }, [location.id]);
 
-  // 查看相关经文 - 跳转到第一个相关经文
+  // 查看相关经文 - 显示经文列表视图
   const handleViewVerses = () => {
-    if (verseLocations.length === 0) return;
-
-    const firstVerse = verseLocations[0];
-    setBook(firstVerse.bookId);
-    setChapter(firstVerse.chapter);
-
-    // 切换到阅读标签页（如果没有则创建）
-    const readTab = tabs.find(t => t.type === 'read');
-    if (readTab) {
-      setActiveTab(readTab.id);
-    }
-
-    // 关闭地图面板
-    setAtlasPanelOpen(false);
-    onClose();
+    setViewingLocationVerses({
+      locationId: location.id,
+      locationName: location.nameZh,
+    });
   };
 
   return (
@@ -149,11 +139,11 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
       <div className="flex gap-2 p-4 pt-0">
         <button
           onClick={handleViewVerses}
-          disabled={verseLocations.length === 0}
-          className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
         >
           <BookOpen className="w-4 h-4" />
-          查看相关经文
+          查看全部相关经文
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     </div>

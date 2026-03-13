@@ -482,6 +482,13 @@ export interface AtlasSlice {
     verseContent: string;
   } | null;
   setAtlasVerseContext: (context: AtlasSlice['atlasVerseContext']) => void;
+
+  // 查看地点相关经文
+  viewingLocationVerses: {
+    locationId: string;
+    locationName: string;
+  } | null;
+  setViewingLocationVerses: (data: AtlasSlice['viewingLocationVerses']) => void;
 }
 
 // --------------------------------------------------
