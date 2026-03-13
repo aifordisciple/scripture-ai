@@ -292,6 +292,83 @@ export async function POST(req: Request, { params }: RouteParams) {
       }
     }
 
+    // [新增] 创建打卡动态记录
+    if (action === 'complete') {
+      // 检查是否已存在相同的动态记录
+      const existingActivity = await prisma.groupCheckInActivity.findFirst({
+        where: {
+          churchId,
+          planId,
+          userId: session.user.id,
+          day,
+          taskType: taskId
+        }
+      });
+
+      if (!existingActivity) {
+        // 解析 bookId 和 chapter（如果是 reading 任务）
+        let bookId: string | undefined;
+        let chapter: number | undefined;
+        if (taskId.startsWith('reading-') && tasks) {
+          const task = tasks.find((t: any) => t.day === day);
+          if (task) {
+            const readingIndex = parseInt(taskId.replace('reading-', ''));
+            const reading = task.readings[readingIndex];
+            if (reading) {
+              bookId = reading.book;
+              chapter = reading.chapter;
+            }
+          }
+        }
+
+        await prisma.groupCheckInActivity.create({
+          data: {
+            churchId,
+            planId,
+            userId: session.user.id,
+            day,
+            taskType: taskId,
+            bookId,
+            chapter
+          }
+        });
+      }
+
+      // 检查是否完成了当天的所有任务，如果是则创建完成动态
+      if (tasks) {
+        const task = tasks.find((t: any) => t.day === day);
+        if (task) {
+          const expectedTasks = ['devotional', ...task.readings.map((_: any, i: number) => `reading-${i}`)];
+          const allCompleted = expectedTasks.every(et => completedTasks[dayKey]?.includes(et));
+
+          if (allCompleted) {
+            // 检查是否已存在完成动态
+            const existingCompletion = await prisma.groupCheckInActivity.findFirst({
+              where: {
+                churchId,
+                planId,
+                userId: session.user.id,
+                day,
+                taskType: 'completion'
+              }
+            });
+
+            if (!existingCompletion) {
+              await prisma.groupCheckInActivity.create({
+                data: {
+                  churchId,
+                  planId,
+                  userId: session.user.id,
+                  day,
+                  taskType: 'completion'
+                }
+              });
+            }
+          }
+        }
+      }
+    }
+
     return NextResponse.json({
       progress: updatedProgress,
       leaderboard: leaderboardEntry,

@@ -92,6 +92,9 @@ model User {
 
   // [新增] AI 解读收藏
   savedInsights SavedInsight[]
+
+  // [新增] 小组打卡动态
+  groupCheckInActivities GroupCheckInActivity[]
 }
 
 model UserSetting {
@@ -408,6 +411,12 @@ model Church {
   // [新增] 小组公告
   announcements GroupAnnouncement[]
 
+  // [新增] 小组打卡动态
+  activities   GroupCheckInActivity[]
+
+  // [新增] 小组勋章
+  groupBadges  GroupBadge[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -472,6 +481,9 @@ model GroupPlan {
 
   // [新增] 排行榜
   leaderboard LeaderboardEntry[]
+
+  // [新增] 打卡动态
+  activities  GroupCheckInActivity[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -693,4 +705,41 @@ model SavedInsight {
 
   @@unique([userId, messageId])
   @@index([userId, bookId, chapter])
+}
+
+// [新增] 小组打卡动态模型
+model GroupCheckInActivity {
+  id          String   @id @default(cuid())
+  churchId    String
+  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  planId      String
+  plan        GroupPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  day         Int
+  taskType    String   // "devotional" | "reading" | "completion"
+  bookId      String?
+  chapter     Int?
+
+  createdAt   DateTime @default(now())
+
+  @@index([churchId, createdAt(sort: Desc)])
+  @@index([planId, day])
+}
+
+// [新增] 小组勋章模型
+model GroupBadge {
+  id          String   @id @default(cuid())
+  churchId    String
+  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+
+  type        String   // "ALL_COMPLETE", "STREAK_7", "ENCOURAGER"
+  name        String
+  description String?
+  iconUrl     String?
+  earnedAt    DateTime @default(now())
+  userIds     String[]
+
+  @@unique([churchId, type])
 }

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import {
   Users, Plus, ChevronLeft, Settings, Crown, Calendar,
-  BookOpen, Trophy, MessageCircle, Ticket, Loader2, UserCog, BarChart3
+  BookOpen, Trophy, MessageCircle, Ticket, Loader2, UserCog, BarChart3, Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,7 @@ import { GroupBadgeGallery } from "@/components/group/GroupBadgeGallery";
 import { GroupSettings } from "@/components/group/GroupSettings";
 import { MemberProfile } from "@/components/group/MemberProfile";
 import { SharedNotes } from "@/components/group/SharedNotes";
+import { GroupActivityFeed } from "@/components/group/GroupActivityFeed";
 
 interface Church {
   id: string;
@@ -272,9 +273,12 @@ export function GroupTab() {
         </div>
 
         <Tabs defaultValue="plans" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="plans" className="gap-2">
               <Calendar className="w-4 h-4" /> 读经计划
+            </TabsTrigger>
+            <TabsTrigger value="activity" className="gap-2">
+              <Activity className="w-4 h-4" /> 动态
             </TabsTrigger>
             <TabsTrigger value="leaderboard" className="gap-2">
               <Trophy className="w-4 h-4" /> 排行榜
@@ -353,6 +357,10 @@ export function GroupTab() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="activity">
+            <GroupActivityFeed churchId={selectedGroup.churchId} />
           </TabsContent>
 
           <TabsContent value="leaderboard">
