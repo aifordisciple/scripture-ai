@@ -14,6 +14,8 @@ import {
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { GroupPlanEditDialog } from "@/components/group/GroupPlanEditDialog";
+import { GroupProgressCalendar } from "@/components/group/GroupProgressCalendar";
+import { BehindMembersPanel } from "@/components/group/BehindMembersPanel";
 
 interface GroupPlanDetailProps {
   churchId: string;
@@ -657,6 +659,24 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Progress Calendar */}
+      <GroupProgressCalendar
+        churchId={churchId}
+        planId={plan.id}
+        startDate={plan.startDate}
+        tasks={tasks}
+        dailyChapters={plan.dailyChapters}
+        onDayClick={(day) => setSelectedDay(day)}
+      />
+
+      {/* Admin: Behind Members Panel */}
+      {isAdmin && (
+        <BehindMembersPanel
+          churchId={churchId}
+          planId={plan.id}
+        />
       )}
 
       {/* Admin: Generate Devotional */}
