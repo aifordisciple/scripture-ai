@@ -562,4 +562,15 @@ export interface ThemeGraphSlice {
   // 图谱视图模式
   graphViewMode: 'network' | 'timeline' | 'list';
   setGraphViewMode: (mode: 'network' | 'timeline' | 'list') => void;
+
+  // 经文上下文 - 用于AI提取主题
+  themeGraphVerseContext: {
+    bookId: string;
+    bookName: string;
+    chapter: number;
+    verseStart: number;
+    verseEnd: number;
+    verseContent: string;
+  } | null;
+  setThemeGraphVerseContext: (context: ThemeGraphSlice['themeGraphVerseContext']) => void;
 }

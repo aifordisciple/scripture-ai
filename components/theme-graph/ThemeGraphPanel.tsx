@@ -40,9 +40,14 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
     setThemeGraphPanelOpen,
     graphDepth,
     setGraphDepth,
+    // 从 store 读取经文上下文
+    themeGraphVerseContext,
+    apiConfig,
   } = useBibleStore();
 
   const [loading, setLoading] = useState(false);
+  const [extractingThemes, setExtractingThemes] = useState(false);
+  const [extractedThemes, setExtractedThemes] = useState<any[]>([]);
 
   // 加载网络图数据
   const loadGraphData = useCallback(async (themeId?: string) => {
@@ -73,6 +78,47 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
       loadGraphData();
     }
   }, [initialThemeId]);
+
+  // 当有经文上下文时，提取主题
+  useEffect(() => {
+    if (!themeGraphVerseContext) return;
+
+    async function extractThemes() {
+      setExtractingThemes(true);
+      console.log('ThemeGraphPanel - extracting themes from verse context:', themeGraphVerseContext);
+
+      try {
+        const res = await fetch('/api/themes/ai-extract', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookId: themeGraphVerseContext.bookId,
+            chapter: themeGraphVerseContext.chapter,
+            verseStart: themeGraphVerseContext.verseStart,
+            verseEnd: themeGraphVerseContext.verseEnd,
+            verseContent: themeGraphVerseContext.verseContent,
+            apiConfig,
+          }),
+        });
+
+        const data = await res.json();
+        console.log('ThemeGraphPanel - extracted themes:', data);
+
+        if (data.themes && data.themes.length > 0) {
+          setExtractedThemes(data.themes);
+          // 选中的第一个主题
+          setSelectedTheme(data.themes[0]);
+          setSelectedThemeId(data.themes[0].id);
+        }
+      } catch (error) {
+        console.error('Failed to extract themes:', error);
+      } finally {
+        setExtractingThemes(false);
+      }
+    }
+
+    extractThemes();
+  }, [themeGraphVerseContext, apiConfig, setSelectedTheme, setSelectedThemeId]);
 
   // 当选中主题变化时，重新加载图数据
   useEffect(() => {

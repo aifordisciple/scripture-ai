@@ -23,7 +23,10 @@ export async function POST(req: Request) {
       // 1. 精确搜索 (包含指定词汇)
       // -----------------------------------------
       const results = await prisma.bibleVerse.findMany({
-        where: { content: { contains: query }, version: 'CUV' },
+        where: {
+          content: { contains: query, mode: 'insensitive' },
+          version: 'CUV'
+        },
         take: 50,
         orderBy: { id: 'asc' }
       });
@@ -125,7 +128,10 @@ export async function GET(request: Request) {
 
     if (mode === 'exact') {
       const results = await prisma.bibleVerse.findMany({
-        where: { content: { contains: query }, version: 'CUV' },
+        where: {
+          content: { contains: query, mode: 'insensitive' },
+          version: 'CUV'
+        },
         take: 50,
         orderBy: { id: 'asc' }
       });

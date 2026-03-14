@@ -834,4 +834,8 @@ export const createThemeGraphSlice: StateCreator<StoreState, [], [], ThemeGraphS
   // 图谱视图模式
   graphViewMode: 'network',
   setGraphViewMode: (mode) => set({ graphViewMode: mode }),
+
+  // 经文上下文 - 用于AI提取主题
+  themeGraphVerseContext: null,
+  setThemeGraphVerseContext: (context) => set({ themeGraphVerseContext: context }),
 });

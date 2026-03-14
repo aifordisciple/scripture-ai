@@ -59,6 +59,7 @@ export const useBibleStore = create<StoreState>()(
         graphData: { nodes: [], edges: [] },
         themeSearchResults: [],
         isThemeGraphPanelOpen: false,
+        themeGraphVerseContext: null,
       }),
     }
   )

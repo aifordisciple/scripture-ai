@@ -56,10 +56,17 @@ export async function POST(request: NextRequest) {
     // 获取API配置
     const baseUrl = apiConfig?.baseUrl || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
     const apiKey = apiConfig?.apiKey || process.env.OPENAI_API_KEY;
-    const model = apiConfig?.model || 'gpt-3.5-turbo';
+    const model = apiConfig?.model || process.env.AI_MODEL || 'gpt-3.5-turbo';
+
+    console.log('Theme AI Extract - Config:', {
+      baseUrl,
+      hasApiKey: !!apiKey,
+      model,
+    });
 
     if (!apiKey) {
-      return NextResponse.json({ error: 'No API key configured' }, { status: 500 });
+      console.error('No API key configured');
+      return NextResponse.json({ error: 'No API key configured', themes: [] }, { status: 200 });
     }
 
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -117,9 +124,16 @@ export async function POST(request: NextRequest) {
         theme = await prisma.bibleTheme.create({
           data: {
             nameZh: extracted.nameZh,
-            nameEn: extracted.nameEn,
+            nameEn: extracted.nameEn || extracted.nameZh,
             category: 'THEOLOGICAL', // 默认分类
+            verseCount: 1,
           },
+        });
+      } else {
+        // 更新主题的经文计数
+        await prisma.bibleTheme.update({
+          where: { id: theme.id },
+          data: { verseCount: { increment: 1 } },
         });
       }
 
