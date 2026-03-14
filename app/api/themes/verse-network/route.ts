@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     const themes = await prisma.bibleTheme.findMany({
       where: { id: { in: themeIds } },
       include: {
-        verses: {
+        verseLinks: {
           take: 20, // 每个主题最多20个经文
           orderBy: { relevance: 'desc' },
         },
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       }
 
       // 为每个主题添加关联的经文节点
-      for (const verseLink of theme.verses) {
+      for (const verseLink of theme.verseLinks) {
         const verseId = `verse-${verseLink.bookId}-${verseLink.chapter}-${verseLink.verseStart}${verseLink.verseEnd ? `-${verseLink.verseEnd}` : ''}`;
 
         // 添加经文节点（如果尚未添加）

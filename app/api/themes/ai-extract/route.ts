@@ -24,7 +24,7 @@ async function createThemeConnectionsIfNeeded(themeIds: string[]) {
     const themesWithVerses = await prisma.bibleTheme.findMany({
       where: { id: { in: themeIds } },
       include: {
-        verses: {
+        verseLinks: {
           select: { bookId: true, chapter: true, verseStart: true },
         },
       },
@@ -38,15 +38,15 @@ async function createThemeConnectionsIfNeeded(themeIds: string[]) {
 
         // 计算共享经文
         const versesA = new Set(
-          themeA.verses.map(v => `${v.bookId}-${v.chapter}-${v.verseStart}`)
+          themeA.verseLinks.map(v => `${v.bookId}-${v.chapter}-${v.verseStart}`)
         );
-        const sharedVerses = themeB.verses.filter(
+        const sharedVerses = themeB.verseLinks.filter(
           v => versesA.has(`${v.bookId}-${v.chapter}-${v.verseStart}`)
         );
 
         // 如果共享>=3个经文，创建连接
         if (sharedVerses.length >= 3) {
-          const strength = sharedVerses.length / Math.max(themeA.verses.length, themeB.verses.length, 1);
+          const strength = sharedVerses.length / Math.max(themeA.verseLinks.length, themeB.verseLinks.length, 1);
 
           // 检查是否已存在连接
           const existingConn = await prisma.themeConnection.findFirst({
@@ -87,23 +87,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing verse content' }, { status: 400 });
     }
 
-    // 检查是否已有缓存的提取结果（修复：正确检查verseEnd范围）
+    // 检查是否已有缓存的提取结果
     const existingLinks = await prisma.themeVerseLink.findMany({
       where: {
         bookId,
         chapter,
         verseStart: verseStart || 1,
-        verseEnd: verseEnd || null,
         source: 'AI',
       },
       include: {
         theme: {
           include: {
-            verses: {
+            verseLinks: {
               take: 10,
               orderBy: { relevance: 'desc' },
-              include: {
-                theme: { select: { id: true, nameZh: true, category: true } },
+              select: {
+                bookId: true,
+                chapter: true,
+                verseStart: true,
+                verseEnd: true,
+                relevance: true,
               },
             },
           },
@@ -111,13 +114,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (existingLinks.length > 0) {
+    // 过滤符合 verseEnd 范围的结果
+    const filteredLinks = existingLinks.filter(link => {
+      if (verseEnd && link.verseEnd) {
+        return link.verseEnd === verseEnd;
+      }
+      return true;
+    });
+
+    if (filteredLinks.length > 0) {
       // 已有缓存，直接返回并包含相关经文
-      const themesWithVerses = existingLinks.map(link => ({
+      const themesWithVerses = filteredLinks.map(link => ({
         ...link.theme,
         relevance: link.relevance,
         context: link.linkType,
-        relatedVerses: link.theme.verses.map(v => ({
+        relatedVerses: link.theme.verseLinks.map(v => ({
           bookId: v.bookId,
           chapter: v.chapter,
           verseStart: v.verseStart,
@@ -154,127 +165,157 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No API key configured', themes: [] }, { status: 200 });
     }
 
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-      }),
-    });
+    // 添加超时控制
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('AI API error:', errorData);
-      return NextResponse.json({ error: 'AI API error' }, { status: 500 });
-    }
-
-    const aiResponse = await response.json();
-    const content = aiResponse.choices?.[0]?.message?.content || '[]';
-
-    // 解析AI返回的JSON
-    let extractedThemes: any[] = [];
     try {
-      const jsonMatch = content.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        extractedThemes = JSON.parse(jsonMatch[0]);
-      }
-    } catch (e) {
-      console.error('Failed to parse AI response:', content);
-      return NextResponse.json({ themes: [], cached: false });
-    }
-
-    // 匹配或创建主题，并创建关联
-    const results = [];
-    const createdThemeIds: string[] = [];
-
-    for (const extracted of extractedThemes) {
-      // 查找匹配的主题
-      let theme = await prisma.bibleTheme.findFirst({
-        where: {
-          OR: [
-            { nameZh: extracted.nameZh },
-            { nameEn: extracted.nameEn },
-            { aliases: { has: extracted.nameZh } },
+      const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'user', content: prompt }
           ],
-        },
-        include: {
-          verses: {
-            take: 10,
-            orderBy: { relevance: 'desc' },
-          },
-        },
+          temperature: 0.3,
+        }),
+        signal: controller.signal,
       });
 
-      if (!theme) {
-        // 创建新主题
-        theme = await prisma.bibleTheme.create({
-          data: {
-            nameZh: extracted.nameZh,
-            nameEn: extracted.nameEn || extracted.nameZh,
-            category: 'THEOLOGICAL', // 默认分类
-            verseCount: 1,
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('AI API error:', errorData);
+        return NextResponse.json({ error: 'AI API error', themes: [] }, { status: 500 });
+      }
+
+      const aiResponse = await response.json();
+      const content = aiResponse.choices?.[0]?.message?.content || '[]';
+
+      // 解析AI返回的JSON
+      let extractedThemes: any[] = [];
+      try {
+        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          extractedThemes = JSON.parse(jsonMatch[0]);
+        }
+      } catch (e) {
+        console.error('Failed to parse AI response:', content);
+        return NextResponse.json({ themes: [], cached: false });
+      }
+
+      // 匹配或创建主题，并创建关联
+      const results = [];
+      const createdThemeIds: string[] = [];
+
+      for (const extracted of extractedThemes) {
+        // 查找匹配的主题
+        let theme = await prisma.bibleTheme.findFirst({
+          where: {
+            OR: [
+              { nameZh: extracted.nameZh },
+              { nameEn: extracted.nameEn },
+              { aliases: { has: extracted.nameZh } },
+            ],
           },
           include: {
-            verses: {
+            verseLinks: {
               take: 10,
               orderBy: { relevance: 'desc' },
+              select: {
+                bookId: true,
+                chapter: true,
+                verseStart: true,
+                verseEnd: true,
+                relevance: true,
+              },
             },
           },
         });
-      } else {
-        // 更新主题的经文计数
-        await prisma.bibleTheme.update({
-          where: { id: theme.id },
-          data: { verseCount: { increment: 1 } },
+
+        if (!theme) {
+          // 创建新主题
+          theme = await prisma.bibleTheme.create({
+            data: {
+              nameZh: extracted.nameZh,
+              nameEn: extracted.nameEn || extracted.nameZh,
+              category: 'THEOLOGICAL', // 默认分类
+              verseCount: 1,
+            },
+            include: {
+              verseLinks: {
+                take: 10,
+                orderBy: { relevance: 'desc' },
+                select: {
+                  bookId: true,
+                  chapter: true,
+                  verseStart: true,
+                  verseEnd: true,
+                  relevance: true,
+                },
+              },
+            },
+          });
+        } else {
+          // 更新主题的经文计数
+          await prisma.bibleTheme.update({
+            where: { id: theme.id },
+            data: { verseCount: { increment: 1 } },
+          });
+        }
+
+        // 创建主题-经文关联
+        await prisma.themeVerseLink.create({
+          data: {
+            themeId: theme.id,
+            bookId,
+            chapter,
+            verseStart: verseStart || 1,
+            verseEnd: verseEnd,
+            relevance: extracted.relevance || 0.8,
+            linkType: 'SECONDARY',
+            source: 'AI',
+          },
+        });
+
+        createdThemeIds.push(theme.id);
+
+        results.push({
+          ...theme,
+          relevance: extracted.relevance,
+          context: extracted.context,
+          relatedVerses: theme.verseLinks?.map(v => ({
+            bookId: v.bookId,
+            chapter: v.chapter,
+            verseStart: v.verseStart,
+            verseEnd: v.verseEnd,
+            relevance: v.relevance,
+          })) || [],
         });
       }
 
-      // 创建主题-经文关联
-      await prisma.themeVerseLink.create({
-        data: {
-          themeId: theme.id,
-          bookId,
-          chapter,
-          verseStart: verseStart || 1,
-          verseEnd: verseEnd,
-          relevance: extracted.relevance || 0.8,
-          linkType: 'SECONDARY',
-          source: 'AI',
-        },
-      });
+      // 创建主题之间的连接（如果共享>=3个经文）
+      await createThemeConnectionsIfNeeded(createdThemeIds);
 
-      createdThemeIds.push(theme.id);
-
-      results.push({
-        ...theme,
-        relevance: extracted.relevance,
-        context: extracted.context,
-        relatedVerses: theme.verses?.map(v => ({
-          bookId: v.bookId,
-          chapter: v.chapter,
-          verseStart: v.verseStart,
-          verseEnd: v.verseEnd,
-          relevance: v.relevance,
-        })) || [],
+      return NextResponse.json({
+        themes: results,
+        cached: false,
       });
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        console.error('AI API timeout');
+        return NextResponse.json({ error: 'AI API timeout', themes: [] }, { status: 504 });
+      }
+      throw fetchError;
     }
-
-    // 创建主题之间的连接（如果共享>=3个经文）
-    await createThemeConnectionsIfNeeded(createdThemeIds);
-
-    return NextResponse.json({
-      themes: results,
-      cached: false,
-    });
   } catch (error) {
     console.error('Error extracting themes:', error);
-    return NextResponse.json({ error: 'Failed to extract themes' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to extract themes', themes: [] }, { status: 500 });
   }
 }
