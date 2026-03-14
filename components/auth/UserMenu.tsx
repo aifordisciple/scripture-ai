@@ -4,10 +4,11 @@
 import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame } from "lucide-react";
+import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageSquare } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export function UserMenu() {
   const { data: session, status } = useSession();
@@ -19,10 +20,21 @@ export function UserMenu() {
     setDashboardOpen, // [新增] 引入看板开关方法
     streakCount // 连续阅读天数
   } = useBibleStore();
-  
+
   const [isOpen, setIsOpen] = useState(false);
   const [apiSettingsOpen, setApiSettingsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Check if user is admin
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/user/role')
+        .then(res => res.json())
+        .then(data => setIsAdmin(data.role === 'admin'))
+        .catch(() => {});
+    }
+  }, [session?.user?.id]);
 
   // 点击外部关闭菜单
   useEffect(() => {
@@ -157,6 +169,20 @@ export function UserMenu() {
           />
 
           <div className="my-1 border-t dark:border-slate-800" />
+
+          {/* Admin Menu Items */}
+          {isAdmin && (
+            <>
+              <Link href="/admin/feedback" onClick={() => setIsOpen(false)}>
+                <div className="w-full flex items-center gap-3 px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left">
+                  <Shield className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  反馈管理
+                  <span className="ml-auto text-[10px] bg-purple-200 dark:bg-purple-800 px-1.5 py-0.5 rounded text-purple-600 dark:text-purple-300">Admin</span>
+                </div>
+              </Link>
+              <div className="my-1 border-t dark:border-slate-800" />
+            </>
+          )}
 
           <MenuItem icon={<ImageIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />} label="经文卡片" onClick={() => alert("功能开发中...")} />
           

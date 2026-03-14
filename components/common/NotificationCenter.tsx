@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Bell, Check, CheckCheck, Trash2, Loader2, MessageCircle,
-  Trophy, Calendar, Users, AlertCircle
+  Trophy, Calendar, Users, AlertCircle, MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +36,8 @@ const NOTIFICATION_ICONS: Record<string, any> = {
   PLAN_UPDATE: Calendar,
   MEMBER_JOIN: Users,
   ANNOUNCEMENT: AlertCircle,
+  NEW_FEEDBACK: MessageSquare,
+  FEEDBACK_REPLY: MessageSquare,
   DEFAULT: Bell
 };
 

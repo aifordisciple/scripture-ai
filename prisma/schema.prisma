@@ -40,6 +40,7 @@ model User {
   email         String    @unique
   password      String    // 加密后的密码
   image         String?
+  role          String    @default("user") // user, admin
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
