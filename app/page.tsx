@@ -149,7 +149,7 @@ export default function Home() {
     lineHeight, setLineHeight,
     tabs, activeTabId, setActiveTab, addTab, closeTab, updateActiveTab,
     sidebarWidth,
-    isDarkMode,
+    isDarkMode, toggleDarkMode,
     chapterSpeechText,
     isMobileSettingsOpen,
     setMobileSettingsOpen,
