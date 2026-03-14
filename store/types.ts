@@ -370,7 +370,7 @@ export interface UserDataSlice {
 // --------------------------------------------------
 // 3. 聚合总状态类型
 // --------------------------------------------------
-export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & ThemeGraphSlice;
+export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & ThemeGraphSlice & DMSlice;
 
 // --------------------------------------------------
 // 4. 小组读经计划状态 (GroupSlice)
@@ -573,4 +573,63 @@ export interface ThemeGraphSlice {
     verseContent: string;
   } | null;
   setThemeGraphVerseContext: (context: ThemeGraphSlice['themeGraphVerseContext']) => void;
+}
+
+// --------------------------------------------------
+// 7. 私信状态 (DMSlice)
+// --------------------------------------------------
+
+export interface DMConversation {
+  userId: string;
+  lastMessage: string;
+  lastMessageTime: Date;
+  unreadCount: number;
+  user: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+}
+
+export interface DMMessage {
+  id: string;
+  content: string;
+  createdAt: string;
+  read: boolean;
+  type: string;
+  sender: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+  receiver: {
+    id: string;
+    name: string | null;
+    image: string | null;
+  };
+}
+
+export interface DMSlice {
+  // 私信面板状态
+  isDmPanelOpen: boolean;
+  setDmPanelOpen: (open: boolean) => void;
+
+  // 会话列表
+  dmConversations: DMConversation[];
+  setDmConversations: (conversations: DMConversation[]) => void;
+
+  // 当前选中的会话
+  activeDmUserId: string | null;
+  setActiveDmUserId: (userId: string | null) => void;
+
+  // 当前会话的消息
+  dmMessages: DMMessage[];
+  setDmMessages: (messages: DMMessage[]) => void;
+  addDmMessage: (message: DMMessage) => void;
+
+  // 未读数
+  dmUnreadCount: number;
+  setDmUnreadCount: (count: number) => void;
+  incrementDmUnread: () => void;
+  decrementDmUnread: (count?: number) => void;
 }

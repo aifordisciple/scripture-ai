@@ -2,11 +2,33 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
-import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, MapPin } from 'lucide-react';
 
 interface TimelineSliderProps {
   year: number;
   onYearChange: (year: number) => void;
+}
+
+interface BibleEvent {
+  id: string;
+  titleZh: string;
+  titleEn?: string;
+  description: string;
+  yearStart?: number | null;
+  yearEnd?: number | null;
+  yearApprox: boolean;
+  locationId?: string | null;
+  location?: {
+    id: string;
+    nameZh: string;
+    nameEn: string;
+    latitude: number;
+    longitude: number;
+  } | null;
+  bookId?: string | null;
+  chapterStart?: number | null;
+  category: string;
+  testament: string;
 }
 
 // 圣经历史关键时间节点
@@ -139,8 +161,15 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
 
 // 事件列表组件
 function EventList({ year, range }: { year: number; range: number }) {
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<BibleEvent[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const {
+    setMapCenter,
+    setSelectedLocation,
+    setAtlasPanelTab,
+    setTimelineYear,
+  } = useBibleStore();
 
   useEffect(() => {
     let mounted = true;
@@ -169,6 +198,24 @@ function EventList({ year, range }: { year: number; range: number }) {
     };
   }, [year, range]);
 
+  // 点击事件，跳转到地图并定位
+  const handleEventClick = (event: BibleEvent) => {
+    if (event.location && event.locationId) {
+      // 设置地图中心
+      setMapCenter([event.location.latitude, event.location.longitude]);
+      // 设置选中的地点
+      setSelectedLocation({
+        id: event.location.id,
+        nameZh: event.location.nameZh,
+        nameEn: event.location.nameEn,
+        latitude: event.location.latitude,
+        longitude: event.location.longitude,
+      });
+      // 切换到地图标签
+      setAtlasPanelTab('map');
+    }
+  };
+
   if (loading) {
     return <div className="text-gray-500 text-sm">加载中...</div>;
   }
@@ -182,23 +229,43 @@ function EventList({ year, range }: { year: number; range: number }) {
       {events.map((event) => (
         <div
           key={event.id}
-          className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          onClick={() => handleEventClick(event)}
+          className={`p-3 bg-gray-50 dark:bg-gray-800 rounded-lg transition-colors ${
+            event.locationId
+              ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+              : 'cursor-default'
+          }`}
         >
-          <div className="font-medium text-gray-900 dark:text-white">{event.titleZh}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {event.yearStart && (
-              <span>
-                {event.yearStart < 0 ? '公元前' : '公元'}
-                {Math.abs(event.yearStart)}
-                {event.yearEnd && event.yearEnd !== event.yearStart && ` - ${event.yearEnd}`}
-              </span>
-            )}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1">
+              <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                {event.titleZh}
+                {event.locationId && (
+                  <MapPin className="w-3.5 h-3.5 text-indigo-500" />
+                )}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {event.yearStart && (
+                  <span>
+                    {event.yearStart < 0 ? '公元前' : '公元'}
+                    {Math.abs(event.yearStart)}
+                    {event.yearEnd && event.yearEnd !== event.yearStart && ` - ${event.yearEnd < 0 ? '公元前' : '公元'}${Math.abs(event.yearEnd)}`}
+                    {event.yearApprox && ' (约)'}
+                  </span>
+                )}
+              </div>
+              {event.description && (
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">
+                  {event.description}
+                </p>
+              )}
+              {event.location && (
+                <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
+                  📍 {event.location.nameZh}
+                </div>
+              )}
+            </div>
           </div>
-          {event.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">
-              {event.description}
-            </p>
-          )}
         </div>
       ))}
     </div>

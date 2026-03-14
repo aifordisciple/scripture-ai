@@ -98,6 +98,20 @@ model User {
 
   // [新增] 小组聊天已读状态
   chatReadStatus GroupChatReadStatus[]
+
+  // [新增] 好友关系
+  friendsAsUser   Friend[] @relation("UserFriends")
+  friendsAsFriend Friend[]
+
+  // [新增] 私信
+  sentMessages     DirectMessage[] @relation("MessageSender")
+  receivedMessages DirectMessage[] @relation("MessageReceiver")
+
+  // [新增] 用户反馈
+  feedbacks Feedback[]
+
+  // [新增] 隐私设置
+  privacySettings PrivacySettings?
 }
 
 model UserSetting {
@@ -914,4 +928,94 @@ model ThemeConnection {
 
   @@unique([themeId, relatedThemeId])
   @@map("theme_connections")
+}
+
+// ==================================================
+// 用户交流与反馈功能模型
+// ==================================================
+
+// 好友关系
+model Friend {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  friendId  String
+  friend    User         @relation("UserFriends", fields: [friendId], references: [id], onDelete: Cascade)
+  status    FriendStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
+  @@map("friends")
+}
+
+enum FriendStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+// 用户反馈
+model Feedback {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        FeedbackType
+  title       String
+  content     String         @db.Text
+  screenshot  String?        @db.Text
+  status      FeedbackStatus @default(OPEN)
+  adminReply  String?        @db.Text
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([status, createdAt])
+  @@map("feedbacks")
+}
+
+enum FeedbackType {
+  BUG_REPORT
+  FEATURE_REQUEST
+  QUESTION
+  OTHER
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+// 私信
+model DirectMessage {
+  id         String   @id @default(cuid())
+  senderId   String
+  sender     User     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  content    String   @db.Text
+  type       String   @default("TEXT") // TEXT, SHARE_VERSE, SHARE_NOTE
+  metadata   String?  @db.Text // JSON: { bookId, chapter, verse, noteId }
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([senderId, receiverId, createdAt])
+  @@index([receiverId, read])
+  @@map("direct_messages")
+}
+
+// 隐私设置
+model PrivacySettings {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  allowDmFrom      String   @default("everyone")  // everyone, friends, nobody
+  showOnlineStatus Boolean  @default(true)
+  profileVisible   String   @default("friends")   // everyone, friends, nobody
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("privacy_settings")
 }

@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, ThemeGraphSlice, ThemeGraphData } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, ThemeGraphSlice, ThemeGraphData, DMSlice } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 
@@ -838,4 +838,34 @@ export const createThemeGraphSlice: StateCreator<StoreState, [], [], ThemeGraphS
   // 经文上下文 - 用于AI提取主题
   themeGraphVerseContext: null,
   setThemeGraphVerseContext: (context) => set({ themeGraphVerseContext: context }),
+});
+
+// [新增] 私信状态
+export const createDMSlice: StateCreator<StoreState, [], [], DMSlice> = (set, get) => ({
+  // 私信面板状态
+  isDmPanelOpen: false,
+  setDmPanelOpen: (open) => set({ isDmPanelOpen: open }),
+
+  // 会话列表
+  dmConversations: [],
+  setDmConversations: (conversations) => set({ dmConversations: conversations }),
+
+  // 当前选中的会话
+  activeDmUserId: null,
+  setActiveDmUserId: (userId) => set({ activeDmUserId: userId }),
+
+  // 当前会话的消息
+  dmMessages: [],
+  setDmMessages: (messages) => set({ dmMessages: messages }),
+  addDmMessage: (message) => set((state) => ({
+    dmMessages: [...state.dmMessages, message]
+  })),
+
+  // 未读数
+  dmUnreadCount: 0,
+  setDmUnreadCount: (count) => set({ dmUnreadCount: count }),
+  incrementDmUnread: () => set((state) => ({ dmUnreadCount: state.dmUnreadCount + 1 })),
+  decrementDmUnread: (count = 1) => set((state) => ({
+    dmUnreadCount: Math.max(0, state.dmUnreadCount - count)
+  })),
 });

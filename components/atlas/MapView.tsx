@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useBibleStore } from '@/store/useBibleStore';
@@ -54,10 +54,13 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
     mapZoom,
     setMapZoom,
     timelineYear,
+    activeJourneyId,
+    journeyStep,
   } = useBibleStore();
 
   const [locations, setLocations] = useState<Location[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [journeyStops, setJourneyStops] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // 加载地点数据
@@ -92,6 +95,24 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
     }
     fetchEvents();
   }, [timelineYear]);
+
+  // 加载旅程站点数据
+  useEffect(() => {
+    async function fetchJourneyStops() {
+      if (!activeJourneyId) {
+        setJourneyStops([]);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/atlas/journeys?id=${activeJourneyId}`);
+        const data = await res.json();
+        setJourneyStops(data.journey?.stops || []);
+      } catch (error) {
+        console.error('Failed to fetch journey stops:', error);
+      }
+    }
+    fetchJourneyStops();
+  }, [activeJourneyId]);
 
   // 当选中地点时，移动地图中心
   const selectedLocation = useMemo(() => {
@@ -194,6 +215,59 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
                 </p>
                 {event.description && (
                   <p className="text-sm text-gray-600 mt-2">{event.description}</p>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
+
+      {/* 旅程路线绘制 */}
+      {journeyStops.length > 1 && (
+        <Polyline
+          positions={journeyStops
+            .sort((a, b) => a.order - b.order)
+            .map(stop => [stop.location.latitude, stop.location.longitude] as [number, number])}
+          pathOptions={{
+            color: '#6366f1',
+            weight: 3,
+            opacity: 0.8,
+            dashArray: '10, 10',
+          }}
+        />
+      )}
+
+      {/* 旅程站点标记 */}
+      {journeyStops.map((stop, index) => {
+        const isCurrentStop = index === journeyStep;
+        const isVisited = index <= journeyStep;
+
+        return (
+          <Marker
+            key={`journey-${stop.id}`}
+            position={[stop.location.latitude, stop.location.longitude]}
+            icon={L.divIcon({
+              className: 'journey-marker',
+              html: `<div class="w-8 h-8 rounded-full ${
+                isCurrentStop
+                  ? 'bg-indigo-600 ring-4 ring-indigo-300'
+                  : isVisited
+                    ? 'bg-indigo-500'
+                    : 'bg-gray-400'
+              } border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold">
+                ${stop.order}
+              </div>`,
+              iconSize: [32, 32],
+              iconAnchor: [16, 16],
+            })}
+          >
+            <Popup>
+              <div className="min-w-[180px]">
+                <div className="text-xs text-indigo-600 font-medium">第 {stop.order} 站</div>
+                <h3 className="font-semibold text-gray-900">{stop.location.nameZh}</h3>
+                <p className="text-sm text-gray-500">{stop.location.nameEn}</p>
+                {stop.verseRef && (
+                  <p className="text-xs text-gray-400 mt-1">📖 {stop.verseRef}</p>
                 )}
               </div>
             </Popup>

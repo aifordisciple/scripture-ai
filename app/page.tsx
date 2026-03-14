@@ -22,6 +22,8 @@ import { UserMenu } from "@/components/auth/UserMenu";
 import { SyncSettings } from "@/components/settings/SyncSettings";
 import { BookPicker } from "@/components/bible/BookPicker";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { NotificationCenter } from "@/components/common/NotificationCenter";
+import { FeedbackButton } from "@/components/feedback/FeedbackButton";
 
 // 动态按需加载
 const AISidebar = dynamic(() => import("@/components/bible/AISidebar").then(mod => mod.AISidebar), { ssr: false });
@@ -327,6 +329,7 @@ export default function Home() {
         onCloseBookPicker={() => setIsBookPickerOpen(false)}
       />
       <InstallPrompt />
+      <FeedbackButton />
 
       {/* Mobile BookPicker - 移动端经文选择器 */}
       <BookPicker
@@ -539,6 +542,9 @@ export default function Home() {
                 )}
               </Button>
 
+              {/* 通知中心 */}
+              <NotificationCenter />
+
                <div className="pl-1">
                  <UserMenu />
                </div>
@@ -568,6 +574,9 @@ export default function Home() {
                   </span>
                 )}
               </Button>
+
+              {/* 通知中心 - 移动端 */}
+              <NotificationCenter />
 
               <UserMenu />
 
