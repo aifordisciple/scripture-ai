@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
+import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 
 interface Node {
   id: string;
@@ -38,6 +39,22 @@ const categoryColors: Record<string, string> = {
   PROPHETIC: '#ef4444',   // red
 };
 
+const categoryLabels: Record<string, string> = {
+  THEOLOGICAL: '神学主题',
+  ETHICAL: '伦理主题',
+  HISTORICAL: '历史主题',
+  PROPHETIC: '预言主题',
+};
+
+// 边类型颜色
+const edgeTypeColors: Record<string, string> = {
+  RELATED: '#9ca3af',   // gray
+  PARENT: '#3b82f6',    // blue
+  CHILD: '#8b5cf6',     // purple
+  CONTRAST: '#ef4444',  // red
+  FULFILLS: '#10b981',  // green
+};
+
 export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: NetworkGraphProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,6 +63,12 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
   const edgesRef = useRef<Edge[]>([]);
   const animationRef = useRef<number>();
   const mouseRef = useRef<{ x: number; y: number; node: Node | null }>({ x: 0, y: 0, node: null });
+
+  // 缩放和平移状态
+  const [scale, setScale] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const lastMouseRef = useRef({ x: 0, y: 0 });
 
   // 初始化节点位置
   const initializePositions = useCallback(() => {
@@ -105,7 +128,7 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
           const dx = (target.x || 0) - (source.x || 0);
           const dy = (target.y || 0) - (source.y || 0);
           const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-          const force = (distance - 100) * 0.01;
+          const force = (distance - 100) * 0.01 * (edge.strength || 0.5);
           source.vx = (source.vx || 0) + (dx / distance) * force;
           source.vy = (source.vy || 0) + (dy / distance) * force;
         }
@@ -148,12 +171,15 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
     ctx.fillStyle = isDarkMode ? '#111827' : '#f9fafb';
     ctx.fillRect(0, 0, width, height);
 
+    // 应用变换
+    ctx.save();
+    ctx.translate(offset.x, offset.y);
+    ctx.scale(scale, scale);
+
     const nodes = nodesRef.current;
     const edges = edgesRef.current;
 
     // 绘制边
-    ctx.strokeStyle = isDarkMode ? '#374151' : '#e5e7eb';
-    ctx.lineWidth = 1;
     edges.forEach((edge) => {
       const source = nodes.find(n => n.id === edge.source);
       const target = nodes.find(n => n.id === edge.target);
@@ -161,9 +187,30 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
         ctx.beginPath();
         ctx.moveTo(source.x, source.y);
         ctx.lineTo(target.x, target.y);
+
+        // 根据边类型设置颜色
+        const edgeColor = edgeTypeColors[edge.type] || edgeTypeColors.RELATED;
+        ctx.strokeStyle = isDarkMode
+          ? edgeColor.replace('#', 'rgba(').replace(/(.{2})(.{2})(.{2})/, (_, r, g, b) =>
+              `${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)}, 0.6)`)
+          : edgeColor.replace('#', 'rgba(').replace(/(.{2})(.{2})(.{2})/, (_, r, g, b) =>
+              `${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)}, 0.4)`);
+
+        // 根据强度设置线宽
+        ctx.lineWidth = Math.max(1, edge.strength * 3);
+
+        // 虚线样式（对于弱关联）
+        if (edge.strength < 0.5) {
+          ctx.setLineDash([5, 5]);
+        } else {
+          ctx.setLineDash([]);
+        }
+
         ctx.stroke();
       }
     });
+
+    ctx.setLineDash([]);
 
     // 绘制节点
     nodes.forEach((node) => {
@@ -187,6 +234,17 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
         ctx.stroke();
       }
 
+      // 悬停光晕
+      if (isHovered && !isSelected) {
+        ctx.strokeStyle = categoryColors[node.category] || '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, radius + 5, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
       // 节点标签
       if (radius > 15 || isSelected || isHovered) {
         ctx.fillStyle = isDarkMode ? '#fff' : '#000';
@@ -197,10 +255,12 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
       }
     });
 
+    ctx.restore();
+
     // 继续动画
     simulate();
     animationRef.current = requestAnimationFrame(draw);
-  }, [isDarkMode, selectedNodeId, simulate]);
+  }, [isDarkMode, selectedNodeId, simulate, scale, offset]);
 
   // 鼠标交互
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -208,8 +268,17 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = (e.clientX - rect.left - offset.x) / scale;
+    const y = (e.clientY - rect.top - offset.y) / scale;
+
+    // 平移
+    if (isDraggingRef.current) {
+      const dx = e.clientX - lastMouseRef.current.x;
+      const dy = e.clientY - lastMouseRef.current.y;
+      setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+      lastMouseRef.current = { x: e.clientX, y: e.clientY };
+      return;
+    }
 
     // 检查是否悬停在节点上
     const hoveredNode = nodesRef.current.find((node) => {
@@ -221,14 +290,43 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
     });
 
     mouseRef.current = { x, y, node: hoveredNode || null };
-    canvas.style.cursor = hoveredNode ? 'pointer' : 'default';
+    canvas.style.cursor = hoveredNode ? 'pointer' : (isDraggingRef.current ? 'grabbing' : 'grab');
+  }, [scale, offset]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!mouseRef.current.node) {
+      isDraggingRef.current = true;
+      lastMouseRef.current = { x: e.clientX, y: e.clientY };
+    }
   }, []);
 
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    if (mouseRef.current.node) {
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
+    if (!isDraggingRef.current && mouseRef.current.node) {
       onNodeClick?.(mouseRef.current.node);
     }
+    isDraggingRef.current = false;
   }, [onNodeClick]);
+
+  // 滚轮缩放
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    setScale(prev => Math.max(0.3, Math.min(3, prev * delta)));
+  }, []);
+
+  // 缩放控制
+  const handleZoomIn = useCallback(() => {
+    setScale(prev => Math.min(3, prev * 1.2));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setScale(prev => Math.max(0.3, prev / 1.2));
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setScale(1);
+    setOffset({ x: 0, y: 0 });
+  }, []);
 
   // 初始化和动画
   useEffect(() => {
@@ -256,9 +354,73 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
       <canvas
         ref={canvasRef}
         onMouseMove={handleMouseMove}
-        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={() => { isDraggingRef.current = false; }}
+        onWheel={handleWheel}
         className="w-full h-full"
       />
+
+      {/* 缩放控制 */}
+      <div className="absolute top-4 right-4 flex flex-col gap-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-1">
+        <button
+          onClick={handleZoomIn}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-600 dark:text-gray-300"
+          title="放大"
+        >
+          <ZoomIn className="w-4 h-4" />
+        </button>
+        <button
+          onClick={handleZoomOut}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-600 dark:text-gray-300"
+          title="缩小"
+        >
+          <ZoomOut className="w-4 h-4" />
+        </button>
+        <button
+          onClick={handleReset}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-600 dark:text-gray-300"
+          title="重置视图"
+        >
+          <Maximize2 className="w-4 h-4" />
+        </button>
+        <div className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400 text-center border-t border-gray-200 dark:border-gray-700">
+          {Math.round(scale * 100)}%
+        </div>
+      </div>
+
+      {/* 图例 */}
+      <div className="absolute bottom-4 left-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 text-xs">
+        <div className="font-medium text-gray-700 dark:text-gray-300 mb-2">主题分类</div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          {Object.entries(categoryLabels).map(([key, label]) => (
+            <div key={key} className="flex items-center gap-1.5">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: categoryColors[key] }}
+              />
+              <span className="text-gray-600 dark:text-gray-400">{label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">关系类型</div>
+          <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-0.5 bg-gray-400" />
+              <span className="text-gray-500 dark:text-gray-400">关联</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-0.5 bg-blue-500" />
+              <span className="text-gray-500 dark:text-gray-400">父主题</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-0.5 bg-green-500" />
+              <span className="text-gray-500 dark:text-gray-400">成全</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

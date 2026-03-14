@@ -34,8 +34,20 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function ThemeCard({ theme, onClose, isSaved, onToggleSave }: ThemeCardProps) {
-  const { isDarkMode } = useBibleStore();
+  const { isDarkMode, tabs, activeTabId, updateActiveTab, addTab, setActiveTab } = useBibleStore();
   const color = categoryColors[theme.category] || 'indigo';
+
+  const handleViewAllVerses = () => {
+    // 找到或创建阅读标签页
+    const existingReadTab = tabs.find(t => t.type === 'read');
+    if (existingReadTab) {
+      setActiveTab(existingReadTab.id);
+    } else {
+      addTab({ type: 'read', book: 'Gen', chapter: '1' });
+    }
+    // 触发搜索该主题的所有经文
+    // 可以通过AI搜索或打开经文列表
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -101,9 +113,7 @@ export default function ThemeCard({ theme, onClose, isSaved, onToggleSave }: The
       {/* 底部操作 */}
       <div className="flex gap-2 p-4 pt-0">
         <button
-          onClick={() => {
-            // TODO: 在阅读器中打开相关经文
-          }}
+          onClick={handleViewAllVerses}
           className="flex-1 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
         >
           查看相关经文
@@ -113,17 +123,39 @@ export default function ThemeCard({ theme, onClose, isSaved, onToggleSave }: The
   );
 }
 
+// 书卷ID转换（从数据库格式 GEN -> 阅读器格式 Gen）
+function convertBookId(bookId: string): string {
+  const bookMap: Record<string, string> = {
+    'GEN': 'Gen', 'EXO': 'Exo', 'LEV': 'Lev', 'NUM': 'Num', 'DEU': 'Deu',
+    'JOS': 'Jos', 'JDG': 'Jdg', 'RUT': 'Rut', '1SA': '1Sa', '2SA': '2Sa',
+    '1KI': '1Ki', '2KI': '2Ki', '1CH': '1Ch', '2CH': '2Ch', 'EZR': 'Ezr',
+    'NEH': 'Neh', 'EST': 'Est', 'JOB': 'Job', 'PSA': 'Psa', 'PRO': 'Pro',
+    'ECC': 'Ecc', 'SNG': 'Sng', 'ISA': 'Isa', 'JER': 'Jer', 'LAM': 'Lam',
+    'EZK': 'Ezk', 'DAN': 'Dan', 'HOS': 'Hos', 'JOL': 'Jol', 'AMO': 'Amo',
+    'OBA': 'Oba', 'JON': 'Jon', 'MIC': 'Mic', 'NAM': 'Nam', 'HAB': 'Hab',
+    'ZEP': 'Zep', 'HAG': 'Hag', 'ZEC': 'Zec', 'MAL': 'Mal',
+    'MAT': 'Mat', 'MRK': 'Mrk', 'LUK': 'Luk', 'JHN': 'Jhn', 'ACT': 'Act',
+    'ROM': 'Rom', '1CO': '1Co', '2CO': '2Co', 'GAL': 'Gal', 'EPH': 'Eph',
+    'PHP': 'Php', 'COL': 'Col', '1TH': '1Th', '2TH': '2Th', '1TI': '1Ti',
+    '2TI': '2Ti', 'TIT': 'Tit', 'PHM': 'Phm', 'HEB': 'Heb', 'JAS': 'Jas',
+    '1PE': '1Pe', '2PE': '2Pe', '1JN': '1Jn', '2JN': '2Jn', '3JN': '3Jn',
+    'JUD': 'Jud', 'REV': 'Rev'
+  };
+  return bookMap[bookId] || bookId;
+}
+
 // 主题相关经文组件
 function ThemeVerses({ themeId }: { themeId: string }) {
   const [verseLinks, setVerseLinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { tabs, activeTabId, updateActiveTab, addTab, setActiveTab, setScrollToVerse } = useBibleStore();
 
   useEffect(() => {
     async function fetchVerses() {
       try {
-        const res = await fetch(`/api/themes/verses?themeId=${themeId}&limit=5`);
+        const res = await fetch(`/api/themes/verses?themeId=${themeId}&limit=10`);
         const data = await res.json();
-        setVerseLinks(data.verseLinks?.slice(0, 5) || []);
+        setVerseLinks(data.verseLinks?.slice(0, 10) || []);
       } catch (error) {
         console.error('Failed to fetch theme verses:', error);
       } finally {
@@ -133,6 +165,36 @@ function ThemeVerses({ themeId }: { themeId: string }) {
     fetchVerses();
   }, [themeId]);
 
+  const handleVerseClick = (link: any) => {
+    const book = convertBookId(link.bookId);
+    const chapter = link.chapter.toString();
+    const verse = link.verseStart;
+
+    // 查找是否已有阅读标签页
+    const existingReadTab = tabs.find(t => t.type === 'read');
+
+    if (existingReadTab) {
+      // 更新现有标签页
+      if (existingReadTab.id === activeTabId) {
+        updateActiveTab({ book, chapter });
+      } else {
+        // 切换到阅读标签页并更新
+        setActiveTab(existingReadTab.id);
+        // 延迟更新以确保标签切换完成
+        setTimeout(() => {
+          updateActiveTab({ book, chapter });
+          setScrollToVerse(verse);
+        }, 50);
+      }
+    } else {
+      // 创建新的阅读标签页
+      addTab({ type: 'read', book, chapter });
+    }
+
+    // 设置滚动到指定经文
+    setScrollToVerse(verse);
+  };
+
   if (loading) {
     return <div className="text-xs text-gray-400">加载相关经文...</div>;
   }
@@ -141,6 +203,27 @@ function ThemeVerses({ themeId }: { themeId: string }) {
     return null;
   }
 
+  // 获取书卷中文名用于显示
+  const getBookDisplayName = (bookId: string): string => {
+    const bookNames: Record<string, string> = {
+      'GEN': '创', 'EXO': '出', 'LEV': '利', 'NUM': '民', 'DEU': '申',
+      'JOS': '书', 'JDG': '士', 'RUT': '得', '1SA': '撒上', '2SA': '撒下',
+      '1KI': '王上', '2KI': '王下', '1CH': '代上', '2CH': '代下', 'EZR': '拉',
+      'NEH': '尼', 'EST': '斯', 'JOB': '伯', 'PSA': '诗', 'PRO': '箴',
+      'ECC': '传', 'SNG': '歌', 'ISA': '赛', 'JER': '耶', 'LAM': '哀',
+      'EZK': '结', 'DAN': '但', 'HOS': '何', 'JOL': '珥', 'AMO': '摩',
+      'OBA': '俄', 'JON': '拿', 'MIC': '弥', 'NAM': '鸿', 'HAB': '哈',
+      'ZEP': '番', 'HAG': '该', 'ZEC': '亚', 'MAL': '玛',
+      'MAT': '太', 'MRK': '可', 'LUK': '路', 'JHN': '约', 'ACT': '徒',
+      'ROM': '罗', '1CO': '林前', '2CO': '林后', 'GAL': '加', 'EPH': '弗',
+      'PHP': '腓', 'COL': '西', '1TH': '帖前', '2TH': '帖后', '1TI': '提前',
+      '2TI': '提后', 'TIT': '多', 'PHM': '门', 'HEB': '来', 'JAS': '雅',
+      '1PE': '彼前', '2PE': '彼后', '1JN': '约壹', '2JN': '约贰', '3JN': '约叁',
+      'JUD': '犹', 'REV': '启'
+    };
+    return bookNames[bookId] || bookId;
+  };
+
   return (
     <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
       <div className="text-xs text-gray-400 mb-2">主要经文</div>
@@ -148,9 +231,10 @@ function ThemeVerses({ themeId }: { themeId: string }) {
         {verseLinks.map((link, index) => (
           <span
             key={index}
-            className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+            onClick={() => handleVerseClick(link)}
+            className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs rounded cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors"
           >
-            {link.bookId} {link.chapter}:{link.verseStart}
+            {getBookDisplayName(link.bookId)}{link.chapter}:{link.verseStart}
           </span>
         ))}
       </div>
