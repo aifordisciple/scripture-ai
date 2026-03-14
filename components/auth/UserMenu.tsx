@@ -4,10 +4,9 @@
 import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, BookMarked, FileText, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageSquare, HelpCircle, MessageCircle, Bell, Users } from "lucide-react";
+import { UserCircle, LogOut, Settings, BookMarked, FileText, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageCircle, Users, BarChart3 } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { UserFeedbackPanel } from "@/components/feedback/UserFeedbackPanel";
-import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { useGroupUnread } from "@/hooks/use-group-unread";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -17,10 +16,7 @@ export function UserMenu() {
   const { data: session, status } = useSession();
   const {
     setAuthOpen,
-    isDarkMode,
-    toggleDarkMode,
     setMobileSettingsOpen,
-    setDashboardOpen, // [新增] 引入看板开关方法
     streakCount, // 连续阅读天数
     tabs,
     setActiveTab,
@@ -31,7 +27,6 @@ export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [apiSettingsOpen, setApiSettingsOpen] = useState(false);
   const [feedbackPanelOpen, setFeedbackPanelOpen] = useState(false);
-  const [notificationSettingsOpen, setNotificationSettingsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -97,7 +92,7 @@ export function UserMenu() {
             <p className="text-xs text-slate-500 truncate mt-0.5">{session.user?.email}</p>
           </div>
 
-          {/* 个人数据看板入口 */}
+          {/* 读经统计入口 */}
           <div className="px-2 mb-2">
             <button
               onClick={() => {
@@ -109,8 +104,8 @@ export function UserMenu() {
               }}
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-colors"
             >
-              <LayoutDashboard className="w-4 h-4" />
-              <span className="flex-1 text-left">个人数据看板</span>
+              <BarChart3 className="w-4 h-4" />
+              <span className="flex-1 text-left">读经统计</span>
               {/* 火焰徽章 - 显示连续阅读天数 */}
               {streakCount > 0 && (
                 <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-100 dark:bg-orange-900/40 rounded-full">
@@ -122,20 +117,15 @@ export function UserMenu() {
             </button>
           </div>
 
-          <MenuItem 
-            icon={<Settings className="w-4 h-4" />} 
-            label="阅读设置" 
-            onClick={() => { setIsOpen(false); setMobileSettingsOpen(true); }} 
+          <MenuItem
+            icon={<Settings className="w-4 h-4" />}
+            label="设置"
+            onClick={() => { setIsOpen(false); setMobileSettingsOpen(true); }}
           />
-          <MenuItem 
-            icon={<BrainCircuit className="w-4 h-4 text-indigo-500" />} 
-            label="AI 模型与接口设置" 
-            onClick={() => { setIsOpen(false); setApiSettingsOpen(true); }} 
-          />
-          <MenuItem 
-            icon={isDarkMode ? <Sun className="w-4 h-4"/> : <Moon className="w-4 h-4"/>} 
-            label={isDarkMode ? "浅色模式" : "深色模式"} 
-            onClick={toggleDarkMode} 
+          <MenuItem
+            icon={<BrainCircuit className="w-4 h-4 text-indigo-500" />}
+            label="AI 模型与接口设置"
+            onClick={() => { setIsOpen(false); setApiSettingsOpen(true); }}
           />
           
           <div className="my-1 border-t dark:border-slate-800" />
@@ -179,32 +169,12 @@ export function UserMenu() {
 
           <div className="my-1 border-t dark:border-slate-800" />
 
-          {/* 新手引导入口 */}
-          <MenuItem
-            icon={<HelpCircle className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
-            label="重新播放引导"
-            onClick={() => {
-              setIsOpen(false);
-              // 触发重新播放引导
-              window.dispatchEvent(new CustomEvent("reset-onboarding", { detail: "welcome" }));
-            }}
-          />
-
           <MenuItem
             icon={<MessageCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
             label="我的反馈"
             onClick={() => {
               setIsOpen(false);
               setFeedbackPanelOpen(true);
-            }}
-          />
-
-          <MenuItem
-            icon={<Bell className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
-            label="通知设置"
-            onClick={() => {
-              setIsOpen(false);
-              setNotificationSettingsOpen(true);
             }}
           />
 
@@ -256,7 +226,6 @@ export function UserMenu() {
       
       <ApiSettingsDialog open={apiSettingsOpen} onOpenChange={setApiSettingsOpen} />
       <UserFeedbackPanel open={feedbackPanelOpen} onOpenChange={setFeedbackPanelOpen} />
-      <NotificationSettings open={notificationSettingsOpen} onOpenChange={setNotificationSettingsOpen} />
     </div>
   );
 }

@@ -11,7 +11,7 @@ import { SearchResults } from "@/components/bible/SearchResults";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen } from "lucide-react";
+import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
@@ -362,10 +362,21 @@ export default function Home() {
         <SheetContent side="bottom" className="bg-card border-t-0 pb-6 rounded-t-2xl max-h-[85vh] overflow-y-auto">
           <SheetHeader className="mb-4 pt-2">
             <SheetTitle className="text-foreground flex items-center gap-2">
-              <Settings className="w-5 h-5 text-primary" /> 阅读设置
+              <Settings className="w-5 h-5 text-primary" /> 设置
             </SheetTitle>
           </SheetHeader>
           <div className="space-y-6">
+            {/* 明暗模式设置 */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+                {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                {isDarkMode ? "深色模式" : "浅色模式"}
+              </span>
+              <Button variant={isDarkMode ? "default" : "secondary"} size="sm" onClick={toggleDarkMode} className="rounded-full px-4">
+                {isDarkMode ? "切换浅色" : "切换深色"}
+              </Button>
+            </div>
+
             {activeTab.type === 'read' && (
               <div className="bg-secondary/50 p-4 rounded-xl border border-border/50">
                  <div className="flex items-center gap-2 mb-2 text-sm font-bold text-foreground">
@@ -382,8 +393,8 @@ export default function Home() {
               <span className="text-sm text-muted-foreground font-medium">行间距</span>
               <div className="flex bg-secondary/50 p-1 rounded-lg">
                 {[1.6, 1.8, 2.2].map(lh => (
-                  <button 
-                    key={lh} 
+                  <button
+                    key={lh}
                     onClick={() => setLineHeight(lh)}
                     className={cn("px-3 py-1 text-xs rounded-md transition-all", lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                   >
@@ -398,15 +409,15 @@ export default function Home() {
                 {showEnglish ? "已开启" : "已关闭"}
               </Button>
             </div>
-            
+
             <div className="pt-2">
               <SyncSettings />
             </div>
           </div>
-          
+
           <div className="mt-8 mb-4">
-            <Button 
-              className="w-full rounded-full font-bold h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground" 
+            <Button
+              className="w-full rounded-full font-bold h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={() => setMobileSettingsOpen(false)}
             >
               完 成 并 关 闭
