@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useBibleStore } from '@/store/useBibleStore';
-import { X, Network, List, Clock, Search, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Network, List, Clock, Search, Bookmark, BookmarkCheck } from 'lucide-react';
 import ThemeCard from './ThemeCard';
 import ThemeSearch from './ThemeSearch';
 
@@ -127,11 +127,6 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
     }
   }, [selectedThemeId, graphDepth]);
 
-  const handleClose = useCallback(() => {
-    setThemeGraphPanelOpen(false);
-    onClose?.();
-  }, [setThemeGraphPanelOpen, onClose]);
-
   const handleThemeSelect = useCallback((theme: any) => {
     setSelectedTheme(theme);
     setSelectedThemeId(theme.id);
@@ -153,17 +148,6 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
 
   return (
     <div className={`flex flex-col h-full bg-white dark:bg-gray-900 ${isDarkMode ? 'dark' : ''}`}>
-      {/* 头部 */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">主题网络图</h2>
-        <button
-          onClick={handleClose}
-          className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
       {/* 搜索栏 */}
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <ThemeSearch onSelectTheme={handleThemeSelect} />

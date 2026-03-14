@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useBibleStore } from '@/store/useBibleStore';
-import { X, Map, Clock, Route, Search, Loader2, MapPin } from 'lucide-react';
+import { Map, Clock, Route, Search, Loader2, MapPin } from 'lucide-react';
 import LocationCard from './LocationCard';
 import TimelineSlider from './TimelineSlider';
 import JourneyPlayer from './JourneyPlayer';
@@ -136,11 +136,6 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
     extractLocations();
   }, [verseContext, apiConfig]);
 
-  const handleClose = useCallback(() => {
-    setAtlasPanelOpen(false);
-    onClose?.();
-  }, [setAtlasPanelOpen, onClose]);
-
   const tabs = [
     { id: 'map', label: '地图', icon: Map },
     { id: 'timeline', label: '时间线', icon: Clock },
@@ -149,17 +144,6 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
-      {/* 头部 */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">圣经地图与时间线</h2>
-        <button
-          onClick={handleClose}
-          className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
       {/* 经文信息提示 */}
       {verseContext && (
         <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800">
