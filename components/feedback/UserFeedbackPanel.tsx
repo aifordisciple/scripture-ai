@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +13,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   MessageSquare,
   Send,
   Loader2,
   Bug,
   Lightbulb,
   HelpCircle,
+  Search,
+  RefreshCw,
+  CheckCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -53,6 +64,10 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
   const [replyContent, setReplyContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [replyLoading, setReplyLoading] = useState(false);
+
+  // 搜索和筛选
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     if (open) {
@@ -118,13 +133,13 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
   const getStatusColor = (status: string) => {
     switch (status) {
       case "OPEN":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
       case "IN_PROGRESS":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
       case "RESOLVED":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
     }
   };
 
@@ -180,9 +195,34 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
     return formatDistanceToNow(new Date(date), { addSuffix: true, locale: zhCN });
   };
 
+  // 检查是否有新回复（用户最后一条回复之后管理员有回复）
+  const hasNewAdminReply = (feedback: Feedback) => {
+    const replies = parseReplies(feedback.replies);
+    if (replies.length === 0) return feedback.adminReply;
+    const lastReply = replies[replies.length - 1];
+    return lastReply?.type === 'admin';
+  };
+
+  // 筛选反馈
+  const filteredFeedbacks = feedbacks.filter((feedback) => {
+    // 状态筛选
+    if (statusFilter !== "all" && feedback.status !== statusFilter) {
+      return false;
+    }
+    // 搜索筛选
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      return (
+        feedback.title.toLowerCase().includes(query) ||
+        feedback.content.toLowerCase().includes(query)
+      );
+    }
+    return true;
+  });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-2xl max-h-[85vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
@@ -204,7 +244,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
 
             <div className="space-y-3">
               <h3 className="text-lg font-semibold">{selectedFeedback.title}</h3>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="outline" className="flex items-center gap-1">
                   {getTypeIcon(selectedFeedback.type)}
                   {getTypeLabel(selectedFeedback.type)}
@@ -223,29 +263,68 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
               <p className="text-sm whitespace-pre-wrap">{selectedFeedback.content}</p>
             </div>
 
-            {/* 回复历史 */}
-            <ScrollArea className="max-h-[300px]">
-              {parseReplies(selectedFeedback.replies).map((reply, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "mb-3 p-3 rounded-lg",
-                    reply.type === "admin"
-                      ? "bg-blue-50 dark:bg-blue-900/20"
-                      : "bg-gray-50 dark:bg-gray-800"
-                  )}
-                >
-                  <div className="text-xs text-gray-500 mb-1">
-                    {reply.type === "admin" ? "管理员回复" : "您的回复"} ·{" "}
-                    {formatTime(reply.createdAt)}
-                  </div>
-                  <p className="text-sm whitespace-pre-wrap">{reply.content}</p>
-                </div>
-              ))}
-            </ScrollArea>
+            {/* 截图 */}
+            {selectedFeedback.screenshot && (
+              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                <div className="text-xs text-gray-500 mb-2">截图</div>
+                <img
+                  src={selectedFeedback.screenshot}
+                  alt="反馈截图"
+                  className="max-w-full rounded-lg border max-h-48"
+                />
+              </div>
+            )}
 
-            {/* 回复输入框 */}
-            {selectedFeedback.status !== "RESOLVED" && (
+            {/* 回复历史 */}
+            {parseReplies(selectedFeedback.replies).length > 0 && (
+              <div>
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  对话记录
+                </div>
+                <ScrollArea className="max-h-[200px] border rounded-lg p-3">
+                  {parseReplies(selectedFeedback.replies).map((reply, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "mb-3 last:mb-0 p-3 rounded-lg",
+                        reply.type === "admin"
+                          ? "bg-blue-50 dark:bg-blue-900/20"
+                          : "bg-gray-100 dark:bg-gray-700"
+                      )}
+                    >
+                      <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                        {reply.type === "admin" ? (
+                          <>
+                            <Badge variant="secondary" className="text-xs py-0 h-5">管理员</Badge>
+                            {formatTime(reply.createdAt)}
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-gray-600 dark:text-gray-400">您</span>
+                            <span>·</span>
+                            {formatTime(reply.createdAt)}
+                          </>
+                        )}
+                      </div>
+                      <p className="text-sm whitespace-pre-wrap">{reply.content}</p>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </div>
+            )}
+
+            {/* 回复输入框或已解决提示 */}
+            {selectedFeedback.status === "RESOLVED" ? (
+              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-center">
+                <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                <p className="text-sm text-green-700 dark:text-green-400 font-medium">
+                  此反馈已解决
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-500 mt-1">
+                  感谢您的反馈！如有其他问题，欢迎提交新的反馈。
+                </p>
+              </div>
+            ) : (
               <div className="space-y-2">
                 <Textarea
                   value={replyContent}
@@ -271,53 +350,107 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
           </div>
         ) : (
           // 列表视图
-          <ScrollArea className="max-h-[400px]">
-            {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          <div className="space-y-3">
+            {/* 搜索和筛选栏 */}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="搜索反馈..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
               </div>
-            ) : feedbacks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                <MessageSquare className="w-12 h-12 mb-2 opacity-50" />
-                <p className="text-sm">暂无反馈记录</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {feedbacks.map((feedback) => (
-                  <div
-                    key={feedback.id}
-                    onClick={() => handleSelectFeedback(feedback)}
-                    className="p-3 rounded-lg border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{feedback.title}</div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "text-xs",
-                              feedback.adminReply
-                                ? "border-blue-300 text-blue-600"
-                                : "text-gray-500"
-                            )}
-                          >
-                            {feedback.adminReply ? "有回复" : "待回复"}
-                          </Badge>
-                          <Badge className={cn("text-xs", getStatusColor(feedback.status))}>
-                            {getStatusLabel(feedback.status)}
-                          </Badge>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-28">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部状态</SelectItem>
+                  <SelectItem value="OPEN">待处理</SelectItem>
+                  <SelectItem value="IN_PROGRESS">处理中</SelectItem>
+                  <SelectItem value="RESOLVED">已解决</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={fetchFeedbacks}
+                disabled={loading}
+                title="刷新"
+              >
+                <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+              </Button>
+            </div>
+
+            {/* 统计信息 */}
+            <div className="flex items-center gap-4 text-xs text-gray-500">
+              <span>共 {feedbacks.length} 条反馈</span>
+              <span>·</span>
+              <span>{feedbacks.filter(f => hasNewAdminReply(f)).length} 条有新回复</span>
+            </div>
+
+            {/* 反馈列表 */}
+            <ScrollArea className="max-h-[350px]">
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : filteredFeedbacks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                  <MessageSquare className="w-12 h-12 mb-2 opacity-50" />
+                  <p className="text-sm">
+                    {searchQuery || statusFilter !== "all" ? "未找到匹配的反馈" : "暂无反馈记录"}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredFeedbacks.map((feedback) => {
+                    const hasNewReply = hasNewAdminReply(feedback);
+                    return (
+                      <div
+                        key={feedback.id}
+                        onClick={() => handleSelectFeedback(feedback)}
+                        className={cn(
+                          "p-3 rounded-lg border cursor-pointer transition-colors",
+                          "hover:bg-gray-50 dark:hover:bg-gray-800",
+                          hasNewReply && "border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10"
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium truncate">{feedback.title}</div>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              {hasNewReply ? (
+                                <Badge className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                  有新回复
+                                </Badge>
+                              ) : feedback.adminReply ? (
+                                <Badge variant="outline" className="text-xs text-gray-500">
+                                  已回复
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-xs text-gray-400">
+                                  待回复
+                                </Badge>
+                              )}
+                              <Badge className={cn("text-xs", getStatusColor(feedback.status))}>
+                                {getStatusLabel(feedback.status)}
+                              </Badge>
+                            </div>
+                          </div>
+                          <span className="text-xs text-gray-500 shrink-0">
+                            {formatTime(feedback.createdAt)}
+                          </span>
                         </div>
                       </div>
-                      <span className="text-xs text-gray-500 shrink-0">
-                        {formatTime(feedback.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </ScrollArea>
+                    );
+                  })}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
         )}
       </DialogContent>
     </Dialog>
