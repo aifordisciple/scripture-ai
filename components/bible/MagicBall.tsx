@@ -621,28 +621,48 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             // iOS Safari 硬件加速
             WebkitTransform: 'translateZ(0)',
             transform: 'translateZ(0)',
+            // iOS Safari 强制裁剪溢出内容
+            WebkitOverflowScrolling: 'touch',
           }}
         >
-          {/* 内部水波纹层 */}
-          <div className={cn(
-            "absolute inset-0 z-0 flex items-end justify-center pointer-events-none opacity-80 transition-all duration-500",
-            (isAiFinishedButUnseen || isQueuePanelOpen) ? "mix-blend-color-burn" : "mix-blend-multiply dark:mix-blend-overlay"
-          )}>
-            <div className={cn(
-              "w-[200%] h-[200%] rounded-[38%] absolute left-[-50%]",
-              (isAiFinishedButUnseen || isQueuePanelOpen) ? "bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 animate-gradient-spin" :
-              "bg-gradient-to-t from-blue-500 to-cyan-300",
+          {/* 内部水波纹层 - iOS Safari 需要额外处理 */}
+          <div
+            data-magic-ball="true"
+            className={cn(
+              "absolute inset-0 z-0 flex items-end justify-center pointer-events-none opacity-80 transition-all duration-500",
+              (isAiFinishedButUnseen || isQueuePanelOpen) ? "mix-blend-color-burn" : "mix-blend-multiply dark:mix-blend-overlay"
+            )}
+            style={{
+              // iOS Safari 圆形强制裁剪
+              WebkitMaskImage: '-webkit-radial-gradient(circle, white 100%, black 100%)',
+              maskImage: 'radial-gradient(circle, white 100%, black 100%)',
+              borderRadius: '50%',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              className={cn(
+                "w-[200%] h-[200%] absolute left-[-50%]",
+                (isAiFinishedButUnseen || isQueuePanelOpen) ? "bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 animate-gradient-spin" :
+                "bg-gradient-to-t from-blue-500 to-cyan-300",
 
-              // [状态逻辑]
-              // Generating: 波浪起伏
-              // Finished: 底部微波
-              // QueueOpen: 满水状态
-              // Open: 满水状态 (-10%)
-              // Default: 隐藏 (-160%)
-              isAiGenerating ? "animate-wave-rise" :
-              ((isAiFinishedButUnseen || isQueuePanelOpen) ? "bottom-[-5%]" :
-              (isAiOpen ? "bottom-[-10%] rotate-[120deg]" : "bottom-[-160%]")) + " transition-all duration-1000 ease-out"
-            )} />
+                // [状态逻辑]
+                // Generating: 波浪起伏
+                // Finished: 底部微波
+                // QueueOpen: 满水状态
+                // Open: 满水状态 (-10%)
+                // Default: 隐藏 (-160%)
+                isAiGenerating ? "animate-wave-rise" :
+                ((isAiFinishedButUnseen || isQueuePanelOpen) ? "bottom-[-5%]" :
+                (isAiOpen ? "bottom-[-10%] rotate-[120deg]" : "bottom-[-160%]")) + " transition-all duration-1000 ease-out"
+              )}
+              style={{
+                // iOS Safari 圆形近似 - 使用 50% 而非 38%
+                borderRadius: '50%',
+                WebkitTransform: 'translateZ(0)',
+                transform: 'translateZ(0)',
+              }}
+            />
           </div>
 
           {/* 核心图标 */}
