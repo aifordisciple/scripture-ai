@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useBibleStore } from '@/store/useBibleStore';
-import { Network, List, Clock, Search, Bookmark, BookmarkCheck, Sparkles, TrendingUp } from 'lucide-react';
+import { Network, List, Clock, Search, Bookmark, BookmarkCheck, Sparkles, TrendingUp, ArrowUpDown } from 'lucide-react';
 import ThemeCard from './ThemeCard';
 import ThemeSearch from './ThemeSearch';
+import ThemeTimeline from './ThemeTimeline';
 
 // 动态导入网络图组件（不支持SSR）
 const NetworkGraph = dynamic(() => import('./NetworkGraph'), {
@@ -344,83 +345,13 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
         )}
 
         {graphViewMode === 'timeline' && (
-          <div className="h-full overflow-y-auto p-4">
-            <ThemeTimeline selectedThemeId={selectedThemeId} />
-          </div>
+          <ThemeTimeline selectedThemeId={selectedThemeId} />
         )}
 
         {graphViewMode === 'list' && (
-          <div className="h-full overflow-y-auto p-4">
-            <ThemeList onSelectTheme={handleThemeSelect} selectedThemeId={selectedThemeId} />
-          </div>
+          <ThemeList onSelectTheme={handleThemeSelect} selectedThemeId={selectedThemeId} />
         )}
       </div>
-    </div>
-  );
-}
-
-// 主题时间线组件
-function ThemeTimeline({ selectedThemeId }: { selectedThemeId?: string | null }) {
-  const [verseLinks, setVerseLinks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!selectedThemeId) {
-      setVerseLinks([]);
-      return;
-    }
-
-    async function fetchVerses() {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/themes/verses?themeId=${selectedThemeId}`);
-        const data = await res.json();
-        setVerseLinks(data.verseLinks || []);
-      } catch (error) {
-        console.error('Failed to fetch theme verses:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchVerses();
-  }, [selectedThemeId]);
-
-  if (!selectedThemeId) {
-    return (
-      <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-        请先选择一个主题
-      </div>
-    );
-  }
-
-  if (loading) {
-    return <div className="text-gray-500 dark:text-gray-400">加载中...</div>;
-  }
-
-  // 按书卷分组
-  const groupedByBook = verseLinks.reduce((acc, link) => {
-    const book = link.bookId;
-    if (!acc[book]) acc[book] = [];
-    acc[book].push(link);
-    return acc;
-  }, {} as Record<string, any[]>);
-
-  return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-gray-900 dark:text-white">主题发展时间线</h3>
-      {Object.entries(groupedByBook).map(([bookId, links]) => (
-        <div key={bookId} className="border-l-2 border-indigo-500 pl-4">
-          <div className="font-medium text-gray-900 dark:text-white">{bookId}</div>
-          <div className="mt-2 space-y-2">
-            {links.map((link, index) => (
-              <div key={index} className="text-sm text-gray-600 dark:text-gray-300">
-                第{link.chapter}章:{link.verseStart}
-                {link.verseEnd && `-${link.verseEnd}`}
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
@@ -432,11 +363,14 @@ function ThemeList({ onSelectTheme, selectedThemeId }: {
 }) {
   const [themes, setThemes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<'verseCount' | 'connectionCount' | 'nameZh'>('verseCount');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchThemes() {
       try {
-        const res = await fetch('/api/themes?limit=50');
+        const res = await fetch('/api/themes?limit=100');
         const data = await res.json();
         setThemes(data.themes || []);
       } catch (error) {
@@ -448,10 +382,6 @@ function ThemeList({ onSelectTheme, selectedThemeId }: {
     fetchThemes();
   }, []);
 
-  if (loading) {
-    return <div className="text-gray-500 dark:text-gray-400">加载中...</div>;
-  }
-
   const categories = ['THEOLOGICAL', 'ETHICAL', 'HISTORICAL', 'PROPHETIC'];
   const categoryLabels: Record<string, string> = {
     THEOLOGICAL: '神学主题',
@@ -460,41 +390,139 @@ function ThemeList({ onSelectTheme, selectedThemeId }: {
     PROPHETIC: '预言主题',
   };
 
-  return (
-    <div className="space-y-6">
-      {categories.map((category) => {
-        const categoryThemes = themes.filter(t => t.category === category);
-        if (categoryThemes.length === 0) return null;
+  const categoryColors: Record<string, string> = {
+    THEOLOGICAL: 'indigo',
+    ETHICAL: 'emerald',
+    HISTORICAL: 'amber',
+    PROPHETIC: 'red',
+  };
 
-        return (
-          <div key={category}>
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
-              {categoryLabels[category]}
-            </h3>
-            <div className="space-y-2">
-              {categoryThemes.map((theme) => (
-                <button
-                  key={theme.id}
-                  onClick={() => onSelectTheme(theme)}
-                  className={`w-full p-3 rounded-lg text-left transition-colors ${
-                    theme.id === selectedThemeId
-                      ? 'bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-300 dark:border-indigo-700'
-                      : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
+  // 筛选和排序
+  const filteredThemes = themes
+    .filter(t => !selectedCategory || t.category === selectedCategory)
+    .sort((a, b) => {
+      let comparison = 0;
+      if (sortBy === 'nameZh') {
+        comparison = a.nameZh.localeCompare(b.nameZh, 'zh');
+      } else {
+        comparison = (a[sortBy] || 0) - (b[sortBy] || 0);
+      }
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center gap-3">
+          <div className="h-2 w-32 bg-gray-300 dark:bg-gray-600 rounded"></div>
+          <div className="h-2 w-24 bg-gray-300 dark:bg-gray-600 rounded"></div>
+          <p className="text-sm text-gray-400">加载主题列表...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full flex flex-col">
+      {/* 筛选和排序控制 */}
+      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 flex-wrap">
+        {/* 分类筛选 */}
+        <div className="flex items-center gap-1">
+          <span className="text-sm text-gray-500 dark:text-gray-400 mr-1">分类：</span>
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`px-2 py-1 text-xs rounded-full transition-colors ${
+              !selectedCategory
+                ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}
+          >
+            全部
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+              className={`px-2 py-1 text-xs rounded-full transition-colors ${
+                selectedCategory === cat
+                  ? `bg-${categoryColors[cat]}-100 dark:bg-${categoryColors[cat]}-900/30 text-${categoryColors[cat]}-700 dark:text-${categoryColors[cat]}-300`
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              {categoryLabels[cat]}
+            </button>
+          ))}
+        </div>
+
+        {/* 排序控制 */}
+        <div className="flex items-center gap-1 ml-auto">
+          <ArrowUpDown className="w-3 h-3 text-gray-400" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="text-xs bg-transparent text-gray-600 dark:text-gray-400 border-none focus:ring-0"
+          >
+            <option value="verseCount">经文数</option>
+            <option value="connectionCount">关联数</option>
+            <option value="nameZh">名称</option>
+          </select>
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            {sortOrder === 'asc' ? '↑' : '↓'}
+          </button>
+        </div>
+      </div>
+
+      {/* 主题列表 */}
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredThemes.map((theme) => (
+            <button
+              key={theme.id}
+              onClick={() => onSelectTheme(theme)}
+              className={`p-3 rounded-lg text-left transition-all hover:shadow-md ${
+                theme.id === selectedThemeId
+                  ? 'bg-indigo-100 dark:bg-indigo-900/30 border-2 border-indigo-400 dark:border-indigo-600'
+                  : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div>
                   <div className="font-medium text-gray-900 dark:text-white">{theme.nameZh}</div>
                   {theme.nameEn && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400">{theme.nameEn}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{theme.nameEn}</div>
                   )}
-                  <div className="text-xs text-gray-400 mt-1">
-                    {theme.verseCount} 处经文
-                  </div>
-                </button>
-              ))}
-            </div>
+                </div>
+                <div className={`px-1.5 py-0.5 text-xs rounded ${
+                  categoryColors[theme.category] === 'indigo' ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300' :
+                  categoryColors[theme.category] === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300' :
+                  categoryColors[theme.category] === 'amber' ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300' :
+                  'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300'
+                }`}>
+                  {theme.verseCount}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                <span>{categoryLabels[theme.category]}</span>
+                {theme.connectionCount > 0 && (
+                  <>
+                    <span>·</span>
+                    <span>{theme.connectionCount} 关联</span>
+                  </>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {filteredThemes.length === 0 && (
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+            没有找到匹配的主题
           </div>
-        );
-      })}
+        )}
+      </div>
     </div>
   );
 }

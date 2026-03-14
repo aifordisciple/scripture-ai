@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
-import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, X } from 'lucide-react';
 
 interface Node {
   id: string;
@@ -20,6 +20,7 @@ interface Edge {
   target: string;
   type: string;
   strength: number;
+  description?: string;
 }
 
 interface NetworkGraphProps {
@@ -55,6 +56,15 @@ const edgeTypeColors: Record<string, string> = {
   FULFILLS: '#10b981',  // green
 };
 
+// 边类型标签
+const edgeTypeLabels: Record<string, string> = {
+  RELATED: '关联',
+  PARENT: '父主题',
+  CHILD: '子主题',
+  CONTRAST: '对比',
+  FULFILLS: '成全',
+};
+
 export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: NetworkGraphProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,13 +72,16 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
   const nodesRef = useRef<Node[]>([]);
   const edgesRef = useRef<Edge[]>([]);
   const animationRef = useRef<number>();
-  const mouseRef = useRef<{ x: number; y: number; node: Node | null }>({ x: 0, y: 0, node: null });
+  const mouseRef = useRef<{ x: number; y: number; node: Node | null; edge: Edge | null }>({ x: 0, y: 0, node: null, edge: null });
 
   // 缩放和平移状态
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
   const lastMouseRef = useRef({ x: 0, y: 0 });
+
+  // 边详情状态
+  const [selectedEdge, setSelectedEdge] = useState<{edge: Edge; sourceNode: Node; targetNode: Node} | null>(null);
 
   // 初始化节点位置
   const initializePositions = useCallback(() => {
@@ -289,20 +302,54 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
       return dx * dx + dy * dy < radius * radius;
     });
 
-    mouseRef.current = { x, y, node: hoveredNode || null };
-    canvas.style.cursor = hoveredNode ? 'pointer' : (isDraggingRef.current ? 'grabbing' : 'grab');
+    // 检查是否悬停在边上
+    let hoveredEdge: Edge | null = null;
+    if (!hoveredNode) {
+      hoveredEdge = edgesRef.current.find((edge) => {
+        const source = nodesRef.current.find(n => n.id === edge.source);
+        const target = nodesRef.current.find(n => n.id === edge.target);
+        if (!source?.x || !source?.y || !target?.x || !target?.y) return false;
+
+        // 计算点到线段的距离
+        const lineLen = Math.sqrt(Math.pow(target.x - source.x, 2) + Math.pow(target.y - source.y, 2));
+        if (lineLen === 0) return false;
+
+        const t = Math.max(0, Math.min(1, ((x - source.x) * (target.x - source.x) + (y - source.y) * (target.y - source.y)) / (lineLen * lineLen)));
+        const nearX = source.x + t * (target.x - source.x);
+        const nearY = source.y + t * (target.y - source.y);
+        const dist = Math.sqrt(Math.pow(x - nearX, 2) + Math.pow(y - nearY, 2));
+
+        return dist < 10; // 10像素内的点击容差
+      }) || null;
+    }
+
+    mouseRef.current = { x, y, node: hoveredNode || null, edge: hoveredEdge };
+    canvas.style.cursor = hoveredNode ? 'pointer' : (hoveredEdge ? 'pointer' : (isDraggingRef.current ? 'grabbing' : 'grab'));
   }, [scale, offset]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!mouseRef.current.node) {
+    if (!mouseRef.current.node && !mouseRef.current.edge) {
       isDraggingRef.current = true;
       lastMouseRef.current = { x: e.clientX, y: e.clientY };
     }
   }, []);
 
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
-    if (!isDraggingRef.current && mouseRef.current.node) {
-      onNodeClick?.(mouseRef.current.node);
+    if (!isDraggingRef.current) {
+      if (mouseRef.current.node) {
+        onNodeClick?.(mouseRef.current.node);
+        setSelectedEdge(null);
+      } else if (mouseRef.current.edge) {
+        const sourceNode = nodesRef.current.find(n => n.id === mouseRef.current.edge?.source);
+        const targetNode = nodesRef.current.find(n => n.id === mouseRef.current.edge?.target);
+        if (sourceNode && targetNode && mouseRef.current.edge) {
+          setSelectedEdge({
+            edge: mouseRef.current.edge,
+            sourceNode,
+            targetNode,
+          });
+        }
+      }
     }
     isDraggingRef.current = false;
   }, [onNodeClick]);
@@ -443,6 +490,82 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
             <span className="text-gray-400">
               ({mouseRef.current.node.verseCount}处经文)
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* 边详情面板 */}
+      {selectedEdge && (
+        <div className="absolute top-4 left-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 max-w-xs">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">主题关系</h4>
+            <button
+              onClick={() => setSelectedEdge(null)}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: categoryColors[selectedEdge.sourceNode.category] || '#6366f1' }}
+              />
+              <span className="font-medium text-gray-900 dark:text-white">
+                {selectedEdge.sourceNode.name}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 px-2">
+              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+              <div className="flex flex-col items-center">
+                <span
+                  className="px-2 py-0.5 text-xs font-medium rounded-full"
+                  style={{
+                    backgroundColor: edgeTypeColors[selectedEdge.edge.type] || '#9ca3af',
+                    color: 'white',
+                  }}
+                >
+                  {edgeTypeLabels[selectedEdge.edge.type] || selectedEdge.edge.type}
+                </span>
+                {selectedEdge.edge.description && (
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {selectedEdge.edge.description}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: categoryColors[selectedEdge.targetNode.category] || '#6366f1' }}
+              />
+              <span className="font-medium text-gray-900 dark:text-white">
+                {selectedEdge.targetNode.name}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <span>关联强度</span>
+              <div className="flex items-center gap-2">
+                <div className="w-24 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${(selectedEdge.edge.strength || 0.5) * 100}%`,
+                      backgroundColor: edgeTypeColors[selectedEdge.edge.type] || '#9ca3af',
+                    }}
+                  />
+                </div>
+                <span>{Math.round((selectedEdge.edge.strength || 0.5) * 100)}%</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
