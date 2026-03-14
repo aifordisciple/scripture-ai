@@ -193,6 +193,17 @@ export default function AdminAnnouncementsPage() {
     }
   };
 
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'WARNING':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'MAINTENANCE':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-blue-100 text-blue-700';
+    }
+  };
+
   if (loading && !data) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -202,77 +213,80 @@ export default function AdminAnnouncementsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">公告管理</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">公告管理</h1>
         <button
           onClick={() => openEditor()}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          className="flex items-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm md:text-base"
         >
-          <Plus size={20} />
-          新建公告
+          <Plus size={18} />
+          <span className="hidden sm:inline">新建公告</span>
+          <span className="sm:hidden">新建</span>
         </button>
       </div>
 
-      {/* 公告列表 */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">公告</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {data?.announcements.map((announcement) => (
-              <tr key={announcement.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">{announcement.title}</div>
-                  <div className="text-sm text-gray-500 line-clamp-1">{announcement.content}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    {getTypeIcon(announcement.type)}
-                    <span className="text-sm text-gray-600">{getTypeLabel(announcement.type)}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <button
-                    onClick={() => toggleActive(announcement)}
-                    className={cn(
-                      "px-2 py-1 text-xs font-medium rounded-full",
-                      announcement.isActive
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-500"
-                    )}
-                  >
-                    {announcement.isActive ? '已启用' : '已禁用'}
-                  </button>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(announcement.createdAt).toLocaleDateString('zh-CN')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => openEditor(announcement)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-3"
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(announcement.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </td>
+      {/* 公告列表 - 桌面端表格 */}
+      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">公告</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data?.announcements.map((announcement) => (
+                <tr key={announcement.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-medium text-gray-900">{announcement.title}</div>
+                    <div className="text-sm text-gray-500 line-clamp-1">{announcement.content}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {getTypeIcon(announcement.type)}
+                      <span className="text-sm text-gray-600">{getTypeLabel(announcement.type)}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => toggleActive(announcement)}
+                      className={cn(
+                        "px-2 py-1 text-xs font-medium rounded-full",
+                        announcement.isActive
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-500"
+                      )}
+                    >
+                      {announcement.isActive ? '已启用' : '已禁用'}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(announcement.createdAt).toLocaleDateString('zh-CN')}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      onClick={() => openEditor(announcement)}
+                      className="text-indigo-600 hover:text-indigo-900 mr-3"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(announcement.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         {data && data.announcements.length === 0 && (
           <div className="text-center py-12 text-gray-500">
@@ -281,11 +295,72 @@ export default function AdminAnnouncementsPage() {
         )}
       </div>
 
+      {/* 公告列表 - 移动端卡片 */}
+      <div className="md:hidden space-y-3">
+        {data?.announcements.map((announcement) => (
+          <div key={announcement.id} className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={cn(
+                    "px-2 py-0.5 text-xs font-medium rounded-full",
+                    getTypeColor(announcement.type)
+                  )}>
+                    {getTypeLabel(announcement.type)}
+                  </span>
+                  <span className={cn(
+                    "px-2 py-0.5 text-xs font-medium rounded-full",
+                    announcement.isActive
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-500"
+                  )}>
+                    {announcement.isActive ? '已启用' : '已禁用'}
+                  </span>
+                </div>
+                <h3 className="font-medium text-gray-900 truncate">{announcement.title}</h3>
+                <p className="text-sm text-gray-500 line-clamp-2 mt-1">{announcement.content}</p>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+              <span className="text-xs text-gray-400">
+                {new Date(announcement.createdAt).toLocaleDateString('zh-CN')}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => toggleActive(announcement)}
+                  className="text-xs px-2 py-1 rounded text-gray-600 hover:bg-gray-100"
+                >
+                  {announcement.isActive ? '禁用' : '启用'}
+                </button>
+                <button
+                  onClick={() => openEditor(announcement)}
+                  className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded"
+                >
+                  <Edit2 size={16} />
+                </button>
+                <button
+                  onClick={() => handleDelete(announcement.id)}
+                  className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {data && data.announcements.length === 0 && (
+          <div className="text-center py-12 text-gray-500 bg-white rounded-lg">
+            暂无公告
+          </div>
+        )}
+      </div>
+
       {/* 编辑弹窗 */}
       {showEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
-            <div className="flex items-center justify-between p-4 border-b">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
               <h3 className="text-lg font-semibold">
                 {editingId ? '编辑公告' : '新建公告'}
               </h3>
@@ -317,7 +392,7 @@ export default function AdminAnnouncementsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">类型</label>
                   <select
@@ -344,7 +419,7 @@ export default function AdminAnnouncementsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">开始时间（可选）</label>
                   <input
@@ -384,7 +459,7 @@ export default function AdminAnnouncementsPage() {
               )}
             </div>
 
-            <div className="flex justify-end gap-3 p-4 border-t">
+            <div className="flex justify-end gap-3 p-4 border-t sticky bottom-0 bg-white">
               <button
                 onClick={closeEditor}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"

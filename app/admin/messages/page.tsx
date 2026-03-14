@@ -2,10 +2,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Send, X, Mail, User, Users, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Send, X, Mail, User, Users, Loader2, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface User {
+interface UserItem {
   id: string;
   name: string | null;
   email: string;
@@ -32,7 +32,7 @@ interface SentMessage {
 }
 
 interface UsersResponse {
-  users: User[];
+  users: UserItem[];
   pagination: {
     page: number;
     limit: number;
@@ -59,7 +59,7 @@ export default function AdminMessagesPage() {
   const [messages, setMessages] = useState<MessagesResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<UserItem[]>([]);
   const [showCompose, setShowCompose] = useState(false);
   const [composeData, setComposeData] = useState({
     title: '',
@@ -109,7 +109,7 @@ export default function AdminMessagesPage() {
     fetchUsers();
   };
 
-  const toggleUserSelection = (user: User) => {
+  const toggleUserSelection = (user: UserItem) => {
     setSelectedUsers(prev => {
       const exists = prev.find(u => u.id === user.id);
       if (exists) {
@@ -185,36 +185,36 @@ export default function AdminMessagesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">私信管理</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">私信管理</h1>
       </div>
 
       {/* Tab 切换 */}
       <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex space-x-4 md:space-x-8">
           <button
             onClick={() => setTab('send')}
             className={cn(
-              "py-4 px-1 border-b-2 font-medium text-sm",
+              "py-3 md:py-4 px-1 border-b-2 font-medium text-sm",
               tab === 'send'
                 ? "border-indigo-500 text-indigo-600"
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             )}
           >
-            <Send size={16} className="inline mr-2" />
+            <Send size={16} className="inline mr-1 md:mr-2" />
             发送私信
           </button>
           <button
             onClick={() => setTab('history')}
             className={cn(
-              "py-4 px-1 border-b-2 font-medium text-sm",
+              "py-3 md:py-4 px-1 border-b-2 font-medium text-sm",
               tab === 'history'
                 ? "border-indigo-500 text-indigo-600"
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             )}
           >
-            <Mail size={16} className="inline mr-2" />
+            <Mail size={16} className="inline mr-1 md:mr-2" />
             发送历史
           </button>
         </nav>
@@ -223,9 +223,9 @@ export default function AdminMessagesPage() {
       {tab === 'send' && (
         <>
           {/* 搜索和批量操作 */}
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex-1 min-w-[200px] relative">
+          <div className="bg-white rounded-lg shadow p-3 md:p-4">
+            <div className="flex flex-col md:flex-row md:flex-wrap items-stretch md:items-center gap-3 md:gap-4">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <input
                   type="text"
@@ -236,105 +236,161 @@ export default function AdminMessagesPage() {
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
-              <button
-                onClick={handleSearch}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-              >
-                搜索
-              </button>
-              <div className="flex gap-2 ml-auto">
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSearch}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                >
+                  搜索
+                </button>
+              </div>
+              <div className="flex gap-2 md:ml-auto">
                 <button
                   onClick={() => openCompose('selected')}
                   disabled={selectedUsers.length === 0}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
                 >
-                  <User size={18} />
-                  发送给选中 ({selectedUsers.length})
+                  <User size={16} />
+                  <span className="hidden sm:inline">发送给选中</span>
+                  <span>({selectedUsers.length})</span>
                 </button>
                 <button
                   onClick={() => openCompose('all')}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm md:text-base"
                 >
-                  <Users size={18} />
-                  发送给所有用户
+                  <Users size={16} />
+                  <span className="hidden sm:inline">发送给所有用户</span>
+                  <span className="sm:hidden">全部用户</span>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* 用户列表 */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          {/* 用户列表 - 桌面端表格 */}
+          <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
               </div>
             ) : (
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
-                      <input
-                        type="checkbox"
-                        checked={users?.users.length === selectedUsers.length && users?.users.length > 0}
-                        onChange={(e) => {
-                          if (e.target.checked && users) {
-                            setSelectedUsers(users.users);
-                          } else {
-                            setSelectedUsers([]);
-                          }
-                        }}
-                      />
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">邮箱</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">注册时间</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users?.users.map((user) => (
-                    <tr
-                      key={user.id}
-                      onClick={() => toggleUserSelection(user)}
-                      className={cn(
-                        "hover:bg-gray-50 cursor-pointer",
-                        selectedUsers.find(u => u.id === user.id) && "bg-indigo-50"
-                      )}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
                         <input
                           type="checkbox"
-                          checked={!!selectedUsers.find(u => u.id === user.id)}
-                          onChange={() => {}}
+                          checked={users?.users.length === selectedUsers.length && users?.users.length > 0}
+                          onChange={(e) => {
+                            if (e.target.checked && users) {
+                              setSelectedUsers(users.users);
+                            } else {
+                              setSelectedUsers([]);
+                            }
+                          }}
                         />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                            {user.image ? (
-                              <img src={user.image} alt="" className="w-8 h-8 rounded-full" />
-                            ) : (
-                              <User size={16} className="text-indigo-600" />
-                            )}
-                          </div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {user.name || '未设置'}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(user.createdAt).toLocaleDateString('zh-CN')}
-                      </td>
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">邮箱</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">注册时间</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {users?.users.map((user) => (
+                      <tr
+                        key={user.id}
+                        onClick={() => toggleUserSelection(user)}
+                        className={cn(
+                          "hover:bg-gray-50 cursor-pointer",
+                          selectedUsers.find(u => u.id === user.id) && "bg-indigo-50"
+                        )}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={!!selectedUsers.find(u => u.id === user.id)}
+                            onChange={() => {}}
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden">
+                              {user.image ? (
+                                <img src={user.image} alt="" className="w-8 h-8 rounded-full" />
+                              ) : (
+                                <User size={16} className="text-indigo-600" />
+                              )}
+                            </div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {user.name || '未设置'}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {user.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(user.createdAt).toLocaleDateString('zh-CN')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
 
             {users && users.users.length === 0 && (
               <div className="text-center py-12 text-gray-500">
+                暂无用户
+              </div>
+            )}
+          </div>
+
+          {/* 用户列表 - 移动端卡片 */}
+          <div className="md:hidden space-y-3">
+            {loading ? (
+              <div className="flex items-center justify-center py-12 bg-white rounded-lg">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+              </div>
+            ) : (
+              users?.users.map((user) => (
+                <div
+                  key={user.id}
+                  onClick={() => toggleUserSelection(user)}
+                  className={cn(
+                    "bg-white rounded-lg shadow p-4 cursor-pointer transition-colors",
+                    selectedUsers.find(u => u.id === user.id) && "ring-2 ring-indigo-500 bg-indigo-50"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">
+                      {user.image ? (
+                        <img src={user.image} alt="" className="w-10 h-10 rounded-full" />
+                      ) : (
+                        <User size={20} className="text-indigo-600" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 truncate">{user.name || '未设置'}</div>
+                      <div className="text-sm text-gray-500 truncate">{user.email}</div>
+                    </div>
+                    <div className={cn(
+                      "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0",
+                      selectedUsers.find(u => u.id === user.id)
+                        ? "bg-indigo-600 border-indigo-600"
+                        : "border-gray-300"
+                    )}>
+                      {selectedUsers.find(u => u.id === user.id) && (
+                        <Check size={14} className="text-white" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+
+            {users && users.users.length === 0 && (
+              <div className="text-center py-12 text-gray-500 bg-white rounded-lg">
                 暂无用户
               </div>
             )}
@@ -350,38 +406,55 @@ export default function AdminMessagesPage() {
             </div>
           ) : (
             <>
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">私信内容</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">接收用户</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">发送时间</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {messages?.messages.map((msg) => (
-                    <tr key={msg.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{msg.title}</div>
-                        <div className="text-sm text-gray-500 line-clamp-2 mt-1">{msg.content}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{msg.user.name || '未设置'}</div>
-                        <div className="text-xs text-gray-500">{msg.user.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(msg.createdAt)}
-                      </td>
+              {/* 桌面端表格 */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">私信内容</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">接收用户</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">发送时间</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {messages?.messages.map((msg) => (
+                      <tr key={msg.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-gray-900">{msg.title}</div>
+                          <div className="text-sm text-gray-500 line-clamp-2 mt-1">{msg.content}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{msg.user.name || '未设置'}</div>
+                          <div className="text-xs text-gray-500">{msg.user.email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(msg.createdAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* 移动端卡片 */}
+              <div className="md:hidden space-y-3 p-3">
+                {messages?.messages.map((msg) => (
+                  <div key={msg.id} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                    <div className="font-medium text-gray-900">{msg.title}</div>
+                    <div className="text-sm text-gray-500 line-clamp-2 mt-1">{msg.content}</div>
+                    <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
+                      <span>接收: {msg.user.name || msg.user.email}</span>
+                      <span>{formatDate(msg.createdAt)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               {/* 分页 */}
               {messages && messages.pagination.totalPages > 1 && (
-                <div className="flex items-center justify-between px-6 py-4 border-t">
+                <div className="flex items-center justify-between px-4 md:px-6 py-4 border-t">
                   <div className="text-sm text-gray-500">
-                    共 {messages.pagination.total} 条记录
+                    共 {messages.pagination.total} 条
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -391,7 +464,7 @@ export default function AdminMessagesPage() {
                     >
                       <ChevronLeft size={18} />
                     </button>
-                    <span className="px-4 py-2 text-sm">
+                    <span className="px-4 py-2 text-sm flex items-center">
                       {messagePage} / {messages.pagination.totalPages}
                     </span>
                     <button
@@ -418,8 +491,8 @@ export default function AdminMessagesPage() {
       {/* 发送私信弹窗 */}
       {showCompose && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
-            <div className="flex items-center justify-between p-4 border-b">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
               <h3 className="text-lg font-semibold">
                 {sendToAll ? '发送给所有用户' : `发送给 ${selectedUsers.length} 位用户`}
               </h3>
@@ -467,7 +540,7 @@ export default function AdminMessagesPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 p-4 border-t">
+            <div className="flex justify-end gap-3 p-4 border-t sticky bottom-0 bg-white">
               <button
                 onClick={closeCompose}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
