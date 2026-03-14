@@ -554,28 +554,10 @@ export default function Home() {
 
             {/* 移动端右侧：精简工具栏 */}
             <div className="flex sm:hidden items-center gap-0.5 shrink-0">
-              {/* 小组读经入口 */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  const groupTab = tabs.find(t => t.type === 'group');
-                  if (groupTab) {
-                    setActiveTab(groupTab.id);
-                  } else {
-                    addTab({ type: 'group' });
-                  }
-                }}
-                className="rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 h-9 w-9 relative"
-                title="小组读经"
-              >
-                <Users className="h-5 w-5" />
-                {groupUnread > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5">
-                    {groupUnread > 99 ? '99+' : groupUnread}
-                  </span>
-                )}
-              </Button>
+              {/* 朗读播放 - 移动端 */}
+              {activeTab.type === 'read' && (
+                <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="compact" />
+              )}
 
               {/* 通知中心 - 移动端 */}
               <NotificationCenter />
