@@ -44,11 +44,13 @@ docker-compose exec web sh    # Shell into container
 
 ```
 app/                     # Next.js App Router
-├── api/                 # API routes (36+ endpoints)
+├── api/                 # API routes (40+ endpoints)
 │   ├── chat/           # AI chat: main, tutor, devotional, prayer, sermon, study-guide
 │   ├── highlight/     # Highlight CRUD
 │   ├── note/          # Note CRUD
 │   ├── tts/           # Text-to-speech
+│   ├── atlas/         # Bible map/timeline data
+│   ├── theme/         # Theme graph endpoints
 │   └── ...            # Friends, posts, church, memory, etc.
 └── page.tsx            # Main reading page
 
@@ -59,11 +61,13 @@ components/
 │   ├── MagicBall.tsx  # Floating action button
 │   ├── PlanTab.tsx    # Reading plan UI (~600 lines)
 │   └── ShareCard.tsx # Verse image generator (~700 lines)
+├── atlas/              # Bible map and timeline components
+├── theme/              # Theme graph network components
 ├── ui/                 # Radix UI primitives
 └── auth/               # Auth components
 
 store/
-├── slices.ts           # Zustand slices (UI, Reader, AI, UserData, Sync)
+├── slices.ts           # Zustand slices (8 slices: UI, Reader, AI, UserData, Sync, Group, Atlas, ThemeGraph)
 ├── useBibleStore.ts    # Main store export
 └── types.ts            # TypeScript types
 
@@ -72,6 +76,13 @@ lib/
 ├── prisma.ts           # Prisma singleton
 ├── constants.ts        # BIBLE_BOOKS, prompts
 └── plans.ts            # Reading plan definitions
+
+hooks/                  # Custom React hooks
+├── use-audio-player.ts # Audio playback
+├── use-bible-search.ts # Bible verse search
+└── ...
+
+app-mobile/             # Expo React Native mobile app
 ```
 
 ### Key Patterns
@@ -83,16 +94,46 @@ lib/
 
 ### State Management
 
-The Zustand store has 5 slices:
+The Zustand store has 8 slices:
 - **UISlice**: Sidebar, tabs, modals, share
 - **ReaderSlice**: Font size, dark mode, tabs, chapter navigation
-- **AISlice**: AI sidebar state, generation status
+- **AISlice**: AI sidebar, generation, queue, sessions, custom prompts, insights
 - **UserDataSlice**: Highlights, notes, reading plans, streaks, badges, API config
 - **SyncSlice**: Cloud sync state
+- **GroupSlice**: Church/group reading plan context and progress
+- **AtlasSlice**: Bible map locations, timeline, journeys
+- **ThemeGraphSlice**: Thematic network graph data
 
 ### Data Models (Prisma)
 
-20+ models including: User, BibleVerse, Highlight, Note, ReadingPlan, Post, Comment, Church, Memory, etc.
+35+ models organized in categories:
+- **Core**: User, BibleVerse, Highlight, Note, ScriptureCard, Interaction
+- **Settings**: UserSetting, Reminder, NotificationToken
+- **AI**: ChatSession, ChatMessage, CustomPrompt, SavedInsight
+- **Memory**: MemoryCard, ReviewLog (Ebbinghaus SM-2 algorithm)
+- **Social**: Church, ChurchMember, InviteCode, GroupPlan, GroupPlanProgress
+- **Atlas**: BibleLocation, BibleEvent, BibleJourney (map/timeline features)
+- **Themes**: BibleTheme, ThemeVerseLink, ThemeConnection
+- **Gamification**: Badge, LeaderboardEntry, GroupBadge
+- **Notifications**: Notification, Like, Comment
+
+### Advanced Patterns
+
+**AI Request Queue System**
+The AISlice manages AI requests in a queue to prevent concurrent API calls:
+- `enqueueAI()` - Add request to queue or start immediately if idle
+- `cancelAIRequest()` - Cancel current or queued request
+- `completeCurrentRequest()` - Mark done and auto-start next
+
+**Reading Plan Flow Context**
+Used for step-by-step plan execution with `readingPlanContext`:
+- Contains `{ planId, day, stepIndex, steps[] }`
+- `advancePlanStep()` - Move to next step, auto-check-in
+
+**Group Plan Flow Context**
+Similar to reading plan but for church groups with `groupPlanContext`:
+- Contains `{ churchId, planId, day, stepIndex, steps[] }`
+- Syncs progress via `/api/church/[id]/plan/[planId]/progress`
 
 ## Important Conventions
 
