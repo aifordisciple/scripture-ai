@@ -10,7 +10,7 @@ interface LocationVersesViewProps {
   onBack: () => void;
 }
 
-interface VerseLocation {
+interface VerseData {
   id: string;
   bookId: string;
   bookName: string;
@@ -21,43 +21,80 @@ interface VerseLocation {
 
 export default function LocationVersesView({ locationId, locationName, onBack }: LocationVersesViewProps) {
   const { fontSize, lineHeight, tabs, addTab, setActiveTab, setScrollToVerse, setBook, setChapter } = useBibleStore();
-  const [verses, setVerses] = useState<VerseLocation[]>([]);
+  const [verses, setVerses] = useState<VerseData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchVerses() {
       setLoading(true);
       try {
-        // 获取地点相关的经文引用
-        const res = await fetch(`/api/atlas/verse-locations?locationId=${locationId}`);
-        const data = await res.json();
-        const verseLocations = data.verseLocations || [];
+        // 先尝试从 bible_verse_locations 表获取
+        const verseLocationsRes = await fetch(`/api/atlas/verse-locations?locationId=${locationId}`);
+        const verseLocationsData = await verseLocationsRes.json();
+        const verseLocations = verseLocationsData.verseLocations || [];
 
-        if (verseLocations.length === 0) {
-          setVerses([]);
-          setLoading(false);
-          return;
+        if (verseLocations.length > 0) {
+          // 有缓存的经文关联，获取经文内容
+          const versePromises = verseLocations.map(async (vl: any) => {
+            const verseRes = await fetch(
+              `/api/bible?bookId=${vl.bookId}&chapter=${vl.chapter}&version=CUV`
+            );
+            const verseData = await verseRes.json();
+            const verseContent = verseData.verses?.find((v: any) => v.verse === vl.verse);
+            return {
+              id: `${vl.bookId}-${vl.chapter}-${vl.verse}`,
+              bookId: vl.bookId,
+              bookName: vl.bookName || vl.bookId,
+              chapter: vl.chapter,
+              verse: vl.verse,
+              content: verseContent?.content || '',
+            };
+          });
+
+          const results = await Promise.all(versePromises);
+          setVerses(results.filter(v => v.content));
+        } else {
+          // 没有缓存的经文关联，直接搜索包含地点名称的经文
+          const searchRes = await fetch('/api/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: locationName, mode: 'exact' })
+          });
+          const searchData = await searchRes.json();
+          const searchResults = searchData.data || [];
+
+          // 转换为统一格式
+          const results = searchResults.map((v: any) => ({
+            id: `${v.bookId}-${v.chapter}-${v.verse}`,
+            bookId: v.bookId,
+            bookName: v.bookName,
+            chapter: v.chapter,
+            verse: v.verse,
+            content: v.content,
+          }));
+
+          setVerses(results);
+
+          // 同时缓存这些关联到数据库
+          if (results.length > 0) {
+            try {
+              await fetch('/api/atlas/cache-verse-locations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  locationId,
+                  verses: results.map((v: VerseData) => ({
+                    bookId: v.bookId,
+                    chapter: v.chapter,
+                    verse: v.verse,
+                  }))
+                })
+              });
+            } catch (e) {
+              console.error('Failed to cache verse locations:', e);
+            }
+          }
         }
-
-        // 获取经文内容
-        const versePromises = verseLocations.map(async (vl: any) => {
-          const verseRes = await fetch(
-            `/api/bible?bookId=${vl.bookId}&chapter=${vl.chapter}&version=CUV`
-          );
-          const verseData = await verseRes.json();
-          const verseContent = verseData.verses?.find((v: any) => v.verse === vl.verse);
-          return {
-            id: `${vl.bookId}-${vl.chapter}-${vl.verse}`,
-            bookId: vl.bookId,
-            bookName: vl.bookName || vl.bookId,
-            chapter: vl.chapter,
-            verse: vl.verse,
-            content: verseContent?.content || '',
-          };
-        });
-
-        const results = await Promise.all(versePromises);
-        setVerses(results.filter(v => v.content));
       } catch (error) {
         console.error('Failed to fetch verses:', error);
       } finally {
@@ -66,7 +103,7 @@ export default function LocationVersesView({ locationId, locationName, onBack }:
     }
 
     fetchVerses();
-  }, [locationId]);
+  }, [locationId, locationName]);
 
   const handleVerseClick = (bookId: string, chapter: number, verse: number) => {
     setScrollToVerse(verse);
