@@ -191,7 +191,10 @@ export function UserMenu() {
           <MenuItem
             icon={<LogOut className="w-4 h-4" />}
             label="退出登录"
-            onClick={() => signOut({ callbackUrl: '/' })}
+            onClick={async () => {
+              await signOut({ redirect: false });
+              window.location.href = '/';
+            }}
             className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
           />
         </div>
