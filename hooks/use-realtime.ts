@@ -14,6 +14,7 @@ interface UseRealtimeOptions {
   onNotification?: (data: any) => void;
   onGroupMessage?: (data: any) => void;
   onDirectMessage?: (data: any) => void;
+  onFeedbackReply?: (data: any) => void;
   reconnectInterval?: number;
   maxReconnectAttempts?: number;
 }
@@ -30,6 +31,7 @@ export function useRealtime(options: UseRealtimeOptions = {}) {
     onNotification,
     onGroupMessage,
     onDirectMessage,
+    onFeedbackReply,
     reconnectInterval = 5000,
     maxReconnectAttempts = 10,
   } = options;
@@ -120,6 +122,16 @@ export function useRealtime(options: UseRealtimeOptions = {}) {
       }
     });
 
+    eventSource.addEventListener('feedback_reply', (e) => {
+      try {
+        const data = JSON.parse((e as MessageEvent).data);
+        onFeedbackReply?.(data);
+        onMessage?.('feedback_reply', data);
+      } catch (error) {
+        console.error('[SSE] Failed to parse feedback reply:', error);
+      }
+    });
+
     eventSource.addEventListener('plan_update', (e) => {
       try {
         const data = JSON.parse((e as MessageEvent).data);
@@ -139,7 +151,7 @@ export function useRealtime(options: UseRealtimeOptions = {}) {
       }
     };
 
-  }, [onMessage, onNotification, onGroupMessage, onDirectMessage, reconnectInterval, maxReconnectAttempts]);
+  }, [onMessage, onNotification, onGroupMessage, onDirectMessage, onFeedbackReply, reconnectInterval, maxReconnectAttempts]);
 
   const disconnect = useCallback(() => {
     if (eventSourceRef.current) {

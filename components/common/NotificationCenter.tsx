@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +14,12 @@ import {
   Trophy, Calendar, Users, AlertCircle, MessageSquare, Mail, Trash
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRealtime } from "@/hooks/use-realtime";
+import {
+  notify,
+  getNotificationType,
+  requestBrowserNotificationPermission,
+} from "@/lib/notification-service";
 
 interface Notification {
   id: string;
@@ -49,12 +55,57 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [browserNotifyEnabled, setBrowserNotifyEnabled] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  // Handle real-time notifications
+  const handleRealtimeNotification = useCallback((data: any) => {
+    // Add to notifications list
+    setNotifications(prev => [data, ...prev.slice(0, 49)]);
+    setUnreadCount(prev => prev + 1);
+
+    // Check user preferences from localStorage
+    const prefs = localStorage.getItem('notification-preferences');
+    const preferences = prefs ? JSON.parse(prefs) : { soundNotify: true, browserNotify: true };
+
+    // Play sound and show browser notification based on preferences
+    const notifType = getNotificationType(data.type || 'DEFAULT');
+
+    notify({
+      title: data.title,
+      body: data.content,
+      type: notifType,
+      playSound: preferences.soundNotify && soundEnabled,
+      showBrowser: preferences.browserNotify && browserNotifyEnabled,
+    });
+  }, [browserNotifyEnabled, soundEnabled]);
+
+  // Use realtime hook
+  useRealtime({
+    onNotification: handleRealtimeNotification,
+    onFeedbackReply: handleRealtimeNotification,
+  });
+
+  // Request browser notification permission on mount
+  useEffect(() => {
+    const initNotificationPermission = async () => {
+      const granted = await requestBrowserNotificationPermission();
+      setBrowserNotifyEnabled(granted);
+    };
+
+    initNotificationPermission();
+
+    // Load user preferences
+    const prefs = localStorage.getItem('notification-preferences');
+    if (prefs) {
+      const preferences = JSON.parse(prefs);
+      setSoundEnabled(preferences.soundNotify ?? true);
+    }
+  }, []);
 
   useEffect(() => {
     fetchNotifications();
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+    // Initial fetch - realtime updates handled by useRealtime hook
   }, []);
 
   const fetchNotifications = async () => {

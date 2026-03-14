@@ -421,6 +421,31 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
           </div>
         </div>
       </div>
+
+      {/* 悬停节点信息提示 */}
+      {mouseRef.current.node && !isDraggingRef.current && (
+        <div
+          className="absolute pointer-events-none bg-white dark:bg-gray-800 rounded-lg shadow-lg px-3 py-2 text-xs border border-gray-200 dark:border-gray-700"
+          style={{
+            left: '50%',
+            top: '20px',
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: categoryColors[mouseRef.current.node.category] || '#6366f1' }}
+            />
+            <span className="font-medium text-gray-900 dark:text-white">
+              {mouseRef.current.node.name}
+            </span>
+            <span className="text-gray-400">
+              ({mouseRef.current.node.verseCount}处经文)
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

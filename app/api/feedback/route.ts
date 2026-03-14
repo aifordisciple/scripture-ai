@@ -4,6 +4,13 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import {
+  sendEmail,
+  getFeedbackReplyTemplate,
+  getNewFeedbackTemplate,
+  shouldSendEmailNotification,
+} from '@/lib/email';
+import { sseManager } from '@/lib/sse-manager';
 
 // Helper to check if user is admin
 async function isAdmin(userId: string): Promise<boolean> {
@@ -133,6 +140,43 @@ export async function POST(req: Request) {
           })
         }))
       });
+
+      // Send real-time SSE notifications to admins
+      for (const admin of admins) {
+        sseManager.sendToUser(admin.id, 'notification', {
+          id: `temp-${Date.now()}`,
+          type: 'NEW_FEEDBACK',
+          title: `新反馈: ${title}`,
+          content: `${user?.name || user?.email || '用户'} 提交了一个${type === 'BUG_REPORT' ? 'Bug报告' : type === 'FEATURE_REQUEST' ? '功能建议' : type === 'QUESTION' ? '问题咨询' : '反馈'}`,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      // Send email notifications to admins
+      const adminsWithSettings = await prisma.user.findMany({
+        where: { role: 'admin' },
+        select: { id: true, name: true, email: true }
+      });
+
+      for (const admin of adminsWithSettings) {
+        if (!admin.email) continue;
+
+        const shouldNotify = await shouldSendEmailNotification(admin.id, 'system');
+        if (!shouldNotify) continue;
+
+        const template = getNewFeedbackTemplate(
+          admin.name || '管理员',
+          user?.name || '匿名用户',
+          user?.email || '',
+          title,
+          content,
+          type,
+          feedback.id
+        );
+
+        // Send email asynchronously without blocking
+        sendEmail(admin.email, template).catch(console.error);
+      }
     } catch (notifyError) {
       console.error('Failed to notify admins:', notifyError);
       // Don't fail the request if notification fails
@@ -252,6 +296,36 @@ export async function PUT(req: Request) {
           })
         }
       });
+
+      // Send real-time SSE notification
+      sseManager.sendToUser(existingFeedback.userId, 'feedback_reply', {
+        id: `temp-${Date.now()}`,
+        type: 'FEEDBACK_REPLY',
+        title: '您的反馈收到了回复',
+        content: adminReply.substring(0, 100),
+        feedbackId: id,
+        feedbackTitle: existingFeedback.title,
+        createdAt: new Date().toISOString(),
+      });
+
+      // Send email notification to user
+      const feedbackOwner = await prisma.user.findUnique({
+        where: { id: existingFeedback.userId },
+        select: { name: true, email: true }
+      });
+
+      if (feedbackOwner?.email) {
+        const shouldNotify = await shouldSendEmailNotification(existingFeedback.userId, 'feedback');
+        if (shouldNotify) {
+          const template = getFeedbackReplyTemplate(
+            feedbackOwner.name || '用户',
+            existingFeedback.title,
+            adminReply,
+            id
+          );
+          sendEmail(feedbackOwner.email, template).catch(console.error);
+        }
+      }
     }
 
     // Notify admins if user replied
@@ -273,6 +347,18 @@ export async function PUT(req: Request) {
           })
         }))
       });
+
+      // Send real-time SSE notifications to admins
+      for (const admin of admins) {
+        sseManager.sendToUser(admin.id, 'notification', {
+          id: `temp-${Date.now()}`,
+          type: 'NEW_FEEDBACK',
+          title: `用户回复了反馈: ${existingFeedback.title}`,
+          content: userReply.substring(0, 100),
+          feedbackId: id,
+          createdAt: new Date().toISOString(),
+        });
+      }
     }
 
     return NextResponse.json({ feedback });

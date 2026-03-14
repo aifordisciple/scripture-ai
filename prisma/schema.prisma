@@ -156,6 +156,12 @@ model UserSetting {
   // [新增] 新手引导状态 (JSON 格式)
   // 格式: {"welcome": true, "reading": true, "ai": true, "plan": true, "group": true}
   onboardingCompleted String? @default("{}")
+
+  // [新增] 通知偏好设置
+  emailNotifyFeedback Boolean @default(true)  // 收到反馈回复时邮件通知
+  emailNotifySystem   Boolean @default(true)  // 系统通知邮件
+  browserNotify       Boolean @default(true)  // 浏览器推送通知
+  soundNotify         Boolean @default(true)  // 声音提醒
 }
 
 model Highlight {

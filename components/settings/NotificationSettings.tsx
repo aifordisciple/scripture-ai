@@ -1,0 +1,213 @@
+// components/settings/NotificationSettings.tsx
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Loader2, Bell, Mail, Globe, Volume2 } from "lucide-react";
+
+interface NotificationSettingsProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+interface NotificationPreferences {
+  emailNotifyFeedback: boolean;
+  emailNotifySystem: boolean;
+  browserNotify: boolean;
+  soundNotify: boolean;
+}
+
+export function NotificationSettings({ open, onOpenChange }: NotificationSettingsProps) {
+  const [preferences, setPreferences] = useState<NotificationPreferences>({
+    emailNotifyFeedback: true,
+    emailNotifySystem: true,
+    browserNotify: true,
+    soundNotify: true,
+  });
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Load settings
+  useEffect(() => {
+    if (open) {
+      loadSettings();
+    }
+  }, [open]);
+
+  const loadSettings = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/user/settings');
+      if (res.ok) {
+        const data = await res.json();
+        setPreferences({
+          emailNotifyFeedback: data.emailNotifyFeedback ?? true,
+          emailNotifySystem: data.emailNotifySystem ?? true,
+          browserNotify: data.browserNotify ?? true,
+          soundNotify: data.soundNotify ?? true,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load notification settings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveSettings = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/user/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(preferences),
+      });
+
+      if (res.ok) {
+        // Also save to localStorage for immediate use
+        localStorage.setItem('notification-preferences', JSON.stringify(preferences));
+        onOpenChange(false);
+      } else {
+        alert('保存失败，请重试');
+      }
+    } catch (error) {
+      console.error('Failed to save notification settings:', error);
+      alert('保存失败，请重试');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Request browser notification permission when enabling browser notifications
+  const handleBrowserNotifyToggle = async () => {
+    if (!preferences.browserNotify) {
+      // Enabling - request permission
+      const { requestBrowserNotificationPermission } = await import('@/lib/notification-service');
+      const granted = await requestBrowserNotificationPermission();
+      if (!granted) {
+        alert('浏览器通知权限被拒绝。请在浏览器设置中允许通知。');
+        return;
+      }
+    }
+    handleToggle('browserNotify');
+  };
+
+  const handleToggle = (key: keyof NotificationPreferences) => {
+    setPreferences(prev => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5" />
+            通知设置
+          </DialogTitle>
+        </DialogHeader>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* 邮件通知 */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Mail className="w-4 h-4" />
+                邮件通知
+              </div>
+
+              <div className="flex items-center justify-between pl-6">
+                <div className="space-y-0.5">
+                  <Label htmlFor="email-feedback" className="text-sm">反馈回复通知</Label>
+                  <p className="text-xs text-gray-500">当管理员回复您的反馈时，发送邮件通知</p>
+                </div>
+                <Switch
+                  id="email-feedback"
+                  checked={preferences.emailNotifyFeedback}
+                  onCheckedChange={() => handleToggle('emailNotifyFeedback')}
+                />
+              </div>
+
+              <div className="flex items-center justify-between pl-6">
+                <div className="space-y-0.5">
+                  <Label htmlFor="email-system" className="text-sm">系统通知</Label>
+                  <p className="text-xs text-gray-500">接收重要的系统消息和公告</p>
+                </div>
+                <Switch
+                  id="email-system"
+                  checked={preferences.emailNotifySystem}
+                  onCheckedChange={() => handleToggle('emailNotifySystem')}
+                />
+              </div>
+            </div>
+
+            {/* 浏览器通知 */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Globe className="w-4 h-4" />
+                浏览器通知
+              </div>
+
+              <div className="flex items-center justify-between pl-6">
+                <div className="space-y-0.5">
+                  <Label htmlFor="browser-notify" className="text-sm">推送通知</Label>
+                  <p className="text-xs text-gray-500">在浏览器中接收实时推送通知</p>
+                </div>
+                <Switch
+                  id="browser-notify"
+                  checked={preferences.browserNotify}
+                  onCheckedChange={handleBrowserNotifyToggle}
+                />
+              </div>
+            </div>
+
+            {/* 声音提醒 */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Volume2 className="w-4 h-4" />
+                声音提醒
+              </div>
+
+              <div className="flex items-center justify-between pl-6">
+                <div className="space-y-0.5">
+                  <Label htmlFor="sound-notify" className="text-sm">通知声音</Label>
+                  <p className="text-xs text-gray-500">收到新通知时播放提示音</p>
+                </div>
+                <Switch
+                  id="sound-notify"
+                  checked={preferences.soundNotify}
+                  onCheckedChange={() => handleToggle('soundNotify')}
+                />
+              </div>
+            </div>
+
+            {/* 保存按钮 */}
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                取消
+              </Button>
+              <Button onClick={saveSettings} disabled={saving}>
+                {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                保存设置
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -40,6 +40,11 @@ export async function POST(req: Request) {
         apiBaseUrl: data.apiBaseUrl || null,
         apiKey: data.apiKey || null,
         apiModel: data.apiModel || null,
+        // 通知偏好设置
+        emailNotifyFeedback: data.emailNotifyFeedback !== undefined ? Boolean(data.emailNotifyFeedback) : true,
+        emailNotifySystem: data.emailNotifySystem !== undefined ? Boolean(data.emailNotifySystem) : true,
+        browserNotify: data.browserNotify !== undefined ? Boolean(data.browserNotify) : true,
+        soundNotify: data.soundNotify !== undefined ? Boolean(data.soundNotify) : true,
     };
 
     const userSettings = await prisma.userSetting.upsert({

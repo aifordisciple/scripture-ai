@@ -3,19 +3,112 @@
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useBibleStore } from '@/store/useBibleStore';
-import { Network, List, Clock, Search, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Network, List, Clock, Search, Bookmark, BookmarkCheck, Sparkles, TrendingUp } from 'lucide-react';
 import ThemeCard from './ThemeCard';
 import ThemeSearch from './ThemeSearch';
 
 // 动态导入网络图组件（不支持SSR）
 const NetworkGraph = dynamic(() => import('./NetworkGraph'), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-      <div className="text-gray-500">加载网络图中...</div>
-    </div>
-  ),
+  loading: () => <GraphSkeleton />,
 });
+
+// 骨架屏组件
+function GraphSkeleton() {
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800">
+      <div className="relative">
+        {/* 模拟网络图的节点骨架 */}
+        <div className="flex gap-8">
+          <div className="animate-pulse flex flex-col items-center gap-2">
+            <div className="rounded-full bg-gray-300 dark:bg-gray-600 h-16 w-16"></div>
+            <div className="bg-gray-300 dark:bg-gray-600 h-3 w-12 rounded"></div>
+          </div>
+          <div className="animate-pulse flex flex-col items-center gap-2" style={{ marginTop: '20px' }}>
+            <div className="rounded-full bg-gray-300 dark:bg-gray-600 h-12 w-12"></div>
+            <div className="bg-gray-300 dark:bg-gray-600 h-3 w-10 rounded"></div>
+          </div>
+          <div className="animate-pulse flex flex-col items-center gap-2">
+            <div className="rounded-full bg-gray-300 dark:bg-gray-600 h-14 w-14"></div>
+            <div className="bg-gray-300 dark:bg-gray-600 h-3 w-11 rounded"></div>
+          </div>
+        </div>
+        {/* 模拟连接线 */}
+        <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200 dark:bg-gray-700" style={{ zIndex: -1 }}></div>
+      </div>
+      <p className="mt-6 text-gray-400 dark:text-gray-500 text-sm">加载主题网络中...</p>
+    </div>
+  );
+}
+
+// AI提取动画组件
+function ExtractingAnimation() {
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800">
+      <div className="relative">
+        <Sparkles className="w-12 h-12 text-indigo-500 animate-pulse" />
+        <div className="absolute inset-0 animate-ping">
+          <Sparkles className="w-12 h-12 text-indigo-300" />
+        </div>
+      </div>
+      <p className="mt-4 text-gray-600 dark:text-gray-300 font-medium">正在分析经文...</p>
+      <p className="mt-1 text-gray-400 dark:text-gray-500 text-sm">AI正在提取相关主题</p>
+    </div>
+  );
+}
+
+// 空状态组件 - 热门主题推荐
+function EmptyState({ hotThemes, onThemeSelect }: {
+  hotThemes: any[];
+  onThemeSelect: (theme: any) => void;
+}) {
+  const categoryColors: Record<string, string> = {
+    THEOLOGICAL: 'indigo',
+    ETHICAL: 'emerald',
+    HISTORICAL: 'amber',
+    PROPHETIC: 'red',
+  };
+
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800 p-6">
+      <div className="text-center max-w-md">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+          <Network className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          探索主题网络
+        </h3>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">
+          搜索主题或选择经文，发现圣经概念之间的关联
+        </p>
+
+        {/* 热门主题推荐 */}
+        <div className="mb-4">
+          <div className="flex items-center justify-center gap-1 text-sm text-gray-500 dark:text-gray-400 mb-3">
+            <TrendingUp className="w-4 h-4" />
+            热门主题
+          </div>
+          <div className="flex flex-wrap justify-center gap-2">
+            {hotThemes.map((theme) => (
+              <button
+                key={theme.id}
+                onClick={() => onThemeSelect(theme)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all hover:scale-105 ${
+                  categoryColors[theme.category] === 'indigo' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900/50' :
+                  categoryColors[theme.category] === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/50' :
+                  categoryColors[theme.category] === 'amber' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50' :
+                  'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50'
+                }`}
+              >
+                {theme.nameZh}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface ThemeGraphPanelProps {
   onClose?: () => void;
@@ -46,8 +139,24 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
   } = useBibleStore();
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [extractingThemes, setExtractingThemes] = useState(false);
   const [extractedThemes, setExtractedThemes] = useState<any[]>([]);
+  const [hotThemes, setHotThemes] = useState<any[]>([]);
+
+  // 加载热门主题
+  useEffect(() => {
+    async function loadHotThemes() {
+      try {
+        const res = await fetch('/api/themes?limit=8&sortBy=verseCount');
+        const data = await res.json();
+        setHotThemes(data.themes || []);
+      } catch (error) {
+        console.error('Failed to load hot themes:', error);
+      }
+    }
+    loadHotThemes();
+  }, []);
 
   // 加载网络图数据
   const loadGraphData = useCallback(async (themeId?: string) => {
@@ -66,6 +175,7 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
       console.error('Failed to load graph data:', error);
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   }, [graphDepth, setGraphData]);
 
@@ -75,7 +185,8 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
       setSelectedThemeId(initialThemeId);
       loadGraphData(initialThemeId);
     } else {
-      loadGraphData();
+      // 不自动加载全部图，等用户选择
+      setInitialLoading(false);
     }
   }, [initialThemeId]);
 
@@ -193,11 +304,19 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
       <div className="flex-1 overflow-hidden">
         {graphViewMode === 'network' && (
           <div className="h-full relative">
-            {loading ? (
-              <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800">
-                <div className="text-gray-500 dark:text-gray-400">加载中...</div>
-              </div>
-            ) : (
+            {/* AI提取动画 */}
+            {extractingThemes && <ExtractingAnimation />}
+
+            {/* 加载骨架屏 */}
+            {loading && !extractingThemes && <GraphSkeleton />}
+
+            {/* 空状态 - 热门主题推荐 */}
+            {!loading && !extractingThemes && graphData.nodes.length === 0 && (
+              <EmptyState hotThemes={hotThemes} onThemeSelect={handleThemeSelect} />
+            )}
+
+            {/* 网络图 */}
+            {!loading && !extractingThemes && graphData.nodes.length > 0 && (
               <NetworkGraph
                 data={graphData}
                 selectedNodeId={selectedThemeId}
@@ -206,8 +325,9 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
                 }}
               />
             )}
+
             {/* 主题详情卡片 */}
-            {selectedTheme && (
+            {selectedTheme && !extractingThemes && (
               <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80">
                 <ThemeCard
                   theme={selectedTheme}

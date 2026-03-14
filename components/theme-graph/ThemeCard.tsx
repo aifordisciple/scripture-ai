@@ -148,6 +148,9 @@ function convertBookId(bookId: string): string {
 function ThemeVerses({ themeId }: { themeId: string }) {
   const [verseLinks, setVerseLinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [verseContents, setVerseContents] = useState<Record<number, string>>({});
+  const [loadingContents, setLoadingContents] = useState<Record<number, boolean>>({});
   const { tabs, activeTabId, updateActiveTab, addTab, setActiveTab, setScrollToVerse } = useBibleStore();
 
   useEffect(() => {
@@ -164,6 +167,24 @@ function ThemeVerses({ themeId }: { themeId: string }) {
     }
     fetchVerses();
   }, [themeId]);
+
+  // 加载单节经文内容
+  const loadVerseContent = async (index: number, link: any) => {
+    if (verseContents[index] || loadingContents[index]) return;
+
+    setLoadingContents(prev => ({ ...prev, [index]: true }));
+    try {
+      const res = await fetch(`/api/bible/${link.bookId}/${link.chapter}/${link.verseStart}`);
+      if (res.ok) {
+        const data = await res.json();
+        setVerseContents(prev => ({ ...prev, [index]: data.content || '加载失败' }));
+      }
+    } catch (error) {
+      console.error('Failed to load verse content:', error);
+    } finally {
+      setLoadingContents(prev => ({ ...prev, [index]: false }));
+    }
+  };
 
   const handleVerseClick = (link: any) => {
     const book = convertBookId(link.bookId);
@@ -229,15 +250,45 @@ function ThemeVerses({ themeId }: { themeId: string }) {
       <div className="text-xs text-gray-400 mb-2">主要经文</div>
       <div className="flex flex-wrap gap-1">
         {verseLinks.map((link, index) => (
-          <span
-            key={index}
-            onClick={() => handleVerseClick(link)}
-            className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs rounded cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors"
-          >
-            {getBookDisplayName(link.bookId)}{link.chapter}:{link.verseStart}
-          </span>
+          <div key={index} className="relative inline-block">
+            <span
+              onMouseEnter={() => {
+                setHoveredIndex(index);
+                loadVerseContent(index, link);
+              }}
+              onMouseLeave={() => setHoveredIndex(null)}
+              onClick={() => handleVerseClick(link)}
+              className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs rounded cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors"
+            >
+              {getBookDisplayName(link.bookId)}{link.chapter}:{link.verseStart}
+            </span>
+            {/* 经文内容预览 Tooltip */}
+            {hoveredIndex === index && (
+              <div className="absolute z-50 bottom-full mb-2 left-0 min-w-[200px] max-w-[300px] p-3 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 text-xs">
+                <div className="font-medium text-gray-900 dark:text-white mb-1">
+                  {getBookDisplayName(link.bookId)}{link.chapter}:{link.verseStart}
+                </div>
+                <div className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  {loadingContents[index] ? (
+                    <span className="text-gray-400">加载中...</span>
+                  ) : verseContents[index] ? (
+                    verseContents[index].length > 100
+                      ? verseContents[index].slice(0, 100) + '...'
+                      : verseContents[index]
+                  ) : (
+                    <span className="text-gray-400">暂无内容</span>
+                  )}
+                </div>
+                {/* 小箭头 */}
+                <div className="absolute top-full left-4 -mt-px">
+                  <div className="w-2 h-2 bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700 transform rotate-45"></div>
+                </div>
+              </div>
+            )}
+          </div>
         ))}
       </div>
+      <div className="text-xs text-gray-400 mt-2">悬停查看经文内容，点击跳转阅读</div>
     </div>
   );
 }
