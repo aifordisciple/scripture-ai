@@ -24,6 +24,7 @@ import { BookPicker } from "@/components/bible/BookPicker";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { NotificationCenter } from "@/components/common/NotificationCenter";
 import { FeedbackButton } from "@/components/feedback/FeedbackButton";
+import { OnboardingManager } from "@/components/onboarding/OnboardingManager";
 
 // 动态按需加载
 const AISidebar = dynamic(() => import("@/components/bible/AISidebar").then(mod => mod.AISidebar), { ssr: false });
@@ -330,6 +331,7 @@ export default function Home() {
       />
       <InstallPrompt />
       <FeedbackButton />
+      <OnboardingManager />
 
       {/* Mobile BookPicker - 移动端经文选择器 */}
       <BookPicker

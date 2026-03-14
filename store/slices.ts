@@ -1,10 +1,10 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, ThemeGraphSlice, ThemeGraphData, DMSlice } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, ThemeGraphSlice, ThemeGraphData, DMSlice, OnboardingStatus } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 
-export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) => ({
+export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set, get) => ({
   isAuthOpen: false,
   setAuthOpen: (open) => set({ isAuthOpen: open }),
   isSidebarOpen: false,
@@ -25,6 +25,77 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set) =>
   // [新增] 记住当前查看的计划
   viewingPlanId: null,
   setViewingPlanId: (id) => set({ viewingPlanId: id }),
+
+  // [新增] 新手引导状态
+  onboarding: {
+    welcome: { completed: false, shown: false },
+    reading: { completed: false, shown: false },
+    ai: { completed: false, shown: false },
+    plan: { completed: false, shown: false },
+    group: { completed: false, shown: false },
+  },
+
+  initOnboarding: (status) => set((state) => ({
+    onboarding: { ...state.onboarding, ...status }
+  })),
+
+  startOnboarding: (type) => set((state) => ({
+    onboarding: {
+      ...state.onboarding,
+      [type]: { ...state.onboarding[type], shown: true }
+    }
+  })),
+
+  completeOnboarding: (type) => {
+    const newStatus = { ...get().onboarding[type], completed: true, shown: true };
+    set((state) => ({
+      onboarding: { ...state.onboarding, [type]: newStatus }
+    }));
+    // 同步到云端
+    if (typeof window !== 'undefined') {
+      fetch('/api/user/onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, completed: true })
+      }).catch(() => {});
+    }
+  },
+
+  skipOnboarding: (type) => {
+    const newStatus = { ...get().onboarding[type], completed: true, shown: true };
+    set((state) => ({
+      onboarding: { ...state.onboarding, [type]: newStatus }
+    }));
+    // 同步到云端
+    if (typeof window !== 'undefined') {
+      fetch('/api/user/onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, completed: true, skipped: true })
+      }).catch(() => {});
+    }
+  },
+
+  resetOnboarding: (type) => set((state) => {
+    if (type) {
+      return {
+        onboarding: {
+          ...state.onboarding,
+          [type]: { completed: false, shown: false }
+        }
+      };
+    }
+    // 重置所有
+    return {
+      onboarding: {
+        welcome: { completed: false, shown: false },
+        reading: { completed: false, shown: false },
+        ai: { completed: false, shown: false },
+        plan: { completed: false, shown: false },
+        group: { completed: false, shown: false },
+      }
+    };
+  }),
 });
 
 export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = (set) => ({

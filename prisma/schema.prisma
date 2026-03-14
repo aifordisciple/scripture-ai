@@ -146,6 +146,10 @@ model UserSetting {
   aiDetail      String?  @default("balanced") // concise, balanced, detailed
   aiDepth       String?  @default("intermediate") // beginner, intermediate, academic
   aiTone        String?  @default("modern") // modern, traditional
+
+  // [新增] 新手引导状态 (JSON 格式)
+  // 格式: {"welcome": true, "reading": true, "ai": true, "plan": true, "group": true}
+  onboardingCompleted String? @default("{}")
 }
 
 model Highlight {

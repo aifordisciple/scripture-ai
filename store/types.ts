@@ -172,10 +172,24 @@ export interface PlanProgress {
 // --------------------------------------------------
 // 2. 状态切片 (Slice) 接口
 // --------------------------------------------------
+// 新手引导状态
+export interface OnboardingState {
+  completed: boolean;
+  shown: boolean;
+}
+
+export interface OnboardingStatus {
+  welcome: OnboardingState;
+  reading: OnboardingState;
+  ai: OnboardingState;
+  plan: OnboardingState;
+  group: OnboardingState;
+}
+
 export interface UISlice {
   isAuthOpen: boolean;
   setAuthOpen: (open: boolean) => void;
-  isSidebarOpen: boolean; 
+  isSidebarOpen: boolean;
   toggleSidebar: (open?: boolean) => void;
   isDesktopSidebarOpen: boolean;
   toggleDesktopSidebar: () => void;
@@ -193,6 +207,14 @@ export interface UISlice {
   // [新增] 记住用户在读经计划页面当前查看的计划ID
   viewingPlanId: string | null;
   setViewingPlanId: (id: string | null) => void;
+
+  // [新增] 新手引导状态
+  onboarding: OnboardingStatus;
+  initOnboarding: (status: Partial<OnboardingStatus>) => void;
+  startOnboarding: (type: keyof OnboardingStatus) => void;
+  completeOnboarding: (type: keyof OnboardingStatus) => void;
+  skipOnboarding: (type: keyof OnboardingStatus) => void;
+  resetOnboarding: (type?: keyof OnboardingStatus) => void;
 }
 
 export interface ReaderSlice {

@@ -4,7 +4,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageSquare } from "lucide-react";
+import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageSquare, HelpCircle } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -165,6 +165,19 @@ export function UserMenu() {
               const existTab = tabs.find(t => t.type === 'plans');
               if (existTab) setActiveTab(existTab.id);
               else addTab({ type: 'plans' });
+            }}
+          />
+
+          <div className="my-1 border-t dark:border-slate-800" />
+
+          {/* 新手引导入口 */}
+          <MenuItem
+            icon={<HelpCircle className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+            label="重新播放引导"
+            onClick={() => {
+              setIsOpen(false);
+              // 触发重新播放引导
+              window.dispatchEvent(new CustomEvent("reset-onboarding", { detail: "welcome" }));
             }}
           />
 
