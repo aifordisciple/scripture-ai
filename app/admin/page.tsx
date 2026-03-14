@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Users, Building2, MessageSquare, Activity, TrendingUp, AlertCircle } from 'lucide-react';
+import { Users, Building2, MessageSquare, Activity, TrendingUp, AlertCircle, BookOpen, Target, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Stats {
@@ -107,97 +107,87 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* 统计数据 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 用户统计 */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">用户统计</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">总用户数</span>
-              <span className="text-2xl font-bold">{stats.users.total}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">本周新增</span>
-              <span className="text-xl font-semibold text-green-600">+{stats.users.newThisWeek}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">今日活跃</span>
-              <span className="text-xl font-semibold">{stats.users.activeToday}</span>
-            </div>
-          </div>
+      {/* 用户统计 */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+          <Users className="text-indigo-600" size={20} />
+          用户统计
+        </h2>
 
-          {/* 用户增长趋势 */}
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-2">近7日新增用户</h3>
-            <div className="h-32 flex items-end gap-1">
-              {stats.activity.newUsersDaily.map((day, i) => {
-                const maxCount = Math.max(...stats.activity.newUsersDaily.map(d => d.count), 1);
-                const height = (day.count / maxCount) * 100;
-                return (
-                  <div key={i} className="flex-1 flex flex-col items-center">
-                    <div
-                      className="w-full bg-indigo-500 rounded-t"
-                      style={{ height: `${Math.max(height, 2)}%` }}
-                    ></div>
-                    <span className="text-xs text-gray-400 mt-1">
-                      {new Date(day.date).toLocaleDateString('zh-CN', { weekday: 'short' })}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <StatItem label="总用户数" value={stats.users.total} />
+          <StatItem label="今日新增" value={stats.users.newToday} color="green" />
+          <StatItem label="本周新增" value={stats.users.newThisWeek} color="green" />
+          <StatItem label="今日活跃" value={stats.users.activeToday} color="blue" />
         </div>
 
-        {/* 小组统计 */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">小组统计</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">总小组数</span>
-              <span className="text-2xl font-bold">{stats.churches.total}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">公开小组</span>
-              <span className="text-xl font-semibold">{stats.churches.publicCount}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">总成员数</span>
-              <span className="text-xl font-semibold">{stats.churches.totalMembers}</span>
-            </div>
-          </div>
-
-          {/* 活跃用户趋势 */}
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-2">近7日活跃用户</h3>
-            <div className="h-32 flex items-end gap-1">
-              {stats.activity.dailyActiveUsers.map((day, i) => {
-                const maxCount = Math.max(...stats.activity.dailyActiveUsers.map(d => d.count), 1);
-                const height = (day.count / maxCount) * 100;
-                return (
-                  <div key={i} className="flex-1 flex flex-col items-center">
+        {/* 用户增长趋势图 */}
+        <div className="mt-8">
+          <h3 className="text-sm font-medium text-gray-500 mb-4">近7日用户增长趋势</h3>
+          <div className="h-48 flex items-end gap-2">
+            {stats.activity.newUsersDaily.map((day, i) => {
+              const maxCount = Math.max(...stats.activity.newUsersDaily.map(d => d.count), 1);
+              const height = (day.count / maxCount) * 100;
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                  <div className="w-full flex-1 flex items-end">
                     <div
-                      className="w-full bg-green-500 rounded-t"
+                      className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t transition-all"
                       style={{ height: `${Math.max(height, 2)}%` }}
-                    ></div>
-                    <span className="text-xs text-gray-400 mt-1">
-                      {new Date(day.date).toLocaleDateString('zh-CN', { weekday: 'short' })}
-                    </span>
+                    >
+                      {day.count > 0 && (
+                        <div className="text-center text-xs text-white font-medium py-1">
+                          {day.count}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+                  <span className="text-xs text-gray-400">
+                    {new Date(day.date).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* 反馈与计划 */}
+      {/* 小组统计 */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+          <BookOpen className="text-purple-600" size={20} />
+          小组统计
+        </h2>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          <StatItem label="总小组数" value={stats.churches.total} />
+          <StatItem label="公开小组" value={stats.churches.publicCount} />
+          <StatItem label="总成员数" value={stats.churches.totalMembers} />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 读经计划统计 */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <Target className="text-orange-600" size={20} />
+            读经计划统计
+          </h2>
+
+          <div className="grid grid-cols-2 gap-6">
+            <StatItem label="进行中计划" value={stats.plans.active} color="indigo" />
+            <StatItem label="已完成计划" value={stats.plans.completed} color="gray" />
+          </div>
+        </div>
+
         {/* 反馈统计 */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">反馈统计</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <TrendingUp className="text-green-600" size={20} />
+            反馈统计
+          </h2>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold">{stats.feedback.total}</div>
               <div className="text-sm text-gray-600">总计</div>
@@ -216,20 +206,39 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* 计划统计 */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">读经计划</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-4 bg-indigo-50 rounded-lg">
-              <div className="text-2xl font-bold text-indigo-600">{stats.plans.active}</div>
-              <div className="text-sm text-gray-600">进行中</div>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold">{stats.plans.completed}</div>
-              <div className="text-sm text-gray-600">已完成</div>
-            </div>
-          </div>
+      {/* 活跃度趋势 */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+          <Calendar className="text-teal-600" size={20} />
+          近7日活跃用户
+        </h2>
+
+        <div className="h-48 flex items-end gap-2">
+          {stats.activity.dailyActiveUsers.map((day, i) => {
+            const maxCount = Math.max(...stats.activity.dailyActiveUsers.map(d => d.count), 1);
+            const height = (day.count / maxCount) * 100;
+            return (
+              <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                <div className="w-full flex-1 flex items-end">
+                  <div
+                    className="w-full bg-gradient-to-t from-teal-600 to-teal-400 rounded-t transition-all"
+                    style={{ height: `${Math.max(height, 2)}%` }}
+                  >
+                    {day.count > 0 && (
+                      <div className="text-center text-xs text-white font-medium py-1">
+                        {day.count}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <span className="text-xs text-gray-400">
+                  {new Date(day.date).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -259,6 +268,33 @@ function StatCard({
           <Icon size={24} />
         </div>
       </div>
+    </div>
+  );
+}
+
+// 统计项组件
+function StatItem({
+  label,
+  value,
+  color = 'default'
+}: {
+  label: string;
+  value: number;
+  color?: 'default' | 'green' | 'blue' | 'orange' | 'indigo' | 'gray';
+}) {
+  const colorClasses = {
+    default: 'text-gray-900',
+    green: 'text-green-600',
+    blue: 'text-blue-600',
+    orange: 'text-orange-600',
+    indigo: 'text-indigo-600',
+    gray: 'text-gray-600'
+  };
+
+  return (
+    <div className="text-center p-4 bg-gray-50 rounded-lg">
+      <div className={cn("text-3xl font-bold", colorClasses[color])}>{value}</div>
+      <div className="text-sm text-gray-600 mt-1">{label}</div>
     </div>
   );
 }

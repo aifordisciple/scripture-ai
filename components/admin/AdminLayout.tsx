@@ -8,7 +8,6 @@ import {
   Users,
   Building2,
   MessageSquare,
-  BarChart3,
   Settings,
   Bell,
   ChevronLeft,
@@ -27,7 +26,6 @@ const navItems = [
   { href: '/admin/users', label: '用户管理', icon: Users },
   { href: '/admin/churches', label: '小组管理', icon: Building2 },
   { href: '/admin/feedback', label: '反馈管理', icon: MessageSquare },
-  { href: '/admin/stats', label: '数据统计', icon: BarChart3 },
   { href: '/admin/announcements', label: '公告管理', icon: Bell },
   { href: '/admin/settings', label: '系统设置', icon: Settings },
 ];
