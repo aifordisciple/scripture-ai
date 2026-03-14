@@ -38,7 +38,7 @@ export function FeedbackButton({ className, variant = "floating" }: FeedbackButt
         size="icon"
         onClick={() => setOpen(true)}
         className={cn(
-          "fixed bottom-20 right-4 md:bottom-6 md:right-6 z-30",
+          "fixed bottom-20 left-4 md:bottom-6 md:left-6 z-30",
           "w-12 h-12 rounded-full shadow-lg",
           "bg-white dark:bg-slate-800 border-border",
           "hover:bg-primary hover:text-white hover:border-primary",
