@@ -54,7 +54,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }, [initialBook, initialChapter]);
 
   const {
-    fontSize, lineHeight, selectedVerses, showEnglish, highlights, enqueueAI, scrollToVerse, setScrollToVerse, clearSelection, setBook: setStoreBook, setChapter: setStoreChapter, addTab, setAtlasPanelOpen, setThemeGraphPanelOpen, setAtlasVerseContext, setThemeGraphVerseContext
+    fontSize, lineHeight, selectedVerses, showEnglish, highlights, enqueueAI, scrollToVerse, setScrollToVerse, clearSelection, setBook: setStoreBook, setChapter: setStoreChapter, addTab, setAtlasPanelOpen, setAtlasVerseContext
   } = useBibleStore();
 
   const { verses, loading } = useBibleData(book, chapter);
@@ -294,36 +294,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     clearSelection();
   }, [selectedVerses, verses, addTab, setAtlasPanelOpen, setIsMenuVisible, clearSelection, setAtlasVerseContext]);
 
-  // [新增] 处理查看主题网络 - 打开ThemeGraph面板
-  // [新增] 处理查看主题网络 - 打开ThemeGraph面板并提取主题
-  const handleThemeGraph = useCallback(() => {
-    if (selectedVerses.length === 0) return;
-
-    const cuvVerses = verses.filter(v => v.version === 'CUV' && selectedVerses.includes(v.verse));
-    if (cuvVerses.length === 0) return;
-
-    const firstVerse = cuvVerses[0];
-    const verseContent = cuvVerses.map(v => v.content).join(' ');
-    const verseStart = Math.min(...selectedVerses);
-    const verseEnd = Math.max(...selectedVerses);
-
-    // 设置经文上下文到 store
-    setThemeGraphVerseContext({
-      bookId: firstVerse.bookId,
-      bookName: firstVerse.bookName,
-      chapter: firstVerse.chapter,
-      verseStart,
-      verseEnd,
-      verseContent,
-    });
-
-    // 打开ThemeGraph面板
-    addTab({ type: 'theme-graph' });
-    setThemeGraphPanelOpen(true);
-    setIsMenuVisible(false);
-    clearSelection();
-  }, [selectedVerses, verses, addTab, setThemeGraphPanelOpen, setIsMenuVisible, clearSelection, setThemeGraphVerseContext]);
-
   return (
     <div className="w-full min-h-screen flex flex-row relative transition-colors duration-500" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       
@@ -472,7 +442,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         onCopy={handleCopy}
         onCrossRef={handleCrossRef}
         onAtlas={handleAtlas}
-        onThemeGraph={handleThemeGraph}
         showAbove={showAbove}
       />
     </div>

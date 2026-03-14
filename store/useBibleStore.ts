@@ -10,7 +10,6 @@ import {
   createSyncSlice,
   createGroupSlice,
   createAtlasSlice,
-  createThemeGraphSlice,
   createDMSlice
 } from './slices';
 
@@ -27,7 +26,6 @@ export const useBibleStore = create<StoreState>()(
       ...createSyncSlice(...a),
       ...createGroupSlice(...a),
       ...createAtlasSlice(...a),
-      ...createThemeGraphSlice(...a),
       ...createDMSlice(...a),
     }),
     {
@@ -55,13 +53,6 @@ export const useBibleStore = create<StoreState>()(
         locationSearchResults: [],
         atlasVerseContext: null,
         viewingLocationVerses: null,
-        // ThemeGraph 状态不持久化
-        selectedThemeId: null,
-        selectedTheme: null,
-        graphData: { nodes: [], edges: [] },
-        themeSearchResults: [],
-        isThemeGraphPanelOpen: false,
-        themeGraphVerseContext: null,
         // DM 状态不持久化
         isDmPanelOpen: false,
         dmConversations: [],

@@ -42,7 +42,6 @@ const CrossRefTab = dynamic(() => import("@/components/bible/CrossRefTab").then(
 const GroupTab = dynamic(() => import("@/components/bible/GroupTab").then(mod => mod.GroupTab), { ssr: false });
 const GroupPlanDailyFlow = dynamic(() => import("@/components/group/GroupPlanDailyFlow").then(mod => mod.GroupPlanDailyFlow), { ssr: false });
 const AtlasPanel = dynamic(() => import("@/components/atlas/AtlasPanel").then(mod => mod.default), { ssr: false });
-const ThemeGraphPanel = dynamic(() => import("@/components/theme-graph/ThemeGraphPanel").then(mod => mod.default), { ssr: false });
 
 // --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
 const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
@@ -492,7 +491,7 @@ export default function Home() {
                 <span className="truncate">
                   {activeTab.type === 'read' ? (
                     <>{activeTab.book} {activeTab.chapter}</>
-                  ) : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : activeTab.type === 'group' ? "小组读经" : activeTab.type === 'atlas' ? "圣经地图" : activeTab.type === 'theme-graph' ? "主题网络" : "读经计划"}
+                  ) : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : activeTab.type === 'group' ? "小组读经" : activeTab.type === 'atlas' ? "圣经地图" : "读经计划"}
                 </span>
               </button>
             </div>
@@ -601,10 +600,6 @@ export default function Home() {
           ) : activeTab.type === 'atlas' ? (
               <div key={activeTab.id} className="h-[calc(100vh-8rem)]">
                 <AtlasPanel />
-              </div>
-          ) : activeTab.type === 'theme-graph' ? (
-              <div key={activeTab.id} className="h-[calc(100vh-8rem)]">
-                <ThemeGraphPanel />
               </div>
           ) : (
               <PlanTab key={activeTab.id} />

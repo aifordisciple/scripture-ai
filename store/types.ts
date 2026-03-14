@@ -392,7 +392,7 @@ export interface UserDataSlice {
 // --------------------------------------------------
 // 3. 聚合总状态类型
 // --------------------------------------------------
-export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & ThemeGraphSlice & DMSlice;
+export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & DMSlice;
 
 // --------------------------------------------------
 // 4. 小组读经计划状态 (GroupSlice)
@@ -514,91 +514,7 @@ export interface AtlasSlice {
 }
 
 // --------------------------------------------------
-// 6. 主题网络图状态 (ThemeGraphSlice)
-// --------------------------------------------------
-
-export interface BibleThemeData {
-  id: string;
-  nameZh: string;
-  nameEn?: string;
-  category: string;
-  summary?: string;
-  verseCount: number;
-}
-
-export interface ThemeNode {
-  id: string;
-  name: string;
-  category: string;
-  verseCount: number;
-  x?: number;
-  y?: number;
-}
-
-export interface ThemeEdge {
-  source: string;
-  target: string;
-  type: string;
-  strength: number;
-}
-
-export interface ThemeGraphData {
-  nodes: ThemeNode[];
-  edges: ThemeEdge[];
-}
-
-export interface ThemeGraphSlice {
-  // 当前选中的主题
-  selectedThemeId: string | null;
-  setSelectedThemeId: (id: string | null) => void;
-
-  // 主题详情
-  selectedTheme: BibleThemeData | null;
-  setSelectedTheme: (theme: BibleThemeData | null) => void;
-
-  // 图谱数据
-  graphData: ThemeGraphData;
-  setGraphData: (data: ThemeGraphData) => void;
-
-  // 图谱配置
-  graphDepth: number;
-  setGraphDepth: (depth: number) => void;
-  themeCategoryFilter: string[];
-  setThemeCategoryFilter: (categories: string[]) => void;
-
-  // 主题搜索
-  themeSearchQuery: string;
-  setThemeSearchQuery: (query: string) => void;
-  themeSearchResults: BibleThemeData[];
-  setThemeSearchResults: (results: BibleThemeData[]) => void;
-
-  // 收藏的主题
-  savedThemes: string[];
-  addSavedTheme: (themeId: string) => void;
-  removeSavedTheme: (themeId: string) => void;
-
-  // 面板状态
-  isThemeGraphPanelOpen: boolean;
-  setThemeGraphPanelOpen: (open: boolean) => void;
-
-  // 图谱视图模式
-  graphViewMode: 'network' | 'timeline' | 'list';
-  setGraphViewMode: (mode: 'network' | 'timeline' | 'list') => void;
-
-  // 经文上下文 - 用于AI提取主题
-  themeGraphVerseContext: {
-    bookId: string;
-    bookName: string;
-    chapter: number;
-    verseStart: number;
-    verseEnd: number;
-    verseContent: string;
-  } | null;
-  setThemeGraphVerseContext: (context: ThemeGraphSlice['themeGraphVerseContext']) => void;
-}
-
-// --------------------------------------------------
-// 7. 私信状态 (DMSlice)
+// 6. 私信状态 (DMSlice)
 // --------------------------------------------------
 
 export interface DMConversation {

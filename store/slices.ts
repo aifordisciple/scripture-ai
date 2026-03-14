@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, ThemeGraphSlice, ThemeGraphData, DMSlice, OnboardingStatus } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 
@@ -861,54 +861,6 @@ export const createAtlasSlice: StateCreator<StoreState, [], [], AtlasSlice> = (s
   // 查看地点相关经文
   viewingLocationVerses: null,
   setViewingLocationVerses: (data) => set({ viewingLocationVerses: data }),
-});
-
-// [新增] 主题网络图状态
-export const createThemeGraphSlice: StateCreator<StoreState, [], [], ThemeGraphSlice> = (set, get) => ({
-  // 当前选中的主题
-  selectedThemeId: null,
-  setSelectedThemeId: (id) => set({ selectedThemeId: id }),
-
-  // 主题详情
-  selectedTheme: null,
-  setSelectedTheme: (theme) => set({ selectedTheme: theme }),
-
-  // 图谱数据
-  graphData: { nodes: [], edges: [] },
-  setGraphData: (data) => set({ graphData: data }),
-
-  // 图谱配置
-  graphDepth: 2,
-  setGraphDepth: (depth) => set({ graphDepth: depth }),
-  themeCategoryFilter: [],
-  setThemeCategoryFilter: (categories) => set({ themeCategoryFilter: categories }),
-
-  // 主题搜索
-  themeSearchQuery: '',
-  setThemeSearchQuery: (query) => set({ themeSearchQuery: query }),
-  themeSearchResults: [],
-  setThemeSearchResults: (results) => set({ themeSearchResults: results }),
-
-  // 收藏的主题
-  savedThemes: [],
-  addSavedTheme: (themeId) => set((state) => ({
-    savedThemes: state.savedThemes.includes(themeId) ? state.savedThemes : [...state.savedThemes, themeId]
-  })),
-  removeSavedTheme: (themeId) => set((state) => ({
-    savedThemes: state.savedThemes.filter(id => id !== themeId)
-  })),
-
-  // 面板状态
-  isThemeGraphPanelOpen: false,
-  setThemeGraphPanelOpen: (open) => set({ isThemeGraphPanelOpen: open }),
-
-  // 图谱视图模式
-  graphViewMode: 'network',
-  setGraphViewMode: (mode) => set({ graphViewMode: mode }),
-
-  // 经文上下文 - 用于AI提取主题
-  themeGraphVerseContext: null,
-  setThemeGraphVerseContext: (context) => set({ themeGraphVerseContext: context }),
 });
 
 // [新增] 私信状态

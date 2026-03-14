@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp, Map, Network } from "lucide-react";
+import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useSession } from "next-auth/react";
@@ -20,7 +20,6 @@ interface FloatingMenuProps {
   onCopy: () => void;
   onCrossRef?: () => void;
   onAtlas?: () => void;
-  onThemeGraph?: () => void;
   showAbove?: boolean; // 菜单显示在选中元素上方还是下方
 }
 
@@ -40,7 +39,7 @@ const AI_OPTIONS = [
   { id: 'prayer', label: '祷告回应', prompt: THEOLOGICAL_PROMPTS[4].prompt },
 ];
 
-export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onCrossRef, onAtlas, onThemeGraph, showAbove = true }: FloatingMenuProps) {
+export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onCrossRef, onAtlas, showAbove = true }: FloatingMenuProps) {
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showAiSubmenu, setShowAiSubmenu] = useState(false);
@@ -326,18 +325,6 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           >
             <Map className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mb-1" />
             <span className="text-[10px] text-slate-500">地图</span>
-          </button>
-        )}
-
-        {onThemeGraph && (
-          <button
-            onClick={(e) => { handleMenuClick(e); onThemeGraph(); }}
-            onMouseDown={handleMenuClick}
-            onPointerDown={handleMenuClick}
-            className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-          >
-            <Network className="w-4 h-4 text-emerald-500 dark:text-emerald-400 mb-1" />
-            <span className="text-[10px] text-slate-500">主题</span>
           </button>
         )}
 
