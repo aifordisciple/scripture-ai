@@ -44,6 +44,12 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // [新增] 禁言相关
+  isMuted       Boolean   @default(false)  // 是否被禁言
+  mutedAt       DateTime?  // 禁言时间
+  mutedReason   String?    // 禁言原因
+  mutedBy       String?    // 禁言操作的管理员ID
+
   // 关联数据
   settings      UserSetting?
   highlights    Highlight[]
@@ -975,6 +981,8 @@ model Feedback {
   screenshot  String?        @db.Text
   status      FeedbackStatus @default(OPEN)
   adminReply  String?        @db.Text
+  userReply   String?        @db.Text  // 用户回复
+  replies     String?        @db.Text  // JSON 格式的回复历史，支持多轮对话
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 

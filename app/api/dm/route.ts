@@ -136,6 +136,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Check if user is muted
+    const sender = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isMuted: true, role: true }
+    });
+
+    if (sender?.isMuted) {
+      return NextResponse.json({ error: '您已被禁言，无法发送消息' }, { status: 403 });
+    }
+
     const { receiverId, content, type, metadata } = await req.json();
 
     if (!receiverId || !content) {

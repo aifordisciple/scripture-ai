@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -10,8 +11,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Send, Trash2 } from 'lucide-react';
+import { Loader2, Send, Trash2, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
+
+interface Reply {
+  type: 'admin' | 'user';
+  content: string;
+  createdAt: string;
+}
 
 interface Feedback {
   id: string;
@@ -21,6 +30,8 @@ interface Feedback {
   status: string;
   screenshot?: string | null;
   adminReply?: string | null;
+  userReply?: string | null;
+  replies?: string | null;
   createdAt: string;
   user: {
     id: string;
@@ -75,6 +86,19 @@ export function FeedbackAdminPanel({ initialFeedbacks, counts: initialCounts, em
       case 'RESOLVED': return '已解决';
       default: return status;
     }
+  };
+
+  const parseReplies = (repliesJson: string | null | undefined): Reply[] => {
+    if (!repliesJson) return [];
+    try {
+      return JSON.parse(repliesJson);
+    } catch {
+      return [];
+    }
+  };
+
+  const formatTime = (date: string) => {
+    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: zhCN });
   };
 
   const handleSelectFeedback = (feedback: Feedback) => {
@@ -211,41 +235,63 @@ export function FeedbackAdminPanel({ initialFeedbacks, counts: initialCounts, em
                     状态
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    回复
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     时间
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {feedbacks.map((feedback) => (
-                  <tr
-                    key={feedback.id}
-                    onClick={() => handleSelectFeedback(feedback)}
-                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {feedback.user?.name || '匿名用户'}
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {feedback.user?.email}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {getTypeLabel(feedback.type)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-white max-w-xs truncate">
-                      {feedback.title}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={cn("px-2 py-1 text-xs rounded-full", getStatusColor(feedback.status))}>
-                        {getStatusLabel(feedback.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(feedback.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
+                {feedbacks.map((feedback) => {
+                    const replies = parseReplies(feedback.replies);
+                    const lastReply = replies[replies.length - 1];
+                    const hasUserReply = lastReply?.type === 'user';
+
+                    return (
+                      <tr
+                        key={feedback.id}
+                        onClick={() => handleSelectFeedback(feedback)}
+                        className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {feedback.user?.name || '匿名用户'}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {feedback.user?.email}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                          {getTypeLabel(feedback.type)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white max-w-xs truncate">
+                          {feedback.title}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={cn("px-2 py-1 text-xs rounded-full", getStatusColor(feedback.status))}>
+                            {getStatusLabel(feedback.status)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {hasUserReply ? (
+                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                              用户已回复
+                            </span>
+                          ) : feedback.adminReply ? (
+                            <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                              已回复
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(feedback.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
@@ -287,9 +333,11 @@ export function FeedbackAdminPanel({ initialFeedbacks, counts: initialCounts, em
                   </div>
                 </div>
 
-                {/* 内容 */}
+                {/* 原始内容 */}
                 <div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">内容</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                    原始反馈 · {formatTime(selectedFeedback.createdAt)}
+                  </div>
                   <div className="text-gray-900 dark:text-white whitespace-pre-wrap bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                     {selectedFeedback.content}
                   </div>
@@ -300,6 +348,31 @@ export function FeedbackAdminPanel({ initialFeedbacks, counts: initialCounts, em
                   <div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">截图</div>
                     <img src={selectedFeedback.screenshot} alt="反馈截图" className="max-w-full rounded-lg border" />
+                  </div>
+                )}
+
+                {/* 回复历史 */}
+                {parseReplies(selectedFeedback.replies).length > 0 && (
+                  <div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">对话记录</div>
+                    <ScrollArea className="max-h-[200px] border rounded-lg p-2">
+                      {parseReplies(selectedFeedback.replies).map((reply, index) => (
+                        <div
+                          key={index}
+                          className={cn(
+                            "mb-2 p-2 rounded",
+                            reply.type === "admin"
+                              ? "bg-blue-50 dark:bg-blue-900/20"
+                              : "bg-green-50 dark:bg-green-900/20"
+                          )}
+                        >
+                          <div className="text-xs text-gray-500 mb-1">
+                            {reply.type === "admin" ? "管理员" : "用户"} · {formatTime(reply.createdAt)}
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap">{reply.content}</p>
+                        </div>
+                      ))}
+                    </ScrollArea>
                   </div>
                 )}
 

@@ -2,8 +2,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, ChevronLeft, ChevronRight, Shield, User, MoreVertical, X } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Shield, User, MoreVertical, X, Ban, CheckCircle, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 interface User {
   id: string;
@@ -11,6 +20,9 @@ interface User {
   email: string;
   image: string | null;
   role: string;
+  isMuted: boolean;
+  mutedAt: string | null;
+  mutedReason: string | null;
   createdAt: string;
   lastActiveDate: string | null;
   streakCount: number;
@@ -38,6 +50,11 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState('');
   const [page, setPage] = useState(1);
   const [updating, setUpdating] = useState<string | null>(null);
+
+  // 禁言相关状态
+  const [muteDialogOpen, setMuteDialogOpen] = useState(false);
+  const [muteUser, setMuteUser] = useState<User | null>(null);
+  const [muteReason, setMuteReason] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -83,6 +100,57 @@ export default function AdminUsersPage() {
     } catch (err) {
       console.error(err);
       alert('更新失败');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  // 打开禁言对话框
+  const openMuteDialog = (user: User) => {
+    setMuteUser(user);
+    setMuteReason('');
+    setMuteDialogOpen(true);
+  };
+
+  // 禁言用户
+  const handleMuteUser = async () => {
+    if (!muteUser) return;
+    setUpdating(muteUser.id);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: muteUser.id,
+          isMuted: true,
+          mutedReason: muteReason || '违反社区规范'
+        })
+      });
+      if (!res.ok) throw new Error('Failed to mute user');
+      setMuteDialogOpen(false);
+      fetchUsers();
+    } catch (err) {
+      console.error(err);
+      alert('禁言失败');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  // 解除禁言
+  const handleUnmuteUser = async (user: User) => {
+    setUpdating(user.id);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, isMuted: false })
+      });
+      if (!res.ok) throw new Error('Failed to unmute user');
+      fetchUsers();
+    } catch (err) {
+      console.error(err);
+      alert('解除禁言失败');
     } finally {
       setUpdating(null);
     }
@@ -141,9 +209,9 @@ export default function AdminUsersPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">角色</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">统计</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">注册时间</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最后活跃</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
               </tr>
             </thead>
@@ -175,6 +243,16 @@ export default function AdminUsersPage() {
                       {user.role === 'admin' ? '管理员' : '用户'}
                     </span>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {user.isMuted ? (
+                      <div className="flex items-center gap-1">
+                        <Ban className="w-4 h-4 text-red-500" />
+                        <span className="text-xs text-red-600">已禁言</span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-green-600">正常</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex gap-3">
                       <span title="高亮">{user._count.highlights} 高亮</span>
@@ -185,25 +263,41 @@ export default function AdminUsersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(user.createdAt).toLocaleDateString('zh-CN')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.lastActiveDate
-                      ? new Date(user.lastActiveDate).toLocaleDateString('zh-CN')
-                      : '-'}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => toggleRole(user)}
-                      disabled={updating === user.id}
-                      className={cn(
-                        "px-3 py-1 rounded text-sm",
-                        user.role === 'admin'
-                          ? "text-red-600 hover:bg-red-50"
-                          : "text-indigo-600 hover:bg-indigo-50",
-                        updating === user.id && "opacity-50 cursor-not-allowed"
+                    <div className="flex items-center justify-end gap-2">
+                      {user.isMuted ? (
+                        <button
+                          onClick={() => handleUnmuteUser(user)}
+                          disabled={updating === user.id}
+                          className="px-3 py-1 rounded text-sm text-green-600 hover:bg-green-50 disabled:opacity-50"
+                        >
+                          <CheckCircle className="w-4 h-4 inline mr-1" />
+                          解除禁言
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => openMuteDialog(user)}
+                          disabled={updating === user.id}
+                          className="px-3 py-1 rounded text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          <Ban className="w-4 h-4 inline mr-1" />
+                          禁言
+                        </button>
                       )}
-                    >
-                      {updating === user.id ? '处理中...' : user.role === 'admin' ? '取消管理员' : '设为管理员'}
-                    </button>
+                      <button
+                        onClick={() => toggleRole(user)}
+                        disabled={updating === user.id}
+                        className={cn(
+                          "px-3 py-1 rounded text-sm",
+                          user.role === 'admin'
+                            ? "text-red-600 hover:bg-red-50"
+                            : "text-indigo-600 hover:bg-indigo-50",
+                          updating === user.id && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
+                        {user.role === 'admin' ? '取消管理员' : '设为管理员'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -230,14 +324,21 @@ export default function AdminUsersPage() {
                   <div className="text-sm text-gray-500 truncate">{user.email}</div>
                 </div>
               </div>
-              <span className={cn(
-                "px-2 py-1 text-xs font-medium rounded-full shrink-0",
-                user.role === 'admin'
-                  ? "bg-purple-100 text-purple-700"
-                  : "bg-gray-100 text-gray-700"
-              )}>
-                {user.role === 'admin' ? '管理员' : '用户'}
-              </span>
+              <div className="flex flex-col items-end gap-1">
+                <span className={cn(
+                  "px-2 py-1 text-xs font-medium rounded-full shrink-0",
+                  user.role === 'admin'
+                    ? "bg-purple-100 text-purple-700"
+                    : "bg-gray-100 text-gray-700"
+                )}>
+                  {user.role === 'admin' ? '管理员' : '用户'}
+                </span>
+                {user.isMuted && (
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
+                    已禁言
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
@@ -246,23 +347,42 @@ export default function AdminUsersPage() {
               <span>{user._count.churchMemberships} 小组</span>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2">
               <div className="text-xs text-gray-400">
                 注册: {new Date(user.createdAt).toLocaleDateString('zh-CN')}
               </div>
-              <button
-                onClick={() => toggleRole(user)}
-                disabled={updating === user.id}
-                className={cn(
-                  "px-3 py-1.5 rounded text-sm font-medium",
-                  user.role === 'admin'
-                    ? "text-red-600 bg-red-50 hover:bg-red-100"
-                    : "text-indigo-600 bg-indigo-50 hover:bg-indigo-100",
-                  updating === user.id && "opacity-50 cursor-not-allowed"
+              <div className="flex gap-2">
+                {user.isMuted ? (
+                  <button
+                    onClick={() => handleUnmuteUser(user)}
+                    disabled={updating === user.id}
+                    className="px-3 py-1.5 rounded text-sm font-medium text-green-600 bg-green-50 hover:bg-green-100 disabled:opacity-50"
+                  >
+                    解除禁言
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => openMuteDialog(user)}
+                    disabled={updating === user.id}
+                    className="px-3 py-1.5 rounded text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 disabled:opacity-50"
+                  >
+                    禁言
+                  </button>
                 )}
-              >
-                {updating === user.id ? '处理中...' : user.role === 'admin' ? '取消管理员' : '设为管理员'}
-              </button>
+                <button
+                  onClick={() => toggleRole(user)}
+                  disabled={updating === user.id}
+                  className={cn(
+                    "px-3 py-1.5 rounded text-sm font-medium",
+                    user.role === 'admin'
+                      ? "text-red-600 bg-red-50 hover:bg-red-100"
+                      : "text-indigo-600 bg-indigo-50 hover:bg-indigo-100",
+                    updating === user.id && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  {user.role === 'admin' ? '取消管理员' : '设为管理员'}
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -295,6 +415,42 @@ export default function AdminUsersPage() {
           </div>
         </div>
       )}
+
+      {/* 禁言对话框 */}
+      <Dialog open={muteDialogOpen} onOpenChange={setMuteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>禁言用户</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              确定要禁言用户 <strong>{muteUser?.name || muteUser?.email}</strong> 吗？禁言后该用户将无法发送私信或回复消息。
+            </p>
+            <div>
+              <label className="text-sm font-medium">禁言原因</label>
+              <Textarea
+                value={muteReason}
+                onChange={(e) => setMuteReason(e.target.value)}
+                placeholder="请输入禁言原因（可选）"
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMuteDialogOpen(false)}>
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleMuteUser}
+              disabled={updating === muteUser?.id}
+            >
+              {updating === muteUser?.id ? '处理中...' : '确认禁言'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

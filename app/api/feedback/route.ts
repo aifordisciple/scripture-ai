@@ -145,7 +145,7 @@ export async function POST(req: Request) {
   }
 }
 
-// PUT /api/feedback - Update feedback (admin reply or status change)
+// PUT /api/feedback - Update feedback (admin reply, user reply, or status change)
 export async function PUT(req: Request) {
   try {
     const session = await auth();
@@ -153,7 +153,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id, status, adminReply } = await req.json();
+    const { id, status, adminReply, userReply } = await req.json();
 
     if (!id) {
       return NextResponse.json({ error: 'Feedback ID required' }, { status: 400 });
@@ -174,15 +174,58 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Check mute status for user replies
+    if (userReply !== undefined && !isUserAdmin) {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { isMuted: true }
+      });
+      if (user?.isMuted) {
+        return NextResponse.json({ error: '您已被禁言，无法回复' }, { status: 403 });
+      }
+    }
+
     // Build update data
     const updateData: any = {};
     if (status) updateData.status = status;
+
     if (adminReply !== undefined) {
       // Only admins can reply
       if (!isUserAdmin) {
         return NextResponse.json({ error: 'Only admins can reply to feedback' }, { status: 403 });
       }
       updateData.adminReply = adminReply;
+
+      // Add to replies history
+      const replies = existingFeedback.replies ? JSON.parse(existingFeedback.replies) : [];
+      replies.push({
+        type: 'admin',
+        content: adminReply,
+        createdAt: new Date().toISOString()
+      });
+      updateData.replies = JSON.stringify(replies);
+    }
+
+    if (userReply !== undefined && !isUserAdmin) {
+      // Only the feedback owner can reply as user
+      if (existingFeedback.userId !== session.user.id) {
+        return NextResponse.json({ error: 'Only feedback owner can reply' }, { status: 403 });
+      }
+      updateData.userReply = userReply;
+
+      // Add to replies history
+      const replies = existingFeedback.replies ? JSON.parse(existingFeedback.replies) : [];
+      replies.push({
+        type: 'user',
+        content: userReply,
+        createdAt: new Date().toISOString()
+      });
+      updateData.replies = JSON.stringify(replies);
+
+      // Reopen feedback if it was resolved
+      if (existingFeedback.status === 'RESOLVED') {
+        updateData.status = 'IN_PROGRESS';
+      }
     }
 
     const feedback = await prisma.feedback.update({
@@ -208,6 +251,27 @@ export async function PUT(req: Request) {
             adminId: session.user.id
           })
         }
+      });
+    }
+
+    // Notify admins if user replied
+    if (userReply && !isUserAdmin) {
+      const admins = await prisma.user.findMany({
+        where: { role: 'admin' },
+        select: { id: true }
+      });
+
+      await prisma.notification.createMany({
+        data: admins.map(admin => ({
+          userId: admin.id,
+          type: 'NEW_FEEDBACK',
+          title: `用户回复了反馈: ${existingFeedback.title}`,
+          content: userReply.substring(0, 100),
+          metadata: JSON.stringify({
+            feedbackId: id,
+            userId: session.user.id
+          })
+        }))
       });
     }
 

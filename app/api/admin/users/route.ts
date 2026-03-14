@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PUT /api/admin/users - 更新用户角色
+// PUT /api/admin/users - 更新用户角色或禁言状态
 export async function PUT(request: NextRequest) {
   const adminCheck = await verifyAdmin();
   if (!adminCheck.authorized) {
@@ -85,18 +85,11 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { userId, role } = body;
+    const { userId, role, isMuted, mutedReason } = body;
 
-    if (!userId || !role) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'userId and role are required' },
-        { status: 400 }
-      );
-    }
-
-    if (!['user', 'admin'].includes(role)) {
-      return NextResponse.json(
-        { error: 'Invalid role. Must be "user" or "admin"' },
+        { error: 'userId is required' },
         { status: 400 }
       );
     }
@@ -104,7 +97,7 @@ export async function PUT(request: NextRequest) {
     // 获取修改前的用户信息
     const beforeUpdate = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, role: true }
+      select: { id: true, name: true, email: true, role: true, isMuted: true, mutedReason: true }
     });
 
     if (!beforeUpdate) {
@@ -114,33 +107,96 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // 更新用户角色
+    // 准备更新数据
+    const updateData: any = {};
+
+    // 角色更新
+    if (role !== undefined) {
+      if (!['user', 'admin'].includes(role)) {
+        return NextResponse.json(
+          { error: 'Invalid role. Must be "user" or "admin"' },
+          { status: 400 }
+        );
+      }
+      updateData.role = role;
+    }
+
+    // 禁言更新
+    if (isMuted !== undefined) {
+      updateData.isMuted = isMuted;
+      updateData.mutedAt = isMuted ? new Date() : null;
+      updateData.mutedReason = isMuted ? (mutedReason || null) : null;
+      updateData.mutedBy = isMuted ? adminCheck.userId : null;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        { error: 'No update data provided' },
+        { status: 400 }
+      );
+    }
+
+    // 更新用户
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { role },
+      data: updateData,
       select: {
         id: true,
         name: true,
         email: true,
-        role: true
+        role: true,
+        isMuted: true,
+        mutedAt: true,
+        mutedReason: true
       }
     });
 
     // 记录操作日志
-    await logAdminAction(
-      adminCheck.userId!,
-      'UPDATE',
-      'USER',
-      {
-        targetId: userId,
-        details: buildAuditDetails(
-          'role_change',
-          { role: beforeUpdate.role },
-          { role }
-        ),
-        ip: getClientIP(request)
-      }
-    );
+    if (role !== undefined) {
+      await logAdminAction(
+        adminCheck.userId!,
+        'UPDATE',
+        'USER',
+        {
+          targetId: userId,
+          details: buildAuditDetails(
+            'role_change',
+            { role: beforeUpdate.role },
+            { role }
+          ),
+          ip: getClientIP(request)
+        }
+      );
+    }
+
+    if (isMuted !== undefined) {
+      await logAdminAction(
+        adminCheck.userId!,
+        isMuted ? 'MUTE' : 'UNMUTE',
+        'USER',
+        {
+          targetId: userId,
+          details: buildAuditDetails(
+            isMuted ? 'user_muted' : 'user_unmuted',
+            { isMuted: beforeUpdate.isMuted },
+            { isMuted, reason: mutedReason }
+          ),
+          ip: getClientIP(request)
+        }
+      );
+
+      // 通知用户被禁言/解禁
+      await prisma.notification.create({
+        data: {
+          userId,
+          type: isMuted ? 'USER_MUTED' : 'USER_UNMUTED',
+          title: isMuted ? '您已被禁言' : '您已解除禁言',
+          content: isMuted
+            ? `您因 "${mutedReason || '违规行为'}" 被管理员禁言，期间无法发送私信或回复消息。`
+            : '您已被解除禁言，现在可以正常发送消息了。',
+        }
+      });
+    }
 
     return NextResponse.json({ user: updatedUser });
   } catch (error) {
