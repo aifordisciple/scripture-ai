@@ -39,6 +39,8 @@ const NOTIFICATION_ICONS: Record<string, any> = {
   NEW_FEEDBACK: MessageSquare,
   FEEDBACK_REPLY: MessageSquare,
   ADMIN_MESSAGE: Mail,
+  USER_MUTED: AlertCircle,
+  USER_UNMUTED: Check,
   DEFAULT: Bell
 };
 
@@ -163,6 +165,12 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
         return "text-red-500 bg-red-100 dark:bg-red-900/30";
       case "ADMIN_MESSAGE":
         return "text-purple-500 bg-purple-100 dark:bg-purple-900/30";
+      case "FEEDBACK_REPLY":
+        return "text-blue-500 bg-blue-100 dark:bg-blue-900/30";
+      case "USER_MUTED":
+        return "text-red-500 bg-red-100 dark:bg-red-900/30";
+      case "USER_UNMUTED":
+        return "text-green-500 bg-green-100 dark:bg-green-900/30";
       default:
         return "text-gray-500 bg-gray-100 dark:bg-gray-800";
     }

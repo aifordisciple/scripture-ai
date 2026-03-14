@@ -4,8 +4,9 @@
 import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageSquare, HelpCircle } from "lucide-react";
+import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageSquare, HelpCircle, MessageCircle } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
+import { UserFeedbackPanel } from "@/components/feedback/UserFeedbackPanel";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -23,6 +24,7 @@ export function UserMenu() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [apiSettingsOpen, setApiSettingsOpen] = useState(false);
+  const [feedbackPanelOpen, setFeedbackPanelOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -181,6 +183,15 @@ export function UserMenu() {
             }}
           />
 
+          <MenuItem
+            icon={<MessageCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+            label="我的反馈"
+            onClick={() => {
+              setIsOpen(false);
+              setFeedbackPanelOpen(true);
+            }}
+          />
+
           <div className="my-1 border-t dark:border-slate-800" />
 
           {/* Admin Menu Items */}
@@ -214,6 +225,7 @@ export function UserMenu() {
       )}
       
       <ApiSettingsDialog open={apiSettingsOpen} onOpenChange={setApiSettingsOpen} />
+      <UserFeedbackPanel open={feedbackPanelOpen} onOpenChange={setFeedbackPanelOpen} />
     </div>
   );
 }
