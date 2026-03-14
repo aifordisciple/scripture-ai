@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Check, AlertTriangle, Info, Bell } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Check, AlertTriangle, Info, Bell, BellRing } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Announcement {
@@ -43,7 +43,8 @@ export default function AdminAnnouncementsPage() {
     type: 'INFO',
     isActive: true,
     startsAt: '',
-    endsAt: ''
+    endsAt: '',
+    sendNotification: false
   });
   const [saving, setSaving] = useState(false);
 
@@ -74,7 +75,8 @@ export default function AdminAnnouncementsPage() {
         type: announcement.type,
         isActive: announcement.isActive,
         startsAt: announcement.startsAt ? announcement.startsAt.slice(0, 16) : '',
-        endsAt: announcement.endsAt ? announcement.endsAt.slice(0, 16) : ''
+        endsAt: announcement.endsAt ? announcement.endsAt.slice(0, 16) : '',
+        sendNotification: false
       });
     } else {
       setEditingId(null);
@@ -84,7 +86,8 @@ export default function AdminAnnouncementsPage() {
         type: 'INFO',
         isActive: true,
         startsAt: '',
-        endsAt: ''
+        endsAt: '',
+        sendNotification: false
       });
     }
     setShowEditor(true);
@@ -99,7 +102,8 @@ export default function AdminAnnouncementsPage() {
       type: 'INFO',
       isActive: true,
       startsAt: '',
-      endsAt: ''
+      endsAt: '',
+      sendNotification: false
     });
   };
 
@@ -361,6 +365,23 @@ export default function AdminAnnouncementsPage() {
                   />
                 </div>
               </div>
+
+              {/* 推送通知选项 - 仅新建时显示 */}
+              {!editingId && (
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="sendNotification"
+                    checked={formData.sendNotification}
+                    onChange={(e) => setFormData({ ...formData, sendNotification: e.target.checked })}
+                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <label htmlFor="sendNotification" className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <BellRing size={16} className="text-indigo-600" />
+                    发布时推送通知给所有用户
+                  </label>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 p-4 border-t">

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Bell, Check, CheckCheck, Trash2, Loader2, MessageCircle,
-  Trophy, Calendar, Users, AlertCircle, MessageSquare
+  Trophy, Calendar, Users, AlertCircle, MessageSquare, Mail, Trash
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +38,7 @@ const NOTIFICATION_ICONS: Record<string, any> = {
   ANNOUNCEMENT: AlertCircle,
   NEW_FEEDBACK: MessageSquare,
   FEEDBACK_REPLY: MessageSquare,
+  ADMIN_MESSAGE: Mail,
   DEFAULT: Bell
 };
 
@@ -112,6 +113,17 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
     }
   };
 
+  const clearAllNotifications = async () => {
+    try {
+      const res = await fetch("/api/notification?clearAll=true", { method: "DELETE" });
+      const data = await res.json();
+      setNotifications([]);
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Failed to clear all notifications:", error);
+    }
+  };
+
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.read) {
       markAsRead([notification.id]);
@@ -149,6 +161,8 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
         return "text-orange-500 bg-orange-100 dark:bg-orange-900/30";
       case "ANNOUNCEMENT":
         return "text-red-500 bg-red-100 dark:bg-red-900/30";
+      case "ADMIN_MESSAGE":
+        return "text-purple-500 bg-purple-100 dark:bg-purple-900/30";
       default:
         return "text-gray-500 bg-gray-100 dark:bg-gray-800";
     }
@@ -173,17 +187,34 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
               <Bell className="w-5 h-5" />
               通知
             </span>
-            {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={markAllRead}
-                className="text-xs text-muted-foreground"
-              >
-                <CheckCheck className="w-4 h-4 mr-1" />
-                全部已读
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {notifications.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (confirm('确定要清除所有通知吗？')) {
+                      clearAllNotifications();
+                    }
+                  }}
+                  className="text-xs text-red-500 hover:text-red-600"
+                >
+                  <Trash className="w-4 h-4 mr-1" />
+                  清除全部
+                </Button>
+              )}
+              {unreadCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={markAllRead}
+                  className="text-xs text-muted-foreground"
+                >
+                  <CheckCheck className="w-4 h-4 mr-1" />
+                  全部已读
+                </Button>
+              )}
+            </div>
           </DialogTitle>
         </DialogHeader>
 

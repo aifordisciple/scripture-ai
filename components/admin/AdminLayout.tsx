@@ -13,7 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Home
+  Home,
+  Mail
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +26,7 @@ const navItems = [
   { href: '/admin', label: '仪表盘', icon: LayoutDashboard },
   { href: '/admin/users', label: '用户管理', icon: Users },
   { href: '/admin/churches', label: '小组管理', icon: Building2 },
+  { href: '/admin/messages', label: '私信管理', icon: Mail },
   { href: '/admin/feedback', label: '反馈管理', icon: MessageSquare },
   { href: '/admin/announcements', label: '公告管理', icon: Bell },
   { href: '/admin/settings', label: '系统设置', icon: Settings },

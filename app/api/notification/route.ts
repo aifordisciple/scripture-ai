@@ -108,7 +108,7 @@ export async function PUT(req: Request) {
   }
 }
 
-// DELETE - Delete notification
+// DELETE - Delete notification or clear all notifications
 export async function DELETE(req: Request) {
   try {
     const session = await auth();
@@ -118,7 +118,17 @@ export async function DELETE(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const notificationId = searchParams.get('id');
+    const clearAll = searchParams.get('clearAll') === 'true';
 
+    // 清除全部通知
+    if (clearAll) {
+      const result = await prisma.notification.deleteMany({
+        where: { userId: session.user.id }
+      });
+      return NextResponse.json({ success: true, deletedCount: result.count });
+    }
+
+    // 删除单个通知
     if (!notificationId) {
       return NextResponse.json({ error: 'Notification ID required' }, { status: 400 });
     }

@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, content, type, startsAt, endsAt } = body;
+    const { title, content, type, startsAt, endsAt, sendNotification } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -96,6 +96,31 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // 如果勾选了推送通知，向所有用户发送通知
+    let notificationCount = 0;
+    if (sendNotification) {
+      const users = await prisma.user.findMany({
+        where: { role: 'user' },
+        select: { id: true }
+      });
+
+      if (users.length > 0) {
+        const notificationResult = await prisma.notification.createMany({
+          data: users.map(user => ({
+            userId: user.id,
+            type: 'ANNOUNCEMENT',
+            title: `系统公告: ${title}`,
+            content: content.length > 200 ? content.slice(0, 200) + '...' : content,
+            metadata: JSON.stringify({
+              announcementId: announcement.id,
+              announcementType: type || 'INFO'
+            })
+          }))
+        });
+        notificationCount = notificationResult.count;
+      }
+    }
+
     // 记录操作日志
     await logAdminAction(
       adminCheck.userId!,
@@ -103,12 +128,20 @@ export async function POST(request: NextRequest) {
       'ANNOUNCEMENT',
       {
         targetId: announcement.id,
-        details: buildAuditDetails('create', null, { title, type }),
+        details: buildAuditDetails('create', null, {
+          title,
+          type,
+          sendNotification,
+          notificationCount
+        }),
         ip: getClientIP(request)
       }
     );
 
-    return NextResponse.json({ announcement }, { status: 201 });
+    return NextResponse.json({
+      announcement,
+      notificationCount
+    }, { status: 201 });
   } catch (error) {
     console.error('Admin announcement create error:', error);
     return NextResponse.json(
