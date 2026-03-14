@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { TrendingUp, Users, BookOpen, Target, Calendar } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Stats {
   users: {
