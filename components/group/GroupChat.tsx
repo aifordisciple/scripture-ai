@@ -53,6 +53,21 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
     };
   }, [churchId]);
 
+  // 标记消息为已读
+  useEffect(() => {
+    const markAsRead = async () => {
+      try {
+        await fetch(`/api/church/${churchId}/chat`, {
+          method: 'PUT'
+        });
+      } catch (error) {
+        console.error('Failed to mark as read:', error);
+      }
+    };
+
+    markAsRead();
+  }, [churchId]);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);

@@ -95,6 +95,9 @@ model User {
 
   // [新增] 小组打卡动态
   groupCheckInActivities GroupCheckInActivity[]
+
+  // [新增] 小组聊天已读状态
+  chatReadStatus GroupChatReadStatus[]
 }
 
 model UserSetting {
@@ -416,6 +419,9 @@ model Church {
 
   // [新增] 小组勋章
   groupBadges  GroupBadge[]
+
+  // [新增] 小组聊天已读状态
+  chatReadStatus GroupChatReadStatus[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -742,6 +748,20 @@ model GroupBadge {
   userIds     String[]
 
   @@unique([churchId, type])
+}
+
+// [新增] 小组聊天已读状态模型
+model GroupChatReadStatus {
+  id          String   @id @default(cuid())
+  churchId    String
+  church      Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt  DateTime @default(now())
+
+  @@unique([churchId, userId])
+  @@index([userId])
+  @@map("group_chat_read_status")
 }
 
 // ==================================================

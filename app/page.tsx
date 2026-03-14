@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
+import { useGroupUnread } from "@/hooks/use-group-unread";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { SyncSettings } from "@/components/settings/SyncSettings";
 import { BookPicker } from "@/components/bible/BookPicker";
@@ -209,6 +210,7 @@ export default function Home() {
   }, [handleNextChapter]);
 
   const player = useAudioPlayer(onPlaybackFinished);
+  const { totalUnread: groupUnread } = useGroupUnread();
 
   useEffect(() => {
     if (chapterSpeechText && autoPlayRef.current && chapterSpeechText !== prevTextRef.current) {
@@ -526,10 +528,15 @@ export default function Home() {
                     addTab({ type: 'group' });
                   }
                 }}
-                className="rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 transition-colors"
+                className="rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 transition-colors relative"
                 title="小组读经"
               >
                 <Users className="h-5 w-5" />
+                {groupUnread > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1">
+                    {groupUnread > 99 ? '99+' : groupUnread}
+                  </span>
+                )}
               </Button>
 
                <div className="pl-1">
@@ -551,10 +558,15 @@ export default function Home() {
                     addTab({ type: 'group' });
                   }
                 }}
-                className="rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 h-9 w-9"
+                className="rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 h-9 w-9 relative"
                 title="小组读经"
               >
                 <Users className="h-5 w-5" />
+                {groupUnread > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5">
+                    {groupUnread > 99 ? '99+' : groupUnread}
+                  </span>
+                )}
               </Button>
 
               <UserMenu />

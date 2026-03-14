@@ -119,3 +119,46 @@ export async function POST(req: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
   }
 }
+
+// PUT - Mark messages as read
+export async function PUT(req: Request, { params }: RouteParams) {
+  try {
+    const { id: churchId } = await params;
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check membership
+    const membership = await prisma.churchMember.findFirst({
+      where: { churchId, userId: session.user.id }
+    });
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Not a member' }, { status: 403 });
+    }
+
+    // Update or create read status
+    await prisma.groupChatReadStatus.upsert({
+      where: {
+        churchId_userId: {
+          churchId,
+          userId: session.user.id
+        }
+      },
+      update: {
+        lastReadAt: new Date()
+      },
+      create: {
+        churchId,
+        userId: session.user.id,
+        lastReadAt: new Date()
+      }
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Mark read error:', error);
+    return NextResponse.json({ error: 'Failed to mark as read' }, { status: 500 });
+  }
+}

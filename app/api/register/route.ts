@@ -38,6 +38,26 @@ export async function POST(req: Request) {
       },
     });
 
+    // 自动加入默认群组"软件使用交流群"
+    try {
+      const defaultGroup = await prisma.church.findFirst({
+        where: { name: '软件使用交流群' }
+      });
+
+      if (defaultGroup) {
+        await prisma.churchMember.create({
+          data: {
+            churchId: defaultGroup.id,
+            userId: user.id,
+            role: 'MEMBER'
+          }
+        });
+      }
+    } catch (groupError) {
+      // 加入群组失败不影响注册流程，仅记录日志
+      console.error("Failed to join default group:", groupError);
+    }
+
     return NextResponse.json({
       id: user.id,
       name: user.name,
