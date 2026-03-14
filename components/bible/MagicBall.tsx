@@ -584,19 +584,25 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         animate={controls}
+        data-magic-ball="true"
         className={cn(
-          "fixed z-[100] touch-none bg-transparent",
+          "fixed z-[100] touch-none",
           isRepositioning ? "cursor-move" : "cursor-grab"
         )}
         style={{ width: 52, height: 52, bottom: position.bottom, right: position.right }}
       >
         <div
+          data-magic-ball="true"
           className={cn(
-            "relative w-full h-full rounded-full overflow-hidden transition-all duration-500",
+            "relative w-full h-full overflow-hidden transition-all duration-500",
+            // 强制圆形 - iOS Safari 兼容
+            "rounded-full",
             // 背景色：保持蓝色调，不仅限于暗色，而是通透感
             "bg-gradient-to-br from-white/60 via-blue-50/50 to-blue-200/40",
             "dark:from-slate-800/80 dark:via-slate-900/80 dark:to-black/80",
-            "backdrop-blur-xl border border-white/40 dark:border-white/10",
+            // backdrop-blur 兼容性处理
+            "backdrop-blur-xl [-webkit-backdrop-filter:blur(24px)]",
+            "border border-white/40 dark:border-white/10",
             "shadow-[inset_0_4px_8px_rgba(255,255,255,0.9),_inset_0_-6px_6px_rgba(0,0,0,0.1),_0_8px_24px_rgba(0,0,0,0.2)]",
             "dark:shadow-[inset_0_2px_6px_rgba(255,255,255,0.15),_inset_0_-6px_10px_rgba(0,0,0,0.5),_0_10px_30px_rgba(0,0,0,0.5)]",
             // 状态 Ring
@@ -607,6 +613,15 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             (hasQueueContent ? "ring-2 ring-purple-400/30 scale-105" :
             (isAiOpen ? "ring-2 ring-blue-400/20 scale-105" : "hover:scale-105")))))
           )}
+          style={{
+            // iOS Safari 圆形强制修复
+            WebkitMaskImage: '-webkit-radial-gradient(circle, white 100%, black 100%)',
+            maskImage: 'radial-gradient(circle, white 100%, black 100%)',
+            borderRadius: '50%',
+            // iOS Safari 硬件加速
+            WebkitTransform: 'translateZ(0)',
+            transform: 'translateZ(0)',
+          }}
         >
           {/* 内部水波纹层 */}
           <div className={cn(

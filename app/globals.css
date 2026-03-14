@@ -461,3 +461,28 @@
 .transition-transform-normal {
   transition: transform var(--duration-normal) var(--ease-spring);
 }
+
+/* =========================================
+   iOS Safari 特定修复
+   ========================================= */
+
+/* MagicBall 圆形强制修复 - 解决 iOS Safari 方形背景问题 */
+@supports (-webkit-touch-callout: none) {
+  /* 仅在 iOS 设备上应用 */
+  [data-magic-ball="true"],
+  [data-magic-ball="true"] * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
+    mask-image: radial-gradient(circle, white 100%, black 100%);
+  }
+}
+
+/* iOS Safari 圆形元素强制渲染 */
+.ios-rounded-fix {
+  -webkit-appearance: none;
+  -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
+  mask-image: radial-gradient(circle, white 100%, black 100%);
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
