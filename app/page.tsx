@@ -556,7 +556,7 @@ export default function Home() {
             <div className="flex sm:hidden items-center gap-0.5 shrink-0">
               {/* 朗读播放 - 移动端 */}
               {activeTab.type === 'read' && (
-                <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="compact" />
+                <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="minimal" />
               )}
 
               {/* 通知中心 - 移动端 */}

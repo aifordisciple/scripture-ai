@@ -4,10 +4,11 @@
 import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, BookMarked, FileText, Image as ImageIcon, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageSquare, HelpCircle, MessageCircle, Bell } from "lucide-react";
+import { UserCircle, LogOut, Settings, BookMarked, FileText, Moon, Sun, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageSquare, HelpCircle, MessageCircle, Bell, Users } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { UserFeedbackPanel } from "@/components/feedback/UserFeedbackPanel";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { useGroupUnread } from "@/hooks/use-group-unread";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -20,8 +21,12 @@ export function UserMenu() {
     toggleDarkMode,
     setMobileSettingsOpen,
     setDashboardOpen, // [新增] 引入看板开关方法
-    streakCount // 连续阅读天数
+    streakCount, // 连续阅读天数
+    tabs,
+    setActiveTab,
+    addTab
   } = useBibleStore();
+  const { totalUnread: groupUnread } = useGroupUnread();
 
   const [isOpen, setIsOpen] = useState(false);
   const [apiSettingsOpen, setApiSettingsOpen] = useState(false);
@@ -203,6 +208,22 @@ export function UserMenu() {
             }}
           />
 
+          <MenuItem
+            icon={<Users className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
+            label="小组读经"
+            onClick={() => {
+              setIsOpen(false);
+              const groupTab = tabs.find(t => t.type === 'group');
+              if (groupTab) setActiveTab(groupTab.id);
+              else addTab({ type: 'group' });
+            }}
+            rightElement={groupUnread > 0 ? (
+              <span className="min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1">
+                {groupUnread > 99 ? '99+' : groupUnread}
+              </span>
+            ) : undefined}
+          />
+
           <div className="my-1 border-t dark:border-slate-800" />
 
           {/* Admin Menu Items */}
@@ -219,10 +240,8 @@ export function UserMenu() {
             </>
           )}
 
-          <MenuItem icon={<ImageIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />} label="经文卡片" onClick={() => alert("功能开发中...")} />
-          
           <div className="my-1 border-t dark:border-slate-800" />
-          
+
           <MenuItem
             icon={<LogOut className="w-4 h-4" />}
             label="退出登录"
@@ -242,17 +261,18 @@ export function UserMenu() {
   );
 }
 
-function MenuItem({ icon, label, onClick, className }: any) {
+function MenuItem({ icon, label, onClick, className, rightElement }: any) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left", 
+        "w-full flex items-center gap-3 px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left",
         className
       )}
     >
       {icon}
-      {label}
+      <span className="flex-1">{label}</span>
+      {rightElement}
     </button>
   );
 }
