@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useBibleStore } from '@/store/useBibleStore';
-import { Network, List, Clock, Search, Bookmark, BookmarkCheck, Sparkles, TrendingUp, ArrowUpDown } from 'lucide-react';
+import { Network, List, Clock, Search, Bookmark, BookmarkCheck, Sparkles, TrendingUp, ArrowUpDown, BookOpen } from 'lucide-react';
 import ThemeCard from './ThemeCard';
 import ThemeSearch from './ThemeSearch';
 import ThemeTimeline from './ThemeTimeline';
@@ -137,6 +137,14 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
     // 从 store 读取经文上下文
     themeGraphVerseContext,
     apiConfig,
+    // 阅读器导航相关
+    tabs,
+    activeTabId,
+    setActiveTab,
+    addTab,
+    updateActiveTab,
+    scrollToVerse,
+    setScrollToVerse,
   } = useBibleStore();
 
   const [loading, setLoading] = useState(false);
@@ -144,6 +152,12 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
   const [extractingThemes, setExtractingThemes] = useState(false);
   const [extractedThemes, setExtractedThemes] = useState<any[]>([]);
   const [hotThemes, setHotThemes] = useState<any[]>([]);
+  const [sourceVerse, setSourceVerse] = useState<{
+    bookId: string;
+    chapter: number;
+    verseStart: number;
+    verseEnd?: number;
+  } | null>(null);
 
   // 加载热门主题
   useEffect(() => {
@@ -199,7 +213,16 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
       setExtractingThemes(true);
       console.log('ThemeGraphPanel - extracting themes from verse context:', themeGraphVerseContext);
 
+      // 保存源经文信息
+      setSourceVerse({
+        bookId: themeGraphVerseContext.bookId,
+        chapter: themeGraphVerseContext.chapter,
+        verseStart: themeGraphVerseContext.verseStart,
+        verseEnd: themeGraphVerseContext.verseEnd,
+      });
+
       try {
+        // 第一步：调用AI提取API
         const res = await fetch('/api/themes/ai-extract', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -218,9 +241,37 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
 
         if (data.themes && data.themes.length > 0) {
           setExtractedThemes(data.themes);
-          // 选中的第一个主题
           setSelectedTheme(data.themes[0]);
           setSelectedThemeId(data.themes[0].id);
+
+          // 第二步：调用verse-network API构建完整网络图
+          try {
+            const networkRes = await fetch('/api/themes/verse-network', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                bookId: themeGraphVerseContext.bookId,
+                chapter: themeGraphVerseContext.chapter,
+                verseStart: themeGraphVerseContext.verseStart,
+                verseEnd: themeGraphVerseContext.verseEnd,
+                themeIds: data.themes.map((t: any) => t.id),
+              }),
+            });
+
+            const networkData = await networkRes.json();
+            console.log('ThemeGraphPanel - verse network:', networkData);
+
+            if (networkData.nodes && networkData.nodes.length > 0) {
+              setGraphData({
+                nodes: networkData.nodes,
+                edges: networkData.edges,
+              });
+            }
+          } catch (networkError) {
+            console.error('Failed to load verse network:', networkError);
+            // 回退到只显示主题节点
+            loadGraphData(data.themes[0].id);
+          }
         }
       } catch (error) {
         console.error('Failed to extract themes:', error);
@@ -230,7 +281,7 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
     }
 
     extractThemes();
-  }, [themeGraphVerseContext, apiConfig, setSelectedTheme, setSelectedThemeId]);
+  }, [themeGraphVerseContext, apiConfig, setSelectedTheme, setSelectedThemeId, setGraphData, loadGraphData]);
 
   // 当选中主题变化时，重新加载图数据
   useEffect(() => {
@@ -251,6 +302,50 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
       addSavedTheme(themeId);
     }
   }, [savedThemes, addSavedTheme, removeSavedTheme]);
+
+  // 处理经文节点点击 - 跳转到阅读器
+  const handleVerseNodeClick = useCallback((node: any) => {
+    console.log('Verse node clicked:', node);
+
+    // 书卷ID转换（从简写到中文名）
+    const bookIdToName: Record<string, string> = {
+      'Gen': '创世记', 'Exo': '出埃及记', 'Lev': '利未记', 'Num': '民数记', 'Deu': '申命记',
+      'Jos': '约书亚记', 'Jdg': '士师记', 'Rut': '路得记', '1Sa': '撒母耳记上', '2Sa': '撒母耳记下',
+      '1Ki': '列王纪上', '2Ki': '列王纪下', '1Ch': '历代志上', '2Ch': '历代志下', 'Ezr': '以斯拉记',
+      'Neh': '尼希米记', 'Est': '以斯帖记', 'Job': '约伯记', 'Psa': '诗篇', 'Pro': '箴言',
+      'Ecc': '传道书', 'Sng': '雅歌', 'Isa': '以赛亚书', 'Jer': '耶利米书', 'Lam': '耶利米哀歌',
+      'Ezk': '以西结书', 'Dan': '但以理书', 'Hos': '何西阿书', 'Joel': '约珥书', 'Amo': '阿摩司书',
+      'Oba': '俄巴底亚书', 'Jon': '约拿书', 'Mic': '弥迦书', 'Nah': '那鸿书', 'Hab': '哈巴谷书',
+      'Zep': '西番雅书', 'Hag': '哈该书', 'Zec': '撒迦利亚书', 'Mal': '玛拉基书',
+      'Mat': '马太福音', 'Mar': '马可福音', 'Luk': '路加福音', 'Jhn': '约翰福音', 'Act': '使徒行传',
+      'Rom': '罗马书', '1Co': '哥林多前书', '2Co': '哥林多后书', 'Gal': '加拉太书', 'Eph': '以弗所书',
+      'Php': '腓立比书', 'Col': '歌罗西书', '1Th': '帖撒罗尼迦前书', '2Th': '帖撒罗尼迦后书',
+      '1Ti': '提摩太前书', '2Ti': '提摩太后书', 'Tit': '提多书', 'Phm': '腓利门书', 'Heb': '希伯来书',
+      'Jas': '雅各书', '1Pe': '彼得前书', '2Pe': '彼得后书', '1Jn': '约翰一书', '2Jn': '约翰二书',
+      '3Jn': '约翰三书', 'Jud': '犹大书', 'Rev': '启示录',
+    };
+
+    const bookName = bookIdToName[node.bookId] || node.bookId;
+
+    // 查找或创建阅读标签页
+    const existingReadTab = tabs.find(t => t.type === 'read');
+    if (existingReadTab) {
+      setActiveTab(existingReadTab.id);
+      updateActiveTab({
+        book: bookName,
+        chapter: node.chapter.toString(),
+      });
+    } else {
+      addTab({
+        type: 'read',
+        book: bookName,
+        chapter: node.chapter.toString(),
+      });
+    }
+
+    // 设置滚动到指定经文
+    setScrollToVerse(node.verseStart);
+  }, [tabs, setActiveTab, addTab, updateActiveTab, setScrollToVerse]);
 
   const viewModes = [
     { id: 'network', label: '网络图', icon: Network },
@@ -324,6 +419,7 @@ export default function ThemeGraphPanel({ onClose, initialThemeId }: ThemeGraphP
                 onNodeClick={(node) => {
                   handleThemeSelect(node);
                 }}
+                onVerseNodeClick={handleVerseNodeClick}
               />
             )}
 

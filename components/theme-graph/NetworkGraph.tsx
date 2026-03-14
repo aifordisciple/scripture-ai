@@ -2,23 +2,43 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
-import { ZoomIn, ZoomOut, Maximize2, X } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, X, BookOpen } from 'lucide-react';
 
-interface Node {
+// 基础节点接口
+interface BaseNode {
   id: string;
   name: string;
-  category: string;
-  verseCount: number;
   x?: number;
   y?: number;
   vx?: number;
   vy?: number;
 }
 
+// 主题节点
+interface ThemeNode extends BaseNode {
+  type: 'THEME';
+  category: string;
+  verseCount: number;
+}
+
+// 经文节点
+interface VerseNode extends BaseNode {
+  type: 'VERSE';
+  bookId: string;
+  chapter: number;
+  verseStart: number;
+  verseEnd?: number;
+  verseContent?: string;
+  isSource?: boolean;
+}
+
+// 联合节点类型
+type Node = ThemeNode | VerseNode;
+
 interface Edge {
   source: string;
   target: string;
-  type: string;
+  type: 'THEME_THEME' | 'THEME_VERSE';
   strength: number;
   description?: string;
 }
@@ -27,9 +47,11 @@ interface NetworkGraphProps {
   data: {
     nodes: Node[];
     edges: Edge[];
+    sourceVerseId?: string;
   };
   selectedNodeId?: string | null;
   onNodeClick?: (node: Node) => void;
+  onVerseNodeClick?: (node: VerseNode) => void;
 }
 
 // 颜色映射
@@ -49,15 +71,19 @@ const categoryLabels: Record<string, string> = {
 
 // 边类型颜色
 const edgeTypeColors: Record<string, string> = {
-  RELATED: '#9ca3af',   // gray
-  PARENT: '#3b82f6',    // blue
-  CHILD: '#8b5cf6',     // purple
-  CONTRAST: '#ef4444',  // red
-  FULFILLS: '#10b981',  // green
+  THEME_THEME: '#6366f1', // indigo - 主题-主题
+  THEME_VERSE: '#94a3b8', // gray - 主题-经文
+  RELATED: '#9ca3af',     // gray (legacy)
+  PARENT: '#3b82f6',      // blue
+  CHILD: '#8b5cf6',       // purple
+  CONTRAST: '#ef4444',    // red
+  FULFILLS: '#10b981',    // green
 };
 
 // 边类型标签
 const edgeTypeLabels: Record<string, string> = {
+  THEME_THEME: '主题关联',
+  THEME_VERSE: '相关经文',
   RELATED: '关联',
   PARENT: '父主题',
   CHILD: '子主题',
@@ -65,7 +91,7 @@ const edgeTypeLabels: Record<string, string> = {
   FULFILLS: '成全',
 };
 
-export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: NetworkGraphProps) {
+export default function NetworkGraph({ data, selectedNodeId, onNodeClick, onVerseNodeClick, sourceVerseId }: NetworkGraphProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { isDarkMode } = useBibleStore();
@@ -82,6 +108,39 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
 
   // 边详情状态
   const [selectedEdge, setSelectedEdge] = useState<{edge: Edge; sourceNode: Node; targetNode: Node} | null>(null);
+
+  // 辅助函数：获取节点半径
+  const getNodeRadius = useCallback((node: Node): number => {
+    if (node.type === 'VERSE') {
+      return node.isSource ? 10 : 8; // 源经文稍大
+    }
+    // 主题节点：根据经文数计算大小
+    return Math.max(12, Math.min(35, Math.sqrt((node as ThemeNode).verseCount || 1) * 2.5));
+  }, []);
+
+  // 辅助函数：获取节点颜色
+  const getNodeColor = useCallback((node: Node): string => {
+    if (node.type === 'VERSE') {
+      return node.isSource ? '#f59e0b' : '#94a3b8'; // 源经文：琥珀色，其他：灰色
+    }
+    // 主题节点：按分类着色
+    return categoryColors[(node as ThemeNode).category] || '#6366f1';
+  }, []);
+
+  // 辅助函数：绘制圆角矩形（兼容性）
+  const drawRoundedRect = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) => {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }, []);
 
   // 初始化节点位置
   const initializePositions = useCallback(() => {
@@ -231,40 +290,74 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
 
       const isSelected = node.id === selectedNodeId;
       const isHovered = mouseRef.current.node?.id === node.id;
-      const baseRadius = Math.max(10, Math.min(30, Math.sqrt(node.verseCount) * 2));
+      const baseRadius = getNodeRadius(node);
       const radius = isSelected || isHovered ? baseRadius * 1.3 : baseRadius;
+      const nodeColor = getNodeColor(node);
 
-      // 节点圆形
-      ctx.beginPath();
-      ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI);
-      ctx.fillStyle = categoryColors[node.category] || '#6366f1';
-      ctx.fill();
+      if (node.type === 'VERSE') {
+        // 经文节点：圆角矩形
+        const width = radius * 2.2;
+        const height = radius * 1.5;
+        const cornerRadius = 4;
+
+        drawRoundedRect(ctx, node.x - width/2, node.y - height/2, width, height, cornerRadius);
+        ctx.fillStyle = nodeColor;
+        ctx.fill();
+
+        // 源经文特殊边框
+        if ((node as VerseNode).isSource) {
+          ctx.strokeStyle = isDarkMode ? '#fbbf24' : '#f59e0b';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      } else {
+        // 主题节点：圆形
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = nodeColor;
+        ctx.fill();
+      }
 
       // 选中边框
       if (isSelected) {
         ctx.strokeStyle = isDarkMode ? '#fff' : '#000';
         ctx.lineWidth = 3;
-        ctx.stroke();
+        if (node.type === 'VERSE') {
+          const width = radius * 2.2;
+          const height = radius * 1.5;
+          ctx.strokeRect(node.x - width/2 - 2, node.y - height/2 - 2, width + 4, height + 4);
+        } else {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI);
+          ctx.stroke();
+        }
       }
 
       // 悬停光晕
       if (isHovered && !isSelected) {
-        ctx.strokeStyle = categoryColors[node.category] || '#6366f1';
+        ctx.strokeStyle = nodeColor;
         ctx.lineWidth = 2;
         ctx.globalAlpha = 0.5;
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, radius + 5, 0, 2 * Math.PI);
-        ctx.stroke();
+        if (node.type === 'VERSE') {
+          const width = radius * 2.2 + 10;
+          const height = radius * 1.5 + 10;
+          drawRoundedRect(ctx, node.x - width/2, node.y - height/2, width, height, 6);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, radius + 5, 0, 2 * Math.PI);
+          ctx.stroke();
+        }
         ctx.globalAlpha = 1;
       }
 
       // 节点标签
-      if (radius > 15 || isSelected || isHovered) {
+      if (radius > 8 || isSelected || isHovered) {
         ctx.fillStyle = isDarkMode ? '#fff' : '#000';
-        ctx.font = `${isSelected || isHovered ? 14 : 12}px sans-serif`;
+        ctx.font = `${isSelected || isHovered ? 12 : 10}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(node.name, node.x, node.y + radius + 15);
+        ctx.fillText(node.name, node.x, node.y + radius + 12);
       }
     });
 
@@ -273,7 +366,7 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
     // 继续动画
     simulate();
     animationRef.current = requestAnimationFrame(draw);
-  }, [isDarkMode, selectedNodeId, simulate, scale, offset]);
+  }, [isDarkMode, selectedNodeId, simulate, scale, offset, getNodeRadius, getNodeColor, drawRoundedRect]);
 
   // 鼠标交互
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -298,7 +391,13 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
       if (!node.x || !node.y) return false;
       const dx = x - node.x;
       const dy = y - node.y;
-      const radius = Math.max(10, Math.min(30, Math.sqrt(node.verseCount) * 2));
+      const radius = getNodeRadius(node);
+      if (node.type === 'VERSE') {
+        // 矩形节点检测
+        const width = radius * 2.2;
+        const height = radius * 1.5;
+        return Math.abs(dx) <= width/2 && Math.abs(dy) <= height/2;
+      }
       return dx * dx + dy * dy < radius * radius;
     });
 
@@ -337,7 +436,13 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
     if (!isDraggingRef.current) {
       if (mouseRef.current.node) {
-        onNodeClick?.(mouseRef.current.node);
+        const node = mouseRef.current.node;
+        // 如果是经文节点且有专门的点击处理
+        if (node.type === 'VERSE' && onVerseNodeClick) {
+          onVerseNodeClick(node as VerseNode);
+        } else {
+          onNodeClick?.(node);
+        }
         setSelectedEdge(null);
       } else if (mouseRef.current.edge) {
         const sourceNode = nodesRef.current.find(n => n.id === mouseRef.current.edge?.source);
@@ -352,7 +457,7 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
       }
     }
     isDraggingRef.current = false;
-  }, [onNodeClick]);
+  }, [onNodeClick, onVerseNodeClick]);
 
   // 滚轮缩放
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -438,6 +543,17 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
 
       {/* 图例 */}
       <div className="absolute bottom-4 left-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 text-xs">
+        <div className="font-medium text-gray-700 dark:text-gray-300 mb-2">节点类型</div>
+        <div className="flex flex-col gap-1 mb-2">
+          <div className="flex items-center gap-1.5">
+            <div className="w-4 h-3 rounded bg-amber-500" />
+            <span className="text-gray-600 dark:text-gray-400">当前经文</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-4 h-3 rounded bg-gray-400" />
+            <span className="text-gray-600 dark:text-gray-400">相关经文</span>
+          </div>
+        </div>
         <div className="font-medium text-gray-700 dark:text-gray-300 mb-2">主题分类</div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           {Object.entries(categoryLabels).map(([key, label]) => (
@@ -454,16 +570,12 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
           <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">关系类型</div>
           <div className="flex flex-wrap gap-2">
             <div className="flex items-center gap-1">
+              <div className="w-4 h-0.5 bg-indigo-500" />
+              <span className="text-gray-500 dark:text-gray-400">主题关联</span>
+            </div>
+            <div className="flex items-center gap-1">
               <div className="w-4 h-0.5 bg-gray-400" />
-              <span className="text-gray-500 dark:text-gray-400">关联</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-0.5 bg-blue-500" />
-              <span className="text-gray-500 dark:text-gray-400">父主题</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-0.5 bg-green-500" />
-              <span className="text-gray-500 dark:text-gray-400">成全</span>
+              <span className="text-gray-500 dark:text-gray-400">相关经文</span>
             </div>
           </div>
         </div>
@@ -480,16 +592,32 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
           }}
         >
           <div className="flex items-center gap-2">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: categoryColors[mouseRef.current.node.category] || '#6366f1' }}
-            />
-            <span className="font-medium text-gray-900 dark:text-white">
-              {mouseRef.current.node.name}
-            </span>
-            <span className="text-gray-400">
-              ({mouseRef.current.node.verseCount}处经文)
-            </span>
+            {mouseRef.current.node.type === 'VERSE' ? (
+              <>
+                <BookOpen className="w-3 h-3 text-amber-500" />
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {mouseRef.current.node.name}
+                </span>
+                {(mouseRef.current.node as VerseNode).isSource && (
+                  <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs">
+                    当前经文
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: categoryColors[(mouseRef.current.node as ThemeNode).category] || '#6366f1' }}
+                />
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {mouseRef.current.node.name}
+                </span>
+                <span className="text-gray-400">
+                  ({(mouseRef.current.node as ThemeNode).verseCount}处经文)
+                </span>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -498,7 +626,9 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
       {selectedEdge && (
         <div className="absolute top-4 left-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 max-w-xs">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">主题关系</h4>
+            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+              {selectedEdge.edge.type === 'THEME_VERSE' ? '经文关联' : '主题关系'}
+            </h4>
             <button
               onClick={() => setSelectedEdge(null)}
               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
@@ -509,10 +639,14 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
 
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: categoryColors[selectedEdge.sourceNode.category] || '#6366f1' }}
-              />
+              {selectedEdge.sourceNode.type === 'VERSE' ? (
+                <BookOpen className="w-3 h-3 text-amber-500" />
+              ) : (
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: categoryColors[(selectedEdge.sourceNode as ThemeNode).category] || '#6366f1' }}
+                />
+              )}
               <span className="font-medium text-gray-900 dark:text-white">
                 {selectedEdge.sourceNode.name}
               </span>
@@ -540,10 +674,14 @@ export default function NetworkGraph({ data, selectedNodeId, onNodeClick }: Netw
             </div>
 
             <div className="flex items-center gap-2">
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: categoryColors[selectedEdge.targetNode.category] || '#6366f1' }}
-              />
+              {selectedEdge.targetNode.type === 'VERSE' ? (
+                <BookOpen className="w-3 h-3 text-amber-500" />
+              ) : (
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: categoryColors[(selectedEdge.targetNode as ThemeNode).category] || '#6366f1' }}
+                />
+              )}
               <span className="font-medium text-gray-900 dark:text-white">
                 {selectedEdge.targetNode.name}
               </span>

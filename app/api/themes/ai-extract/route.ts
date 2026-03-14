@@ -15,6 +15,68 @@ const EXTRACT_THEME_PROMPT = `你是一个圣经学者和神学专家。从以�
 经文：
 {verseContent}`;
 
+// 辅助函数：创建主题之间的连接（如果两个主题共享>=3个经文）
+async function createThemeConnectionsIfNeeded(themeIds: string[]) {
+  if (themeIds.length < 2) return;
+
+  try {
+    // 获取每个主题的经文列表
+    const themesWithVerses = await prisma.bibleTheme.findMany({
+      where: { id: { in: themeIds } },
+      include: {
+        verses: {
+          select: { bookId: true, chapter: true, verseStart: true },
+        },
+      },
+    });
+
+    // 对每对主题检查共享经文
+    for (let i = 0; i < themesWithVerses.length; i++) {
+      for (let j = i + 1; j < themesWithVerses.length; j++) {
+        const themeA = themesWithVerses[i];
+        const themeB = themesWithVerses[j];
+
+        // 计算共享经文
+        const versesA = new Set(
+          themeA.verses.map(v => `${v.bookId}-${v.chapter}-${v.verseStart}`)
+        );
+        const sharedVerses = themeB.verses.filter(
+          v => versesA.has(`${v.bookId}-${v.chapter}-${v.verseStart}`)
+        );
+
+        // 如果共享>=3个经文，创建连接
+        if (sharedVerses.length >= 3) {
+          const strength = sharedVerses.length / Math.max(themeA.verses.length, themeB.verses.length, 1);
+
+          // 检查是否已存在连接
+          const existingConn = await prisma.themeConnection.findFirst({
+            where: {
+              OR: [
+                { themeId: themeA.id, relatedThemeId: themeB.id },
+                { themeId: themeB.id, relatedThemeId: themeA.id },
+              ],
+            },
+          });
+
+          if (!existingConn) {
+            await prisma.themeConnection.create({
+              data: {
+                themeId: themeA.id,
+                relatedThemeId: themeB.id,
+                connectionType: 'RELATED',
+                strength: Math.min(strength, 1.0),
+              },
+            });
+            console.log(`Created theme connection: ${themeA.nameZh} <-> ${themeB.nameZh} (${sharedVerses.length} shared verses)`);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error creating theme connections:', error);
+  }
+}
+
 // POST /api/themes/ai-extract - AI从经文中提取主题信息
 export async function POST(request: NextRequest) {
   try {
@@ -25,27 +87,50 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing verse content' }, { status: 400 });
     }
 
-    // 检查是否已有缓存的提取结果
+    // 检查是否已有缓存的提取结果（修复：正确检查verseEnd范围）
     const existingLinks = await prisma.themeVerseLink.findMany({
       where: {
         bookId,
         chapter,
-        verseStart: { gte: verseStart || 1 },
+        verseStart: verseStart || 1,
+        verseEnd: verseEnd || null,
         source: 'AI',
       },
       include: {
-        theme: true,
+        theme: {
+          include: {
+            verses: {
+              take: 10,
+              orderBy: { relevance: 'desc' },
+              include: {
+                theme: { select: { id: true, nameZh: true, category: true } },
+              },
+            },
+          },
+        },
       },
     });
 
     if (existingLinks.length > 0) {
-      // 已有缓存，直接返回
-      return NextResponse.json({
-        themes: existingLinks.map(link => ({
-          ...link.theme,
-          relevance: link.relevance,
-          context: link.linkType,
+      // 已有缓存，直接返回并包含相关经文
+      const themesWithVerses = existingLinks.map(link => ({
+        ...link.theme,
+        relevance: link.relevance,
+        context: link.linkType,
+        relatedVerses: link.theme.verses.map(v => ({
+          bookId: v.bookId,
+          chapter: v.chapter,
+          verseStart: v.verseStart,
+          verseEnd: v.verseEnd,
+          relevance: v.relevance,
         })),
+      }));
+
+      // 创建主题之间的连接（如果共享>=3个经文）
+      await createThemeConnectionsIfNeeded(themesWithVerses.map(t => t.id));
+
+      return NextResponse.json({
+        themes: themesWithVerses,
         cached: true,
       });
     }
@@ -107,6 +192,8 @@ export async function POST(request: NextRequest) {
 
     // 匹配或创建主题，并创建关联
     const results = [];
+    const createdThemeIds: string[] = [];
+
     for (const extracted of extractedThemes) {
       // 查找匹配的主题
       let theme = await prisma.bibleTheme.findFirst({
@@ -116,6 +203,12 @@ export async function POST(request: NextRequest) {
             { nameEn: extracted.nameEn },
             { aliases: { has: extracted.nameZh } },
           ],
+        },
+        include: {
+          verses: {
+            take: 10,
+            orderBy: { relevance: 'desc' },
+          },
         },
       });
 
@@ -127,6 +220,12 @@ export async function POST(request: NextRequest) {
             nameEn: extracted.nameEn || extracted.nameZh,
             category: 'THEOLOGICAL', // 默认分类
             verseCount: 1,
+          },
+          include: {
+            verses: {
+              take: 10,
+              orderBy: { relevance: 'desc' },
+            },
           },
         });
       } else {
@@ -151,12 +250,24 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      createdThemeIds.push(theme.id);
+
       results.push({
         ...theme,
         relevance: extracted.relevance,
         context: extracted.context,
+        relatedVerses: theme.verses?.map(v => ({
+          bookId: v.bookId,
+          chapter: v.chapter,
+          verseStart: v.verseStart,
+          verseEnd: v.verseEnd,
+          relevance: v.relevance,
+        })) || [],
       });
     }
+
+    // 创建主题之间的连接（如果共享>=3个经文）
+    await createThemeConnectionsIfNeeded(createdThemeIds);
 
     return NextResponse.json({
       themes: results,
