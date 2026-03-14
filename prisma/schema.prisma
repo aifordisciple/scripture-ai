@@ -113,6 +113,9 @@ model User {
 
   // [新增] 隐私设置
   privacySettings PrivacySettings?
+
+  // [新增] 管理员操作日志
+  adminLogs AdminLog[]
 }
 
 model UserSetting {
@@ -1019,4 +1022,42 @@ model PrivacySettings {
   updatedAt        DateTime @updatedAt
 
   @@map("privacy_settings")
+}
+
+// ==================================================
+// 管理员系统模型
+// ==================================================
+
+// 操作日志
+model AdminLog {
+  id          String   @id @default(cuid())
+  adminId     String
+  admin       User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action      String   // VIEW, UPDATE, DELETE, CREATE
+  targetType  String   // USER, CHURCH, FEEDBACK, ANNOUNCEMENT, SYSTEM
+  targetId    String?
+  details     String?  @db.Text
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  @@index([adminId, createdAt])
+  @@index([targetType, targetId])
+  @@map("admin_logs")
+}
+
+// 系统公告
+model SystemAnnouncement {
+  id        String    @id @default(cuid())
+  title     String
+  content   String    @db.Text
+  type      String    @default("INFO") // INFO, WARNING, MAINTENANCE
+  isActive  Boolean   @default(true)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdBy String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([isActive, startsAt, endsAt])
+  @@map("system_announcements")
 }

@@ -58,6 +58,7 @@ interface FeedbackAdminPanelProps {
     inProgress: number;
     resolved: number;
   };
+  embedded?: boolean;
 }
 
 const TYPE_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
@@ -74,7 +75,7 @@ const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string }>
   CLOSED: { label: "已关闭", icon: AlertCircle, color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400" },
 };
 
-export function FeedbackAdminPanel({ initialFeedbacks, counts }: FeedbackAdminPanelProps) {
+export function FeedbackAdminPanel({ initialFeedbacks, counts, embedded = false }: FeedbackAdminPanelProps) {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>(initialFeedbacks);
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -191,28 +192,30 @@ export function FeedbackAdminPanel({ initialFeedbacks, counts }: FeedbackAdminPa
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/">
-                <Button variant="ghost" size="icon">
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-xl font-bold">反馈管理</h1>
-                <p className="text-sm text-muted-foreground">管理和回复用户反馈</p>
+    <div className={cn("min-h-screen bg-background", embedded && "min-h-0")}>
+      {/* Header - only show when not embedded */}
+      {!embedded && (
+        <header className="border-b bg-card sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Link href="/">
+                  <Button variant="ghost" size="icon">
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                </Link>
+                <div>
+                  <h1 className="text-xl font-bold">反馈管理</h1>
+                  <p className="text-sm text-muted-foreground">管理和回复用户反馈</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Stats */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className={cn("max-w-7xl mx-auto px-4 py-6", embedded && "px-0 py-0")}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-card rounded-lg border p-4">
             <div className="text-2xl font-bold">{counts.total}</div>

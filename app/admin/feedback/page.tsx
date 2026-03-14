@@ -43,6 +43,7 @@ export default async function AdminFeedbackPage() {
     <FeedbackAdminPanel
       initialFeedbacks={JSON.parse(JSON.stringify(feedbacks))}
       counts={{ total, open, inProgress, resolved }}
+      embedded={true}
     />
   );
 }
