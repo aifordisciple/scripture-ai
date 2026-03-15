@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import MindMap from 'simple-mind-map';
+// 使用 full 版本，包含 Export、TouchEvent 等插件
+import MindMap from 'simple-mind-map/full';
 import { MindMapNode } from '@/store/types';
 import { toSimpleMindMapData } from './markdownParser';
 import { MindMapToolbar, LAYOUT_OPTIONS } from './MindMapToolbar';

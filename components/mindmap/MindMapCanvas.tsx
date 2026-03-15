@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import MindMap from 'simple-mind-map';
+// 使用 full 版本，包含所有插件
+import MindMap from 'simple-mind-map/full';
 import { MindMapNode } from '@/store/types';
 import { toSimpleMindMapData } from './markdownParser';
 
