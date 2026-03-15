@@ -6,7 +6,7 @@ import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
 import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle, PenLine, MessageSquare, Plus, History, Bookmark, Share2, ChevronDown, Trash2, GraduationCap, FileText, BookMarked, Type, Settings, Edit, Network } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
+import { THEOLOGICAL_PROMPTS, BIBLE_BOOKS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { AudioButton } from './AudioButton';
@@ -37,7 +37,7 @@ const MessageBubble = memo(({
   content: string;
   isLatest: boolean;
   onRetry?: () => void;
-  onSaveToNote?: (text: string) => void;
+  onSaveToNote?: (text: string, messageContent?: string) => void;
   onSaveInsight?: () => void;
   isSaved?: boolean;
   onShare?: () => void;
@@ -82,7 +82,7 @@ const MessageBubble = memo(({
   const handleSaveToNote = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onSaveToNote) {
-       onSaveToNote(mainText);
+       onSaveToNote(mainText, content);  // 传入消息内容用于解析经文引用
        showSuccess(setSaved);
     }
   };
@@ -512,6 +512,51 @@ export function AISidebar() {
     addSavedInsight(insight);
   }, [aiRequestTrigger, addSavedInsight]);
 
+  // [新增] 从消息内容中解析经文引用
+  const parseVerseReference = useCallback((content: string): { bookId: string; chapter: number; verse: number } | null => {
+    // 匹配格式：**📖 创世记 1:1** 或 **📖 创世记 1 章 (全章摘要)**
+    const refMatch = content.match(/\*\*📖\s*(.+?)\*\*/);
+    if (!refMatch) return null;
+
+    const refText = refMatch[1].trim();
+
+    // 匹配 "书卷 章节:节" 格式
+    const verseMatch = refText.match(/^(.+?)\s+(\d+):(\d+)$/);
+    if (verseMatch) {
+      const bookName = verseMatch[1].trim();
+      const chapter = parseInt(verseMatch[2]);
+      const verse = parseInt(verseMatch[3]);
+      const book = BIBLE_BOOKS.find(b => b.name === bookName || b.id === bookName);
+      if (book) {
+        return { bookId: book.id, chapter, verse };
+      }
+    }
+
+    // 匹配 "书卷 章节 章" 格式（全章摘要）
+    const chapterMatch = refText.match(/^(.+?)\s+(\d+)\s*章/);
+    if (chapterMatch) {
+      const bookName = chapterMatch[1].trim();
+      const chapter = parseInt(chapterMatch[2]);
+      const book = BIBLE_BOOKS.find(b => b.name === bookName || b.id === bookName);
+      if (book) {
+        return { bookId: book.id, chapter, verse: 0 };
+      }
+    }
+
+    // 匹配简单的 "书卷 章节" 格式
+    const simpleMatch = refText.match(/^(.+?)\s+(\d+)$/);
+    if (simpleMatch) {
+      const bookName = simpleMatch[1].trim();
+      const chapter = parseInt(simpleMatch[2]);
+      const book = BIBLE_BOOKS.find(b => b.name === bookName || b.id === bookName);
+      if (book) {
+        return { bookId: book.id, chapter, verse: 0 };
+      }
+    }
+
+    return null;
+  }, []);
+
   // [新增] 打开思维导图
   const handleOpenMindMap = useCallback((content: string) => {
     if (!aiRequestTrigger) return;
@@ -609,25 +654,43 @@ export function AISidebar() {
   };
 
   // [新增] 处理将 AI 解读一键追加到笔记中的逻辑
-  const handleSaveToNote = useCallback((aiText: string) => {
-    if (!aiRequestTrigger) {
+  const handleSaveToNote = useCallback((aiText: string, messageContent?: string) => {
+    let bookId: string;
+    let chapter: number;
+    let verse: number;
+
+    // 优先使用 aiRequestTrigger（当前会话的上下文）
+    if (aiRequestTrigger) {
+      bookId = aiRequestTrigger.ref.bookName;
+      chapter = aiRequestTrigger.ref.chapter;
+      verse = aiRequestTrigger.ref.verse;
+    } else if (messageContent) {
+      // 尝试从消息内容中解析经文引用
+      const parsed = parseVerseReference(messageContent);
+      if (parsed) {
+        bookId = parsed.bookId;
+        chapter = parsed.chapter;
+        verse = parsed.verse;
+      } else {
+        alert("无法识别这条消息对应的经文，请手动在左侧选择经文后重试。");
+        return;
+      }
+    } else {
       alert("请先在左侧经文中选中并触发一次对话，才能关联笔记哦！");
       return;
     }
-    
-    const { bookName, chapter, verse } = aiRequestTrigger.ref;
-    
+
     // 打开笔记面板（此操作会自动去 store 找是否有对应的 existingNote）
-    openNoteEditor(bookName, chapter, verse);
-    
+    openNoteEditor(bookId, chapter, verse);
+
     // 我们需要把内容追加进去
     // 注意：这里的逻辑依赖于 NoteEditor.tsx 中对 zustand 状态的同步
     // 为了防止覆写，我们最好构造一段漂亮的 Markdown
     setTimeout(() => {
       const appendContent = `\n\n---\n**✨ AI 启发 (${new Date().toLocaleDateString()})：**\n${aiText}`;
-      
-      const existingNote = useBibleStore.getState().notes.find(n => n.bookId === bookName && n.chapter === chapter && n.verse === verse);
-      
+
+      const existingNote = useBibleStore.getState().notes.find(n => n.bookId === bookId && n.chapter === chapter && n.verse === verse);
+
       if (existingNote) {
          // 如果已经有笔记了，直接更新 Zustand
          useBibleStore.getState().updateNote(existingNote.id, existingNote.content + appendContent);
@@ -636,12 +699,12 @@ export function AISidebar() {
          // 更好的做法是在 NoteEditor 里暴露一个追加事件，或者利用 zustand
          const tempId = `temp-${Date.now()}`;
          useBibleStore.getState().addNote({
-            id: tempId, bookId: bookName, chapter, verse, content: appendContent.trim()
+            id: tempId, bookId, chapter, verse, content: appendContent.trim()
          });
       }
-    }, 100); 
+    }, 100);
 
-  }, [aiRequestTrigger, openNoteEditor]);
+  }, [aiRequestTrigger, openNoteEditor, parseVerseReference]);
 
 
   const getIcon = (id: string) => {
@@ -912,7 +975,7 @@ export function AISidebar() {
                             isLatest={isLatest && isLoading}
                             onRetry={(!isLoading && isAssistant && isLatest) ? () => reload() : undefined}
                             // [新增] 只有助手回复并且不为空时才显示保存笔记按钮
-                            onSaveToNote={(isAssistant && m.content.length > 0) ? handleSaveToNote : undefined}
+                            onSaveToNote={(isAssistant && m.content.length > 0) ? (text) => handleSaveToNote(text, m.content) : undefined}
                             // [新增] 收藏功能
                             onSaveInsight={(isAssistant && m.content.length > 0 && aiRequestTrigger) ? () => handleSaveInsight(messageId, m.content) : undefined}
                             isSaved={savedInsights.some(i => i.messageId === messageId)}
