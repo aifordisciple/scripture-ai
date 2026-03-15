@@ -53,6 +53,14 @@ export function MindMapCanvas({ data, onZoomChange, onLayoutChange, currentLayou
       // 禁用编辑
       enableEdit: false,
       enableNodeDrag: false,
+      // 启用双击缩放
+      enableDblclickZoom: true,
+      // 启用触摸缩放（双指捏合）
+      disableTouchZoom: false,
+      minTouchZoomScale: 0.2,
+      maxTouchZoomScale: 3,
+      // 鼠标滚轮缩放
+      disableMouseWheelZoom: false,
       // 样式配置
       style: {
         lineColor: '#4a90d9',
@@ -69,6 +77,7 @@ export function MindMapCanvas({ data, onZoomChange, onLayoutChange, currentLayou
         paddingX: 20,
         paddingY: 20,
       },
+      fitPadding: 20,
     });
 
     mindMapRef.current = mindMap;
@@ -170,10 +179,19 @@ export function MindMapCanvasView({ data, currentLayout = 'logicalStructure' }: 
       fit: true,
       enableEdit: false,
       enableNodeDrag: false,
+      // 启用双击缩放
+      enableDblclickZoom: true,
+      // 启用触摸缩放（双指捏合）
+      disableTouchZoom: false,
+      minTouchZoomScale: 0.2,
+      maxTouchZoomScale: 3,
+      // 鼠标滚轮缩放
+      disableMouseWheelZoom: false,
       style: {
         lineColor: '#4a90d9',
         lineWidth: 2,
       },
+      fitPadding: 20,
     });
 
     mindMapRef.current = mindMap;
