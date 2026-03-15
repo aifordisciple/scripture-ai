@@ -799,30 +799,57 @@ export const createGroupSlice: StateCreator<StoreState, [], [], GroupSlice> = (s
       taskId: 'completion'
     });
 
-    set({
-      groupPlanContext: {
-        churchId,
-        planId,
-        planName,
-        day,
-        stepIndex: 0,
-        steps
-      }
-    });
-
-    // 如果第一步是灵修导读，保持在当前页面
-    // 如果第一步是阅读，切换到阅读 Tab
+    // 如果第一步是阅读，需要同时更新标签页和切换
     if (steps[0].type === 'reading' && steps[0].book && steps[0].chapter) {
       const readTab = state.tabs.find(t => t.type === 'read');
       if (readTab) {
-        // 先更新 tab 数据，再切换 activeTab
-        useBibleStore.setState((s) => ({
-          tabs: s.tabs.map(t => t.id === readTab.id ? { ...t, book: steps[0].book, chapter: steps[0].chapter!.toString() } : t)
-        }));
-        state.setActiveTab(readTab.id);
+        // 合并所有状态更新为一次原子操作
+        set({
+          groupPlanContext: {
+            churchId,
+            planId,
+            planName,
+            day,
+            stepIndex: 0,
+            steps
+          },
+          tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: steps[0].book, chapter: steps[0].chapter!.toString() } : t),
+          activeTabId: readTab.id
+        });
       } else {
-        state.addTab({ type: 'read', book: steps[0].book, chapter: steps[0].chapter.toString() });
+        // 创建新标签页并设置 context
+        const newTabId = `tab-${Date.now()}`;
+        const newTab: any = {
+          id: newTabId,
+          type: 'read',
+          book: steps[0].book,
+          chapter: steps[0].chapter.toString()
+        };
+        set({
+          groupPlanContext: {
+            churchId,
+            planId,
+            planName,
+            day,
+            stepIndex: 0,
+            steps
+          },
+          tabs: [...state.tabs, newTab],
+          activeTabId: newTabId
+        });
       }
+    } else {
+      // 第一步是灵修导读，只需设置 context（保持在当前页面，GroupPlanDailyFlow 会显示全屏导读）
+      set({
+        groupPlanContext: {
+          churchId,
+          planId,
+          planName,
+          day,
+          stepIndex: 0,
+          steps
+        }
+      });
     }
   }
 });

@@ -11,8 +11,7 @@ export function GroupPlanDailyFlow() {
     groupPlanContext: ctx,
     advanceGroupPlanStep,
     tabs,
-    addTab,
-    setActiveTab
+    addTab
   } = useBibleStore();
 
   const step = ctx?.steps[ctx.stepIndex];
@@ -22,16 +21,16 @@ export function GroupPlanDailyFlow() {
     if (ctx && step?.type === 'reading' && step.book && step.chapter) {
       const readTab = tabs.find(t => t.type === 'read');
       if (readTab) {
-        // 先更新 tab 数据，再切换 activeTab
+        // 合并状态更新为一次原子操作
         useBibleStore.setState((state) => ({
-          tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: step.book, chapter: step.chapter!.toString() } : t)
+          tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: step.book, chapter: step.chapter!.toString() } : t),
+          activeTabId: readTab.id
         }));
-        setActiveTab(readTab.id);
       } else {
         addTab({ type: 'read', book: step.book, chapter: step.chapter.toString() });
       }
     }
-  }, [ctx?.stepIndex]);
+  }, [ctx?.stepIndex, step, tabs, addTab]);
 
   if (!ctx || !step) return null;
 
