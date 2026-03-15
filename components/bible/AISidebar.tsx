@@ -376,6 +376,17 @@ export function AISidebar() {
         console.error("🔥 AI Error:", error);
         setAiGenerating(false);
         failCurrentRequest(error.message || 'AI 生成失败');
+
+        // 检测 Server Action 版本不匹配错误，提示用户刷新页面
+        const errorMsg = error.message || '';
+        if (errorMsg.includes('Server Action') || errorMsg.includes('older or newer deployment')) {
+          // 延迟显示提示，避免干扰用户
+          setTimeout(() => {
+            if (confirm('检测到应用已更新，请刷新页面以继续使用。是否立即刷新？')) {
+              window.location.reload();
+            }
+          }, 500);
+        }
     },
     onFinish: () => {
         setAiGenerating(false);
