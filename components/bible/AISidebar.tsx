@@ -14,6 +14,7 @@ import { useChat } from 'ai/react';
 import { motion, AnimatePresence } from "framer-motion";
 import type { ChatSession } from '@/store/types';
 import { parseMarkdownToMindMap } from '@/components/mindmap/markdownParser';
+import { BookPicker } from './BookPicker';
 
 // --- 1. 子组件：高性能消息气泡 ---
 const MessageBubble = memo(({
@@ -353,6 +354,11 @@ export function AISidebar() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
 
+  // [新增] 经文选择器状态（用于保存笔记时无法自动识别经文的情况）
+  const [showVersePicker, setShowVersePicker] = useState(false);
+  const [pendingNoteText, setPendingNoteText] = useState<string | null>(null);
+  const [isParsingVerse, setIsParsingVerse] = useState(false);
+
   const { apiConfig } = useBibleStore();
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload } = useChat({
     api: '/api/chat',
@@ -653,8 +659,51 @@ export function AISidebar() {
     append({ role: 'user', content: finalPrompt });
   };
 
+  // [新增] 使用AI解析经文引用
+  const parseVerseWithAI = useCallback(async (content: string): Promise<{ bookId: string; chapter: number; verse: number } | null> => {
+    try {
+      const res = await fetch('/api/parse-verse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, apiConfig }),
+      });
+      const data = await res.json();
+
+      if (data.bookId && data.chapter !== null && data.confidence !== 'none') {
+        return {
+          bookId: data.bookId,
+          chapter: data.chapter,
+          verse: data.verse || 0
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('AI parse verse error:', error);
+      return null;
+    }
+  }, [apiConfig]);
+
+  // [新增] 实际保存笔记到指定经文
+  const saveNoteToVerse = useCallback((aiText: string, bookId: string, chapter: number, verse: number) => {
+    openNoteEditor(bookId, chapter, verse);
+
+    setTimeout(() => {
+      const appendContent = `\n\n---\n**✨ AI 启发 (${new Date().toLocaleDateString()})：**\n${aiText}`;
+      const existingNote = useBibleStore.getState().notes.find(n => n.bookId === bookId && n.chapter === chapter && n.verse === verse);
+
+      if (existingNote) {
+        useBibleStore.getState().updateNote(existingNote.id, existingNote.content + appendContent);
+      } else {
+        const tempId = `temp-${Date.now()}`;
+        useBibleStore.getState().addNote({
+          id: tempId, bookId, chapter, verse, content: appendContent.trim()
+        });
+      }
+    }, 100);
+  }, [openNoteEditor]);
+
   // [新增] 处理将 AI 解读一键追加到笔记中的逻辑
-  const handleSaveToNote = useCallback((aiText: string, messageContent?: string) => {
+  const handleSaveToNote = useCallback(async (aiText: string, messageContent?: string) => {
     let bookId: string;
     let chapter: number;
     let verse: number;
@@ -664,47 +713,56 @@ export function AISidebar() {
       bookId = aiRequestTrigger.ref.bookName;
       chapter = aiRequestTrigger.ref.chapter;
       verse = aiRequestTrigger.ref.verse;
-    } else if (messageContent) {
-      // 尝试从消息内容中解析经文引用
+      saveNoteToVerse(aiText, bookId, chapter, verse);
+      return;
+    }
+
+    // 尝试从消息内容中解析经文引用
+    if (messageContent) {
       const parsed = parseVerseReference(messageContent);
       if (parsed) {
         bookId = parsed.bookId;
         chapter = parsed.chapter;
         verse = parsed.verse;
-      } else {
-        alert("无法识别这条消息对应的经文，请手动在左侧选择经文后重试。");
+        saveNoteToVerse(aiText, bookId, chapter, verse);
         return;
       }
-    } else {
-      alert("请先在左侧经文中选中并触发一次对话，才能关联笔记哦！");
+
+      // 正则解析失败，尝试AI解析
+      setIsParsingVerse(true);
+      try {
+        const aiParsed = await parseVerseWithAI(messageContent);
+        setIsParsingVerse(false);
+
+        if (aiParsed) {
+          saveNoteToVerse(aiText, aiParsed.bookId, aiParsed.chapter, aiParsed.verse);
+          return;
+        }
+
+        // AI也无法识别，显示手动选择器
+        setPendingNoteText(aiText);
+        setShowVersePicker(true);
+      } catch (error) {
+        setIsParsingVerse(false);
+        setPendingNoteText(aiText);
+        setShowVersePicker(true);
+      }
       return;
     }
 
-    // 打开笔记面板（此操作会自动去 store 找是否有对应的 existingNote）
-    openNoteEditor(bookId, chapter, verse);
+    // 既没有 aiRequestTrigger 也没有 messageContent
+    setPendingNoteText(aiText);
+    setShowVersePicker(true);
+  }, [aiRequestTrigger, parseVerseReference, parseVerseWithAI, saveNoteToVerse]);
 
-    // 我们需要把内容追加进去
-    // 注意：这里的逻辑依赖于 NoteEditor.tsx 中对 zustand 状态的同步
-    // 为了防止覆写，我们最好构造一段漂亮的 Markdown
-    setTimeout(() => {
-      const appendContent = `\n\n---\n**✨ AI 启发 (${new Date().toLocaleDateString()})：**\n${aiText}`;
-
-      const existingNote = useBibleStore.getState().notes.find(n => n.bookId === bookId && n.chapter === chapter && n.verse === verse);
-
-      if (existingNote) {
-         // 如果已经有笔记了，直接更新 Zustand
-         useBibleStore.getState().updateNote(existingNote.id, existingNote.content + appendContent);
-      } else {
-         // 如果是全新的，由于 openNoteEditor 只设了 targetVerse，我们需要模拟新建并保存的过程
-         // 更好的做法是在 NoteEditor 里暴露一个追加事件，或者利用 zustand
-         const tempId = `temp-${Date.now()}`;
-         useBibleStore.getState().addNote({
-            id: tempId, bookId, chapter, verse, content: appendContent.trim()
-         });
-      }
-    }, 100);
-
-  }, [aiRequestTrigger, openNoteEditor, parseVerseReference]);
+  // [新增] 处理手动选择经文后的保存
+  const handleVersePickerSelect = useCallback((bookId: string, chapter: number) => {
+    setShowVersePicker(false);
+    if (pendingNoteText) {
+      saveNoteToVerse(pendingNoteText, bookId, chapter, 0);
+      setPendingNoteText(null);
+    }
+  }, [pendingNoteText, saveNoteToVerse]);
 
 
   const getIcon = (id: string) => {
@@ -1125,6 +1183,26 @@ export function AISidebar() {
         
         {isResizing && <div className="fixed inset-0 z-[100] cursor-col-resize" />}
       </div>
+
+      {/* [新增] AI解析经文时的加载提示 */}
+      {isParsingVerse && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30">
+          <div className="bg-white dark:bg-slate-800 px-6 py-4 rounded-xl shadow-xl flex items-center gap-3">
+            <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+            <span className="text-sm text-gray-700 dark:text-gray-200">正在识别经文引用...</span>
+          </div>
+        </div>
+      )}
+
+      {/* [新增] 手动选择经文的弹窗 */}
+      <BookPicker
+        open={showVersePicker}
+        onOpenChange={(open) => {
+          setShowVersePicker(open);
+          if (!open) setPendingNoteText(null);
+        }}
+        onSelect={handleVersePickerSelect}
+      />
     </>
   );
 }
