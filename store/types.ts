@@ -124,7 +124,7 @@ export interface ChatSession {
   startVerse?: number;
   endVerse?: number;
   title?: string;
-  mode: 'general' | 'tutor' | 'sermon' | 'study-guide';
+  mode: 'general' | 'tutor' | 'sermon' | 'study-guide' | 'custom';
   createdAt: string;
   updatedAt: string;
 }
@@ -280,8 +280,8 @@ export interface AISlice {
   updateSession: (id: string, data: Partial<ChatSession>) => void;
   deleteSession: (id: string) => void;
   // [新增] AI 模式
-  aiMode: 'general' | 'tutor' | 'sermon' | 'study-guide';
-  setAiMode: (mode: 'general' | 'tutor' | 'sermon' | 'study-guide') => void;
+  aiMode: 'general' | 'tutor' | 'sermon' | 'study-guide' | 'custom';
+  setAiMode: (mode: 'general' | 'tutor' | 'sermon' | 'study-guide' | 'custom') => void;
   // [新增] AI 风格设置
   aiStyleSettings: AIStyleSettings;
   setAiStyleSettings: (settings: Partial<AIStyleSettings>) => void;

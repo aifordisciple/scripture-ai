@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle, PenLine, MessageSquare, Plus, History, Bookmark, Share2, ChevronDown, Trash2, GraduationCap, FileText, BookMarked, Type } from 'lucide-react';
+import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle, PenLine, MessageSquare, Plus, History, Bookmark, Share2, ChevronDown, Trash2, GraduationCap, FileText, BookMarked, Type, Settings, Edit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
@@ -314,6 +314,8 @@ export function AISidebar() {
     currentSessionId, setCurrentSessionId, sessions, setSessions, addSession, deleteSession,
     // [新增] AI 模式
     aiMode, setAiMode,
+    // [新增] 自定义提示词
+    customPrompts, setCustomPrompts,
     // [新增] 收藏
     savedInsights, addSavedInsight, deleteSavedInsight,
     // [新增] AI 字体大小
@@ -403,6 +405,18 @@ export function AISidebar() {
       })
       .catch(err => console.error("Failed to load sessions", err));
   }, [setSessions]);
+
+  // [新增] 加载用户自定义提示词
+  useEffect(() => {
+    fetch('/api/prompts')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setCustomPrompts(data);
+        }
+      })
+      .catch(err => console.error("Failed to load custom prompts", err));
+  }, [setCustomPrompts]);
 
   // [新增] 创建新会话
   const handleNewSession = useCallback(async () => {
@@ -726,18 +740,21 @@ export function AISidebar() {
                   aiMode === 'general' ? "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" : "",
                   aiMode === 'tutor' ? "text-violet-600 bg-violet-50 dark:bg-violet-900/20" : "",
                   aiMode === 'sermon' ? "text-orange-600 bg-orange-50 dark:bg-orange-900/20" : "",
-                  aiMode === 'study-guide' ? "text-teal-600 bg-teal-50 dark:bg-teal-900/20" : ""
+                  aiMode === 'study-guide' ? "text-teal-600 bg-teal-50 dark:bg-teal-900/20" : "",
+                  aiMode === 'custom' ? "text-slate-600 bg-slate-100 dark:bg-slate-800" : ""
                 )}
               >
                 {aiMode === 'tutor' && <GraduationCap className="w-3.5 h-3.5" />}
                 {aiMode === 'sermon' && <FileText className="w-3.5 h-3.5" />}
                 {aiMode === 'study-guide' && <BookMarked className="w-3.5 h-3.5" />}
                 {aiMode === 'general' && <Sparkles className="w-3.5 h-3.5" />}
+                {aiMode === 'custom' && <Settings className="w-3.5 h-3.5" />}
                 <span className="hidden sm:inline">
                   {aiMode === 'general' && '标准'}
                   {aiMode === 'tutor' && '导师'}
                   {aiMode === 'sermon' && '讲章'}
                   {aiMode === 'study-guide' && '查经'}
+                  {aiMode === 'custom' && '自定义'}
                 </span>
               </button>
 
@@ -754,6 +771,7 @@ export function AISidebar() {
                       { mode: 'tutor' as const, icon: GraduationCap, label: '苏格拉底导师', color: 'text-violet-600' },
                       { mode: 'sermon' as const, icon: FileText, label: '讲章生成', color: 'text-orange-600' },
                       { mode: 'study-guide' as const, icon: BookMarked, label: '查经材料', color: 'text-teal-600' },
+                      { mode: 'custom' as const, icon: Settings, label: '自定义', color: 'text-slate-600' },
                     ].map(item => (
                       <button
                         key={item.mode}
@@ -909,7 +927,8 @@ export function AISidebar() {
                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-1 mb-2">
                    {aiMode === 'tutor' ? '苏格拉底式引导' :
                     aiMode === 'sermon' ? '讲章工具' :
-                    aiMode === 'study-guide' ? '查经工具' : '深度探索'}
+                    aiMode === 'study-guide' ? '查经工具' :
+                    aiMode === 'custom' ? '自定义快捷问题' : '深度探索'}
                  </div>
                  {/* 水平滚动容器，隐藏滚动条 */}
                  <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1">
@@ -917,25 +936,61 @@ export function AISidebar() {
                      .scrollbar-hide::-webkit-scrollbar { display: none; }
                      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
                    `}</style>
-                   {THEOLOGICAL_PROMPTS.filter(t => {
-                     // 根据模式过滤显示的提示词
-                     if (aiMode === 'tutor') return t.id === 'tutor';
-                     if (aiMode === 'sermon') return t.id === 'sermon';
-                     if (aiMode === 'study-guide') return t.id === 'study-guide';
-                     return !t.mode; // 标准模式显示基础提示词
-                   }).map((t) => (
-                     <button
-                       key={t.id}
-                       onClick={() => handleChipClick(t.prompt)}
-                       className={cn(
-                         "flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-slate-700 transition-all active:scale-95 shadow-sm dark:bg-slate-800 dark:text-slate-200 hover:brightness-95 whitespace-nowrap shrink-0",
-                         t.color
+                   {/* 自定义模式显示用户的自定义提示词 */}
+                   {aiMode === 'custom' ? (
+                     <>
+                       {customPrompts.length === 0 ? (
+                         <div className="flex items-center gap-2 px-3 py-2 text-sm text-slate-400">
+                           <span>暂无自定义问题</span>
+                           <button
+                             onClick={() => window.location.href = '/settings/prompts'}
+                             className="text-blue-500 hover:text-blue-600 underline"
+                           >
+                             去添加
+                           </button>
+                         </div>
+                       ) : (
+                         customPrompts.map((p) => (
+                           <button
+                             key={p.id}
+                             onClick={() => handleChipClick(p.prompt)}
+                             className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-slate-700 transition-all active:scale-95 shadow-sm dark:bg-slate-800 dark:text-slate-200 hover:brightness-95 whitespace-nowrap shrink-0 bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                           >
+                             <Sparkles className="w-3 h-3" />
+                             {p.label}
+                           </button>
+                         ))
                        )}
-                     >
-                       {getIcon(t.id)}
-                       {t.label}
-                     </button>
-                   ))}
+                       {/* 管理按钮 */}
+                       <button
+                         onClick={() => window.location.href = '/settings/prompts'}
+                         className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-slate-700 transition-all active:scale-95 shadow-sm dark:bg-slate-800 dark:text-slate-200 hover:brightness-95 whitespace-nowrap shrink-0 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                       >
+                         <Settings className="w-3 h-3" />
+                         管理
+                       </button>
+                     </>
+                   ) : (
+                     THEOLOGICAL_PROMPTS.filter(t => {
+                       // 根据模式过滤显示的提示词
+                       if (aiMode === 'tutor') return t.id === 'tutor';
+                       if (aiMode === 'sermon') return t.id === 'sermon';
+                       if (aiMode === 'study-guide') return t.id === 'study-guide';
+                       return !t.mode; // 标准模式显示基础提示词
+                     }).map((t) => (
+                       <button
+                         key={t.id}
+                         onClick={() => handleChipClick(t.prompt)}
+                         className={cn(
+                           "flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-slate-700 transition-all active:scale-95 shadow-sm dark:bg-slate-800 dark:text-slate-200 hover:brightness-95 whitespace-nowrap shrink-0",
+                           t.color
+                         )}
+                       >
+                         {getIcon(t.id)}
+                         {t.label}
+                       </button>
+                     ))
+                   )}
                  </div>
               </div>
             )}
