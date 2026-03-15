@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle, PenLine, MessageSquare, Plus, History, Bookmark, Share2, ChevronDown, Trash2, GraduationCap, FileText, BookMarked, Type, Settings, Edit } from 'lucide-react';
+import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle, PenLine, MessageSquare, Plus, History, Bookmark, Share2, ChevronDown, Trash2, GraduationCap, FileText, BookMarked, Type, Settings, Edit, Network } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 import ReactMarkdown from 'react-markdown';
@@ -13,6 +13,7 @@ import { AudioButton } from './AudioButton';
 import { useChat } from 'ai/react';
 import { motion, AnimatePresence } from "framer-motion";
 import type { ChatSession } from '@/store/types';
+import { parseMarkdownToMindMap } from '@/components/mindmap/markdownParser';
 
 // --- 1. 子组件：高性能消息气泡 ---
 const MessageBubble = memo(({
@@ -28,7 +29,9 @@ const MessageBubble = memo(({
   // [新增] 分享功能
   onShare,
   // [新增] 字体大小
-  fontSize
+  fontSize,
+  // [新增] 打开思维导图
+  onOpenMindMap
 }: {
   role: string;
   content: string;
@@ -39,6 +42,7 @@ const MessageBubble = memo(({
   isSaved?: boolean;
   onShare?: () => void;
   fontSize?: 'small' | 'medium' | 'large' | 'xlarge';
+  onOpenMindMap?: () => void;
 }) => {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -272,6 +276,18 @@ const MessageBubble = memo(({
                         </button>
                       )}
 
+                      {/* [新增] 思维导图按钮 */}
+                      {onOpenMindMap && (
+                        <button
+                            onClick={onOpenMindMap}
+                            className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md text-slate-400 hover:text-purple-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            title="生成思维导图"
+                        >
+                            <Network className="w-3 h-3" />
+                            导图
+                        </button>
+                      )}
+
                       {onRetry && (
                         <button
                             onClick={onRetry}
@@ -319,7 +335,9 @@ export function AISidebar() {
     // [新增] 收藏
     savedInsights, addSavedInsight, deleteSavedInsight,
     // [新增] AI 字体大小
-    aiFontSize, setAiFontSize
+    aiFontSize, setAiFontSize,
+    // [新增] 思维导图
+    openMindMapModal
   } = useBibleStore();
 
   // [新增] 会话相关状态
@@ -493,6 +511,23 @@ export function AISidebar() {
     const insight = await res.json();
     addSavedInsight(insight);
   }, [aiRequestTrigger, addSavedInsight]);
+
+  // [新增] 打开思维导图
+  const handleOpenMindMap = useCallback((content: string) => {
+    if (!aiRequestTrigger) return;
+
+    // 生成标题
+    const { ref } = aiRequestTrigger;
+    const title = ref.verse > 0
+      ? `${ref.bookName} ${ref.chapter}:${ref.verse}`
+      : `${ref.bookName} ${ref.chapter}`;
+
+    // 解析 Markdown 并生成思维导图数据
+    const mindMapData = parseMarkdownToMindMap(content, title);
+
+    // 打开思维导图弹窗
+    openMindMapModal(mindMapData, title);
+  }, [aiRequestTrigger, openMindMapModal]);
 
   const handleClearChat = async () => {
     if(confirm("确定要清空所有灵修对话历史吗？")) {
@@ -888,6 +923,8 @@ export function AISidebar() {
                             } : undefined}
                             // [新增] 字体大小
                             fontSize={aiFontSize}
+                            // [新增] 思维导图
+                            onOpenMindMap={(isAssistant && m.content.length > 0 && aiRequestTrigger) ? () => handleOpenMindMap(m.content) : undefined}
                         />
                     );
                 })}

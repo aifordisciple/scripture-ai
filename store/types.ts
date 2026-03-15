@@ -3,6 +3,15 @@
 // --------------------------------------------------
 // 1. 基础数据结构
 // --------------------------------------------------
+
+// [新增] 思维导图节点类型
+export interface MindMapNode {
+  id: string;
+  text: string;
+  children?: MindMapNode[];
+  collapsed?: boolean;
+}
+
 export interface Tab {
   id: string;
   type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph';
@@ -215,6 +224,13 @@ export interface UISlice {
   completeOnboarding: (type: keyof OnboardingStatus) => void;
   skipOnboarding: (type: keyof OnboardingStatus) => void;
   resetOnboarding: (type?: keyof OnboardingStatus) => void;
+
+  // [新增] 思维导图弹窗状态
+  isMindMapOpen: boolean;
+  mindMapData: MindMapNode | null;
+  mindMapTitle: string;
+  openMindMapModal: (data: MindMapNode, title: string) => void;
+  closeMindMapModal: () => void;
 }
 
 export interface ReaderSlice {
