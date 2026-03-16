@@ -11,7 +11,7 @@ import { SearchResults } from "@/components/bible/SearchResults";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen, Moon, Sun } from "lucide-react";
+import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen, Moon, Sun, ChevronDown, Type } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
@@ -136,6 +136,7 @@ export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isBookPickerOpen, setIsBookPickerOpen] = useState(false);
+  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false); // [新增] 设置下拉菜单状态
   
   const [isNavVisible, setIsNavVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -512,23 +513,97 @@ export default function Home() {
                  <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="full" />
               )}
 
-              <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="全屏">
-                <Maximize className="h-4 w-4" />
-              </Button>
+              {/* [新增] 阅读设置下拉菜单 - 整合全屏、行高、文字大小 */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+                  className={cn(
+                    "text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5",
+                    showSettingsDropdown && "bg-black/5 dark:bg-white/10"
+                  )}
+                  title="阅读设置"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
 
-              <div className="mx-1 border-l h-5 border-border/50"></div>
+                {/* 设置下拉面板 */}
+                {showSettingsDropdown && (
+                  <>
+                    {/* 点击外部关闭 */}
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowSettingsDropdown(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border/50 rounded-xl shadow-xl z-50 p-3 space-y-3">
+                      {/* 全屏模式 */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                          全屏模式
+                        </span>
+                        <Button
+                          variant={isFullscreen ? "default" : "secondary"}
+                          size="sm"
+                          onClick={toggleFullscreen}
+                          className="rounded-full px-3 h-7 text-xs"
+                        >
+                          {isFullscreen ? "退出" : "开启"}
+                        </Button>
+                      </div>
 
-              <Button variant="ghost" size="icon" onClick={toggleLineHeight} className="text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5" title="调整行高">
-                <AlignJustify className="h-4 w-4" />
-              </Button>
+                      {/* 分隔线 */}
+                      <div className="border-t border-border/50" />
+
+                      {/* 行间距 */}
+                      <div className="space-y-1.5">
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          <AlignJustify className="w-4 h-4" />
+                          行间距
+                        </span>
+                        <div className="flex bg-secondary/50 p-1 rounded-lg">
+                          {[1.6, 1.8, 2.2].map(lh => (
+                            <button
+                              key={lh}
+                              onClick={() => setLineHeight(lh)}
+                              className={cn(
+                                "flex-1 px-2 py-1 text-xs rounded-md transition-all",
+                                lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                              )}
+                            >
+                              {lh === 1.6 ? "紧凑" : lh === 1.8 ? "标准" : "宽松"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 字号大小 */}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground flex items-center gap-2">
+                            <Type className="w-4 h-4" />
+                            字号大小
+                          </span>
+                          <span className="text-xs text-muted-foreground font-medium">{fontSize}px</span>
+                        </div>
+                        <Slider
+                          value={[fontSize]}
+                          min={14}
+                          max={32}
+                          step={1}
+                          onValueChange={(val) => setFontSize(val[0])}
+                          className="cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
 
               <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold rounded-full">
                 <Languages className="h-4 w-4" />{showEnglish ? "中/英" : "中"}
               </Button>
-
-              <div className="w-20 mx-2 group relative flex items-center">
-                <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} className="cursor-pointer" />
-              </div>
 
               <div className="mx-1 border-l h-5 border-border/50"></div>
 
