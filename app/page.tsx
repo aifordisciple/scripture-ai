@@ -537,6 +537,22 @@ export default function Home() {
                       onClick={() => setShowSettingsDropdown(false)}
                     />
                     <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border/50 rounded-xl shadow-xl z-50 p-3 space-y-3">
+                      {/* 深色模式 */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                          {isDarkMode ? "深色模式" : "浅色模式"}
+                        </span>
+                        <Button
+                          variant={isDarkMode ? "default" : "secondary"}
+                          size="sm"
+                          onClick={toggleDarkMode}
+                          className="rounded-full px-3 h-7 text-xs"
+                        >
+                          {isDarkMode ? "切换浅色" : "切换深色"}
+                        </Button>
+                      </div>
+
                       {/* 全屏模式 */}
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground flex items-center gap-2">
