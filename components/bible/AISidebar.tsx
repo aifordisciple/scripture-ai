@@ -387,6 +387,24 @@ export function AISidebar() {
   const [renameTitle, setRenameTitle] = useState('');
   const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
 
+  // [新增] 会话搜索状态
+  const [sessionSearchQuery, setSessionSearchQuery] = useState('');
+  const [activeSessionMenu, setActiveSessionMenu] = useState<string | null>(null);
+
+  // [新增] 删除确认弹窗状态
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTargetSession, setDeleteTargetSession] = useState<ChatSession | null>(null);
+
+  // 过滤会话列表
+  const filteredSessions = sessions.filter(session => {
+    if (!sessionSearchQuery) return true;
+    const query = sessionSearchQuery.toLowerCase();
+    return (
+      session.title?.toLowerCase().includes(query) ||
+      new Date(session.updatedAt).toLocaleDateString().includes(query)
+    );
+  });
+
   const { apiConfig } = useBibleStore();
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload } = useChat({
     api: '/api/chat',
@@ -557,10 +575,18 @@ export function AISidebar() {
   }, [setCurrentSessionId, setMessages]);
 
   // [修复] 删除会话
-  const handleDeleteSession = useCallback(async (sessionId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm('确定要删除这个会话吗？')) return;
+  const handleDeleteSession = useCallback(async (session: ChatSession) => {
+    setDeleteTargetSession(session);
+    setShowDeleteConfirm(true);
+    setShowSessionList(false);
+    setActiveSessionMenu(null);
+  }, []);
 
+  // [新增] 确认删除会话
+  const confirmDeleteSession = useCallback(async () => {
+    if (!deleteTargetSession) return;
+
+    const sessionId = deleteTargetSession.id;
     await fetch(`/api/chat/session?id=${sessionId}`, { method: 'DELETE' });
     deleteSession(sessionId);
     if (currentSessionId === sessionId) {
@@ -571,7 +597,9 @@ export function AISidebar() {
       setMessages([]);
       pendingSessionHasMessages.current = false;
     }
-  }, [currentSessionId, deleteSession, setCurrentSessionId, setMessages]);
+    setShowDeleteConfirm(false);
+    setDeleteTargetSession(null);
+  }, [currentSessionId, deleteSession, deleteTargetSession, setCurrentSessionId, setMessages]);
 
   // [新增] 自动生成会话标题
   const generateSessionTitle = useCallback(async (sessionId: string, firstMessage: string) => {
@@ -602,12 +630,12 @@ export function AISidebar() {
   }, [apiConfig, aiRequestTrigger, updateSession]);
 
   // [新增] 打开重命名弹窗
-  const handleOpenRename = useCallback((session: ChatSession, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleOpenRename = useCallback((session: ChatSession) => {
     setRenameSessionId(session.id);
     setRenameTitle(session.title || '');
     setShowRenameModal(true);
     setShowSessionList(false);
+    setActiveSessionMenu(null);
   }, []);
 
   // [新增] 提交重命名
@@ -1085,58 +1113,119 @@ export function AISidebar() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="fixed top-20 left-4 w-72 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-[200] max-h-80 overflow-y-auto"
+                    className="fixed inset-0 md:inset-auto md:top-20 md:left-4 md:w-80 bg-white dark:bg-slate-800 md:rounded-xl shadow-xl border-0 md:border dark:border-slate-700 z-[200] md:max-h-[70vh] overflow-hidden flex flex-col"
                   >
-                    <div className="p-2 border-b dark:border-slate-700">
-                      <button
-                        onClick={handleNewSession}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                      >
-                        <Plus className="w-4 h-4" />
-                        新建对话
-                      </button>
-                    </div>
-                    <div className="p-1">
-                      {sessions.length === 0 ? (
-                        <div className="px-3 py-4 text-center text-slate-400 text-sm">暂无历史对话</div>
-                      ) : (
-                        sessions.map(session => (
-                          <div
-                            key={session.id}
-                            onClick={() => handleSelectSession(session)}
-                            className={cn(
-                              "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors group",
-                              currentSessionId === session.id
-                                ? "bg-blue-50 dark:bg-blue-900/30"
-                                : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
-                            )}
-                          >
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium truncate">{session.title || '未命名对话'}</div>
-                              <div className="text-xs text-slate-400">
-                                {new Date(session.updatedAt).toLocaleDateString()}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={(e) => handleOpenRename(session, e)}
-                                className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-all"
-                                title="重命名"
-                              >
-                                <Edit className="w-3 h-3 text-blue-500" />
-                              </button>
-                              <button
-                                onClick={(e) => handleDeleteSession(session.id, e)}
-                                className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-all"
-                                title="删除"
-                              >
-                                <Trash2 className="w-3 h-3 text-red-500" />
-                              </button>
-                            </div>
-                          </div>
-                        ))
+                    {/* 顶部：新建按钮 + 搜索框 */}
+                    <div className="p-3 border-b dark:border-slate-700 space-y-2 flex-shrink-0">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handleNewSession}
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-colors shadow-sm"
+                        >
+                          <Plus className="w-4 h-4" />
+                          新建对话
+                        </button>
+                        <button
+                          onClick={() => setShowSessionList(false)}
+                          className="md:hidden p-2.5 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                      {/* 搜索框 */}
+                      {sessions.length > 3 && (
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input
+                            type="text"
+                            value={sessionSearchQuery}
+                            onChange={(e) => setSessionSearchQuery(e.target.value)}
+                            placeholder="搜索对话..."
+                            className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          />
+                          {sessionSearchQuery && (
+                            <button
+                              onClick={() => setSessionSearchQuery('')}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
+
+                    {/* 会话列表 */}
+                    <div className="flex-1 overflow-y-auto overscroll-contain">
+                      {filteredSessions.length === 0 ? (
+                        <div className="px-3 py-8 text-center text-slate-400 text-sm">
+                          {sessionSearchQuery ? '没有找到匹配的对话' : '暂无历史对话'}
+                        </div>
+                      ) : (
+                        <div className="p-2 space-y-1">
+                          {filteredSessions.map(session => (
+                            <div
+                              key={session.id}
+                              onClick={() => {
+                                handleSelectSession(session);
+                                setShowSessionList(false);
+                                setActiveSessionMenu(null);
+                              }}
+                              className={cn(
+                                "flex items-center justify-between px-3 py-3 rounded-xl cursor-pointer transition-all",
+                                currentSessionId === session.id
+                                  ? "bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800"
+                                  : "hover:bg-slate-50 dark:hover:bg-slate-700/50 border border-transparent"
+                              )}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium truncate text-slate-800 dark:text-slate-200">
+                                  {session.title || '未命名对话'}
+                                </div>
+                                <div className="text-xs text-slate-400 mt-0.5">
+                                  {new Date(session.updatedAt).toLocaleDateString('zh-CN', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </div>
+                              </div>
+                              {/* 操作按钮 - 始终显示以便移动端操作 */}
+                              <div className="flex items-center gap-1 ml-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenRename(session);
+                                  }}
+                                  className="p-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-all active:scale-95"
+                                  title="重命名"
+                                >
+                                  <Edit className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteSession(session);
+                                  }}
+                                  className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all active:scale-95"
+                                  title="删除"
+                                >
+                                  <Trash2 className="w-4 h-4 text-slate-500 dark:text-slate-400 hover:text-red-500" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 底部统计 */}
+                    {sessions.length > 0 && (
+                      <div className="p-2 border-t dark:border-slate-700 text-center text-xs text-slate-400">
+                        共 {sessions.length} 个对话
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -1477,24 +1566,27 @@ export function AISidebar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
             onClick={() => setShowRenameModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-4 w-80"
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-5 w-full max-w-sm"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-bold mb-3 text-gray-800 dark:text-gray-200">重命名对话</h3>
-              <div className="flex gap-2 mb-3">
+              <h3 className="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <Edit className="w-5 h-5 text-blue-500" />
+                重命名对话
+              </h3>
+              <div className="flex gap-2 mb-4">
                 <input
                   type="text"
                   value={renameTitle}
                   onChange={(e) => setRenameTitle(e.target.value)}
                   placeholder="输入对话标题..."
-                  className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-slate-900 dark:text-white"
+                  className="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-slate-900 dark:text-white"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleRenameSubmit();
@@ -1504,25 +1596,79 @@ export function AISidebar() {
                 <button
                   onClick={handleAutoGenerateTitle}
                   disabled={isGeneratingTitle}
-                  className="px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors disabled:opacity-50"
+                  className="px-3 py-3 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors disabled:opacity-50"
                   title="AI自动生成标题"
                 >
-                  {isGeneratingTitle ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {isGeneratingTitle ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
                 </button>
               </div>
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setShowRenameModal(false)}
-                  className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                  className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
                 >
                   取消
                 </button>
                 <button
                   onClick={handleRenameSubmit}
                   disabled={!renameTitle.trim()}
-                  className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
                   保存
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* [新增] 删除确认弹窗 */}
+      <AnimatePresence>
+        {showDeleteConfirm && deleteTargetSession && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
+            onClick={() => {
+              setShowDeleteConfirm(false);
+              setDeleteTargetSession(null);
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-5 w-full max-w-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <Trash2 className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">删除对话</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">此操作无法撤销</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mb-5 px-1">
+                确定要删除对话「<span className="font-medium">{deleteTargetSession.title || '未命名对话'}</span>」吗？
+              </p>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteTargetSession(null);
+                  }}
+                  className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={confirmDeleteSession}
+                  className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl transition-colors shadow-sm"
+                >
+                  确认删除
                 </button>
               </div>
             </motion.div>
