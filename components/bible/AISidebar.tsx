@@ -112,16 +112,16 @@ const MessageBubble = memo(({
   };
 
   return (
-    <div className={cn("flex group relative mb-4", role === 'user' ? "justify-end" : "justify-start")}>
+    <div className={cn("flex group relative mb-5", role === 'user' ? "justify-end" : "justify-start")}>
       <div className={cn(
         "relative transition-all",
         role === 'user'
-          ? "max-w-[90%] rounded-2xl px-4 py-3 shadow-sm bg-blue-600 text-white text-[15px]"
+          ? "max-w-[88%] rounded-2xl rounded-tr-md px-4 py-3 shadow-sm bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-indigo-600 text-white text-[14.5px]"
           : "w-full" // AI 消息全宽，无背景框
       )}>
         {/* 用户消息显示用户标识在右上角 */}
         {role === 'user' && (
-          <div className="absolute -top-5 right-0 flex items-center gap-1 text-[10px] font-bold opacity-60 select-none text-blue-500 flex-row-reverse">
+          <div className="absolute -top-5 right-0 flex items-center gap-1 text-[10px] font-medium opacity-50 select-none text-blue-400 flex-row-reverse">
             <User className="w-3 h-3" />
             <span>你</span>
           </div>
@@ -131,9 +131,9 @@ const MessageBubble = memo(({
            <div className="prose prose-sm dark:prose-invert max-w-none break-words text-white">
              <ReactMarkdown
                 components={{
-                    blockquote: ({node, ...props}) => <blockquote className="relative border-l-4 border-white/50 pl-3 py-1 my-2 bg-white/10 rounded-r-md italic text-white/90 text-xs" {...props} />,
-                    p: ({node, ...props}) => <p className="leading-relaxed mb-2 last:mb-0" {...props} />,
-                    strong: ({node, ...props}) => <strong className="font-bold text-white bg-white/20 px-1 py-0.5 rounded text-[13px]" {...props} />
+                    blockquote: ({node, ...props}) => <blockquote className="relative border-l-[3px] border-white/40 pl-3 py-1.5 my-2 bg-white/10 rounded-r-lg italic text-white/90 text-[13px]" {...props} />,
+                    p: ({node, ...props}) => <p className="leading-[1.75] mb-2 last:mb-0" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-semibold text-white bg-white/20 px-1.5 py-0.5 rounded text-[13px]" {...props} />
                 }}
              >
                 {content}
@@ -141,16 +141,22 @@ const MessageBubble = memo(({
            </div>
         ) : (
           <>
-            {/* AI 标识 */}
-            <div className="flex items-center gap-1.5 mb-3 text-slate-400 dark:text-slate-500 select-none">
-              <Bot className="w-3.5 h-3.5" />
-              <span className="text-[11px] font-medium">AI</span>
+            {/* AI 标识 - 简化现代风格 */}
+            <div className="flex items-center gap-2 mb-4 select-none">
+              <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-sm">
+                <Sparkles className="w-3 h-3 text-white" />
+              </div>
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">AI 解读</span>
             </div>
 
             {isThinking && (
-              <div className="flex items-center gap-2 text-blue-500 mb-3 text-[13px] font-medium animate-pulse select-none">
-                 <Loader2 className="w-4 h-4 animate-spin" />
-                 <span>AI 正在深度解读中...</span>
+              <div className="flex items-center gap-2.5 text-blue-500 mb-4 text-[13px] font-medium select-none">
+                 <div className="flex items-center gap-1">
+                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></span>
+                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></span>
+                 </div>
+                 <span className="text-slate-500 dark:text-slate-400">正在深度解读中...</span>
               </div>
             )}
 
@@ -167,53 +173,65 @@ const MessageBubble = memo(({
                       components={{
                         h3: ({node, ...props}) => (
                           <h3 className={cn(
-                            "font-bold text-slate-800 dark:text-slate-100 mt-6 mb-3 flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700/50",
-                            fontSize === 'small' ? "text-sm" : fontSize === 'large' ? "text-lg" : fontSize === 'xlarge' ? "text-xl" : "text-base"
+                            "font-semibold text-slate-900 dark:text-slate-50 mt-8 mb-4 pb-2 border-b border-slate-200/60 dark:border-slate-700/50 flex items-center gap-2.5",
+                            fontSize === 'small' ? "text-[15px]" : fontSize === 'large' ? "text-lg" : fontSize === 'xlarge' ? "text-xl" : "text-base"
                           )}>
-                              <span className="w-1 h-4 bg-blue-500 rounded-full inline-block"></span>
+                              <span className="w-1 h-4 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full inline-block"></span>
                               {props.children}
                           </h3>
                         ),
                         h4: ({node, ...props}) => <h4 className={cn(
-                          "font-bold text-slate-700 dark:text-slate-300 mt-4 mb-2 flex items-center gap-1",
-                          fontSize === 'small' ? "text-xs" : fontSize === 'large' ? "text-base" : fontSize === 'xlarge' ? "text-lg" : "text-sm"
-                        )} {...props}><ChevronRight className="w-3 h-3 text-blue-400" />{props.children}</h4>,
+                          "font-medium text-slate-800 dark:text-slate-200 mt-6 mb-3 flex items-center gap-2",
+                          fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[15px]" : fontSize === 'xlarge' ? "text-base" : "text-[14px]"
+                        )} {...props}><span className="w-1.5 h-1.5 bg-blue-500 rounded-full inline-block"></span>{props.children}</h4>,
                         p: ({node, ...props}) => <p className={cn(
-                          "leading-7 text-slate-600 dark:text-slate-300 mb-3 last:mb-0 text-justify",
-                          fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[17px]" : fontSize === 'xlarge' ? "text-[19px]" : "text-[15px]"
+                          "leading-[1.9] text-slate-700 dark:text-slate-300 mb-5 last:mb-0 text-justify",
+                          fontSize === 'small' ? "text-[13px] leading-[1.85]" : fontSize === 'large' ? "text-[16px] leading-[1.95]" : fontSize === 'xlarge' ? "text-[17px] leading-[2]" : "text-[14.5px]"
                         )} {...props} />,
-                        ul: ({node, ...props}) => <ul className="my-2 space-y-1 pl-1" {...props} />,
+                        ul: ({node, ...props}) => <ul className="my-4 space-y-2.5 pl-1" {...props} />,
+                        ol: ({node, ...props}) => <ol className="my-4 space-y-2.5 pl-2 list-decimal" {...props} />,
                         li: ({node, ...props}) => (
                           <li className={cn(
-                            "leading-relaxed text-slate-600 dark:text-slate-300 flex items-start gap-2 pl-1",
-                            fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[17px]" : fontSize === 'xlarge' ? "text-[19px]" : "text-[15px]"
+                            "leading-[1.8] text-slate-700 dark:text-slate-300 flex items-start gap-2.5 pl-0",
+                            fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[16px]" : fontSize === 'xlarge' ? "text-[17px]" : "text-[14.5px]"
                           )} {...props}>
-                             <span className="text-blue-400 select-none mt-2 text-[6px] shrink-0">●</span>
+                             <span className="text-blue-500 dark:text-blue-400 select-none mt-2 text-[5px] shrink-0">●</span>
                              <span className="flex-1">{props.children}</span>
                           </li>
                         ),
                         strong: ({node, ...props}) => <strong className={cn(
-                          "font-semibold text-blue-900 dark:text-blue-100 bg-blue-50 dark:bg-blue-900/30 px-1 py-0.5 rounded mx-0.5",
-                          fontSize === 'small' ? "text-[12px]" : fontSize === 'large' ? "text-[16px]" : fontSize === 'xlarge' ? "text-[18px]" : "text-[14px]"
+                          "font-semibold text-slate-900 dark:text-slate-50 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 dark:from-blue-900/30 dark:to-indigo-900/30 px-1.5 py-0.5 rounded",
+                          fontSize === 'small' ? "text-[12.5px]" : fontSize === 'large' ? "text-[15.5px]" : fontSize === 'xlarge' ? "text-[16.5px]" : "text-[14px]"
                         )} {...props} />,
                         blockquote: ({node, ...props}) => (
-                          <blockquote className="relative border-l-4 border-blue-300 dark:border-blue-700 pl-4 py-2 my-4 bg-slate-50 dark:bg-slate-800/50 rounded-r-lg" {...props}>
-                              <Quote className="absolute top-2 right-2 w-4 h-4 text-slate-200 dark:text-slate-700" />
+                          <blockquote className="relative border-l-[3px] border-blue-400/60 dark:border-blue-500/50 pl-5 pr-4 py-3 my-5 bg-gradient-to-r from-slate-50/80 to-slate-50/40 dark:from-slate-800/60 dark:to-slate-800/30 rounded-r-xl" {...props}>
+                              <Quote className="absolute top-3 right-3 w-4 h-4 text-slate-200 dark:text-slate-600" />
                               <div className={cn(
-                                "italic text-slate-600 dark:text-slate-400",
-                                fontSize === 'small' ? "text-xs" : fontSize === 'large' ? "text-base" : fontSize === 'xlarge' ? "text-lg" : "text-sm"
+                                "italic text-slate-600 dark:text-slate-400 leading-relaxed",
+                                fontSize === 'small' ? "text-[12.5px]" : fontSize === 'large' ? "text-[15px]" : fontSize === 'xlarge' ? "text-[16px]" : "text-[13.5px]"
                               )}>{props.children}</div>
                           </blockquote>
                         ),
-                        code: ({node, ...props}) => <code className="bg-slate-100 dark:bg-slate-800 text-red-500 dark:text-red-400 px-1.5 py-0.5 rounded text-xs font-mono border dark:border-slate-700" {...props} />,
+                        code: ({node, className, children, ...props}) => {
+                          const isInline = !className;
+                          if (isInline) {
+                            return <code className="bg-slate-100 dark:bg-slate-800/80 text-rose-600 dark:text-rose-400 px-1.5 py-0.5 rounded-md text-[13px] font-mono border border-slate-200/50 dark:border-slate-700/50" {...props}>{children}</code>;
+                          }
+                          return <code className={className} {...props}>{children}</code>;
+                        },
+                        pre: ({node, ...props}) => (
+                          <pre className="bg-slate-900 dark:bg-slate-950 text-slate-100 rounded-xl p-4 my-4 overflow-x-auto border border-slate-800" {...props} />
+                        ),
+                        hr: ({node, ...props}) => <hr className="my-8 border-slate-200 dark:border-slate-700/50" {...props} />,
+                        a: ({node, ...props}) => <a className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline decoration-blue-300/50 dark:decoration-blue-500/30 underline-offset-2" {...props} />,
                       }}
                     >
                       {mainText}
                     </ReactMarkdown>
                 ) : (
                     <div className={cn(
-                      "whitespace-pre-wrap leading-relaxed text-slate-700 dark:text-slate-300",
-                      fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[17px]" : fontSize === 'xlarge' ? "text-[19px]" : "text-[15px]"
+                      "whitespace-pre-wrap leading-[1.9] text-slate-700 dark:text-slate-300",
+                      fontSize === 'small' ? "text-[13px]" : fontSize === 'large' ? "text-[16px]" : fontSize === 'xlarge' ? "text-[17px]" : "text-[14.5px]"
                     )}>{mainText}</div>
                 )}
               </div>
@@ -221,17 +239,17 @@ const MessageBubble = memo(({
 
             {/* 底部工具栏：复制 + 笔记 + 收藏 + 重试 + 朗读 */}
             {(mainText || !isThinking) && (
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center opacity-100 select-none">
-                  <div className="flex items-center gap-1 flex-wrap">
+              <div className="mt-5 pt-4 border-t border-slate-100/80 dark:border-slate-800/60 flex justify-between items-center opacity-100 select-none">
+                  <div className="flex items-center gap-0.5 flex-wrap">
                       <button
                           onClick={handleCopy}
                           className={cn(
-                              "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
-                              copied ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                              "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg",
+                              copied ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                           )}
                           title="复制内容"
                       >
-                          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                           {copied ? "已复制" : "复制"}
                       </button>
 
@@ -240,13 +258,13 @@ const MessageBubble = memo(({
                         <button
                             onClick={handleSaveToNote}
                             className={cn(
-                                "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
-                                saved ? "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" : "text-slate-400 hover:text-amber-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg",
+                                saved ? "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" : "text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                             )}
                             title="存为笔记"
                         >
-                            {saved ? <Check className="w-3 h-3" /> : <PenLine className="w-3 h-3" />}
-                            {saved ? "已添加" : "笔记"}
+                            {saved ? <Check className="w-3.5 h-3.5" /> : <PenLine className="w-3.5 h-3.5" />}
+                            {saved ? "已保存" : "笔记"}
                         </button>
                       )}
 
@@ -255,12 +273,12 @@ const MessageBubble = memo(({
                         <button
                             onClick={() => { onSaveInsight(); setBookmarked(true); }}
                             className={cn(
-                                "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md",
-                                bookmarked ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg",
+                                bookmarked ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                             )}
                             title="收藏解读"
                         >
-                            <Bookmark className={cn("w-3 h-3", bookmarked && "fill-current")} />
+                            <Bookmark className={cn("w-3.5 h-3.5", bookmarked && "fill-current")} />
                             {bookmarked ? "已收藏" : "收藏"}
                         </button>
                       )}
@@ -269,10 +287,10 @@ const MessageBubble = memo(({
                       {onShare && (
                         <button
                             onClick={onShare}
-                            className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md text-slate-400 hover:text-teal-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                             title="分享到小组"
                         >
-                            <Share2 className="w-3 h-3" />
+                            <Share2 className="w-3.5 h-3.5" />
                             分享
                         </button>
                       )}
@@ -281,10 +299,10 @@ const MessageBubble = memo(({
                       {onOpenMindMap && (
                         <button
                             onClick={onOpenMindMap}
-                            className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md text-slate-400 hover:text-purple-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                             title="生成思维导图"
                         >
-                            <Network className="w-3 h-3" />
+                            <Network className="w-3.5 h-3.5" />
                             导图
                         </button>
                       )}
@@ -292,17 +310,17 @@ const MessageBubble = memo(({
                       {onRetry && (
                         <button
                             onClick={onRetry}
-                            className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2 py-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                            className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                             title="重新生成"
                         >
-                            <RefreshCw className="w-3 h-3" />
+                            <RefreshCw className="w-3.5 h-3.5" />
                             重试
                         </button>
                       )}
                   </div>
 
                   <div onClick={(e) => e.stopPropagation()}>
-                      <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 h-7 px-2 text-[11px]" label="朗读" />
+                      <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 h-8 px-2.5 text-[11px] rounded-lg" label="朗读" />
                   </div>
               </div>
             )}
@@ -1262,11 +1280,13 @@ export function AISidebar() {
         >
           {messages.length === 0 && !isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-500 select-none opacity-60">
-                <Bot className="w-16 h-16 stroke-1 mb-4" />
-                <p className="text-sm">👋 选中经文，点击菜单即可开始。</p>
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center mb-5">
+                  <Bot className="w-10 h-10 stroke-1 text-slate-400 dark:text-slate-500" />
+                </div>
+                <p className="text-[13px] text-slate-500 dark:text-slate-400">选中经文，点击菜单即可开始</p>
             </div>
           ) : (
-            <div className="flex flex-col pb-4">
+            <div className="flex flex-col pb-6 pt-2">
                 {messages.map((m, index) => {
                     const isLatest = index === messages.length - 1;
                     const isAssistant = m.role === 'assistant';
