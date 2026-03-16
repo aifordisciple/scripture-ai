@@ -5,7 +5,7 @@ import { streamText } from 'ai';
 import { auth } from "@/lib/auth";
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 
-export const maxDuration = 60;
+export const maxDuration = 180; // 增加到180秒(3分钟)，支持更长的流式输出
 
 // Socratic Tutor Prompt
 const TUTOR_PROMPT = `

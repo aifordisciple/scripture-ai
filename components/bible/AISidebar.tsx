@@ -1,7 +1,7 @@
 // components/bible/AISidebar.tsx
 "use client";
 
-import { useEffect, useRef, useState, useCallback, memo } from 'react';
+import { useEffect, useRef, useState, useCallback, memo, useMemo } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
 import { X, Sparkles, Send, BookOpen, Search, Lightbulb, LayoutList, Minimize2, Copy, Check, Bot, User, StopCircle, Eraser, Quote, ChevronRight, Loader2, RefreshCw, AlertCircle, PenLine, MessageSquare, Plus, History, Bookmark, Share2, ChevronDown, Trash2, GraduationCap, FileText, BookMarked, Type, Settings, Edit, Network } from 'lucide-react';
@@ -419,25 +419,35 @@ export function AISidebar() {
             contextText: aiRequestTrigger.context
         } : null
     },
+    // 设置较长的流式响应超时
+    streamProtocol: 'data',
     onError: (error) => {
         console.error("🔥 AI Error:", error);
         setAiGenerating(false);
         failCurrentRequest(error.message || 'AI 生成失败');
 
-        // 检测 Server Action 版本不匹配错误，提示用户刷新页面
+        // 检测特定错误类型
         const errorMsg = error.message || '';
+
+        // 检测 Server Action 版本不匹配错误
         if (errorMsg.includes('Server Action') || errorMsg.includes('older or newer deployment')) {
-          // 延迟显示提示，避免干扰用户
           setTimeout(() => {
             if (confirm('检测到应用已更新，请刷新页面以继续使用。是否立即刷新？')) {
               window.location.reload();
             }
           }, 500);
         }
+        // 检测网络错误或超时，提供重试建议
+        else if (errorMsg.includes('fetch') || errorMsg.includes('network') ||
+                 errorMsg.includes('timeout') || errorMsg.includes('abort')) {
+          console.log('[AI] 网络错误，可尝试重新生成');
+        }
     },
-    onFinish: () => {
+    onFinish: (message) => {
         setAiGenerating(false);
         completeCurrentRequest();
+        // 记录完成状态
+        console.log('[AI] Stream completed successfully');
     }
   });
 
@@ -1430,14 +1440,20 @@ export function AISidebar() {
                 })}
 
                 {error && (
-                    <div className="flex flex-col items-center justify-center p-4 mt-2 mb-4 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/20">
-                        <AlertCircle className="w-6 h-6 text-red-500 mb-2 opacity-80" />
-                        <span className="text-xs text-red-600 dark:text-red-400 text-center mb-3">
-                            由于网络波动或熄屏，AI 生成已中断。<br/>请保持屏幕常亮并重新尝试。
+                    <div className="flex flex-col items-center justify-center p-4 mt-2 mb-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/20">
+                        <AlertCircle className="w-6 h-6 text-amber-500 mb-2 opacity-80" />
+                        <span className="text-xs text-amber-600 dark:text-amber-400 text-center mb-3">
+                            AI 生成已中断，可能原因：<br/>
+                            网络波动、服务繁忙或连接超时
                         </span>
-                        <Button variant="outline" size="sm" onClick={() => reload()} className="h-8 text-xs rounded-full border-red-200 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30">
-                           <RefreshCw className="w-3 h-3 mr-1" /> 重新生成
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => reload()} className="h-8 text-xs rounded-full border-amber-200 text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/30">
+                             <RefreshCw className="w-3 h-3 mr-1" /> 重新生成
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => setMessages(messages.slice(0, -1))} className="h-8 text-xs rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+                             忽略
+                          </Button>
+                        </div>
                     </div>
                 )}
             </div>

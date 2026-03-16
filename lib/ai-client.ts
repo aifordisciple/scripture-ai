@@ -174,43 +174,48 @@ export async function getAIModel(requestConfig?: AIConfig, userId?: string): Pro
   // MiniMax compatibility: use custom fetch to filter unsupported params
   const isMiniMax = baseUrl.includes('minimax');
 
+  // 流式输出优化配置
+  // 不设置超时中断，让流自然完成，避免意外中断
+  // 通过 keep-alive 和重试机制来保证稳定性
+  const customFetch = async (url: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    // 对于 MiniMax API，需要清理不支持的参数
+    if (isMiniMax && init?.body) {
+      const rawBody = init.body;
+      const body = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
+
+      // Build clean request body with only MiniMax-supported params
+      const cleanBody: Record<string, any> = {
+        model: body.model,
+        messages: body.messages,
+        stream: body.stream === true,
+      };
+
+      // Only add optional params if they exist
+      if (body.temperature !== undefined) cleanBody.temperature = body.temperature;
+      if (body.max_tokens !== undefined) cleanBody.max_tokens = body.max_tokens;
+      if (body.top_p !== undefined) cleanBody.top_p = body.top_p;
+
+      // MiniMax: Disable thinking/reasoning process to get direct output
+      cleanBody.disable_thinking = true;
+
+      console.log('[MiniMax] stream:', cleanBody.stream, '| model:', cleanBody.model);
+
+      return fetch(url, {
+        ...init,
+        body: JSON.stringify(cleanBody),
+        // 不设置 signal，让流自然完成
+      });
+    }
+
+    // 其他 API 正常调用
+    return fetch(url, init);
+  };
+
   const client = createOpenAI({
     baseURL: baseUrl,
     apiKey,
     compatibility: isMiniMax ? 'compatible' : 'strict',
-    // MiniMax doesn't support some OpenAI parameters, use custom fetch to handle
-    fetch: isMiniMax ? async (url, init) => {
-      try {
-        const rawBody = init?.body;
-        const body = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
-
-        // Build clean request body with only MiniMax-supported params
-        const cleanBody: Record<string, any> = {
-          model: body.model,
-          messages: body.messages,
-          // IMPORTANT: Default to false if not specified (for generateText)
-          // streamText will explicitly set stream: true
-          stream: body.stream === true,
-        };
-
-        // Only add optional params if they exist
-        if (body.temperature !== undefined) cleanBody.temperature = body.temperature;
-        if (body.max_tokens !== undefined) cleanBody.max_tokens = body.max_tokens;
-        if (body.top_p !== undefined) cleanBody.top_p = body.top_p;
-
-        // MiniMax: Disable thinking/reasoning process to get direct output
-        // This prevents the model from outputting <think> tags
-        cleanBody.disable_thinking = true;
-
-        // Debug: log the actual request being sent
-        console.log('[MiniMax] stream:', cleanBody.stream, '| model:', cleanBody.model, '| disable_thinking:', cleanBody.disable_thinking);
-
-        return fetch(url, { ...init, body: JSON.stringify(cleanBody) });
-      } catch (e) {
-        console.error('[MiniMax] Fetch error:', e);
-        return fetch(url, init);
-      }
-    } : undefined,
+    fetch: customFetch,
   });
 
   return client(modelName);

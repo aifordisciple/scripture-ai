@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 
-export const maxDuration = 60;
+export const maxDuration = 300; // 增加到300秒(5分钟)，支持更长的流式输出
 
 export async function POST(req: Request) {
   try {
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
                verseRef: verseRef || null,
                verseContent: verseContent || null,
              }
-          });
+          }).catch(err => console.error("Failed to save user message:", err));
        }
     }
 
@@ -74,27 +74,54 @@ ${backgroundText}
       model: model,
       system: fullSystemPrompt,
       messages: messages,
+      // 设置最大 token 数，确保输出完整
+      maxTokens: 4096,
       // AI 流式输出完成后，保存回复到数据库
-      onFinish: async ({ text }) => {
-         if (userId) {
-            await prisma.chatMessage.create({
-               data: {
-                 userId,
-                 role: 'assistant',
-                 content: text,
-                 sessionId: sessionId || null,
-                 verseRef: verseRef || null,
-                 verseContent: verseContent || null,
-               }
-            });
+      onFinish: async ({ text, finishReason, usage }) => {
+         // 记录完成原因，便于调试
+         console.log(`[AI] Stream finished. Reason: ${finishReason}, Tokens: ${usage?.totalTokens || 'N/A'}`);
+
+         // 检查是否异常中断
+         if (finishReason && finishReason !== 'stop' && finishReason !== 'length') {
+           console.warn(`[AI] Stream may have been interrupted: ${finishReason}`);
          }
+
+         if (userId && text) {
+            try {
+              await prisma.chatMessage.create({
+                 data: {
+                   userId,
+                   role: 'assistant',
+                   content: text,
+                   sessionId: sessionId || null,
+                   verseRef: verseRef || null,
+                   verseContent: verseContent || null,
+                 }
+              });
+            } catch (err) {
+              console.error("Failed to save assistant message:", err);
+            }
+         }
+      },
+      onError: async ({ error }) => {
+        console.error('[AI] Stream error:', error);
       }
     });
 
-    return result.toDataStreamResponse();
+    // 返回流式响应，设置适当的 headers
+    const response = result.toDataStreamResponse();
+    // 设置响应头以支持流式传输
+    response.headers.set('Connection', 'keep-alive');
+    response.headers.set('Keep-Alive', 'timeout=300');
+    return response;
 
   } catch (error) {
     console.error("❌ API 路由致命错误:", error);
-    return new Response(JSON.stringify({ error: '后端处理失败' }), { status: 500 });
+    // 返回更详细的错误信息
+    const errorMessage = error instanceof Error ? error.message : '后端处理失败';
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
