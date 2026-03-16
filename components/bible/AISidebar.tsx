@@ -492,7 +492,28 @@ export function AISidebar() {
       .catch(err => console.error("Failed to load custom prompts", err));
   }, [setCustomPrompts]);
 
-  // [修复] 当打开AI解读界面时，自动创建一个临时新会话
+  // [修复] 标记是否已加载当前会话的消息
+  const loadedSessionRef = useRef<string | null>(null);
+
+  // [修复] 当打开AI解读界面时，恢复之前会话的消息
+  useEffect(() => {
+    if (isAiOpen && currentSessionId && !currentSessionId.startsWith('temp-')) {
+      // 有已保存的会话，检查是否需要加载消息
+      if (loadedSessionRef.current !== currentSessionId) {
+        loadedSessionRef.current = currentSessionId;
+        fetch(`/api/chat/history?sessionId=${currentSessionId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+              setMessages(data.map((m: any) => ({ id: m.id, role: m.role, content: m.content })));
+            }
+          })
+          .catch(err => console.error("Failed to load session messages", err));
+      }
+    }
+  }, [isAiOpen, currentSessionId, setMessages]);
+
+  // [修复] 当打开AI解读界面时，自动创建一个临时新会话（仅在没有任何会话时）
   useEffect(() => {
     if (isAiOpen && !currentSessionId && !pendingSessionId) {
       // 生成一个临时会话ID（不保存到数据库）
@@ -501,6 +522,7 @@ export function AISidebar() {
       setCurrentSessionId(tempId);
       setMessages([]);
       pendingSessionHasMessages.current = false;
+      loadedSessionRef.current = tempId;
     }
   }, [isAiOpen, currentSessionId, pendingSessionId, setCurrentSessionId, setMessages]);
 
@@ -523,6 +545,7 @@ export function AISidebar() {
     const tempId = `temp-${Date.now()}`;
     setPendingSessionId(tempId);
     setCurrentSessionId(tempId);
+    loadedSessionRef.current = tempId; // 标记已加载
     setMessages([]);
     setShowSessionList(false);
   }, [setCurrentSessionId, setMessages]);
@@ -565,6 +588,7 @@ export function AISidebar() {
     pendingSessionHasMessages.current = false;
 
     setCurrentSessionId(session.id);
+    loadedSessionRef.current = session.id; // 标记已加载
     // 加载该会话的消息
     const res = await fetch(`/api/chat/history?sessionId=${session.id}`);
     const messages = await res.json();
