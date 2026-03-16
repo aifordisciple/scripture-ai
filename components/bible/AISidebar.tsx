@@ -328,7 +328,7 @@ export function AISidebar() {
     // 队列相关
     currentAiRequest, aiQueue, completeCurrentRequest, failCurrentRequest, cancelAIRequest,
     // [新增] 会话管理
-    currentSessionId, setCurrentSessionId, sessions, setSessions, addSession, deleteSession,
+    currentSessionId, setCurrentSessionId, sessions, setSessions, addSession, updateSession, deleteSession,
     // [新增] AI 模式
     aiMode, setAiMode,
     // [新增] 自定义提示词
@@ -362,6 +362,12 @@ export function AISidebar() {
   const [showVersePicker, setShowVersePicker] = useState(false);
   const [pendingNoteText, setPendingNoteText] = useState<string | null>(null);
   const [isParsingVerse, setIsParsingVerse] = useState(false);
+
+  // [新增] 重命名会话状态
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renameSessionId, setRenameSessionId] = useState<string | null>(null);
+  const [renameTitle, setRenameTitle] = useState('');
+  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
 
   const { apiConfig } = useBibleStore();
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload } = useChat({
@@ -549,6 +555,92 @@ export function AISidebar() {
     }
   }, [currentSessionId, deleteSession, setCurrentSessionId, setMessages]);
 
+  // [新增] 自动生成会话标题
+  const generateSessionTitle = useCallback(async (sessionId: string, firstMessage: string) => {
+    try {
+      setIsGeneratingTitle(true);
+      const res = await fetch('/api/chat/session/generate-title', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          content: firstMessage,
+          bookName: aiRequestTrigger?.ref.bookName,
+          chapter: aiRequestTrigger?.ref.chapter,
+          verse: aiRequestTrigger?.ref.verse,
+          apiConfig,
+        }),
+      });
+      const data = await res.json();
+      if (data.title) {
+        // 更新本地会话列表中的标题
+        updateSession(sessionId, { title: data.title });
+      }
+    } catch (error) {
+      console.error('Failed to generate title:', error);
+    } finally {
+      setIsGeneratingTitle(false);
+    }
+  }, [apiConfig, aiRequestTrigger, updateSession]);
+
+  // [新增] 打开重命名弹窗
+  const handleOpenRename = useCallback((session: ChatSession, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRenameSessionId(session.id);
+    setRenameTitle(session.title || '');
+    setShowRenameModal(true);
+    setShowSessionList(false);
+  }, []);
+
+  // [新增] 提交重命名
+  const handleRenameSubmit = useCallback(async () => {
+    if (!renameSessionId || !renameTitle.trim()) return;
+
+    try {
+      const res = await fetch('/api/chat/session', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: renameSessionId, title: renameTitle.trim() }),
+      });
+      const data = await res.json();
+      if (data.id) {
+        updateSession(renameSessionId, { title: renameTitle.trim() });
+      }
+    } catch (error) {
+      console.error('Failed to rename session:', error);
+    } finally {
+      setShowRenameModal(false);
+      setRenameSessionId(null);
+      setRenameTitle('');
+    }
+  }, [renameSessionId, renameTitle, updateSession]);
+
+  // [新增] AI自动生成标题（用于重命名）
+  const handleAutoGenerateTitle = useCallback(async () => {
+    if (!renameSessionId) return;
+
+    // 找到该会话的第一条消息
+    const session = sessions.find(s => s.id === renameSessionId);
+    if (!session) return;
+
+    try {
+      setIsGeneratingTitle(true);
+      const res = await fetch('/api/chat/session/generate-title', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: renameSessionId, apiConfig }),
+      });
+      const data = await res.json();
+      if (data.title) {
+        setRenameTitle(data.title);
+      }
+    } catch (error) {
+      console.error('Failed to generate title:', error);
+    } finally {
+      setIsGeneratingTitle(false);
+    }
+  }, [renameSessionId, sessions, apiConfig]);
+
   // [新增] 收藏消息
   const handleSaveInsight = useCallback(async (messageId: string, content: string) => {
     if (!aiRequestTrigger) return;
@@ -666,6 +758,7 @@ export function AISidebar() {
     // [修复] 如果是临时会话且有第一条消息，先保存会话到数据库
     const sendMessage = async () => {
       let sessionId = currentSessionId;
+      let isNewSession = false;
 
       if (pendingSessionId && !pendingSessionHasMessages.current) {
         // 这是临时会话的第一条消息，需要先保存会话
@@ -678,6 +771,7 @@ export function AISidebar() {
           setCurrentSessionId(savedId);
           setPendingSessionId(null);
           sessionId = savedId;
+          isNewSession = true;
         }
         pendingSessionHasMessages.current = true;
       }
@@ -697,10 +791,15 @@ export function AISidebar() {
         { role: 'user', content: enrichedPrompt },
         { body: { sessionId } }
       );
+
+      // [新增] 新会话时自动生成标题
+      if (isNewSession && sessionId) {
+        generateSessionTitle(sessionId, enrichedPrompt);
+      }
     };
 
     sendMessage();
-  }, [aiRequestTrigger, append, currentSessionId, pendingSessionId, savePendingSession, setCurrentSessionId]);
+  }, [aiRequestTrigger, append, currentSessionId, pendingSessionId, savePendingSession, setCurrentSessionId, generateSessionTitle]);
 
   const startResizing = useCallback(() => setIsResizing(true), []);
   const stopResizing = useCallback(() => setIsResizing(false), []);
@@ -728,6 +827,7 @@ export function AISidebar() {
 
     // [修复] 如果是临时会话且有第一条消息，先保存会话到数据库
     let sessionId = currentSessionId;
+    let isNewSession = false;
     if (pendingSessionId && !pendingSessionHasMessages.current) {
       let reference = '';
       if (aiRequestTrigger) {
@@ -739,6 +839,7 @@ export function AISidebar() {
         setCurrentSessionId(savedId);
         setPendingSessionId(null);
         sessionId = savedId;
+        isNewSession = true;
       }
       pendingSessionHasMessages.current = true;
     }
@@ -755,6 +856,11 @@ export function AISidebar() {
       { role: 'user', content: finalPrompt },
       { body: { sessionId } }
     );
+
+    // [新增] 新会话时自动生成标题
+    if (isNewSession && sessionId) {
+      generateSessionTitle(sessionId, finalPrompt);
+    }
   };
 
   // [修复] 自定义表单提交处理 - 在发送前检查临时会话
@@ -764,22 +870,30 @@ export function AISidebar() {
 
     // 如果是临时会话且有第一条消息，先保存会话到数据库
     let sessionId = currentSessionId;
+    let isNewSession = false;
     if (pendingSessionId && !pendingSessionHasMessages.current) {
       const savedId = await savePendingSession(pendingSessionId, input.trim());
       if (savedId) {
         setCurrentSessionId(savedId);
         setPendingSessionId(null);
         sessionId = savedId;
+        isNewSession = true;
       }
       pendingSessionHasMessages.current = true;
     }
 
     // 使用 append 发送消息，传递最新的 sessionId
+    const messageContent = input.trim();
     append(
-      { role: 'user', content: input.trim() },
+      { role: 'user', content: messageContent },
       { body: { sessionId } }
     );
-  }, [input, isLoading, currentSessionId, pendingSessionId, savePendingSession, setCurrentSessionId, append]);
+
+    // [新增] 新会话时自动生成标题
+    if (isNewSession && sessionId) {
+      generateSessionTitle(sessionId, messageContent);
+    }
+  }, [input, isLoading, currentSessionId, pendingSessionId, savePendingSession, setCurrentSessionId, append, generateSessionTitle]);
 
   // [新增] 使用AI解析经文引用
   const parseVerseWithAI = useCallback(async (content: string): Promise<{ bookId: string; chapter: number; verse: number } | null> => {
@@ -985,12 +1099,22 @@ export function AISidebar() {
                                 {new Date(session.updatedAt).toLocaleDateString()}
                               </div>
                             </div>
-                            <button
-                              onClick={(e) => handleDeleteSession(session.id, e)}
-                              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-all"
-                            >
-                              <Trash2 className="w-3 h-3 text-red-500" />
-                            </button>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={(e) => handleOpenRename(session, e)}
+                                className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-all"
+                                title="重命名"
+                              >
+                                <Edit className="w-3 h-3 text-blue-500" />
+                              </button>
+                              <button
+                                onClick={(e) => handleDeleteSession(session.id, e)}
+                                className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-all"
+                                title="删除"
+                              >
+                                <Trash2 className="w-3 h-3 text-red-500" />
+                              </button>
+                            </div>
                           </div>
                         ))
                       )}
@@ -1325,6 +1449,66 @@ export function AISidebar() {
         }}
         onSelect={handleVersePickerSelect}
       />
+
+      {/* [新增] 重命名会话弹窗 */}
+      <AnimatePresence>
+        {showRenameModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30"
+            onClick={() => setShowRenameModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-4 w-80"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-bold mb-3 text-gray-800 dark:text-gray-200">重命名对话</h3>
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  value={renameTitle}
+                  onChange={(e) => setRenameTitle(e.target.value)}
+                  placeholder="输入对话标题..."
+                  className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-slate-900 dark:text-white"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleRenameSubmit();
+                    if (e.key === 'Escape') setShowRenameModal(false);
+                  }}
+                />
+                <button
+                  onClick={handleAutoGenerateTitle}
+                  disabled={isGeneratingTitle}
+                  className="px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors disabled:opacity-50"
+                  title="AI自动生成标题"
+                >
+                  {isGeneratingTitle ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                </button>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setShowRenameModal(false)}
+                  className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleRenameSubmit}
+                  disabled={!renameTitle.trim()}
+                  className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  保存
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
