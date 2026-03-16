@@ -345,6 +345,10 @@ export function AISidebar() {
   const [showSessionList, setShowSessionList] = useState(false);
   const [showModeSelector, setShowModeSelector] = useState(false);
   const [showFontSizeSelector, setShowFontSizeSelector] = useState(false);
+  // [修复] 临时会话ID - 用于追踪未保存到数据库的会话
+  const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
+  // [修复] 追踪临时会话是否已有消息（用于决定是否保存会话）
+  const pendingSessionHasMessages = useRef(false);
   
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -364,6 +368,7 @@ export function AISidebar() {
     api: '/api/chat',
     body: {
         apiConfig: apiConfig,
+        sessionId: currentSessionId, // [修复] 传递当前会话ID
         context: aiRequestTrigger ? {
             bookName: aiRequestTrigger.ref.bookName,
             chapter: aiRequestTrigger.ref.chapter,
@@ -418,16 +423,8 @@ export function AISidebar() {
     return () => { releaseWakeLock(); document.removeEventListener('visibilitychange', handleVisibilityChange); };
   }, [isLoading]);
 
-  useEffect(() => {
-    fetch('/api/chat/history')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.length > 0) {
-          setMessages(data.map((m: any) => ({ id: m.id, role: m.role, content: m.content })));
-        }
-      })
-      .catch(err => console.error("Failed to load chat history", err));
-  }, [setMessages]);
+  // [修复] 不再自动加载所有消息，改为在打开AI解读时或切换会话时加载
+  // 历史消息加载逻辑已移到 handleSelectSession 和 isAiOpen effect 中
 
   // [新增] 加载会话列表
   useEffect(() => {
@@ -453,40 +450,78 @@ export function AISidebar() {
       .catch(err => console.error("Failed to load custom prompts", err));
   }, [setCustomPrompts]);
 
-  // [新增] 创建新会话
-  const handleNewSession = useCallback(async () => {
-    if (!aiRequestTrigger) {
-      // 没有经文上下文时创建空会话
-      const res = await fetch('/api/chat/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: aiMode }),
-      });
-      const session = await res.json();
-      addSession(session);
-      setCurrentSessionId(session.id);
+  // [修复] 当打开AI解读界面时，自动创建一个临时新会话
+  useEffect(() => {
+    if (isAiOpen && !currentSessionId && !pendingSessionId) {
+      // 生成一个临时会话ID（不保存到数据库）
+      const tempId = `temp-${Date.now()}`;
+      setPendingSessionId(tempId);
+      setCurrentSessionId(tempId);
       setMessages([]);
-      return;
+      pendingSessionHasMessages.current = false;
+    }
+  }, [isAiOpen, currentSessionId, pendingSessionId, setCurrentSessionId, setMessages]);
+
+  // [修复] 当关闭AI解读界面时，清理临时会话（如果没有消息则不保存）
+  useEffect(() => {
+    if (!isAiOpen && pendingSessionId && !pendingSessionHasMessages.current) {
+      // 临时会话没有消息，清理状态
+      setPendingSessionId(null);
+      setCurrentSessionId(null);
+    }
+  }, [isAiOpen, pendingSessionId, setCurrentSessionId]);
+
+  // [修复] 创建新会话 - 使用临时会话机制
+  const handleNewSession = useCallback(async () => {
+    // 清理之前的临时会话状态
+    setPendingSessionId(null);
+    pendingSessionHasMessages.current = false;
+
+    // 创建新的临时会话ID
+    const tempId = `temp-${Date.now()}`;
+    setPendingSessionId(tempId);
+    setCurrentSessionId(tempId);
+    setMessages([]);
+    setShowSessionList(false);
+  }, [setCurrentSessionId, setMessages]);
+
+  // [修复] 保存临时会话到数据库（当用户发送第一条消息时调用）
+  const savePendingSession = useCallback(async (tempId: string, firstMessage?: string): Promise<string | null> => {
+    // 生成标题
+    let title = '新对话';
+    if (aiRequestTrigger) {
+      const { ref } = aiRequestTrigger;
+      const verseSuffix = ref.verse > 0 ? `:${ref.verse}` : '';
+      title = `${ref.bookName} ${ref.chapter}${verseSuffix}`;
+    } else if (firstMessage) {
+      title = firstMessage.substring(0, 30) + (firstMessage.length > 30 ? '...' : '');
     }
 
-    // 有经文上下文时创建关联会话
     const res = await fetch('/api/chat/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        bookId: aiRequestTrigger.ref.bookName,
-        chapter: aiRequestTrigger.ref.chapter,
-        startVerse: aiRequestTrigger.ref.verse > 0 ? aiRequestTrigger.ref.verse : undefined,
         mode: aiMode,
+        title,
+        bookId: aiRequestTrigger?.ref.bookName,
+        chapter: aiRequestTrigger?.ref.chapter,
+        startVerse: aiRequestTrigger?.ref.verse > 0 ? aiRequestTrigger.ref.verse : undefined,
       }),
     });
+
+    if (!res.ok) return null;
+
     const session = await res.json();
     addSession(session);
-    setCurrentSessionId(session.id);
-  }, [aiRequestTrigger, aiMode, addSession, setCurrentSessionId, setMessages]);
+    return session.id;
+  }, [aiMode, aiRequestTrigger, addSession]);
 
   // [新增] 切换会话
   const handleSelectSession = useCallback(async (session: ChatSession) => {
+    // [修复] 切换会话前，清理临时会话状态
+    setPendingSessionId(null);
+    pendingSessionHasMessages.current = false;
+
     setCurrentSessionId(session.id);
     // 加载该会话的消息
     const res = await fetch(`/api/chat/history?sessionId=${session.id}`);
@@ -497,7 +532,7 @@ export function AISidebar() {
     setShowSessionList(false);
   }, [setCurrentSessionId, setMessages]);
 
-  // [新增] 删除会话
+  // [修复] 删除会话
   const handleDeleteSession = useCallback(async (sessionId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm('确定要删除这个会话吗？')) return;
@@ -505,8 +540,12 @@ export function AISidebar() {
     await fetch(`/api/chat/session?id=${sessionId}`, { method: 'DELETE' });
     deleteSession(sessionId);
     if (currentSessionId === sessionId) {
-      setCurrentSessionId(null);
+      // 删除当前会话后，创建一个新的临时会话
+      const tempId = `temp-${Date.now()}`;
+      setPendingSessionId(tempId);
+      setCurrentSessionId(tempId);
       setMessages([]);
+      pendingSessionHasMessages.current = false;
     }
   }, [currentSessionId, deleteSession, setCurrentSessionId, setMessages]);
 
@@ -624,18 +663,44 @@ export function AISidebar() {
     lastProcessedTimeRef.current = aiRequestTrigger.timestamp;
     shouldAutoScrollRef.current = true;
 
-    let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`;
-    if (aiRequestTrigger.ref.verse > 0) {
-        reference += `:${aiRequestTrigger.ref.verse}`;
-    } else {
-        reference += ` 章 (全章摘要)`;
-    }
+    // [修复] 如果是临时会话且有第一条消息，先保存会话到数据库
+    const sendMessage = async () => {
+      let sessionId = currentSessionId;
 
-    const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n');
-    const enrichedPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**我的请求**：${aiRequestTrigger.prompt}`;
+      if (pendingSessionId && !pendingSessionHasMessages.current) {
+        // 这是临时会话的第一条消息，需要先保存会话
+        let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`;
+        if (aiRequestTrigger.ref.verse > 0) {
+          reference += `:${aiRequestTrigger.ref.verse}`;
+        }
+        const savedId = await savePendingSession(pendingSessionId, reference);
+        if (savedId) {
+          setCurrentSessionId(savedId);
+          setPendingSessionId(null);
+          sessionId = savedId;
+        }
+        pendingSessionHasMessages.current = true;
+      }
 
-    append({ role: 'user', content: enrichedPrompt });
-  }, [aiRequestTrigger, append]);
+      let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`;
+      if (aiRequestTrigger.ref.verse > 0) {
+          reference += `:${aiRequestTrigger.ref.verse}`;
+      } else {
+          reference += ` 章 (全章摘要)`;
+      }
+
+      const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n');
+      const enrichedPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**我的请求**：${aiRequestTrigger.prompt}`;
+
+      // [修复] 直接在 append 时传递最新的 sessionId
+      append(
+        { role: 'user', content: enrichedPrompt },
+        { body: { sessionId } }
+      );
+    };
+
+    sendMessage();
+  }, [aiRequestTrigger, append, currentSessionId, pendingSessionId, savePendingSession, setCurrentSessionId]);
 
   const startResizing = useCallback(() => setIsResizing(true), []);
   const stopResizing = useCallback(() => setIsResizing(false), []);
@@ -657,9 +722,27 @@ export function AISidebar() {
     };
   }, [isResizing, resize, stopResizing]);
 
-  const handleChipClick = (prompt: string) => {
+  const handleChipClick = async (prompt: string) => {
     if (isLoading) return;
-    shouldAutoScrollRef.current = true; 
+    shouldAutoScrollRef.current = true;
+
+    // [修复] 如果是临时会话且有第一条消息，先保存会话到数据库
+    let sessionId = currentSessionId;
+    if (pendingSessionId && !pendingSessionHasMessages.current) {
+      let reference = '';
+      if (aiRequestTrigger) {
+        reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`;
+        if (aiRequestTrigger.ref.verse > 0) reference += `:${aiRequestTrigger.ref.verse}`;
+      }
+      const savedId = await savePendingSession(pendingSessionId, reference || prompt);
+      if (savedId) {
+        setCurrentSessionId(savedId);
+        setPendingSessionId(null);
+        sessionId = savedId;
+      }
+      pendingSessionHasMessages.current = true;
+    }
+
     let finalPrompt = prompt;
     if (aiRequestTrigger && messages.length === 0) {
         let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`;
@@ -667,8 +750,36 @@ export function AISidebar() {
         const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n');
         finalPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**我的请求**：${prompt}`;
     }
-    append({ role: 'user', content: finalPrompt });
+    // [修复] 直接在 append 时传递最新的 sessionId
+    append(
+      { role: 'user', content: finalPrompt },
+      { body: { sessionId } }
+    );
   };
+
+  // [修复] 自定义表单提交处理 - 在发送前检查临时会话
+  const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    // 如果是临时会话且有第一条消息，先保存会话到数据库
+    let sessionId = currentSessionId;
+    if (pendingSessionId && !pendingSessionHasMessages.current) {
+      const savedId = await savePendingSession(pendingSessionId, input.trim());
+      if (savedId) {
+        setCurrentSessionId(savedId);
+        setPendingSessionId(null);
+        sessionId = savedId;
+      }
+      pendingSessionHasMessages.current = true;
+    }
+
+    // 使用 append 发送消息，传递最新的 sessionId
+    append(
+      { role: 'user', content: input.trim() },
+      { body: { sessionId } }
+    );
+  }, [input, isLoading, currentSessionId, pendingSessionId, savePendingSession, setCurrentSessionId, append]);
 
   // [新增] 使用AI解析经文引用
   const parseVerseWithAI = useCallback(async (content: string): Promise<{ bookId: string; chapter: number; verse: number } | null> => {
@@ -1165,7 +1276,7 @@ export function AISidebar() {
             )}
 
             <div className="p-4 safe-area-bottom">
-              <form onSubmit={handleSubmit} className="flex gap-2 relative">
+              <form onSubmit={handleFormSubmit} className="flex gap-2 relative">
                 <input
                   className="flex-1 px-4 py-3 pr-12 border border-slate-200 dark:border-slate-700 rounded-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50 dark:bg-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-900"
                   value={input}
