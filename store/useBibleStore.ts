@@ -59,6 +59,11 @@ export const useBibleStore = create<StoreState>()(
         activeDmUserId: null,
         dmMessages: [],
         dmUnreadCount: 0,
+        // [修复] AI会话状态不持久化，页面刷新后创建新会话
+        currentSessionId: null,
+        sessions: [], // 会话列表从API加载
+        currentAiRequest: null,
+        aiQueue: [],
       }),
     }
   )

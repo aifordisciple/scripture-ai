@@ -478,16 +478,30 @@ export function AISidebar() {
   // [修复] 不再自动加载所有消息，改为在打开AI解读时或切换会话时加载
   // 历史消息加载逻辑已移到 handleSelectSession 和 isAiOpen effect 中
 
-  // [新增] 加载会话列表
+  // [新增] 加载会话列表 - 使用更健壮的错误处理
   useEffect(() => {
-    fetch('/api/chat/session')
-      .then(res => res.json())
-      .then(data => {
+    const loadSessions = async () => {
+      try {
+        const res = await fetch('/api/chat/session');
+        if (!res.ok) {
+          if (res.status === 401) {
+            // 用户未登录，不显示错误，静默处理
+            console.log('[AI] User not logged in, sessions will not be loaded');
+          }
+          return;
+        }
+        const data = await res.json();
         if (Array.isArray(data)) {
           setSessions(data);
+          console.log('[AI] Loaded', data.length, 'sessions from server');
+        } else if (data.error) {
+          console.error('[AI] API error:', data.error);
         }
-      })
-      .catch(err => console.error("Failed to load sessions", err));
+      } catch (err) {
+        console.error("[AI] Failed to load sessions:", err);
+      }
+    };
+    loadSessions();
   }, [setSessions]);
 
   // [新增] 加载用户自定义提示词
@@ -872,10 +886,8 @@ export function AISidebar() {
         { body: { sessionId } }
       );
 
-      // [新增] 新会话时自动生成标题
-      if (isNewSession && sessionId) {
-        generateSessionTitle(sessionId, enrichedPrompt);
-      }
+      // [修复] 新会话不需要自动生成标题，因为标题已经使用经文引用命名
+      // 如果用户想要自定义标题，可以使用重命名功能
     };
 
     sendMessage();
@@ -937,10 +949,7 @@ export function AISidebar() {
       { body: { sessionId } }
     );
 
-    // [新增] 新会话时自动生成标题
-    if (isNewSession && sessionId) {
-      generateSessionTitle(sessionId, finalPrompt);
-    }
+    // [修复] 新会话不需要自动生成标题，因为标题已经使用经文引用命名
   };
 
   // [修复] 自定义表单提交处理 - 在发送前检查临时会话
@@ -969,11 +978,8 @@ export function AISidebar() {
       { body: { sessionId } }
     );
 
-    // [新增] 新会话时自动生成标题
-    if (isNewSession && sessionId) {
-      generateSessionTitle(sessionId, messageContent);
-    }
-  }, [input, isLoading, currentSessionId, pendingSessionId, savePendingSession, setCurrentSessionId, append, generateSessionTitle]);
+    // [修复] 新会话不需要自动生成标题，因为标题已经使用经文引用命名
+  }, [input, isLoading, currentSessionId, pendingSessionId, savePendingSession, setCurrentSessionId, append]);
 
   // [新增] 使用AI解析经文引用
   const parseVerseWithAI = useCallback(async (content: string): Promise<{ bookId: string; chapter: number; verse: number } | null> => {
