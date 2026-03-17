@@ -269,12 +269,13 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     // 如果径向菜单打开，不做处理
     if (isRadialMenuOpen) return;
 
-    // 有队列内容或有解读待查看时：弹出队列面板
-    if (hasQueueContent || isAiFinishedButUnseen) {
+    // [修改] 只有在解读时（正在生成或有待查看的解读）点击才显示候选解读窗口
+    // 正在生成解读 或 有解读待查看时，弹出队列面板
+    if (isAiGenerating || isAiFinishedButUnseen) {
       setIsQueuePanelOpen(!isQueuePanelOpen);
       controls.start({ scale: [1, 0.9, 1], transition: { duration: 0.2 } });
     }
-    // 无队列时普通点击：不做操作（防止误触）
+    // [修改] 普通点击（无解读进行中）不做操作，避免误触
   };
 
   const handleDrag = (event: any, info: PanInfo) => {
@@ -321,10 +322,12 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     const isHorizontal = Math.abs(x) > Math.abs(y);
     const isVertical = Math.abs(y) > Math.abs(x);
 
+    // [修改] 左滑：只切换 AI 界面，不触发任何其他操作（如队列面板）
     if (isHorizontal && x < -threshold) {
-      // 左滑：切换 AI
       setAiOpen(!isAiOpen);
       setIsQueuePanelOpen(false);
+      // [新增] 清除手势提示，确保不会误触发其他 UI
+      setShowHint(null);
     }
     else if (isVertical && y < -threshold) {
       // 上滑：切换经文选择器（移动端）或切换目录（桌面端）
@@ -345,6 +348,8 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
       toggleFullscreen();
       setIsQueuePanelOpen(false);
     }
+    // [新增] 小幅度拖动（不满足任何方向阈值）：不做任何操作
+    // 这样可以避免误触发点击事件
 
     setShowHint(null);
     controls.start({
