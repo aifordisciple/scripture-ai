@@ -591,10 +591,17 @@ export function AISidebar() {
   const savePendingSession = useCallback(async (tempId: string, firstMessage?: string): Promise<string | null> => {
     // 生成标题
     let title = '新对话';
+    let bookId: string | undefined;
+    let chapter: number | undefined;
+
     if (aiRequestTrigger) {
       const { ref } = aiRequestTrigger;
       const verseSuffix = ref.verse > 0 ? `:${ref.verse}` : '';
       title = `${ref.bookName} ${ref.chapter}${verseSuffix}`;
+      // [修复] 从 bookName 查找 bookId
+      const book = BIBLE_BOOKS.find(b => b.name === ref.bookName || b.id === ref.bookName);
+      bookId = book?.id;
+      chapter = ref.chapter;
     } else if (firstMessage) {
       title = firstMessage.substring(0, 30) + (firstMessage.length > 30 ? '...' : '');
     }
@@ -605,8 +612,8 @@ export function AISidebar() {
       body: JSON.stringify({
         mode: aiMode,
         title,
-        bookId: aiRequestTrigger?.ref.bookName,
-        chapter: aiRequestTrigger?.ref.chapter,
+        bookId,
+        chapter,
         startVerse: aiRequestTrigger?.ref.verse > 0 ? aiRequestTrigger.ref.verse : undefined,
       }),
     });

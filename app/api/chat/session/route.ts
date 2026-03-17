@@ -52,15 +52,18 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { bookId, chapter, startVerse, endVerse, mode = 'general' } = body;
+    const { bookId, chapter, startVerse, endVerse, mode = 'general', title: providedTitle } = body;
 
-    // 自动生成标题
-    let title = '';
-    if (bookId && chapter) {
+    // 生成标题：优先使用前端传来的标题
+    let title = providedTitle;
+    if (!title && bookId && chapter) {
       const book = BIBLE_BOOKS.find(b => b.id === bookId);
       const bookName = book?.name || bookId;
       const date = new Date().toLocaleDateString('zh-CN');
       title = `《${bookName}》第${chapter}章 - ${date}`;
+    }
+    if (!title) {
+      title = '新对话';
     }
 
     const newSession = await prisma.chatSession.create({
