@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+    const userId = session.user.id;
 
     const body = await req.json();
     const {
@@ -42,14 +43,14 @@ export async function POST(req: NextRequest) {
 
     // 使用事务确保原子性
     const result = await prisma.$transaction(async (tx) => {
-      let finalSessionId = providedSessionId;
+      let finalSessionId = providedSessionId as string | undefined;
 
       // 如果需要创建会话
       if (createSession) {
         const { mode = 'general', title: providedTitle, bookId, chapter, startVerse, endVerse } = sessionData || {};
 
         // 生成标题
-        let title = providedTitle;
+        let title = providedTitle as string | undefined;
         if (!title && bookId && chapter) {
           const book = BIBLE_BOOKS.find(b => b.id === bookId);
           const bookName = book?.name || bookId;
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
 
         const newSession = await tx.chatSession.create({
           data: {
-            userId: session.user.id,
+            userId,
             bookId,
             chapter,
             startVerse,
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
       // 保存用户消息
       const userMessage = await tx.chatMessage.create({
         data: {
-          userId: session.user.id,
+          userId,
           sessionId: finalSessionId,
           role: message.role || 'user',
           content: message.content,
@@ -106,7 +107,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(result);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[API] Message save error:', error);
 
     if (error instanceof ChatError) {
@@ -144,6 +145,7 @@ export async function PATCH(req: NextRequest) {
         { status: 401 }
       );
     }
+    const userId = session.user.id;
 
     const body = await req.json();
     const { sessionId, content, verseRef, verseContent } = body;
@@ -159,7 +161,7 @@ export async function PATCH(req: NextRequest) {
     const result = await prisma.$transaction(async (tx) => {
       // 验证会话存在且属于当前用户
       const existingSession = await tx.chatSession.findFirst({
-        where: { id: sessionId, userId: session.user.id },
+        where: { id: sessionId, userId },
       });
 
       if (!existingSession) {
@@ -172,7 +174,7 @@ export async function PATCH(req: NextRequest) {
       // 保存 AI 回复
       const aiMessage = await tx.chatMessage.create({
         data: {
-          userId: session.user.id,
+          userId,
           sessionId,
           role: 'assistant',
           content,
@@ -191,7 +193,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     return NextResponse.json(result);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[API] AI message save error:', error);
 
     if (error instanceof ChatError) {

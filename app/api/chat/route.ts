@@ -176,7 +176,7 @@ ${backgroundText}
           }
         }
       },
-      onError: async ({ error }) => {
+      onError: async ({ error }: { error: unknown }) => {
         const chatError = ChatError.fromError(error, ChatErrorCode.AI_GENERATION_FAILED);
         logChatError(chatError, { sessionId, userId });
       }
