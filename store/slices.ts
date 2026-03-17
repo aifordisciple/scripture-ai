@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, MindMapNode } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, MindMapNode, SessionStatus, SessionError } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 
@@ -159,6 +159,23 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
   setAiOpen: (open) => set({ isAiOpen: open }),
   isAiGenerating: false,
   setAiGenerating: (isAiGenerating) => set({ isAiGenerating }),
+
+  // [新增] 会话状态机 - 简化状态管理
+  sessionStatus: 'idle',
+  sessionError: null,
+  setSessionStatus: (status) => set({ sessionStatus: status }),
+  setSessionError: (error) => set({ sessionError: error }),
+  resetSession: () => set({
+    sessionStatus: 'idle',
+    sessionError: null,
+    currentSessionId: null,
+  }),
+
+  // [新增] 会话加载状态
+  sessionsLoading: false,
+  messagesLoading: false,
+  setSessionsLoading: (loading) => set({ sessionsLoading: loading }),
+  setMessagesLoading: (loading) => set({ messagesLoading: loading }),
 
   // 队列状态
   currentAiRequest: null,

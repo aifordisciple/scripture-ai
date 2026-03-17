@@ -4,6 +4,7 @@ import { SYSTEM_PROMPT } from '@/lib/constants';
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
+import { ChatError, ChatErrorCode, logChatError } from '@/lib/errors/chat-errors';
 
 export const maxDuration = 300; // 增加到300秒(5分钟)，支持更长的流式输出
 
@@ -19,28 +20,74 @@ export async function POST(req: Request) {
     };
 
     if (!messages) {
-      return new Response(JSON.stringify({ error: 'Missing messages' }), { status: 400 });
+      return new Response(JSON.stringify({
+        error: 'Missing messages',
+        code: 'INVALID_REQUEST',
+        recoverable: false,
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // 获取当前登录用户会话
     const session = await auth();
     const userId = session?.user?.id;
 
-    // 如果用户已登录，保存用户的提问到数据库
-    if (userId) {
-       const lastUserMessage = messages[messages.length - 1];
-       if (lastUserMessage && lastUserMessage.role === 'user') {
-          await prisma.chatMessage.create({
-             data: {
-               userId,
-               role: 'user',
-               content: lastUserMessage.content,
-               sessionId: sessionId || null,
-               verseRef: verseRef || null,
-               verseContent: verseContent || null,
-             }
-          }).catch(err => console.error("Failed to save user message:", err));
-       }
+    // 如果用户已登录且有有效的 sessionId，使用事务保存用户消息
+    let userMessageId: string | null = null;
+    if (userId && sessionId && !sessionId.startsWith('temp-')) {
+      const lastUserMessage = messages[messages.length - 1];
+      if (lastUserMessage && lastUserMessage.role === 'user') {
+        try {
+          // 使用事务确保消息和会话更新的一致性
+          const result = await prisma.$transaction(async (tx) => {
+            // 保存用户消息
+            const msg = await tx.chatMessage.create({
+              data: {
+                userId,
+                role: 'user',
+                content: lastUserMessage.content,
+                sessionId: sessionId,
+                verseRef: verseRef || null,
+                verseContent: verseContent || null,
+              }
+            });
+
+            // 更新会话的 updatedAt
+            await tx.chatSession.update({
+              where: { id: sessionId },
+              data: { updatedAt: new Date() },
+            });
+
+            return msg;
+          });
+
+          userMessageId = result.id;
+          console.log('[AI] User message saved:', userMessageId);
+        } catch (err) {
+          const chatError = ChatError.fromError(err, ChatErrorCode.MESSAGE_SAVE_FAILED);
+          logChatError(chatError, { sessionId, userId, role: 'user' });
+          // 继续执行，不影响 AI 生成
+        }
+      }
+    } else if (userId) {
+      // 没有 sessionId 的情况下，仅保存消息（向后兼容）
+      const lastUserMessage = messages[messages.length - 1];
+      if (lastUserMessage && lastUserMessage.role === 'user') {
+        await prisma.chatMessage.create({
+          data: {
+            userId,
+            role: 'user',
+            content: lastUserMessage.content,
+            sessionId: sessionId || null,
+            verseRef: verseRef || null,
+            verseContent: verseContent || null,
+          }
+        }).catch(err => {
+          console.error("[AI] Failed to save user message:", err);
+        });
+      }
     }
 
     // --- 构造分层的 Context Prompt ---
@@ -78,33 +125,60 @@ ${backgroundText}
       maxTokens: 4096,
       // AI 流式输出完成后，保存回复到数据库
       onFinish: async ({ text, finishReason, usage }) => {
-         // 记录完成原因，便于调试
-         console.log(`[AI] Stream finished. Reason: ${finishReason}, Tokens: ${usage?.totalTokens || 'N/A'}`);
+        // 记录完成原因，便于调试
+        console.log(`[AI] Stream finished. Reason: ${finishReason}, Tokens: ${usage?.totalTokens || 'N/A'}`);
 
-         // 检查是否异常中断
-         if (finishReason && finishReason !== 'stop' && finishReason !== 'length') {
-           console.warn(`[AI] Stream may have been interrupted: ${finishReason}`);
-         }
+        // 检查是否异常中断
+        if (finishReason && finishReason !== 'stop' && finishReason !== 'length') {
+          console.warn(`[AI] Stream may have been interrupted: ${finishReason}`);
+        }
 
-         if (userId && text) {
-            try {
-              await prisma.chatMessage.create({
-                 data: {
-                   userId,
-                   role: 'assistant',
-                   content: text,
-                   sessionId: sessionId || null,
-                   verseRef: verseRef || null,
-                   verseContent: verseContent || null,
-                 }
+        // 保存 AI 回复
+        if (userId && text) {
+          try {
+            // 如果有有效的 sessionId，使用事务保存
+            if (sessionId && !sessionId.startsWith('temp-')) {
+              await prisma.$transaction(async (tx) => {
+                await tx.chatMessage.create({
+                  data: {
+                    userId,
+                    role: 'assistant',
+                    content: text,
+                    sessionId: sessionId,
+                    verseRef: verseRef || null,
+                    verseContent: verseContent || null,
+                  }
+                });
+
+                // 更新会话的 updatedAt
+                await tx.chatSession.update({
+                  where: { id: sessionId },
+                  data: { updatedAt: new Date() },
+                });
               });
-            } catch (err) {
-              console.error("Failed to save assistant message:", err);
+              console.log('[AI] Assistant message saved for session:', sessionId);
+            } else {
+              // 向后兼容：没有 sessionId 的情况
+              await prisma.chatMessage.create({
+                data: {
+                  userId,
+                  role: 'assistant',
+                  content: text,
+                  sessionId: sessionId || null,
+                  verseRef: verseRef || null,
+                  verseContent: verseContent || null,
+                }
+              });
             }
-         }
+          } catch (err) {
+            const chatError = ChatError.fromError(err, ChatErrorCode.MESSAGE_SAVE_FAILED);
+            logChatError(chatError, { sessionId, userId, role: 'assistant', textLength: text.length });
+          }
+        }
       },
       onError: async ({ error }) => {
-        console.error('[AI] Stream error:', error);
+        const chatError = ChatError.fromError(error, ChatErrorCode.AI_GENERATION_FAILED);
+        logChatError(chatError, { sessionId, userId });
       }
     });
 
@@ -117,9 +191,14 @@ ${backgroundText}
 
   } catch (error) {
     console.error("❌ API 路由致命错误:", error);
-    // 返回更详细的错误信息
-    const errorMessage = error instanceof Error ? error.message : '后端处理失败';
-    return new Response(JSON.stringify({ error: errorMessage }), {
+
+    const chatError = ChatError.fromError(error, ChatErrorCode.UNKNOWN_ERROR);
+
+    return new Response(JSON.stringify({
+      error: chatError.userMessage,
+      code: chatError.code,
+      recoverable: chatError.recoverable,
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

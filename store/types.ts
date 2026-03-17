@@ -4,6 +4,23 @@
 // 1. 基础数据结构
 // --------------------------------------------------
 
+// [新增] 会话状态机状态
+export type SessionStatus = 'idle' | 'loading' | 'ready' | 'creating' | 'error';
+
+// [新增] 会话错误类型
+export type SessionErrorType =
+  | 'LOAD_FAILED'
+  | 'CREATE_FAILED'
+  | 'MESSAGE_SAVE_FAILED'
+  | 'NETWORK_ERROR';
+
+// [新增] 会话错误信息
+export interface SessionError {
+  type: SessionErrorType;
+  message: string;
+  recoverable: boolean;
+}
+
 // [新增] 思维导图节点类型
 export interface MindMapNode {
   id: string;
@@ -287,6 +304,20 @@ export interface AISlice {
   aiRequestTrigger: { prompt: string; content: string; context: string; ref: VerseRef; timestamp: number; } | null;
   /** @deprecated Use enqueueAI instead */
   triggerAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
+
+  // [新增] 会话状态机 - 简化状态管理
+  sessionStatus: SessionStatus;
+  sessionError: SessionError | null;
+  setSessionStatus: (status: SessionStatus) => void;
+  setSessionError: (error: SessionError | null) => void;
+  resetSession: () => void;
+
+  // [新增] 会话加载状态
+  sessionsLoading: boolean;
+  messagesLoading: boolean;
+  setSessionsLoading: (loading: boolean) => void;
+  setMessagesLoading: (loading: boolean) => void;
+
   // [新增] 会话管理
   currentSessionId: string | null;
   setCurrentSessionId: (id: string | null) => void;
