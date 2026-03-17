@@ -266,6 +266,9 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
   };
 
   const handleTap = (event: MouseEvent, info: TapInfo) => {
+    // [修复] 如果发生了拖动，不处理点击
+    if (isDraggingRef.current) return;
+
     // 如果径向菜单打开，不做处理
     if (isRadialMenuOpen) return;
 
@@ -356,6 +359,11 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
       x: 0, y: 0, scale: 1,
       transition: { type: "spring", stiffness: 500, damping: 25 }
     });
+
+    // [修复] 延迟重置拖动标志，确保 onTap 不会在拖动结束后被误触发
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 100);
   };
 
   // 关闭队列面板
