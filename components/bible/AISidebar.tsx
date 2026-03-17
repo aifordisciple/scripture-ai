@@ -367,11 +367,13 @@ export function AISidebar() {
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
   // [修复] 追踪临时会话是否已有消息（用于决定是否保存会话）
   const pendingSessionHasMessages = useRef(false);
-  
+  // [修复] 追踪 sessions 是否已加载完成（用于避免竞态条件）
+  const sessionsLoadedRef = useRef(false);
+
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const [isImmersive, setIsImmersive] = useState(false); 
-  
+  const [isImmersive, setIsImmersive] = useState(false);
+
   const lastProcessedTimeRef = useRef<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
@@ -488,21 +490,27 @@ export function AISidebar() {
             // 用户未登录，不显示错误，静默处理
             console.log('[AI] User not logged in, sessions will not be loaded');
           }
+          sessionsLoadedRef.current = true;
           return;
         }
         const data = await res.json();
         if (Array.isArray(data)) {
           setSessions(data);
+          sessionsLoadedRef.current = true;
           console.log('[AI] Loaded', data.length, 'sessions from server');
+          // [修复] 不再自动恢复最近的会话，而是每次打开时都创建新对话
+          // 用户可以通过历史对话下拉菜单切换到历史会话
         } else if (data.error) {
           console.error('[AI] API error:', data.error);
+          sessionsLoadedRef.current = true;
         }
       } catch (err) {
         console.error("[AI] Failed to load sessions:", err);
+        sessionsLoadedRef.current = true;
       }
     };
     loadSessions();
-  }, [setSessions]);
+  }, [setSessions]); // [修复] 移除 currentSessionId 依赖，避免重复加载
 
   // [新增] 加载用户自定义提示词
   useEffect(() => {
@@ -537,16 +545,21 @@ export function AISidebar() {
     }
   }, [isAiOpen, currentSessionId, setMessages]);
 
-  // [修复] 当打开AI解读界面时，自动创建一个临时新会话（仅在没有任何会话时）
+  // [修复] 当打开AI解读界面时，始终创建一个新的临时会话
+  // 用户可以通过历史对话下拉菜单切换到历史会话
   useEffect(() => {
+    // [修复] 等待 sessions 加载完成后再决定是否创建临时会话
+    if (!sessionsLoadedRef.current) return;
+
     if (isAiOpen && !currentSessionId && !pendingSessionId) {
-      // 生成一个临时会话ID（不保存到数据库）
+      // 每次打开AI解读时都创建新的临时会话ID（不保存到数据库，直到发送第一条消息）
       const tempId = `temp-${Date.now()}`;
       setPendingSessionId(tempId);
       setCurrentSessionId(tempId);
       setMessages([]);
       pendingSessionHasMessages.current = false;
       loadedSessionRef.current = tempId;
+      console.log('[AI] Created new temp session:', tempId);
     }
   }, [isAiOpen, currentSessionId, pendingSessionId, setCurrentSessionId, setMessages]);
 
