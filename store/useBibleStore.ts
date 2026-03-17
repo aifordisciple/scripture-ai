@@ -32,39 +32,43 @@ export const useBibleStore = create<StoreState>()(
       name: 'bible-storage',
       storage: createJSONStorage(() => localStorage),
       // 控制哪些状态不要保存到 localStorage 中
-      partialize: (state) => ({
-        ...state,
-        isAuthOpen: false,
-        isShareOpen: false,
-        isNoteOpen: false,
-        isAiGenerating: false,
-        isMobileSettingsOpen: false,
-        isAiOpen: false,
-        aiRequestTrigger: null,
-        chapterSpeechText: "",
-        scrollToVerse: null,
-        isSyncing: false,
-        syncError: null,
-        groupPlanContext: null, // 不持久化小组计划上下文
-        // Atlas 状态不持久化
-        selectedLocationId: null,
-        selectedLocation: null,
-        isAtlasPanelOpen: false,
-        locationSearchResults: [],
-        atlasVerseContext: null,
-        viewingLocationVerses: null,
-        // DM 状态不持久化
-        isDmPanelOpen: false,
-        dmConversations: [],
-        activeDmUserId: null,
-        dmMessages: [],
-        dmUnreadCount: 0,
-        // [修复] AI会话状态不持久化，页面刷新后创建新会话
-        currentSessionId: null,
-        sessions: [], // 会话列表从API加载
-        currentAiRequest: null,
-        aiQueue: [],
-      }),
+      partialize: (state) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { sessions, currentSessionId, currentAiRequest, aiQueue, ...rest } = state;
+        return {
+          ...rest,
+          isAuthOpen: false,
+          isShareOpen: false,
+          isNoteOpen: false,
+          isAiGenerating: false,
+          isMobileSettingsOpen: false,
+          isAiOpen: false,
+          aiRequestTrigger: null,
+          chapterSpeechText: "",
+          scrollToVerse: null,
+          isSyncing: false,
+          syncError: null,
+          groupPlanContext: null, // 不持久化小组计划上下文
+          // Atlas 状态不持久化
+          selectedLocationId: null,
+          selectedLocation: null,
+          isAtlasPanelOpen: false,
+          locationSearchResults: [],
+          atlasVerseContext: null,
+          viewingLocationVerses: null,
+          // DM 状态不持久化
+          isDmPanelOpen: false,
+          dmConversations: [],
+          activeDmUserId: null,
+          dmMessages: [],
+          dmUnreadCount: 0,
+          // [修复] AI会话状态不持久化，页面刷新后创建新会话
+          // sessions 和 currentSessionId 从 API 加载，不保存到 localStorage
+          currentSessionId: null,
+          currentAiRequest: null,
+          aiQueue: [],
+        };
+      },
     }
   )
 );
