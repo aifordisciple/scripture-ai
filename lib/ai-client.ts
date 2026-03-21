@@ -18,7 +18,7 @@ export interface AIConfig {
 // 🔧 DEFAULT CONFIGURATION - Change these values to modify defaults
 // ============================================================================
 // 默认使用 MiniMax 云端 API
-const DEFAULT_CLOUD_MODEL = 'MiniMax-M2.5-highspeed';
+const DEFAULT_CLOUD_MODEL = 'MiniMax-M2.7-highspeed';
 const DEFAULT_CLOUD_BASE_URL = 'https://api.minimaxi.com/v1';
 
 // 本地 Ollama 配置（备选）

@@ -407,7 +407,7 @@ export function AISidebar() {
   });
 
   const { apiConfig } = useBibleStore();
-  const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload, setInput } = useChat({
     api: '/api/chat',
     body: {
         apiConfig: apiConfig,
@@ -1033,7 +1033,9 @@ export function AISidebar() {
       { role: 'user', content: messageContent },
       { body: { sessionId } }
     );
-  }, [input, isLoading, currentSessionId, savePendingSession, setCurrentSessionId, append]);
+    // 清空输入框
+    setInput('');
+  }, [input, isLoading, currentSessionId, savePendingSession, setCurrentSessionId, append, setInput]);
 
   // [新增] 使用AI解析经文引用
   const parseVerseWithAI = useCallback(async (content: string): Promise<{ bookId: string; chapter: number; verse: number } | null> => {

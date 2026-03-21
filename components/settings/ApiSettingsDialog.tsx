@@ -127,7 +127,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
         provider: 'cloud',
         baseUrl: 'https://api.minimaxi.com/v1',
         apiKey: 'sk-cp-q9pAztav67XjDz0H1rvF9bqP0u6Ejwrp4-bw7tZJo8-E2yCSTYCgJlePKkFe8GC1PWxIjxwfU2R5dDhwAt2C5YJxV_bFmH7JMT7-sJCIEPLPkRIOJUYe2Kg',
-        model: 'MiniMax-M2.5-highspeed'
+        model: 'MiniMax-M2.7-highspeed'
       });
     }
   };
