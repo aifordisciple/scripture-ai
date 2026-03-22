@@ -61,19 +61,29 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
   const [sharedDevotionals, setSharedDevotionals] = useState<Record<string, string>>({});
   const [togglingTask, setTogglingTask] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // Calculate current day based on start date (using midnight for accurate calculation)
-  const calculateCurrentDay = () => {
+  // Calculate current day based on start date (client-side only to avoid hydration mismatch)
+  const [currentDay, setCurrentDay] = useState(1);
+
+  useEffect(() => {
+    setMounted(true);
     const startDateObj = new Date(plan.startDate);
     const startMidnight = startDateObj.setHours(0, 0, 0, 0);
     const todayMidnight = new Date().setHours(0, 0, 0, 0);
     const diffDays = Math.round((todayMidnight - startMidnight) / 86400000);
-    return Math.max(1, diffDays + 1);
-  };
+    const calculatedDay = Math.max(1, diffDays + 1);
+    setCurrentDay(calculatedDay);
+  }, [plan.startDate]);
 
-  const currentDay = Math.min(calculateCurrentDay(), tasks.length || plan.dailyChapters.length);
+  // Update currentDay when tasks are loaded
+  useEffect(() => {
+    if (tasks.length > 0 || plan.dailyChapters.length > 0) {
+      setCurrentDay(prev => Math.min(prev, tasks.length || plan.dailyChapters.length));
+    }
+  }, [tasks.length, plan.dailyChapters.length]);
 
-  // Helper function to get date string for a task day
+  // Helper function to get date string for a task day (deterministic, uses plan.startDate)
   const getTaskDate = (day: number) => {
     const startDateObj = new Date(plan.startDate);
     startDateObj.setHours(0, 0, 0, 0);
@@ -82,7 +92,11 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
   };
 
   // Calculate overdue days (days before current day that are not completed)
-  const getOverdueDays = () => {
+  // Store as state to avoid hydration mismatch
+  const [overdueDays, setOverdueDays] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (!mounted) return;
     const overdue: number[] = [];
     for (let day = 1; day < currentDay; day++) {
       const dayTasks = progress.completedTasks[day.toString()] || [];
@@ -96,10 +110,9 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
         }
       }
     }
-    return overdue;
-  };
+    setOverdueDays(overdue);
+  }, [mounted, currentDay, progress.completedTasks, tasks, sharedDevotionals]);
 
-  const overdueDays = getOverdueDays();
   const hasOverdue = overdueDays.length > 0;
 
   // Determine which day to show/use
