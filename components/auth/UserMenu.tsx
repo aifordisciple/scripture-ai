@@ -4,7 +4,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, BookMarked, FileText, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageCircle, Users, BarChart3 } from "lucide-react";
+import { UserCircle, LogOut, Settings, BookMarked, FileText, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageCircle, Users, BarChart3, Bookmark } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { UserFeedbackPanel } from "@/components/feedback/UserFeedbackPanel";
 import { useGroupUnread } from "@/hooks/use-group-unread";
