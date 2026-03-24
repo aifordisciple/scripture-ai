@@ -152,6 +152,17 @@ export function UserMenu() {
               else addTab({ type: 'notes' });
             }}
           />
+          <MenuItem
+            icon={<Bookmark className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+            label="我的收藏"
+            onClick={() => {
+              setIsOpen(false);
+              const { tabs, setActiveTab, addTab } = useBibleStore.getState();
+              const existTab = tabs.find(t => t.type === 'insights');
+              if (existTab) setActiveTab(existTab.id);
+              else addTab({ type: 'insights' });
+            }}
+          />
 
           <div className="my-1 border-t dark:border-slate-800" />
 
