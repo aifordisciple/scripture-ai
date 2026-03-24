@@ -142,9 +142,15 @@ export function InsightsTab() {
     setEditTags("");
   };
 
+  // 移除 think 标签及其内容
+  const removeThinkTags = (content: string) => {
+    return content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  };
+
   // 获取摘要（前100字）
   const getSummary = (content: string) => {
-    const text = content.replace(/[#*`>\-\[\]]/g, '').trim();
+    const cleanContent = removeThinkTags(content);
+    const text = cleanContent.replace(/[#*`>\-\[\]]/g, '').trim();
     return text.length > 100 ? text.substring(0, 100) + '...' : text;
   };
 
@@ -310,7 +316,7 @@ export function InsightsTab() {
                         )}
                         {expandedId === item.id ? (
                           <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.content || ''}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{removeThinkTags(item.content || '')}</ReactMarkdown>
                           </div>
                         ) : (
                           <p className="text-[15px] leading-relaxed text-foreground/80 line-clamp-2">
