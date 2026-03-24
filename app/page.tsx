@@ -42,7 +42,6 @@ const CrossRefTab = dynamic(() => import("@/components/bible/CrossRefTab").then(
 const GroupTab = dynamic(() => import("@/components/bible/GroupTab").then(mod => mod.GroupTab), { ssr: false });
 const GroupPlanDailyFlow = dynamic(() => import("@/components/group/GroupPlanDailyFlow").then(mod => mod.GroupPlanDailyFlow), { ssr: false });
 const AtlasPanel = dynamic(() => import("@/components/atlas/AtlasPanel").then(mod => mod.default), { ssr: false });
-const MindMapModal = dynamic(() => import("@/components/mindmap/MindMapModal").then(mod => mod.MindMapModal), { ssr: false });
 
 // --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
 const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
@@ -154,9 +153,7 @@ export default function Home() {
     chapterSpeechText,
     isMobileSettingsOpen,
     setMobileSettingsOpen,
-    streakCount,
-    // [新增] 思维导图
-    isMindMapOpen, mindMapData, mindMapTitle, closeMindMapModal
+    streakCount
   } = useBibleStore();
 
   // 用于追踪 activeTabId 变化，以重置滚动检测状态
@@ -327,12 +324,6 @@ export default function Home() {
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <NoteEditor />
       <ShareCard />
-      <MindMapModal
-        isOpen={isMindMapOpen}
-        onClose={closeMindMapModal}
-        data={mindMapData}
-        title={mindMapTitle}
-      />
       <MagicBall
         onOpenBookPicker={() => setIsBookPickerOpen(true)}
         isBookPickerOpen={isBookPickerOpen}

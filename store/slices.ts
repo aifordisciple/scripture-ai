@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, MindMapNode, SessionStatus, SessionError } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, SessionStatus, SessionError } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 
@@ -95,21 +95,6 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set, ge
         group: { completed: false, shown: false },
       }
     };
-  }),
-
-  // [新增] 思维导图弹窗状态
-  isMindMapOpen: false,
-  mindMapData: null,
-  mindMapTitle: '',
-  openMindMapModal: (data, title) => set({
-    isMindMapOpen: true,
-    mindMapData: data,
-    mindMapTitle: title
-  }),
-  closeMindMapModal: () => set({
-    isMindMapOpen: false,
-    mindMapData: null,
-    mindMapTitle: ''
   }),
 });
 
