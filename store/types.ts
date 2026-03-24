@@ -23,7 +23,7 @@ export interface SessionError {
 
 export interface Tab {
   id: string;
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph';
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights';
   book?: string;
   chapter?: string;
   query?: string;
@@ -164,8 +164,10 @@ export interface SavedInsight {
   chapter: number;
   verse?: number;
   title?: string;
+  content: string;
   tags: string[];
   createdAt: string;
+  updatedAt?: string;
 }
 
 // [新增] 快捷动作配置
@@ -248,7 +250,7 @@ export interface ReaderSlice {
   activeTabId: string;
   // [修复] 在这里补上 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group'
   addTab: (params: {
-    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph';
+    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights';
     book?: string;
     chapter?: string;
     query?: string;
@@ -326,6 +328,7 @@ export interface AISlice {
   savedInsights: SavedInsight[];
   setSavedInsights: (insights: SavedInsight[]) => void;
   addSavedInsight: (insight: SavedInsight) => void;
+  updateSavedInsight: (id: string, data: Partial<SavedInsight>) => void;
   deleteSavedInsight: (id: string) => void;
   // [新增] 快捷动作
   quickActions: QuickAction[];

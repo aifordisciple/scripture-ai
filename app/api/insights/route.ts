@@ -15,15 +15,22 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const bookId = searchParams.get('bookId');
     const chapter = searchParams.get('chapter');
+    const search = searchParams.get('search');  // 关键词搜索
 
     // 构建查询条件
     const where: any = { userId: session.user.id };
     if (bookId) where.bookId = bookId;
     if (chapter) where.chapter = parseInt(chapter);
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } }
+      ];
+    }
 
     const insights = await prisma.savedInsight.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { updatedAt: 'desc' },
       take: 100,
     });
 
@@ -43,7 +50,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { messageId, bookId, chapter, verse, title, tags = [] } = body;
+    const { messageId, bookId, chapter, verse, title, content, tags = [] } = body;
 
     if (!messageId || !bookId || !chapter) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -71,6 +78,7 @@ export async function POST(req: NextRequest) {
         chapter,
         verse,
         title,
+        content: content || '',
         tags,
       },
     });
@@ -78,6 +86,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(insight);
   } catch (error) {
     console.error('Error saving insight:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// PUT: 更新收藏内容
+export async function PUT(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { id, title, content, tags } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+    }
+
+    const insight = await prisma.savedInsight.update({
+      where: { id, userId: session.user.id },
+      data: { title, content, tags },
+    });
+
+    return NextResponse.json(insight);
+  } catch (error) {
+    console.error('Error updating insight:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

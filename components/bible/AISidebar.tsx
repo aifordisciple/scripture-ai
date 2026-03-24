@@ -13,7 +13,6 @@ import { AudioButton } from './AudioButton';
 import { useChat } from 'ai/react';
 import { motion, AnimatePresence } from "framer-motion";
 import type { ChatSession } from '@/store/types';
-import { BookPicker } from './BookPicker';
 
 // --- 1. 子组件：高性能消息气泡 ---
 const MessageBubble = memo(({
@@ -21,8 +20,6 @@ const MessageBubble = memo(({
   content,
   isLatest,
   onRetry,
-  // [新增] 传入用于保存笔记的上下文信息
-  onSaveToNote,
   // [新增] 收藏功能
   onSaveInsight,
   isSaved,
@@ -35,14 +32,12 @@ const MessageBubble = memo(({
   content: string;
   isLatest: boolean;
   onRetry?: () => void;
-  onSaveToNote?: (text: string, messageContent?: string) => void;
   onSaveInsight?: () => void;
   isSaved?: boolean;
   onShare?: () => void;
   fontSize?: 'small' | 'medium' | 'large' | 'xlarge';
 }) => {
   const [copied, setCopied] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [bookmarked, setBookmarked] = useState(isSaved);
 
   let mainText = content;
@@ -73,14 +68,6 @@ const MessageBubble = memo(({
         });
     } else {
       fallbackCopy(copyText, setCopied);
-    }
-  };
-
-  const handleSaveToNote = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onSaveToNote) {
-       onSaveToNote(mainText, content);  // 传入消息内容用于解析经文引用
-       showSuccess(setSaved);
     }
   };
 
@@ -249,21 +236,6 @@ const MessageBubble = memo(({
                           {copied ? "已复制" : "复制"}
                       </button>
 
-                      {/* [新增] 保存到笔记按钮 */}
-                      {onSaveToNote && (
-                        <button
-                            onClick={handleSaveToNote}
-                            className={cn(
-                                "flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg",
-                                saved ? "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" : "text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
-                            )}
-                            title="存为笔记"
-                        >
-                            {saved ? <Check className="w-3.5 h-3.5" /> : <PenLine className="w-3.5 h-3.5" />}
-                            {saved ? "已保存" : "笔记"}
-                        </button>
-                      )}
-
                       {/* [新增] 收藏按钮 */}
                       {onSaveInsight && (
                         <button
@@ -326,7 +298,7 @@ export function AISidebar() {
   const {
     isAiOpen, setAiOpen, clearSelection, aiRequestTrigger,
     sidebarWidth, setSidebarWidth,
-    setAiGenerating, openNoteEditor, notes, updateNote,
+    setAiGenerating,
     // 队列相关
     currentAiRequest, aiQueue, completeCurrentRequest, failCurrentRequest, cancelAIRequest,
     // [新增] 会话管理 - 使用新的状态机
@@ -355,11 +327,6 @@ export function AISidebar() {
   const lastProcessedTimeRef = useRef<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
-
-  // [新增] 经文选择器状态（用于保存笔记时无法自动识别经文的情况）
-  const [showVersePicker, setShowVersePicker] = useState(false);
-  const [pendingNoteText, setPendingNoteText] = useState<string | null>(null);
-  const [isParsingVerse, setIsParsingVerse] = useState(false);
 
   // [新增] 重命名会话状态
   const [showRenameModal, setShowRenameModal] = useState(false);
@@ -803,56 +770,12 @@ export function AISidebar() {
         chapter: aiRequestTrigger.ref.chapter,
         verse: aiRequestTrigger.ref.verse > 0 ? aiRequestTrigger.ref.verse : undefined,
         title: content.substring(0, 50) + '...',
+        content: content,  // 存储完整内容
       }),
     });
     const insight = await res.json();
     addSavedInsight(insight);
   }, [aiRequestTrigger, addSavedInsight]);
-
-  // [新增] 从消息内容中解析经文引用
-  const parseVerseReference = useCallback((content: string): { bookId: string; chapter: number; verse: number } | null => {
-    // 匹配格式：**📖 创世记 1:1** 或 **📖 创世记 1 章 (全章摘要)**
-    const refMatch = content.match(/\*\*📖\s*(.+?)\*\*/);
-    if (!refMatch) return null;
-
-    const refText = refMatch[1].trim();
-
-    // 匹配 "书卷 章节:节" 格式
-    const verseMatch = refText.match(/^(.+?)\s+(\d+):(\d+)$/);
-    if (verseMatch) {
-      const bookName = verseMatch[1].trim();
-      const chapter = parseInt(verseMatch[2]);
-      const verse = parseInt(verseMatch[3]);
-      const book = BIBLE_BOOKS.find(b => b.name === bookName || b.id === bookName);
-      if (book) {
-        return { bookId: book.id, chapter, verse };
-      }
-    }
-
-    // 匹配 "书卷 章节 章" 格式（全章摘要）
-    const chapterMatch = refText.match(/^(.+?)\s+(\d+)\s*章/);
-    if (chapterMatch) {
-      const bookName = chapterMatch[1].trim();
-      const chapter = parseInt(chapterMatch[2]);
-      const book = BIBLE_BOOKS.find(b => b.name === bookName || b.id === bookName);
-      if (book) {
-        return { bookId: book.id, chapter, verse: 0 };
-      }
-    }
-
-    // 匹配简单的 "书卷 章节" 格式
-    const simpleMatch = refText.match(/^(.+?)\s+(\d+)$/);
-    if (simpleMatch) {
-      const bookName = simpleMatch[1].trim();
-      const chapter = parseInt(simpleMatch[2]);
-      const book = BIBLE_BOOKS.find(b => b.name === bookName || b.id === bookName);
-      if (book) {
-        return { bookId: book.id, chapter, verse: 0 };
-      }
-    }
-
-    return null;
-  }, []);
 
   const handleClearChat = async () => {
     if(confirm("确定要清空所有灵修对话历史吗？")) {
@@ -1001,112 +924,6 @@ export function AISidebar() {
     // 清空输入框
     setInput('');
   }, [input, isLoading, currentSessionId, savePendingSession, setCurrentSessionId, append, setInput]);
-
-  // [新增] 使用AI解析经文引用
-  const parseVerseWithAI = useCallback(async (content: string): Promise<{ bookId: string; chapter: number; verse: number } | null> => {
-    try {
-      const res = await fetch('/api/parse-verse', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, apiConfig }),
-      });
-      const data = await res.json();
-
-      if (data.bookId && data.chapter !== null && data.confidence !== 'none') {
-        return {
-          bookId: data.bookId,
-          chapter: data.chapter,
-          verse: data.verse || 0
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error('AI parse verse error:', error);
-      return null;
-    }
-  }, [apiConfig]);
-
-  // [新增] 实际保存笔记到指定经文
-  const saveNoteToVerse = useCallback((aiText: string, bookId: string, chapter: number, verse: number) => {
-    openNoteEditor(bookId, chapter, verse);
-
-    setTimeout(() => {
-      const appendContent = `\n\n---\n**✨ AI 启发 (${new Date().toLocaleDateString()})：**\n${aiText}`;
-      const existingNote = useBibleStore.getState().notes.find(n => n.bookId === bookId && n.chapter === chapter && n.verse === verse);
-
-      if (existingNote) {
-        useBibleStore.getState().updateNote(existingNote.id, existingNote.content + appendContent);
-      } else {
-        const tempId = `temp-${Date.now()}`;
-        useBibleStore.getState().addNote({
-          id: tempId, bookId, chapter, verse, content: appendContent.trim()
-        });
-      }
-    }, 100);
-  }, [openNoteEditor]);
-
-  // [新增] 处理将 AI 解读一键追加到笔记中的逻辑
-  const handleSaveToNote = useCallback(async (aiText: string, messageContent?: string) => {
-    let bookId: string;
-    let chapter: number;
-    let verse: number;
-
-    // 优先使用 aiRequestTrigger（当前会话的上下文）
-    if (aiRequestTrigger) {
-      bookId = aiRequestTrigger.ref.bookName;
-      chapter = aiRequestTrigger.ref.chapter;
-      verse = aiRequestTrigger.ref.verse;
-      saveNoteToVerse(aiText, bookId, chapter, verse);
-      return;
-    }
-
-    // 尝试从消息内容中解析经文引用
-    if (messageContent) {
-      const parsed = parseVerseReference(messageContent);
-      if (parsed) {
-        bookId = parsed.bookId;
-        chapter = parsed.chapter;
-        verse = parsed.verse;
-        saveNoteToVerse(aiText, bookId, chapter, verse);
-        return;
-      }
-
-      // 正则解析失败，尝试AI解析
-      setIsParsingVerse(true);
-      try {
-        const aiParsed = await parseVerseWithAI(messageContent);
-        setIsParsingVerse(false);
-
-        if (aiParsed) {
-          saveNoteToVerse(aiText, aiParsed.bookId, aiParsed.chapter, aiParsed.verse);
-          return;
-        }
-
-        // AI也无法识别，显示手动选择器
-        setPendingNoteText(aiText);
-        setShowVersePicker(true);
-      } catch (error) {
-        setIsParsingVerse(false);
-        setPendingNoteText(aiText);
-        setShowVersePicker(true);
-      }
-      return;
-    }
-
-    // 既没有 aiRequestTrigger 也没有 messageContent
-    setPendingNoteText(aiText);
-    setShowVersePicker(true);
-  }, [aiRequestTrigger, parseVerseReference, parseVerseWithAI, saveNoteToVerse]);
-
-  // [新增] 处理手动选择经文后的保存
-  const handleVersePickerSelect = useCallback((bookId: string, chapter: number) => {
-    setShowVersePicker(false);
-    if (pendingNoteText) {
-      saveNoteToVerse(pendingNoteText, bookId, chapter, 0);
-      setPendingNoteText(null);
-    }
-  }, [pendingNoteText, saveNoteToVerse]);
-
 
   const getIcon = (id: string) => {
     switch (id) {
@@ -1448,8 +1265,6 @@ export function AISidebar() {
                             content={m.content}
                             isLatest={isLatest && isLoading}
                             onRetry={(!isLoading && isAssistant && isLatest) ? () => reload() : undefined}
-                            // [新增] 只有助手回复并且不为空时才显示保存笔记按钮
-                            onSaveToNote={(isAssistant && m.content.length > 0) ? (text) => handleSaveToNote(text, m.content) : undefined}
                             // [新增] 收藏功能
                             onSaveInsight={(isAssistant && m.content.length > 0 && aiRequestTrigger) ? () => handleSaveInsight(messageId, m.content) : undefined}
                             isSaved={savedInsights.some(i => i.messageId === messageId)}
@@ -1603,26 +1418,6 @@ export function AISidebar() {
         
         {isResizing && <div className="fixed inset-0 z-[100] cursor-col-resize" />}
       </div>
-
-      {/* [新增] AI解析经文时的加载提示 */}
-      {isParsingVerse && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30">
-          <div className="bg-white dark:bg-slate-800 px-6 py-4 rounded-xl shadow-xl flex items-center gap-3">
-            <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
-            <span className="text-sm text-gray-700 dark:text-gray-200">正在识别经文引用...</span>
-          </div>
-        </div>
-      )}
-
-      {/* [新增] 手动选择经文的弹窗 */}
-      <BookPicker
-        open={showVersePicker}
-        onOpenChange={(open) => {
-          setShowVersePicker(open);
-          if (!open) setPendingNoteText(null);
-        }}
-        onSelect={handleVersePickerSelect}
-      />
 
       {/* [新增] 重命名会话弹窗 */}
       <AnimatePresence>

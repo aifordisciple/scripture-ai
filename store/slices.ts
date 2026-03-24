@@ -306,6 +306,9 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
   savedInsights: [],
   setSavedInsights: (insights) => set({ savedInsights: insights }),
   addSavedInsight: (insight) => set((state) => ({ savedInsights: [insight, ...state.savedInsights] })),
+  updateSavedInsight: (id, data) => set((state) => ({
+    savedInsights: state.savedInsights.map(i => i.id === id ? { ...i, ...data } : i)
+  })),
   deleteSavedInsight: (id) => set((state) => ({ savedInsights: state.savedInsights.filter(i => i.id !== id) })),
 
   // [新增] 快捷动作 - 从 THEOLOGICAL_PROMPTS 初始化
