@@ -104,7 +104,7 @@ export function useAudioPlayer(onFinished?: () => void) {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: "圣经朗读",
-            artist: "Scripture AI",
+            artist: "AI读",
             album: "Audio Bible",
             // artwork: [{ src: '/icon.png', sizes: '512x512', type: 'image/png' }] // 可选：添加图标
         });

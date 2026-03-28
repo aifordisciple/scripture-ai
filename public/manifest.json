@@ -1,6 +1,6 @@
 {
-  "name": "Scripture AI - 圣经阅读与灵修助手",
-  "short_name": "Scripture AI",
+  "name": "AI读 - 圣经阅读与灵修助手",
+  "short_name": "AI读",
   "description": "AI驱动的圣经阅读与灵修助手，支持中英对照、语音朗读、高亮笔记、读经计划等功能",
   "start_url": "/",
   "scope": "/",

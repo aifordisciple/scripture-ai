@@ -203,13 +203,13 @@ export async function POST(req: NextRequest) {
                   {bookName} {chapter}:{verseRange}
                 </div>
                 {layoutMode === 'modern' && (
-                  <div style={{ fontSize: 18, opacity: 0.7, marginTop: 8 }}>Scripture AI Daily Verse</div>
+                  <div style={{ fontSize: 18, opacity: 0.7, marginTop: 8 }}>AI读 每日经文</div>
                 )}
               </div>
 
               {layoutMode !== 'modern' && layoutMode !== 'minimal' && (
                 <div style={{ fontSize: 16, opacity: 0.7, letterSpacing: 2, textTransform: 'uppercase' }}>
-                  Scripture AI
+                  AI读
                 </div>
               )}
             </div>

@@ -64,7 +64,7 @@ export function getFeedbackReplyTemplate(
       <body>
         <div class="container">
           <div class="header">
-            <h1 style="margin: 0;">📖 Scripture AI</h1>
+            <h1 style="margin: 0;">📖 AI读</h1>
             <p style="margin: 10px 0 0 0;">您的反馈收到了回复</p>
           </div>
           <div class="content">
@@ -85,8 +85,8 @@ export function getFeedbackReplyTemplate(
             </p>
           </div>
           <div class="footer">
-            <p>此邮件由 Scripture AI 自动发送，请勿直接回复。</p>
-            <p>© ${new Date().getFullYear()} Scripture AI. All rights reserved.</p>
+            <p>此邮件由 AI读 自动发送，请勿直接回复。</p>
+            <p>© ${new Date().getFullYear()} AI读. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -104,7 +104,7 @@ ${adminReply}
 
 查看完整对话：${feedbackUrl}
 
-此邮件由 Scripture AI 自动发送，请勿直接回复。
+此邮件由 AI读 自动发送，请勿直接回复。
     `.trim(),
   };
 }
@@ -174,8 +174,8 @@ export function getNewFeedbackTemplate(
             <a href="${adminUrl}" class="button">前往管理后台处理</a>
           </div>
           <div class="footer">
-            <p>此邮件由 Scripture AI 自动发送</p>
-            <p>© ${new Date().getFullYear()} Scripture AI. All rights reserved.</p>
+            <p>此邮件由 AI读 自动发送</p>
+            <p>© ${new Date().getFullYear()} AI读. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -195,7 +195,7 @@ ${feedbackContent}
 
 前往管理后台处理：${adminUrl}
 
-此邮件由 Scripture AI 自动发送。
+此邮件由 AI读 自动发送。
     `.trim(),
   };
 }
@@ -221,7 +221,7 @@ export async function sendEmail(
 
   try {
     await transporter.sendMail({
-      from: `"Scripture AI" <${process.env.SMTP_USER}>`,
+      from: `"AI读" <${process.env.SMTP_USER}>`,
       to,
       subject: template.subject,
       text: template.text,

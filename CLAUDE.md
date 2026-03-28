@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Scripture AI** is a Bible reading & devotional web application with AI-powered verse interpretation, TTS voice reading, highlights, notes, and reading plans. Chinese-first UI with CUV/KJV bilingual support.
+**AI读** is a Bible reading & devotional web application with AI-powered verse interpretation, TTS voice reading, highlights, notes, and reading plans. Chinese-first UI with CUV/KJV bilingual support.
 
 ## Commands
 

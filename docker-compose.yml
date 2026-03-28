@@ -12,10 +12,14 @@ services:
     # [方案 B] 强制让 Docker 读取项目根目录下的环境变量文件
     env_file:
       - .env.local
+    volumes:
+      - ./prisma:/app/prisma  # 关键：挂载 prisma 目录
+      - ./data:/app/data:ro  # ro 表示只读挂载，确保安全
     environment:
       # 这里的变量会覆盖 .env.local 中的同名变量
       # 确保容器内部连接数据库使用的是服务名 'db' 而不是 'localhost'
       - DATABASE_URL=postgresql://user:password@db:5432/scripture_db
+      - PRISMA_BINARIES_MIRROR=https://registry.npmmirror.com/-/binary/prisma # 镜像加速
       - AUTH_TRUST_HOST=true
     depends_on:
       db:

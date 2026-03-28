@@ -354,11 +354,11 @@ export function ShareCard() {
                                     {bookName} {shareData.chapter}:{formatVerseRange(shareData.verses)}
                                 </div>
                                 {layoutMode === 'modern' && (
-                                    <div className="text-xs opacity-70 mt-1">Scripture AI Daily Verse</div>
+                                    <div className="text-xs opacity-70 mt-1">AI读 每日经文</div>
                                 )}
                             </div>
                             {layoutMode !== 'modern' && layoutMode !== 'minimal' && (
-                                <div className="text-[10px] uppercase tracking-widest opacity-70">Scripture AI</div>
+                                <div className="text-[10px] uppercase tracking-widest opacity-70">AI读</div>
                             )}
                         </div>
                     </div>

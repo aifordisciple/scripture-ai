@@ -1,7 +1,7 @@
 // app.json - Expo configuration
 {
   "expo": {
-    "name": "Scripture AI",
+    "name": "AI读",
     "slug": "scripture-ai",
     "version": "1.0.0",
     "orientation": "portrait",

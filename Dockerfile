@@ -55,7 +55,19 @@ RUN mkdir .next && chown nextjs:nodejs .next
 # 复制 Next.js standalone 构建产物
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/client ./node_modules/@prisma/client
+
+# 复制脚本和数据
 COPY --chown=nextjs:nodejs scripts ./scripts
+COPY --chown=nextjs:nodejs prisma ./prisma
+COPY --chown=nextjs:nodejs data ./data
+
+# 注意：不要在 RUN 里做 seed，因为此时数据库服务不可用
+# 建议在 docker-compose 中使用 entrypoint 或手动执行一次
+
 
 USER nextjs
 EXPOSE 3000

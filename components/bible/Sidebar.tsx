@@ -218,7 +218,7 @@ export function Sidebar() {
 
             <div className="flex flex-col items-center justify-center opacity-30 mt-4 mb-8 pointer-events-none select-none">
                 <Library className="w-8 h-8 mb-2" />
-                <span className="text-[10px] font-serif tracking-[0.2em] uppercase">Scripture AI</span>
+                <span className="text-[10px] font-serif tracking-[0.2em] uppercase">AI读</span>
             </div>
             </>
          )}

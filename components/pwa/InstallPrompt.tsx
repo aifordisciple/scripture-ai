@@ -89,7 +89,7 @@ export function InstallPrompt() {
                     添加到主屏幕
                   </h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    安装 Scripture AI，获得更流畅的阅读体验，支持离线访问
+                    安装 AI读，获得更流畅的阅读体验，支持离线访问
                   </p>
                 </div>
 

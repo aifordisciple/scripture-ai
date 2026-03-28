@@ -15,7 +15,7 @@ import { OnboardingStep, OnboardingStepData } from "./shared/OnboardingStep";
 const WELCOME_STEPS: OnboardingStepData[] = [
   {
     id: "welcome",
-    title: "欢迎来到 Scripture AI",
+    title: "欢迎来到 AI读",
     description: "你的智能读经伙伴，帮助你深入理解神的话语，建立持续的读经习惯。",
     icon: <Sparkles className="w-12 h-12 text-purple-500" />,
   },
