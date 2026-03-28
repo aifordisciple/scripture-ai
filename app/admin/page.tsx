@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Users, Building2, MessageSquare, Activity, TrendingUp, AlertCircle, BookOpen, Target, Calendar } from 'lucide-react';
+import { Users, Building2, MessageSquare, Activity, TrendingUp, AlertCircle, BookOpen, Target, Calendar, Eye, MousePointer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Stats {
@@ -34,13 +34,21 @@ interface Stats {
   };
 }
 
+interface Analytics {
+  today: { pv: number; uv: number };
+  trend: Array<{ date: string; pv: number; uv: number }>;
+  topPages: Array<{ path: string; count: number }>;
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStats();
+    fetchAnalytics();
   }, []);
 
   const fetchStats = async () => {
@@ -53,6 +61,19 @@ export default function AdminDashboard() {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAnalytics = async () => {
+    try {
+      const res = await fetch('/api/analytics?days=7');
+      if (res.ok) {
+        const data = await res.json();
+        setAnalytics(data);
+      }
+    } catch (err) {
+      // 静默失败，不影响主流程
+      console.debug('Analytics not available:', err);
     }
   };
 
@@ -94,18 +115,66 @@ export default function AdminDashboard() {
           color="bg-blue-500"
         />
         <StatCard
-          title="待处理反馈"
-          value={stats.feedback.open}
-          icon={MessageSquare}
-          color="bg-orange-500"
+          title="今日访问量"
+          value={analytics?.today?.pv || 0}
+          icon={Eye}
+          color="bg-cyan-500"
         />
         <StatCard
-          title="活跃计划"
-          value={stats.plans.active}
-          icon={Building2}
-          color="bg-purple-500"
+          title="今日访客数"
+          value={analytics?.today?.uv || 0}
+          icon={MousePointer}
+          color="bg-pink-500"
         />
       </div>
+
+      {/* 访问统计趋势图 */}
+      {analytics && analytics.trend.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <Eye className="text-cyan-600" size={20} />
+            近7日访问趋势
+          </h2>
+
+          <div className="h-48 flex items-end gap-2">
+            {analytics.trend.map((day, i) => {
+              const maxPV = Math.max(...analytics.trend.map(d => d.pv), 1);
+              const height = (day.pv / maxPV) * 100;
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                  <div className="w-full flex-1 flex items-end">
+                    <div
+                      className="w-full bg-gradient-to-t from-cyan-600 to-cyan-400 rounded-t transition-all"
+                      style={{ height: `${Math.max(height, 2)}%` }}
+                    >
+                      {day.pv > 0 && (
+                        <div className="text-center text-xs text-white font-medium py-1">
+                          {day.pv}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {new Date(day.date).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* PV/UV 图例 */}
+          <div className="mt-4 flex items-center justify-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-cyan-500"></div>
+              <span className="text-gray-600">页面浏览量 (PV)</span>
+            </div>
+            <div className="text-gray-400">|</div>
+            <div className="text-gray-600">
+              独立访客 (UV): {analytics.trend.map(d => d.uv).reduce((a, b) => a + b, 0)} 总计
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 用户统计 */}
       <div className="bg-white rounded-lg shadow p-6">

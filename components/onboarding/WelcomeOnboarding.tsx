@@ -8,7 +8,9 @@ import {
   Calendar,
   Users,
   ChevronRight,
-  Rocket
+  Rocket,
+  MoveHorizontal,
+  CircleDot
 } from "lucide-react";
 import { OnboardingStep, OnboardingStepData } from "./shared/OnboardingStep";
 
@@ -42,6 +44,18 @@ const WELCOME_STEPS: OnboardingStepData[] = [
     title: "小组共读",
     description: "创建或加入读经小组，与弟兄姊妹一起读经，互相鼓励，共同成长。",
     icon: <Users className="w-12 h-12 text-pink-500" />,
+  },
+  {
+    id: "swipe",
+    title: "滑动换页",
+    description: "左右滑动可切换章节，快速浏览经文；上下滑动可滚动页面内容。",
+    icon: <MoveHorizontal className="w-12 h-12 text-cyan-500" />,
+  },
+  {
+    id: "magic-ball",
+    title: "Magic Ball 悬浮球",
+    description: "右下角悬浮球是你的智能助手。左滑打开AI解读，上滑选择书卷，下滑全屏模式，长按展开快捷菜单。",
+    icon: <CircleDot className="w-12 h-12 text-amber-500" />,
   },
   {
     id: "start",

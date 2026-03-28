@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
 import { BadgePopup } from "@/components/bible/BadgePopup";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 const baseUrl = process.env.NEXTAUTH_URL || 'https://aidu.app';
 
@@ -110,6 +111,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
            <SyncProvider />
            {/* 勋章获得弹窗 */}
            <BadgePopup />
+           {/* 访问统计追踪 */}
+           <AnalyticsTracker />
         </AuthProvider>
       </body>
     </html>

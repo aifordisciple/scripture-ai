@@ -1081,3 +1081,20 @@ model SystemAnnouncement {
   @@index([isActive, startsAt, endsAt])
   @@map("system_announcements")
 }
+
+// 页面访问统计
+model PageView {
+  id        String   @id @default(cuid())
+  path      String   // 访问路径
+  userId    String?  // 登录用户ID（可为空）
+  sessionId String   // 匿名访客标识
+  referrer  String?  // 来源
+  userAgent String?  // 设备信息
+  ip        String?  // IP地址
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+  @@index([sessionId])
+  @@map("page_views")
+}

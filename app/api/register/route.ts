@@ -33,6 +33,8 @@ export async function POST(req: Request) {
             lineHeight: 1.8,
             isDarkMode: false,
             showEnglish: true,
+            // 默认使用云端AI（MiniMax）
+            apiProvider: "cloud",
           }
         }
       },
