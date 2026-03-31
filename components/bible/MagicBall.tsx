@@ -50,7 +50,6 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
   const [contextActions, setContextActions] = useState<QuickAction[]>([]);
 
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const radialMenuTimer = useRef<NodeJS.Timeout | null>(null);
   const isDraggingRef = useRef(false);
   const prevAiGenRef = useRef(false);
 
@@ -252,15 +251,6 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
         controls.start({ scale: 1.1, y: 0 });
       }
     }, 600);
-
-    // 中等时长触发径向菜单 (0.4s)
-    radialMenuTimer.current = setTimeout(() => {
-      if (!isDraggingRef.current && !isRepositioning) {
-        setIsRadialMenuOpen(true);
-        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([30, 50, 30]);
-        controls.start({ scale: 1.05 });
-      }
-    }, 400);
   };
 
   const handleDragStart = () => {
@@ -268,10 +258,6 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
-    }
-    if (radialMenuTimer.current) {
-      clearTimeout(radialMenuTimer.current);
-      radialMenuTimer.current = null;
     }
     // 关闭径向菜单
     setIsRadialMenuOpen(false);
@@ -281,10 +267,6 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
-    }
-    if (radialMenuTimer.current) {
-      clearTimeout(radialMenuTimer.current);
-      radialMenuTimer.current = null;
     }
   };
 
