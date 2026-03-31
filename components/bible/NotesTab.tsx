@@ -211,13 +211,18 @@ export function NotesTab() {
                     return (
                       <div
                         key={item.id}
-                        className="group relative flex flex-col p-5 bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300"
+                        className={cn(
+                          "group relative flex flex-col rounded-2xl border dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300",
+                          isExpanded ? "bg-white dark:bg-slate-900" : "p-5 bg-white dark:bg-slate-900"
+                        )}
                       >
-                        {/* 标题栏 - 点击可切换展开/收缩 */}
+                        {/* 标题栏 - 展开时 sticky 固定在顶部 */}
                         <div
                           className={cn(
-                            "flex items-center justify-between mb-3 border-b dark:border-slate-800 pb-2",
-                            needsExpand && "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-t-xl -mx-5 -mt-5 px-5 pt-5"
+                            "flex items-center justify-between border-b dark:border-slate-800 pb-2 px-5 pt-5",
+                            needsExpand && "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50",
+                            // 展开时 sticky 效果
+                            isExpanded && needsExpand && "sticky top-0 z-10 bg-white dark:bg-slate-900 rounded-t-2xl shadow-sm"
                           )}
                           onClick={(e) => {
                             if (needsExpand) {
@@ -268,10 +273,9 @@ export function NotesTab() {
                         {/* 内容区域 */}
                         <div
                           className={cn(
-                            "prose prose-sm dark:prose-invert max-w-none break-words text-slate-700 dark:text-slate-300",
+                            "prose prose-sm dark:prose-invert max-w-none break-words text-slate-700 dark:text-slate-300 px-5 pb-5",
                             !isExpanded && needsExpand && "line-clamp-3"
                           )}
-                          onClick={() => handleJump(item.bookId, item.chapter, item.verse)}
                         >
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.content}</ReactMarkdown>
                         </div>
