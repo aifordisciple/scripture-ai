@@ -4,11 +4,12 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
-import { BookOpen, Edit3, Trash2, ChevronRight, Search, Download, X } from "lucide-react";
+import { BookOpen, Edit3, Trash2, ChevronRight, ChevronDown, ChevronUp, Search, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { cn } from "@/lib/utils";
 
 export function NotesTab() {
   const router = useRouter();
@@ -17,6 +18,22 @@ export function NotesTab() {
 
   // [P1增强] 搜索状态
   const [searchQuery, setSearchQuery] = useState('');
+
+  // [P1增强] 展开/收起状态 - 记录哪些笔记是展开的
+  const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
+
+  // 切换笔记展开状态
+  const toggleExpand = (noteId: string) => {
+    setExpandedNotes(prev => {
+      const next = new Set(prev);
+      if (next.has(noteId)) {
+        next.delete(noteId);
+      } else {
+        next.add(noteId);
+      }
+      return next;
+    });
+  };
 
   // [P1增强] 过滤笔记（全文搜索）
   const filteredNotes = useMemo(() => {
@@ -186,43 +203,80 @@ export function NotesTab() {
                 {bookName}
               </h2>
               <div className="grid grid-cols-1 gap-4">
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleJump(item.bookId, item.chapter, item.verse)}
-                    className="group relative flex flex-col p-5 bg-white dark:bg-slate-900 rounded-2xl cursor-pointer border dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300"
-                  >
-                    <div className="flex items-center justify-between mb-3 border-b dark:border-slate-800 pb-2">
-                      <span className="text-sm font-bold text-amber-600 dark:text-amber-500">
-                        {item.bookId} {item.chapter}:{item.verse}
-                      </span>
-                      <div className="flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-900/30 rounded-full"
-                          onClick={(e) => handleEdit(e, item.bookId, item.chapter, item.verse)}
-                          title="编辑"
+                {items.map((item) => {
+                    const isExpanded = expandedNotes.has(item.id);
+                    const contentLength = item.content.length;
+                    const needsExpand = contentLength > 150; // 超过150字符需要展开
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="group relative flex flex-col p-5 bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300"
+                      >
+                        {/* 标题栏 */}
+                        <div
+                          className="flex items-center justify-between mb-3 border-b dark:border-slate-800 pb-2 cursor-pointer"
+                          onClick={() => handleJump(item.bookId, item.chapter, item.verse)}
                         >
-                          <Edit3 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-slate-400 hover:text-red-600 bg-slate-50 hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-900/30 rounded-full"
-                          onClick={(e) => handleDelete(e, item.id)}
-                          title="删除"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground ml-1" />
+                          <span className="text-sm font-bold text-amber-600 dark:text-amber-500">
+                            {item.bookId} {item.chapter}:{item.verse}
+                          </span>
+                          <div className="flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-900/30 rounded-full"
+                              onClick={(e) => handleEdit(e, item.bookId, item.chapter, item.verse)}
+                              title="编辑"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-slate-400 hover:text-red-600 bg-slate-50 hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-900/30 rounded-full"
+                              onClick={(e) => handleDelete(e, item.id)}
+                              title="删除"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                            <ChevronRight className="w-5 h-5 text-muted-foreground ml-1" />
+                          </div>
+                        </div>
+
+                        {/* 内容区域 */}
+                        <div className={cn(
+                          "prose prose-sm dark:prose-invert max-w-none break-words text-slate-700 dark:text-slate-300",
+                          !isExpanded && needsExpand && "line-clamp-3"
+                        )}>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.content}</ReactMarkdown>
+                        </div>
+
+                        {/* 展开/收起按钮 */}
+                        {needsExpand && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleExpand(item.id);
+                            }}
+                            className="mt-2 flex items-center gap-1 text-xs text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 transition-colors self-start"
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="w-3.5 h-3.5" />
+                                <span>收起</span>
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-3.5 h-3.5" />
+                                <span>展开全文</span>
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
-                    </div>
-                    <div className="prose prose-sm dark:prose-invert max-w-none break-words text-slate-700 dark:text-slate-300">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.content}</ReactMarkdown>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })}
               </div>
             </div>
           ))}
