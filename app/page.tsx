@@ -6,8 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 
 import { Sidebar } from "@/components/bible/Sidebar";
-import { Reader } from "@/components/bible/Reader";
-import { SearchResults } from "@/components/bible/SearchResults";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -25,24 +23,17 @@ import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { NotificationCenter } from "@/components/common/NotificationCenter";
 import { FeedbackButton } from "@/components/feedback/FeedbackButton";
 import { OnboardingManager } from "@/components/onboarding/OnboardingManager";
+import { TabContentRenderer } from "@/components/bible/TabContentRenderer";
 
-// 动态按需加载
+// 动态按需加载 - 非Tab内容组件
 const AISidebar = dynamic(() => import("@/components/bible/AISidebar").then(mod => mod.AISidebar), { ssr: false });
 const MagicBall = dynamic(() => import("@/components/bible/MagicBall").then(mod => mod.MagicBall), { ssr: false });
 const SearchDialog = dynamic(() => import("@/components/bible/SearchDialog").then(mod => mod.SearchDialog), { ssr: false });
 const NoteEditor = dynamic(() => import("@/components/bible/NoteEditor").then(mod => mod.NoteEditor), { ssr: false });
 const ShareCard = dynamic(() => import("@/components/bible/ShareCard").then(mod => mod.ShareCard), { ssr: false });
 const AuthDialog = dynamic(() => import("@/components/auth/AuthDialog").then(mod => mod.AuthDialog), { ssr: false });
-const DashboardTab = dynamic(() => import("@/components/bible/DashboardTab").then(mod => mod.DashboardTab), { ssr: false });
-const HighlightsTab = dynamic(() => import("@/components/bible/HighlightsTab").then(mod => mod.HighlightsTab), { ssr: false });
-const NotesTab = dynamic(() => import("@/components/bible/NotesTab").then(mod => mod.NotesTab), { ssr: false });
-const PlanTab = dynamic(() => import("@/components/bible/PlanTab").then(mod => mod.PlanTab), { ssr: false });
 const PlanDailyFlow = dynamic(() => import("@/components/bible/PlanDailyFlow").then(mod => mod.PlanDailyFlow), { ssr: false });
-const CrossRefTab = dynamic(() => import("@/components/bible/CrossRefTab").then(mod => mod.CrossRefTab), { ssr: false });
-const GroupTab = dynamic(() => import("@/components/bible/GroupTab").then(mod => mod.GroupTab), { ssr: false });
 const GroupPlanDailyFlow = dynamic(() => import("@/components/group/GroupPlanDailyFlow").then(mod => mod.GroupPlanDailyFlow), { ssr: false });
-const AtlasPanel = dynamic(() => import("@/components/atlas/AtlasPanel").then(mod => mod.default), { ssr: false });
-const InsightsTab = dynamic(() => import("@/components/bible/InsightsTab").then(mod => mod.InsightsTab), { ssr: false });
 
 // --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
 const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
@@ -675,29 +666,12 @@ export default function Home() {
 
         {/* Main Content Area */}
         <div id="reader-scroll-container" onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-smooth pt-20 md:pt-24 pb-24 md:pb-10">
-          {activeTab.type === 'read' ? (
-              <Reader key={activeTab.id} initialBook={activeTab.book || 'Gen'} initialChapter={activeTab.chapter || '1'} />
-          ) : activeTab.type === 'search' ? (
-              <SearchResults key={activeTab.id} query={activeTab.query || ''} mode={activeTab.searchMode || 'exact'} cachedResults={activeTab.results} onUpdateResults={(data) => updateActiveTab({ results: data })} />
-          ) : activeTab.type === 'dashboard' ? (
-              <DashboardTab key={activeTab.id} />
-          ) : activeTab.type === 'highlights' ? (
-              <HighlightsTab key={activeTab.id} />
-          ) : activeTab.type === 'notes' ? (
-              <NotesTab key={activeTab.id} />
-          ) : activeTab.type === 'cross-ref' ? (
-              <CrossRefTab key={activeTab.id} sourceVerse={activeTab.crossRefSource!} />
-          ) : activeTab.type === 'group' ? (
-              <GroupTab key={activeTab.id} />
-          ) : activeTab.type === 'atlas' ? (
-              <div key={activeTab.id} className="h-[calc(100vh-8rem)]">
-                <AtlasPanel />
-              </div>
-          ) : activeTab.type === 'insights' ? (
-              <InsightsTab key={activeTab.id} />
-          ) : (
-              <PlanTab key={activeTab.id} />
-          )}
+          <TabContentRenderer
+            tabs={tabs}
+            activeTabId={activeTabId}
+            chapterSpeechText={chapterSpeechText}
+            updateActiveTab={updateActiveTab}
+          />
         </div>
 
         {/* Mobile Tab Bar */}
