@@ -715,26 +715,30 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
 
           {/* 顶部高光反射 */}
           <div className="absolute top-[10%] left-[20%] w-[30%] h-[15%] bg-gradient-to-b from-white to-transparent opacity-90 rounded-full rotate-[-15deg] blur-[0.5px]" />
+        </div>
 
-          {/* 围绕旋转的火星 */}
+        {/* 围绕旋转的火星 - 在Magic Ball外边缘 */}
+        <div
+          className="absolute pointer-events-none z-30"
+          style={{
+            width: 52,
+            height: 52,
+            bottom: position.bottom,
+            right: position.right,
+            animation: 'sparkle-orbit 8s linear infinite',
+          }}
+        >
           <div
-            className="absolute inset-0 pointer-events-none z-30"
+            className="absolute w-2.5 h-2.5 rounded-full"
             style={{
-              animation: 'sparkle-orbit 4s linear infinite',
+              top: -5,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'radial-gradient(circle, #fff 0%, #ffd700 40%, #ff8c00 70%, transparent 100%)',
+              boxShadow: '0 0 6px 2px rgba(255, 215, 0, 0.8), 0 0 12px 4px rgba(255, 140, 0, 0.5)',
+              animation: 'sparkle-glow 1.5s ease-in-out infinite alternate',
             }}
-          >
-            <div
-              className="absolute w-2 h-2 rounded-full"
-              style={{
-                top: '8%',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'radial-gradient(circle, #fff 0%, #ffd700 40%, #ff8c00 70%, transparent 100%)',
-                boxShadow: '0 0 6px 2px rgba(255, 215, 0, 0.8), 0 0 12px 4px rgba(255, 140, 0, 0.5)',
-                animation: 'sparkle-glow 1.5s ease-in-out infinite alternate',
-              }}
-            />
-          </div>
+          />
         </div>
       </motion.div>
 
