@@ -23,7 +23,7 @@ export interface SessionError {
 
 export interface Tab {
   id: string;
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights';
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights' | 'bookmarks';
   book?: string;
   chapter?: string;
   query?: string;
@@ -56,6 +56,14 @@ export interface Tab {
     themeId?: string;
     searchTerm?: string;
   };
+}
+
+// [P1增强] 书签数据结构
+export interface BookmarkData {
+  id: string;
+  bookId: string;
+  chapter: number;
+  createdAt: number;
 }
 
 export interface HighlightData {
@@ -422,6 +430,12 @@ export interface UserDataSlice {
   // API configuration
   apiConfig: ApiConfig;
   setApiConfig: (config: Partial<ApiConfig>) => void;
+
+  // [P1增强] 书签系统
+  bookmarks: BookmarkData[];
+  addBookmark: (bookId: string, chapter: number) => void;
+  removeBookmark: (id: string) => void;
+  isBookmarked: (bookId: string, chapter: number) => boolean;
 }
 
 // --------------------------------------------------

@@ -6,9 +6,10 @@ import { useBibleStore } from "@/store/useBibleStore";
 import { BibleHeatmap } from "@/components/bible/BibleHeatmap";
 import { HomeGroupCard } from "@/components/group/HomeGroupCard";
 import { useMemo, useState, useEffect } from "react";
-import { Download, Activity, Trash2, CheckSquare, Square, BrainCircuit, Clock, Users } from "lucide-react";
+import { Download, Activity, Trash2, CheckSquare, Square, BrainCircuit, Clock, Users, Flame, Target, TrendingUp, Award, BookCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie } from 'recharts';
+import { BIBLE_PLANS } from "@/lib/plans";
 
 /**
  * 仪表盘控制面板 (DashboardTab)
@@ -16,15 +17,18 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
  * 1. 提供 "7d", "30d", "1y" 多维度时间切片。
  * 2. 对接后端聚合 API 渲染 Recharts 的交互式动态趋势图。
  * 3. 将所选范围内的数据导出为标准 TSV (Tab-Separated Values) 格式报表。
+ * 4. [P1增强] 计划完成率可视化、火苗成长轨迹、详细阅读统计。
  */
 export function DashboardTab() {
   const router = useRouter();
-  const { 
-    highlights, notes, interactions, 
+  const {
+    highlights, notes, interactions,
     updateActiveTab, addTab, tabs, setActiveTab,
-    clearAllHighlights, clearAllNotes, clearAllInteractions
+    clearAllHighlights, clearAllNotes, clearAllInteractions,
+    // [P1增强] 获取计划和火苗数据
+    activePlans, streakCount, lastActiveDate
   } = useBibleStore();
-  
+
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '1y'>('30d');
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -119,6 +123,61 @@ export function DashboardTab() {
   const totalAiChats = chartData.reduce((acc, cur) => acc + cur.aiChats, 0);
   const totalHighlights = chartData.reduce((acc, cur) => acc + cur.interactions, 0);
 
+  // [P1增强] 计划完成率计算
+  const planProgressData = useMemo(() => {
+    return activePlans
+      .filter(p => p.status === 'active')
+      .map(plan => {
+        const planConfig = BIBLE_PLANS.find(p => p.id === plan.planId);
+        const totalDays = planConfig?.durationDays || 30;
+        const completedDays = Object.keys(plan.completedTasks || {}).length;
+        const progress = Math.round((completedDays / totalDays) * 100);
+        return {
+          planId: plan.planId,
+          planName: planConfig?.name || plan.planId,
+          totalDays,
+          completedDays,
+          progress,
+        };
+      });
+  }, [activePlans]);
+
+  // [P1增强] 火苗成长轨迹（最近7天的打卡记录）
+  const streakData = useMemo(() => {
+    const data = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+      // 模拟每日打卡状态（实际应该从API获取）
+      const isActive = i < streakCount % 7 || (streakCount >= 7 && streakCount > 0);
+      data.push({
+        date: dateStr,
+        active: isActive,
+        day: 7 - i,
+      });
+    }
+    return data;
+  }, [streakCount]);
+
+  // [P1增强] 总体统计
+  const overallStats = useMemo(() => {
+    const totalPlans = activePlans.length;
+    const activePlanCount = activePlans.filter(p => p.status === 'active').length;
+    const completedPlanCount = activePlans.filter(p => p.status === 'completed').length;
+    const avgProgress = planProgressData.length > 0
+      ? Math.round(planProgressData.reduce((sum, p) => sum + p.progress, 0) / planProgressData.length)
+      : 0;
+
+    return {
+      totalPlans,
+      activePlanCount,
+      completedPlanCount,
+      avgProgress,
+    };
+  }, [activePlans, planProgressData]);
+
   return (
     <div className="w-full max-w-5xl xl:max-w-6xl mx-auto px-4 relative pb-20">
       
@@ -212,6 +271,44 @@ export function DashboardTab() {
              <div className="p-4 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl"><Activity className="w-8 h-8"/></div>
              <div><div className="text-3xl font-black">{totalHighlights}</div><div className="text-sm text-slate-500 font-medium">经文研读互动数</div></div>
          </div>
+
+         {/* [P1增强] 火苗成长卡片 */}
+         <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-100 dark:border-orange-900/50 p-6 rounded-2xl flex items-center gap-5 shadow-sm">
+             <div className="p-4 bg-orange-100 dark:bg-orange-900/50 text-orange-500 rounded-2xl">
+               <Flame className="w-8 h-8 animate-pulse" />
+             </div>
+             <div className="flex-1">
+               <div className="text-3xl font-black text-orange-600 dark:text-orange-400">{streakCount}</div>
+               <div className="text-sm text-orange-600/70 dark:text-orange-400/70 font-medium">连续打卡天数</div>
+             </div>
+             {/* 最近7天打卡指示器 */}
+             <div className="flex gap-1.5">
+               {streakData.map((day, i) => (
+                 <div
+                   key={i}
+                   className={`w-3 h-8 rounded-full ${day.active ? 'bg-orange-400' : 'bg-orange-200 dark:bg-orange-900/30'}`}
+                   title={day.date}
+                 />
+               ))}
+             </div>
+         </div>
+
+         {/* [P1增强] 计划进度卡片 */}
+         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-100 dark:border-emerald-900/50 p-6 rounded-2xl flex items-center gap-5 shadow-sm">
+             <div className="p-4 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-500 rounded-2xl">
+               <Target className="w-8 h-8" />
+             </div>
+             <div className="flex-1">
+               <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{overallStats.activePlanCount}</div>
+               <div className="text-sm text-emerald-600/70 dark:text-emerald-400/70 font-medium">
+                 进行中的计划 · 平均 {overallStats.avgProgress}%
+               </div>
+             </div>
+             <div className="text-right">
+               <div className="text-xs text-emerald-500/70">已完成</div>
+               <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{overallStats.completedPlanCount}</div>
+             </div>
+         </div>
       </div>
 
       {/* 动态趋势图表 */}
@@ -244,6 +341,33 @@ export function DashboardTab() {
             )}
         </div>
       </div>
+
+      {/* [P1增强] 计划完成率可视化 */}
+      {planProgressData.length > 0 && (
+        <div className="bg-white dark:bg-slate-900/50 rounded-2xl shadow-sm border dark:border-slate-800 p-6 mb-8">
+          <h3 className="text-base font-bold mb-6 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-emerald-500" /> 读经计划进度
+          </h3>
+          <div className="space-y-4">
+            {planProgressData.map((plan) => (
+              <div key={plan.planId} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-foreground">{plan.planName}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {plan.completedDays} / {plan.totalDays} 天 ({plan.progress}%)
+                  </span>
+                </div>
+                <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-500"
+                    style={{ width: `${plan.progress}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 原本静态热力图保留在下方即可，作为"全景概览"使用 */}
       <div className="bg-white dark:bg-slate-900/50 rounded-2xl shadow-sm border dark:border-slate-800 p-4 md:p-6 overflow-x-auto">

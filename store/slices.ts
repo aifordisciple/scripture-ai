@@ -694,6 +694,29 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   setApiConfig: (config) => set((state) => ({
     apiConfig: { ...state.apiConfig, ...config }
   })),
+
+  // [P1增强] 书签系统
+  bookmarks: [],
+  addBookmark: (bookId, chapter) => set((state) => {
+    // 检查是否已存在
+    const exists = state.bookmarks.some(b => b.bookId === bookId && b.chapter === chapter);
+    if (exists) return state;
+    return {
+      bookmarks: [...state.bookmarks, {
+        id: `bookmark-${Date.now()}`,
+        bookId,
+        chapter,
+        createdAt: Date.now()
+      }]
+    };
+  }),
+  removeBookmark: (id) => set((state) => ({
+    bookmarks: state.bookmarks.filter(b => b.id !== id)
+  })),
+  isBookmarked: (bookId, chapter) => {
+    const state = get();
+    return state.bookmarks.some(b => b.bookId === bookId && b.chapter === chapter);
+  },
 });
 
 export const createSyncSlice: StateCreator<StoreState, [], [], SyncSlice> = (set) => ({

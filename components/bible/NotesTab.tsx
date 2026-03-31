@@ -1,10 +1,10 @@
 // components/bible/NotesTab.tsx
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
-import { BookOpen, Edit3, Trash2, ChevronRight } from "lucide-react";
+import { BookOpen, Edit3, Trash2, ChevronRight, Search, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import ReactMarkdown from 'react-markdown';
@@ -15,10 +15,24 @@ export function NotesTab() {
   const { notes, deleteNote, openNoteEditor, tabs, addTab, setActiveTab, updateActiveTab } = useBibleStore();
   const { data: session } = useSession();
 
+  // [P1增强] 搜索状态
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // [P1增强] 过滤笔记（全文搜索）
+  const filteredNotes = useMemo(() => {
+    if (!searchQuery.trim()) return notes;
+    const query = searchQuery.toLowerCase();
+    return notes.filter(note =>
+      note.content.toLowerCase().includes(query) ||
+      note.bookId.toLowerCase().includes(query) ||
+      `${note.chapter}:${note.verse}`.includes(query)
+    );
+  }, [notes, searchQuery]);
+
   // 按书卷分组笔记
   const groupedNotes = useMemo(() => {
-    const groups: Record<string, typeof notes> = {};
-    notes.forEach(n => {
+    const groups: Record<string, typeof filteredNotes> = {};
+    filteredNotes.forEach(n => {
       if (!groups[n.bookId]) groups[n.bookId] = [];
       groups[n.bookId].push(n);
     });
@@ -27,7 +41,7 @@ export function NotesTab() {
       groups[key].sort((a, b) => a.chapter !== b.chapter ? a.chapter - b.chapter : a.verse - b.verse);
     });
     return groups;
-  }, [notes]);
+  }, [filteredNotes]);
 
   const handleJump = (bookId: string, chapter: number, verse: number) => {
     const readTab = tabs.find(t => t.type === 'read');
@@ -68,22 +82,100 @@ export function NotesTab() {
     openNoteEditor(bookId, chapter, verse);
   };
 
+  // [P1增强] 导出笔记为Markdown
+  const handleExportMarkdown = () => {
+    if (notes.length === 0) {
+      alert('没有笔记可导出');
+      return;
+    }
+
+    let markdown = '# 我的读经笔记\n\n';
+    markdown += `> 导出时间: ${new Date().toLocaleString('zh-CN')}\n\n`;
+    markdown += `> 共 ${notes.length} 条笔记\n\n---\n\n`;
+
+    const grouped = groupedNotes;
+    Object.entries(grouped).forEach(([bookName, items]) => {
+      markdown += `## ${bookName}\n\n`;
+      items.forEach(item => {
+        markdown += `### ${item.chapter}:${item.verse}\n\n`;
+        markdown += `${item.content}\n\n`;
+        if (item.updatedAt) {
+          markdown += `*更新于 ${new Date(item.updatedAt).toLocaleString('zh-CN')}*\n\n`;
+        }
+        markdown += '---\n\n';
+      });
+    });
+
+    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `读经笔记_${new Date().toISOString().split('T')[0]}.md`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
       <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
         <div className="p-2.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl">
           <BookOpen className="w-6 h-6" />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-foreground tracking-tight">我的笔记</h1>
           <p className="text-sm text-muted-foreground mt-1">共记录了 {notes.length} 条灵修感悟。</p>
         </div>
+
+        {/* [P1增强] 导出按钮 */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExportMarkdown}
+          className="gap-2 rounded-full border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
+        >
+          <Download className="w-4 h-4" /> 导出
+        </Button>
+      </div>
+
+      {/* [P1增强] 搜索框 */}
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="搜索笔记内容、书卷、章节..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {searchQuery && (
+          <p className="text-xs text-muted-foreground mt-2">
+            找到 {filteredNotes.length} 条匹配的笔记
+          </p>
+        )}
       </div>
 
       {notes.length === 0 ? (
         <div className="text-center py-20 opacity-40 select-none">
           <BookOpen className="w-16 h-16 mx-auto mb-4 stroke-[1.5]" />
           <p className="text-lg">您还没有写过任何笔记</p>
+        </div>
+      ) : filteredNotes.length === 0 ? (
+        <div className="text-center py-20 opacity-40 select-none">
+          <Search className="w-16 h-16 mx-auto mb-4 stroke-[1.5]" />
+          <p className="text-lg">没有找到匹配的笔记</p>
+          <p className="text-sm mt-2">尝试其他搜索词</p>
         </div>
       ) : (
         <div className="space-y-8">
