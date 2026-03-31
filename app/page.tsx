@@ -409,13 +409,13 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground font-medium">行间距</span>
               <div className="flex bg-secondary/50 p-1 rounded-lg">
-                {[1.4, 1.8, 2.2].map(lh => (
+                {[1.1, 1.8, 2.2].map(lh => (
                   <button
                     key={lh}
                     onClick={() => setLineHeight(lh)}
                     className={cn("px-3 py-1 text-xs rounded-md transition-all", lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                   >
-                    {lh === 1.4 ? "紧凑" : lh === 1.8 ? "标准" : "宽松"}
+                    {lh === 1.1 ? "紧凑" : lh === 1.8 ? "标准" : "宽松"}
                   </button>
                 ))}
               </div>
@@ -587,7 +587,7 @@ export default function Home() {
                           行间距
                         </span>
                         <div className="flex bg-secondary/50 p-1 rounded-lg">
-                          {[1.4, 1.8, 2.2].map(lh => (
+                          {[1.1, 1.8, 2.2].map(lh => (
                             <button
                               key={lh}
                               onClick={() => setLineHeight(lh)}
@@ -596,7 +596,7 @@ export default function Home() {
                                 lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                               )}
                             >
-                              {lh === 1.4 ? "紧凑" : lh === 1.8 ? "标准" : "宽松"}
+                              {lh === 1.1 ? "紧凑" : lh === 1.8 ? "标准" : "宽松"}
                             </button>
                           ))}
                         </div>
