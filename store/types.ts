@@ -66,6 +66,15 @@ export interface BookmarkData {
   createdAt: number;
 }
 
+// [P2增强] 阅读历史数据结构
+export interface ReadingHistoryData {
+  id: string;
+  bookId: string;
+  chapter: number;
+  timestamp: number;
+  duration: number; // 阅读时长（秒）
+}
+
 export interface HighlightData {
   bookId: string;
   chapter: number;
@@ -436,6 +445,13 @@ export interface UserDataSlice {
   addBookmark: (bookId: string, chapter: number) => void;
   removeBookmark: (id: string) => void;
   isBookmarked: (bookId: string, chapter: number) => boolean;
+
+  // [P2增强] 阅读历史系统
+  readingHistory: ReadingHistoryData[];
+  addReadingHistory: (bookId: string, chapter: number, duration: number) => void;
+  clearReadingHistory: () => void;
+  getRecentReading: (limit?: number) => ReadingHistoryData[];
+  getContinueReading: () => { bookId: string; chapter: number } | null;
 }
 
 // --------------------------------------------------

@@ -16,10 +16,14 @@ const AtlasPanel = dynamic(() => import('@/components/atlas/AtlasPanel').then(mo
 const InsightsTab = dynamic(() => import('@/components/bible/InsightsTab').then(mod => ({ default: mod.InsightsTab })), { ssr: false })
 // [P1增强] 书签Tab
 const BookmarksTab = dynamic(() => import('@/components/bible/BookmarksTab').then(mod => ({ default: mod.BookmarksTab })), { ssr: false })
+// [P2增强] 阅读历史Tab
+const ReadingHistoryTab = dynamic(() => import('@/components/bible/ReadingHistoryTab').then(mod => ({ default: mod.ReadingHistoryTab })), { ssr: false })
+// [P2增强] 主题图谱Tab
+const ThemeGraphTab = dynamic(() => import('@/components/bible/ThemeGraphTab').then(mod => ({ default: mod.ThemeGraphTab })), { ssr: false })
 
 export interface Tab {
   id: string
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'cross-ref' | 'group' | 'atlas' | 'insights' | 'plan' | 'bookmarks'
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'cross-ref' | 'group' | 'atlas' | 'insights' | 'plan' | 'bookmarks' | 'reading-history' | 'theme-graph'
   book?: string
   chapter?: number | string
   query?: string
@@ -94,6 +98,12 @@ const TabContent = memo(function TabContent({
 
       {/* [P1增强] 书签Tab */}
       {tab.type === 'bookmarks' && <BookmarksTab key={tab.id} />}
+
+      {/* [P2增强] 阅读历史Tab */}
+      {tab.type === 'reading-history' && <ReadingHistoryTab key={tab.id} />}
+
+      {/* [P2增强] 主题图谱Tab */}
+      {tab.type === 'theme-graph' && <ThemeGraphTab key={tab.id} />}
     </div>
   )
 })

@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, SessionStatus, SessionError } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, SessionStatus, SessionError, ReadingHistoryData } from './types';
 import { BIBLE_PLANS } from '@/lib/plans';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 
@@ -716,6 +716,46 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
   isBookmarked: (bookId, chapter) => {
     const state = get();
     return state.bookmarks.some(b => b.bookId === bookId && b.chapter === chapter);
+  },
+
+  // [P2增强] 阅读历史系统
+  readingHistory: [],
+  addReadingHistory: (bookId, chapter, duration) => set((state) => {
+    const id = `history-${Date.now()}`;
+    const newEntry: ReadingHistoryData = { id, bookId, chapter, timestamp: Date.now(), duration };
+    // 保留最近100条记录
+    const newHistory = [newEntry, ...state.readingHistory].slice(0, 100);
+    return { readingHistory: newHistory };
+  }),
+  clearReadingHistory: () => set({ readingHistory: [] }),
+  getRecentReading: (limit = 10) => {
+    const state = get();
+    return state.readingHistory.slice(0, limit);
+  },
+  getContinueReading: () => {
+    const state = get();
+    if (state.readingHistory.length === 0) return null;
+
+    // 找到最近阅读的书卷和章节
+    const recent = state.readingHistory[0];
+    const { bookId, chapter } = recent;
+
+    // 检查下一章是否已读
+    const nextChapterRead = state.readingHistory.some(
+      h => h.bookId === bookId && h.chapter === chapter + 1
+    );
+
+    // 如果下一章已读，推荐当前书卷未读的下一章
+    if (nextChapterRead) {
+      // 找到该书卷最大已读章节
+      const chaptersRead = state.readingHistory
+        .filter(h => h.bookId === bookId)
+        .map(h => h.chapter);
+      const maxChapter = Math.max(...chaptersRead);
+      return { bookId, chapter: maxChapter + 1 };
+    }
+
+    return { bookId, chapter: chapter + 1 };
   },
 });
 
