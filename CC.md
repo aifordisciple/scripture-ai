@@ -607,6 +607,22 @@ cat backup.sql | docker compose exec -T db psql -U scripture_user scripture_db
 # 拉取最新代码
 git pull origin main
 
+
+保存本地修改到进度列表：
+
+Bash
+git stash
+拉取远程代码：
+
+Bash
+git pull origin main
+恢复本地修改（此时可能会触发冲突，需要手动合并）：
+
+Bash
+git stash pop
+
+
+
 # 重新构建并启动
 docker compose down
 docker compose up -d --build
