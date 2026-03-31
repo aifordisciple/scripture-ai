@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import {
   Users, Plus, ChevronLeft, Settings, Crown, Calendar,
-  BookOpen, Trophy, MessageCircle, Ticket, Loader2, UserCog, BarChart3, Activity
+  BookOpen, Trophy, MessageCircle, Ticket, Loader2, UserCog, BarChart3, Activity, LogIn
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,7 @@ interface GroupPlan {
 
 export function GroupTab() {
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   // 从全局 store 获取选择状态（用于跨标签页保持）
   const { selectedGroupForPlan, selectedPlanId, setSelectedGroupForPlan, setSelectedPlanId } = useBibleStore();
@@ -96,9 +98,14 @@ export function GroupTab() {
   // 根据 selectedPlanId 从 groupPlans 中找到对应的计划
   const selectedPlan = selectedPlanId ? groupPlans.find(p => p.id === selectedPlanId) || null : null;
 
+  // 只在用户已登录时加载数据
   useEffect(() => {
-    fetchGroups();
-  }, []);
+    if (status === 'authenticated') {
+      fetchGroups();
+    } else if (status === 'unauthenticated') {
+      setLoading(false);
+    }
+  }, [status]);
 
   useEffect(() => {
     if (selectedGroup) {
@@ -110,6 +117,11 @@ export function GroupTab() {
     try {
       // Fetch my groups
       const myRes = await fetch("/api/church?type=my");
+      if (myRes.status === 401) {
+        // 未授权，清空数据
+        setMyGroups([]);
+        return;
+      }
       const myData = await myRes.json();
       if (myData.churches) {
         // Transform to Membership format
@@ -220,6 +232,52 @@ export function GroupTab() {
   const handlePlanCreated = (plan: GroupPlan) => {
     setGroupPlans(prev => [plan, ...prev]);
   };
+
+  // 显示加载状态
+  if (status === 'loading' || loading) {
+    return (
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-4" />
+        <p className="text-muted-foreground">加载中...</p>
+      </div>
+    );
+  }
+
+  // 未登录状态提示
+  if (status === 'unauthenticated') {
+    return (
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
+        <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
+          <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+            <Users className="w-6 h-6" />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">家庭/小组读经</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              与家人、朋友一起读经，互相鼓励，共同成长。
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-center py-20">
+          <LogIn className="w-16 h-16 text-muted-foreground mb-4" />
+          <h2 className="text-xl font-bold text-foreground mb-2">请先登录</h2>
+          <p className="text-muted-foreground text-center max-w-md mb-6">
+            登录后即可创建或加入小组，与弟兄姊妹一起读经、分享和成长。
+          </p>
+          <Button
+            onClick={() => {
+              useBibleStore.getState().setAuthOpen(true);
+            }}
+            className="gap-2"
+          >
+            <LogIn className="w-4 h-4" />
+            立即登录
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Render plan detail if selected
   if (selectedPlan && selectedGroup) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -51,6 +52,7 @@ const NOTIFICATION_ICONS: Record<string, any> = {
 };
 
 export function NotificationCenter({ onNotificationClick }: NotificationCenterProps) {
+  const { status } = useSession();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -80,10 +82,10 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
     });
   }, [browserNotifyEnabled, soundEnabled]);
 
-  // Use realtime hook
+  // Use realtime hook only when authenticated
   useRealtime({
-    onNotification: handleRealtimeNotification,
-    onFeedbackReply: handleRealtimeNotification,
+    onNotification: status === 'authenticated' ? handleRealtimeNotification : undefined,
+    onFeedbackReply: status === 'authenticated' ? handleRealtimeNotification : undefined,
   });
 
   // Request browser notification permission on mount
@@ -104,9 +106,14 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
   }, []);
 
   useEffect(() => {
-    fetchNotifications();
+    // Only fetch notifications when user is authenticated
+    if (status === 'authenticated') {
+      fetchNotifications();
+    } else if (status === 'unauthenticated') {
+      setLoading(false);
+    }
     // Initial fetch - realtime updates handled by useRealtime hook
-  }, []);
+  }, [status]);
 
   const fetchNotifications = async () => {
     try {
