@@ -1,6 +1,6 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useRef, useEffect } from 'react'
 import { Sparkles, GraduationCap, FileText, BookMarked, Settings, LayoutList, BookOpen, Search, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants'
@@ -43,6 +43,31 @@ export const QuickPrompts = memo(function QuickPrompts({
   onChipClick,
   customPrompts = [],
 }: QuickPromptsProps) {
+  // 滚轮横向滚动
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const handleWheel = (e: WheelEvent) => {
+      // 检查是否有水平滚动空间
+      if (container.scrollWidth <= container.clientWidth) return
+
+      // 阻止默认垂直滚动行为
+      e.preventDefault()
+
+      // 将垂直滚轮转换为水平滚动
+      container.scrollBy({
+        left: e.deltaY,
+        behavior: 'auto'
+      })
+    }
+
+    container.addEventListener('wheel', handleWheel, { passive: false })
+    return () => container.removeEventListener('wheel', handleWheel)
+  }, [])
+
   // 不在加载时或没有消息时渲染
   if (isLoading || messagesCount === 0) {
     return null
@@ -65,7 +90,7 @@ export const QuickPrompts = memo(function QuickPrompts({
       </div>
 
       {/* 水平滚动容器 */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1">
+      <div ref={scrollContainerRef} className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1">
         <style jsx>{`
           .scrollbar-hide::-webkit-scrollbar { display: none; }
           .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
