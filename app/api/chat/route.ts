@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 import { ChatError, ChatErrorCode, logChatError } from '@/lib/errors/chat-errors';
+import { getAIContextPrompt } from '@/lib/ai-context-builder';
 
 export const maxDuration = 300; // 增加到300秒(5分钟)，支持更长的流式输出
 
@@ -112,10 +113,18 @@ ${backgroundText}
     // 使用集中式 AI 客户端
     const model = await getAIModel(apiConfig);
 
+    // 获取用户上下文记忆 (异步并行获取)
+    const userAIContext = await getAIContextPrompt(userId);
+
     // 合并 system prompt，避免多个 system 消息导致 MiniMax 等API报错
-    const fullSystemPrompt = context
-      ? `${SYSTEM_PROMPT}\n\n${userContext}`
-      : SYSTEM_PROMPT;
+    // 结构: 系统提示词 + 用户偏好记忆 + 当前经文上下文
+    let fullSystemPrompt = SYSTEM_PROMPT;
+    if (userAIContext) {
+      fullSystemPrompt += `\n\n---\n### 👤 用户个性化记忆\n${userAIContext}`;
+    }
+    if (context) {
+      fullSystemPrompt += `\n\n---\n${userContext}`;
+    }
 
     const result = await streamText({
       model: model,
