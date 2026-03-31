@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Eraser, Sparkles, GraduationCap, FileText, BookMarked, Settings, Type, Edit, Trash2, Loader2 } from 'lucide-react'
 import { useChat } from 'ai/react'
+import { useSession } from 'next-auth/react'
 
 import { useBibleStore } from '@/store/useBibleStore'
 import { BIBLE_BOOKS } from '@/lib/constants'
@@ -18,6 +19,7 @@ import { AIInputForm } from './AIInputForm'
 
 // --- 主组件：AI Sidebar ---
 export function AISidebar() {
+  const { status } = useSession();
   const {
     isAiOpen, setAiOpen, clearSelection, aiRequestTrigger,
     sidebarWidth, setSidebarWidth,
@@ -119,6 +121,12 @@ export function AISidebar() {
 
   // 加载会话列表
   useEffect(() => {
+    // Only load sessions when authenticated
+    if (status !== 'authenticated') {
+      setSessionsLoading(false);
+      return;
+    }
+
     const loadSessions = async () => {
       setSessionsLoading(true)
       setSessionStatus('loading')
@@ -151,17 +159,23 @@ export function AISidebar() {
       }
     }
     loadSessions()
-  }, [setSessions, setSessionsLoading, setSessionStatus, setSessionError])
+  }, [setSessions, setSessionsLoading, setSessionStatus, setSessionError, status])
 
   // 加载自定义提示词
   useEffect(() => {
+    // Only load prompts when authenticated
+    if (status !== 'authenticated') return;
+
     fetch('/api/prompts')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) return null;
+        return res.json();
+      })
       .then(data => {
         if (Array.isArray(data)) setCustomPrompts(data)
       })
       .catch(err => console.error("Failed to load custom prompts", err))
-  }, [setCustomPrompts])
+  }, [setCustomPrompts, status])
 
   // 恢复会话消息
   useEffect(() => {

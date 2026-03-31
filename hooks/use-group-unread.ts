@@ -2,6 +2,7 @@
 // 获取小组未读消息数的 Hook
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface UnreadData {
   totalUnread: number;
@@ -9,10 +10,17 @@ interface UnreadData {
 }
 
 export function useGroupUnread() {
+  const { status } = useSession();
   const [data, setData] = useState<UnreadData>({ totalUnread: 0, groups: [] });
   const [loading, setLoading] = useState(true);
 
   const fetchUnread = useCallback(async () => {
+    // Only fetch when authenticated
+    if (status !== 'authenticated') {
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/church/unread-count');
       if (res.ok) {
@@ -24,16 +32,17 @@ export function useGroupUnread() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [status]);
 
   useEffect(() => {
     fetchUnread();
 
-    // 每 30 秒轮询一次
-    const interval = setInterval(fetchUnread, 30000);
-
-    return () => clearInterval(interval);
-  }, [fetchUnread]);
+    // 每 30 秒轮询一次 (only when authenticated)
+    if (status === 'authenticated') {
+      const interval = setInterval(fetchUnread, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [fetchUnread, status]);
 
   return {
     totalUnread: data.totalUnread,

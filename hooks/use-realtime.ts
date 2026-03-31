@@ -2,6 +2,7 @@
 // Hook for real-time updates via SSE
 
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useBibleStore } from '@/store/useBibleStore';
 
 interface SSEEvent {
@@ -26,6 +27,7 @@ interface RealtimeState {
 }
 
 export function useRealtime(options: UseRealtimeOptions = {}) {
+  const { status } = useSession();
   const {
     onMessage,
     onNotification,
@@ -165,14 +167,19 @@ export function useRealtime(options: UseRealtimeOptions = {}) {
     setState(prev => ({ ...prev, connected: false }));
   }, []);
 
-  // Auto-connect on mount, disconnect on unmount
+  // Auto-connect on mount when authenticated, disconnect on unmount or when unauthenticated
   useEffect(() => {
-    connect();
+    // Only connect when user is authenticated
+    if (status === 'authenticated') {
+      connect();
+    } else if (status === 'unauthenticated') {
+      disconnect();
+    }
 
     return () => {
       disconnect();
     };
-  }, [connect, disconnect]);
+  }, [connect, disconnect, status]);
 
   return {
     ...state,

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus, Trash2, Edit, Star, StarOff } from 'lucide-react';
@@ -115,6 +116,7 @@ function PromptFormModal({
 
 // 主页面组件
 export default function PromptsSettingsPage() {
+  const { status } = useSession();
   const { customPrompts, setCustomPrompts } = useBibleStore();
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -123,6 +125,12 @@ export default function PromptsSettingsPage() {
   // 加载用户的自定义提示词
   useEffect(() => {
     const loadPrompts = async () => {
+      // Only load when authenticated
+      if (status !== 'authenticated') {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch('/api/prompts');
         if (res.ok) {
@@ -136,7 +144,7 @@ export default function PromptsSettingsPage() {
       }
     };
     loadPrompts();
-  }, [setCustomPrompts]);
+  }, [setCustomPrompts, status]);
 
   // 添加新提示词
   const handleAdd = useCallback(async (label: string, prompt: string) => {
@@ -220,8 +228,28 @@ export default function PromptsSettingsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white dark:bg-slate-800 border-b dark:border-slate-700">
+      {/* Unauthenticated state */}
+      {status === 'unauthenticated' && (
+        <div className="flex flex-col items-center justify-center min-h-screen px-4">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-slate-800 dark:text-white mb-2">
+              请先登录
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 mb-4">
+              登录后即可管理自定义问题
+            </p>
+            <Button onClick={() => window.location.href = '/'}>
+              返回首页
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Authenticated content */}
+      {status === 'authenticated' && (
+        <>
+          {/* Header */}
+          <header className="sticky top-0 z-40 bg-white dark:bg-slate-800 border-b dark:border-slate-700">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -370,6 +398,8 @@ export default function PromptsSettingsPage() {
           />
         )}
       </AnimatePresence>
+        </>
+      )}
     </div>
   );
 }
