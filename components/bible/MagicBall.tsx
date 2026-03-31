@@ -715,6 +715,26 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
 
           {/* 顶部高光反射 */}
           <div className="absolute top-[10%] left-[20%] w-[30%] h-[15%] bg-gradient-to-b from-white to-transparent opacity-90 rounded-full rotate-[-15deg] blur-[0.5px]" />
+
+          {/* 围绕旋转的火星 */}
+          <div
+            className="absolute inset-0 pointer-events-none z-30"
+            style={{
+              animation: 'sparkle-orbit 4s linear infinite',
+            }}
+          >
+            <div
+              className="absolute w-2 h-2 rounded-full"
+              style={{
+                top: '8%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'radial-gradient(circle, #fff 0%, #ffd700 40%, #ff8c00 70%, transparent 100%)',
+                boxShadow: '0 0 6px 2px rgba(255, 215, 0, 0.8), 0 0 12px 4px rgba(255, 140, 0, 0.5)',
+                animation: 'sparkle-glow 1.5s ease-in-out infinite alternate',
+              }}
+            />
+          </div>
         </div>
       </motion.div>
 
@@ -747,6 +767,26 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
           50% { transform: translateY(-3px); }
         }
         .animate-bounce-subtle { animation: bounce-subtle 1.5s ease-in-out infinite; }
+
+        /* 火星围绕旋转动画 */
+        @keyframes sparkle-orbit {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        /* 火星闪烁发光动画 */
+        @keyframes sparkle-glow {
+          0% {
+            opacity: 0.7;
+            transform: translateX(-50%) scale(0.8);
+            box-shadow: 0 0 4px 1px rgba(255, 215, 0, 0.6), 0 0 8px 2px rgba(255, 140, 0, 0.4);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.2);
+            box-shadow: 0 0 8px 3px rgba(255, 215, 0, 0.9), 0 0 16px 6px rgba(255, 140, 0, 0.6);
+          }
+        }
 
         .ease-out-back { transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
       `}</style>
