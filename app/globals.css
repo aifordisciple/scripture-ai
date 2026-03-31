@@ -499,6 +499,293 @@
   }
 }
 
+/* =========================================
+   AI 解读 Markdown 排版美化
+   ========================================= */
+
+/* AI解读 prose 样式增强 */
+.prose.prose-slate {
+  /* 基础文本 */
+  --tw-prose-body: oklch(0.35 0.04 265);
+  --tw-prose-headings: oklch(0.21 0.04 265);
+  --tw-prose-links: oklch(0.55 0.15 260);
+  --tw-prose-bold: oklch(0.21 0.04 265);
+  --tw-prose-quotes: oklch(0.554 0.046 257);
+  --tw-prose-quote-borders: oklch(0.55 0.15 260);
+  --tw-prose-code: oklch(0.55 0.15 260);
+  --tw-prose-counters: oklch(0.554 0.046 257);
+  --tw-prose-bullets: oklch(0.55 0.15 260);
+  --tw-prose-hr: oklch(0.92 0.01 86);
+  --tw-prose-th-borders: oklch(0.85 0.01 86);
+  --tw-prose-td-borders: oklch(0.92 0.01 86);
+}
+
+.dark .prose.prose-slate,
+.dark .prose.prose-invert {
+  --tw-prose-body: oklch(0.85 0.01 265);
+  --tw-prose-headings: oklch(0.98 0.005 247);
+  --tw-prose-links: oklch(0.70 0.14 260);
+  --tw-prose-bold: oklch(0.98 0.005 247);
+  --tw-prose-quotes: oklch(0.75 0.02 265);
+  --tw-prose-quote-borders: oklch(0.70 0.14 260);
+  --tw-prose-code: oklch(0.70 0.14 260);
+  --tw-prose-counters: oklch(0.75 0.02 265);
+  --tw-prose-bullets: oklch(0.70 0.14 260);
+  --tw-prose-hr: oklch(0.28 0.03 265);
+  --tw-prose-th-borders: oklch(0.35 0.03 265);
+  --tw-prose-td-borders: oklch(0.28 0.03 265);
+}
+
+/* 标题样式 - 清晰的层次结构 */
+.prose h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--tw-prose-headings);
+}
+
+.prose h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--tw-prose-headings);
+  border-bottom: 1px solid oklch(0.92 0.01 86);
+  padding-bottom: 0.375rem;
+}
+
+.dark .prose h2 {
+  border-bottom-color: oklch(0.28 0.03 265);
+}
+
+.prose h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  color: var(--tw-prose-headings);
+}
+
+.prose h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--tw-prose-headings);
+}
+
+/* 段落样式 */
+.prose p {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.75;
+  text-align: justify;
+}
+
+/* 引用块样式 - 经文引用风格 */
+.prose blockquote {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-left-width: 3px;
+  border-left-color: var(--tw-prose-quote-borders);
+  border-radius: 0.25rem;
+  background: oklch(0.98 0.008 86);
+  font-style: normal;
+  font-weight: 500;
+  color: var(--tw-prose-quotes);
+}
+
+.dark .prose blockquote {
+  background: oklch(0.22 0.03 265);
+}
+
+.prose blockquote p:first-child::before {
+  content: "「";
+  color: var(--tw-prose-quote-borders);
+  font-weight: 600;
+}
+
+.prose blockquote p:last-child::after {
+  content: "」";
+  color: var(--tw-prose-quote-borders);
+  font-weight: 600;
+}
+
+/* 列表样式 */
+.prose ul,
+.prose ol {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.prose li {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+  line-height: 1.6;
+}
+
+.prose li::marker {
+  color: var(--tw-prose-bullets);
+  font-weight: 600;
+}
+
+.prose ol li::marker {
+  color: var(--tw-prose-counters);
+}
+
+/* 嵌套列表 */
+.prose ul ul,
+.prose ol ol,
+.prose ul ol,
+.prose ol ul {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* 强调文本 */
+.prose strong {
+  font-weight: 700;
+  color: var(--tw-prose-bold);
+}
+
+.prose em {
+  font-style: italic;
+  color: var(--tw-prose-quotes);
+}
+
+/* 行内代码 */
+.prose code {
+  font-size: 0.875em;
+  font-weight: 500;
+  color: var(--tw-prose-code);
+  background: oklch(0.95 0.008 86);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+.dark .prose code {
+  background: oklch(0.24 0.03 265);
+}
+
+/* 代码块 */
+.prose pre {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: oklch(0.16 0.02 265);
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.prose pre code {
+  background: transparent;
+  padding: 0;
+  color: oklch(0.85 0.01 265);
+}
+
+/* 表格样式 */
+.prose table {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.prose thead {
+  background: oklch(0.95 0.008 86);
+}
+
+.dark .prose thead {
+  background: oklch(0.24 0.03 265);
+}
+
+.prose th {
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid var(--tw-prose-th-borders);
+}
+
+.prose td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--tw-prose-td-borders);
+}
+
+.prose tbody tr:hover {
+  background: oklch(0.98 0.006 86);
+}
+
+.dark .prose tbody tr:hover {
+  background: oklch(0.20 0.03 265);
+}
+
+/* 链接样式 */
+.prose a {
+  color: var(--tw-prose-links);
+  text-decoration: underline;
+  text-decoration-color: oklch(0.70 0.10 260 / 0.4);
+  text-underline-offset: 0.15em;
+  transition: color 150ms ease, text-decoration-color 150ms ease;
+}
+
+.prose a:hover {
+  text-decoration-color: var(--tw-prose-links);
+}
+
+/* 分隔线 */
+.prose hr {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-top-width: 1px;
+  border-color: var(--tw-prose-hr);
+}
+
+/* 图片 */
+.prose img {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}
+
+/* 字体大小变体 */
+.prose.prose-sm {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.prose.prose-sm h1 { font-size: 1.25rem; }
+.prose.prose-sm h2 { font-size: 1.125rem; }
+.prose.prose-sm h3 { font-size: 1rem; }
+
+.prose.prose-lg {
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.prose.prose-lg h1 { font-size: 1.75rem; }
+.prose.prose-lg h2 { font-size: 1.5rem; }
+.prose.prose-lg h3 { font-size: 1.25rem; }
+
+.prose.prose-xl {
+  font-size: 1.25rem;
+  line-height: 1.8;
+}
+
+.prose.prose-xl h1 { font-size: 2rem; }
+.prose.prose-xl h2 { font-size: 1.75rem; }
+.prose.prose-xl h3 { font-size: 1.5rem; }
+
 /* iOS Safari 圆形元素强制渲染 */
 .ios-rounded-fix {
   -webkit-appearance: none;
