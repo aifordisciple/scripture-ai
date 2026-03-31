@@ -36,6 +36,11 @@ const ACTION_ICONS: Record<string, string> = {
   tutor: "👨‍🏫",
   sermon: "📋",
   "study-guide": "📖",
+  // [P0优化] AI模式选项
+  "ai-mode-general": "✨",
+  "ai-mode-tutor": "👨‍🏫",
+  "ai-mode-sermon": "📋",
+  "ai-mode-study-guide": "📖",
 };
 
 // 颜色映射
@@ -49,6 +54,11 @@ const ACTION_COLORS: Record<string, string> = {
   tutor: "from-violet-500 to-purple-600",
   sermon: "from-orange-500 to-red-600",
   "study-guide": "from-teal-500 to-emerald-600",
+  // [P0优化] AI模式选项颜色
+  "ai-mode-general": "from-blue-500 to-indigo-600",
+  "ai-mode-tutor": "from-violet-500 to-purple-600",
+  "ai-mode-sermon": "from-orange-500 to-amber-600",
+  "ai-mode-study-guide": "from-teal-500 to-cyan-600",
 };
 
 export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: RadialMenuProps) {

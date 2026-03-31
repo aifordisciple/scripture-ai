@@ -145,7 +145,8 @@ export default function Home() {
     chapterSpeechText,
     isMobileSettingsOpen,
     setMobileSettingsOpen,
-    streakCount
+    streakCount,
+    aiMode, // [P0优化] AI模式状态
   } = useBibleStore();
 
   // 用于追踪 activeTabId 变化，以重置滚动检测状态
@@ -242,8 +243,8 @@ export default function Home() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
-        e.target instanceof HTMLInputElement || 
-        e.target instanceof HTMLTextAreaElement || 
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
         (e.target as HTMLElement).isContentEditable
       ) {
         return;
@@ -252,6 +253,30 @@ export default function Home() {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsSearchOpen(true);
+        return;
+      }
+
+      // [P0优化] Alt+1/2/3/4 切换AI模式
+      if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        const { setAiMode } = useBibleStore.getState();
+        switch (e.key) {
+          case '1':
+            e.preventDefault();
+            setAiMode('general');
+            break;
+          case '2':
+            e.preventDefault();
+            setAiMode('tutor');
+            break;
+          case '3':
+            e.preventDefault();
+            setAiMode('sermon');
+            break;
+          case '4':
+            e.preventDefault();
+            setAiMode('study-guide');
+            break;
+        }
         return;
       }
 
@@ -602,6 +627,22 @@ export default function Home() {
 
               <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold rounded-full">
                 <Languages className="h-4 w-4" />{showEnglish ? "中/英" : "中"}
+              </Button>
+
+              {/* [P0优化] AI模式指示器 */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAiOpen(true)}
+                className="gap-1 text-xs font-bold rounded-full bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/40 dark:hover:to-purple-900/40 border border-blue-100 dark:border-blue-900/50"
+                title={`当前AI模式: ${aiMode === 'general' ? '标准' : aiMode === 'tutor' ? '导师' : aiMode === 'sermon' ? '讲章' : '查经'} (Alt+1/2/3/4切换)`}
+              >
+                <span className="text-sm">
+                  {aiMode === 'general' ? '✨' : aiMode === 'tutor' ? '👨‍🏫' : aiMode === 'sermon' ? '📋' : '📖'}
+                </span>
+                <span className="hidden lg:inline">
+                  {aiMode === 'general' ? '标准' : aiMode === 'tutor' ? '导师' : aiMode === 'sermon' ? '讲章' : '查经'}
+                </span>
               </Button>
 
               <div className="mx-1 border-l h-5 border-border/50"></div>

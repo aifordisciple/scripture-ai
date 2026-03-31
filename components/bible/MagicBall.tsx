@@ -82,9 +82,20 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
   const queueCount = aiQueue.length;
   const isProcessing = currentAiRequest?.status === 'processing';
 
+  // [P0优化] AI模式快捷动作
+  const aiModeActions: QuickAction[] = [
+    { id: 'ai-mode-general', label: '✨ 标准模式', prompt: '', mode: 'general', priority: 100, category: 'ai-mode' },
+    { id: 'ai-mode-tutor', label: '👨‍🏫 导师模式', prompt: '', mode: 'tutor', priority: 101, category: 'ai-mode' },
+    { id: 'ai-mode-sermon', label: '📋 讲章模式', prompt: '', mode: 'sermon', priority: 102, category: 'ai-mode' },
+    { id: 'ai-mode-study-guide', label: '📖 查经模式', prompt: '', mode: 'study-guide', priority: 103, category: 'ai-mode' },
+  ];
+
   // 更新上下文感知的快捷动作
   useEffect(() => {
-    const actions = quickActions.slice(0, 6);
+    // 获取前4个快捷动作
+    const regularActions = quickActions.slice(0, 4);
+    // 添加AI模式切换选项（只显示前2个，避免菜单过长）
+    const actions = [...regularActions, ...aiModeActions.slice(0, 2)];
     setContextActions(actions);
   }, [quickActions, selectedVerses, activePlans, currentAiRequest]);
 
@@ -115,6 +126,18 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
   // 处理快捷动作选择
   const handleQuickActionSelect = useCallback((action: QuickAction) => {
     setActiveQuickAction(action);
+
+    // [P0优化] 如果是AI模式切换动作，只切换模式
+    if (action.category === 'ai-mode' && action.mode) {
+      const state = useBibleStore.getState();
+      state.setAiMode(action.mode);
+
+      // 触觉反馈
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      return;
+    }
 
     // 获取当前阅读上下文
     const state = useBibleStore.getState();
