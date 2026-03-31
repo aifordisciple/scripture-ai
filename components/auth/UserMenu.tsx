@@ -172,9 +172,9 @@ export function UserMenu() {
             onClick={() => {
               setIsOpen(false);
               const { tabs, setActiveTab, addTab } = useBibleStore.getState();
-              const existTab = tabs.find(t => t.type === 'plans');
+              const existTab = tabs.find(t => t.type === 'plan');
               if (existTab) setActiveTab(existTab.id);
-              else addTab({ type: 'plans' });
+              else addTab({ type: 'plan' });
             }}
           />
 

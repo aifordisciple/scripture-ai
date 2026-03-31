@@ -564,7 +564,7 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
         set({ readingPlanContext: { ...ctx, stepIndex: ctx.stepIndex + 1 } });
     } else {
         set({ readingPlanContext: null }); // 结束流
-        const planTab = state.tabs.find(t => t.type === 'plans');
+        const planTab = state.tabs.find(t => t.type === 'plan');
         if (planTab) state.setActiveTab(planTab.id);
     }
   },

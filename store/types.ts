@@ -23,7 +23,7 @@ export interface SessionError {
 
 export interface Tab {
   id: string;
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights' | 'bookmarks';
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plan' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights' | 'bookmarks';
   book?: string;
   chapter?: string;
   query?: string;
@@ -265,9 +265,9 @@ export interface ReaderSlice {
   toggleEnglish: () => void; 
   tabs: Tab[];
   activeTabId: string;
-  // [修复] 在这里补上 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group'
+  // [修复] 在这里补上 'highlights' | 'notes' | 'plan' | 'cross-ref' | 'group'
   addTab: (params: {
-    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plans' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights';
+    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plan' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights';
     book?: string;
     chapter?: string;
     query?: string;
