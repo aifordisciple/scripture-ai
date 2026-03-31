@@ -213,14 +213,35 @@ export function NotesTab() {
                         key={item.id}
                         className="group relative flex flex-col p-5 bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300"
                       >
-                        {/* 标题栏 */}
+                        {/* 标题栏 - 点击可切换展开/收缩 */}
                         <div
-                          className="flex items-center justify-between mb-3 border-b dark:border-slate-800 pb-2 cursor-pointer"
-                          onClick={() => handleJump(item.bookId, item.chapter, item.verse)}
+                          className={cn(
+                            "flex items-center justify-between mb-3 border-b dark:border-slate-800 pb-2",
+                            needsExpand && "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-t-xl -mx-5 -mt-5 px-5 pt-5"
+                          )}
+                          onClick={(e) => {
+                            if (needsExpand) {
+                              e.stopPropagation();
+                              toggleExpand(item.id);
+                            } else {
+                              handleJump(item.bookId, item.chapter, item.verse);
+                            }
+                          }}
                         >
-                          <span className="text-sm font-bold text-amber-600 dark:text-amber-500">
-                            {item.bookId} {item.chapter}:{item.verse}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-amber-600 dark:text-amber-500">
+                              {item.bookId} {item.chapter}:{item.verse}
+                            </span>
+                            {needsExpand && (
+                              <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                                {isExpanded ? (
+                                  <><ChevronUp className="w-3.5 h-3.5" />收起</>
+                                ) : (
+                                  <><ChevronDown className="w-3.5 h-3.5" />展开</>
+                                )}
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                               variant="ghost"
@@ -245,35 +266,15 @@ export function NotesTab() {
                         </div>
 
                         {/* 内容区域 */}
-                        <div className={cn(
-                          "prose prose-sm dark:prose-invert max-w-none break-words text-slate-700 dark:text-slate-300",
-                          !isExpanded && needsExpand && "line-clamp-3"
-                        )}>
+                        <div
+                          className={cn(
+                            "prose prose-sm dark:prose-invert max-w-none break-words text-slate-700 dark:text-slate-300",
+                            !isExpanded && needsExpand && "line-clamp-3"
+                          )}
+                          onClick={() => handleJump(item.bookId, item.chapter, item.verse)}
+                        >
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.content}</ReactMarkdown>
                         </div>
-
-                        {/* 展开/收起按钮 */}
-                        {needsExpand && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleExpand(item.id);
-                            }}
-                            className="mt-2 flex items-center gap-1 text-xs text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 transition-colors self-start"
-                          >
-                            {isExpanded ? (
-                              <>
-                                <ChevronUp className="w-3.5 h-3.5" />
-                                <span>收起</span>
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="w-3.5 h-3.5" />
-                                <span>展开全文</span>
-                              </>
-                            )}
-                          </button>
-                        )}
                       </div>
                     );
                   })}
