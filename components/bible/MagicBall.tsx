@@ -698,7 +698,13 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             ) : isAiGenerating ? (
               <Sparkles className="w-5 h-5 text-white animate-pulse drop-shadow-md" />
             ) : (
-              <Sparkles className="w-5 h-5 text-blue-600/90 dark:text-blue-200/90 drop-shadow-sm" />
+              <Sparkles
+                className="w-5 h-5 drop-shadow-sm animate-sparkle-glow"
+                style={{
+                  color: '#fbbf24',
+                  filter: 'drop-shadow(0 0 6px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 12px rgba(251, 191, 36, 0.4))',
+                }}
+              />
             )}
           </div>
 
@@ -715,27 +721,6 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
 
           {/* 顶部高光反射 */}
           <div className="absolute top-[10%] left-[20%] w-[30%] h-[15%] bg-gradient-to-b from-white to-transparent opacity-90 rounded-full rotate-[-15deg] blur-[0.5px]" />
-        </div>
-
-        {/* 围绕旋转的火星 - 紧贴Magic Ball外边缘，放在外部容器中 */}
-        <div
-          className="absolute inset-0 pointer-events-none z-30"
-          style={{
-            animation: 'sparkle-orbit 8s linear infinite',
-            transformOrigin: 'center center',
-          }}
-        >
-          <div
-            className="absolute w-2 h-2 rounded-full"
-            style={{
-              top: 0,
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              background: 'radial-gradient(circle, #fff 0%, #ffd700 40%, #ff8c00 70%, transparent 100%)',
-              boxShadow: '0 0 6px 2px rgba(255, 215, 0, 0.8), 0 0 12px 4px rgba(255, 140, 0, 0.5)',
-              animation: 'sparkle-glow 1.5s ease-in-out infinite alternate',
-            }}
-          />
         </div>
       </motion.div>
 
@@ -769,24 +754,21 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
         }
         .animate-bounce-subtle { animation: bounce-subtle 1.5s ease-in-out infinite; }
 
-        /* 火星围绕旋转动画 */
-        @keyframes sparkle-orbit {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        /* 火星闪烁发光动画 */
+        /* 星星闪烁发光动画 */
         @keyframes sparkle-glow {
-          0% {
-            opacity: 0.7;
-            transform: translateX(-50%) scale(0.8);
-            box-shadow: 0 0 4px 1px rgba(255, 215, 0, 0.6), 0 0 8px 2px rgba(255, 140, 0, 0.4);
+          0%, 100% {
+            opacity: 0.6;
+            filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 8px rgba(251, 191, 36, 0.3));
+            transform: scale(1);
           }
-          100% {
+          50% {
             opacity: 1;
-            transform: translateX(-50%) scale(1.2);
-            box-shadow: 0 0 8px 3px rgba(255, 215, 0, 0.9), 0 0 16px 6px rgba(255, 140, 0, 0.6);
+            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 1)) drop-shadow(0 0 20px rgba(251, 191, 36, 0.6));
+            transform: scale(1.1);
           }
+        }
+        .animate-sparkle-glow {
+          animation: sparkle-glow 2s ease-in-out infinite;
         }
 
         .ease-out-back { transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
