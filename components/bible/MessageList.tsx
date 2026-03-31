@@ -1,9 +1,9 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { Copy, Check, Bookmark, Share2, RefreshCw, Quote, User, Sparkles } from 'lucide-react'
+import { Copy, Check, Bookmark, Share2, RefreshCw, User, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AudioButton } from './AudioButton'
 
@@ -23,14 +23,6 @@ export interface MessageListProps {
   fontSize?: 'small' | 'medium' | 'large' | 'xlarge'
   isSaved?: (messageId: string) => boolean
 }
-
-// 复制成功状态管理
-function useCopyState() {
-  const [copied, setCopied] = useState(false)
-  return { copied, setCopied }
-}
-
-import { useState } from 'react'
 
 // 消息气泡组件
 const MessageBubble = memo(function MessageBubble({
