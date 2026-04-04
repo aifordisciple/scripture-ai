@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="64" fill="#4f46e5"/>
+
+  <!-- Book icon -->
+  <g fill="white" transform="translate(96, 96)">
+    <!-- Left page -->
+    <path d="M160 0H40C17.9 0 0 17.9 0 40v280c0 22.1 17.9 40 40 40h120V0z" opacity="0.9"/>
+
+    <!-- Right page -->
+    <path d="M200 0h120c22.1 0 40 17.9 40 40v280c0 22.1-17.9 40-40 40H200V0z" opacity="0.7"/>
+
+    <!-- Spine -->
+    <rect x="160" y="0" width="40" height="360" opacity="0.8"/>
+
+    <!-- Text lines on left page -->
+    <g fill="#4f46e5" opacity="0.3">
+      <rect x="20" y="60" width="120" height="8" rx="4"/>
+      <rect x="20" y="80" width="100" height="8" rx="4"/>
+      <rect x="20" y="100" width="110" height="8" rx="4"/>
+      <rect x="20" y="120" width="90" height="8" rx="4"/>
+    </g>
+
+    <!-- AI sparkle -->
+    <circle cx="280" cy="80" r="20" fill="#fbbf24"/>
+    <circle cx="300" cy="60" r="10" fill="#fbbf24" opacity="0.7"/>
+  </g>
+</svg>

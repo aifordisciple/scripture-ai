@@ -1,19 +1,53 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getPlatform, getAuthAdapter, isDesktop } from '@scripture-ai/native';
+import { ReaderPage } from './pages';
+import { OfflineIndicator } from './components';
+import { useTauriEvent } from './hooks';
+import {
+  BookOpen,
+  MessageCircle,
+  Calendar,
+  Bookmark,
+  Settings,
+  User,
+  Menu,
+  X,
+} from 'lucide-react';
+
+type TabId = 'read' | 'ai' | 'plan' | 'notes' | 'settings';
+
+interface Tab {
+  id: TabId;
+  label: string;
+  icon: React.ReactNode;
+}
+
+const TABS: Tab[] = [
+  { id: 'read', label: '阅读', icon: <BookOpen className="w-5 h-5" /> },
+  { id: 'ai', label: 'AI助手', icon: <MessageCircle className="w-5 h-5" /> },
+  { id: 'plan', label: '计划', icon: <Calendar className="w-5 h-5" /> },
+  { id: 'notes', label: '笔记', icon: <Bookmark className="w-5 h-5" /> },
+  { id: 'settings', label: '设置', icon: <Settings className="w-5 h-5" /> },
+];
 
 function App() {
   const [platform, setPlatform] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabId>('read');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  // Initialize platform detection
   useEffect(() => {
-    // Initialize platform detection
     const currentPlatform = getPlatform();
     setPlatform(currentPlatform);
-
-    // Check authentication status
     checkAuth();
   }, []);
+
+  // Listen for login complete event from Tauri
+  useTauriEvent<{ userId: string }>('login-complete', useCallback(() => {
+    checkAuth();
+  }, []));
 
   async function checkAuth() {
     try {
@@ -31,8 +65,6 @@ function App() {
     try {
       const auth = getAuthAdapter();
       await auth.login();
-      // After login, check auth status again
-      // For desktop, this will be triggered by callback
       if (!isDesktop()) {
         await checkAuth();
       }
@@ -51,60 +83,164 @@ function App() {
     }
   }
 
+  // Loading state
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-text">加载中...</div>
+      <div className="loading-screen">
+        <div className="loading-content">
+          <div className="loading-logo">
+            <BookOpen className="w-12 h-12 text-primary" />
+          </div>
+          <h2 className="loading-title">AI读</h2>
+          <p className="loading-text">正在加载...</p>
+        </div>
       </div>
     );
   }
 
+  // Not authenticated - show login prompt
+  if (!isAuthenticated) {
+    return (
+      <div className="login-screen">
+        <div className="login-card">
+          <div className="login-icon">
+            <BookOpen className="w-16 h-16" />
+          </div>
+          <h1 className="login-title">AI读</h1>
+          <p className="login-subtitle">智能圣经阅读助手</p>
+          <p className="login-description">
+            登录以同步您的阅读进度、高亮和笔记
+          </p>
+          <button className="btn btn-primary btn-large" onClick={handleLogin}>
+            <User className="w-5 h-5" />
+            开始使用
+          </button>
+          <div className="login-features">
+            <div className="feature">📖 中英对照阅读</div>
+            <div className="feature">🤖 AI经文解读</div>
+            <div className="feature">📝 高亮与笔记</div>
+            <div className="feature">📅 读经计划</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main app - Authenticated
+  const currentTab = TABS.find(t => t.id === activeTab);
+
   return (
-    <div className="app-container">
-      {/* Header */}
-      <header className="header">
-        <h1 className="title">AI读 - 圣经阅读</h1>
-        <div className="header-actions">
-          <span className="platform-badge">{platform}</span>
-          {isAuthenticated ? (
-            <button className="btn btn-secondary" onClick={handleLogout}>
-              退出登录
-            </button>
-          ) : (
-            <button className="btn btn-primary" onClick={handleLogin}>
-              登录
-            </button>
+    <div className="app-layout">
+      {/* Sidebar */}
+      <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
+        <div className="sidebar-header">
+          <button
+            className="collapse-btn"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          >
+            {sidebarCollapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
+          </button>
+          {!sidebarCollapsed && (
+            <span className="sidebar-title">AI读</span>
           )}
         </div>
-      </header>
+
+        <nav className="sidebar-nav">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+              title={tab.label}
+            >
+              {tab.icon}
+              {!sidebarCollapsed && <span>{tab.label}</span>}
+            </button>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
+          <button className="user-btn" onClick={handleLogout}>
+            <User className="w-5 h-5" />
+            {!sidebarCollapsed && <span>退出登录</span>}
+          </button>
+        </div>
+      </aside>
 
       {/* Main Content */}
-      <main className="main-content">
-        {isAuthenticated ? (
-          <div className="content-area">
-            <div className="placeholder-text">
-              圣经阅读功能开发中...
-              <br />
-              <small>核心功能将逐步迁移到桌面端</small>
-            </div>
-          </div>
-        ) : (
-          <div className="login-prompt">
-            <div className="login-icon">📖</div>
-            <h2>欢迎使用 AI读</h2>
-            <p>请登录以同步您的阅读进度、高亮和笔记</p>
-            <button className="btn btn-primary btn-large" onClick={handleLogin}>
-              开始使用
-            </button>
-          </div>
-        )}
-      </main>
+      <main className="main-area">
+        {/* Tab Content */}
+        <div className="tab-content">
+          {activeTab === 'read' && <ReaderPage />}
 
-      {/* Status Bar */}
-      <footer className="status-bar">
-        <span>AI读桌面版 v0.1.0</span>
-        <span>平台: {platform}</span>
-      </footer>
+          {activeTab === 'ai' && (
+            <div className="placeholder-page">
+              <MessageCircle className="w-16 h-16 text-muted" />
+              <h2>AI助手</h2>
+              <p>AI对话功能开发中...</p>
+            </div>
+          )}
+
+          {activeTab === 'plan' && (
+            <div className="placeholder-page">
+              <Calendar className="w-16 h-16 text-muted" />
+              <h2>读经计划</h2>
+              <p>计划功能开发中...</p>
+            </div>
+          )}
+
+          {activeTab === 'notes' && (
+            <div className="placeholder-page">
+              <Bookmark className="w-16 h-16 text-muted" />
+              <h2>笔记与高亮</h2>
+              <p>笔记功能开发中...</p>
+            </div>
+          )}
+
+          {activeTab === 'settings' && (
+            <div className="settings-page">
+              <h2>设置</h2>
+              <div className="settings-group">
+                <h3>通用</h3>
+                <div className="setting-item">
+                  <span>主题</span>
+                  <select>
+                    <option>跟随系统</option>
+                    <option>浅色</option>
+                    <option>深色</option>
+                  </select>
+                </div>
+                <div className="setting-item">
+                  <span>字体大小</span>
+                  <input type="range" min="14" max="28" defaultValue="18" />
+                </div>
+              </div>
+              <div className="settings-group">
+                <h3>同步</h3>
+                <div className="setting-item">
+                  <span>自动同步</span>
+                  <input type="checkbox" defaultChecked />
+                </div>
+                <button className="btn btn-secondary">立即同步</button>
+              </div>
+              <div className="settings-group">
+                <h3>关于</h3>
+                <div className="setting-item">
+                  <span>版本</span>
+                  <span>0.1.0</span>
+                </div>
+                <div className="setting-item">
+                  <span>平台</span>
+                  <span>{platform}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Offline Indicator */}
+        <OfflineIndicator className="offline-banner" />
+      </main>
     </div>
   );
 }

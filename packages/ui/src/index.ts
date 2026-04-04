@@ -2,3 +2,4 @@
 // UI Package exports
 
 export * from './hooks';
+export * from './utils';

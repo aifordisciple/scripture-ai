@@ -7,11 +7,15 @@
   "scripts": {
     "type-check": "tsc --noEmit"
   },
+  "dependencies": {
+    "clsx": "^2.1.1"
+  },
   "peerDependencies": {
     "react": ">=18.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@types/react": "^19.2.14"
   },
   "keywords": [
     "bible",

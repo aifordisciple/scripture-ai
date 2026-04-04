@@ -6,7 +6,7 @@
 
 mod commands;
 
-use commands::{auth, storage};
+use commands::{auth, storage, system};
 
 fn main() {
     tauri::Builder::default()
@@ -15,6 +15,12 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::default().build())
         // Register all IPC commands
         .invoke_handler(tauri::generate_handler![
+            // System commands
+            system::get_platform,
+            system::quit_app,
+            system::get_app_version,
+            system::minimize_window,
+            system::toggle_maximize,
             // Auth commands
             auth::store_token,
             auth::get_token,

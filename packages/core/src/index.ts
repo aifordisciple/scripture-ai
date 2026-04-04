@@ -11,6 +11,9 @@ export * from './bible';
 // AI module
 export * from './ai';
 
+// API client
+export * from './api';
+
 // Storage
 export * from './storage';
 
