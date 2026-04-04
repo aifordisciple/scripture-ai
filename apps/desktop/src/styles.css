@@ -104,6 +104,15 @@ body {
   background: var(--color-surface-hover);
 }
 
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.btn-secondary:hover {
+  background: var(--color-surface-hover);
+}
+
 .btn-large {
   padding: 12px 32px;
   font-size: 16px;

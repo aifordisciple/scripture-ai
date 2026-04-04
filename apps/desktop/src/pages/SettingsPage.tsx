@@ -16,6 +16,11 @@ import { invoke } from '@tauri-apps/api/core';
 import { getAuthAdapter, getStorageAdapter } from '@scripture-ai/native';
 import { syncWithServer as performSync } from '../utils/sync';
 import {
+  startNotificationScheduler,
+  stopNotificationScheduler,
+  sendTestNotification,
+} from '../utils/notificationScheduler';
+import {
   Settings,
   Moon,
   Sun,
@@ -85,6 +90,23 @@ export function SettingsPage() {
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
   }, [settings.theme]);
+
+  // Start/stop notification scheduler when settings change
+  useEffect(() => {
+    if (settings.notificationsEnabled) {
+      startNotificationScheduler({
+        enabled: true,
+        time: settings.reminderTime,
+      });
+    } else {
+      stopNotificationScheduler();
+    }
+
+    // Cleanup on unmount
+    return () => {
+      stopNotificationScheduler();
+    };
+  }, [settings.notificationsEnabled, settings.reminderTime]);
 
   const loadSettings = async () => {
     try {
@@ -576,15 +598,26 @@ export function SettingsPage() {
 
             {/* Reminder Time */}
             {settings.notificationsEnabled && (
-              <div className="setting-row">
-                <span className="setting-label">读经提醒时间</span>
-                <input
-                  type="time"
-                  className="time-input"
-                  value={settings.reminderTime}
-                  onChange={(e) => handleReminderTimeChange(e.target.value)}
-                />
-              </div>
+              <>
+                <div className="setting-row">
+                  <span className="setting-label">读经提醒时间</span>
+                  <input
+                    type="time"
+                    className="time-input"
+                    value={settings.reminderTime}
+                    onChange={(e) => handleReminderTimeChange(e.target.value)}
+                  />
+                </div>
+                <div className="setting-row">
+                  <span className="setting-label">测试通知</span>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={sendTestNotification}
+                  >
+                    发送测试通知
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </section>
