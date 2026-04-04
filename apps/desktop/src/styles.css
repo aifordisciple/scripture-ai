@@ -1,6 +1,6 @@
 /* AI读 Desktop App Styles */
 
-/* CSS Variables */
+/* CSS Variables - Light Mode (Default) */
 :root {
   --color-primary: #4f46e5;
   --color-primary-hover: #4338ca;
@@ -20,9 +20,20 @@
   --header-height: 48px;
 }
 
-/* Dark mode */
+/* Dark mode - via class (manual toggle) */
+.dark {
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-hover: #334155;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-border: #334155;
+}
+
+/* Dark mode - via system preference (when theme is 'system') */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.dark):not(.light) {
     --color-background: #0f172a;
     --color-surface: #1e293b;
     --color-surface-hover: #334155;
@@ -31,6 +42,17 @@
     --color-text-muted: #64748b;
     --color-border: #334155;
   }
+}
+
+/* Light mode - via class (to override system preference) */
+.light {
+  --color-background: #ffffff;
+  --color-surface: #f9fafb;
+  --color-surface-hover: #f3f4f6;
+  --color-text: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+  --color-border: #e5e7eb;
 }
 
 /* Reset & Base */

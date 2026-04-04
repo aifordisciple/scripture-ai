@@ -63,6 +63,14 @@ export function SettingsPage() {
   // Apply theme when changed
   useEffect(() => {
     applyTheme(settings.theme);
+
+    // Listen for system theme changes when in 'system' mode
+    if (settings.theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => applyTheme('system');
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
   }, [settings.theme]);
 
   const loadSettings = async () => {
@@ -107,11 +115,18 @@ export function SettingsPage() {
   const applyTheme = (theme: Theme) => {
     const root = document.documentElement;
 
+    // Remove both classes first
+    root.classList.remove('dark', 'light');
+
     if (theme === 'system') {
+      // No class needed - CSS will use media query
+      // But we can still apply immediate effect based on current preference
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.classList.toggle('dark', prefersDark);
+      // Don't add classes for system mode - let CSS media query handle it
+    } else if (theme === 'dark') {
+      root.classList.add('dark');
     } else {
-      root.classList.toggle('dark', theme === 'dark');
+      root.classList.add('light');
     }
   };
 
