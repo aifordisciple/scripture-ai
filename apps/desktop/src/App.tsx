@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getPlatform, getAuthAdapter, isDesktop } from '@scripture-ai/native';
 import { ReaderPage, AIChatPage, PlanPage, NotesPage, SettingsPage } from './pages';
-import { OfflineIndicator } from './components';
+import { OfflineIndicator, KeyboardShortcutsHelp } from './components';
 import { useTauriEvent, useKeyboardShortcuts, createCommonShortcuts } from './hooks';
 import {
   BookOpen,
@@ -44,6 +44,7 @@ function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [aiContext, setAIContext] = useState<AIContext | undefined>();
   const [readerNavigation, setReaderNavigation] = useState<{ bookId: string; chapter: number } | undefined>();
+  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
 
   // Initialize platform detection
   useEffect(() => {
@@ -108,6 +109,7 @@ function App() {
     onToggleSidebar: () => setSidebarCollapsed(prev => !prev),
     onEscape: () => {
       // Close any open modals/menus
+      setShowKeyboardHelp(false);
       setReaderNavigation(undefined);
     },
   });
@@ -126,6 +128,19 @@ function App() {
           e.preventDefault();
           const tabs: TabId[] = ['read', 'ai', 'plan', 'notes', 'settings'];
           setActiveTab(tabs[num - 1]);
+        }
+        // Ctrl/Cmd + / for help
+        if (e.key === '/') {
+          e.preventDefault();
+          setShowKeyboardHelp(prev => !prev);
+        }
+      }
+      // ? for help (only when not in input)
+      if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          setShowKeyboardHelp(prev => !prev);
         }
       }
     };
@@ -242,6 +257,12 @@ function App() {
         {/* Offline Indicator */}
         <OfflineIndicator className="offline-banner" />
       </main>
+
+      {/* Keyboard Shortcuts Help Modal */}
+      <KeyboardShortcutsHelp
+        isOpen={showKeyboardHelp}
+        onClose={() => setShowKeyboardHelp(false)}
+      />
     </div>
   );
 }
