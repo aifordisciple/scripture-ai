@@ -123,6 +123,98 @@ body {
   background: var(--color-background);
 }
 
+/* Desktop Menu Styles */
+.desktop-menu {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 28px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 8px;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.menu-dropdown {
+  position: relative;
+  -webkit-app-region: no-drag;
+}
+
+.menu-trigger {
+  padding: 4px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.menu-trigger:hover {
+  background: var(--color-surface-hover);
+}
+
+.menu-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  z-index: 1000;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.menu-item:hover:not(.disabled) {
+  background: var(--color-surface-hover);
+}
+
+.menu-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.menu-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  color: var(--color-text-secondary);
+}
+
+.menu-label {
+  flex: 1;
+}
+
+.menu-shortcut {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.menu-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 8px;
+}
+
 .loading-content {
   text-align: center;
 }
@@ -733,6 +825,27 @@ body {
   cursor: not-allowed;
 }
 
+.ask-ai-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px;
+  margin-top: 8px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ask-ai-btn:hover {
+  opacity: 0.9;
+}
+
 .remove-btn {
   width: 100%;
   padding: 8px;
@@ -782,6 +895,82 @@ body {
   color: var(--color-text-secondary);
   min-width: 50px;
   text-align: center;
+}
+
+/* Audio Player in Footer */
+.footer-audio {
+  padding: 12px 24px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.audio-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.audio-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.audio-btn:hover {
+  opacity: 0.9;
+}
+
+.audio-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.audio-btn.stop {
+  width: 28px;
+  height: 28px;
+  background: var(--color-text-muted);
+}
+
+.audio-icon {
+  color: var(--color-text-secondary);
+}
+
+.audio-time {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-family: monospace;
+}
+
+.audio-error {
+  font-size: 12px;
+  color: var(--color-error);
+  padding: 4px 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 4px;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Offline Indicator */
@@ -835,6 +1024,18 @@ body {
 .header-title h2 {
   font-size: 18px;
   font-weight: 600;
+}
+
+.context-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .chat-modes {
@@ -1828,6 +2029,50 @@ body {
 
 .sync-now-btn .spin {
   animation: spin 1s linear infinite;
+}
+
+/* Data Management Buttons */
+.data-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.data-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.data-btn.export {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+.data-btn.export:hover {
+  opacity: 0.9;
+}
+
+.data-btn.import {
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.data-btn.import:hover {
+  background: var(--color-surface-hover);
+}
+
+.setting-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+  line-height: 1.5;
 }
 
 /* Logout Button */

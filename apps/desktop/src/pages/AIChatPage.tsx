@@ -64,6 +64,20 @@ export function AIChatPage({ context }: AIChatPageProps) {
     inputRef.current?.focus();
   }, []);
 
+  // Handle context changes - auto-switch to interpret mode and pre-fill prompt
+  useEffect(() => {
+    if (context?.bookId && context?.verses && context.verses.length > 0) {
+      // Switch to interpret mode
+      setMode('interpret');
+
+      // Pre-fill input with verse question
+      const verseStr = context.verses.length === 1
+        ? `${context.verses[0]}节`
+        : `${context.verses[0]}-${context.verses[context.verses.length - 1]}节`;
+      setInput(`请帮我解读这段经文的含义：`);
+    }
+  }, [context]);
+
   // Get system prompt based on mode
   const getSystemPrompt = useCallback(() => {
     const prompts: Record<ChatMode, string> = {
@@ -209,6 +223,15 @@ export function AIChatPage({ context }: AIChatPageProps) {
         <div className="header-title">
           <Bot className="w-6 h-6" />
           <h2>AI助手</h2>
+          {context?.bookId && (
+            <span className="context-badge">
+              <BookOpen className="w-4 h-4" />
+              {context.bookId} {context.chapter}章
+              {context.verses && context.verses.length > 0 && (
+                <span>: {context.verses[0]}-{context.verses[context.verses.length - 1]}节</span>
+              )}
+            </span>
+          )}
         </div>
         <div className="chat-modes">
           {CHAT_MODES.map(m => (

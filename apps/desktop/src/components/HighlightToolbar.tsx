@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Highlighter, X, Check } from 'lucide-react';
+import { Highlighter, X, Check, MessageCircle } from 'lucide-react';
 import type { Highlight } from '@scripture-ai/native';
 
 interface HighlightToolbarProps {
@@ -19,6 +19,7 @@ interface HighlightToolbarProps {
   onHighlightAdded: (highlight: Highlight) => void;
   onHighlightRemoved: (id: string) => void;
   onClose: () => void;
+  onAskAI?: (bookId: string, chapter: number, verses: number[]) => void;
 }
 
 const HIGHLIGHT_COLORS = [
@@ -41,6 +42,7 @@ export function HighlightToolbar({
   onHighlightAdded,
   onHighlightRemoved,
   onClose,
+  onAskAI,
 }: HighlightToolbarProps) {
   const [saving, setSaving] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -157,6 +159,17 @@ export function HighlightToolbar({
           </button>
         ))}
       </div>
+
+      {onAskAI && (
+        <button
+          className="ask-ai-btn"
+          onClick={() => onAskAI(bookId, chapter, selectedVerses)}
+          title="向AI助手询问这些经文"
+        >
+          <MessageCircle className="w-4 h-4" />
+          <span>询问AI</span>
+        </button>
+      )}
 
       {existingHighlight && (
         <button className="remove-btn" onClick={handleRemoveHighlight} disabled={saving}>

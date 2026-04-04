@@ -10,8 +10,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
 import { getAuthAdapter, getStorageAdapter, type Highlight, type Bookmark as BookmarkType } from '@scripture-ai/native';
-import { HighlightToolbar, SearchModal } from '../components';
-import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck } from 'lucide-react';
+import { HighlightToolbar, SearchModal, AudioPlayer } from '../components';
+import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck, Volume2 } from 'lucide-react';
 
 // Bible book list - Complete 66 books
 const BIBLE_BOOKS = [
@@ -96,9 +96,10 @@ const BIBLE_BOOKS = [
 interface ReaderPageProps {
   initialBook?: string;
   initialChapter?: number;
+  onAskAI?: (bookId: string, chapter: number, verses: number[]) => void;
 }
 
-export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPageProps) {
+export function ReaderPage({ initialBook = 'gen', initialChapter = 1, onAskAI }: ReaderPageProps) {
   const [bookId, setBookId] = useState(initialBook);
   const [chapter, setChapter] = useState(initialChapter);
   const [verses, setVerses] = useState<BibleVerse[]>([]);
@@ -123,6 +124,9 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
 
   // Search state
   const [showSearch, setShowSearch] = useState(false);
+
+  // Audio player state
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
 
   const currentBook = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
 
@@ -441,6 +445,9 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
         </div>
 
         <div className="header-right">
+          <button className="icon-btn" title="朗读" onClick={() => setShowAudioPlayer(!showAudioPlayer)}>
+            <Volume2 className="w-5 h-5" />
+          </button>
           <button className="icon-btn" title="搜索" onClick={() => setShowSearch(true)}>
             <Search className="w-5 h-5" />
           </button>
@@ -566,6 +573,7 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
                 setShowHighlightToolbar(false);
                 setSelectedVerses([]);
               }}
+              onAskAI={onAskAI}
             />
           </>
         )}
@@ -573,6 +581,15 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
 
       {/* Footer */}
       <footer className="reader-footer">
+        {showAudioPlayer && verses.length > 0 && (
+          <div className="footer-audio">
+            <AudioPlayer
+              text={verses.map(v => v.text).join(' ')}
+              title={currentBook.name}
+              reference={`${currentBook.name} ${chapter}章`}
+            />
+          </div>
+        )}
         <div className="font-controls">
           <button onClick={() => setFontSize(Math.max(12, fontSize - 2))}>A-</button>
           <span>{fontSize}px</span>

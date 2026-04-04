@@ -16,6 +16,12 @@ import {
 
 type TabId = 'read' | 'ai' | 'plan' | 'notes' | 'settings';
 
+interface AIContext {
+  bookId?: string;
+  chapter?: number;
+  verses?: number[];
+}
+
 interface Tab {
   id: TabId;
   label: string;
@@ -36,6 +42,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>('read');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [aiContext, setAIContext] = useState<AIContext | undefined>();
 
   // Initialize platform detection
   useEffect(() => {
@@ -82,6 +89,12 @@ function App() {
       console.error('Logout failed:', error);
     }
   }
+
+  // Handle Ask AI from ReaderPage
+  const handleAskAI = useCallback((bookId: string, chapter: number, verses: number[]) => {
+    setAIContext({ bookId, chapter, verses });
+    setActiveTab('ai');
+  }, []);
 
   // Loading state
   if (loading) {
@@ -171,9 +184,9 @@ function App() {
       <main className="main-area">
         {/* Tab Content */}
         <div className="tab-content">
-          {activeTab === 'read' && <ReaderPage />}
+          {activeTab === 'read' && <ReaderPage onAskAI={handleAskAI} />}
 
-          {activeTab === 'ai' && <AIChatPage />}
+          {activeTab === 'ai' && <AIChatPage context={aiContext} />}
 
           {activeTab === 'plan' && <PlanPage />}
 

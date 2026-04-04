@@ -30,6 +30,8 @@ import {
   Database,
   Bell,
   BellOff,
+  Download,
+  Upload,
 } from 'lucide-react';
 
 type Theme = 'light' | 'dark' | 'system';
@@ -222,6 +224,147 @@ export function SettingsPage() {
     }
   };
 
+  const handleExportData = async () => {
+    try {
+      const auth = getAuthAdapter();
+      const token = await auth.getToken();
+
+      if (!token) {
+        console.error('Not authenticated');
+        return;
+      }
+
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.sub || payload.id || 'default-user';
+
+      // Gather all user data
+      const highlights = await invoke<Array<unknown>>('db_get_highlights', { userId });
+      const notes = await invoke<Array<unknown>>('db_get_notes', { userId });
+      const bookmarks = await invoke<Array<unknown>>('db_get_bookmarks', { userId });
+
+      const exportData = {
+        version: APP_VERSION,
+        exportDate: new Date().toISOString(),
+        userId,
+        data: {
+          highlights,
+          notes,
+          bookmarks,
+          settings,
+        },
+      };
+
+      // Create downloadable file
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `scripture-ai-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      console.log('Export completed');
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const handleImportData = async () => {
+    try {
+      // Create file input
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const content = event.target?.result as string;
+            const importData = JSON.parse(content);
+
+            // Validate import data structure
+            if (!importData.data) {
+              console.error('Invalid import file format');
+              return;
+            }
+
+            const auth = getAuthAdapter();
+            const token = await auth.getToken();
+
+            if (!token) {
+              console.error('Not authenticated');
+              return;
+            }
+
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const userId = payload.sub || payload.id || 'default-user';
+
+            // Import highlights
+            if (importData.data.highlights && Array.isArray(importData.data.highlights)) {
+              for (const highlight of importData.data.highlights) {
+                await invoke('db_save_highlight', {
+                  highlight: {
+                    ...highlight,
+                    user_id: userId, // Use current user's ID
+                  },
+                });
+              }
+            }
+
+            // Import notes
+            if (importData.data.notes && Array.isArray(importData.data.notes)) {
+              for (const note of importData.data.notes) {
+                await invoke('db_save_note', {
+                  note: {
+                    ...note,
+                    user_id: userId,
+                  },
+                });
+              }
+            }
+
+            // Import bookmarks
+            if (importData.data.bookmarks && Array.isArray(importData.data.bookmarks)) {
+              for (const bookmark of importData.data.bookmarks) {
+                await invoke('db_save_bookmark', {
+                  bookmark: {
+                    ...bookmark,
+                    user_id: userId,
+                  },
+                });
+              }
+            }
+
+            // Import settings
+            if (importData.data.settings) {
+              const storage = getStorageAdapter();
+              await storage.set('app-settings', importData.data.settings);
+              setSettings({ ...DEFAULT_SETTINGS, ...importData.data.settings });
+            }
+
+            console.log('Import completed');
+            // Reload to reflect changes
+            window.location.reload();
+          } catch (error) {
+            console.error('Failed to parse import file:', error);
+          }
+        };
+
+        reader.readAsText(file);
+      };
+
+      input.click();
+    } catch (error) {
+      console.error('Import failed:', error);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       const auth = getAuthAdapter();
@@ -378,6 +521,32 @@ export function SettingsPage() {
               <RefreshCw className={`w-4 h-4 ${syncing ? 'spin' : ''}`} />
               {syncing ? '同步中...' : '立即同步'}
             </button>
+          </div>
+        </section>
+
+        {/* Data Section */}
+        <section className="settings-section">
+          <h3>
+            <Database className="w-5 h-5" />
+            数据管理
+          </h3>
+          <div className="settings-card">
+            <div className="setting-row">
+              <span className="setting-label">备份与恢复</span>
+              <div className="data-actions">
+                <button className="data-btn export" onClick={handleExportData}>
+                  <Download className="w-4 h-4" />
+                  导出数据
+                </button>
+                <button className="data-btn import" onClick={handleImportData}>
+                  <Upload className="w-4 h-4" />
+                  导入数据
+                </button>
+              </div>
+            </div>
+            <p className="setting-hint">
+              导出您的高亮、笔记、书签和设置到JSON文件，或从备份文件恢复数据。
+            </p>
           </div>
         </section>
 
