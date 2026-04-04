@@ -2679,6 +2679,32 @@ body {
   border-color: var(--color-primary);
 }
 
+/* Update Actions */
+.update-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.update-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.update-available {
+  font-size: 13px;
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.update-error {
+  font-size: 13px;
+  color: var(--color-error);
+}
+
 /* Toggle Switch */
 .toggle {
   position: relative;

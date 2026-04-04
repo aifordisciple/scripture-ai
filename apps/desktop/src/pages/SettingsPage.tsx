@@ -20,6 +20,7 @@ import {
   stopNotificationScheduler,
   sendTestNotification,
 } from '../utils/notificationScheduler';
+import { useUpdater } from '../hooks';
 import {
   Settings,
   Moon,
@@ -37,6 +38,7 @@ import {
   BellOff,
   Download,
   Upload,
+  DownloadCloud,
 } from 'lucide-react';
 
 type Theme = 'light' | 'dark' | 'system';
@@ -70,6 +72,18 @@ export function SettingsPage() {
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Updater
+  const {
+    checking,
+    updateAvailable,
+    downloading,
+    readyToInstall,
+    error: updateError,
+    updateInfo,
+    checkForUpdates,
+    installAndRestart,
+  } = useUpdater({ autoCheck: true });
 
   // Load settings on mount
   useEffect(() => {
@@ -642,6 +656,41 @@ export function SettingsPage() {
               <a href="https://aidu.app" target="_blank" rel="noopener noreferrer" className="link">
                 aidu.app
               </a>
+            </div>
+            <div className="setting-row">
+              <span className="setting-label">检查更新</span>
+              <div className="update-actions">
+                {checking ? (
+                  <span className="update-status">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    检查中...
+                  </span>
+                ) : downloading ? (
+                  <span className="update-status">
+                    <DownloadCloud className="w-4 h-4 animate-pulse" />
+                    下载中...
+                  </span>
+                ) : readyToInstall ? (
+                  <button className="btn btn-primary btn-sm" onClick={installAndRestart}>
+                    <RefreshCw className="w-4 h-4" />
+                    重启安装
+                  </button>
+                ) : updateAvailable && updateInfo ? (
+                  <span className="update-available">
+                    新版本 {updateInfo.version} 可用
+                  </span>
+                ) : updateError ? (
+                  <span className="update-error">{updateError}</span>
+                ) : (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => checkForUpdates(false)}
+                  >
+                    <Download className="w-4 h-4" />
+                    检查更新
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </section>
