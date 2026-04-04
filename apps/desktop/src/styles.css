@@ -476,6 +476,15 @@ body {
   color: var(--color-text);
 }
 
+.icon-btn.bookmarked {
+  color: var(--color-primary);
+  background: rgba(79, 70, 229, 0.1);
+}
+
+.icon-btn.bookmarked:hover {
+  background: rgba(79, 70, 229, 0.2);
+}
+
 /* Book Picker */
 .book-picker-overlay {
   position: fixed;

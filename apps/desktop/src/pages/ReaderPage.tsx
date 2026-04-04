@@ -9,9 +9,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
-import { getAuthAdapter, getStorageAdapter, type Highlight } from '@scripture-ai/native';
+import { getAuthAdapter, getStorageAdapter, type Highlight, type Bookmark as BookmarkType } from '@scripture-ai/native';
 import { HighlightToolbar } from '../components';
-import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck } from 'lucide-react';
 
 // Bible book list - Complete 66 books
 const BIBLE_BOOKS = [
@@ -117,6 +117,10 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
   const [selectedVerses, setSelectedVerses] = useState<number[]>([]);
   const versesContainerRef = useRef<HTMLDivElement>(null);
 
+  // Bookmark state
+  const [bookmarks, setBookmarks] = useState<BookmarkType[]>([]);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
   const currentBook = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
 
   // Load settings on mount
@@ -165,6 +169,28 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
     }
     loadHighlights();
   }, [userId, bookId]);
+
+  // Load bookmarks
+  useEffect(() => {
+    async function loadBookmarks() {
+      if (!userId) return;
+      try {
+        const data = await invoke<BookmarkType[]>('db_get_bookmarks', { userId });
+        setBookmarks(data || []);
+      } catch (error) {
+        console.error('Failed to load bookmarks:', error);
+      }
+    }
+    loadBookmarks();
+  }, [userId]);
+
+  // Check if current chapter is bookmarked
+  useEffect(() => {
+    const bookmarked = bookmarks.some(
+      b => b.book_id === bookId && b.chapter === chapter
+    );
+    setIsBookmarked(bookmarked);
+  }, [bookmarks, bookId, chapter]);
 
   // Fetch verses when book/chapter changes
   useEffect(() => {
@@ -329,6 +355,37 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
     setSelectedVerses([]);
   }, []);
 
+  // Toggle bookmark for current chapter
+  const handleToggleBookmark = useCallback(async () => {
+    if (!userId || !bookId) return;
+
+    try {
+      if (isBookmarked) {
+        // Remove bookmark
+        const bookmark = bookmarks.find(
+          b => b.book_id === bookId && b.chapter === chapter
+        );
+        if (bookmark) {
+          await invoke('db_delete_bookmark', { id: bookmark.id });
+          setBookmarks(prev => prev.filter(b => b.id !== bookmark.id));
+        }
+      } else {
+        // Add bookmark
+        const newBookmark: BookmarkType = {
+          id: `bookmark-${Date.now()}`,
+          user_id: userId,
+          book_id: bookId,
+          chapter,
+          created_at: new Date().toISOString(),
+        };
+        await invoke('db_save_bookmark', { bookmark: newBookmark });
+        setBookmarks(prev => [...prev, newBookmark]);
+      }
+    } catch (error) {
+      console.error('Failed to toggle bookmark:', error);
+    }
+  }, [userId, bookId, chapter, isBookmarked, bookmarks]);
+
   return (
     <div className="reader-page">
       {/* Header */}
@@ -367,8 +424,16 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
           <button className="icon-btn" title="搜索">
             <Search className="w-5 h-5" />
           </button>
-          <button className="icon-btn" title="书签">
-            <Bookmark className="w-5 h-5" />
+          <button
+            className={`icon-btn ${isBookmarked ? 'bookmarked' : ''}`}
+            title={isBookmarked ? '移除书签' : '添加书签'}
+            onClick={handleToggleBookmark}
+          >
+            {isBookmarked ? (
+              <BookmarkCheck className="w-5 h-5" />
+            ) : (
+              <Bookmark className="w-5 h-5" />
+            )}
           </button>
           <button className="icon-btn" title="设置">
             <Settings className="w-5 h-5" />
@@ -440,47 +505,49 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
             <button onClick={() => setChapter(chapter)}>重试</button>
           </div>
         ) : (
-          <div className="verses-container" style={{ fontSize: `${fontSize}px` }} ref={versesContainerRef}>
-            {verses.map(verse => {
-              const highlight = getVerseHighlight(verse.verse);
-              const isSelected = selectedVerses.includes(verse.verse);
-              const englishText = englishVerses.get(verse.verse) || verse.textEn;
-              return (
-                <div
-                  key={verse.id}
-                  className={`verse ${highlight ? 'highlighted' : ''} ${isSelected ? 'selected' : ''}`}
-                  data-verse={verse.verse}
-                  onClick={(e) => handleVerseClick(verse.verse, e)}
-                  style={highlight ? { backgroundColor: highlight.color } : undefined}
-                >
-                  <span className="verse-number">{verse.verse}</span>
-                  <div className="verse-content">
-                    <span className="verse-text">{verse.text}</span>
-                    {showEnglish && englishText && (
-                      <span className="verse-text-en">{englishText}</span>
-                    )}
+          <>
+            <div className="verses-container" style={{ fontSize: `${fontSize}px` }} ref={versesContainerRef}>
+              {verses.map(verse => {
+                const highlight = getVerseHighlight(verse.verse);
+                const isSelected = selectedVerses.includes(verse.verse);
+                const englishText = englishVerses.get(verse.verse) || verse.textEn;
+                return (
+                  <div
+                    key={verse.id}
+                    className={`verse ${highlight ? 'highlighted' : ''} ${isSelected ? 'selected' : ''}`}
+                    data-verse={verse.verse}
+                    onClick={(e) => handleVerseClick(verse.verse, e)}
+                    style={highlight ? { backgroundColor: highlight.color } : undefined}
+                  >
+                    <span className="verse-number">{verse.verse}</span>
+                    <div className="verse-content">
+                      <span className="verse-text">{verse.text}</span>
+                      {showEnglish && englishText && (
+                        <span className="verse-text-en">{englishText}</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
 
-          {/* Highlight Toolbar */}
-          <HighlightToolbar
-            visible={showHighlightToolbar}
-            position={toolbarPosition}
-            bookId={bookId}
-            chapter={chapter}
-            selectedVerses={selectedVerses}
-            userId={userId}
-            existingHighlights={highlights}
-            onHighlightAdded={handleHighlightAdded}
-            onHighlightRemoved={handleHighlightRemoved}
-            onClose={() => {
-              setShowHighlightToolbar(false);
-              setSelectedVerses([]);
-            }}
-          />
+            {/* Highlight Toolbar */}
+            <HighlightToolbar
+              visible={showHighlightToolbar}
+              position={toolbarPosition}
+              bookId={bookId}
+              chapter={chapter}
+              selectedVerses={selectedVerses}
+              userId={userId}
+              existingHighlights={highlights}
+              onHighlightAdded={handleHighlightAdded}
+              onHighlightRemoved={handleHighlightRemoved}
+              onClose={() => {
+                setShowHighlightToolbar(false);
+                setSelectedVerses([]);
+              }}
+            />
+          </>
         )}
       </main>
 

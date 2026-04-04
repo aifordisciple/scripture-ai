@@ -141,8 +141,8 @@ export class DesktopSyncEngine {
           });
         } else {
           // Compare timestamps and resolve conflict
-          const localTime = new Date(local.updatedAt || local.createdAt).getTime();
-          const serverTime = new Date(server.updatedAt || server.createdAt).getTime();
+          const localTime = new Date(local.updated_at || local.created_at).getTime();
+          const serverTime = new Date(server.updated_at || server.created_at).getTime();
 
           if (localTime > serverTime) {
             // Local is newer, push to server
@@ -163,7 +163,7 @@ export class DesktopSyncEngine {
 
       // Download new server highlights
       for (const server of serverHighlights) {
-        const local = localHighlights.find(l => l.id === server.id);
+        const local = localHighlights.find((l: Highlight) => l.id === server.id);
         if (!local) {
           await invoke('db_save_highlight', { highlight: server });
         }

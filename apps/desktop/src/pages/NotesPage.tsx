@@ -9,8 +9,8 @@
  * - Sync with server
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { Bookmark, FileText, Plus, Trash2, Edit2, Search, Sync } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Bookmark, FileText, Plus, Trash2, Edit2, Search, RefreshCw } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
 import { getAuthAdapter } from '@scripture-ai/native';
 import type { Highlight, Note } from '@scripture-ai/native';
@@ -144,13 +144,13 @@ export function NotesPage() {
     try {
       const note: Note = {
         id: editingNote?.id || `note-${Date.now()}`,
-        userId,
-        bookId: editingNote?.bookId || 'gen',
+        user_id: userId,
+        book_id: editingNote?.book_id || 'gen',
         chapter: editingNote?.chapter || 1,
-        verseStart: editingNote?.verseStart || 1,
+        verse_start: editingNote?.verse_start || 1,
         content: newNoteContent,
-        createdAt: editingNote?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        created_at: editingNote?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
       await invoke('db_save_note', { note });
@@ -177,13 +177,13 @@ export function NotesPage() {
   // Filter items by search
   const filteredHighlights = highlights.filter(h => {
     if (!searchQuery) return true;
-    const bookName = getBookName(h.bookId);
+    const bookName = getBookName(h.book_id);
     return bookName.includes(searchQuery) || h.color.includes(searchQuery);
   });
 
   const filteredNotes = notes.filter(n => {
     if (!searchQuery) return true;
-    return n.content.includes(searchQuery) || getBookName(n.bookId).includes(searchQuery);
+    return n.content.includes(searchQuery) || getBookName(n.book_id).includes(searchQuery);
   });
 
   return (
@@ -208,7 +208,7 @@ export function NotesPage() {
             onClick={handleSync}
             disabled={syncing}
           >
-            <Sync className="w-4 h-4" />
+            <RefreshCw className={`w-4 h-4 ${syncing ? 'spin' : ''}`} />
             {syncing ? '同步中...' : '同步'}
           </button>
         </div>
@@ -255,8 +255,8 @@ export function NotesPage() {
                   <div className="item-content">
                     <div className="item-header">
                       <span className="item-reference">
-                        {getBookName(highlight.bookId)} {highlight.chapter}:{highlight.verseStart}
-                        {highlight.verseEnd > highlight.verseStart && `-${highlight.verseEnd}`}
+                        {getBookName(highlight.book_id)} {highlight.chapter}:{highlight.verse_start}
+                        {highlight.verse_end > highlight.verse_start && `-${highlight.verse_end}`}
                       </span>
                       <button
                         className="delete-btn"
@@ -266,7 +266,7 @@ export function NotesPage() {
                       </button>
                     </div>
                     <div className="item-date">
-                      {new Date(highlight.createdAt).toLocaleDateString('zh-CN')}
+                      {new Date(highlight.created_at).toLocaleDateString('zh-CN')}
                     </div>
                   </div>
                 </div>
@@ -299,7 +299,7 @@ export function NotesPage() {
                   <div className="item-content">
                     <div className="item-header">
                       <span className="item-reference">
-                        {getBookName(note.bookId)} {note.chapter}:{note.verseStart}
+                        {getBookName(note.book_id)} {note.chapter}:{note.verse_start}
                       </span>
                       <div className="item-actions">
                         <button onClick={() => {
@@ -318,7 +318,7 @@ export function NotesPage() {
                       {note.content.length > 100 ? `${note.content.slice(0, 100)}...` : note.content}
                     </div>
                     <div className="item-date">
-                      {new Date(note.updatedAt || note.createdAt).toLocaleDateString('zh-CN')}
+                      {new Date(note.updated_at || note.created_at).toLocaleDateString('zh-CN')}
                     </div>
                   </div>
                 </div>

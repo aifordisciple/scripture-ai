@@ -69,54 +69,58 @@ export interface DatabaseAdapter {
 
 /**
  * Highlight data structure
+ * Note: Fields use snake_case to match Rust backend struct
  */
 export interface Highlight {
   id: string;
-  userId: string;
-  bookId: string;
+  user_id: string;
+  book_id: string;
   chapter: number;
-  verseStart: number;
-  verseEnd: number;
+  verse_start: number;
+  verse_end: number;
   color: string;
-  createdAt: string;
-  updatedAt?: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 /**
  * Note data structure
+ * Note: Fields use snake_case to match Rust backend struct
  */
 export interface Note {
   id: string;
-  userId: string;
-  bookId: string;
+  user_id: string;
+  book_id: string;
   chapter: number;
-  verseStart: number;
-  verseEnd?: number;
+  verse_start: number;
+  verse_end?: number;
   content: string;
-  createdAt: string;
-  updatedAt?: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 /**
  * Reading history entry
+ * Note: Fields use snake_case to match Rust backend struct
  */
 export interface ReadingHistoryEntry {
   id: string;
-  userId: string;
-  bookId: string;
+  user_id: string;
+  book_id: string;
   chapter: number;
-  readAt: string;
+  read_at: string;
   duration?: number; // Reading duration in seconds
 }
 
 /**
  * Bookmark data structure
+ * Note: Fields use snake_case to match Rust backend struct
  */
 export interface Bookmark {
   id: string;
-  userId: string;
-  bookId: string;
+  user_id: string;
+  book_id: string;
   chapter: number;
   verse?: number;
-  createdAt: string;
+  created_at: string;
 }
