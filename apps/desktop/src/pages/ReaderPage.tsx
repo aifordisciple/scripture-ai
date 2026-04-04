@@ -10,7 +10,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
 import { getAuthAdapter, getStorageAdapter, type Highlight, type Bookmark as BookmarkType } from '@scripture-ai/native';
-import { HighlightToolbar, SearchModal, AudioPlayer } from '../components';
+import { HighlightToolbar, SearchModal, AudioPlayer, TabBar, createReadingTab, type ReadingTab } from '../components';
 import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck, Volume2 } from 'lucide-react';
 
 // Bible book list - Complete 66 books
@@ -97,11 +97,40 @@ interface ReaderPageProps {
   initialBook?: string;
   initialChapter?: number;
   onAskAI?: (bookId: string, chapter: number, verses: number[]) => void;
+  onTabsChange?: (tabs: ReadingTab[], activeTabId: string) => void;
+  initialTabs?: ReadingTab[];
+  initialActiveTabId?: string;
 }
 
-export function ReaderPage({ initialBook = 'gen', initialChapter = 1, onAskAI }: ReaderPageProps) {
-  const [bookId, setBookId] = useState(initialBook);
-  const [chapter, setChapter] = useState(initialChapter);
+export function ReaderPage({
+  initialBook = 'gen',
+  initialChapter = 1,
+  onAskAI,
+  onTabsChange,
+  initialTabs,
+  initialActiveTabId
+}: ReaderPageProps) {
+  // Tab state
+  const [tabs, setTabs] = useState<ReadingTab[]>(() => {
+    if (initialTabs && initialTabs.length > 0) {
+      return initialTabs;
+    }
+    const book = BIBLE_BOOKS.find(b => b.id === initialBook) || BIBLE_BOOKS[0];
+    return [createReadingTab(initialBook, book.name, initialChapter)];
+  });
+  const [activeTabId, setActiveTabId] = useState<string>(() => {
+    if (initialActiveTabId && initialTabs?.some(t => t.id === initialActiveTabId)) {
+      return initialActiveTabId;
+    }
+    return tabs[0].id;
+  });
+
+  // Get current tab
+  const currentTab = tabs.find(t => t.id === activeTabId) || tabs[0];
+  const bookId = currentTab.bookId;
+  const chapter = currentTab.chapter;
+  const currentBook = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
+
   const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [englishVerses, setEnglishVerses] = useState<Map<number, string>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -128,7 +157,57 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1, onAskAI }:
   // Audio player state
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
 
-  const currentBook = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
+  // Tab management
+  const handleTabSelect = useCallback((tabId: string) => {
+    setActiveTabId(tabId);
+  }, []);
+
+  const handleTabClose = useCallback((tabId: string) => {
+    setTabs(prev => {
+      const newTabs = prev.filter(t => t.id !== tabId);
+      if (newTabs.length === 0) {
+        // If no tabs left, create a new default one
+        const book = BIBLE_BOOKS[0];
+        const newTab = createReadingTab(book.id, book.name, 1);
+        setActiveTabId(newTab.id);
+        onTabsChange?.([newTab], newTab.id);
+        return [newTab];
+      }
+      // If closing active tab, switch to the previous or first tab
+      if (tabId === activeTabId) {
+        const closedIndex = prev.findIndex(t => t.id === tabId);
+        const newActiveIndex = Math.max(0, closedIndex - 1);
+        setActiveTabId(newTabs[newActiveIndex].id);
+      }
+      onTabsChange?.(newTabs, tabId === activeTabId ? newTabs[Math.max(0, prev.findIndex(t => t.id === tabId) - 1)].id : activeTabId);
+      return newTabs;
+    });
+  }, [activeTabId, onTabsChange]);
+
+  const handleTabAdd = useCallback(() => {
+    const book = BIBLE_BOOKS[0];
+    const newTab = createReadingTab(book.id, book.name, 1);
+    setTabs(prev => [...prev, newTab]);
+    setActiveTabId(newTab.id);
+    onTabsChange?.([...tabs, newTab], newTab.id);
+  }, [tabs, onTabsChange]);
+
+  // Update tab when book/chapter changes
+  const updateCurrentTab = useCallback((newBookId: string, newChapter: number) => {
+    const book = BIBLE_BOOKS.find(b => b.id === newBookId) || BIBLE_BOOKS[0];
+    setTabs(prev => prev.map(t =>
+      t.id === activeTabId
+        ? { ...t, bookId: newBookId, bookName: book.name, chapter: newChapter, title: `${book.name} ${newChapter}章` }
+        : t
+    ));
+    onTabsChange?.(
+      tabs.map(t => t.id === activeTabId
+        ? { ...t, bookId: newBookId, bookName: book.name, chapter: newChapter, title: `${book.name} ${newChapter}章` }
+        : t
+      ),
+      activeTabId
+    );
+  }, [activeTabId, tabs, onTabsChange]);
 
   // Load settings on mount
   useEffect(() => {
@@ -276,31 +355,29 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1, onAskAI }:
   // Navigation handlers
   const goToPrevChapter = useCallback(() => {
     if (chapter > 1) {
-      setChapter(chapter - 1);
+      updateCurrentTab(bookId, chapter - 1);
     } else {
       // Go to last chapter of previous book
       const bookIndex = BIBLE_BOOKS.findIndex(b => b.id === bookId);
       if (bookIndex > 0) {
         const prevBook = BIBLE_BOOKS[bookIndex - 1];
-        setBookId(prevBook.id);
-        setChapter(prevBook.chapters);
+        updateCurrentTab(prevBook.id, prevBook.chapters);
       }
     }
-  }, [bookId, chapter]);
+  }, [bookId, chapter, updateCurrentTab]);
 
   const goToNextChapter = useCallback(() => {
     if (chapter < currentBook.chapters) {
-      setChapter(chapter + 1);
+      updateCurrentTab(bookId, chapter + 1);
     } else {
       // Go to first chapter of next book
       const bookIndex = BIBLE_BOOKS.findIndex(b => b.id === bookId);
       if (bookIndex < BIBLE_BOOKS.length - 1) {
         const nextBook = BIBLE_BOOKS[bookIndex + 1];
-        setBookId(nextBook.id);
-        setChapter(1);
+        updateCurrentTab(nextBook.id, 1);
       }
     }
-  }, [bookId, chapter, currentBook.chapters]);
+  }, [bookId, chapter, currentBook.chapters, updateCurrentTab]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -412,6 +489,15 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1, onAskAI }:
 
   return (
     <div className="reader-page">
+      {/* Tab Bar */}
+      <TabBar
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onTabSelect={handleTabSelect}
+        onTabClose={handleTabClose}
+        onTabAdd={handleTabAdd}
+      />
+
       {/* Header */}
       <header className="reader-header">
         <div className="header-left">
@@ -485,8 +571,7 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1, onAskAI }:
                       key={book.id}
                       className={`book-item ${book.id === bookId ? 'active' : ''}`}
                       onClick={() => {
-                        setBookId(book.id);
-                        setChapter(1);
+                        updateCurrentTab(book.id, 1);
                         setShowBookPicker(false);
                       }}
                     >
@@ -504,8 +589,7 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1, onAskAI }:
                       key={book.id}
                       className={`book-item ${book.id === bookId ? 'active' : ''}`}
                       onClick={() => {
-                        setBookId(book.id);
-                        setChapter(1);
+                        updateCurrentTab(book.id, 1);
                         setShowBookPicker(false);
                       }}
                     >
