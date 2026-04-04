@@ -132,6 +132,25 @@ pub struct Bookmark {
     pub created_at: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ChatSession {
+    pub id: String,
+    pub user_id: String,
+    pub title: String,
+    pub mode: String,
+    pub created_at: String,
+    pub updated_at: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ChatMessage {
+    pub id: String,
+    pub session_id: String,
+    pub role: String,
+    pub content: String,
+    pub created_at: String,
+}
+
 // ============================================================================
 // Database Commands (tauri-plugin-sql)
 // ============================================================================
@@ -195,6 +214,32 @@ pub async fn db_init(app: AppHandle) -> Result<(), String> {
             chapter INTEGER NOT NULL,
             verse INTEGER,
             created_at TEXT NOT NULL
+        )",
+        [],
+    ).await.map_err(|e| e.to_string())?;
+
+    // Create chat_sessions table
+    db.execute(
+        "CREATE TABLE IF NOT EXISTS chat_sessions (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            mode TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT
+        )",
+        [],
+    ).await.map_err(|e| e.to_string())?;
+
+    // Create chat_messages table
+    db.execute(
+        "CREATE TABLE IF NOT EXISTS chat_messages (
+            id TEXT PRIMARY KEY,
+            session_id TEXT NOT NULL,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
         )",
         [],
     ).await.map_err(|e| e.to_string())?;
@@ -442,6 +487,122 @@ pub async fn db_delete_bookmark(
         "DELETE FROM bookmarks WHERE id = ?",
         [id],
     ).await.map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+// ============================================================================
+// Chat Session Commands
+// ============================================================================
+
+#[tauri::command]
+pub async fn db_get_chat_sessions(
+    app: AppHandle,
+    user_id: String,
+) -> Result<Vec<ChatSession>, String> {
+    let db = app.state::<Sql>();
+
+    let result = db
+        .query(
+            "SELECT id, user_id, title, mode, created_at, updated_at FROM chat_sessions WHERE user_id = ? ORDER BY updated_at DESC",
+            [&user_id]
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn db_save_chat_session(
+    app: AppHandle,
+    session: ChatSession,
+) -> Result<(), String> {
+    let db = app.state::<Sql>();
+
+    db.execute(
+        "INSERT OR REPLACE INTO chat_sessions (id, user_id, title, mode, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+        [
+            &session.id,
+            &session.user_id,
+            &session.title,
+            &session.mode,
+            &session.created_at,
+            &session.updated_at.unwrap_or_default(),
+        ]
+    ).await.map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn db_delete_chat_session(
+    app: AppHandle,
+    id: String,
+) -> Result<(), String> {
+    let db = app.state::<Sql>();
+
+    // Delete session and its messages
+    db.execute("DELETE FROM chat_messages WHERE session_id = ?", [&id])
+        .await
+        .map_err(|e| e.to_string())?;
+
+    db.execute("DELETE FROM chat_sessions WHERE id = ?", [&id])
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn db_get_chat_messages(
+    app: AppHandle,
+    session_id: String,
+) -> Result<Vec<ChatMessage>, String> {
+    let db = app.state::<Sql>();
+
+    let result = db
+        .query(
+            "SELECT id, session_id, role, content, created_at FROM chat_messages WHERE session_id = ? ORDER BY created_at ASC",
+            [&session_id]
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn db_save_chat_message(
+    app: AppHandle,
+    message: ChatMessage,
+) -> Result<(), String> {
+    let db = app.state::<Sql>();
+
+    db.execute(
+        "INSERT INTO chat_messages (id, session_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)",
+        [
+            &message.id,
+            &message.session_id,
+            &message.role,
+            &message.content,
+            &message.created_at,
+        ]
+    ).await.map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn db_clear_chat_messages(
+    app: AppHandle,
+    session_id: String,
+) -> Result<(), String> {
+    let db = app.state::<Sql>();
+
+    db.execute("DELETE FROM chat_messages WHERE session_id = ?", [&session_id])
+        .await
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }

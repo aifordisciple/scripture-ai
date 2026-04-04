@@ -55,6 +55,13 @@ fn main() {
             storage::db_delete_bookmark,
             storage::db_get_last_sync_time,
             storage::db_set_last_sync_time,
+            // Chat session commands
+            storage::db_get_chat_sessions,
+            storage::db_save_chat_session,
+            storage::db_delete_chat_session,
+            storage::db_get_chat_messages,
+            storage::db_save_chat_message,
+            storage::db_clear_chat_messages,
         ])
         // Setup system tray
         .setup(|app| {
