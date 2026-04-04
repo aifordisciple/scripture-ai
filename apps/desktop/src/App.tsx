@@ -154,6 +154,25 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isAuthenticated]);
 
+  // Save window state on visibility change
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'hidden') {
+        try {
+          const { invoke } = await import('@tauri-apps/api/core');
+          await invoke('save_current_window_state');
+        } catch {
+          // Ignore errors
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isAuthenticated]);
+
   // Loading state
   if (loading) {
     return (

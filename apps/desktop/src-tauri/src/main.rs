@@ -6,7 +6,7 @@
 
 mod commands;
 
-use commands::{auth, storage, system};
+use commands::{auth, storage, system, window};
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -71,6 +71,11 @@ fn main() {
             storage::db_save_bible_verse,
             storage::db_count_bible_verses,
             storage::db_init_bible_tables,
+            // Window state commands
+            window::save_window_state,
+            window::get_window_state,
+            window::save_current_window_state,
+            window::restore_window_state,
         ])
         // Setup system tray
         .setup(|app| {
@@ -100,6 +105,10 @@ fn main() {
                         }
                     }
                     "quit" => {
+                        // Save window state before quitting
+                        let _ = tauri::async_runtime::block_on(async {
+                            let _ = window::save_current_window_state(app.clone()).await;
+                        });
                         app.exit(0);
                     }
                     _ => {}
@@ -119,6 +128,12 @@ fn main() {
                     }
                 })
                 .build(app)?;
+
+            // Restore window state
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                let _ = window::restore_window_state(app_handle).await;
+            });
 
             Ok(())
         })
