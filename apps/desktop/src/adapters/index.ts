@@ -16,6 +16,14 @@ let initialized = false;
 export async function initializeAdapters(): Promise<void> {
   if (initialized) return;
 
+  // Initialize performance monitoring
+  try {
+    const { initPerformanceMonitoring } = await import('../utils/performance');
+    initPerformanceMonitoring();
+  } catch {
+    // Performance monitoring not available
+  }
+
   // Initialize database
   const db = getDatabaseAdapter();
   if (db) {

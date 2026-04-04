@@ -676,6 +676,44 @@ export function SettingsPage() {
           </div>
         </section>
 
+        {/* Developer Section (only in development) */}
+        {process.env.NODE_ENV === 'development' && (
+          <section className="settings-section">
+            <h3>
+              <Database className="w-5 h-5" />
+              开发者
+            </h3>
+            <div className="settings-card">
+              <div className="setting-row">
+                <span className="setting-label">性能指标</span>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={async () => {
+                    const { getPerformanceReport, clearMetrics } = await import('../utils/performance');
+                    const report = getPerformanceReport();
+                    console.log('Performance Report:', report);
+                    alert(`启动时间: ${report.summary.startupTime}ms\n平均页面加载: ${report.summary.averagePageLoad}ms\n交互次数: ${report.summary.totalInteractions}`);
+                  }}
+                >
+                  查看性能报告
+                </button>
+              </div>
+              <div className="setting-row">
+                <span className="setting-label">清除性能数据</span>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={async () => {
+                    const { clearMetrics } = await import('../utils/performance');
+                    clearMetrics();
+                  }}
+                >
+                  清除
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Save Indicator */}
         {saved && (
           <div className="save-indicator">
