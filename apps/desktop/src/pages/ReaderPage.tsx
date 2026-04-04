@@ -10,8 +10,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
 import { getAuthAdapter, getStorageAdapter, type Highlight, type Bookmark as BookmarkType } from '@scripture-ai/native';
-import { HighlightToolbar, SearchModal, AudioPlayer, TabBar, createReadingTab, type ReadingTab } from '../components';
-import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck, Volume2 } from 'lucide-react';
+import { HighlightToolbar, SearchModal, AudioPlayer, TabBar, createReadingTab, type ReadingTab, ShareCard } from '../components';
+import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck, Volume2, Share2 } from 'lucide-react';
 
 // Bible book list - Complete 66 books
 const BIBLE_BOOKS = [
@@ -156,6 +156,11 @@ export function ReaderPage({
 
   // Audio player state
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
+
+  // Share state
+  const [showShare, setShowShare] = useState(false);
+  const [shareVerses, setShareVerses] = useState<number[]>([]);
+  const [shareTexts, setShareTexts] = useState<string[]>([]);
 
   // Tab management
   const handleTabSelect = useCallback((tabId: string) => {
@@ -548,6 +553,25 @@ export function ReaderPage({
               <Bookmark className="w-5 h-5" />
             )}
           </button>
+          <button
+            className="icon-btn"
+            title="分享经文"
+            onClick={() => {
+              if (selectedVerses.length > 0) {
+                setShareVerses(selectedVerses);
+                setShareTexts(selectedVerses.map(v => {
+                  const verse = verses.find(vv => vv.verse === v);
+                  return verse?.text || '';
+                }));
+              } else {
+                setShareVerses(verses.map(v => v.verse));
+                setShareTexts(verses.map(v => v.text));
+              }
+              setShowShare(true);
+            }}
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
           <button className="icon-btn" title="设置">
             <Settings className="w-5 h-5" />
           </button>
@@ -686,9 +710,18 @@ export function ReaderPage({
         visible={showSearch}
         onClose={() => setShowSearch(false)}
         onNavigate={(newBookId, newChapter) => {
-          setBookId(newBookId);
-          setChapter(newChapter);
+          updateCurrentTab(newBookId, newChapter);
         }}
+      />
+
+      {/* Share Card */}
+      <ShareCard
+        isOpen={showShare}
+        onClose={() => setShowShare(false)}
+        bookName={currentBook.name}
+        chapter={chapter}
+        verses={shareVerses}
+        verseTexts={shareTexts}
       />
     </div>
   );
