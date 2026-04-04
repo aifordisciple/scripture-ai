@@ -9,7 +9,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
-import { getAuthAdapter, type Highlight } from '@scripture-ai/native';
+import { getAuthAdapter, getStorageAdapter, type Highlight } from '@scripture-ai/native';
 import { HighlightToolbar } from '../components';
 import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark } from 'lucide-react';
 
@@ -102,10 +102,12 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
   const [bookId, setBookId] = useState(initialBook);
   const [chapter, setChapter] = useState(initialChapter);
   const [verses, setVerses] = useState<BibleVerse[]>([]);
+  const [englishVerses, setEnglishVerses] = useState<Map<number, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showBookPicker, setShowBookPicker] = useState(false);
   const [fontSize, setFontSize] = useState(18);
+  const [showEnglish, setShowEnglish] = useState(false);
 
   // Highlight feature state
   const [userId, setUserId] = useState<string>('');
@@ -116,6 +118,22 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
   const versesContainerRef = useRef<HTMLDivElement>(null);
 
   const currentBook = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
+
+  // Load settings on mount
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const storage = getStorageAdapter();
+        const settings = await storage.get<{ showEnglish?: boolean }>('app-settings');
+        if (settings?.showEnglish !== undefined) {
+          setShowEnglish(settings.showEnglish);
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    }
+    loadSettings();
+  }, []);
 
   // Load user ID on mount
   useEffect(() => {
@@ -157,9 +175,35 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
       setError(null);
 
       try {
+        // Fetch all verses (API returns both CUV and KJV)
         const data = await bibleApi.getChapter(bookId, chapter);
+
         if (!cancelled) {
-          setVerses(data);
+          // Separate CUV and KJV verses
+          const cuvVerses: BibleVerse[] = [];
+          const kjvMap = new Map<number, string>();
+
+          // API returns verses with version field
+          for (const v of data) {
+            const verseWithVersion = v as BibleVerse & { version?: string };
+            if (verseWithVersion.version === 'KJV') {
+              kjvMap.set(v.verse, v.text);
+            } else {
+              // Default to CUV for verses without version or with 'CUV'
+              cuvVerses.push({
+                ...v,
+                textEn: kjvMap.get(v.verse) || v.textEn,
+              });
+            }
+          }
+
+          // If no version separation, use the data as-is
+          if (cuvVerses.length === 0 && data.length > 0) {
+            setVerses(data);
+          } else {
+            setVerses(cuvVerses);
+          }
+          setEnglishVerses(kjvMap);
         }
       } catch (err) {
         if (!cancelled) {
@@ -400,6 +444,7 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
             {verses.map(verse => {
               const highlight = getVerseHighlight(verse.verse);
               const isSelected = selectedVerses.includes(verse.verse);
+              const englishText = englishVerses.get(verse.verse) || verse.textEn;
               return (
                 <div
                   key={verse.id}
@@ -409,7 +454,12 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
                   style={highlight ? { backgroundColor: highlight.color } : undefined}
                 >
                   <span className="verse-number">{verse.verse}</span>
-                  <span className="verse-text">{verse.text}</span>
+                  <div className="verse-content">
+                    <span className="verse-text">{verse.text}</span>
+                    {showEnglish && englishText && (
+                      <span className="verse-text-en">{englishText}</span>
+                    )}
+                  </div>
                 </div>
               );
             })}

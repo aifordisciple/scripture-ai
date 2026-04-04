@@ -622,6 +622,20 @@ body {
   flex: 1;
 }
 
+.verse-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.verse-text-en {
+  font-size: 0.9em;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  opacity: 0.85;
+}
+
 /* Verse Highlight Styles */
 .verse.highlighted {
   border-radius: 4px;
