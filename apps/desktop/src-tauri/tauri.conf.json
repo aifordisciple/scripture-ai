@@ -1,0 +1,52 @@
+{
+  "$schema": "https://v2.tauri.app/schemas/tauri.config.json",
+  "productName": "AI读",
+  "version": "0.1.0",
+  "identifier": "com.scripture-ai.desktop",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "AI读 - 圣经阅读",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true,
+        "decorations": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "publisher": "Scripture AI",
+    "homepage": "https://scripture-ai.com",
+    "shortDescription": "AI读 - 智能圣经阅读助手",
+    "longDescription": "AI读是一款智能圣经阅读应用，提供AI解读、语音朗读、高亮笔记、阅读计划等功能",
+    "category": "Lifestyle"
+  },
+  "plugins": {
+    "sql": {
+      "preload": ["sqlite:scripture.db"]
+    }
+  }
+}

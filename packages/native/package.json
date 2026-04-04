@@ -8,17 +8,26 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "react": ">=18.0.0"
+    "react": ">=18.0.0",
+    "@tauri-apps/api": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tauri-apps/api": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@tauri-apps/api": "^2.0.0"
   },
   "keywords": [
     "bible",
     "scripture",
     "native",
     "notifications",
-    "audio"
+    "audio",
+    "tauri",
+    "desktop"
   ],
   "license": "MIT"
 }
