@@ -233,6 +233,23 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
             setVerses(cuvVerses);
           }
           setEnglishVerses(kjvMap);
+
+          // Save reading history
+          if (userId) {
+            try {
+              await invoke('db_save_reading_history', {
+                entry: {
+                  id: `history-${userId}-${bookId}-${chapter}-${Date.now()}`,
+                  user_id: userId,
+                  book_id: bookId,
+                  chapter,
+                  read_at: new Date().toISOString(),
+                },
+              });
+            } catch (err) {
+              console.error('Failed to save reading history:', err);
+            }
+          }
         }
       } catch (err) {
         if (!cancelled) {
@@ -250,7 +267,7 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
     return () => {
       cancelled = true;
     };
-  }, [bookId, chapter]);
+  }, [bookId, chapter, userId]);
 
   // Navigation handlers
   const goToPrevChapter = useCallback(() => {

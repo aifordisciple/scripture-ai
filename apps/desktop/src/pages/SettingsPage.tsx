@@ -8,9 +8,10 @@
  * - Sync settings
  * - Account info
  * - About info
+ * - Notification settings
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { getAuthAdapter, getStorageAdapter } from '@scripture-ai/native';
 import { syncWithServer as performSync } from '../utils/sync';
@@ -27,6 +28,8 @@ import {
   Check,
   Cloud,
   Database,
+  Bell,
+  BellOff,
 } from 'lucide-react';
 
 type Theme = 'light' | 'dark' | 'system';
@@ -37,6 +40,8 @@ interface AppSettings {
   autoSync: boolean;
   syncInterval: number; // minutes
   showEnglish: boolean;
+  notificationsEnabled: boolean;
+  reminderTime: string; // HH:mm format
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -45,7 +50,12 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoSync: true,
   syncInterval: 30,
   showEnglish: false,
+  notificationsEnabled: true,
+  reminderTime: '08:00',
 };
+
+// Read version from package.json at build time
+const APP_VERSION = '0.1.0';
 
 export function SettingsPage() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
@@ -157,6 +167,28 @@ export function SettingsPage() {
 
   const handleShowEnglishChange = (enabled: boolean) => {
     saveSettings({ ...settings, showEnglish: enabled });
+  };
+
+  const handleNotificationsChange = async (enabled: boolean) => {
+    if (enabled) {
+      // Request notification permission
+      try {
+        const { requestPermission } = await import('@scripture-ai/native');
+        const result = await requestPermission();
+        if (!result.granted) {
+          console.warn('Notification permission not granted');
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to request notification permission:', error);
+        return;
+      }
+    }
+    saveSettings({ ...settings, notificationsEnabled: enabled });
+  };
+
+  const handleReminderTimeChange = (time: string) => {
+    saveSettings({ ...settings, reminderTime: time });
   };
 
   const handleSyncNow = async () => {
@@ -349,6 +381,45 @@ export function SettingsPage() {
           </div>
         </section>
 
+        {/* Notification Section */}
+        <section className="settings-section">
+          <h3>
+            {settings.notificationsEnabled ? (
+              <Bell className="w-5 h-5" />
+            ) : (
+              <BellOff className="w-5 h-5" />
+            )}
+            通知
+          </h3>
+          <div className="settings-card">
+            {/* Notifications Toggle */}
+            <div className="setting-row">
+              <span className="setting-label">启用通知</span>
+              <label className="toggle">
+                <input
+                  type="checkbox"
+                  checked={settings.notificationsEnabled}
+                  onChange={(e) => handleNotificationsChange(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+
+            {/* Reminder Time */}
+            {settings.notificationsEnabled && (
+              <div className="setting-row">
+                <span className="setting-label">读经提醒时间</span>
+                <input
+                  type="time"
+                  className="time-input"
+                  value={settings.reminderTime}
+                  onChange={(e) => handleReminderTimeChange(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* About Section */}
         <section className="settings-section">
           <h3>
@@ -358,7 +429,7 @@ export function SettingsPage() {
           <div className="settings-card">
             <div className="setting-row">
               <span className="setting-label">版本</span>
-              <span className="setting-value">0.1.0</span>
+              <span className="setting-value">{APP_VERSION}</span>
             </div>
             <div className="setting-row">
               <span className="setting-label">技术栈</span>

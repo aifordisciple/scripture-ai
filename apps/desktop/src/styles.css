@@ -1732,6 +1732,23 @@ body {
   color: var(--color-text-secondary);
 }
 
+/* Time Input */
+.time-input {
+  padding: 8px 12px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.time-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
 /* Toggle Switch */
 .toggle {
   position: relative;

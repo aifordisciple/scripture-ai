@@ -23,22 +23,83 @@ interface BibleBook {
   name: string;
 }
 
-// Simplified book list
+// Complete 66 books of the Bible
 const BOOKS: BibleBook[] = [
+  // Old Testament - Pentateuch (摩西五经)
   { id: 'gen', name: '创世记' },
   { id: 'exod', name: '出埃及记' },
   { id: 'lev', name: '利未记' },
   { id: 'num', name: '民数记' },
   { id: 'deut', name: '申命记' },
+  // Old Testament - Historical Books (历史书)
+  { id: 'josh', name: '约书亚记' },
+  { id: 'judg', name: '士师记' },
+  { id: 'ruth', name: '路得记' },
+  { id: '1sam', name: '撒母耳记上' },
+  { id: '2sam', name: '撒母耳记下' },
+  { id: '1kgs', name: '列王纪上' },
+  { id: '2kgs', name: '列王纪下' },
+  { id: '1chr', name: '历代志上' },
+  { id: '2chr', name: '历代志下' },
+  { id: 'ezra', name: '以斯拉记' },
+  { id: 'neh', name: '尼希米记' },
+  { id: 'esth', name: '以斯帖记' },
+  // Old Testament - Poetry (诗歌智慧书)
+  { id: 'job', name: '约伯记' },
   { id: 'ps', name: '诗篇' },
   { id: 'prov', name: '箴言' },
+  { id: 'eccl', name: '传道书' },
+  { id: 'song', name: '雅歌' },
+  // Old Testament - Major Prophets (大先知书)
   { id: 'isa', name: '以赛亚书' },
+  { id: 'jer', name: '耶利米书' },
+  { id: 'lam', name: '耶利米哀歌' },
+  { id: 'ezek', name: '以西结书' },
+  { id: 'dan', name: '但以理书' },
+  // Old Testament - Minor Prophets (小先知书)
+  { id: 'hos', name: '何西阿书' },
+  { id: 'joel', name: '约珥书' },
+  { id: 'amos', name: '阿摩司书' },
+  { id: 'obad', name: '俄巴底亚书' },
+  { id: 'jonah', name: '约拿书' },
+  { id: 'mic', name: '弥迦书' },
+  { id: 'nah', name: '那鸿书' },
+  { id: 'hab', name: '哈巴谷书' },
+  { id: 'zeph', name: '西番雅书' },
+  { id: 'hag', name: '哈该书' },
+  { id: 'zech', name: '撒迦利亚书' },
+  { id: 'mal', name: '玛拉基书' },
+  // New Testament - Gospels (福音书)
   { id: 'mat', name: '马太福音' },
   { id: 'mark', name: '马可福音' },
   { id: 'luke', name: '路加福音' },
   { id: 'john', name: '约翰福音' },
+  // New Testament - History (历史书)
   { id: 'acts', name: '使徒行传' },
+  // New Testament - Pauline Epistles (保罗书信)
   { id: 'rom', name: '罗马书' },
+  { id: '1cor', name: '哥林多前书' },
+  { id: '2cor', name: '哥林多后书' },
+  { id: 'gal', name: '加拉太书' },
+  { id: 'eph', name: '以弗所书' },
+  { id: 'phil', name: '腓立比书' },
+  { id: 'col', name: '歌罗西书' },
+  { id: '1thess', name: '帖撒罗尼迦前书' },
+  { id: '2thess', name: '帖撒罗尼迦后书' },
+  { id: '1tim', name: '提摩太前书' },
+  { id: '2tim', name: '提摩太后书' },
+  { id: 'titus', name: '提多书' },
+  { id: 'phlm', name: '腓利门书' },
+  // New Testament - General Epistles (普通书信)
+  { id: 'heb', name: '希伯来书' },
+  { id: 'jas', name: '雅各书' },
+  { id: '1pet', name: '彼得前书' },
+  { id: '2pet', name: '彼得后书' },
+  { id: '1john', name: '约翰一书' },
+  { id: '2john', name: '约翰二书' },
+  { id: '3john', name: '约翰三书' },
+  { id: 'jude', name: '犹大书' },
+  // New Testament - Prophecy (预言书)
   { id: 'rev', name: '启示录' },
 ];
 

@@ -9,8 +9,10 @@ import { invoke } from '@tauri-apps/api/core';
 import { getAuthAdapter, getDatabaseAdapter } from '@scripture-ai/native';
 import type { Highlight, Note, ReadingHistoryEntry, Bookmark } from '@scripture-ai/native';
 
-// API base URL - should be configured based on environment
-const API_BASE = 'https://your-domain.com';
+// API base URL - use environment variable or default to aidu.app
+const API_BASE = typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE
+  ? import.meta.env.VITE_API_BASE
+  : 'https://aidu.app';
 
 /**
  * Sync status
