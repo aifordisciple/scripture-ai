@@ -9,44 +9,84 @@ import { useState, useEffect, useCallback } from 'react';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
 import { ChevronLeft, ChevronRight, BookOpen, Search, Settings } from 'lucide-react';
 
-// Bible book list (simplified - full list in packages/core)
+// Bible book list - Complete 66 books
 const BIBLE_BOOKS = [
-  { id: 'gen', name: '创世记', chapters: 50 },
-  { id: 'exod', name: '出埃及记', chapters: 40 },
-  { id: 'lev', name: '利未记', chapters: 27 },
-  { id: 'num', name: '民数记', chapters: 36 },
-  { id: 'deut', name: '申命记', chapters: 34 },
-  { id: 'josh', name: '约书亚记', chapters: 24 },
-  { id: 'judg', name: '士师记', chapters: 21 },
-  { id: 'ruth', name: '路得记', chapters: 4 },
-  { id: '1sam', name: '撒母耳记上', chapters: 31 },
-  { id: '2sam', name: '撒母耳记下', chapters: 24 },
-  { id: '1kgs', name: '列王纪上', chapters: 22 },
-  { id: '2kgs', name: '列王纪下', chapters: 25 },
-  // ... more books
-  { id: 'ps', name: '诗篇', chapters: 150 },
-  { id: 'prov', name: '箴言', chapters: 31 },
-  { id: 'eccl', name: '传道书', chapters: 12 },
-  { id: 'song', name: '雅歌', chapters: 8 },
-  { id: 'isa', name: '以赛亚书', chapters: 66 },
-  { id: 'jer', name: '耶利米书', chapters: 52 },
-  { id: 'lam', name: '耶利米哀歌', chapters: 5 },
-  { id: 'ezek', name: '以西结书', chapters: 48 },
-  { id: 'dan', name: '但以理书', chapters: 12 },
-  // ... more books
-  { id: 'mat', name: '马太福音', chapters: 28 },
-  { id: 'mark', name: '马可福音', chapters: 16 },
-  { id: 'luke', name: '路加福音', chapters: 24 },
-  { id: 'john', name: '约翰福音', chapters: 21 },
-  { id: 'acts', name: '使徒行传', chapters: 28 },
-  { id: 'rom', name: '罗马书', chapters: 16 },
-  { id: '1cor', name: '哥林多前书', chapters: 16 },
-  { id: '2cor', name: '哥林多后书', chapters: 13 },
-  { id: 'gal', name: '加拉太书', chapters: 6 },
-  { id: 'eph', name: '以弗所书', chapters: 6 },
-  { id: 'phil', name: '腓立比书', chapters: 4 },
-  { id: 'col', name: '歌罗西书', chapters: 4 },
-  { id: 'rev', name: '启示录', chapters: 22 },
+  // Old Testament - Pentateuch (摩西五经)
+  { id: 'gen', name: '创世记', chapters: 50, testament: 'ot', category: 'pentateuch' },
+  { id: 'exod', name: '出埃及记', chapters: 40, testament: 'ot', category: 'pentateuch' },
+  { id: 'lev', name: '利未记', chapters: 27, testament: 'ot', category: 'pentateuch' },
+  { id: 'num', name: '民数记', chapters: 36, testament: 'ot', category: 'pentateuch' },
+  { id: 'deut', name: '申命记', chapters: 34, testament: 'ot', category: 'pentateuch' },
+  // Old Testament - Historical Books (历史书)
+  { id: 'josh', name: '约书亚记', chapters: 24, testament: 'ot', category: 'historical' },
+  { id: 'judg', name: '士师记', chapters: 21, testament: 'ot', category: 'historical' },
+  { id: 'ruth', name: '路得记', chapters: 4, testament: 'ot', category: 'historical' },
+  { id: '1sam', name: '撒母耳记上', chapters: 31, testament: 'ot', category: 'historical' },
+  { id: '2sam', name: '撒母耳记下', chapters: 24, testament: 'ot', category: 'historical' },
+  { id: '1kgs', name: '列王纪上', chapters: 22, testament: 'ot', category: 'historical' },
+  { id: '2kgs', name: '列王纪下', chapters: 25, testament: 'ot', category: 'historical' },
+  { id: '1chr', name: '历代志上', chapters: 29, testament: 'ot', category: 'historical' },
+  { id: '2chr', name: '历代志下', chapters: 36, testament: 'ot', category: 'historical' },
+  { id: 'ezra', name: '以斯拉记', chapters: 10, testament: 'ot', category: 'historical' },
+  { id: 'neh', name: '尼希米记', chapters: 13, testament: 'ot', category: 'historical' },
+  { id: 'esth', name: '以斯帖记', chapters: 10, testament: 'ot', category: 'historical' },
+  // Old Testament - Poetry (诗歌智慧书)
+  { id: 'job', name: '约伯记', chapters: 42, testament: 'ot', category: 'poetry' },
+  { id: 'ps', name: '诗篇', chapters: 150, testament: 'ot', category: 'poetry' },
+  { id: 'prov', name: '箴言', chapters: 31, testament: 'ot', category: 'poetry' },
+  { id: 'eccl', name: '传道书', chapters: 12, testament: 'ot', category: 'poetry' },
+  { id: 'song', name: '雅歌', chapters: 8, testament: 'ot', category: 'poetry' },
+  // Old Testament - Major Prophets (大先知书)
+  { id: 'isa', name: '以赛亚书', chapters: 66, testament: 'ot', category: 'major_prophets' },
+  { id: 'jer', name: '耶利米书', chapters: 52, testament: 'ot', category: 'major_prophets' },
+  { id: 'lam', name: '耶利米哀歌', chapters: 5, testament: 'ot', category: 'major_prophets' },
+  { id: 'ezek', name: '以西结书', chapters: 48, testament: 'ot', category: 'major_prophets' },
+  { id: 'dan', name: '但以理书', chapters: 12, testament: 'ot', category: 'major_prophets' },
+  // Old Testament - Minor Prophets (小先知书)
+  { id: 'hos', name: '何西阿书', chapters: 14, testament: 'ot', category: 'minor_prophets' },
+  { id: 'joel', name: '约珥书', chapters: 3, testament: 'ot', category: 'minor_prophets' },
+  { id: 'amos', name: '阿摩司书', chapters: 9, testament: 'ot', category: 'minor_prophets' },
+  { id: 'obad', name: '俄巴底亚书', chapters: 1, testament: 'ot', category: 'minor_prophets' },
+  { id: 'jonah', name: '约拿书', chapters: 4, testament: 'ot', category: 'minor_prophets' },
+  { id: 'mic', name: '弥迦书', chapters: 7, testament: 'ot', category: 'minor_prophets' },
+  { id: 'nah', name: '那鸿书', chapters: 3, testament: 'ot', category: 'minor_prophets' },
+  { id: 'hab', name: '哈巴谷书', chapters: 3, testament: 'ot', category: 'minor_prophets' },
+  { id: 'zeph', name: '西番雅书', chapters: 3, testament: 'ot', category: 'minor_prophets' },
+  { id: 'hag', name: '哈该书', chapters: 2, testament: 'ot', category: 'minor_prophets' },
+  { id: 'zech', name: '撒迦利亚书', chapters: 14, testament: 'ot', category: 'minor_prophets' },
+  { id: 'mal', name: '玛拉基书', chapters: 4, testament: 'ot', category: 'minor_prophets' },
+  // New Testament - Gospels (福音书)
+  { id: 'mat', name: '马太福音', chapters: 28, testament: 'nt', category: 'gospels' },
+  { id: 'mark', name: '马可福音', chapters: 16, testament: 'nt', category: 'gospels' },
+  { id: 'luke', name: '路加福音', chapters: 24, testament: 'nt', category: 'gospels' },
+  { id: 'john', name: '约翰福音', chapters: 21, testament: 'nt', category: 'gospels' },
+  // New Testament - History (历史书)
+  { id: 'acts', name: '使徒行传', chapters: 28, testament: 'nt', category: 'history' },
+  // New Testament - Pauline Epistles (保罗书信)
+  { id: 'rom', name: '罗马书', chapters: 16, testament: 'nt', category: 'pauline' },
+  { id: '1cor', name: '哥林多前书', chapters: 16, testament: 'nt', category: 'pauline' },
+  { id: '2cor', name: '哥林多后书', chapters: 13, testament: 'nt', category: 'pauline' },
+  { id: 'gal', name: '加拉太书', chapters: 6, testament: 'nt', category: 'pauline' },
+  { id: 'eph', name: '以弗所书', chapters: 6, testament: 'nt', category: 'pauline' },
+  { id: 'phil', name: '腓立比书', chapters: 4, testament: 'nt', category: 'pauline' },
+  { id: 'col', name: '歌罗西书', chapters: 4, testament: 'nt', category: 'pauline' },
+  { id: '1thess', name: '帖撒罗尼迦前书', chapters: 5, testament: 'nt', category: 'pauline' },
+  { id: '2thess', name: '帖撒罗尼迦后书', chapters: 3, testament: 'nt', category: 'pauline' },
+  { id: '1tim', name: '提摩太前书', chapters: 6, testament: 'nt', category: 'pauline' },
+  { id: '2tim', name: '提摩太后书', chapters: 4, testament: 'nt', category: 'pauline' },
+  { id: 'titus', name: '提多书', chapters: 3, testament: 'nt', category: 'pauline' },
+  { id: 'phlm', name: '腓利门书', chapters: 1, testament: 'nt', category: 'pauline' },
+  // New Testament - General Epistles (普通书信)
+  { id: 'heb', name: '希伯来书', chapters: 13, testament: 'nt', category: 'general' },
+  { id: 'jas', name: '雅各书', chapters: 5, testament: 'nt', category: 'general' },
+  { id: '1pet', name: '彼得前书', chapters: 5, testament: 'nt', category: 'general' },
+  { id: '2pet', name: '彼得后书', chapters: 3, testament: 'nt', category: 'general' },
+  { id: '1john', name: '约翰一书', chapters: 5, testament: 'nt', category: 'general' },
+  { id: '2john', name: '约翰二书', chapters: 1, testament: 'nt', category: 'general' },
+  { id: '3john', name: '约翰三书', chapters: 1, testament: 'nt', category: 'general' },
+  { id: 'jude', name: '犹大书', chapters: 1, testament: 'nt', category: 'general' },
+  // New Testament - Prophecy (预言书)
+  { id: 'rev', name: '启示录', chapters: 22, testament: 'nt', category: 'prophecy' },
 ];
 
 interface ReaderPageProps {
@@ -190,20 +230,45 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
             <div className="book-picker-header">
               <h3>选择书卷</h3>
             </div>
-            <div className="book-list">
-              {BIBLE_BOOKS.map(book => (
-                <button
-                  key={book.id}
-                  className={`book-item ${book.id === bookId ? 'active' : ''}`}
-                  onClick={() => {
-                    setBookId(book.id);
-                    setChapter(1);
-                    setShowBookPicker(false);
-                  }}
-                >
-                  {book.name}
-                </button>
-              ))}
+            <div className="book-list-container">
+              {/* Old Testament */}
+              <div className="book-section">
+                <h4 className="book-section-title">旧约</h4>
+                <div className="book-list">
+                  {BIBLE_BOOKS.filter(b => b.testament === 'ot').map(book => (
+                    <button
+                      key={book.id}
+                      className={`book-item ${book.id === bookId ? 'active' : ''}`}
+                      onClick={() => {
+                        setBookId(book.id);
+                        setChapter(1);
+                        setShowBookPicker(false);
+                      }}
+                    >
+                      {book.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* New Testament */}
+              <div className="book-section">
+                <h4 className="book-section-title">新约</h4>
+                <div className="book-list">
+                  {BIBLE_BOOKS.filter(b => b.testament === 'nt').map(book => (
+                    <button
+                      key={book.id}
+                      className={`book-item ${book.id === bookId ? 'active' : ''}`}
+                      onClick={() => {
+                        setBookId(book.id);
+                        setChapter(1);
+                        setShowBookPicker(false);
+                      }}
+                    >
+                      {book.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
