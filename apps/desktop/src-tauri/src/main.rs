@@ -64,6 +64,11 @@ fn main() {
             storage::db_get_chat_messages,
             storage::db_save_chat_message,
             storage::db_clear_chat_messages,
+            // Bible verse cache commands (offline support)
+            storage::db_get_bible_chapter,
+            storage::db_save_bible_verse,
+            storage::db_count_bible_verses,
+            storage::db_init_bible_tables,
         ])
         // Setup system tray
         .setup(|app| {

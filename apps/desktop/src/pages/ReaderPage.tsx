@@ -11,6 +11,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
 import { getAuthAdapter, getStorageAdapter, type Highlight, type Bookmark as BookmarkType } from '@scripture-ai/native';
 import { HighlightToolbar, SearchModal, AudioPlayer, TabBar, createReadingTab, type ReadingTab, ShareCard } from '../components';
+import { getChapter, isOnline } from '../utils/offlineBible';
 import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck, Volume2, Share2 } from 'lucide-react';
 
 // Bible book list - Complete 66 books
@@ -292,8 +293,39 @@ export function ReaderPage({
       setError(null);
 
       try {
-        // Fetch all verses (API returns both CUV and KJV)
-        const data = await bibleApi.getChapter(bookId, chapter);
+        // Use offline-aware getChapter (tries API first, falls back to cache)
+        let data: BibleVerse[] = [];
+
+        if (isOnline()) {
+          // Try API first
+          try {
+            data = await bibleApi.getChapter(bookId, chapter);
+          } catch (apiError) {
+            console.warn('API fetch failed, trying offline cache:', apiError);
+            const offlineVerses = await getChapter(bookId, chapter, 'CUV');
+            data = offlineVerses.map(v => ({
+              id: v.id,
+              book: v.book_id,
+              bookName: v.book_id,
+              chapter: v.chapter,
+              verse: v.verse,
+              text: v.text,
+              textEn: v.text_en,
+            }));
+          }
+        } else {
+          // Offline: use cached verses
+          const offlineVerses = await getChapter(bookId, chapter, 'CUV');
+          data = offlineVerses.map(v => ({
+            id: v.id,
+            book: v.book_id,
+            bookName: v.book_id,
+            chapter: v.chapter,
+            verse: v.verse,
+            text: v.text,
+            textEn: v.text_en,
+          }));
+        }
 
         if (!cancelled) {
           // Separate CUV and KJV verses

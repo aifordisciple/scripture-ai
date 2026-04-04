@@ -253,6 +253,28 @@ pub async fn db_init(app: AppHandle) -> Result<(), String> {
         [],
     ).await.map_err(|e| e.to_string())?;
 
+    // Create bible_verses table for offline reading
+    db.execute(
+        "CREATE TABLE IF NOT EXISTS bible_verses (
+            id TEXT PRIMARY KEY,
+            book_id TEXT NOT NULL,
+            chapter INTEGER NOT NULL,
+            verse INTEGER NOT NULL,
+            text TEXT NOT NULL,
+            text_en TEXT,
+            version TEXT NOT NULL,
+            cached_at TEXT NOT NULL
+        )",
+        [],
+    ).await.map_err(|e| e.to_string())?;
+
+    // Create index for faster chapter lookups
+    db.execute(
+        "CREATE INDEX IF NOT EXISTS idx_bible_chapter
+         ON bible_verses(book_id, chapter, version)",
+        [],
+    ).await.map_err(|e| e.to_string())?;
+
     Ok(())
 }
 
@@ -635,6 +657,97 @@ pub async fn db_set_last_sync_time(
         [timestamp],
     ).await.map_err(|e| e.to_string())?;
 
+    Ok(())
+}
+
+// ============================================================================
+// Bible Verse Cache Commands (Offline Support)
+// ============================================================================
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BibleVerse {
+    pub id: String,
+    pub book_id: String,
+    pub chapter: i32,
+    pub verse: i32,
+    pub text: String,
+    pub text_en: Option<String>,
+    pub version: String,
+    pub cached_at: String,
+}
+
+#[tauri::command]
+pub async fn db_get_bible_chapter(
+    app: AppHandle,
+    book_id: String,
+    chapter: i32,
+    version: String,
+) -> Result<Vec<BibleVerse>, String> {
+    let db = app.state::<Sql>();
+
+    let verses: Vec<BibleVerse> = db
+        .query(
+            "SELECT id, book_id, chapter, verse, text, text_en, version, cached_at
+             FROM bible_verses
+             WHERE book_id = ? AND chapter = ? AND version = ?
+             ORDER BY verse",
+            [book_id, chapter.to_string(), version],
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(verses)
+}
+
+#[tauri::command]
+pub async fn db_save_bible_verse(
+    app: AppHandle,
+    verse: BibleVerse,
+) -> Result<(), String> {
+    let db = app.state::<Sql>();
+
+    db.execute(
+        "INSERT OR REPLACE INTO bible_verses
+         (id, book_id, chapter, verse, text, text_en, version, cached_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+            verse.id,
+            verse.book_id,
+            verse.chapter.to_string(),
+            verse.verse.to_string(),
+            verse.text,
+            verse.text_en.unwrap_or_default(),
+            verse.version,
+            verse.cached_at,
+        ],
+    ).await.map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn db_count_bible_verses(
+    app: AppHandle,
+    book_id: String,
+) -> Result<i32, String> {
+    let db = app.state::<Sql>();
+
+    let result: Vec<(i32,)> = db
+        .query(
+            "SELECT COUNT(*) FROM bible_verses WHERE book_id = ?",
+            [book_id],
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(result.first().map(|r| r.0).unwrap_or(0))
+}
+
+#[tauri::command]
+pub async fn db_init_bible_tables(app: AppHandle) -> Result<(), String> {
+    // This is called separately to initialize Bible tables
+    // The main db_init already creates them, so this is a no-op
+    // kept for API compatibility
     Ok(())
 }
 
