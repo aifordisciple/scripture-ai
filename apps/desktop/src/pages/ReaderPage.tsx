@@ -3,11 +3,15 @@
  * Main Bible reading page for desktop app
  *
  * Displays Bible verses with navigation and reading features
+ * Supports verse selection and highlighting
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
-import { ChevronLeft, ChevronRight, BookOpen, Search, Settings } from 'lucide-react';
+import { getAuthAdapter, type Highlight } from '@scripture-ai/native';
+import { HighlightToolbar } from '../components';
+import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark } from 'lucide-react';
 
 // Bible book list - Complete 66 books
 const BIBLE_BOOKS = [
@@ -103,7 +107,46 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
   const [showBookPicker, setShowBookPicker] = useState(false);
   const [fontSize, setFontSize] = useState(18);
 
+  // Highlight feature state
+  const [userId, setUserId] = useState<string>('');
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [showHighlightToolbar, setShowHighlightToolbar] = useState(false);
+  const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 });
+  const [selectedVerses, setSelectedVerses] = useState<number[]>([]);
+  const versesContainerRef = useRef<HTMLDivElement>(null);
+
   const currentBook = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
+
+  // Load user ID on mount
+  useEffect(() => {
+    async function loadUserId() {
+      try {
+        const auth = getAuthAdapter();
+        const token = await auth.getToken();
+        if (token) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          setUserId(payload.sub || payload.id || 'default-user');
+        }
+      } catch {
+        setUserId('default-user');
+      }
+    }
+    loadUserId();
+  }, []);
+
+  // Load highlights when book/chapter/user changes
+  useEffect(() => {
+    async function loadHighlights() {
+      if (!userId || !bookId) return;
+      try {
+        const data = await invoke<Highlight[]>('db_get_highlights', { userId });
+        setHighlights(data || []);
+      } catch (error) {
+        console.error('Failed to load highlights:', error);
+      }
+    }
+    loadHighlights();
+  }, [userId, bookId]);
 
   // Fetch verses when book/chapter changes
   useEffect(() => {
@@ -179,6 +222,69 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goToPrevChapter, goToNextChapter]);
 
+  // Handle verse selection for highlighting
+  const handleVerseClick = useCallback((verseNum: number, e: React.MouseEvent) => {
+    if (e.shiftKey && selectedVerses.length > 0) {
+      // Shift+click: extend selection
+      const lastVerse = selectedVerses[selectedVerses.length - 1];
+      const start = Math.min(lastVerse, verseNum);
+      const end = Math.max(lastVerse, verseNum);
+      const range = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+      setSelectedVerses(range);
+    } else if (e.ctrlKey || e.metaKey) {
+      // Ctrl/Cmd+click: toggle verse in selection
+      setSelectedVerses(prev =>
+        prev.includes(verseNum)
+          ? prev.filter(v => v !== verseNum)
+          : [...prev, verseNum].sort((a, b) => a - b)
+      );
+    } else {
+      // Normal click: start new selection
+      setSelectedVerses([verseNum]);
+    }
+  }, [selectedVerses]);
+
+  // Show toolbar when verses are selected
+  useEffect(() => {
+    if (selectedVerses.length > 0 && versesContainerRef.current) {
+      const container = versesContainerRef.current;
+      const selector = `[data-verse="${selectedVerses[0]}"]`;
+      const verseEl = container.querySelector(selector);
+      if (verseEl) {
+        const rect = verseEl.getBoundingClientRect();
+        setToolbarPosition({
+          x: rect.left + rect.width / 2 - 100,
+          y: rect.top - 50,
+        });
+        setShowHighlightToolbar(true);
+      }
+    } else {
+      setShowHighlightToolbar(false);
+    }
+  }, [selectedVerses]);
+
+  // Get highlight for a verse
+  const getVerseHighlight = useCallback((verseNum: number): Highlight | undefined => {
+    return highlights.find(h =>
+      h.book_id === bookId &&
+      h.chapter === chapter &&
+      verseNum >= h.verse_start &&
+      verseNum <= h.verse_end
+    );
+  }, [highlights, bookId, chapter]);
+
+  // Handle highlight added
+  const handleHighlightAdded = useCallback((highlight: Highlight) => {
+    setHighlights(prev => [...prev, highlight]);
+    setSelectedVerses([]);
+  }, []);
+
+  // Handle highlight removed
+  const handleHighlightRemoved = useCallback((id: string) => {
+    setHighlights(prev => prev.filter(h => h.id !== id));
+    setSelectedVerses([]);
+  }, []);
+
   return (
     <div className="reader-page">
       {/* Header */}
@@ -214,10 +320,13 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
         </div>
 
         <div className="header-right">
-          <button className="icon-btn">
+          <button className="icon-btn" title="搜索">
             <Search className="w-5 h-5" />
           </button>
-          <button className="icon-btn">
+          <button className="icon-btn" title="书签">
+            <Bookmark className="w-5 h-5" />
+          </button>
+          <button className="icon-btn" title="设置">
             <Settings className="w-5 h-5" />
           </button>
         </div>
@@ -287,14 +396,41 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
             <button onClick={() => setChapter(chapter)}>重试</button>
           </div>
         ) : (
-          <div className="verses-container" style={{ fontSize: `${fontSize}px` }}>
-            {verses.map(verse => (
-              <div key={verse.id} className="verse" data-verse={verse.verse}>
-                <span className="verse-number">{verse.verse}</span>
-                <span className="verse-text">{verse.text}</span>
-              </div>
-            ))}
+          <div className="verses-container" style={{ fontSize: `${fontSize}px` }} ref={versesContainerRef}>
+            {verses.map(verse => {
+              const highlight = getVerseHighlight(verse.verse);
+              const isSelected = selectedVerses.includes(verse.verse);
+              return (
+                <div
+                  key={verse.id}
+                  className={`verse ${highlight ? 'highlighted' : ''} ${isSelected ? 'selected' : ''}`}
+                  data-verse={verse.verse}
+                  onClick={(e) => handleVerseClick(verse.verse, e)}
+                  style={highlight ? { backgroundColor: highlight.color } : undefined}
+                >
+                  <span className="verse-number">{verse.verse}</span>
+                  <span className="verse-text">{verse.text}</span>
+                </div>
+              );
+            })}
           </div>
+
+          {/* Highlight Toolbar */}
+          <HighlightToolbar
+            visible={showHighlightToolbar}
+            position={toolbarPosition}
+            bookId={bookId}
+            chapter={chapter}
+            selectedVerses={selectedVerses}
+            userId={userId}
+            existingHighlights={highlights}
+            onHighlightAdded={handleHighlightAdded}
+            onHighlightRemoved={handleHighlightRemoved}
+            onClose={() => {
+              setShowHighlightToolbar(false);
+              setSelectedVerses([]);
+            }}
+          />
         )}
       </main>
 

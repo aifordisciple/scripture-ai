@@ -622,6 +622,116 @@ body {
   flex: 1;
 }
 
+/* Verse Highlight Styles */
+.verse.highlighted {
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.verse.selected {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.verse.highlighted.selected {
+  outline: 2px dashed var(--color-primary);
+}
+
+/* Highlight Toolbar */
+.highlight-toolbar {
+  position: fixed;
+  z-index: 1000;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  min-width: 200px;
+  transform: translateX(-50%);
+}
+
+.toolbar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.toolbar-header .close-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+}
+
+.toolbar-header .close-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.color-options {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.color-btn {
+  width: 28px;
+  height: 28px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.color-btn:hover {
+  transform: scale(1.1);
+}
+
+.color-btn.active {
+  border-color: var(--color-text);
+}
+
+.color-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.remove-btn {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid var(--color-error);
+  border-radius: 6px;
+  color: var(--color-error);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.remove-btn:hover {
+  background: var(--color-error);
+  color: white;
+}
+
+.remove-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Reader Footer */
 .reader-footer {
   padding: 12px 24px;
