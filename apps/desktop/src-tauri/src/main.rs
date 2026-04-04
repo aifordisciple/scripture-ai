@@ -19,6 +19,7 @@ fn main() {
         .plugin(tauri_plugin_sql::Builder::default().build())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_tray::init())
+        .plugin(tauri_plugin_notification::init())
         // Register all IPC commands
         .invoke_handler(tauri::generate_handler![
             // System commands
