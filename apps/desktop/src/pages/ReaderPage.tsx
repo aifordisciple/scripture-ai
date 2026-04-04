@@ -10,7 +10,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
 import { getAuthAdapter, getStorageAdapter, type Highlight, type Bookmark as BookmarkType } from '@scripture-ai/native';
-import { HighlightToolbar } from '../components';
+import { HighlightToolbar, SearchModal } from '../components';
 import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck } from 'lucide-react';
 
 // Bible book list - Complete 66 books
@@ -120,6 +120,9 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
   // Bookmark state
   const [bookmarks, setBookmarks] = useState<BookmarkType[]>([]);
   const [isBookmarked, setIsBookmarked] = useState(false);
+
+  // Search state
+  const [showSearch, setShowSearch] = useState(false);
 
   const currentBook = BIBLE_BOOKS.find(b => b.id === bookId) || BIBLE_BOOKS[0];
 
@@ -421,7 +424,7 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
         </div>
 
         <div className="header-right">
-          <button className="icon-btn" title="搜索">
+          <button className="icon-btn" title="搜索" onClick={() => setShowSearch(true)}>
             <Search className="w-5 h-5" />
           </button>
           <button
@@ -559,6 +562,16 @@ export function ReaderPage({ initialBook = 'gen', initialChapter = 1 }: ReaderPa
           <button onClick={() => setFontSize(Math.min(28, fontSize + 2))}>A+</button>
         </div>
       </footer>
+
+      {/* Search Modal */}
+      <SearchModal
+        visible={showSearch}
+        onClose={() => setShowSearch(false)}
+        onNavigate={(newBookId, newChapter) => {
+          setBookId(newBookId);
+          setChapter(newChapter);
+        }}
+      />
     </div>
   );
 }
