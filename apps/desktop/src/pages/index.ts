@@ -3,3 +3,4 @@ export { ReaderPage } from './ReaderPage';
 export { AIChatPage } from './AIChatPage';
 export { PlanPage } from './PlanPage';
 export { NotesPage } from './NotesPage';
+export { SettingsPage } from './SettingsPage';

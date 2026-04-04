@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getPlatform, getAuthAdapter, isDesktop } from '@scripture-ai/native';
-import { ReaderPage, AIChatPage, PlanPage, NotesPage } from './pages';
+import { ReaderPage, AIChatPage, PlanPage, NotesPage, SettingsPage } from './pages';
 import { OfflineIndicator } from './components';
 import { useTauriEvent } from './hooks';
 import {
@@ -179,45 +179,7 @@ function App() {
 
           {activeTab === 'notes' && <NotesPage />}
 
-          {activeTab === 'settings' && (
-            <div className="settings-page">
-              <h2>设置</h2>
-              <div className="settings-group">
-                <h3>通用</h3>
-                <div className="setting-item">
-                  <span>主题</span>
-                  <select>
-                    <option>跟随系统</option>
-                    <option>浅色</option>
-                    <option>深色</option>
-                  </select>
-                </div>
-                <div className="setting-item">
-                  <span>字体大小</span>
-                  <input type="range" min="14" max="28" defaultValue="18" />
-                </div>
-              </div>
-              <div className="settings-group">
-                <h3>同步</h3>
-                <div className="setting-item">
-                  <span>自动同步</span>
-                  <input type="checkbox" defaultChecked />
-                </div>
-                <button className="btn btn-secondary">立即同步</button>
-              </div>
-              <div className="settings-group">
-                <h3>关于</h3>
-                <div className="setting-item">
-                  <span>版本</span>
-                  <span>0.1.0</span>
-                </div>
-                <div className="setting-item">
-                  <span>平台</span>
-                  <span>{platform}</span>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === 'settings' && <SettingsPage />}
         </div>
 
         {/* Offline Indicator */}
