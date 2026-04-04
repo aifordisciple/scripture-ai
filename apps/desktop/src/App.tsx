@@ -3,6 +3,7 @@ import { getPlatform, getAuthAdapter, isDesktop } from '@scripture-ai/native';
 import { ReaderPage, AIChatPage, PlanPage, NotesPage, SettingsPage } from './pages';
 import { OfflineIndicator, KeyboardShortcutsHelp } from './components';
 import { useTauriEvent, useKeyboardShortcuts, createCommonShortcuts } from './hooks';
+import { useTheme } from './contexts';
 import {
   BookOpen,
   MessageCircle,
@@ -45,6 +46,9 @@ function App() {
   const [aiContext, setAIContext] = useState<AIContext | undefined>();
   const [readerNavigation, setReaderNavigation] = useState<{ bookId: string; chapter: number } | undefined>();
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
+
+  // Theme
+  const { toggleTheme } = useTheme();
 
   // Initialize platform detection
   useEffect(() => {
@@ -107,6 +111,7 @@ function App() {
   // Keyboard shortcuts
   const shortcuts = createCommonShortcuts({
     onToggleSidebar: () => setSidebarCollapsed(prev => !prev),
+    onToggleDarkMode: toggleTheme,
     onEscape: () => {
       // Close any open modals/menus
       setShowKeyboardHelp(false);

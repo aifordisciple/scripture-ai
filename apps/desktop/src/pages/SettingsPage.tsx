@@ -21,6 +21,7 @@ import {
   sendTestNotification,
 } from '../utils/notificationScheduler';
 import { useUpdater } from '../hooks';
+import { useTheme } from '../contexts';
 import {
   Settings,
   Moon,
@@ -73,6 +74,9 @@ export function SettingsPage() {
   const [syncing, setSyncing] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  // Theme from context
+  const { theme, setTheme } = useTheme();
+
   // Updater
   const {
     checking,
@@ -92,18 +96,12 @@ export function SettingsPage() {
     loadSyncStatus();
   }, []);
 
-  // Apply theme when changed
+  // Sync settings.theme with context theme
   useEffect(() => {
-    applyTheme(settings.theme);
-
-    // Listen for system theme changes when in 'system' mode
-    if (settings.theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = () => applyTheme('system');
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
+    if (settings.theme && settings.theme !== theme) {
+      setTheme(settings.theme);
     }
-  }, [settings.theme]);
+  }, [settings.theme, theme, setTheme]);
 
   // Start/stop notification scheduler when settings change
   useEffect(() => {
@@ -161,24 +159,6 @@ export function SettingsPage() {
     }
   };
 
-  const applyTheme = (theme: Theme) => {
-    const root = document.documentElement;
-
-    // Remove both classes first
-    root.classList.remove('dark', 'light');
-
-    if (theme === 'system') {
-      // No class needed - CSS will use media query
-      // But we can still apply immediate effect based on current preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      // Don't add classes for system mode - let CSS media query handle it
-    } else if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.add('light');
-    }
-  };
-
   const saveSettings = async (newSettings: AppSettings) => {
     try {
       const storage = getStorageAdapter();
@@ -191,8 +171,9 @@ export function SettingsPage() {
     }
   };
 
-  const handleThemeChange = (theme: Theme) => {
-    saveSettings({ ...settings, theme });
+  const handleThemeChange = (newTheme: Theme) => {
+    setTheme(newTheme);
+    saveSettings({ ...settings, theme: newTheme });
   };
 
   const handleFontSizeChange = (size: number) => {
