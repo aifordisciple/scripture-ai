@@ -12,6 +12,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Bot, User, BookOpen, Sparkles, RefreshCw, Copy, Check } from 'lucide-react';
 import { chatApi } from '@scripture-ai/core';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   id: string;
@@ -291,7 +292,9 @@ export function AIChatPage({ context }: AIChatPageProps) {
                   </div>
                 ) : (
                   <>
-                    <div className="message-text">{message.content}</div>
+                    <div className="message-text">
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    </div>
                     {message.role === 'assistant' && (
                       <button
                         className="copy-btn"

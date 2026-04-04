@@ -43,6 +43,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<TabId>('read');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [aiContext, setAIContext] = useState<AIContext | undefined>();
+  const [readerNavigation, setReaderNavigation] = useState<{ bookId: string; chapter: number } | undefined>();
 
   // Initialize platform detection
   useEffect(() => {
@@ -94,6 +95,12 @@ function App() {
   const handleAskAI = useCallback((bookId: string, chapter: number, verses: number[]) => {
     setAIContext({ bookId, chapter, verses });
     setActiveTab('ai');
+  }, []);
+
+  // Handle navigate to verse from NotesPage
+  const handleNavigateToVerse = useCallback((bookId: string, chapter: number) => {
+    setReaderNavigation({ bookId, chapter });
+    setActiveTab('read');
   }, []);
 
   // Loading state
@@ -184,13 +191,19 @@ function App() {
       <main className="main-area">
         {/* Tab Content */}
         <div className="tab-content">
-          {activeTab === 'read' && <ReaderPage onAskAI={handleAskAI} />}
+          {activeTab === 'read' && (
+            <ReaderPage
+              initialBook={readerNavigation?.bookId}
+              initialChapter={readerNavigation?.chapter}
+              onAskAI={handleAskAI}
+            />
+          )}
 
           {activeTab === 'ai' && <AIChatPage context={aiContext} />}
 
           {activeTab === 'plan' && <PlanPage />}
 
-          {activeTab === 'notes' && <NotesPage />}
+          {activeTab === 'notes' && <NotesPage onNavigate={handleNavigateToVerse} />}
 
           {activeTab === 'settings' && <SettingsPage />}
         </div>

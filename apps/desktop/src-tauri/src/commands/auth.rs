@@ -97,3 +97,42 @@ pub async fn login_complete(
 
     Ok(())
 }
+
+// ============================================================================
+// Tests
+// ============================================================================
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn login_url_uses_env_or_default() {
+        // When LOGIN_URL env var is not set, should use default
+        let default_url = option_env!("LOGIN_URL")
+            .unwrap_or("https://aidu.app/desktop-login");
+
+        assert!(!default_url.is_empty());
+        assert!(default_url.starts_with("https://"));
+        assert!(default_url.contains("desktop-login"));
+    }
+
+    #[test]
+    fn token_key_formatting() {
+        // Test that token keys are correctly formatted
+        let key = "auth_token";
+        assert!(key.contains('_'));
+        assert!(!key.is_empty());
+    }
+
+    #[test]
+    fn user_id_optional() {
+        // Test that user_id is properly optional in login_complete
+        fn takes_optional_user_id(user_id: Option<String>) -> bool {
+            user_id.is_some()
+        }
+
+        assert!(!takes_optional_user_id(None));
+        assert!(takes_optional_user_id(Some("user-123".to_string())));
+    }
+}

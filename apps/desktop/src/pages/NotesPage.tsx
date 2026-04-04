@@ -111,7 +111,11 @@ const HIGHLIGHT_COLORS = [
   { id: 'purple', color: '#e9d5ff', label: '紫色' },
 ];
 
-export function NotesPage() {
+interface NotesPageProps {
+  onNavigate?: (bookId: string, chapter: number) => void;
+}
+
+export function NotesPage({ onNavigate }: NotesPageProps) {
   const [activeTab, setActiveTab] = useState<TabId>('highlights');
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -308,7 +312,12 @@ export function NotesPage() {
               </div>
             ) : (
               filteredHighlights.map(highlight => (
-                <div key={highlight.id} className="item-card highlight-card">
+                <div
+                  key={highlight.id}
+                  className="item-card highlight-card clickable"
+                  onClick={() => onNavigate?.(highlight.book_id, highlight.chapter)}
+                  title="点击跳转到此经文"
+                >
                   <div
                     className="highlight-color-bar"
                     style={{ backgroundColor: HIGHLIGHT_COLORS.find(c => c.id === highlight.color)?.color || '#fef08a' }}
@@ -321,7 +330,10 @@ export function NotesPage() {
                       </span>
                       <button
                         className="delete-btn"
-                        onClick={() => deleteHighlight(highlight.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteHighlight(highlight.id);
+                        }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -356,21 +368,30 @@ export function NotesPage() {
               </div>
             ) : (
               filteredNotes.map(note => (
-                <div key={note.id} className="item-card note-card">
+                <div
+                  key={note.id}
+                  className="item-card note-card clickable"
+                  onClick={() => onNavigate?.(note.book_id, note.chapter)}
+                  title="点击跳转到此经文"
+                >
                   <div className="item-content">
                     <div className="item-header">
                       <span className="item-reference">
                         {getBookName(note.book_id)} {note.chapter}:{note.verse_start}
                       </span>
                       <div className="item-actions">
-                        <button onClick={() => {
+                        <button onClick={(e) => {
+                          e.stopPropagation();
                           setEditingNote(note);
                           setNewNoteContent(note.content);
                           setShowNoteEditor(true);
                         }}>
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => deleteNote(note.id)}>
+                        <button onClick={(e) => {
+                          e.stopPropagation();
+                          deleteNote(note.id);
+                        }}>
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>

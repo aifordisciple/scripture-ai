@@ -1182,6 +1182,82 @@ body {
   word-break: break-word;
 }
 
+/* Markdown content styles */
+.message-text p {
+  margin: 0 0 0.5em 0;
+}
+
+.message-text p:last-child {
+  margin-bottom: 0;
+}
+
+.message-text h1,
+.message-text h2,
+.message-text h3,
+.message-text h4 {
+  margin: 0.5em 0 0.25em 0;
+  font-weight: 600;
+}
+
+.message-text h1 { font-size: 1.3em; }
+.message-text h2 { font-size: 1.2em; }
+.message-text h3 { font-size: 1.1em; }
+
+.message-text ul,
+.message-text ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.message-text li {
+  margin: 0.25em 0;
+}
+
+.message-text code {
+  background: var(--color-background);
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.message-text pre {
+  background: var(--color-background);
+  padding: 0.75em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
+
+.message-text pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.message-text blockquote {
+  border-left: 3px solid var(--color-primary);
+  margin: 0.5em 0;
+  padding-left: 0.75em;
+  color: var(--color-text-secondary);
+}
+
+.message-text a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.message-text a:hover {
+  text-decoration: underline;
+}
+
+.message-text strong {
+  font-weight: 600;
+}
+
+.message-text em {
+  font-style: italic;
+}
+
 .message.user .message-text {
   background: var(--color-primary);
   color: white;
@@ -1686,6 +1762,17 @@ body {
   border-radius: 12px;
   margin-bottom: 12px;
   overflow: hidden;
+}
+
+.item-card.clickable {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.item-card.clickable:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 .highlight-card {

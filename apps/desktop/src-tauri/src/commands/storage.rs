@@ -476,3 +476,142 @@ pub async fn db_set_last_sync_time(
 
     Ok(())
 }
+
+// ============================================================================
+// Tests
+// ============================================================================
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn highlight_serialization() {
+        let highlight = Highlight {
+            id: "test-1".to_string(),
+            user_id: "user-1".to_string(),
+            book_id: "gen".to_string(),
+            chapter: 1,
+            verse_start: 1,
+            verse_end: 3,
+            color: "#fef08a".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: None,
+        };
+
+        let json = serde_json::to_string(&highlight).unwrap();
+        let parsed: Highlight = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(parsed.id, "test-1");
+        assert_eq!(parsed.book_id, "gen");
+        assert_eq!(parsed.verse_start, 1);
+        assert_eq!(parsed.verse_end, 3);
+    }
+
+    #[test]
+    fn note_serialization() {
+        let note = Note {
+            id: "note-1".to_string(),
+            user_id: "user-1".to_string(),
+            book_id: "gen".to_string(),
+            chapter: 1,
+            verse_start: Some(1),
+            verse_end: Some(3),
+            title: "Test Note".to_string(),
+            content: "This is a test note.".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: None,
+        };
+
+        let json = serde_json::to_string(&note).unwrap();
+        let parsed: Note = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(parsed.id, "note-1");
+        assert_eq!(parsed.title, "Test Note");
+        assert_eq!(parsed.verse_start, Some(1));
+    }
+
+    #[test]
+    fn bookmark_serialization() {
+        let bookmark = Bookmark {
+            id: "bookmark-1".to_string(),
+            user_id: "user-1".to_string(),
+            book_id: "ps".to_string(),
+            chapter: 23,
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+        };
+
+        let json = serde_json::to_string(&bookmark).unwrap();
+        let parsed: Bookmark = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(parsed.id, "bookmark-1");
+        assert_eq!(parsed.book_id, "ps");
+        assert_eq!(parsed.chapter, 23);
+    }
+
+    #[test]
+    fn reading_history_serialization() {
+        let entry = ReadingHistoryEntry {
+            id: "history-1".to_string(),
+            user_id: "user-1".to_string(),
+            book_id: "john".to_string(),
+            chapter: 3,
+            read_at: "2024-01-01T00:00:00Z".to_string(),
+        };
+
+        let json = serde_json::to_string(&entry).unwrap();
+        let parsed: ReadingHistoryEntry = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(parsed.id, "history-1");
+        assert_eq!(parsed.book_id, "john");
+        assert_eq!(parsed.chapter, 3);
+    }
+
+    #[test]
+    fn highlight_verse_range_validation() {
+        // Valid range
+        let highlight = Highlight {
+            id: "test-1".to_string(),
+            user_id: "user-1".to_string(),
+            book_id: "gen".to_string(),
+            chapter: 1,
+            verse_start: 1,
+            verse_end: 10,
+            color: "#fef08a".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: None,
+        };
+        assert!(highlight.verse_start <= highlight.verse_end);
+
+        // Single verse
+        let single_verse = Highlight {
+            verse_start: 5,
+            verse_end: 5,
+            ..highlight.clone()
+        };
+        assert_eq!(single_verse.verse_start, single_verse.verse_end);
+    }
+
+    #[test]
+    fn note_with_optional_verses() {
+        // Note without specific verses
+        let note_general = Note {
+            id: "note-general".to_string(),
+            user_id: "user-1".to_string(),
+            book_id: "gen".to_string(),
+            chapter: 1,
+            verse_start: None,
+            verse_end: None,
+            title: "General Note".to_string(),
+            content: "Notes about the chapter.".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: None,
+        };
+
+        let json = serde_json::to_string(&note_general).unwrap();
+        let parsed: Note = serde_json::from_str(&json).unwrap();
+
+        assert!(parsed.verse_start.is_none());
+        assert!(parsed.verse_end.is_none());
+    }
+}
