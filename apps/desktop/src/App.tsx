@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getPlatform, getAuthAdapter, isDesktop } from '@scripture-ai/native';
-import { ReaderPage } from './pages';
+import { ReaderPage, AIChatPage, PlanPage, NotesPage } from './pages';
 import { OfflineIndicator } from './components';
 import { useTauriEvent } from './hooks';
 import {
@@ -173,29 +173,11 @@ function App() {
         <div className="tab-content">
           {activeTab === 'read' && <ReaderPage />}
 
-          {activeTab === 'ai' && (
-            <div className="placeholder-page">
-              <MessageCircle className="w-16 h-16 text-muted" />
-              <h2>AI助手</h2>
-              <p>AI对话功能开发中...</p>
-            </div>
-          )}
+          {activeTab === 'ai' && <AIChatPage />}
 
-          {activeTab === 'plan' && (
-            <div className="placeholder-page">
-              <Calendar className="w-16 h-16 text-muted" />
-              <h2>读经计划</h2>
-              <p>计划功能开发中...</p>
-            </div>
-          )}
+          {activeTab === 'plan' && <PlanPage />}
 
-          {activeTab === 'notes' && (
-            <div className="placeholder-page">
-              <Bookmark className="w-16 h-16 text-muted" />
-              <h2>笔记与高亮</h2>
-              <p>笔记功能开发中...</p>
-            </div>
-          )}
+          {activeTab === 'notes' && <NotesPage />}
 
           {activeTab === 'settings' && (
             <div className="settings-page">
