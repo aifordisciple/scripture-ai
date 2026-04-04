@@ -7,3 +7,4 @@ export { AudioPlayer } from './AudioPlayer';
 export { TabBar, createReadingTab } from './TabBar';
 export type { ReadingTab } from './TabBar';
 export { ShareCard } from './ShareCard';
+export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';

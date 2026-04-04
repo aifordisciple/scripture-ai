@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getPlatform, getAuthAdapter, isDesktop } from '@scripture-ai/native';
 import { ReaderPage, AIChatPage, PlanPage, NotesPage, SettingsPage } from './pages';
 import { OfflineIndicator } from './components';
-import { useTauriEvent } from './hooks';
+import { useTauriEvent, useKeyboardShortcuts, createCommonShortcuts } from './hooks';
 import {
   BookOpen,
   MessageCircle,
@@ -102,6 +102,37 @@ function App() {
     setReaderNavigation({ bookId, chapter });
     setActiveTab('read');
   }, []);
+
+  // Keyboard shortcuts
+  const shortcuts = createCommonShortcuts({
+    onToggleSidebar: () => setSidebarCollapsed(prev => !prev),
+    onEscape: () => {
+      // Close any open modals/menus
+      setReaderNavigation(undefined);
+    },
+  });
+
+  useKeyboardShortcuts(shortcuts, { enabled: isAuthenticated });
+
+  // Tab navigation shortcuts
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + 1-5 for tab switching
+      if (e.ctrlKey || e.metaKey) {
+        const num = parseInt(e.key);
+        if (num >= 1 && num <= 5) {
+          e.preventDefault();
+          const tabs: TabId[] = ['read', 'ai', 'plan', 'notes', 'settings'];
+          setActiveTab(tabs[num - 1]);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAuthenticated]);
 
   // Loading state
   if (loading) {
