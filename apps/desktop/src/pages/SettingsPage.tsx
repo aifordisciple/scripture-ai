@@ -13,6 +13,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { getAuthAdapter, getStorageAdapter } from '@scripture-ai/native';
+import { syncWithServer as performSync } from '../utils/sync';
 import {
   Settings,
   Moon,
@@ -161,11 +162,27 @@ export function SettingsPage() {
   const handleSyncNow = async () => {
     setSyncing(true);
     try {
-      // Trigger sync
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const now = Date.now();
-      await invoke('db_set_last_sync_time', { timestamp: now });
-      setLastSyncTime(now);
+      const auth = getAuthAdapter();
+      const token = await auth.getToken();
+
+      if (!token) {
+        console.error('Not authenticated');
+        return;
+      }
+
+      // Get user ID from token
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.sub || payload.id || 'default-user';
+
+      const result = await performSync(userId);
+
+      if (result.success) {
+        const now = Date.now();
+        setLastSyncTime(now);
+        console.log('Sync completed:', result);
+      } else {
+        console.error('Sync failed:', result.error);
+      }
     } catch (error) {
       console.error('Sync failed:', error);
     } finally {

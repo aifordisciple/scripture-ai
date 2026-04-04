@@ -14,6 +14,7 @@ import { Bookmark, FileText, Plus, Trash2, Edit2, Search, Sync } from 'lucide-re
 import { invoke } from '@tauri-apps/api/core';
 import { getAuthAdapter } from '@scripture-ai/native';
 import type { Highlight, Note } from '@scripture-ai/native';
+import { syncWithServer as performSync } from '../utils/sync';
 
 type TabId = 'highlights' | 'notes';
 
@@ -86,12 +87,26 @@ export function NotesPage() {
   };
 
   // Sync with server
-  const syncWithServer = async () => {
+  const handleSync = async () => {
     setSyncing(true);
     try {
-      // In real app, call sync API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Sync completed');
+      const auth = getAuthAdapter();
+      const token = await auth.getToken();
+      if (!token) {
+        console.error('Not authenticated');
+        return;
+      }
+
+      const userId = await auth.getUserId?.() || 'local-user';
+      const result = await performSync(userId);
+
+      if (result.success) {
+        console.log('Sync completed:', result);
+        // Reload data after sync
+        await loadData();
+      } else {
+        console.error('Sync failed:', result.error);
+      }
     } catch (error) {
       console.error('Sync failed:', error);
     } finally {
@@ -190,7 +205,7 @@ export function NotesPage() {
           </div>
           <button
             className={`sync-btn ${syncing ? 'syncing' : ''}`}
-            onClick={syncWithServer}
+            onClick={handleSync}
             disabled={syncing}
           >
             <Sync className="w-4 h-4" />
