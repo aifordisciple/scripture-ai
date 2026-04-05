@@ -8,6 +8,27 @@
 import { vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 
+// Mock HTMLMediaElement for audio player tests
+window.HTMLMediaElement.prototype.play = vi.fn(() => Promise.resolve());
+window.HTMLMediaElement.prototype.pause = vi.fn();
+window.HTMLMediaElement.prototype.load = vi.fn();
+
+// Mock Audio constructor
+window.Audio = vi.fn().mockImplementation(() => ({
+  play: vi.fn(() => Promise.resolve()),
+  pause: vi.fn(),
+  load: vi.fn(),
+  src: '',
+  currentTime: 0,
+  duration: 0,
+  volume: 1,
+  muted: false,
+  paused: true,
+  ended: false,
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+}));
+
 // Mock Tauri API
 const mockInvoke = vi.fn();
 const mockGetCurrentWindow = vi.fn(() => ({
