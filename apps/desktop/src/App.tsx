@@ -45,6 +45,7 @@ function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [aiContext, setAIContext] = useState<AIContext | undefined>();
   const [readerNavigation, setReaderNavigation] = useState<{ bookId: string; chapter: number } | undefined>();
+  const [navigationKey, setNavigationKey] = useState(0);
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showQuickJump, setShowQuickJump] = useState(false);
@@ -69,6 +70,7 @@ function App() {
   useTauriEvent<[string, number]>('navigate-to-reading', useCallback((data) => {
     const [bookId, chapter] = data;
     setReaderNavigation({ bookId, chapter });
+    setNavigationKey(k => k + 1);
     setActiveTab('read');
   }, []));
 
@@ -115,6 +117,7 @@ function App() {
   // Handle navigate to verse from NotesPage
   const handleNavigateToVerse = useCallback((bookId: string, chapter: number) => {
     setReaderNavigation({ bookId, chapter });
+    setNavigationKey(k => k + 1);
     setActiveTab('read');
   }, []);
 
@@ -288,6 +291,7 @@ function App() {
         <div className="tab-content">
           {activeTab === 'read' && (
             <ReaderPage
+              key={navigationKey}
               initialBook={readerNavigation?.bookId}
               initialChapter={readerNavigation?.chapter}
               onAskAI={handleAskAI}
@@ -335,6 +339,7 @@ function App() {
         onClose={() => setShowQuickJump(false)}
         onNavigate={(bookId, chapter) => {
           setReaderNavigation({ bookId, chapter });
+          setNavigationKey(k => k + 1);
           setActiveTab('read');
         }}
       />
