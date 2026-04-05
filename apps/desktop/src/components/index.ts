@@ -15,3 +15,4 @@ export { CommandPalette } from './CommandPalette';
 export { SplashScreen } from './SplashScreen';
 export { QuickJump } from './QuickJump';
 export { ReadingHistory } from './ReadingHistory';
+export { OfflineDownload } from './OfflineDownload';

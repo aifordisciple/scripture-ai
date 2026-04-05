@@ -750,19 +750,42 @@ pub async fn db_save_bible_verse(
 #[tauri::command]
 pub async fn db_count_bible_verses(
     app: AppHandle,
-    book_id: String,
+    book_id: Option<String>,
 ) -> Result<i32, String> {
     let db = app.state::<SqlitePool>();
 
-    let result: Option<(i32,)> = sqlx::query_as(
-        "SELECT COUNT(*) FROM bible_verses WHERE book_id = ?",
-    )
-    .bind(&book_id)
-    .fetch_optional(&*db)
-    .await
-    .map_err(|e| e.to_string())?;
+    let count = if let Some(book) = book_id {
+        let result: Option<(i32,)> = sqlx::query_as(
+            "SELECT COUNT(*) FROM bible_verses WHERE book_id = ?",
+        )
+        .bind(&book)
+        .fetch_optional(&*db)
+        .await
+        .map_err(|e| e.to_string())?;
+        result.map(|r| r.0).unwrap_or(0)
+    } else {
+        let result: Option<(i32,)> = sqlx::query_as(
+            "SELECT COUNT(*) FROM bible_verses",
+        )
+        .fetch_optional(&*db)
+        .await
+        .map_err(|e| e.to_string())?;
+        result.map(|r| r.0).unwrap_or(0)
+    };
 
-    Ok(result.map(|r| r.0).unwrap_or(0))
+    Ok(count)
+}
+
+#[tauri::command]
+pub async fn db_clear_bible_cache(app: AppHandle) -> Result<(), String> {
+    let db = app.state::<SqlitePool>();
+
+    sqlx::query("DELETE FROM bible_verses")
+        .execute(&*db)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
 }
 
 #[tauri::command]

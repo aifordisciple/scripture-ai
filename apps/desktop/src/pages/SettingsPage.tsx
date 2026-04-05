@@ -22,6 +22,7 @@ import {
 } from '../utils/notificationScheduler';
 import { useUpdater } from '../hooks';
 import { useTheme } from '../contexts';
+import { OfflineDownload } from '../components';
 import {
   Settings,
   Moon,
@@ -40,6 +41,7 @@ import {
   Download,
   Upload,
   DownloadCloud,
+  Wifi,
 } from 'lucide-react';
 
 type Theme = 'light' | 'dark' | 'system';
@@ -73,6 +75,7 @@ export function SettingsPage() {
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showOfflineDownload, setShowOfflineDownload] = useState(false);
 
   // Theme from context
   const { theme, setTheme } = useTheme();
@@ -567,6 +570,29 @@ export function SettingsPage() {
           </div>
         </section>
 
+        {/* Offline Download Section */}
+        <section className="settings-section">
+          <h3>
+            <Wifi className="w-5 h-5" />
+            离线圣经
+          </h3>
+          <div className="settings-card">
+            <div className="setting-row">
+              <span className="setting-label">离线阅读</span>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setShowOfflineDownload(true)}
+              >
+                <Download className="w-4 h-4" />
+                管理离线下载
+              </button>
+            </div>
+            <p className="setting-hint">
+              下载圣经经文到本地，无需网络连接即可阅读。
+            </p>
+          </div>
+        </section>
+
         {/* Notification Section */}
         <section className="settings-section">
           <h3>
@@ -722,6 +748,15 @@ export function SettingsPage() {
           </div>
         )}
       </div>
+
+      {/* Offline Download Modal */}
+      {showOfflineDownload && (
+        <div className="modal-overlay" onClick={() => setShowOfflineDownload(false)}>
+          <div className="modal-content offline-modal" onClick={(e) => e.stopPropagation()}>
+            <OfflineDownload onClose={() => setShowOfflineDownload(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
