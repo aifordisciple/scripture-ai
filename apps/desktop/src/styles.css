@@ -2401,6 +2401,16 @@ body {
   opacity: 0.6;
 }
 
+.reading-item.clickable {
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.reading-item.clickable:hover {
+  background: var(--color-surface-hover);
+  transform: translateX(4px);
+}
+
 .reading-day {
   min-width: 60px;
   font-size: 14px;

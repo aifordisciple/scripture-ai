@@ -368,7 +368,17 @@ export function PlanPage({ onNavigate }: PlanPageProps) {
                 <h4>每日阅读</h4>
                 <div className="readings-list">
                   {dailyReadings.slice(0, 10).map(reading => (
-                    <div key={reading.day} className={`reading-item ${reading.completed ? 'completed' : ''}`}>
+                    <div
+                      key={reading.day}
+                      className={`reading-item ${reading.completed ? 'completed' : ''} ${onNavigate ? 'clickable' : ''}`}
+                      onClick={() => {
+                        if (onNavigate && reading.readings.length > 0) {
+                          const firstReading = reading.readings[0];
+                          onNavigate(firstReading.bookId, firstReading.chapter);
+                        }
+                      }}
+                      title={onNavigate ? '点击前往阅读' : undefined}
+                    >
                       <div className="reading-day">
                         {reading.completed ? (
                           <Check className="w-5 h-5 text-green-500" />
@@ -380,7 +390,10 @@ export function PlanPage({ onNavigate }: PlanPageProps) {
                       {!reading.completed && (
                         <button
                           className="check-in-btn"
-                          onClick={() => checkIn(reading.day)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            checkIn(reading.day);
+                          }}
                         >
                           打卡
                         </button>
