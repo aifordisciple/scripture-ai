@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getPlatform, getAuthAdapter, isDesktop } from '@scripture-ai/native';
 import { ReaderPage, AIChatPage, PlanPage, NotesPage, SettingsPage } from './pages';
-import { OfflineIndicator, KeyboardShortcutsHelp, CommandPalette, QuickJump } from './components';
+import { OfflineIndicator, KeyboardShortcutsHelp, CommandPalette, QuickJump, TitleBar } from './components';
 import { useTauriEvent, useKeyboardShortcuts, createCommonShortcuts } from './hooks';
 import { useTheme } from './contexts';
 import {
@@ -249,6 +249,9 @@ function App() {
 
   return (
     <div className="app-layout">
+      {/* Title Bar (Windows/Linux only) */}
+      <TitleBar />
+
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">

@@ -1,5 +1,6 @@
 // apps/desktop/src/components/index.ts
 export { DesktopMenu } from './DesktopMenu';
+export { TitleBar } from './TitleBar';
 export { OfflineIndicator } from './OfflineIndicator';
 export { HighlightToolbar } from './HighlightToolbar';
 export { SearchModal } from './SearchModal';

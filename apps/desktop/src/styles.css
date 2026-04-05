@@ -4284,3 +4284,75 @@ body {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* Title Bar Styles */
+.title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 8px;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.title-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 8px;
+}
+
+.app-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+}
+
+.app-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.title-bar-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 16px;
+  -webkit-app-region: no-drag;
+}
+
+.title-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  -webkit-app-region: no-drag;
+}
+
+.window-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: all 0.15s ease;
+}
+
+.window-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.window-btn.close:hover {
+  background: #e81123;
+  color: white;
+}
