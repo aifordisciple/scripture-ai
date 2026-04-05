@@ -5,6 +5,7 @@
  * Configures testing environment with necessary mocks
  */
 
+import { vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 
 // Mock Tauri API

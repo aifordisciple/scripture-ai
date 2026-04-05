@@ -6,11 +6,11 @@
 
 mod commands;
 
-use commands::{auth, storage, system, window};
+use commands::{auth, storage, system, window, tray};
 use tauri::{
-    menu::{Menu, MenuItem},
+    menu::{MenuBuilder, MenuItemBuilder},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    Manager,
+    Emitter,
 };
 
 fn main() {
@@ -18,7 +18,6 @@ fn main() {
         // Initialize plugins
         .plugin(tauri_plugin_sql::Builder::default().build())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_tray::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
@@ -76,22 +75,58 @@ fn main() {
             window::get_window_state,
             window::save_current_window_state,
             window::restore_window_state,
+            // Tray commands
+            tray::get_recent_readings,
+            tray::add_recent_reading,
+            tray::clear_recent_readings,
         ])
         // Setup system tray
         .setup(|app| {
-            // Create tray menu items
-            let show_item = MenuItem::with_id(app, "show", "显示窗口", true, None::<&str>)?;
-            let hide_item = MenuItem::with_id(app, "hide", "隐藏窗口", true, None::<&str>)?;
-            let quit_item = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
+            use tauri::Manager;
 
-            // Build tray menu
-            let menu = Menu::with_items(app, &[&show_item, &hide_item, &quit_item])?;
+            // Load recent readings for tray menu
+            let recent_readings = tauri::async_runtime::block_on(async {
+                tray::get_recent_readings(app.handle().clone()).await.unwrap_or_default()
+            });
+
+            // Create tray menu items
+            let show_item = MenuItemBuilder::with_id("show", "显示窗口").build(app)?;
+            let hide_item = MenuItemBuilder::with_id("hide", "隐藏窗口").build(app)?;
+            let quit_item = MenuItemBuilder::with_id("quit", "退出").build(app)?;
+
+            // Build tray menu with recent readings
+            let mut menu_builder = MenuBuilder::new(app)
+                .item(&show_item)
+                .item(&hide_item)
+                .separator();
+
+            // Add recent readings section header
+            if !recent_readings.is_empty() {
+                let recent_header = MenuItemBuilder::with_id("recent-header", "最近阅读")
+                    .enabled(false)
+                    .build(app)?;
+                menu_builder = menu_builder.item(&recent_header);
+
+                // Add each recent reading
+                for reading in &recent_readings {
+                    let id = format!("reading-{}-{}", reading.book_id, reading.chapter);
+                    let text = format!("{} {}章", reading.book_name, reading.chapter);
+                    let item = MenuItemBuilder::with_id(&id, &text).build(app)?;
+                    menu_builder = menu_builder.item(&item);
+                }
+
+                menu_builder = menu_builder.separator();
+            }
+
+            let menu = menu_builder
+                .item(&quit_item)
+                .build()?;
 
             // Create system tray
             let _tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&menu)
-                .menu_on_left_click(false)
+                .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "show" => {
                         if let Some(window) = app.get_webview_window("main") {
@@ -110,6 +145,22 @@ fn main() {
                             let _ = window::save_current_window_state(app.clone()).await;
                         });
                         app.exit(0);
+                    }
+                    id if id.starts_with("reading-") => {
+                        // Navigate to recent reading
+                        // Parse book_id and chapter from id: "reading-{book_id}-{chapter}"
+                        let parts: Vec<&str> = id.split('-').collect();
+                        if parts.len() == 3 {
+                            let book_id = parts[1];
+                            let chapter: i32 = parts[2].parse().unwrap_or(1);
+                            // Emit event to frontend for navigation
+                            let _ = app.emit("navigate-to-reading", (book_id, chapter));
+                            // Show window
+                            if let Some(window) = app.get_webview_window("main") {
+                                let _ = window.show();
+                                let _ = window.set_focus();
+                            }
+                        }
                     }
                     _ => {}
                 })

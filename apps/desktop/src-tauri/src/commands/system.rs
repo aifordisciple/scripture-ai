@@ -2,7 +2,7 @@
 //!
 //! Platform info and app control commands
 
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 
 /// Get current platform name
 #[tauri::command]
@@ -42,7 +42,12 @@ pub async fn minimize_window(app: AppHandle) -> Result<(), String> {
 #[tauri::command]
 pub async fn toggle_maximize(app: AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window("main") {
-        window.toggle_maximize().map_err(|e| e.to_string())?;
+        let is_maximized = window.is_maximized().map_err(|e| e.to_string())?;
+        if is_maximized {
+            window.unmaximize().map_err(|e| e.to_string())?;
+        } else {
+            window.maximize().map_err(|e| e.to_string())?;
+        }
     }
     Ok(())
 }

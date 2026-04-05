@@ -2,7 +2,7 @@
 //!
 //! Handles token storage and login window management
 
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_store::StoreExt;
 
 /// Store authentication token

@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
 
 /**
  * Hook to check if Tauri APIs are available
@@ -17,24 +16,6 @@ export function useTauri() {
   }, []);
 
   return isTauri;
-}
-
-/**
- * Hook for desktop-specific keyboard shortcuts
- */
-export function useKeyboardShortcuts() {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Cmd/Ctrl + Q to quit
-      if ((e.metaKey || e.ctrlKey) && e.key === 'q') {
-        e.preventDefault();
-        invoke('quit_app').catch(console.error);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 }
 
 /**

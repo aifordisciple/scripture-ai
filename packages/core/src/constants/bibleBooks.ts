@@ -1,13 +1,7 @@
 // packages/core/src/constants/bibleBooks.ts
 // Bible book metadata - shared between web and mobile
 
-export interface BibleBook {
-  name: string;
-  id: string;
-  chapters: number;
-  category: string;
-  intro: string;
-}
+import type { BibleBook } from './types';
 
 export const BIBLE_BOOKS: BibleBook[] = [
   // --- 旧约 ---

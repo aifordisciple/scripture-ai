@@ -7,10 +7,13 @@
  * - Daily reading schedule
  * - Progress tracking
  * - Check-in functionality
+ * - Reading history with statistics
  */
 
 import { useState, useEffect } from 'react';
-import { Calendar, Check, ChevronRight, Clock, Target, Trophy, Flame } from 'lucide-react';
+import { invoke } from '@tauri-apps/api/core';
+import { Calendar, Check, ChevronRight, Clock, Target, Trophy, Flame, History, BookOpen } from 'lucide-react';
+import { ReadingHistory } from '../components';
 
 interface ReadingPlan {
   id: string;
@@ -41,6 +44,10 @@ interface DailyReading {
     verseEnd?: number;
   }[];
   completed: boolean;
+}
+
+interface PlanPageProps {
+  onNavigate?: (bookId: string, chapter: number) => void;
 }
 
 // Sample reading plans
@@ -140,11 +147,31 @@ function generateDailyReadings(planId: string): DailyReading[] {
   return readings;
 }
 
-export function PlanPage() {
+export function PlanPage({ onNavigate }: PlanPageProps) {
   const [activePlan, setActivePlan] = useState<PlanProgress | null>(null);
   const [dailyReadings, setDailyReadings] = useState<DailyReading[]>([]);
   const [showPlanList, setShowPlanList] = useState(true);
   const [streak, setStreak] = useState(0);
+  const [activeTab, setActiveTab] = useState<'plan' | 'history'>('plan');
+  const [userId, setUserId] = useState<string>('default-user');
+
+  // Get user ID on mount
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const { getAuthAdapter } = await import('@scripture-ai/native');
+        const auth = getAuthAdapter();
+        const token = await auth.getToken();
+        if (token) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          setUserId(payload.sub || payload.id || 'default-user');
+        }
+      } catch {
+        // Use default user ID
+      }
+    };
+    getUserId();
+  }, []);
 
   // Load active plan from storage
   useEffect(() => {
@@ -238,16 +265,44 @@ export function PlanPage() {
           <Calendar className="w-6 h-6" />
           <h2>读经计划</h2>
         </div>
-        {activePlan && (
+        {activePlan && activeTab === 'plan' && (
           <button className="leave-btn" onClick={leavePlan}>
             退出计划
           </button>
         )}
       </header>
 
+      {/* Tab Switcher */}
+      <div className="plan-tabs">
+        <button
+          className={`plan-tab ${activeTab === 'plan' ? 'active' : ''}`}
+          onClick={() => setActiveTab('plan')}
+        >
+          <Target className="w-4 h-4" />
+          计划
+        </button>
+        <button
+          className={`plan-tab ${activeTab === 'history' ? 'active' : ''}`}
+          onClick={() => setActiveTab('history')}
+        >
+          <History className="w-4 h-4" />
+          阅读记录
+        </button>
+      </div>
+
       {/* Content */}
       <div className="plan-content">
-        {showPlanList ? (
+        {activeTab === 'history' ? (
+          /* Reading History */
+          <ReadingHistory
+            userId={userId}
+            onNavigate={(bookId, chapter) => {
+              if (onNavigate) {
+                onNavigate(bookId, chapter);
+              }
+            }}
+          />
+        ) : showPlanList ? (
           /* Plan Selection */
           <div className="plan-list-section">
             <h3>选择一个计划开始</h3>

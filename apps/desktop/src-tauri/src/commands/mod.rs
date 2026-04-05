@@ -6,3 +6,4 @@ pub mod auth;
 pub mod storage;
 pub mod system;
 pub mod window;
+pub mod tray;

@@ -91,13 +91,15 @@ export function SearchModal({ visible, onClose, onNavigate }: SearchModalProps) 
 
   // Handle result click
   const handleResultClick = (verse: BibleVerse) => {
-    onNavigate(verse.bookId, verse.chapter, verse.verse);
+    const bookId = verse.bookId || verse.book || 'gen';
+    onNavigate(bookId, verse.chapter, verse.verse);
     onClose();
   };
 
   // Get display reference
   const getReference = (verse: BibleVerse): string => {
-    const bookName = BOOK_NAMES[verse.bookId] || verse.bookId;
+    const bookId = verse.bookId || verse.book || '';
+    const bookName = BOOK_NAMES[bookId] || bookId;
     return `${bookName} ${verse.chapter}:${verse.verse}`;
   };
 

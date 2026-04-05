@@ -109,7 +109,6 @@ export async function showNotification(notification: PushNotification): Promise<
         title: notification.title,
         body: notification.body || '',
         icon: notification.icon,
-        data: notification.data,
       });
     } catch (error) {
       console.error('Failed to show Tauri notification:', error);

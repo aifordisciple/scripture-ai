@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getPlatform, getAuthAdapter, isDesktop } from '@scripture-ai/native';
 import { ReaderPage, AIChatPage, PlanPage, NotesPage, SettingsPage } from './pages';
-import { OfflineIndicator, KeyboardShortcutsHelp } from './components';
+import { OfflineIndicator, KeyboardShortcutsHelp, CommandPalette, QuickJump } from './components';
 import { useTauriEvent, useKeyboardShortcuts, createCommonShortcuts } from './hooks';
 import { useTheme } from './contexts';
 import {
@@ -46,9 +46,12 @@ function App() {
   const [aiContext, setAIContext] = useState<AIContext | undefined>();
   const [readerNavigation, setReaderNavigation] = useState<{ bookId: string; chapter: number } | undefined>();
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showQuickJump, setShowQuickJump] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
   // Theme
-  const { toggleTheme } = useTheme();
+  const { toggleTheme, theme } = useTheme();
 
   // Initialize platform detection
   useEffect(() => {
@@ -60,6 +63,13 @@ function App() {
   // Listen for login complete event from Tauri
   useTauriEvent<{ userId: string }>('login-complete', useCallback(() => {
     checkAuth();
+  }, []));
+
+  // Listen for navigation from tray menu
+  useTauriEvent<[string, number]>('navigate-to-reading', useCallback((data) => {
+    const [bookId, chapter] = data;
+    setReaderNavigation({ bookId, chapter });
+    setActiveTab('read');
   }, []));
 
   async function checkAuth() {
@@ -134,10 +144,25 @@ function App() {
           const tabs: TabId[] = ['read', 'ai', 'plan', 'notes', 'settings'];
           setActiveTab(tabs[num - 1]);
         }
+        // Ctrl/Cmd + K for command palette
+        if (e.key === 'k') {
+          e.preventDefault();
+          setShowCommandPalette(prev => !prev);
+        }
+        // Ctrl/Cmd + G for quick jump
+        if (e.key === 'g') {
+          e.preventDefault();
+          setShowQuickJump(prev => !prev);
+        }
         // Ctrl/Cmd + / for help
         if (e.key === '/') {
           e.preventDefault();
           setShowKeyboardHelp(prev => !prev);
+        }
+        // Ctrl/Cmd + F for search
+        if (e.key === 'f') {
+          e.preventDefault();
+          setShowSearch(true);
         }
       }
       // ? for help (only when not in input)
@@ -271,7 +296,7 @@ function App() {
 
           {activeTab === 'ai' && <AIChatPage context={aiContext} />}
 
-          {activeTab === 'plan' && <PlanPage />}
+          {activeTab === 'plan' && <PlanPage onNavigate={handleNavigateToVerse} />}
 
           {activeTab === 'notes' && <NotesPage onNavigate={handleNavigateToVerse} />}
 
@@ -286,6 +311,32 @@ function App() {
       <KeyboardShortcutsHelp
         isOpen={showKeyboardHelp}
         onClose={() => setShowKeyboardHelp(false)}
+      />
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        onNavigate={(tab) => setActiveTab(tab as TabId)}
+        onSearch={() => {
+          setShowSearch(true);
+          setActiveTab('read');
+        }}
+        onToggleTheme={toggleTheme}
+        onCheckUpdates={() => {
+          setActiveTab('settings');
+        }}
+        isDarkMode={theme === 'dark'}
+      />
+
+      {/* Quick Jump */}
+      <QuickJump
+        isOpen={showQuickJump}
+        onClose={() => setShowQuickJump(false)}
+        onNavigate={(bookId, chapter) => {
+          setReaderNavigation({ bookId, chapter });
+          setActiveTab('read');
+        }}
       />
     </div>
   );

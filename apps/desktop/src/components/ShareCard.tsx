@@ -7,7 +7,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { toPng } from 'html-to-image';
 import { save } from '@tauri-apps/plugin-dialog';
-import { writeBinaryFile } from '@tauri-apps/plugin-fs';
+import { writeFile } from '@tauri-apps/plugin-fs';
 import {
   X, Download, Image, Palette, Type, AlignLeft, AlignCenter, AlignRight, RefreshCw,
 } from 'lucide-react';
@@ -103,7 +103,7 @@ export function ShareCard({
       });
 
       if (filePath) {
-        await writeBinaryFile(filePath, bytes);
+        await writeFile(filePath, bytes);
       }
     } catch (error) {
       console.error('Failed to generate image:', error);

@@ -10,13 +10,16 @@ export interface BibleBook {
 }
 
 export interface BibleVerse {
-  id: number;
-  bookId: string;
-  bookName: string;
+  id: number | string;
+  bookId?: string;
+  book?: string;  // Alternative field name
+  bookName?: string;
   chapter: number;
   verse: number;
-  content: string;
-  version: string;
+  text: string;   // Main text content (Chinese)
+  textEn?: string; // English text (KJV)
+  content?: string; // Alternative field name
+  version?: string;
 }
 
 export interface VerseRef {

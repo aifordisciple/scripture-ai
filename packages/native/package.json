@@ -9,16 +9,21 @@
   },
   "peerDependencies": {
     "react": ">=18.0.0",
-    "@tauri-apps/api": "^2.0.0"
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-notification": "^2.0.0"
   },
   "peerDependenciesMeta": {
     "@tauri-apps/api": {
+      "optional": true
+    },
+    "@tauri-apps/plugin-notification": {
       "optional": true
     }
   },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "@tauri-apps/api": "^2.0.0"
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-notification": "^2.0.0"
   },
   "keywords": [
     "bible",

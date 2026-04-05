@@ -1,0 +1,12 @@
+/opt/data1/public/software/systools/bibleAI/scripture-ai/apps/desktop/src-tauri/target/debug/deps/tar-3fe128ac512d76e7.d: /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/lib.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/archive.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/builder.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/entry.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/entry_type.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/error.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/header.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/pax.rs
+
+/opt/data1/public/software/systools/bibleAI/scripture-ai/apps/desktop/src-tauri/target/debug/deps/libtar-3fe128ac512d76e7.rmeta: /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/lib.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/archive.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/builder.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/entry.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/entry_type.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/error.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/header.rs /Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/pax.rs
+
+/Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/lib.rs:
+/Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/archive.rs:
+/Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/builder.rs:
+/Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/entry.rs:
+/Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/entry_type.rs:
+/Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/error.rs:
+/Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/header.rs:
+/Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tar-0.4.45/src/pax.rs:

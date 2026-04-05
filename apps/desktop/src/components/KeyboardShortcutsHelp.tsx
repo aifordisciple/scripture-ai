@@ -27,6 +27,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: 'Ctrl/Cmd + 1-5', description: '切换页面标签' },
       { keys: '← / →', description: '上一章 / 下一章' },
       { keys: 'Ctrl/Cmd + B', description: '切换侧边栏' },
+      { keys: 'Ctrl/Cmd + G', description: '快速跳转到经文' },
     ],
   },
   {
@@ -40,6 +41,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
   {
     title: '操作',
     shortcuts: [
+      { keys: 'Ctrl/Cmd + K', description: '打开命令面板' },
       { keys: 'Ctrl/Cmd + F', description: '搜索经文' },
       { keys: 'Escape', description: '关闭弹窗/取消选择' },
     ],
@@ -48,6 +50,8 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
     title: '界面',
     shortcuts: [
       { keys: 'Ctrl/Cmd + Shift + D', description: '切换深色模式' },
+      { keys: 'Ctrl/Cmd + /', description: '显示快捷键帮助' },
+      { keys: '?', description: '显示快捷键帮助' },
     ],
   },
 ];

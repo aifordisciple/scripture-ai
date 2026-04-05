@@ -14,7 +14,7 @@ import {
   Upload,
   Download,
   Copy,
-  SelectAll,
+  ListChecks,
   Sun,
   Moon,
   Maximize,
@@ -258,7 +258,7 @@ export function DesktopMenu() {
           onClick={handleCopy}
         />
         <MenuItem
-          icon={<SelectAll className="w-4 h-4" />}
+          icon={<ListChecks className="w-4 h-4" />}
           label="全选"
           shortcut="Ctrl+A"
           onClick={handleSelectAll}

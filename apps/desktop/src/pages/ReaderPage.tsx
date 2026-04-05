@@ -10,8 +10,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
 import { getAuthAdapter, getStorageAdapter, type Highlight, type Bookmark as BookmarkType } from '@scripture-ai/native';
-import { HighlightToolbar, SearchModal, AudioPlayer, TabBar, createReadingTab, type ReadingTab, ShareCard } from '../components';
+import { HighlightToolbar, SearchModal, AudioPlayer, TabBar, createReadingTab, type ReadingTab, ShareCard, ContextMenu } from '../components';
 import { getChapter, isOnline } from '../utils/offlineBible';
+import { useRecentReadings } from '../hooks';
 import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck, Volume2, Share2 } from 'lucide-react';
 
 // Bible book list - Complete 66 books
@@ -162,6 +163,21 @@ export function ReaderPage({
   const [showShare, setShowShare] = useState(false);
   const [shareVerses, setShareVerses] = useState<number[]>([]);
   const [shareTexts, setShareTexts] = useState<string[]>([]);
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    position: { x: number; y: number };
+    verseNumbers: number[];
+  }>({ visible: false, position: { x: 0, y: 0 }, verseNumbers: [] });
+
+  // Note dialog state
+  const [showNoteDialog, setShowNoteDialog] = useState(false);
+  const [noteVerses, setNoteVerses] = useState<number[]>([]);
+  const [noteContent, setNoteContent] = useState('');
+
+  // Recent readings for tray menu
+  const { addRecentReading } = useRecentReadings();
 
   // Tab management
   const handleTabSelect = useCallback((tabId: string) => {
@@ -370,6 +386,9 @@ export function ReaderPage({
               console.error('Failed to save reading history:', err);
             }
           }
+
+          // Add to recent readings for tray menu
+          addRecentReading(bookId, currentBook.name, chapter);
         }
       } catch (err) {
         if (!cancelled) {
@@ -470,6 +489,157 @@ export function ReaderPage({
       setShowHighlightToolbar(false);
     }
   }, [selectedVerses]);
+
+  // Handle right-click context menu
+  const handleContextMenu = useCallback((e: React.MouseEvent, verseNum: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // If verses are already selected, use them; otherwise select the clicked verse
+    const versesToUse = selectedVerses.length > 0 ? selectedVerses : [verseNum];
+
+    setContextMenu({
+      visible: true,
+      position: { x: e.clientX, y: e.clientY },
+      verseNumbers: versesToUse,
+    });
+  }, [selectedVerses]);
+
+  // Context menu handlers
+  const handleCopyVerses = useCallback(async () => {
+    const text = contextMenu.verseNumbers.map(v => {
+      const verse = verses.find(vv => vv.verse === v);
+      return verse ? `${v} ${verse.text}` : '';
+    }).join('\n');
+
+    try {
+      await navigator.clipboard.writeText(`${currentBook.name} ${chapter}章\n${text}`);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  }, [contextMenu.verseNumbers, verses, currentBook.name, chapter]);
+
+  const handleContextHighlight = useCallback(async (color: string) => {
+    if (!userId || contextMenu.verseNumbers.length === 0) return;
+
+    const verseStart = Math.min(...contextMenu.verseNumbers);
+    const verseEnd = Math.max(...contextMenu.verseNumbers);
+
+    try {
+      const highlight: Highlight = {
+        id: `highlight-${Date.now()}`,
+        user_id: userId,
+        book_id: bookId,
+        chapter,
+        verse_start: verseStart,
+        verse_end: verseEnd,
+        color,
+        created_at: new Date().toISOString(),
+      };
+
+      await invoke('db_save_highlight', { highlight });
+      setHighlights(prev => [...prev, highlight]);
+    } catch (err) {
+      console.error('Failed to save highlight:', err);
+    }
+  }, [userId, contextMenu.verseNumbers, bookId, chapter]);
+
+  const handleRemoveHighlight = useCallback(async () => {
+    const existingHighlight = highlights.find(h =>
+      h.book_id === bookId &&
+      h.chapter === chapter &&
+      contextMenu.verseNumbers.some(v => v >= h.verse_start && v <= h.verse_end)
+    );
+
+    if (existingHighlight) {
+      try {
+        await invoke('db_delete_highlight', { id: existingHighlight.id });
+        setHighlights(prev => prev.filter(h => h.id !== existingHighlight.id));
+      } catch (err) {
+        console.error('Failed to remove highlight:', err);
+      }
+    }
+  }, [highlights, bookId, chapter, contextMenu.verseNumbers]);
+
+  const handleAddNote = useCallback(() => {
+    setNoteVerses(contextMenu.verseNumbers);
+    setNoteContent('');
+    setShowNoteDialog(true);
+  }, [contextMenu.verseNumbers]);
+
+  const handleSaveNote = useCallback(async () => {
+    if (!userId || noteVerses.length === 0 || !noteContent.trim()) return;
+
+    const verseStart = Math.min(...noteVerses);
+    const verseEnd = Math.max(...noteVerses);
+
+    try {
+      await invoke('db_save_note', {
+        note: {
+          id: `note-${Date.now()}`,
+          user_id: userId,
+          book_id: bookId,
+          chapter,
+          verse_start: verseStart,
+          verse_end: verseEnd,
+          content: noteContent,
+          created_at: new Date().toISOString(),
+          updated_at: Date.now(),
+        },
+      });
+      setShowNoteDialog(false);
+      setNoteContent('');
+      setNoteVerses([]);
+    } catch (err) {
+      console.error('Failed to save note:', err);
+    }
+  }, [userId, noteVerses, noteContent, bookId, chapter]);
+
+  const handleContextShare = useCallback(() => {
+    setShareVerses(contextMenu.verseNumbers);
+    setShareTexts(contextMenu.verseNumbers.map(v => {
+      const verse = verses.find(vv => vv.verse === v);
+      return verse?.text || '';
+    }));
+    setShowShare(true);
+  }, [contextMenu.verseNumbers, verses]);
+
+  const handleContextAskAI = useCallback(() => {
+    if (onAskAI) {
+      onAskAI(bookId, chapter, contextMenu.verseNumbers);
+    }
+  }, [onAskAI, bookId, chapter, contextMenu.verseNumbers]);
+
+  const handleContextBookmark = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const newBookmark: BookmarkType = {
+        id: `bookmark-${Date.now()}`,
+        user_id: userId,
+        book_id: bookId,
+        chapter,
+        created_at: new Date().toISOString(),
+      };
+      await invoke('db_save_bookmark', { bookmark: newBookmark });
+      setBookmarks(prev => [...prev, newBookmark]);
+      setIsBookmarked(true);
+    } catch (err) {
+      console.error('Failed to add bookmark:', err);
+    }
+  }, [userId, bookId, chapter]);
+
+  // Get existing highlight for context menu
+  const getContextHighlight = useCallback((): { exists: boolean; color?: string } => {
+    const existingHighlight = highlights.find(h =>
+      h.book_id === bookId &&
+      h.chapter === chapter &&
+      contextMenu.verseNumbers.some(v => v >= h.verse_start && v <= h.verse_end)
+    );
+    return {
+      exists: !!existingHighlight,
+      color: existingHighlight?.color,
+    };
+  }, [highlights, bookId, chapter, contextMenu.verseNumbers]);
 
   // Get highlight for a verse
   const getVerseHighlight = useCallback((verseNum: number): Highlight | undefined => {
@@ -669,7 +839,10 @@ export function ReaderPage({
         ) : error ? (
           <div className="error-state">
             <p>{error}</p>
-            <button onClick={() => setChapter(chapter)}>重试</button>
+            <button onClick={() => {
+              // Trigger a reload by toggling the tab
+              updateCurrentTab(bookId, chapter);
+            }}>重试</button>
           </div>
         ) : (
           <>
@@ -684,6 +857,7 @@ export function ReaderPage({
                     className={`verse ${highlight ? 'highlighted' : ''} ${isSelected ? 'selected' : ''}`}
                     data-verse={verse.verse}
                     onClick={(e) => handleVerseClick(verse.verse, e)}
+                    onContextMenu={(e) => handleContextMenu(e, verse.verse)}
                     style={highlight ? { backgroundColor: highlight.color } : undefined}
                   >
                     <span className="verse-number">{verse.verse}</span>
@@ -755,6 +929,56 @@ export function ReaderPage({
         verses={shareVerses}
         verseTexts={shareTexts}
       />
+
+      {/* Context Menu */}
+      <ContextMenu
+        visible={contextMenu.visible}
+        position={contextMenu.position}
+        verseNumbers={contextMenu.verseNumbers}
+        hasHighlight={getContextHighlight().exists}
+        highlightColor={getContextHighlight().color}
+        onClose={() => setContextMenu(prev => ({ ...prev, visible: false }))}
+        onCopy={handleCopyVerses}
+        onHighlight={handleContextHighlight}
+        onRemoveHighlight={handleRemoveHighlight}
+        onAddNote={handleAddNote}
+        onShare={handleContextShare}
+        onAskAI={handleContextAskAI}
+        onBookmark={handleContextBookmark}
+      />
+
+      {/* Note Dialog */}
+      {showNoteDialog && (
+        <div className="note-dialog-overlay" onClick={() => setShowNoteDialog(false)}>
+          <div className="note-dialog" onClick={e => e.stopPropagation()}>
+            <h3>添加笔记</h3>
+            <p className="note-verse-info">
+              {currentBook.name} {chapter}章
+              {noteVerses.length === 1
+                ? ` 第${noteVerses[0]}节`
+                : ` 第${Math.min(...noteVerses)}-${Math.max(...noteVerses)}节`}
+            </p>
+            <textarea
+              value={noteContent}
+              onChange={e => setNoteContent(e.target.value)}
+              placeholder="写下你的笔记..."
+              autoFocus
+            />
+            <div className="note-dialog-actions">
+              <button className="btn btn-secondary" onClick={() => setShowNoteDialog(false)}>
+                取消
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleSaveNote}
+                disabled={!noteContent.trim()}
+              >
+                保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

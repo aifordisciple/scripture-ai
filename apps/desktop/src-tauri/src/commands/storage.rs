@@ -4,8 +4,8 @@
 
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
-use tauri_plugin_sql::Sql;
 use tauri_plugin_store::StoreExt;
+use sqlx::SqlitePool;
 
 // ============================================================================
 // Key-Value Store Commands (tauri-plugin-store)
@@ -76,7 +76,8 @@ pub async fn store_keys(app: AppHandle) -> Result<Vec<String>, String> {
         .map_err(|e| e.to_string())?;
 
     let keys: Vec<String> = store.keys()
-        .filter_map(|k| k.as_str().map(String::from))
+        .into_iter()
+        .map(|k| k.to_string())
         .collect();
 
     Ok(keys)
@@ -86,7 +87,7 @@ pub async fn store_keys(app: AppHandle) -> Result<Vec<String>, String> {
 // Data Types
 // ============================================================================
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Highlight {
     pub id: String,
     pub user_id: String,
@@ -99,7 +100,7 @@ pub struct Highlight {
     pub updated_at: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Note {
     pub id: String,
     pub user_id: String,
@@ -112,7 +113,7 @@ pub struct Note {
     pub updated_at: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct ReadingHistoryEntry {
     pub id: String,
     pub user_id: String,
@@ -122,7 +123,7 @@ pub struct ReadingHistoryEntry {
     pub duration: Option<i32>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Bookmark {
     pub id: String,
     pub user_id: String,
@@ -132,7 +133,7 @@ pub struct Bookmark {
     pub created_at: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, sqlx::FromRow)]
 pub struct ChatSession {
     pub id: String,
     pub user_id: String,
@@ -142,7 +143,7 @@ pub struct ChatSession {
     pub updated_at: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, sqlx::FromRow)]
 pub struct ChatMessage {
     pub id: String,
     pub session_id: String,
@@ -158,10 +159,10 @@ pub struct ChatMessage {
 /// Initialize database tables
 #[tauri::command]
 pub async fn db_init(app: AppHandle) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
     // Create highlights table
-    db.execute(
+    sqlx::query(
         "CREATE TABLE IF NOT EXISTS highlights (
             id TEXT PRIMARY KEY,
             user_id TEXT NOT NULL,
@@ -173,11 +174,10 @@ pub async fn db_init(app: AppHandle) -> Result<(), String> {
             created_at TEXT NOT NULL,
             updated_at TEXT
         )",
-        [],
-    ).await.map_err(|e| e.to_string())?;
+    ).execute(&*db).await.map_err(|e| e.to_string())?;
 
     // Create notes table
-    db.execute(
+    sqlx::query(
         "CREATE TABLE IF NOT EXISTS notes (
             id TEXT PRIMARY KEY,
             user_id TEXT NOT NULL,
@@ -189,11 +189,10 @@ pub async fn db_init(app: AppHandle) -> Result<(), String> {
             created_at TEXT NOT NULL,
             updated_at TEXT
         )",
-        [],
-    ).await.map_err(|e| e.to_string())?;
+    ).execute(&*db).await.map_err(|e| e.to_string())?;
 
     // Create reading_history table
-    db.execute(
+    sqlx::query(
         "CREATE TABLE IF NOT EXISTS reading_history (
             id TEXT PRIMARY KEY,
             user_id TEXT NOT NULL,
@@ -202,11 +201,10 @@ pub async fn db_init(app: AppHandle) -> Result<(), String> {
             read_at TEXT NOT NULL,
             duration INTEGER
         )",
-        [],
-    ).await.map_err(|e| e.to_string())?;
+    ).execute(&*db).await.map_err(|e| e.to_string())?;
 
     // Create bookmarks table
-    db.execute(
+    sqlx::query(
         "CREATE TABLE IF NOT EXISTS bookmarks (
             id TEXT PRIMARY KEY,
             user_id TEXT NOT NULL,
@@ -215,11 +213,10 @@ pub async fn db_init(app: AppHandle) -> Result<(), String> {
             verse INTEGER,
             created_at TEXT NOT NULL
         )",
-        [],
-    ).await.map_err(|e| e.to_string())?;
+    ).execute(&*db).await.map_err(|e| e.to_string())?;
 
     // Create chat_sessions table
-    db.execute(
+    sqlx::query(
         "CREATE TABLE IF NOT EXISTS chat_sessions (
             id TEXT PRIMARY KEY,
             user_id TEXT NOT NULL,
@@ -228,11 +225,10 @@ pub async fn db_init(app: AppHandle) -> Result<(), String> {
             created_at TEXT NOT NULL,
             updated_at TEXT
         )",
-        [],
-    ).await.map_err(|e| e.to_string())?;
+    ).execute(&*db).await.map_err(|e| e.to_string())?;
 
     // Create chat_messages table
-    db.execute(
+    sqlx::query(
         "CREATE TABLE IF NOT EXISTS chat_messages (
             id TEXT PRIMARY KEY,
             session_id TEXT NOT NULL,
@@ -241,20 +237,18 @@ pub async fn db_init(app: AppHandle) -> Result<(), String> {
             created_at TEXT NOT NULL,
             FOREIGN KEY (session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
         )",
-        [],
-    ).await.map_err(|e| e.to_string())?;
+    ).execute(&*db).await.map_err(|e| e.to_string())?;
 
     // Create sync_status table
-    db.execute(
+    sqlx::query(
         "CREATE TABLE IF NOT EXISTS sync_status (
             id INTEGER PRIMARY KEY CHECK (id = 1),
             last_sync_time INTEGER NOT NULL
         )",
-        [],
-    ).await.map_err(|e| e.to_string())?;
+    ).execute(&*db).await.map_err(|e| e.to_string())?;
 
     // Create bible_verses table for offline reading
-    db.execute(
+    sqlx::query(
         "CREATE TABLE IF NOT EXISTS bible_verses (
             id TEXT PRIMARY KEY,
             book_id TEXT NOT NULL,
@@ -265,15 +259,13 @@ pub async fn db_init(app: AppHandle) -> Result<(), String> {
             version TEXT NOT NULL,
             cached_at TEXT NOT NULL
         )",
-        [],
-    ).await.map_err(|e| e.to_string())?;
+    ).execute(&*db).await.map_err(|e| e.to_string())?;
 
     // Create index for faster chapter lookups
-    db.execute(
+    sqlx::query(
         "CREATE INDEX IF NOT EXISTS idx_bible_chapter
          ON bible_verses(book_id, chapter, version)",
-        [],
-    ).await.map_err(|e| e.to_string())?;
+    ).execute(&*db).await.map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -287,15 +279,16 @@ pub async fn db_get_highlights(
     app: AppHandle,
     user_id: String,
 ) -> Result<Vec<Highlight>, String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    let highlights: Vec<Highlight> = db
-        .query(
-            "SELECT * FROM highlights WHERE user_id = ?",
-            [user_id],
-        )
-        .await
-        .map_err(|e| e.to_string())?;
+    let highlights = sqlx::query_as::<_, Highlight>(
+        "SELECT id, user_id, book_id, chapter, verse_start, verse_end, color, created_at, updated_at
+         FROM highlights WHERE user_id = ?",
+    )
+    .bind(&user_id)
+    .fetch_all(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(highlights)
 }
@@ -305,24 +298,25 @@ pub async fn db_save_highlight(
     app: AppHandle,
     highlight: Highlight,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
+    sqlx::query(
         "INSERT OR REPLACE INTO highlights
          (id, user_id, book_id, chapter, verse_start, verse_end, color, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-            highlight.id,
-            highlight.user_id,
-            highlight.book_id,
-            highlight.chapter.to_string(),
-            highlight.verse_start.to_string(),
-            highlight.verse_end.to_string(),
-            highlight.color,
-            highlight.created_at,
-            highlight.updated_at.unwrap_or_default(),
-        ],
-    ).await.map_err(|e| e.to_string())?;
+    )
+    .bind(&highlight.id)
+    .bind(&highlight.user_id)
+    .bind(&highlight.book_id)
+    .bind(highlight.chapter)
+    .bind(highlight.verse_start)
+    .bind(highlight.verse_end)
+    .bind(&highlight.color)
+    .bind(&highlight.created_at)
+    .bind(&highlight.updated_at)
+    .execute(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -332,12 +326,13 @@ pub async fn db_delete_highlight(
     app: AppHandle,
     id: String,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
-        "DELETE FROM highlights WHERE id = ?",
-        [id],
-    ).await.map_err(|e| e.to_string())?;
+    sqlx::query("DELETE FROM highlights WHERE id = ?")
+        .bind(&id)
+        .execute(&*db)
+        .await
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -351,15 +346,16 @@ pub async fn db_get_notes(
     app: AppHandle,
     user_id: String,
 ) -> Result<Vec<Note>, String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    let notes: Vec<Note> = db
-        .query(
-            "SELECT * FROM notes WHERE user_id = ?",
-            [user_id],
-        )
-        .await
-        .map_err(|e| e.to_string())?;
+    let notes = sqlx::query_as::<_, Note>(
+        "SELECT id, user_id, book_id, chapter, verse_start, verse_end, content, created_at, updated_at
+         FROM notes WHERE user_id = ?",
+    )
+    .bind(&user_id)
+    .fetch_all(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(notes)
 }
@@ -369,24 +365,25 @@ pub async fn db_save_note(
     app: AppHandle,
     note: Note,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
+    sqlx::query(
         "INSERT OR REPLACE INTO notes
          (id, user_id, book_id, chapter, verse_start, verse_end, content, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-            note.id,
-            note.user_id,
-            note.book_id,
-            note.chapter.to_string(),
-            note.verse_start.to_string(),
-            note.verse_end.map(|v| v.to_string()).unwrap_or_default(),
-            note.content,
-            note.created_at,
-            note.updated_at.unwrap_or_default(),
-        ],
-    ).await.map_err(|e| e.to_string())?;
+    )
+    .bind(&note.id)
+    .bind(&note.user_id)
+    .bind(&note.book_id)
+    .bind(note.chapter)
+    .bind(note.verse_start)
+    .bind(note.verse_end)
+    .bind(&note.content)
+    .bind(&note.created_at)
+    .bind(&note.updated_at)
+    .execute(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -396,12 +393,13 @@ pub async fn db_delete_note(
     app: AppHandle,
     id: String,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
-        "DELETE FROM notes WHERE id = ?",
-        [id],
-    ).await.map_err(|e| e.to_string())?;
+    sqlx::query("DELETE FROM notes WHERE id = ?")
+        .bind(&id)
+        .execute(&*db)
+        .await
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -415,15 +413,16 @@ pub async fn db_get_reading_history(
     app: AppHandle,
     user_id: String,
 ) -> Result<Vec<ReadingHistoryEntry>, String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    let history: Vec<ReadingHistoryEntry> = db
-        .query(
-            "SELECT * FROM reading_history WHERE user_id = ? ORDER BY read_at DESC",
-            [user_id],
-        )
-        .await
-        .map_err(|e| e.to_string())?;
+    let history = sqlx::query_as::<_, ReadingHistoryEntry>(
+        "SELECT id, user_id, book_id, chapter, read_at, duration
+         FROM reading_history WHERE user_id = ? ORDER BY read_at DESC",
+    )
+    .bind(&user_id)
+    .fetch_all(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(history)
 }
@@ -433,21 +432,22 @@ pub async fn db_save_reading_history(
     app: AppHandle,
     entry: ReadingHistoryEntry,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
+    sqlx::query(
         "INSERT OR REPLACE INTO reading_history
          (id, user_id, book_id, chapter, read_at, duration)
          VALUES (?, ?, ?, ?, ?, ?)",
-        [
-            entry.id,
-            entry.user_id,
-            entry.book_id,
-            entry.chapter.to_string(),
-            entry.read_at,
-            entry.duration.map(|d| d.to_string()).unwrap_or_default(),
-        ],
-    ).await.map_err(|e| e.to_string())?;
+    )
+    .bind(&entry.id)
+    .bind(&entry.user_id)
+    .bind(&entry.book_id)
+    .bind(entry.chapter)
+    .bind(&entry.read_at)
+    .bind(entry.duration)
+    .execute(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -461,15 +461,16 @@ pub async fn db_get_bookmarks(
     app: AppHandle,
     user_id: String,
 ) -> Result<Vec<Bookmark>, String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    let bookmarks: Vec<Bookmark> = db
-        .query(
-            "SELECT * FROM bookmarks WHERE user_id = ? ORDER BY created_at DESC",
-            [user_id],
-        )
-        .await
-        .map_err(|e| e.to_string())?;
+    let bookmarks = sqlx::query_as::<_, Bookmark>(
+        "SELECT id, user_id, book_id, chapter, verse, created_at
+         FROM bookmarks WHERE user_id = ? ORDER BY created_at DESC",
+    )
+    .bind(&user_id)
+    .fetch_all(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(bookmarks)
 }
@@ -479,21 +480,22 @@ pub async fn db_save_bookmark(
     app: AppHandle,
     bookmark: Bookmark,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
+    sqlx::query(
         "INSERT OR REPLACE INTO bookmarks
          (id, user_id, book_id, chapter, verse, created_at)
          VALUES (?, ?, ?, ?, ?, ?)",
-        [
-            bookmark.id,
-            bookmark.user_id,
-            bookmark.book_id,
-            bookmark.chapter.to_string(),
-            bookmark.verse.map(|v| v.to_string()).unwrap_or_default(),
-            bookmark.created_at,
-        ],
-    ).await.map_err(|e| e.to_string())?;
+    )
+    .bind(&bookmark.id)
+    .bind(&bookmark.user_id)
+    .bind(&bookmark.book_id)
+    .bind(bookmark.chapter)
+    .bind(bookmark.verse)
+    .bind(&bookmark.created_at)
+    .execute(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -503,12 +505,13 @@ pub async fn db_delete_bookmark(
     app: AppHandle,
     id: String,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
-        "DELETE FROM bookmarks WHERE id = ?",
-        [id],
-    ).await.map_err(|e| e.to_string())?;
+    sqlx::query("DELETE FROM bookmarks WHERE id = ?")
+        .bind(&id)
+        .execute(&*db)
+        .await
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -522,15 +525,16 @@ pub async fn db_get_chat_sessions(
     app: AppHandle,
     user_id: String,
 ) -> Result<Vec<ChatSession>, String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    let result = db
-        .query(
-            "SELECT id, user_id, title, mode, created_at, updated_at FROM chat_sessions WHERE user_id = ? ORDER BY updated_at DESC",
-            [&user_id]
-        )
-        .await
-        .map_err(|e| e.to_string())?;
+    let result = sqlx::query_as::<_, ChatSession>(
+        "SELECT id, user_id, title, mode, created_at, updated_at
+         FROM chat_sessions WHERE user_id = ? ORDER BY updated_at DESC",
+    )
+    .bind(&user_id)
+    .fetch_all(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(result)
 }
@@ -540,19 +544,21 @@ pub async fn db_save_chat_session(
     app: AppHandle,
     session: ChatSession,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
-        "INSERT OR REPLACE INTO chat_sessions (id, user_id, title, mode, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-        [
-            &session.id,
-            &session.user_id,
-            &session.title,
-            &session.mode,
-            &session.created_at,
-            &session.updated_at.unwrap_or_default(),
-        ]
-    ).await.map_err(|e| e.to_string())?;
+    sqlx::query(
+        "INSERT OR REPLACE INTO chat_sessions (id, user_id, title, mode, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?)",
+    )
+    .bind(&session.id)
+    .bind(&session.user_id)
+    .bind(&session.title)
+    .bind(&session.mode)
+    .bind(&session.created_at)
+    .bind(&session.updated_at)
+    .execute(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -562,14 +568,18 @@ pub async fn db_delete_chat_session(
     app: AppHandle,
     id: String,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
     // Delete session and its messages
-    db.execute("DELETE FROM chat_messages WHERE session_id = ?", [&id])
+    sqlx::query("DELETE FROM chat_messages WHERE session_id = ?")
+        .bind(&id)
+        .execute(&*db)
         .await
         .map_err(|e| e.to_string())?;
 
-    db.execute("DELETE FROM chat_sessions WHERE id = ?", [&id])
+    sqlx::query("DELETE FROM chat_sessions WHERE id = ?")
+        .bind(&id)
+        .execute(&*db)
         .await
         .map_err(|e| e.to_string())?;
 
@@ -581,15 +591,16 @@ pub async fn db_get_chat_messages(
     app: AppHandle,
     session_id: String,
 ) -> Result<Vec<ChatMessage>, String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    let result = db
-        .query(
-            "SELECT id, session_id, role, content, created_at FROM chat_messages WHERE session_id = ? ORDER BY created_at ASC",
-            [&session_id]
-        )
-        .await
-        .map_err(|e| e.to_string())?;
+    let result = sqlx::query_as::<_, ChatMessage>(
+        "SELECT id, session_id, role, content, created_at
+         FROM chat_messages WHERE session_id = ? ORDER BY created_at ASC",
+    )
+    .bind(&session_id)
+    .fetch_all(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(result)
 }
@@ -599,18 +610,19 @@ pub async fn db_save_chat_message(
     app: AppHandle,
     message: ChatMessage,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
+    sqlx::query(
         "INSERT INTO chat_messages (id, session_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)",
-        [
-            &message.id,
-            &message.session_id,
-            &message.role,
-            &message.content,
-            &message.created_at,
-        ]
-    ).await.map_err(|e| e.to_string())?;
+    )
+    .bind(&message.id)
+    .bind(&message.session_id)
+    .bind(&message.role)
+    .bind(&message.content)
+    .bind(&message.created_at)
+    .execute(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -620,9 +632,11 @@ pub async fn db_clear_chat_messages(
     app: AppHandle,
     session_id: String,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute("DELETE FROM chat_messages WHERE session_id = ?", [&session_id])
+    sqlx::query("DELETE FROM chat_messages WHERE session_id = ?")
+        .bind(&session_id)
+        .execute(&*db)
         .await
         .map_err(|e| e.to_string())?;
 
@@ -635,14 +649,16 @@ pub async fn db_clear_chat_messages(
 
 #[tauri::command]
 pub async fn db_get_last_sync_time(app: AppHandle) -> Result<Option<i64>, String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    let result: Vec<(i64,)> = db
-        .query("SELECT last_sync_time FROM sync_status WHERE id = 1", [])
-        .await
-        .map_err(|e| e.to_string())?;
+    let result: Option<(i64,)> = sqlx::query_as(
+        "SELECT last_sync_time FROM sync_status WHERE id = 1",
+    )
+    .fetch_optional(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
-    Ok(result.first().map(|r| r.0))
+    Ok(result.map(|r| r.0))
 }
 
 #[tauri::command]
@@ -650,12 +666,15 @@ pub async fn db_set_last_sync_time(
     app: AppHandle,
     timestamp: i64,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
+    sqlx::query(
         "INSERT OR REPLACE INTO sync_status (id, last_sync_time) VALUES (1, ?)",
-        [timestamp],
-    ).await.map_err(|e| e.to_string())?;
+    )
+    .bind(timestamp)
+    .execute(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -664,7 +683,7 @@ pub async fn db_set_last_sync_time(
 // Bible Verse Cache Commands (Offline Support)
 // ============================================================================
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct BibleVerse {
     pub id: String,
     pub book_id: String,
@@ -683,18 +702,20 @@ pub async fn db_get_bible_chapter(
     chapter: i32,
     version: String,
 ) -> Result<Vec<BibleVerse>, String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    let verses: Vec<BibleVerse> = db
-        .query(
-            "SELECT id, book_id, chapter, verse, text, text_en, version, cached_at
-             FROM bible_verses
-             WHERE book_id = ? AND chapter = ? AND version = ?
-             ORDER BY verse",
-            [book_id, chapter.to_string(), version],
-        )
-        .await
-        .map_err(|e| e.to_string())?;
+    let verses = sqlx::query_as::<_, BibleVerse>(
+        "SELECT id, book_id, chapter, verse, text, text_en, version, cached_at
+         FROM bible_verses
+         WHERE book_id = ? AND chapter = ? AND version = ?
+         ORDER BY verse",
+    )
+    .bind(&book_id)
+    .bind(chapter)
+    .bind(&version)
+    .fetch_all(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(verses)
 }
@@ -704,23 +725,24 @@ pub async fn db_save_bible_verse(
     app: AppHandle,
     verse: BibleVerse,
 ) -> Result<(), String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    db.execute(
+    sqlx::query(
         "INSERT OR REPLACE INTO bible_verses
          (id, book_id, chapter, verse, text, text_en, version, cached_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-            verse.id,
-            verse.book_id,
-            verse.chapter.to_string(),
-            verse.verse.to_string(),
-            verse.text,
-            verse.text_en.unwrap_or_default(),
-            verse.version,
-            verse.cached_at,
-        ],
-    ).await.map_err(|e| e.to_string())?;
+    )
+    .bind(&verse.id)
+    .bind(&verse.book_id)
+    .bind(verse.chapter)
+    .bind(verse.verse)
+    .bind(&verse.text)
+    .bind(&verse.text_en)
+    .bind(&verse.version)
+    .bind(&verse.cached_at)
+    .execute(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -730,21 +752,21 @@ pub async fn db_count_bible_verses(
     app: AppHandle,
     book_id: String,
 ) -> Result<i32, String> {
-    let db = app.state::<Sql>();
+    let db = app.state::<SqlitePool>();
 
-    let result: Vec<(i32,)> = db
-        .query(
-            "SELECT COUNT(*) FROM bible_verses WHERE book_id = ?",
-            [book_id],
-        )
-        .await
-        .map_err(|e| e.to_string())?;
+    let result: Option<(i32,)> = sqlx::query_as(
+        "SELECT COUNT(*) FROM bible_verses WHERE book_id = ?",
+    )
+    .bind(&book_id)
+    .fetch_optional(&*db)
+    .await
+    .map_err(|e| e.to_string())?;
 
-    Ok(result.first().map(|r| r.0).unwrap_or(0))
+    Ok(result.map(|r| r.0).unwrap_or(0))
 }
 
 #[tauri::command]
-pub async fn db_init_bible_tables(app: AppHandle) -> Result<(), String> {
+pub async fn db_init_bible_tables(_app: AppHandle) -> Result<(), String> {
     // This is called separately to initialize Bible tables
     // The main db_init already creates them, so this is a no-op
     // kept for API compatibility
@@ -783,35 +805,13 @@ mod tests {
     }
 
     #[test]
-    fn note_serialization() {
-        let note = Note {
-            id: "note-1".to_string(),
-            user_id: "user-1".to_string(),
-            book_id: "gen".to_string(),
-            chapter: 1,
-            verse_start: Some(1),
-            verse_end: Some(3),
-            title: "Test Note".to_string(),
-            content: "This is a test note.".to_string(),
-            created_at: "2024-01-01T00:00:00Z".to_string(),
-            updated_at: None,
-        };
-
-        let json = serde_json::to_string(&note).unwrap();
-        let parsed: Note = serde_json::from_str(&json).unwrap();
-
-        assert_eq!(parsed.id, "note-1");
-        assert_eq!(parsed.title, "Test Note");
-        assert_eq!(parsed.verse_start, Some(1));
-    }
-
-    #[test]
     fn bookmark_serialization() {
         let bookmark = Bookmark {
             id: "bookmark-1".to_string(),
             user_id: "user-1".to_string(),
             book_id: "ps".to_string(),
             chapter: 23,
+            verse: None,
             created_at: "2024-01-01T00:00:00Z".to_string(),
         };
 
@@ -831,6 +831,7 @@ mod tests {
             book_id: "john".to_string(),
             chapter: 3,
             read_at: "2024-01-01T00:00:00Z".to_string(),
+            duration: None,
         };
 
         let json = serde_json::to_string(&entry).unwrap();
@@ -864,28 +865,5 @@ mod tests {
             ..highlight.clone()
         };
         assert_eq!(single_verse.verse_start, single_verse.verse_end);
-    }
-
-    #[test]
-    fn note_with_optional_verses() {
-        // Note without specific verses
-        let note_general = Note {
-            id: "note-general".to_string(),
-            user_id: "user-1".to_string(),
-            book_id: "gen".to_string(),
-            chapter: 1,
-            verse_start: None,
-            verse_end: None,
-            title: "General Note".to_string(),
-            content: "Notes about the chapter.".to_string(),
-            created_at: "2024-01-01T00:00:00Z".to_string(),
-            updated_at: None,
-        };
-
-        let json = serde_json::to_string(&note_general).unwrap();
-        let parsed: Note = serde_json::from_str(&json).unwrap();
-
-        assert!(parsed.verse_start.is_none());
-        assert!(parsed.verse_end.is_none());
     }
 }

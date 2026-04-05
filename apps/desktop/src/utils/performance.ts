@@ -103,7 +103,7 @@ export function recordMetric(metric: PerformanceMetric): void {
 /**
  * Track page load time
  */
-export function trackPageLoad(pageName: string): void {
+export function trackPageLoad(pageName: string): () => void {
   if (typeof performance !== 'undefined') {
     const startTime = performance.now();
 
@@ -220,13 +220,11 @@ function saveMetrics(): void {
 /**
  * Performance measurement hook for React components
  */
-export function usePerformanceTracking(componentName: string): void {
-  if (typeof useEffect !== 'undefined') {
-    const { useEffect } = require('react');
+import { useEffect } from 'react';
 
-    useEffect(() => {
-      const endTracking = trackPageLoad(componentName);
-      return () => endTracking();
-    }, [componentName]);
-  }
+export function usePerformanceTracking(componentName: string): void {
+  useEffect(() => {
+    const endTracking = trackPageLoad(componentName);
+    return () => endTracking();
+  }, [componentName]);
 }

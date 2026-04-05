@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Pause, Square, Volume2, Loader2 } from 'lucide-react';
-import { createAudioPlayer, setupMediaSession, setupMediaSessionActions } from '@scripture-ai/native';
+import { createAudioPlayerFromBlob, setupMediaSession, setupMediaSessionActions } from '@scripture-ai/native';
 
 interface AudioPlayerProps {
   text: string;
@@ -31,7 +31,7 @@ export function AudioPlayer({
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const playerRef = useRef<ReturnType<typeof createAudioPlayer> | null>(null);
+  const playerRef = useRef<ReturnType<typeof createAudioPlayerFromBlob> | null>(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -67,7 +67,7 @@ export function AudioPlayer({
       }
 
       const audioBlob = await response.blob();
-      const player = createAudioPlayer(audioBlob, {
+      const player = createAudioPlayerFromBlob(audioBlob, {
         onPlay: () => {
           setIsPlaying(true);
           onPlayStart?.();
