@@ -17,3 +17,5 @@ export { SplashScreen } from './SplashScreen';
 export { QuickJump } from './QuickJump';
 export { ReadingHistory } from './ReadingHistory';
 export { OfflineDownload } from './OfflineDownload';
+export { ReadingProgress, useReadingProgress } from './ReadingProgress';
+export { PrintPreview } from './PrintPreview';

@@ -10,10 +10,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { bibleApi, type BibleVerse } from '@scripture-ai/core';
 import { getAuthAdapter, getStorageAdapter, type Highlight, type Bookmark as BookmarkType } from '@scripture-ai/native';
-import { HighlightToolbar, SearchModal, AudioPlayer, TabBar, createReadingTab, type ReadingTab, ShareCard, ContextMenu } from '../components';
+import { HighlightToolbar, SearchModal, AudioPlayer, TabBar, createReadingTab, type ReadingTab, ShareCard, ContextMenu, PrintPreview, ReadingProgress, useReadingProgress } from '../components';
 import { getChapter, isOnline } from '../utils/offlineBible';
 import { useRecentReadings } from '../hooks';
-import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck, Volume2, Share2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, Search, Settings, Bookmark, BookmarkCheck, Volume2, Share2, Printer } from 'lucide-react';
 
 // Bible book list - Complete 66 books
 const BIBLE_BOOKS = [
@@ -176,8 +176,15 @@ export function ReaderPage({
   const [noteVerses, setNoteVerses] = useState<number[]>([]);
   const [noteContent, setNoteContent] = useState('');
 
+  // Print state
+  const [showPrint, setShowPrint] = useState(false);
+  const [printVerses, setPrintVerses] = useState<number[]>([]);
+
   // Recent readings for tray menu
   const { addRecentReading } = useRecentReadings();
+
+  // Reading progress
+  const { markChapterRead } = useReadingProgress();
 
   // Tab management
   const handleTabSelect = useCallback((tabId: string) => {
@@ -389,6 +396,9 @@ export function ReaderPage({
 
           // Add to recent readings for tray menu
           addRecentReading(bookId, currentBook.name, chapter);
+
+          // Mark chapter as read for progress tracking
+          markChapterRead(bookId, chapter);
         }
       } catch (err) {
         if (!cancelled) {
@@ -628,6 +638,19 @@ export function ReaderPage({
     }
   }, [userId, bookId, chapter]);
 
+  // Handle print
+  const handlePrint = useCallback((verseNumbers?: number[]) => {
+    setPrintVerses(verseNumbers || []);
+    setShowPrint(true);
+    setContextMenu(prev => ({ ...prev, visible: false }));
+  }, []);
+
+  // Handle print entire chapter
+  const handlePrintChapter = useCallback(() => {
+    setPrintVerses([]);
+    setShowPrint(true);
+  }, []);
+
   // Get existing highlight for context menu
   const getContextHighlight = useCallback((): { exists: boolean; color?: string } => {
     const existingHighlight = highlights.find(h =>
@@ -715,6 +738,13 @@ export function ReaderPage({
             <BookOpen className="w-4 h-4" />
             <span>{currentBook.name} {chapter}章</span>
           </button>
+          {/* Reading Progress */}
+          <ReadingProgress
+            bookId={bookId}
+            chapter={chapter}
+            totalChapters={currentBook.chapters}
+            bookName={currentBook.name}
+          />
         </div>
 
         <div className="header-center">
@@ -773,6 +803,13 @@ export function ReaderPage({
             }}
           >
             <Share2 className="w-5 h-5" />
+          </button>
+          <button
+            className="icon-btn"
+            title="打印"
+            onClick={handlePrintChapter}
+          >
+            <Printer className="w-5 h-5" />
           </button>
           <button className="icon-btn" title="设置">
             <Settings className="w-5 h-5" />
@@ -979,6 +1016,20 @@ export function ReaderPage({
           </div>
         </div>
       )}
+
+      {/* Print Preview */}
+      <PrintPreview
+        isOpen={showPrint}
+        onClose={() => setShowPrint(false)}
+        bookName={currentBook.name}
+        chapter={chapter}
+        verses={verses.map(v => ({
+          verse: v.verse,
+          text: v.text,
+          textEn: englishVerses.get(v.verse) || v.textEn,
+        }))}
+        selectedVerses={printVerses.length > 0 ? printVerses : undefined}
+      />
     </div>
   );
 }
