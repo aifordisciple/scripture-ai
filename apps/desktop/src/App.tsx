@@ -41,8 +41,15 @@ function App() {
   const [platform, setPlatform] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabId>('read');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    // Load saved tab from localStorage
+    const saved = localStorage.getItem('app-active-tab');
+    return (saved as TabId) || 'read';
+  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('app-sidebar-collapsed');
+    return saved === 'true';
+  });
   const [aiContext, setAIContext] = useState<AIContext | undefined>();
   const [readerNavigation, setReaderNavigation] = useState<{ bookId: string; chapter: number } | undefined>();
   const [navigationKey, setNavigationKey] = useState(0);
@@ -53,6 +60,16 @@ function App() {
 
   // Theme
   const { toggleTheme, theme } = useTheme();
+
+  // Persist activeTab
+  useEffect(() => {
+    localStorage.setItem('app-active-tab', activeTab);
+  }, [activeTab]);
+
+  // Persist sidebar state
+  useEffect(() => {
+    localStorage.setItem('app-sidebar-collapsed', String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   // Initialize platform detection
   useEffect(() => {
