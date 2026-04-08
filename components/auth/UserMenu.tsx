@@ -9,6 +9,7 @@ import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { UserFeedbackPanel } from "@/components/feedback/UserFeedbackPanel";
 import { useGroupUnread } from "@/hooks/use-group-unread";
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -28,7 +29,20 @@ export function UserMenu() {
   const [apiSettingsOpen, setApiSettingsOpen] = useState(false);
   const [feedbackPanelOpen, setFeedbackPanelOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // 更新菜单位置
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right
+      });
+    }
+  }, [isOpen]);
 
   // Check if user is admin
   useEffect(() => {
@@ -43,7 +57,10 @@ export function UserMenu() {
   // 点击外部关闭菜单
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      if (
+        menuRef.current && !menuRef.current.contains(event.target as Node) &&
+        buttonRef.current && !buttonRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -59,9 +76,9 @@ export function UserMenu() {
   // 未登录
   if (!session) {
     return (
-      <Button 
-        variant="ghost" 
-        size="sm" 
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => setAuthOpen(true)}
         className="text-slate-600 dark:text-slate-300 gap-2"
       >
@@ -75,18 +92,23 @@ export function UserMenu() {
   const userInitial = session.user?.name?.[0]?.toUpperCase() || "U";
 
   return (
-    <div className="relative" ref={menuRef}>
-      <Button 
-        variant="ghost" 
-        size="icon" 
+    <>
+      <Button
+        ref={buttonRef}
+        variant="ghost"
+        size="icon"
         className="rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 border-2 border-transparent hover:border-blue-200"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="font-bold">{userInitial}</span>
       </Button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-xl border dark:border-slate-800 py-2 z-[100] animate-in fade-in zoom-in-95 duration-200">
+      {isOpen && createPortal(
+        <div
+          ref={menuRef}
+          className="fixed bg-white dark:bg-slate-900 rounded-xl shadow-xl border dark:border-slate-800 py-2 z-[9999] animate-in fade-in zoom-in-95 duration-200 w-56"
+          style={{ top: menuPosition.top, right: menuPosition.right }}
+        >
           <div className="px-4 py-3 border-b dark:border-slate-800 mb-2 bg-slate-50/50 dark:bg-slate-800/20">
             <p className="font-bold text-sm text-slate-800 dark:text-slate-100 truncate">{session.user?.name}</p>
             <p className="text-xs text-slate-500 truncate mt-0.5">{session.user?.email}</p>
@@ -127,19 +149,19 @@ export function UserMenu() {
             label="AI 模型与接口设置"
             onClick={() => { setIsOpen(false); setApiSettingsOpen(true); }}
           />
-          
+
           <div className="my-1 border-t dark:border-slate-800" />
-          
-          <MenuItem 
-            icon={<BookMarked className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />} 
-            label="我的高亮" 
-            onClick={() => { 
-              setIsOpen(false); 
+
+          <MenuItem
+            icon={<BookMarked className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
+            label="我的高亮"
+            onClick={() => {
+              setIsOpen(false);
               const { tabs, setActiveTab, addTab } = useBibleStore.getState();
               const existTab = tabs.find(t => t.type === 'highlights');
               if (existTab) setActiveTab(existTab.id);
               else addTab({ type: 'highlights' });
-            }} 
+            }}
           />
           <MenuItem
             icon={<FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
@@ -232,12 +254,13 @@ export function UserMenu() {
             }}
             className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
           />
-        </div>
+        </div>,
+        document.body
       )}
-      
+
       <ApiSettingsDialog open={apiSettingsOpen} onOpenChange={setApiSettingsOpen} />
       <UserFeedbackPanel open={feedbackPanelOpen} onOpenChange={setFeedbackPanelOpen} />
-    </div>
+    </>
   );
 }
 
