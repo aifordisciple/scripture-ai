@@ -738,25 +738,35 @@ export function AISidebar() {
         </div>
 
         {/* 快捷提示词 */}
-        <QuickPrompts
-          isLoading={isLoading}
-          messagesCount={messages.length}
-          aiMode={aiMode}
-          onChipClick={handleChipClick}
-          customPrompts={customPrompts}
-        />
+        <div className={cn(
+          "transition-all duration-300 ease-in-out overflow-hidden",
+          isImmersive ? "h-0 opacity-0 border-none" : "opacity-100"
+        )}>
+          <QuickPrompts
+            isLoading={isLoading}
+            messagesCount={messages.length}
+            aiMode={aiMode}
+            onChipClick={handleChipClick}
+            customPrompts={customPrompts}
+          />
+        </div>
 
         {/* 输入表单 */}
-        <AIInputForm
-          input={input}
-          isLoading={isLoading}
-          onInputChange={(value) => {
-            const event = { target: { value } } as React.ChangeEvent<HTMLInputElement>
-            handleInputChange(event)
-          }}
-          onSubmit={handleFormSubmit}
-          onStop={stop}
-        />
+        <div className={cn(
+          "bg-white dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
+          isImmersive ? "h-0 opacity-0 shadow-none" : "opacity-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
+        )}>
+          <AIInputForm
+            input={input}
+            isLoading={isLoading}
+            onInputChange={(value) => {
+              const event = { target: { value } } as React.ChangeEvent<HTMLInputElement>
+              handleInputChange(event)
+            }}
+            onSubmit={handleFormSubmit}
+            onStop={stop}
+          />
+        </div>
 
         {isResizing && <div className="fixed inset-0 z-[100] cursor-col-resize" />}
       </div>

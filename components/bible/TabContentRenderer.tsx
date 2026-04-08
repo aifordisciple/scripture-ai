@@ -49,11 +49,15 @@ const TabContent = memo(function TabContent({
   isActive: boolean
   updateActiveTab?: (data: Partial<Tab>) => void
 }) {
-  // 使用 visibility 而不是条件渲染，保持组件状态
+  // 使用 z-index + opacity 控制显隐，避免残影问题
+  // 非活跃 Tab 置于底层并透明化，活跃 Tab 置于顶层
   return (
     <div
-      style={{ visibility: isActive ? 'visible' : 'hidden' }}
-      className={isActive ? 'h-full' : 'absolute inset-0 pointer-events-none'}
+      className={`transition-opacity duration-150 ease-in-out ${
+        isActive
+          ? 'relative h-full opacity-100 z-10'
+          : 'absolute inset-0 opacity-0 pointer-events-none z-0'
+      }`}
       aria-hidden={!isActive}
     >
       {tab.type === 'read' && (
