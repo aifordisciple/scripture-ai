@@ -106,7 +106,7 @@ const MessageBubble = memo(function MessageBubble({
         )}
 
         {role === 'user' ? (
-          <div className="prose prose-sm dark:prose-invert max-w-none break-words text-white [&_blockquote]:bg-white/20 [&_blockquote]:border-l-white/50 [&_blockquote]:text-white [&_blockquote]:backdrop-blur-sm">
+          <div className="prose prose-sm dark:prose-invert max-w-none break-words text-white user-message-content">
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
         ) : (

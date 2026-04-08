@@ -618,6 +618,20 @@
   font-weight: 600;
 }
 
+/* 用户消息中 blockquote 样式 - 蓝色背景上显示经文引用 */
+.user-message-content blockquote {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-left-color: rgba(255, 255, 255, 0.4) !important;
+  color: white !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.user-message-content blockquote p::before,
+.user-message-content blockquote p::after {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
 /* 列表样式 */
 .prose ul,
 .prose ol {
