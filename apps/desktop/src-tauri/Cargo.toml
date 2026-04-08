@@ -9,7 +9,7 @@ edition = "2021"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["devtools", "tray-icon"] }
+tauri = { version = "2", features = ["protocol-asset", "devtools", "tray-icon"] }
 tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 tauri-plugin-store = "2"
 tauri-plugin-notification = "2"

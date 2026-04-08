@@ -1,0 +1,13 @@
+cargo:rerun-if-env-changed=TAURI_CONFIG
+cargo:rustc-check-cfg=cfg(desktop)
+cargo:rustc-cfg=desktop
+cargo:rustc-check-cfg=cfg(mobile)
+cargo:rerun-if-changed=/opt/data1/public/software/systools/bibleAI/scripture-ai/apps/desktop/src-tauri/tauri.conf.json
+cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_APP_NAME=desktop
+cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_PREFIX=com_scripture_1ai
+cargo:rustc-check-cfg=cfg(dev)
+cargo:PERMISSION_FILES_PATH=/opt/data1/public/software/systools/bibleAI/scripture-ai/apps/desktop/src-tauri/target/release/build/scripture-ai-desktop-eb95e332dd176d9a/out/app-manifest/__app__-permission-files
+cargo:rerun-if-changed=capabilities
+cargo:rerun-if-env-changed=REMOVE_UNUSED_COMMANDS
+cargo:rustc-env=TAURI_ENV_TARGET_TRIPLE=aarch64-apple-darwin
+cargo:rustc-env=MACOSX_DEPLOYMENT_TARGET=10.13

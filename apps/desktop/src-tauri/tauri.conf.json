@@ -25,12 +25,11 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' https: data: blob:; connect-src 'self' https://api.openai.com https://api.deepseek.com https://*.scripture-ai.com https://images.unsplash.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self' data:; worker-src 'self' blob:;"
-    },
-    "tray-icon": {
-      "iconPath": "icons/32x32.png",
-      "iconAsTemplate": true,
-      "menuOnLeftClick": false
+      "csp": "default-src 'self' http: https:; img-src 'self' https: http: data: blob:; connect-src 'self' https://api.openai.com https://api.deepseek.com https://*.scripture-ai.com http://113.44.66.210:3000 https://images.unsplash.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; font-src 'self' data:; worker-src 'self' blob:;",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["http://**", "https://**"]
+      }
     }
   },
   "bundle": {
@@ -47,16 +46,19 @@
     "homepage": "https://scripture-ai.com",
     "shortDescription": "AI读 - 智能圣经阅读助手",
     "longDescription": "AI读是一款智能圣经阅读应用，提供AI解读、语音朗读、高亮笔记、阅读计划等功能",
-    "category": "Lifestyle"
+    "category": "Lifestyle",
+    "macOS": {
+      "minimumSystemVersion": "10.13",
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    }
   },
   "plugins": {
-    "sql": {
-      "preload": ["sqlite:scripture.db"]
-    },
     "updater": {
-      "endpoints": [
-        "https://releases.scripture-ai.com/desktop/{{target}}/{{arch}}/{{current_version}}"
-      ],
+      "endpoints": [],
       "pubkey": ""
     }
   }

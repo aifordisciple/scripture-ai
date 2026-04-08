@@ -1,0 +1,7 @@
+cargo:rerun-if-changed=permissions
+cargo:PERMISSION_FILES_PATH=/opt/data1/public/software/systools/bibleAI/scripture-ai/apps/desktop/src-tauri/target/release/build/tauri-plugin-process-e12dee3f15075e86/out/tauri-plugin-process-permission-files
+cargo:rerun-if-env-changed=REMOVE_UNUSED_COMMANDS
+cargo:GLOBAL_API_SCRIPT_PATH=/Users/chengchao/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-plugin-process-2.3.1/api-iife.js
+cargo:rustc-check-cfg=cfg(mobile)
+cargo:rustc-check-cfg=cfg(desktop)
+cargo:rustc-cfg=desktop

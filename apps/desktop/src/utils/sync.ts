@@ -9,12 +9,12 @@ import { invoke } from '@tauri-apps/api/core';
 import { getAuthAdapter } from '@scripture-ai/native';
 import type { Highlight, Note } from '@scripture-ai/native';
 
-// API base URL - use window injection or environment variable, default to aidu.app
+// API base URL - use window injection or environment variable, default to local server
 const API_BASE = typeof window !== 'undefined' && (window as unknown as { __API_URL__?: string }).__API_URL__
   ? (window as unknown as { __API_URL__: string }).__API_URL__
   : (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE
       ? import.meta.env.VITE_API_BASE
-      : 'https://aidu.app');
+      : 'http://113.44.66.210:3000');
 
 interface SyncResult {
   success: boolean;

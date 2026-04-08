@@ -30,7 +30,7 @@ export interface PreloadProgress {
 
 export type ProgressCallback = (progress: PreloadProgress) => void;
 
-const API_BASE_URL = 'https://scripture-ai.com/api';
+const API_BASE_URL = 'http://113.44.66.210:3000/api';
 
 // Book chapter counts (standard Protestant canon)
 export const BOOK_CHAPTERS: Record<string, number> = {

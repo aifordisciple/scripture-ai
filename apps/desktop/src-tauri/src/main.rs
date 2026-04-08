@@ -7,10 +7,11 @@
 mod commands;
 
 use commands::{auth, storage, system, window, tray};
+use sqlx::SqlitePool;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    Emitter,
+    Emitter, Manager,
 };
 
 fn main() {
@@ -81,9 +82,33 @@ fn main() {
             tray::add_recent_reading,
             tray::clear_recent_readings,
         ])
-        // Setup system tray
+        // Setup: initialize database and system tray
         .setup(|app| {
-            use tauri::Manager;
+            // Initialize database
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::block_on(async {
+                // Create SQLite pool
+                let app_data_dir = app_handle.path().app_data_dir()
+                    .expect("Failed to get app data dir");
+
+                // Ensure directory exists
+                std::fs::create_dir_all(&app_data_dir)
+                    .expect("Failed to create app data directory");
+
+                let db_path = app_data_dir.join("scripture.db");
+                let db_url = format!("sqlite:{}?mode=rwc", db_path.display());
+
+                // Connect to database
+                let pool = SqlitePool::connect(&db_url)
+                    .await
+                    .expect("Failed to connect to database");
+
+                // Store pool in app state
+                app_handle.manage(pool);
+
+                // Initialize tables
+                let _ = storage::db_init(app_handle.clone()).await;
+            });
 
             // Load recent readings for tray menu
             let recent_readings = tauri::async_runtime::block_on(async {
@@ -124,62 +149,67 @@ fn main() {
                 .build()?;
 
             // Create system tray
-            let _tray = TrayIconBuilder::new()
-                .icon(app.default_window_icon().unwrap().clone())
-                .menu(&menu)
-                .show_menu_on_left_click(false)
-                .on_menu_event(|app, event| match event.id.as_ref() {
-                    "show" => {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        }
-                    }
-                    "hide" => {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.hide();
-                        }
-                    }
-                    "quit" => {
-                        // Save window state before quitting
-                        let _ = tauri::async_runtime::block_on(async {
-                            let _ = window::save_current_window_state(app.clone()).await;
-                        });
-                        app.exit(0);
-                    }
-                    id if id.starts_with("reading-") => {
-                        // Navigate to recent reading
-                        // Parse book_id and chapter from id: "reading-{book_id}-{chapter}"
-                        let parts: Vec<&str> = id.split('-').collect();
-                        if parts.len() == 3 {
-                            let book_id = parts[1];
-                            let chapter: i32 = parts[2].parse().unwrap_or(1);
-                            // Emit event to frontend for navigation
-                            let _ = app.emit("navigate-to-reading", (book_id, chapter));
-                            // Show window
-                            if let Some(window) = app.get_webview_window("main") {
-                                let _ = window.show();
-                                let _ = window.set_focus();
+            match app.default_window_icon().cloned() {
+                Some(icon) => {
+                    if let Err(e) = TrayIconBuilder::new()
+                        .icon(icon)
+                        .menu(&menu)
+                        .show_menu_on_left_click(false)
+                        .on_menu_event(|app, event| match event.id.as_ref() {
+                            "show" => {
+                                if let Some(window) = app.get_webview_window("main") {
+                                    let _ = window.show();
+                                    let _ = window.set_focus();
+                                }
                             }
-                        }
-                    }
-                    _ => {}
-                })
-                .on_tray_icon_event(|tray, event| {
-                    if let TrayIconEvent::Click {
-                        button: MouseButton::Left,
-                        button_state: MouseButtonState::Up,
-                        ..
-                    } = event
+                            "hide" => {
+                                if let Some(window) = app.get_webview_window("main") {
+                                    let _ = window.hide();
+                                }
+                            }
+                            "quit" => {
+                                let _ = tauri::async_runtime::block_on(async {
+                                    let _ = window::save_current_window_state(app.clone()).await;
+                                });
+                                app.exit(0);
+                            }
+                            id if id.starts_with("reading-") => {
+                                let parts: Vec<&str> = id.split('-').collect();
+                                if parts.len() == 3 {
+                                    let book_id = parts[1];
+                                    let chapter: i32 = parts[2].parse().unwrap_or(1);
+                                    let _ = app.emit("navigate-to-reading", (book_id, chapter));
+                                    if let Some(window) = app.get_webview_window("main") {
+                                        let _ = window.show();
+                                        let _ = window.set_focus();
+                                    }
+                                }
+                            }
+                            _ => {}
+                        })
+                        .on_tray_icon_event(|tray, event| {
+                            if let TrayIconEvent::Click {
+                                button: MouseButton::Left,
+                                button_state: MouseButtonState::Up,
+                                ..
+                            } = event
+                            {
+                                let app = tray.app_handle();
+                                if let Some(window) = app.get_webview_window("main") {
+                                    let _ = window.show();
+                                    let _ = window.set_focus();
+                                }
+                            }
+                        })
+                        .build(app)
                     {
-                        let app = tray.app_handle();
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        }
+                        eprintln!("Warning: Failed to create system tray: {}", e);
                     }
-                })
-                .build(app)?;
+                }
+                None => {
+                    eprintln!("Warning: No default window icon available, skipping tray creation");
+                }
+            }
 
             // Restore window state
             let app_handle = app.handle().clone();

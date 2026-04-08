@@ -60,18 +60,22 @@ pub async fn open_login_window(
 
     // Get login URL from environment variable or use default
     let login_url = option_env!("LOGIN_URL")
-        .unwrap_or("https://aidu.app/desktop-login");
+        .unwrap_or("http://113.44.66.210:3000/desktop-login");
 
-    // Create login window
+    // Create login window with proper configuration
     let _window = WebviewWindowBuilder::new(
         &app,
         "login",
         WebviewUrl::External(login_url.parse().unwrap())
     )
     .title("登录 - AI读")
-    .inner_size(400.0, 600.0)
-    .resizable(false)
+    .inner_size(450.0, 650.0)
+    .resizable(true)
     .center()
+    .initialization_script(r#"
+        // Allow the page to communicate with the desktop app
+        window.__TAURI__ = window.__TAURI__ || {};
+    "#)
     .build()
     .map_err(|e| e.to_string())?;
 

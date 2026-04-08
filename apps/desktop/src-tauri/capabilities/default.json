@@ -1,0 +1,23 @@
+{
+  "$schema": "https://v2.tauri.app/schemas/capability.json",
+  "identifier": "default",
+  "description": "Default capabilities for all windows",
+  "windows": ["main", "login"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "fs:default",
+    "notification:default",
+    "process:default",
+    "sql:default",
+    "store:default",
+    "updater:default"
+  ],
+  "remote": {
+    "urls": ["http://113.44.66.210:3000/*", "http://localhost:3000/*"],
+    "permissions": [
+      "core:event:default",
+      "core:window:default"
+    ]
+  }
+}

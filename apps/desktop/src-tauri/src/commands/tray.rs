@@ -16,12 +16,13 @@ pub struct RecentReading {
 
 const RECENT_READINGS_KEY: &str = "recent-readings";
 const MAX_RECENT: usize = 5;
+const STORE_NAME: &str = "data.json";
 
 /// Get recent readings
 #[tauri::command]
 pub async fn get_recent_readings(app: AppHandle) -> Result<Vec<RecentReading>, String> {
-    let store = app.store("data.json")
-        .map_err(|e| e.to_string())?;
+    let store = app.store(STORE_NAME)
+        .map_err(|e| format!("Store error: {}", e))?;
 
     let value = store.get(RECENT_READINGS_KEY);
 
@@ -40,8 +41,8 @@ pub async fn add_recent_reading(
     app: AppHandle,
     reading: RecentReading,
 ) -> Result<(), String> {
-    let store = app.store("data.json")
-        .map_err(|e| e.to_string())?;
+    let store = app.store(STORE_NAME)
+        .map_err(|e| format!("Store error: {}", e))?;
 
     let mut readings: Vec<RecentReading> = store.get(RECENT_READINGS_KEY)
         .and_then(|v| serde_json::from_value(v.clone()).ok())
@@ -57,7 +58,7 @@ pub async fn add_recent_reading(
     readings.truncate(MAX_RECENT);
 
     store.set(RECENT_READINGS_KEY, serde_json::to_value(&readings).unwrap());
-    store.save().map_err(|e| e.to_string())?;
+    store.save().map_err(|e| format!("Save error: {}", e))?;
 
     Ok(())
 }
@@ -65,11 +66,11 @@ pub async fn add_recent_reading(
 /// Clear recent readings
 #[tauri::command]
 pub async fn clear_recent_readings(app: AppHandle) -> Result<(), String> {
-    let store = app.store("data.json")
-        .map_err(|e| e.to_string())?;
+    let store = app.store(STORE_NAME)
+        .map_err(|e| format!("Store error: {}", e))?;
 
     store.set(RECENT_READINGS_KEY, serde_json::json!([]));
-    store.save().map_err(|e| e.to_string())?;
+    store.save().map_err(|e| format!("Save error: {}", e))?;
 
     Ok(())
 }

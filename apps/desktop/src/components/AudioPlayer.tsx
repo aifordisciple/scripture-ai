@@ -22,7 +22,7 @@ export function AudioPlayer({
   text,
   title = '圣经朗读',
   reference = '',
-  apiBase = 'https://aidu.app',
+  apiBase = 'http://113.44.66.210:3000',
   onPlayStart,
   onPlayEnd,
 }: AudioPlayerProps) {
