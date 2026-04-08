@@ -23,10 +23,10 @@ interface ReaderProps {
 }
 
 const HIGHLIGHT_COLORS: Record<string, string> = {
-  yellow: "bg-yellow-100/80 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-100",
-  green: "bg-green-100/80 dark:bg-green-900/30 text-green-900 dark:text-green-100",
-  blue: "bg-blue-100/80 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100",
-  red: "bg-red-100/80 dark:bg-red-900/30 text-red-900 dark:text-red-100",
+  yellow: "bg-yellow-200 dark:bg-yellow-800/60 text-yellow-900 dark:text-yellow-100",
+  green: "bg-green-200 dark:bg-green-800/60 text-green-900 dark:text-green-100",
+  blue: "bg-blue-200 dark:bg-blue-800/60 text-blue-900 dark:text-blue-100",
+  red: "bg-red-200 dark:bg-red-800/60 text-red-900 dark:text-red-100",
 };
 
 // 优化后的滑动变体：完全的水平位移，纯粹的拉扯感

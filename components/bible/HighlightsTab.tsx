@@ -11,10 +11,10 @@ import { cn } from "@/lib/utils";
 
 // 高亮颜色映射表 (与 Reader.tsx 保持一致)
 const HIGHLIGHT_COLORS: Record<string, string> = {
-  yellow: "border-yellow-400 dark:border-yellow-500/50 bg-yellow-50/50 dark:bg-yellow-900/10",
-  green: "border-green-400 dark:border-green-500/50 bg-green-50/50 dark:bg-green-900/10",
-  blue: "border-blue-400 dark:border-blue-500/50 bg-blue-50/50 dark:bg-blue-900/10",
-  red: "border-red-400 dark:border-red-500/50 bg-red-50/50 dark:bg-red-900/10",
+  yellow: "border-yellow-400 dark:border-yellow-500 bg-yellow-100 dark:bg-yellow-800/40",
+  green: "border-green-400 dark:border-green-500 bg-green-100 dark:bg-green-800/40",
+  blue: "border-blue-400 dark:border-blue-500 bg-blue-100 dark:bg-blue-800/40",
+  red: "border-red-400 dark:border-red-500 bg-red-100 dark:bg-red-800/40",
 };
 
 // [P1增强] 颜色名称映射

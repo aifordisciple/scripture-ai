@@ -86,7 +86,7 @@ export function UserMenu() {
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-xl border dark:border-slate-800 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-xl border dark:border-slate-800 py-2 z-[100] animate-in fade-in zoom-in-95 duration-200">
           <div className="px-4 py-3 border-b dark:border-slate-800 mb-2 bg-slate-50/50 dark:bg-slate-800/20">
             <p className="font-bold text-sm text-slate-800 dark:text-slate-100 truncate">{session.user?.name}</p>
             <p className="text-xs text-slate-500 truncate mt-0.5">{session.user?.email}</p>
