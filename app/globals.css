@@ -810,3 +810,10 @@
   overflow: hidden;
   border-radius: 50% !important;
 }
+
+/* 强制 Sheet/Dialog 组件最高层级 */
+[data-slot="sheet-portal"],
+[data-slot="sheet-overlay"],
+[data-slot="sheet-content"] {
+  z-index: 9999 !important;
+}
