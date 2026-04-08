@@ -699,11 +699,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
               <Sparkles className="w-5 h-5 text-white animate-pulse drop-shadow-md" />
             ) : (
               <Sparkles
-                className="w-5 h-5 drop-shadow-sm animate-sparkle-glow"
-                style={{
-                  color: '#fbbf24',
-                  filter: 'drop-shadow(0 0 6px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 12px rgba(251, 191, 36, 0.4))',
-                }}
+                className="w-5 h-5 drop-shadow-sm animate-sparkle-glow dark:text-amber-400 text-blue-500"
               />
             )}
           </div>
@@ -754,16 +750,16 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
         }
         .animate-bounce-subtle { animation: bounce-subtle 1.5s ease-in-out infinite; }
 
-        /* 星星闪烁发光动画 */
+        /* 星星闪烁发光动画 - 使用当前元素颜色 */
         @keyframes sparkle-glow {
           0%, 100% {
             opacity: 0.6;
-            filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 8px rgba(251, 191, 36, 0.3));
+            filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 8px currentColor);
             transform: scale(1);
           }
           50% {
             opacity: 1;
-            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 1)) drop-shadow(0 0 20px rgba(251, 191, 36, 0.6));
+            filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
             transform: scale(1.1);
           }
         }

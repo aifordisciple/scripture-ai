@@ -36,19 +36,25 @@ export async function POST(req: Request) {
       // -----------------------------------------
       // 2. AI 智能推荐 (大模型推理 + 数据库验真)
       // -----------------------------------------
+
+      // 第一步：让AI推荐经文并生成总结
       const { text } = await generateText({
         model: llmModel,
-        system: `你是一位精通《圣经》的助手。根据用户的查询，推荐最贴切的真实经文。
+        system: `你是一位精通《圣经》的属灵导师。根据用户的查询，推荐最贴切的真实经文，并给出有深度的属灵洞见。
 
-【重要】直接返回 JSON 数组，不要有任何思考过程、解释或 Markdown 标记。直接以 [ 开始，以 ] 结束。
+【重要】直接返回 JSON 对象，不要有任何思考过程、解释或 Markdown 标记。
 
 JSON 格式：
-[
-  { "bookName": "创世记", "chapter": 1, "verse": 1 },
-  { "bookName": "诗篇", "chapter": 23, "verse": 1 }
-]
+{
+  "summary": "一段温暖、有逻辑、触动人心的属灵总结（150-300字），帮助用户理解这些经文如何回应他的处境",
+  "verses": [
+    { "bookName": "创世记", "chapter": 1, "verse": 1 },
+    { "bookName": "诗篇", "chapter": 23, "verse": 1 }
+  ]
+}
 
 要求：
+- summary 要有温度，像一位理解你的牧者在说话
 - 推荐 15-30 节最相关的经文
 - 必须使用中文书卷名（如：创世记、诗篇、马太福音、启示录等）
 - 章和节必须是真实存在的数字`,
@@ -63,11 +69,14 @@ JSON 格式：
       jsonString = jsonString.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
       jsonString = jsonString.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
 
-      // Try to find JSON array in the response
-      const jsonMatch = jsonString.match(/\[[\s\S]*\]/);
+      // Try to find JSON object in the response
+      const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
       if (!jsonMatch) return NextResponse.json({ data: [] });
 
-      const verses = JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]);
+      const verses = parsed.verses || [];
+      const aiSummary = parsed.summary || '';
+
       if (!Array.isArray(verses) || verses.length === 0) return NextResponse.json({ data: [] });
 
       const orConditions = verses.map((v: any) => ({
@@ -80,7 +89,7 @@ JSON 格式：
          results.find(r => r.bookName === v.bookName && r.chapter === v.chapter && r.verse === v.verse)
       ).filter(Boolean);
 
-      return NextResponse.json({ data: sortedResults });
+      return NextResponse.json({ data: sortedResults, aiSummary });
 
     } else if (mode === 'fuzzy') {
       // -----------------------------------------
@@ -140,17 +149,21 @@ export async function GET(request: Request) {
     } else if (mode === 'ai') {
       const { text } = await generateText({
         model: llmModel,
-        system: `你是一位精通《圣经》的助手。根据用户的查询，推荐最贴切的真实经文。
+        system: `你是一位精通《圣经》的属灵导师。根据用户的查询，推荐最贴切的真实经文，并给出有深度的属灵洞见。
 
-【重要】直接返回 JSON 数组，不要有任何思考过程、解释或 Markdown 标记。直接以 [ 开始，以 ] 结束。
+【重要】直接返回 JSON 对象，不要有任何思考过程、解释或 Markdown 标记。
 
 JSON 格式：
-[
-  { "bookName": "创世记", "chapter": 1, "verse": 1 },
-  { "bookName": "诗篇", "chapter": 23, "verse": 1 }
-]
+{
+  "summary": "一段温暖、有逻辑、触动人心的属灵总结（150-300字），帮助用户理解这些经文如何回应他的处境",
+  "verses": [
+    { "bookName": "创世记", "chapter": 1, "verse": 1 },
+    { "bookName": "诗篇", "chapter": 23, "verse": 1 }
+  ]
+}
 
 要求：
+- summary 要有温度，像一位理解你的牧者在说话
 - 推荐 15-30 节最相关的经文
 - 必须使用中文书卷名（如：创世记、诗篇、马太福音、启示录等）
 - 章和节必须是真实存在的数字`,
@@ -165,10 +178,13 @@ JSON 格式：
       jsonString = jsonString.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
       jsonString = jsonString.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
 
-      const jsonMatch = jsonString.match(/\[[\s\S]*\]/);
+      const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
       if (!jsonMatch) return NextResponse.json({ data: [] });
 
-      const verses = JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]);
+      const verses = parsed.verses || [];
+      const aiSummary = parsed.summary || '';
+
       if (!Array.isArray(verses) || verses.length === 0) return NextResponse.json({ data: [] });
 
       const orConditions = verses.map((v: any) => ({
@@ -181,7 +197,7 @@ JSON 格式：
          results.find(r => r.bookName === v.bookName && r.chapter === v.chapter && r.verse === v.verse)
       ).filter(Boolean);
 
-      return NextResponse.json({ data: sortedResults });
+      return NextResponse.json({ data: sortedResults, aiSummary });
 
     } else if (mode === 'fuzzy') {
       const embeddingModel = getEmbeddingModel('bge-m3');

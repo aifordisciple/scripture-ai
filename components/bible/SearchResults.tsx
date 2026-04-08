@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
-import { Loader2, ExternalLink } from "lucide-react";
+import { Loader2, ExternalLink, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SearchResultsProps {
@@ -17,6 +17,8 @@ interface SearchResultsProps {
 export function SearchResults({ query, mode, cachedResults, onUpdateResults }: SearchResultsProps) {
   const [results, setResults] = useState<any[]>(cachedResults || []);
   const [loading, setLoading] = useState(!cachedResults);
+  const [aiSummary, setAiSummary] = useState<string>('');
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
 
   const { fontSize, lineHeight, tabs, addTab, setActiveTab, setScrollToVerse, apiConfig } = useBibleStore();
   
@@ -41,6 +43,12 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
         const json = await res.json();
         const data = json.data || [];
         setResults(data);
+        // AI模式下保存总结
+        if (mode === 'ai' && json.aiSummary) {
+          setAiSummary(json.aiSummary);
+        } else {
+          setAiSummary('');
+        }
         if (onUpdateResultsRef.current) onUpdateResultsRef.current(data);
       } catch (error) {
         console.error(error);
@@ -97,6 +105,40 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
           模式: {mode === 'exact' ? '精确匹配' : mode === 'fuzzy' ? '模糊语义搜索' : 'AI 智能推荐'} • 找到 {results.length} 条结果
         </p>
       </div>
+
+      {/* AI 总结卡片 - 仅在AI模式下显示 */}
+      {mode === 'ai' && aiSummary && (
+        <div className="mb-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/50 overflow-hidden">
+          <button
+            onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+            className="w-full flex items-center justify-between p-4 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-indigo-500" />
+              <span className="font-semibold text-indigo-700 dark:text-indigo-300">AI 属灵洞见</span>
+            </div>
+            {isSummaryExpanded ? (
+              <ChevronUp className="w-5 h-5 text-indigo-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-indigo-400" />
+            )}
+          </button>
+
+          <div className={cn(
+            "overflow-hidden transition-all duration-300",
+            isSummaryExpanded ? "max-h-[500px] opacity-100" : "max-h-20 opacity-80"
+          )}>
+            <div className="px-4 pb-4 text-slate-700 dark:text-slate-300 leading-relaxed">
+              {!isSummaryExpanded && (
+                <p className="line-clamp-2">{aiSummary}</p>
+              )}
+              {isSummaryExpanded && (
+                <p>{aiSummary}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {results.length === 0 ? (
         <div className="text-center text-slate-500 py-10">

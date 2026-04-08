@@ -4,9 +4,8 @@
 import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { BibleHeatmap } from "@/components/bible/BibleHeatmap";
-import { HomeGroupCard } from "@/components/group/HomeGroupCard";
 import { useMemo, useState, useEffect } from "react";
-import { Download, Activity, Trash2, CheckSquare, Square, BrainCircuit, Clock, Users } from "lucide-react";
+import { Download, Activity, Trash2, CheckSquare, Square, BrainCircuit, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -155,14 +154,6 @@ export function DashboardTab() {
           </div>
         </div>
       )}
-
-      {/* 小组读经快捷入口 */}
-      <div className="mb-6">
-        <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
-          <Users className="w-4 h-4" /> 小组读经
-        </h2>
-        <HomeGroupCard />
-      </div>
 
       {/* 头部区域：标题与操作盘 */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 mb-8 mt-4 md:mt-8 w-full">
