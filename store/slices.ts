@@ -928,8 +928,8 @@ export const createGroupSlice: StateCreator<StoreState, [], [], GroupSlice> = (s
 
   // [新增] 追赶进度 - 计算第一个需要补做的天数
   catchUpGroupPlan: (progress, tasks, currentDay) => {
-    // 找出第一个未完成且已过期的天数
-    for (let day = 1; day < currentDay; day++) {
+    // 找出第一个未完成且已过期的天数（包含当前天）
+    for (let day = 1; day <= currentDay; day++) {
       const task = tasks.find((t: any) => t.day === day);
       if (!task) continue;
 

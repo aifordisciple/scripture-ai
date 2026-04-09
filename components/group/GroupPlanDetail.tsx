@@ -296,12 +296,13 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
 
   // Get current day's readings
   const getCurrentDayReadings = () => {
+    const targetDay = displayDay;
     if (tasks.length > 0) {
-      const task = tasks.find(t => t.day === currentDay);
+      const task = tasks.find(t => t.day === targetDay);
       return task?.readings || [];
     }
     // Fallback to dailyChapters
-    const chaptersStr = plan.dailyChapters[currentDay - 1];
+    const chaptersStr = plan.dailyChapters[targetDay - 1];
     if (!chaptersStr) return [];
     return chaptersStr.split(',').map(c => {
       const [book, chapter] = c.split('-');
