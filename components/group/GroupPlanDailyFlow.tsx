@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Sparkles, CheckCircle2, PartyPopper, Users } from "lucide-react";
@@ -15,22 +15,31 @@ export function GroupPlanDailyFlow() {
   } = useBibleStore();
 
   const step = ctx?.steps[ctx.stepIndex];
+  // 使用 ref 跟踪已处理的 stepIndex，避免在 tabs 更新后重复触发 useEffect
+  const prevStepIndexRef = useRef<number | null>(null);
 
   // 同步 Reader Tab：当步骤进入经文阅读时，自动切换后台的阅读页面
   useEffect(() => {
-    if (ctx && step?.type === 'reading' && step.book && step.chapter) {
-      const readTab = tabs.find(t => t.type === 'read');
-      if (readTab) {
-        // 合并状态更新为一次原子操作
-        useBibleStore.setState((state) => ({
-          tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: step.book, chapter: step.chapter!.toString() } : t),
-          activeTabId: readTab.id
-        }));
-      } else {
-        addTab({ type: 'read', book: step.book, chapter: step.chapter.toString() });
-      }
+    if (!ctx || !step || step.type !== 'reading' || !step.book || !step.chapter) {
+      return;
     }
-  }, [ctx?.stepIndex, step, tabs, addTab]);
+
+    // 避免重复处理同一个 stepIndex
+    if (prevStepIndexRef.current === ctx.stepIndex) {
+      return;
+    }
+    prevStepIndexRef.current = ctx.stepIndex;
+
+    const readTab = tabs.find(t => t.type === 'read');
+    if (readTab) {
+      useBibleStore.setState((state) => ({
+        tabs: state.tabs.map(t => t.id === readTab.id ? { ...t, book: step.book, chapter: step.chapter!.toString() } : t),
+        activeTabId: readTab.id
+      }));
+    } else {
+      addTab({ type: 'read', book: step.book, chapter: step.chapter.toString() });
+    }
+  }, [ctx?.stepIndex, step, addTab, tabs]);
 
   if (!ctx || !step) return null;
 
