@@ -3,7 +3,6 @@
 import * as React from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
-import { createPortal } from "react-dom"
 
 import { cn } from "@/lib/utils"
 
@@ -21,6 +20,12 @@ function SheetClose({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Close>) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
+}
+
+function SheetPortal({
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Portal>) {
+  return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />
 }
 
 function SheetOverlay({
@@ -49,14 +54,8 @@ function SheetContent({
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
 }) {
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const content = (
-    <>
+  return (
+    <SheetPortal container={typeof document !== 'undefined' ? document.body : undefined}>
       <SheetOverlay />
       <SheetPrimitive.Content
         data-slot="sheet-content"
@@ -82,12 +81,8 @@ function SheetContent({
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Content>
-    </>
+    </SheetPortal>
   )
-
-  if (!mounted) return null
-
-  return createPortal(content, document.body)
 }
 
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
