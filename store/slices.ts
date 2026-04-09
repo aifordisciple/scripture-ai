@@ -804,7 +804,12 @@ export const createGroupSlice: StateCreator<StoreState, [], [], GroupSlice> = (s
     if (ctx.stepIndex < ctx.steps.length - 1) {
       set({ groupPlanContext: { ...ctx, stepIndex: ctx.stepIndex + 1 } });
     } else {
-      // 结束流，保持在当前阅读页面（用户刚读完的经文），不自动跳回小组页面
+      // 结束流，派遣自定义事件通知 GroupPlanDetail 刷新进度
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('group-plan-flow-complete', {
+          detail: { churchId: ctx.churchId, planId: ctx.planId }
+        }));
+      }
       set({ groupPlanContext: null });
     }
   },
@@ -919,6 +924,25 @@ export const createGroupSlice: StateCreator<StoreState, [], [], GroupSlice> = (s
         }
       });
     }
+  },
+
+  // [新增] 追赶进度 - 计算第一个需要补做的天数
+  catchUpGroupPlan: (progress, tasks, currentDay) => {
+    // 找出第一个未完成且已过期的天数
+    for (let day = 1; day < currentDay; day++) {
+      const task = tasks.find((t: any) => t.day === day);
+      if (!task) continue;
+
+      const dayTasks = progress.completedTasks?.[day.toString()] || [];
+      const hasDevotional = task.devotional;
+      const devotionalCompleted = !hasDevotional || dayTasks.includes('devotional');
+      const readingsCompleted = task.readings.every((_: any, i: number) => dayTasks.includes(`reading-${i}`));
+
+      if (!devotionalCompleted || !readingsCompleted) {
+        return day;
+      }
+    }
+    return null; // 没有需要补做的
   }
 });
 

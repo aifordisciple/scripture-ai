@@ -43,7 +43,7 @@ interface Task {
 }
 
 export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDetailProps) {
-  const { startGroupPlanFlow, apiConfig, addTab, setActiveTab, tabs } = useBibleStore();
+  const { startGroupPlanFlow, apiConfig, addTab, setActiveTab, tabs, catchUpGroupPlan, groupPlanContext } = useBibleStore();
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [progress, setProgress] = useState<{
@@ -120,6 +120,20 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
 
   useEffect(() => {
     fetchProgress();
+  }, [plan.id]);
+
+  // [新增] 监听小组读经计划流程完成事件，刷新进度
+  useEffect(() => {
+    const handleFlowComplete = (e: Event) => {
+      const customEvent = e as CustomEvent<{ churchId: string; planId: string }>;
+      if (customEvent.detail.planId === plan.id) {
+        fetchProgress();
+      }
+    };
+    window.addEventListener('group-plan-flow-complete', handleFlowComplete);
+    return () => {
+      window.removeEventListener('group-plan-flow-complete', handleFlowComplete);
+    };
   }, [plan.id]);
 
   // Auto-generate devotional for current day if not exists
@@ -444,6 +458,21 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                     </span>
                   )}
                 </div>
+                {/* [新增] 追赶进度按钮 */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const catchUpDay = catchUpGroupPlan(progress, tasks, currentDay);
+                    if (catchUpDay) {
+                      setSelectedDay(catchUpDay);
+                    }
+                  }}
+                  className="mt-3 text-orange-600 border-orange-200 hover:bg-orange-50 dark:text-orange-400 dark:border-orange-800 dark:hover:bg-orange-900/20"
+                >
+                  <FastForward className="w-4 h-4 mr-1" />
+                  追赶进度
+                </Button>
               </div>
             </div>
           </CardContent>

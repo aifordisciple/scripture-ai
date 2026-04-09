@@ -493,6 +493,7 @@ export interface GroupSlice {
   previousGroupPlanStep: () => void;
   toggleGroupTaskCompleted: (churchId: string, planId: string, day: number, taskId: string, action?: 'complete' | 'uncomplete') => Promise<void>;
   startGroupPlanFlow: (churchId: string, planId: string, planName: string, tasks: any[], day: number) => void;
+  catchUpGroupPlan: (progress: { completedTasks: Record<string, string[]> }, tasks: any[], currentDay: number) => number | null;
 }
 
 // --------------------------------------------------
