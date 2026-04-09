@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
-import { Loader2, BookOpenCheck, ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon, Sparkles } from "lucide-react";
+import { Loader2, BookOpenCheck, ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon, Sparkles, AlertCircle } from "lucide-react";
 import { FloatingMenu } from "./FloatingMenu";
 import { Button } from "@/components/ui/button";
 import { CHAPTER_SUMMARY_PROMPT } from "@/lib/constants";
@@ -57,7 +57,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     fontSize, lineHeight, selectedVerses, showEnglish, highlights, enqueueAI, scrollToVerse, setScrollToVerse, clearSelection, setBook: setStoreBook, setChapter: setStoreChapter, addTab, setAtlasPanelOpen, setAtlasVerseContext
   } = useBibleStore();
 
-  const { verses, loading } = useBibleData(book, chapter);
+  const { verses, loading, error, refetch } = useBibleData(book, chapter);
   const { direction, handleNextChapter, handlePrevChapter, handleTouchStart, handleTouchEnd } = useSwipeNavigation(book, chapter);
   const { menuPosition, isMenuVisible, setIsMenuVisible, handleVerseClick, handleAIExplain, handleCopy, showAbove } = useVerseMenu(verses);
 
@@ -323,6 +323,21 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                   showEnglish={showEnglish}
                   fontSize={fontSize}
                 />
+            ) : error ? (
+                <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+                    <AlertCircle className="w-16 h-16 text-destructive mb-4" />
+                    <p className="text-lg font-medium text-destructive mb-2">{error}</p>
+                    <Button variant="outline" onClick={refetch} className="mt-4">
+                        <Loader2 className="w-4 h-4 mr-2" />
+                        重试
+                    </Button>
+                </div>
+            ) : renderList.length === 0 ? (
+                <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+                    <BookOpenCheck className="w-16 h-16 text-muted-foreground/50 mb-4" />
+                    <p className="text-lg font-medium text-muted-foreground mb-2">此章节暂无经文内容</p>
+                    <p className="text-sm text-muted-foreground/70">可能数据库尚未加载此章节</p>
+                </div>
             ) : (
                 <>  
                     <div className="flex items-center justify-center mb-10 md:mb-16 relative mt-4">

@@ -16,41 +16,43 @@ export interface Verse {
 export function useBibleData(book: string, chapter: string) {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const { clearSelection, setChapterSpeechText } = useBibleStore();
 
-  useEffect(() => {
-    async function fetchData() {
-      if (verses.length === 0) setLoading(true);
-      
-      clearSelection();
-      setChapterSpeechText(""); 
-      
-      try {
-        const versesRes = await fetch(`/api/bible?book=${book}&chapter=${chapter}`);
-        if (!versesRes.ok) throw new Error("API request failed");
-        
-        const versesJson = await versesRes.json();
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    clearSelection();
+    setChapterSpeechText("");
 
-        if (versesJson.data && versesJson.data.length > 0) {
-            setVerses(versesJson.data);
-            const fullText = versesJson.data
-                .filter((v: Verse) => v.version === 'CUV')
-                .map((v: Verse) => v.content)
-                .join(" ");
-            setChapterSpeechText(fullText);
-        } else {
-            console.warn(`No verses found for ${book} ${chapter}, Database might be empty.`);
-            setVerses([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch bible data:", error);
-        setVerses([]);
-      } finally {
-        setLoading(false);
+    try {
+      const versesRes = await fetch(`/api/bible?book=${book}&chapter=${chapter}`);
+      if (!versesRes.ok) throw new Error("API request failed");
+
+      const versesJson = await versesRes.json();
+
+      if (versesJson.data && versesJson.data.length > 0) {
+          setVerses(versesJson.data);
+          const fullText = versesJson.data
+              .filter((v: Verse) => v.version === 'CUV')
+              .map((v: Verse) => v.content)
+              .join(" ");
+          setChapterSpeechText(fullText);
+      } else {
+          console.warn(`No verses found for ${book} ${chapter}, Database might be empty.`);
+          setVerses([]);
       }
+    } catch (err) {
+      console.error("Failed to fetch bible data:", err);
+      setError("加载章节失败，请检查网络连接");
+      setVerses([]);
+    } finally {
+      setLoading(false);
     }
-    
+  };
+
+  useEffect(() => {
     fetchData();
   }, [book, chapter, clearSelection, setChapterSpeechText]);
 
@@ -81,5 +83,5 @@ export function useBibleData(book: string, chapter: string) {
     return () => clearTimeout(timer);
   }, [book, chapter]);
 
-  return { verses, loading };
+  return { verses, loading, error, refetch: fetchData };
 }

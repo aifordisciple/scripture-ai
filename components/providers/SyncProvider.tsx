@@ -4,6 +4,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useCallback } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
+import { useToast } from "@/components/ui/toast";
 
 export function SyncProvider() {
   const { data: session } = useSession();
@@ -18,6 +19,7 @@ export function SyncProvider() {
     customPlans, // [修复] 从 store 中解构 customPlans
   } = useBibleStore();
 
+  const { addToast } = useToast();
   const isLoadedRef = useRef(false);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -40,6 +42,7 @@ export function SyncProvider() {
         .catch((err) => {
           console.error("Sync failed", err);
           setSyncError("同步失败，请稍后重试");
+          addToast({ type: 'error', message: '同步失败，请检查网络连接' });
         })
         .finally(() => {
           setIsSyncing(false);
@@ -108,10 +111,12 @@ export function SyncProvider() {
         setAllUserData(data.data);
         setLastSyncTime(Date.now());
         console.log(`Data synced to server (${syncMode} mode)`);
+        // Don't show toast for auto-sync to avoid annoying the user
       }
     } catch (err) {
       console.error("Sync to server failed", err);
       setSyncError("同步到服务器失败");
+      addToast({ type: 'error', message: '同步失败，请稍后重试' });
     } finally {
       setIsSyncing(false);
     }

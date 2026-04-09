@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Verse } from './use-bible-data';
+import { useToast } from '@/components/ui/toast';
 
 export function useVerseMenu(verses: Verse[]) {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -9,6 +10,7 @@ export function useVerseMenu(verses: Verse[]) {
   const [showAbove, setShowAbove] = useState(true); // 菜单显示在选中元素上方还是下方
 
   const { selectedVerses, toggleVerseSelection, clearSelection, enqueueAI } = useBibleStore();
+  const { addToast } = useToast();
 
   // 点击空白处关闭菜单
   useEffect(() => {
@@ -95,6 +97,7 @@ export function useVerseMenu(verses: Verse[]) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       try {
           await navigator.clipboard.writeText(selectedContent);
+          addToast({ type: 'success', message: '已复制到剪贴板' });
           return;
       } catch (err) {
           console.warn("Clipboard API failed, trying fallback...", err);
@@ -112,9 +115,10 @@ export function useVerseMenu(verses: Verse[]) {
       textarea.setSelectionRange(0, 99999);
       document.execCommand('copy');
       document.body.removeChild(textarea);
+      addToast({ type: 'success', message: '已复制到剪贴板' });
     } catch (e) {
       console.error("Fallback copy failed:", e);
-      alert("复制失败，请手动复制");
+      addToast({ type: 'error', message: '复制失败，请手动复制' });
     }
   };
 

@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
 import { BadgePopup } from "@/components/bible/BadgePopup";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import { ToastProvider } from "@/components/ui/toast";
 
 const baseUrl = process.env.NEXTAUTH_URL || 'https://aidu.app';
 
@@ -106,6 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased">
         <AuthProvider>
+          <ToastProvider>
            {children}
            {/* 后台数据同步组件，它自带 "use client"，会自动在浏览器空闲时挂载 */}
            <SyncProvider />
@@ -113,6 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
            <BadgePopup />
            {/* 访问统计追踪 */}
            <AnalyticsTracker />
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

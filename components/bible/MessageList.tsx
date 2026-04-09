@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm'
 import { Copy, Check, Bookmark, Share2, RefreshCw, User, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AudioButton } from './AudioButton'
+import { useToast } from '@/components/ui/toast'
 
 export interface Message {
   id: string
@@ -72,6 +73,7 @@ const MessageBubble = memo(function MessageBubble({
       navigator.clipboard.writeText(copyText)
         .then(() => {
           setCopied(true)
+          addToast({ type: 'success', message: '已复制到剪贴板' });
           setTimeout(() => setCopied(false), 2000)
         })
         .catch(() => {
@@ -85,6 +87,7 @@ const MessageBubble = memo(function MessageBubble({
           document.execCommand('copy')
           document.body.removeChild(textArea)
           setCopied(true)
+          addToast({ type: 'success', message: '已复制到剪贴板' });
           setTimeout(() => setCopied(false), 2000)
         })
     }
@@ -258,6 +261,8 @@ export const MessageList = memo(function MessageList({
   fontSize = 'medium',
   isSaved,
 }: MessageListProps) {
+  const { addToast } = useToast();
+
   if (messages.length === 0 && !isLoading) {
     return <EmptyState />
   }

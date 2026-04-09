@@ -10,6 +10,7 @@ import { useBibleStore } from '@/store/useBibleStore'
 import { BIBLE_BOOKS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/toast'
 
 // 拆分后的子组件
 import { MessageList } from './MessageList'
@@ -63,6 +64,7 @@ export function AISidebar() {
   const loadedSessionRef = useRef<string | null>(null)
 
   const { apiConfig } = useBibleStore()
+  const { addToast } = useToast()
 
   // useChat hook
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload, setInput } = useChat({
@@ -89,6 +91,13 @@ export function AISidebar() {
       completeCurrentRequest()
     }
   })
+
+  // 显示session错误toast
+  useEffect(() => {
+    if (sessionError) {
+      addToast({ type: 'error', message: sessionError.message || '会话错误，请重试' });
+    }
+  }, [sessionError, addToast]);
 
   // 屏幕防睡眠
   useEffect(() => {

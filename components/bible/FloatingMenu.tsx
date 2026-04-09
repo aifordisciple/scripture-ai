@@ -186,6 +186,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
                 "w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center",
                 c.bg, c.border
                 )}
+                aria-label={c.id === 'none' ? '清除高亮' : `高亮为${c.id}色`}
             >
                 {c.icon && <X className="w-3 h-3 text-slate-500" />}
             </button>
@@ -202,6 +203,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
+            aria-label="AI深度解读"
           >
             <Sparkles className="w-4 h-4 fill-current animate-pulse" />
             <span className="font-bold text-sm">AI 深度解读</span>
@@ -217,6 +219,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
               "text-white",
               "border-l border-white/20"
             )}
+            aria-label="更多AI模式"
             title="更多 AI 模式"
           >
             {showAiSubmenu ? (
@@ -289,6 +292,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
           className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          aria-label="添加笔记"
         >
           <PenLine className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
           <span className="text-[10px] text-slate-500">笔记</span>
@@ -299,6 +303,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
           className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          aria-label="分享经文"
         >
           <Share2 className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
           <span className="text-[10px] text-slate-500">分享</span>
@@ -310,6 +315,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
             className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            aria-label="查看串珠"
           >
             <GitBranch className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
             <span className="text-[10px] text-slate-500">串珠</span>
@@ -322,6 +328,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
             className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            aria-label="查看地图"
           >
             <Map className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mb-1" />
             <span className="text-[10px] text-slate-500">地图</span>
@@ -333,6 +340,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
           className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          aria-label={copied ? "已复制到剪贴板" : "复制经文"}
         >
           <Copy className={cn("w-4 h-4 mb-1", copied ? "text-green-600" : "text-slate-500 dark:text-slate-400")} />
           <span className={cn("text-[10px]", copied ? "text-green-600 font-bold" : "text-slate-500")}>

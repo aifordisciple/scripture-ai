@@ -37,6 +37,7 @@ export const useBibleStore = create<StoreState>()(
         const { sessions, currentSessionId, currentAiRequest, aiQueue, ...rest } = state;
         return {
           ...rest,
+          // UI状态重置
           isAuthOpen: false,
           isShareOpen: false,
           isNoteOpen: false,
@@ -46,8 +47,12 @@ export const useBibleStore = create<StoreState>()(
           aiRequestTrigger: null,
           chapterSpeechText: "",
           scrollToVerse: null,
+          // 同步状态重置
           isSyncing: false,
           syncError: null,
+          // 保留同步配置和最后同步时间
+          lastSyncTime: state.lastSyncTime,
+          syncMode: state.syncMode,
           groupPlanContext: null, // 不持久化小组计划上下文
           // Atlas 状态不持久化
           selectedLocationId: null,

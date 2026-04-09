@@ -24,6 +24,7 @@ import { NotificationCenter } from "@/components/common/NotificationCenter";
 import { FeedbackButton } from "@/components/feedback/FeedbackButton";
 import { OnboardingManager } from "@/components/onboarding/OnboardingManager";
 import { TabContentRenderer } from "@/components/bible/TabContentRenderer";
+import { KeyboardShortcutsDialog } from "@/components/common/KeyboardShortcutsDialog";
 
 // 动态按需加载 - 非Tab内容组件
 const AISidebar = dynamic(() => import("@/components/bible/AISidebar").then(mod => mod.AISidebar), { ssr: false });
@@ -128,6 +129,7 @@ export default function Home() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isBookPickerOpen, setIsBookPickerOpen] = useState(false);
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false); // [新增] 设置下拉菜单状态
+  const [showShortcutsDialog, setShowShortcutsDialog] = useState(false); // 快捷键帮助对话框
   
   const [isNavVisible, setIsNavVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -301,6 +303,10 @@ export default function Home() {
             e.preventDefault();
             setIsSearchOpen(true);
             break;
+          case '?':
+            e.preventDefault();
+            setShowShortcutsDialog(true);
+            break;
         }
       }
     };
@@ -339,6 +345,7 @@ export default function Home() {
     <main className="flex h-screen w-full overflow-hidden bg-background relative transition-colors duration-500">
       <AuthDialog />
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
+      <KeyboardShortcutsDialog open={showShortcutsDialog} onOpenChange={setShowShortcutsDialog} />
       <NoteEditor />
       <ShareCard />
       <MagicBall
