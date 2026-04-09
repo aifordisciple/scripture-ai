@@ -454,9 +454,9 @@ export default function Home() {
       >
         
         {/* Header */}
-        <div 
+        <div
           className={cn(
-            "absolute top-0 left-0 right-0 z-10 p-2 md:p-4 pointer-events-none transition-transform duration-300 ease-in-out",
+            "absolute top-0 left-0 right-0 z-30 p-2 md:p-4 pointer-events-none transition-transform duration-300 ease-in-out",
             isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
@@ -541,10 +541,10 @@ export default function Home() {
                   <>
                     {/* 点击外部关闭 */}
                     <div
-                      className="fixed inset-0 z-40"
+                      className="fixed inset-0 z-[100]"
                       onClick={() => setShowSettingsDropdown(false)}
                     />
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border/50 rounded-xl shadow-xl z-50 p-3 space-y-3">
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border/50 rounded-xl shadow-xl z-[100] p-3 space-y-3">
                       {/* 深色模式 */}
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground flex items-center gap-2">
@@ -691,7 +691,7 @@ export default function Home() {
         </div>
 
         {/* Main Content Area */}
-        <div id="reader-scroll-container" onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-smooth pt-20 md:pt-24 pb-24 md:pb-10">
+        <div id="reader-scroll-container" onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-smooth pt-20 md:pt-24 pb-24 md:pb-10 relative z-0">
           <TabContentRenderer
             tabs={tabs}
             activeTabId={activeTabId}
@@ -701,9 +701,9 @@ export default function Home() {
         </div>
 
         {/* Mobile Tab Bar */}
-        <div 
+        <div
           className={cn(
-            "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-20 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out",
+            "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out",
             isNavVisible ? "translate-y-0" : "translate-y-[120%]"
           )}
         >
