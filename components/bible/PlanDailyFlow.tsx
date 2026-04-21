@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Sparkles, CheckCircle2, PartyPopper } from "lucide-react";
 import { BIBLE_BOOKS } from "@/lib/constants";
 
 export function PlanDailyFlow() {
+  const router = useRouter();
   const {
     readingPlanContext: ctx,
     advancePlanStep,
@@ -32,6 +34,8 @@ export function PlanDailyFlow() {
       } else {
         addTab({ type: 'read', book: step.book, chapter: step.chapter.toString() });
       }
+      // 同步更新 URL，确保 Reader 组件从 searchParams 读取正确的经卷/章节
+      router.push(`/?book=${step.book}&chapter=${step.chapter}`);
     }
   }, [ctx?.stepIndex]);
 
