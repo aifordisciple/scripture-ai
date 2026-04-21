@@ -147,7 +147,7 @@ export function PlanTab() {
     const isTotallyCompleted = completedDaysCount >= totalDays;
 
     return (
-      <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
+      <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
         <button onClick={() => setViewingPlanId(null)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm font-medium">
           <ChevronLeft className="w-4 h-4" /> 返回计划大厅
         </button>
@@ -349,7 +349,7 @@ export function PlanTab() {
   const discoverPlans = allPlans.filter(p => !activePlans.some(active => active.planId === p.id));
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
+    <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
       <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
         <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
            <Calendar className="w-6 h-6" />

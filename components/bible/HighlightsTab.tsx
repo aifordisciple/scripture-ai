@@ -157,7 +157,7 @@ export function HighlightsTab() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
+    <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
       <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-slate-800">
         <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
           <BookMarked className="w-6 h-6" />

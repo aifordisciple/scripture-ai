@@ -307,7 +307,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       </div>
 
       {/* 中间阅读区 - 增加 overflow-x-hidden */}
-      <div className="w-full max-w-5xl xl:max-w-6xl px-4 py-8 md:px-10 pb-8 z-0 overflow-x-hidden">
+      <div className="w-full max-w-5xl xl:max-w-6xl px-4 py-6 md:px-10 pb-4 z-0 overflow-x-hidden">
         <AnimatePresence mode='wait' custom={direction} initial={false}>
           <motion.div
             key={`${book}-${chapter}`} 

@@ -53,7 +53,7 @@ export function BookmarksTab() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
+    <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
       <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
         <div className="p-2.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl">
           <Bookmark className="w-6 h-6" />

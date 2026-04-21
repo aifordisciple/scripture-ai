@@ -72,6 +72,8 @@ export const useBibleStore = create<StoreState>()(
           currentSessionId: null,
           currentAiRequest: null,
           aiQueue: [],
+          sessionStatus: 'idle',
+          sessionError: null,
         };
       },
     }
