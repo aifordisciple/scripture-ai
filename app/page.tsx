@@ -9,7 +9,7 @@ import { Sidebar } from "@/components/bible/Sidebar";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen, Moon, Sun, ChevronDown, Type } from "lucide-react";
+import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen, Moon, Sun, ChevronDown, Type, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
@@ -647,27 +647,22 @@ export default function Home() {
                 </div>
               )}
 
-              {/* 小组读经入口 - 桌面端 */}
+              {/* 读经计划入口 - 桌面端 */}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => {
-                  const groupTab = tabs.find(t => t.type === 'group');
-                  if (groupTab) {
-                    setActiveTab(groupTab.id);
+                  const planTab = tabs.find(t => t.type === 'plan');
+                  if (planTab) {
+                    setActiveTab(planTab.id);
                   } else {
-                    addTab({ type: 'group' });
+                    addTab({ type: 'plan' });
                   }
                 }}
                 className="rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 transition-colors relative"
-                title="小组读经"
+                title="读经计划"
               >
-                <Users className="h-5 w-5" />
-                {groupUnread > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1">
-                    {groupUnread > 99 ? '99+' : groupUnread}
-                  </span>
-                )}
+                <Calendar className="h-5 w-5" />
               </Button>
 
               {/* 通知中心 */}

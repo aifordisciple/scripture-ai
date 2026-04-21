@@ -116,7 +116,7 @@ export function ReadingHistoryTab() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
+    <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
       {/* 头部 */}
       <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-slate-800">
         <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl">

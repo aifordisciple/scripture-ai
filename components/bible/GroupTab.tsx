@@ -236,7 +236,7 @@ export function GroupTab() {
   // 显示加载状态
   if (status === 'loading' || loading) {
     return (
-      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen flex flex-col items-center justify-center">
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8 flex flex-col items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-4" />
         <p className="text-muted-foreground">加载中...</p>
       </div>
@@ -246,7 +246,7 @@ export function GroupTab() {
   // 未登录状态提示
   if (status === 'unauthenticated') {
     return (
-      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
         <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
           <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
             <Users className="w-6 h-6" />
@@ -282,7 +282,7 @@ export function GroupTab() {
   // Render plan detail if selected
   if (selectedPlan && selectedGroup) {
     return (
-      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
         <GroupPlanDetail
           churchId={selectedGroup.churchId}
           plan={selectedPlan}
@@ -298,7 +298,7 @@ export function GroupTab() {
     const isAdmin = selectedGroup.role === "OWNER" || selectedGroup.role === "ADMIN";
 
     return (
-      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
         <button
           onClick={() => {
             setSelectedGroupForPlan(null);
@@ -502,7 +502,7 @@ export function GroupTab() {
 
   // Main list view
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-32 min-h-screen">
+    <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
       <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
         <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
           <Users className="w-6 h-6" />

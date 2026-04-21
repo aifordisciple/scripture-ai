@@ -295,7 +295,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }, [selectedVerses, verses, addTab, setAtlasPanelOpen, setIsMenuVisible, clearSelection, setAtlasVerseContext]);
 
   return (
-    <div className="w-full min-h-screen flex flex-row relative transition-colors duration-500" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <div className="w-full flex flex-row relative transition-colors duration-500" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       
       {/* 左侧导航 */}
       <div className="hidden md:flex flex-1 self-stretch group items-start justify-center">
@@ -307,7 +307,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       </div>
 
       {/* 中间阅读区 - 增加 overflow-x-hidden */}
-      <div className="w-full max-w-5xl xl:max-w-6xl px-4 py-8 md:px-10 pb-32 min-h-screen z-0 overflow-x-hidden">
+      <div className="w-full max-w-5xl xl:max-w-6xl px-4 py-8 md:px-10 pb-8 z-0 overflow-x-hidden">
         <AnimatePresence mode='wait' custom={direction} initial={false}>
           <motion.div
             key={`${book}-${chapter}`} 
