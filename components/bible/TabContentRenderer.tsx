@@ -56,7 +56,7 @@ const TabContent = memo(function TabContent({
       className={`transition-opacity duration-150 ease-in-out ${
         isActive
           ? 'relative h-full opacity-100 z-10'
-          : 'absolute inset-0 opacity-0 pointer-events-none z-0'
+          : 'absolute inset-0 opacity-0 pointer-events-none z-0 overflow-hidden'
       }`}
       aria-hidden={!isActive}
     >
