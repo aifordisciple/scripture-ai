@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
 import { BIBLE_BOOKS } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { useGroupUnread } from "@/hooks/use-group-unread";
 import { UserMenu } from "@/components/auth/UserMenu";
@@ -125,6 +126,7 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
 export default function Home() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isBookPickerOpen, setIsBookPickerOpen] = useState(false);
@@ -387,7 +389,7 @@ export default function Home() {
         <SheetContent side="bottom" className="bg-card border-t-0 pb-6 rounded-t-2xl max-h-[85vh] overflow-y-auto">
           <SheetHeader className="mb-4 pt-2">
             <SheetTitle className="text-foreground flex items-center gap-2">
-              <Settings className="w-5 h-5 text-primary" /> 设置
+              <Settings className="w-5 h-5 text-primary" /> {t('settings.title')}
             </SheetTitle>
           </SheetHeader>
           <div className="space-y-6">
@@ -395,27 +397,27 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">
                 {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                {isDarkMode ? "深色模式" : "浅色模式"}
+                {isDarkMode ? t('settings.darkMode') : t('settings.lightMode')}
               </span>
               <Button variant={isDarkMode ? "default" : "secondary"} size="sm" onClick={toggleDarkMode} className="rounded-full px-4">
-                {isDarkMode ? "切换浅色" : "切换深色"}
+                {isDarkMode ? t('settings.toggleLight') : t('settings.toggleDark')}
               </Button>
             </div>
 
             {activeTab.type === 'read' && (
               <div className="bg-secondary/50 p-4 rounded-xl border border-border/50">
                  <div className="flex items-center gap-2 mb-2 text-sm font-bold text-foreground">
-                    <Headphones className="w-4 h-4 text-primary" /> 语音朗读
+                    <Headphones className="w-4 h-4 text-primary" /> {t('settings.tts')}
                  </div>
                  <HeaderPlayer player={player} text={chapterSpeechText || ""} mode="full" className="bg-background border border-border shadow-sm w-full rounded-lg" />
               </div>
             )}
             <div className="space-y-2">
-              <div className="flex justify-between text-sm text-muted-foreground font-medium"><span>字号大小</span><span>{fontSize}px</span></div>
+              <div className="flex justify-between text-sm text-muted-foreground font-medium"><span>{t('settings.fontSize')}</span><span>{fontSize}px</span></div>
               <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} className="py-2" />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground font-medium">行间距</span>
+              <span className="text-sm text-muted-foreground font-medium">{t('settings.lineHeight')}</span>
               <div className="flex bg-secondary/50 p-1 rounded-lg">
                 {[1.1, 1.8, 2.2].map(lh => (
                   <button
@@ -423,21 +425,21 @@ export default function Home() {
                     onClick={() => setLineHeight(lh)}
                     className={cn("px-3 py-1 text-xs rounded-md transition-all", lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                   >
-                    {lh === 1.1 ? "紧凑" : lh === 1.8 ? "标准" : "宽松"}
+                    {lh === 1.1 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground font-medium">中英对照</span>
+                        <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground font-medium">{t('settings.bilingual')}</span>
               <Button variant={showEnglish ? "default" : "secondary"} size="sm" onClick={toggleEnglish} className="rounded-full px-4">
-                {showEnglish ? "已开启" : "已关闭"}
+                {showEnglish ? t('settings.enabled') : t('settings.disabled')}
               </Button>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">
                 <Languages className="w-4 h-4" />
-                {locale === 'zh' ? '界面语言' : 'Language'}
+                {t('settings.language')}
               </span>
               <div className="flex bg-secondary/50 p-1 rounded-lg">
                 <button
@@ -447,7 +449,10 @@ export default function Home() {
                   中文
                 </button>
                 <button
-                  onClick={() => setLocale('en')}
+                  onClick={() => {
+                    setLocale('en');
+                    if (!showEnglish) toggleEnglish();
+                  }}
                   className={cn("px-3 py-1 text-xs rounded-md transition-all", locale === 'en' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                 >
                   English
@@ -465,7 +470,7 @@ export default function Home() {
               className="w-full rounded-full font-bold h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={() => setMobileSettingsOpen(false)}
             >
-              完 成 并 关 闭
+              {t('settings.closeAndFinish')}
             </Button>
           </div>
         </SheetContent>
@@ -502,7 +507,7 @@ export default function Home() {
 
               <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-secondary/60 hover:bg-secondary border-none ml-1" onClick={() => setIsSearchOpen(true)}>
                   <Search className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground pr-2">搜索经文、问题... ( / 或 Cmd+K )</span>
+                  <span className="text-xs text-muted-foreground pr-2">{t('reader.searchPlaceholder')}</span>
               </Button>
 
               <Button variant="ghost" size="icon" className="md:hidden flex text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full h-9 w-9" onClick={() => setIsSearchOpen(true)}>
@@ -537,7 +542,7 @@ export default function Home() {
                 <span className="truncate">
                   {activeTab.type === 'read' ? (
                     <>{activeTab.book} {activeTab.chapter}</>
-                  ) : activeTab.type === 'search' ? "搜索结果" : activeTab.type === 'dashboard' ? "数据看板" : activeTab.type === 'highlights' ? "我的高亮" : activeTab.type === 'notes' ? "我的笔记" : activeTab.type === 'cross-ref' ? "经文串珠" : activeTab.type === 'group' ? "小组读经" : activeTab.type === 'atlas' ? "圣经地图" : activeTab.type === 'insights' ? "我的收藏" : "读经计划"}
+                  ) : activeTab.type === 'search' ? t('tabs.search') : activeTab.type === 'dashboard' ? t('tabs.dashboard') : activeTab.type === 'highlights' ? t('tabs.highlights') : activeTab.type === 'notes' ? t('tabs.notes') : activeTab.type === 'cross-ref' ? t('tabs.crossref') : activeTab.type === 'group' ? t('tabs.group') : activeTab.type === 'atlas' ? t('tabs.atlas') : activeTab.type === 'insights' ? t('tabs.insights') : t('tabs.plan')}
                 </span>
               </button>
             </div>
@@ -577,7 +582,7 @@ export default function Home() {
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground flex items-center gap-2">
                           {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                          {isDarkMode ? "深色模式" : "浅色模式"}
+                          {isDarkMode ? t('settings.darkMode') : t('settings.lightMode')}
                         </span>
                         <Button
                           variant={isDarkMode ? "default" : "secondary"}
@@ -585,7 +590,7 @@ export default function Home() {
                           onClick={toggleDarkMode}
                           className="rounded-full px-3 h-7 text-xs"
                         >
-                          {isDarkMode ? "切换浅色" : "切换深色"}
+                          {isDarkMode ? t('settings.toggleLight') : t('settings.toggleDark')}
                         </Button>
                       </div>
 
@@ -593,7 +598,7 @@ export default function Home() {
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground flex items-center gap-2">
                           {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-                          全屏模式
+                          {t('reader.fullscreen')}
                         </span>
                         <Button
                           variant={isFullscreen ? "default" : "secondary"}
@@ -601,7 +606,7 @@ export default function Home() {
                           onClick={toggleFullscreen}
                           className="rounded-full px-3 h-7 text-xs"
                         >
-                          {isFullscreen ? "退出" : "开启"}
+                          {isFullscreen ? t('settings.exitFullscreen') : t('settings.enterFullscreen')}
                         </Button>
                       </div>
 
@@ -612,7 +617,7 @@ export default function Home() {
                       <div className="space-y-1.5">
                         <span className="text-sm text-muted-foreground flex items-center gap-2">
                           <AlignJustify className="w-4 h-4" />
-                          行间距
+                          {t('settings.lineHeight')}
                         </span>
                         <div className="flex bg-secondary/50 p-1 rounded-lg">
                           {[1.1, 1.8, 2.2].map(lh => (
@@ -624,7 +629,7 @@ export default function Home() {
                                 lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                               )}
                             >
-                              {lh === 1.1 ? "紧凑" : lh === 1.8 ? "标准" : "宽松"}
+                              {lh === 1.1 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
                             </button>
                           ))}
                         </div>
@@ -635,7 +640,7 @@ export default function Home() {
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-muted-foreground flex items-center gap-2">
                             <Type className="w-4 h-4" />
-                            字号大小
+                            {t('settings.fontSize')}
                           </span>
                           <span className="text-xs text-muted-foreground font-medium">{fontSize}px</span>
                         </div>
@@ -688,7 +693,7 @@ export default function Home() {
                   }
                 }}
                 className="rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 transition-colors relative"
-                title="读经计划"
+                title={t('tabs.plan')}
               >
                 <Calendar className="h-5 w-5" />
               </Button>
