@@ -1,6 +1,8 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, SessionStatus, SessionError, ReadingHistoryData } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, SessionStatus, SessionError, ReadingHistoryData, LocaleSlice } from './types';
+import { createLocaleSlice } from './slices/localeSlice';
+export { createLocaleSlice };
 import { BIBLE_PLANS } from '@/lib/plans';
 import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
 
@@ -660,7 +662,7 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
    // [新增] AI 灵修导读生成
    generateAiDevotional: async (planId, day, planTitle, readings) => {
      // [修复] 从 store 获取当前 apiConfig
-     const { apiConfig } = useBibleStore.getState();
+     const { apiConfig } = get();
      const res = await fetch("/api/chat/devotional", {
        method: "POST",
        headers: { "Content-Type": "application/json" },

@@ -23,3 +23,4 @@ export {
 // These will be used as slices are migrated
 export { createUISlice as createUISliceNew } from './uiSlice'
 export { createReaderSlice as createReaderSliceNew } from './readerSlice'
+export { createLocaleSlice } from './localeSlice'

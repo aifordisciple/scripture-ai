@@ -188,11 +188,13 @@ export interface SavedInsight {
 }
 
 // [新增] 快捷动作配置
+import type { DualLangString } from '@/lib/constants';
+
 export interface QuickAction {
   id: string;
-  label: string;
+  label: string | DualLangString;
   icon?: string;
-  prompt: string;
+  prompt: string | DualLangString;
   mode?: 'general' | 'tutor' | 'sermon' | 'study-guide';
   priority: number;
   category?: 'selected' | 'reading' | 'plan' | 'completed';
@@ -455,9 +457,18 @@ export interface UserDataSlice {
 }
 
 // --------------------------------------------------
+// 7. 国际化状态 (LocaleSlice)
+// --------------------------------------------------
+
+export interface LocaleSlice {
+  locale: 'zh' | 'en';
+  setLocale: (locale: 'zh' | 'en') => void;
+}
+
+// --------------------------------------------------
 // 3. 聚合总状态类型
 // --------------------------------------------------
-export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & DMSlice;
+export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & DMSlice & LocaleSlice;
 
 // --------------------------------------------------
 // 4. 小组读经计划状态 (GroupSlice)

@@ -10,7 +10,8 @@ import {
   createSyncSlice,
   createGroupSlice,
   createAtlasSlice,
-  createDMSlice
+  createDMSlice,
+  createLocaleSlice
 } from './slices';
 
 // --------------------------------------------------
@@ -27,6 +28,7 @@ export const useBibleStore = create<StoreState>()(
       ...createGroupSlice(...a),
       ...createAtlasSlice(...a),
       ...createDMSlice(...a),
+      ...createLocaleSlice(...a),
     }),
     {
       name: 'bible-storage',

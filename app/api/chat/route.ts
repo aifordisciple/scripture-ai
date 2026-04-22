@@ -1,6 +1,6 @@
 // app/api/chat/route.ts
 import { streamText } from 'ai';
-import { SYSTEM_PROMPT } from '@/lib/constants';
+import { SYSTEM_PROMPT, type DualLangString } from '@/lib/constants';
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
@@ -12,12 +12,13 @@ export const maxDuration = 300; // 增加到300秒(5分钟)，支持更长的流
 export async function POST(req: Request) {
   try {
     const { apiConfig, body } = await extractApiConfig(req);
-    const { messages, context, sessionId, verseRef, verseContent } = body as {
-      messages?: Array<{role: string; content: string}>;
+    const { messages, context, sessionId, verseRef, verseContent, locale = 'zh' } = body as {
+      messages?: Array<{role: 'user' | 'assistant' | 'system'; content: string}>;
       context?: any;
       sessionId?: string;
       verseRef?: string;
       verseContent?: string;
+      locale?: string;
     };
 
     if (!messages) {
@@ -118,7 +119,8 @@ ${backgroundText}
 
     // 合并 system prompt，避免多个 system 消息导致 MiniMax 等API报错
     // 结构: 系统提示词 + 用户偏好记忆 + 当前经文上下文
-    let fullSystemPrompt = SYSTEM_PROMPT;
+    const resolvedLocale = (locale === 'en') ? 'en' : 'zh';
+    let fullSystemPrompt = SYSTEM_PROMPT[resolvedLocale as keyof DualLangString] || SYSTEM_PROMPT.zh;
     if (userAIContext) {
       fullSystemPrompt += `\n\n---\n### 👤 用户个性化记忆\n${userAIContext}`;
     }
@@ -184,10 +186,6 @@ ${backgroundText}
             logChatError(chatError, { sessionId, userId, role: 'assistant', textLength: text.length });
           }
         }
-      },
-      onError: async ({ error }: { error: unknown }) => {
-        const chatError = ChatError.fromError(error, ChatErrorCode.AI_GENERATION_FAILED);
-        logChatError(chatError, { sessionId, userId });
       }
     });
 

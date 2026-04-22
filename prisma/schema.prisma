@@ -162,6 +162,9 @@ model UserSetting {
   emailNotifySystem   Boolean @default(true)  // 系统通知邮件
   browserNotify       Boolean @default(true)  // 浏览器推送通知
   soundNotify         Boolean @default(true)  // 声音提醒
+
+  // [新增] 国际化语言设置
+  locale String? // 'zh' | 'en', null = default Chinese
 }
 
 model Highlight {
