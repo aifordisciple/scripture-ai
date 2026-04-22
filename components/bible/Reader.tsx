@@ -410,7 +410,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                     </div>
 
                     {/* 全章摘要按钮 */}
-                    <div className="mt-20 text-center pb-4">
+                    <div className="mt-20 text-center pb-32">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
