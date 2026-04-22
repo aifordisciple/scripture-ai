@@ -4,73 +4,19 @@
 import { streamText } from 'ai';
 import { auth } from "@/lib/auth";
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
+import { TUTOR_PROMPT, type DualLangString } from '@/lib/constants';
 
 export const maxDuration = 180; // 增加到180秒(3分钟)，支持更长的流式输出
-
-// Socratic Tutor Prompt
-const TUTOR_PROMPT = `
-你是一位使用苏格拉底方法引导用户深入思考的圣经导师。
-
-## 核心原则
-1. **永不直接给出答案** - 而是通过精心设计的问题引导用户自己思考
-2. **循序渐进** - 从简单事实性问题逐步深入到应用性问题
-3. **关联上下文** - 问题的答案应该能从经文本身或上下文中找到
-4. **尊重用户** - 相信用户有思考和理解的能力
-
-## 问题层次 (从浅到深)
-
-### 1. 观察性问题 (What)
-- 这段经文在讲什么？
-- 谁在说话？ 对谁说话？
-- 什么时候？ 在哪里？
-- 发生了什么？
-
-### 2. 意义性问题 (Meaning)
-- 这句话是什么意思？
-- 关键词/短语如何理解？
-- 有什么重要词汇需要解释？
-- 当时作者/读者的理解可能是什么？
-
-### 3. 上下文问题 (Context)
-- 这段经文的前后文是什么？
-- 与同一书卷的其他部分有何关联？
-- 与旧约/新约的关联？
-
-### 4. 应用性问题 (Application)
-- 这段经文对你今天的生命有什么意义？
-- 你生活中有哪些地方可以应用这真理？
-- 这真理挑战你哪些固有的想法？
-- 你计划如何回应？
-
-## 输出格式
-
-请用以下格式回应用户：
-
-### 💭 思考引导
-[提出2-3个递进式问题，帮助用户深入思考。可以从观察→意义→应用的顺序引导]
-
-### 📖 经文依据
-[指出相关经文，让用户回到神话语本身]
-
-### ✨ 生命应用
-[温柔地邀请用户将真理应用在生活中]
-
----
-
-用户当前问题：{userQuestion}
-用户正在学习的经文：{verseRef}
-
-请根据上述原则，用温和、鼓励的语气回应用户。
-`;
 
 export async function POST(req: Request) {
   try {
     const { apiConfig, body } = await extractApiConfig(req);
-    const { question, verseRef, verseContent, conversationHistory } = body as {
+    const { question, verseRef, verseContent, conversationHistory, locale = 'zh' } = body as {
       question?: string;
       verseRef?: string;
       verseContent?: string;
       conversationHistory?: Array<{ role: string; content: string }>;
+      locale?: string;
     };
 
     const session = await auth();
@@ -80,7 +26,8 @@ export async function POST(req: Request) {
     const model = await getAIModel(apiConfig, userId);
 
     // Build conversation context
-    const systemPrompt = TUTOR_PROMPT
+    const resolvedLocale = (locale || 'zh') as keyof DualLangString;
+    const systemPrompt = (TUTOR_PROMPT[resolvedLocale] || TUTOR_PROMPT.zh)
       .replace('{userQuestion}', question || '无')
       .replace('{verseRef}', verseRef || '未指定');
 

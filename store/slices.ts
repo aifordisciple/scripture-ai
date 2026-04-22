@@ -662,11 +662,12 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
    // [新增] AI 灵修导读生成
    generateAiDevotional: async (planId, day, planTitle, readings) => {
      // [修复] 从 store 获取当前 apiConfig
-     const { apiConfig } = get();
+     const { apiConfig, locale } = get();
+     const resolvedLocale = locale || 'zh';
      const res = await fetch("/api/chat/devotional", {
        method: "POST",
        headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({ planTitle, day, readings, apiConfig }) // [修复] 传递 apiConfig
+       body: JSON.stringify({ planTitle, day, readings, apiConfig, locale: resolvedLocale }) // [修复] 传递 apiConfig + locale
      });
      const data = await res.json();
      if (data.devotional) {

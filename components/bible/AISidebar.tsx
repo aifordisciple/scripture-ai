@@ -67,11 +67,13 @@ export function AISidebar() {
   const { addToast } = useToast()
 
   // useChat hook
+  const { locale } = useBibleStore();
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload, setInput } = useChat({
     api: '/api/chat',
     body: {
       apiConfig,
       sessionId: currentSessionId,
+      locale,
       context: aiRequestTrigger ? {
         bookName: aiRequestTrigger.ref.bookName,
         chapter: aiRequestTrigger.ref.chapter,

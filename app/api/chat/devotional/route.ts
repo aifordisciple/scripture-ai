@@ -2,13 +2,15 @@
 import { generateText } from 'ai';
 import { NextResponse } from 'next/server';
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
+import { DEVOTIONAL_PROMPT, type DualLangString } from '@/lib/constants';
 
 export async function POST(req: Request) {
   const { apiConfig, body } = await extractApiConfig(req);
-  const { planTitle, day, readings } = body as {
+  const { planTitle, day, readings, locale = 'zh' } = body as {
     planTitle?: string;
     day?: number;
     readings?: Array<{ book: string; chapter: number }>;
+    locale?: string;
   };
 
   try {
@@ -17,16 +19,11 @@ export async function POST(req: Request) {
 
     const readingsStr = readings?.map((r) => `${r.book} ${r.chapter}章`).join('，') || '';
 
-    const systemPrompt = `你是一位充满属灵洞察力、温暖且专业的牧者。
-用户正在进行名为【${planTitle}】的读经计划，今天是第 ${day} 天。
-今天的阅读经文是：${readingsStr}。
-
-请撰写一段约 150-250 字的优美灵修导读（Devotional）。
-要求：
-1. 提炼这些经文的核心信息，或者说明它们如何相互呼应。
-2. 给出能在今天日常生活中实际应用的属灵鼓励。
-3. 语气要像是一位老朋友或导师在对面轻声交谈。
-4. 直接输出导读文本，绝对不要包含任何 Markdown 标记或多余的解释。`;
+    const resolvedLocale = (locale || 'zh') as keyof DualLangString;
+    const systemPrompt = (DEVOTIONAL_PROMPT[resolvedLocale] || DEVOTIONAL_PROMPT.zh)
+      .replace('{planTitle}', planTitle || '')
+      .replace('{day}', String(day || ''))
+      .replace('{readingsStr}', readingsStr);
 
     const { text } = await generateText({
       model: model,

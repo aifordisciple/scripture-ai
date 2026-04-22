@@ -140,6 +140,7 @@ export default function Home() {
     isDesktopSidebarOpen, toggleDesktopSidebar,
     isAiOpen, setAiOpen,
     showEnglish, toggleEnglish,
+    locale, setLocale,
     lineHeight, setLineHeight,
     tabs, activeTabId, setActiveTab, addTab, closeTab, updateActiveTab,
     sidebarWidth,
@@ -433,6 +434,26 @@ export default function Home() {
                 {showEnglish ? "已开启" : "已关闭"}
               </Button>
             </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+                <Languages className="w-4 h-4" />
+                {locale === 'zh' ? '界面语言' : 'Language'}
+              </span>
+              <div className="flex bg-secondary/50 p-1 rounded-lg">
+                <button
+                  onClick={() => setLocale('zh')}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all", locale === 'zh' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                >
+                  中文
+                </button>
+                <button
+                  onClick={() => setLocale('en')}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all", locale === 'en' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                >
+                  English
+                </button>
+              </div>
+            </div>
 
             <div className="pt-2">
               <SyncSettings />
@@ -633,10 +654,17 @@ export default function Home() {
               </div>
 
               <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold rounded-full">
-                <Languages className="h-4 w-4" />{showEnglish ? "中/英" : "中"}
+                <Languages className="h-4 w-4" />{showEnglish ? (locale === 'zh' ? "中/英" : "Zh/En") : (locale === 'zh' ? "中" : "En")}
               </Button>
 
-              
+              <Button variant={locale === 'en' ? "secondary" : "ghost"} size="sm" onClick={() => {
+                const newLocale = locale === 'zh' ? 'en' : 'zh';
+                setLocale(newLocale);
+                // 切换到英文时自动开启双语对照，切换到中文时保持用户偏好
+                if (newLocale === 'en' && !showEnglish) toggleEnglish();
+              }} className="gap-1 text-xs font-bold rounded-full">
+                {locale === 'zh' ? '中文' : 'EN'}
+              </Button>
               <div className="mx-1 border-l h-5 border-border/50"></div>
 
               {/* 火苗动效 - 桌面端 */}
