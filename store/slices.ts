@@ -424,8 +424,8 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
              updates.tabs = newTabs;
          }
       }
-      if (data.settings.customPlans) {
-          try { updates.customPlans = JSON.parse(data.settings.customPlans); } catch (e) {}
+      if (data.settings.customPlans !== undefined && data.settings.customPlans !== null) {
+          try { updates.customPlans = JSON.parse(data.settings.customPlans); } catch (e) { updates.customPlans = []; }
       }
     }
     if (data.highlights) updates.highlights = data.highlights;
