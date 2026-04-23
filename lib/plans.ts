@@ -14,9 +14,12 @@ export interface PlanDay {
 export interface ReadingPlan {
   id: string;
   title: string;
+  titleEn?: string;
   description: string;
+  descriptionEn?: string;
   durationDays: number;
   tags: string[];
+  tagsEn?: string[];
   tasks: PlanDay[];
 }
 
@@ -25,9 +28,12 @@ export const BIBLE_PLANS: ReadingPlan[] = [
   {
     id: "nt-90days",
     title: "新约 90 天通读",
+    titleEn: "New Testament in 90 Days",
     description: "每天阅读大约 2-3 章，三个月内轻松读完整个新约。非常适合初信者或者想要重新温习耶稣生平与使徒教导的弟兄姊妹。",
+    descriptionEn: "Read about 2-3 chapters per day and complete the entire New Testament in three months. Perfect for new believers or anyone wanting to revisit the life of Jesus and the apostles' teachings.",
     durationDays: 90,
     tags: ["新约", "三个月", "初信友好"],
+    tagsEn: ["New Testament", "3 Months", "Beginner Friendly"],
     tasks: [
       { day: 1, readings: [{ book: "Mat", chapter: 1 }, { book: "Mat", chapter: 2 }, { book: "Mat", chapter: 3 }] },
       { day: 2, readings: [{ book: "Mat", chapter: 4 }, { book: "Mat", chapter: 5 }, { book: "Mat", chapter: 6 }] },

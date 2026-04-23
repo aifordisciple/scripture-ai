@@ -14,8 +14,12 @@ export function PlanTab() {
   const {
     activePlans, startPlan, toggleTaskCompleted, quitPlan, tabs, addTab, setActiveTab,
     customPlans, addCustomPlan, deleteCustomPlan, catchUpPlan, setReadingPlanContext, generateAiDevotional,
-    viewingPlanId, setViewingPlanId, apiConfig // [新增] 取出 apiConfig
+    viewingPlanId, setViewingPlanId, apiConfig, locale // [i18n] 取出 locale
   } = useBibleStore();
+
+  // [i18n] Locale-aware text helper
+  const t = (zh: string, en?: string) => locale === 'en' ? (en || zh) : zh;
+  const tArr = (zh: string[], en?: string[]) => locale === 'en' ? (en || zh) : zh;
 
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -54,7 +58,7 @@ export function PlanTab() {
              if (plan.savedDevotionals?.[task.day.toString()]) continue; // 之前已经生成过了
 
              // 找到了一个缺失导读的"天"，将其作为当前目标
-             targetTask = { planId: plan.planId, day: task.day, planTitle: planDetails.title, readings: task.readings };
+             targetTask = { planId: plan.planId, day: task.day, planTitle: t(planDetails.title, planDetails.titleEn), readings: task.readings };
              break;
           }
           if (targetTask) break; // 每次只锁死一个任务
@@ -159,7 +163,7 @@ export function PlanTab() {
                 <span className="text-sm uppercase tracking-widest">正在进行</span>
              </div>
              <h1 className="text-2xl md:text-3xl font-bold text-foreground font-serif flex items-center gap-3">
-                {planDetails.title}
+                {t(planDetails.title, planDetails.titleEn)}
                 {isTotallyCompleted && <Medal className="w-8 h-8 text-yellow-500 drop-shadow-md animate-bounce" />}
              </h1>
           </div>
@@ -211,7 +215,7 @@ export function PlanTab() {
                 if (steps.length > 1) { // >1 因为最后一个总是 completion
                     setReadingPlanContext({
                         planId: viewingPlanId,
-                        planTitle: planDetails.title,
+                        planTitle: t(planDetails.title, planDetails.titleEn),
                         day,
                         stepIndex: 0,
                         steps
@@ -398,7 +402,7 @@ export function PlanTab() {
                         <Medal className="w-7 h-7 text-white" />
                      </div>
                    )}
-                   <h3 className="text-xl font-bold text-indigo-900 dark:text-indigo-300 font-serif mb-1 pr-10">{plan.title}</h3>
+                   <h3 className="text-xl font-bold text-indigo-900 dark:text-indigo-300 font-serif mb-1 pr-10">{t(plan.title, plan.titleEn)}</h3>
                    <div className="flex justify-between items-center mt-auto pt-6">
                       <div className="flex-1 mr-4">
                         <div className="flex justify-between text-xs mb-1 font-medium text-slate-500"><span className="text-indigo-600">{progressPercent}%</span><span>{plan.durationDays} 天</span></div>
@@ -454,7 +458,7 @@ export function PlanTab() {
                  )}
                  <Medal className="w-10 h-10 text-yellow-400 mb-2 drop-shadow-sm" />
                  <h3 className="text-sm font-bold text-center font-serif text-slate-700 dark:text-slate-300 line-clamp-2 leading-snug">
-                   {plan!.title}
+                   {t(plan!.title, plan!.titleEn)}
                  </h3>
                  <span className="text-[10px] text-muted-foreground mt-2 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">已完成</span>
               </div>
@@ -518,15 +522,15 @@ export function PlanTab() {
              )}
              <div className="flex items-start justify-between mb-4 pr-6">
                 <div>
-                  <h3 className="text-lg font-bold text-foreground font-serif">{plan.title}</h3>
+                  <h3 className="text-lg font-bold text-foreground font-serif">{t(plan.title, plan.titleEn)}</h3>
                   <div className="flex items-center gap-2 mt-2">
-                     {plan.tags?.map((tag: string) => <span key={tag} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-md font-medium">{tag}</span>)}
+                     {tArr(plan.tags, plan.tagsEn)?.map((tag: string) => <span key={tag} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-md font-medium">{tag}</span>)}
                      <span className="text-xs text-muted-foreground ml-1">{plan.durationDays} 天</span>
                   </div>
                 </div>
                 <Target className="w-8 h-8 text-indigo-100 dark:text-indigo-900/50" />
              </div>
-             <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1 line-clamp-3">{plan.description}</p>
+             <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1 line-clamp-3">{t(plan.description, plan.descriptionEn)}</p>
              <Button onClick={() => { startPlan(plan.id); setViewingPlanId(plan.id); }} className="w-full gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white">
                <PlayCircle className="w-4 h-4" /> 开始计划
              </Button>
