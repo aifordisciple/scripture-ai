@@ -35,7 +35,7 @@ export function BookPicker({
   currentChapter,
   onSelect,
 }: BookPickerProps) {
-  const t = useTranslation();
+  const { t } = useTranslation();
 
   // 当前选中的约（旧约/新约）
   const [testament, setTestament] = useState<Testament>("old");

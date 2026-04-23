@@ -10,7 +10,7 @@ import { useTranslation } from "@/lib/i18n";
  * 旧约/新约切换 Tab
  */
 export function TestamentTabs({ testament, onChange }: TestamentTabsProps) {
-  const t = useTranslation();
+  const { t } = useTranslation();
 
   const tabs: { id: Testament; labelKey: string; count: number }[] = [
     { id: "old", labelKey: "sidebar.oldTestament", count: 39 },

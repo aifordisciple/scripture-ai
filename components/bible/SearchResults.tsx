@@ -16,7 +16,7 @@ interface SearchResultsProps {
 }
 
 export function SearchResults({ query, mode, cachedResults, onUpdateResults }: SearchResultsProps) {
-  const t = useTranslation();
+  const { t } = useTranslation();
   const [results, setResults] = useState<any[]>(cachedResults || []);
   const [loading, setLoading] = useState(!cachedResults);
   const [aiSummary, setAiSummary] = useState<string>('');
