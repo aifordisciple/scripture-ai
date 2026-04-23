@@ -39,6 +39,7 @@ const GroupPlanDailyFlow = dynamic(() => import("@/components/group/GroupPlanDai
 
 // --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
 const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -96,7 +97,7 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             )}
           >
             <span className="max-w-[120px] truncate select-none">
-              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? '📊 数据看板' : tab.type === 'highlights' ? '🖍️ 我的高亮' : tab.type === 'notes' ? '📝 我的笔记' : tab.type === 'cross-ref' ? '🔗 经文串珠' : tab.type === 'group' ? '👥 小组读经' : tab.type === 'atlas' ? '🗺️ 圣经地图' : tab.type === 'insights' ? '⭐ 我的收藏' : tab.type === 'theme-graph' ? '🕸️ 主题网络' : '📅 读经计划'}
+              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? `📊 ${t('tabs.dashboard')}` : tab.type === 'highlights' ? `🖍️ ${t('tabs.highlights')}` : tab.type === 'notes' ? `📝 ${t('tabs.notes')}` : tab.type === 'cross-ref' ? `🔗 ${t('tabs.crossref')}` : tab.type === 'group' ? `👥 ${t('tabs.group')}` : tab.type === 'atlas' ? `🗺️ ${t('tabs.atlas')}` : tab.type === 'insights' ? `⭐ ${t('tabs.insights')}` : tab.type === 'theme-graph' ? `🕸️ ${t('tabs.theme')}` : `📅 ${t('tabs.plan')}`}
             </span>
             <X
               className={cn(
@@ -379,7 +380,7 @@ export default function Home() {
       {/* Mobile Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={toggleSidebar}>
         <SheetContent side="left" className="p-0 w-80 bg-card border-r-0">
-          <SheetTitle className="sr-only">圣经目录</SheetTitle>
+          <SheetTitle className="sr-only">{t('reader.sidebar.title')}</SheetTitle>
           <Sidebar />
         </SheetContent>
       </Sheet>
@@ -564,7 +565,7 @@ export default function Home() {
                     "text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5",
                     showSettingsDropdown && "bg-black/5 dark:bg-white/10"
                   )}
-                  title="阅读设置"
+                  title={t('settings.readingSettings')}
                 >
                   <Settings className="h-4 w-4" />
                 </Button>
@@ -659,7 +660,7 @@ export default function Home() {
               </div>
 
               <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold rounded-full">
-                <Languages className="h-4 w-4" />{showEnglish ? (locale === 'zh' ? "中/英" : "Zh/En") : (locale === 'zh' ? "中" : "En")}
+                <Languages className="h-4 w-4" />{showEnglish ? (locale === 'zh' ? `${t('settings.chinese')}/${t('settings.english')}` : "Zh/En") : (locale === 'zh' ? t('settings.chinese') : "En")}
               </Button>
 
               <Button variant={locale === 'en' ? "secondary" : "ghost"} size="sm" onClick={() => {
@@ -668,7 +669,7 @@ export default function Home() {
                 // 切换到英文时自动开启双语对照，切换到中文时保持用户偏好
                 if (newLocale === 'en' && !showEnglish) toggleEnglish();
               }} className="gap-1 text-xs font-bold rounded-full">
-                {locale === 'zh' ? '中文' : 'EN'}
+                {locale === 'zh' ? t('settings.chinese') : 'EN'}
               </Button>
               <div className="mx-1 border-l h-5 border-border/50"></div>
 

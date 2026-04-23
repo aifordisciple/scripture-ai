@@ -19,5 +19,7 @@ export const settings = {
     enterFullscreen: '开启',
     tts: '语音朗读',
     readingSettings: '阅读设置',
+    enabled: '已开启',
+    disabled: '已关闭',
   },
 } as const
