@@ -45,6 +45,13 @@ export const ai = {
     immersiveHint: '轻触显示菜单',
     myRequest: '我的请求',
     chapterSuffix: ' 章 (全章摘要)',
+    queuedCount: '{count} 排队',
+    tutorShort: '导师',
+    sermonShort: '讲章',
+    studyGuideShort: '查经',
+    fontSize: '调整字体大小',
+    cancel: '取消',
+    save: '保存',
   },
   floatingMenu: {
     copy: '复制',

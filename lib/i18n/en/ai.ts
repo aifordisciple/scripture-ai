@@ -45,6 +45,13 @@ export const ai = {
     immersiveHint: 'Tap to show menu',
     myRequest: 'My Request',
     chapterSuffix: ' (Chapter Summary)',
+    queuedCount: '{count} queued',
+    tutorShort: 'Tutor',
+    sermonShort: 'Sermon',
+    studyGuideShort: 'Study',
+    fontSize: 'Adjust font size',
+    cancel: 'Cancel',
+    save: 'Save',
   },
   floatingMenu: {
     copy: 'Copy',

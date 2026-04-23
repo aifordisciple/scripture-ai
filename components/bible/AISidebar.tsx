@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react'
 
 import { useBibleStore } from '@/store/useBibleStore'
 import { BIBLE_BOOKS } from '@/lib/constants'
+import { useTranslation } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
@@ -40,6 +41,8 @@ export function AISidebar() {
     // AI 字体大小
     aiFontSize, setAiFontSize,
   } = useBibleStore()
+
+  const { t } = useTranslation()
 
   // UI 状态
   const [showSessionList, setShowSessionList] = useState(false)
@@ -86,7 +89,7 @@ export function AISidebar() {
     onError: (error) => {
       console.error("AI Error:", error)
       setAiGenerating(false)
-      failCurrentRequest(error.message || 'AI 生成失败')
+      failCurrentRequest(error.message || t('ai.aiGenerateFailed'))
     },
     onFinish: () => {
       setAiGenerating(false)
@@ -97,7 +100,7 @@ export function AISidebar() {
   // 显示session错误toast
   useEffect(() => {
     if (sessionError) {
-      addToast({ type: 'error', message: sessionError.message || '会话错误，请重试' });
+      addToast({ type: 'error', message: sessionError.message || t('ai.sessionError') });
     }
   }, [sessionError, addToast]);
 
@@ -161,7 +164,7 @@ export function AISidebar() {
         console.error("Failed to load sessions:", err)
         setSessionError({
           type: 'LOAD_FAILED',
-          message: '加载会话列表失败',
+          message: t('ai.sessionLoadFailed'),
           recoverable: true,
         })
         setSessionStatus('error')
@@ -233,7 +236,7 @@ export function AISidebar() {
   const savePendingSession = useCallback(async (tempId: string, firstMessage?: string): Promise<string | null> => {
     setSessionStatus('creating')
 
-    let title = '新对话'
+    let title = t('ai.newChat')
     let bookId: string | undefined
     let chapter: number | undefined
 
@@ -271,7 +274,7 @@ export function AISidebar() {
       console.error('Failed to save pending session:', error)
       setSessionError({
         type: 'CREATE_FAILED',
-        message: '创建会话失败',
+        message: t('ai.sessionCreateFailed'),
         recoverable: true,
       })
       setSessionStatus('error')
@@ -309,7 +312,7 @@ export function AISidebar() {
       console.error('Failed to load session messages:', error)
       setSessionError({
         type: 'LOAD_FAILED',
-        message: '无法加载对话历史',
+        message: t('ai.historyLoadFailed'),
         recoverable: true,
       })
       setSessionStatus('error')
@@ -400,7 +403,7 @@ export function AISidebar() {
 
   // 清空对话
   const handleClearChat = async () => {
-    if (confirm("确定要清空所有灵修对话历史吗？")) {
+    if (confirm(t('ai.clearAllConfirm'))) {
       setMessages([])
       await fetch('/api/chat/history', { method: 'DELETE' })
     }
@@ -454,11 +457,11 @@ export function AISidebar() {
       if (aiRequestTrigger.ref.verse > 0) {
         reference += `:${aiRequestTrigger.ref.verse}`
       } else {
-        reference += ` 章 (全章摘要)`
+        reference += t('ai.chapterSuffix')
       }
 
       const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n')
-      const enrichedPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**我的请求**：${aiRequestTrigger.prompt}`
+      const enrichedPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**${t('ai.myRequest')}**：${aiRequestTrigger.prompt}`
 
       append(
         { role: 'user', content: enrichedPrompt },
@@ -514,7 +517,7 @@ export function AISidebar() {
       let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`
       if (aiRequestTrigger.ref.verse > 0) reference += `:${aiRequestTrigger.ref.verse}`
       const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n')
-      finalPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**我的请求**：${prompt}`
+      finalPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**${t('ai.myRequest')}**：${prompt}`
     }
 
     append(
@@ -594,8 +597,8 @@ export function AISidebar() {
 
             {(currentAiRequest || aiQueue.length > 0) && (
               <span className="text-xs font-normal bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full">
-                {currentAiRequest?.status === 'processing' && '处理中'}
-                {aiQueue.length > 0 && ` · ${aiQueue.length} 排队`}
+                {currentAiRequest?.status === 'processing' && t('ai.processing')}
+                {aiQueue.length > 0 && ` · ${t('ai.queuedCount', { count: aiQueue.length })}`}
               </span>
             )}
           </div>
@@ -620,11 +623,11 @@ export function AISidebar() {
                 {aiMode === 'general' && <Sparkles className="w-3.5 h-3.5" />}
                 {aiMode === 'custom' && <Settings className="w-3.5 h-3.5" />}
                 <span className="hidden sm:inline">
-                  {aiMode === 'general' && '标准'}
-                  {aiMode === 'tutor' && '导师'}
-                  {aiMode === 'sermon' && '讲章'}
-                  {aiMode === 'study-guide' && '查经'}
-                  {aiMode === 'custom' && '自定义'}
+                  {aiMode === 'general' && t('ai.general')}
+                  {aiMode === 'tutor' && t('ai.tutorShort')}
+                  {aiMode === 'sermon' && t('ai.sermonShort')}
+                  {aiMode === 'study-guide' && t('ai.studyGuideShort')}
+                  {aiMode === 'custom' && t('ai.custom')}
                 </span>
               </button>
 
@@ -637,11 +640,11 @@ export function AISidebar() {
                     className="fixed top-20 right-20 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-[200] overflow-hidden"
                   >
                     {[
-                      { mode: 'general' as const, icon: Sparkles, label: '标准解读', color: 'text-slate-600' },
-                      { mode: 'tutor' as const, icon: GraduationCap, label: '苏格拉底导师', color: 'text-violet-600' },
-                      { mode: 'sermon' as const, icon: FileText, label: '讲章生成', color: 'text-orange-600' },
-                      { mode: 'study-guide' as const, icon: BookMarked, label: '查经材料', color: 'text-teal-600' },
-                      { mode: 'custom' as const, icon: Settings, label: '自定义', color: 'text-slate-600' },
+                      { mode: 'general' as const, icon: Sparkles, label: t('ai.generalDesc'), color: 'text-slate-600' },
+                      { mode: 'tutor' as const, icon: GraduationCap, label: t('ai.tutorDesc'), color: 'text-violet-600' },
+                      { mode: 'sermon' as const, icon: FileText, label: t('ai.sermonDesc'), color: 'text-orange-600' },
+                      { mode: 'study-guide' as const, icon: BookMarked, label: t('ai.studyGuideDesc'), color: 'text-teal-600' },
+                      { mode: 'custom' as const, icon: Settings, label: t('ai.custom'), color: 'text-slate-600' },
                     ].map(item => (
                       <button
                         key={item.mode}
@@ -670,7 +673,7 @@ export function AISidebar() {
                   "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors",
                   aiFontSize === 'medium' ? "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" : "text-blue-600 bg-blue-50 dark:bg-blue-900/20"
                 )}
-                title="调整字体大小"
+                title={t('ai.fontSize')}
               >
                 <Type className="w-3.5 h-3.5" />
               </button>
@@ -684,10 +687,10 @@ export function AISidebar() {
                     className="fixed top-20 right-32 w-32 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-[200] overflow-hidden"
                   >
                     {[
-                      { size: 'small' as const, label: '小' },
-                      { size: 'medium' as const, label: '中' },
-                      { size: 'large' as const, label: '大' },
-                      { size: 'xlarge' as const, label: '超大' },
+                      { size: 'small' as const, label: t('ai.fontSmall') },
+                      { size: 'medium' as const, label: t('ai.fontMedium') },
+                      { size: 'large' as const, label: t('ai.fontLarge') },
+                      { size: 'xlarge' as const, label: t('ai.fontXLarge') },
                     ].map(item => (
                       <button
                         key={item.size}
@@ -707,7 +710,7 @@ export function AISidebar() {
               </AnimatePresence>
             </div>
 
-            <Button variant="ghost" size="icon" onClick={handleClearChat} title="清空">
+            <Button variant="ghost" size="icon" onClick={handleClearChat} title={t('ai.clear')}>
               <Eraser className="w-4 h-4 text-slate-400" />
             </Button>
             <Button variant="ghost" size="icon" onClick={() => { setAiOpen(false); clearSelection(); }} className="dark:text-slate-400 dark:hover:bg-slate-800">
@@ -742,7 +745,7 @@ export function AISidebar() {
           {isImmersive && (
             <div className="fixed top-6 left-1/2 -translate-x-1/2 md:left-auto md:right-[calc(var(--sidebar-width)/2)] md:translate-x-1/2 z-50 pointer-events-none animate-in fade-in duration-500">
               <div className="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
-                轻触显示菜单
+                {t('ai.immersiveHint')}
               </div>
             </div>
           )}
@@ -819,6 +822,7 @@ function RenameModal({
   onSubmit: () => void
   onTitleChange: (value: string) => void
 }) {
+  const { t } = useTranslation()
   if (!show) return null
 
   return (
@@ -839,14 +843,14 @@ function RenameModal({
         >
           <h3 className="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
             <Edit className="w-5 h-5 text-blue-500" />
-            重命名对话
+            {t('ai.renameChat')}
           </h3>
           <div className="flex gap-2 mb-4">
             <input
               type="text"
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
-              placeholder="输入对话标题..."
+              placeholder={t('ai.renamePlaceholder')}
               className="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-slate-900 dark:text-white"
               autoFocus
               onKeyDown={(e) => {
@@ -866,14 +870,14 @@ function RenameModal({
               onClick={onClose}
               className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
             >
-              取消
+              {t('ai.cancel')}
             </button>
             <button
               onClick={onSubmit}
               disabled={!title.trim()}
               className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
-              保存
+              {t('ai.save')}
             </button>
           </div>
         </motion.div>
@@ -894,6 +898,7 @@ function DeleteConfirmModal({
   onClose: () => void
   onConfirm: () => void
 }) {
+  const { t } = useTranslation()
   if (!show || !session) return null
 
   return (
@@ -917,25 +922,25 @@ function DeleteConfirmModal({
               <Trash2 className="w-5 h-5 text-red-500" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">删除对话</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">此操作无法撤销</p>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('ai.deleteChat')}</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('ai.deleteChatHint')}</p>
             </div>
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-300 mb-5 px-1">
-            确定要删除对话「<span className="font-medium">{session.title || '未命名对话'}</span>」吗？
+            {t('ai.deleteChatConfirm', { title: session.title || t('ai.unnamedChat') })}
           </p>
           <div className="flex justify-end gap-2">
             <button
               onClick={onClose}
               className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
             >
-              取消
+              {t('ai.cancel')}
             </button>
             <button
               onClick={onConfirm}
               className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl transition-colors shadow-sm"
             >
-              确认删除
+              {t('ai.confirmDelete')}
             </button>
           </div>
         </motion.div>
