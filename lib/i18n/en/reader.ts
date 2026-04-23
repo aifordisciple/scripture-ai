@@ -20,6 +20,9 @@ export const reader = {
     fullscreen: 'Fullscreen',
     settings: 'Reading Settings',
     searchPlaceholder: 'Search verses, questions... ( / or Cmd+K )',
+    aiInterpretPrompt: 'Please provide an in-depth interpretation of the following scripture.',
+    prayerPrompt: 'Based on the inspiration of this passage, please write a prayer for me. The prayer should include: praise for His attributes, repentance for sins, gratitude for grace, and specific petitions. The tone should be sincere and intimate.',
+    fullChapter: '[{book} Ch. {chapter}] Full Chapter',
   },
   sidebar: {
     title: 'Bible Contents',
@@ -29,5 +32,6 @@ export const reader = {
     chapters: 'Ch.',
     familyGroup: 'Family/Group Reading',
     familyGroupDesc: 'Read the Bible with family and friends',
+    brandName: 'ScriptureAI',
   },
 } as const

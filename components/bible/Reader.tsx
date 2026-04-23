@@ -40,7 +40,7 @@ const slideVariants = {
 
 export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const searchParams = useSearchParams();
-  const { locale } = useTranslation();
+  const { t, locale } = useTranslation();
 
   // Version linkage: locale determines primary and secondary Bible versions
   // zh → CUV primary, KJV secondary; en → KJV primary, CUV secondary
@@ -183,7 +183,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                  const context = verses.filter(v => v.version === primaryVersion).map(v => `[${v.verse}] ${v.content}`).join('\n');
                  const ref = { bookName: primaryVerses[0].bookName, chapter: primaryVerses[0].chapter, verse: primaryVerses[0].verse };
 
-                 state.enqueueAI("请深入解读以下经文。", content, context, ref);
+                 state.enqueueAI(t('reader.aiInterpretPrompt'), content, context, ref);
                  state.setAiOpen(true);
                  clearSelection();
                  setIsMenuVisible(false);
@@ -203,7 +203,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
               const context = verses.filter(v => v.version === primaryVersion).map(v => `[${v.verse}] ${v.content}`).join('\n');
               const ref = { bookName: primaryVerses[0].bookName, chapter: primaryVerses[0].chapter, verse: primaryVerses[0].verse };
 
-              state.enqueueAI("请基于这段经文的感动，为我写一篇祷告文。祷告应包含：对他属性的赞美、对罪的悔改、对恩典的感谢以及具体的祈求。语气要真诚、亲切。", content, context, ref);
+              state.enqueueAI(t('reader.prayerPrompt'), content, context, ref);
               state.setAiOpen(true);
               clearSelection();
               setIsMenuVisible(false);
@@ -218,7 +218,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
           const primaryVersesForSummary = verses.filter(v => v.version === primaryVersion);
           if (primaryVersesForSummary.length > 0) {
             const fullContext = primaryVersesForSummary.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
-            state.enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), `【${getBookDisplayName(primaryVersesForSummary[0].bookId, locale)} ${locale === 'en' ? 'Ch.' : '第'} ${primaryVersesForSummary[0].chapter} ${locale === 'en' ? '' : '章'}】${locale === 'en' ? 'Full Chapter' : '全章'}`, fullContext, { bookName: primaryVersesForSummary[0].bookName, chapter: primaryVersesForSummary[0].chapter, verse: 0 });
+            state.enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), t('reader.fullChapter', { book: getBookDisplayName(primaryVersesForSummary[0].bookId, locale), chapter: primaryVersesForSummary[0].chapter }), fullContext, { bookName: primaryVersesForSummary[0].bookName, chapter: primaryVersesForSummary[0].chapter, verse: 0 });
             state.setAiOpen(true);
           }
           break;
@@ -307,7 +307,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       
       {/* 左侧导航 */}
       <div className="hidden md:flex flex-1 self-stretch group items-start justify-center">
-        <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }} title="上一章">
+        <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }} title={t('reader.prevChapter')}>
            <div className="glass-panel p-3 rounded-full text-muted-foreground hover:text-foreground hover:scale-110 transition-all duration-300">
               <ChevronLeft className="w-8 h-8 opacity-50 group-hover:opacity-100" />
            </div>
@@ -337,14 +337,14 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                     <p className="text-lg font-medium text-destructive mb-2">{error}</p>
                     <Button variant="outline" onClick={refetch} className="mt-4">
                         <Loader2 className="w-4 h-4 mr-2" />
-                        {locale === 'en' ? 'Retry' : '重试'}
+                        {t('common.retry')}
                     </Button>
                 </div>
             ) : renderList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
                     <BookOpenCheck className="w-16 h-16 text-muted-foreground/50 mb-4" />
-                    <p className="text-lg font-medium text-muted-foreground mb-2">{locale === 'en' ? 'No content available for this chapter' : '此章节暂无经文内容'}</p>
-                    <p className="text-sm text-muted-foreground/70">{locale === 'en' ? 'This chapter may not be loaded in the database yet' : '可能数据库尚未加载此章节'}</p>
+                    <p className="text-lg font-medium text-muted-foreground mb-2">{t('reader.noContent')}</p>
+                    <p className="text-sm text-muted-foreground/70">{t('reader.noContentHint')}</p>
                 </div>
             ) : (
                 <>  
@@ -408,11 +408,11 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                                     const content = mainVerse.content;
                                     const context = verses.filter(v => v.version === primaryVersion).map(v => `[${v.verse}] ${v.content}`).join('\n');
                                     const ref = { bookName: mainVerse.bookName, chapter: mainVerse.chapter, verse: mainVerse.verse };
-                                    enqueueAI("请深入解读以下经文。", content, context, ref);
+                                    enqueueAI(t('reader.aiInterpretPrompt'), content, context, ref);
                                     useBibleStore.getState().setAiOpen(true);
                                 }}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/verse:opacity-100 transition-all duration-200 p-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-500 dark:text-blue-400 hover:scale-110 active:scale-95"
-                                title="AI 解读此节经文"
+                                title={t('reader.aiInterpret')}
                             >
                                 <Sparkles className="w-3.5 h-3.5" />
                             </button>
@@ -429,7 +429,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                             const primaryVerses = verses.filter(v => v.version === primaryVersion);
                             if (primaryVerses.length > 0) {
                                 const fullContext = primaryVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
-                                enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), `【${getBookDisplayName(primaryVerses[0].bookId, locale)} ${locale === 'en' ? 'Ch.' : '第'} ${primaryVerses[0].chapter} ${locale === 'en' ? '' : '章'}】${locale === 'en' ? 'Full Chapter' : '全章'}`, fullContext, { bookName: primaryVerses[0].bookName, chapter: primaryVerses[0].chapter, verse: 0 });
+                                enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), t('reader.fullChapter', { book: getBookDisplayName(primaryVerses[0].bookId, locale), chapter: primaryVerses[0].chapter }), fullContext, { bookName: primaryVerses[0].bookName, chapter: primaryVerses[0].chapter, verse: 0 });
                             }
                         }} 
                         className={cn(
@@ -440,7 +440,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         )}
                     >
                         <BookOpenCheck className="w-5 h-5 text-primary group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300" />
-                        {locale === 'en' ? `Read Ch. ${chapter} Essence` : `阅读第 ${chapter} 章精意`}
+                        {t('reader.chapterSummary', { chapter })}
                     </button>
                     </div>
                 </>
@@ -451,7 +451,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
       {/* 右侧导航 */}
       <div className="hidden md:flex flex-1 self-stretch group items-start justify-center">
-        <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleNextChapter(); }} title="下一章">
+        <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleNextChapter(); }} title={t('reader.nextChapter')}>
            <div className="glass-panel p-3 rounded-full text-muted-foreground hover:text-foreground hover:scale-110 transition-all duration-300">
               <ChevronRight className="w-8 h-8 opacity-50 group-hover:opacity-100" />
            </div>

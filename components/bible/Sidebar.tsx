@@ -7,8 +7,10 @@ import { useBibleStore } from "@/store/useBibleStore";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Book, ChevronRight, Search, X, Library, Users } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export function Sidebar() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { tabs, activeTabId, updateActiveTab, isSidebarOpen, toggleSidebar, setActiveTab, addTab } = useBibleStore();
   
@@ -159,14 +161,14 @@ export function Sidebar() {
            <div className="p-1.5 bg-primary/10 rounded-lg">
              <Library className="w-5 h-5 text-primary" />
            </div>
-           <h2 className="text-xl font-serif font-bold text-foreground tracking-widest select-none">圣经目录</h2>
+           <h2 className="text-xl font-serif font-bold text-foreground tracking-widest select-none">{t('sidebar.title')}</h2>
         </div>
         
         <div className="relative group">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <input 
             type="text" 
-            placeholder="搜索卷名拼音或汉字..." 
+            placeholder={t('sidebar.searchPlaceholder')} 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-secondary/60 text-foreground text-sm rounded-2xl pl-10 pr-10 py-2.5 border border-border/50 focus:outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/60"
@@ -184,8 +186,8 @@ export function Sidebar() {
 
       {/* 书卷列表滚动区 */}
       <div className="flex-1 overflow-y-auto no-scrollbar pt-6 pb-28">
-         {renderBookList(oldTestament, "旧约全书")}
-         {renderBookList(newTestament, "新约全书")}
+         {renderBookList(oldTestament, t('sidebar.oldTestament'))}
+         {renderBookList(newTestament, t('sidebar.newTestament'))}
          
          {/* 底部留白插画或签名空间 */}
          {searchQuery === "" && (
@@ -209,8 +211,8 @@ export function Sidebar() {
                   <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="font-bold text-sm text-foreground">家庭/小组读经</p>
-                  <p className="text-xs text-muted-foreground">与家人朋友一起读经</p>
+                  <p className="font-bold text-sm text-foreground">{t('sidebar.familyGroup')}</p>
+                  <p className="text-xs text-muted-foreground">{t('sidebar.familyGroupDesc')}</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
               </button>
@@ -218,7 +220,7 @@ export function Sidebar() {
 
             <div className="flex flex-col items-center justify-center opacity-30 mt-4 mb-8 pointer-events-none select-none">
                 <Library className="w-8 h-8 mb-2" />
-                <span className="text-[10px] font-serif tracking-[0.2em] uppercase">AI读</span>
+                <span className="text-[10px] font-serif tracking-[0.2em] uppercase">{t('sidebar.brandName')}</span>
             </div>
             </>
          )}

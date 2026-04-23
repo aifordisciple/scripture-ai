@@ -20,6 +20,9 @@ export const reader = {
     fullscreen: '全屏模式',
     settings: '阅读设置',
     searchPlaceholder: '搜索经文、问题... ( / 或 Cmd+K )',
+    aiInterpretPrompt: '请深入解读以下经文。',
+    prayerPrompt: '请基于这段经文的感动，为我写一篇祷告文。祷告应包含：对他属性的赞美、对罪的悔改、对恩典的感谢以及具体的祈求。语气要真诚、亲切。',
+    fullChapter: '【{book} 第 {chapter} 章】全章',
   },
   sidebar: {
     title: '圣经目录',
@@ -29,5 +32,6 @@ export const reader = {
     chapters: '章',
     familyGroup: '家庭/小组读经',
     familyGroupDesc: '与家人朋友一起读经',
+    brandName: 'AI读',
   },
 } as const

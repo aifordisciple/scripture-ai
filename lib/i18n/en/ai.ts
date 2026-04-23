@@ -71,5 +71,13 @@ export const ai = {
     aiDeep: 'AI Deep Interpret',
     aiMore: 'More AI Modes',
     mark: 'Mark',
+    clearHighlight: 'Clear highlight',
+    highlightColor: 'Highlight as {color}',
+    addNote: 'Add Note',
+    shareVerse: 'Share Verse',
+    viewCrossRef: 'View Cross Reference',
+    viewAtlas: 'View Map',
+    copiedToClipboard: 'Copied to clipboard',
+    copyVerse: 'Copy Verse',
   },
 } as const

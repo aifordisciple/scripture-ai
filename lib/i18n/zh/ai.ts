@@ -71,5 +71,13 @@ export const ai = {
     aiDeep: 'AI 深度解读',
     aiMore: '更多 AI 模式',
     mark: '标记',
+    clearHighlight: '清除高亮',
+    highlightColor: '高亮为{color}色',
+    addNote: '添加笔记',
+    shareVerse: '分享经文',
+    viewCrossRef: '查看串珠',
+    viewAtlas: '查看地图',
+    copiedToClipboard: '已复制到剪贴板',
+    copyVerse: '复制经文',
   },
 } as const

@@ -8,6 +8,7 @@ import { useBibleStore } from "@/store/useBibleStore";
 import { useSession } from "next-auth/react";
 import { THEOLOGICAL_PROMPTS } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/lib/i18n";
 
 interface FloatingMenuProps {
   visible: boolean;
@@ -33,13 +34,14 @@ const COLORS = [
 
 // AI 快捷选项
 const AI_OPTIONS = [
-  { id: 'detail', label: '深度解读', prompt: THEOLOGICAL_PROMPTS[0].prompt },
-  { id: 'original', label: '原文词义', prompt: THEOLOGICAL_PROMPTS[2].prompt },
-  { id: 'application', label: '生活应用', prompt: THEOLOGICAL_PROMPTS[3].prompt },
-  { id: 'prayer', label: '祷告回应', prompt: THEOLOGICAL_PROMPTS[4].prompt },
+  { id: 'detail', labelKey: 'floatingMenu.deepInterpret', prompt: THEOLOGICAL_PROMPTS[0].prompt },
+  { id: 'original', labelKey: 'floatingMenu.originalMeaning', prompt: THEOLOGICAL_PROMPTS[2].prompt },
+  { id: 'application', labelKey: 'floatingMenu.lifeApply', prompt: THEOLOGICAL_PROMPTS[3].prompt },
+  { id: 'prayer', labelKey: 'floatingMenu.prayerRespond', prompt: THEOLOGICAL_PROMPTS[4].prompt },
 ];
 
 export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onCrossRef, onAtlas, showAbove = true }: FloatingMenuProps) {
+  const { t } = useTranslation();
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showAiSubmenu, setShowAiSubmenu] = useState(false);
@@ -176,7 +178,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
     >
       {/* 1. 颜色选择区 */}
       <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-medium text-slate-400">标记</span>
+        <span className="text-xs font-medium text-slate-400">{t('floatingMenu.mark')}</span>
         <div className="flex gap-2">
             {COLORS.map((c) => (
             <button
@@ -186,7 +188,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
                 "w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center",
                 c.bg, c.border
                 )}
-                aria-label={c.id === 'none' ? '清除高亮' : `高亮为${c.id}色`}
+                aria-label={c.id === 'none' ? t('floatingMenu.clearHighlight') : t('floatingMenu.highlightColor', { color: c.id })}
             >
                 {c.icon && <X className="w-3 h-3 text-slate-500" />}
             </button>
@@ -203,10 +205,10 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
-            aria-label="AI深度解读"
+            aria-label={t('floatingMenu.aiDeep')}
           >
             <Sparkles className="w-4 h-4 fill-current animate-pulse" />
-            <span className="font-bold text-sm">AI 深度解读</span>
+            <span className="font-bold text-sm">{t('floatingMenu.aiDeep')}</span>
           </button>
           {/* 下拉箭头按钮 */}
           <button
@@ -219,8 +221,8 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
               "text-white",
               "border-l border-white/20"
             )}
-            aria-label="更多AI模式"
-            title="更多 AI 模式"
+            aria-label={t('floatingMenu.aiMore')}
+            title={t('floatingMenu.aiMore')}
           >
             {showAiSubmenu ? (
               <ChevronUp className="w-4 h-4" />
@@ -260,7 +262,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
                       "border border-slate-200 dark:border-slate-600"
                     )}
                   >
-                    {option.label}
+                    {t(option.labelKey)}
                   </button>
                 ))}
                 <button
@@ -277,7 +279,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
                   )}
                 >
                   <Sparkles className="w-3 h-3" />
-                  更多模式...
+                  {t('floatingMenu.moreModes')}
                 </button>
               </div>
             </motion.div>
@@ -292,10 +294,10 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
           className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-          aria-label="添加笔记"
+          aria-label={t('floatingMenu.addNote')}
         >
           <PenLine className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
-          <span className="text-[10px] text-slate-500">笔记</span>
+          <span className="text-[10px] text-slate-500">{t('floatingMenu.note')}</span>
         </button>
 
         <button
@@ -303,10 +305,10 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
           className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-          aria-label="分享经文"
+          aria-label={t('floatingMenu.shareVerse')}
         >
           <Share2 className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
-          <span className="text-[10px] text-slate-500">分享</span>
+          <span className="text-[10px] text-slate-500">{t('floatingMenu.share')}</span>
         </button>
 
         {onCrossRef && (
@@ -315,10 +317,10 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
             className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-            aria-label="查看串珠"
+            aria-label={t('floatingMenu.viewCrossRef')}
           >
             <GitBranch className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
-            <span className="text-[10px] text-slate-500">串珠</span>
+            <span className="text-[10px] text-slate-500">{t('floatingMenu.crossRef')}</span>
           </button>
         )}
 
@@ -328,10 +330,10 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
             className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-            aria-label="查看地图"
+            aria-label={t('floatingMenu.viewAtlas')}
           >
             <Map className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mb-1" />
-            <span className="text-[10px] text-slate-500">地图</span>
+            <span className="text-[10px] text-slate-500">{t('floatingMenu.atlas')}</span>
           </button>
         )}
 
@@ -340,11 +342,11 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
           className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-          aria-label={copied ? "已复制到剪贴板" : "复制经文"}
+          aria-label={copied ? t('floatingMenu.copiedToClipboard') : t('floatingMenu.copyVerse')}
         >
           <Copy className={cn("w-4 h-4 mb-1", copied ? "text-green-600" : "text-slate-500 dark:text-slate-400")} />
           <span className={cn("text-[10px]", copied ? "text-green-600 font-bold" : "text-slate-500")}>
-            {copied ? "已复制" : "复制"}
+            {copied ? t('floatingMenu.copied') : t('floatingMenu.copy')}
           </span>
         </button>
       </div>
