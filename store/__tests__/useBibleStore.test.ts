@@ -83,12 +83,12 @@ describe('useBibleStore', () => {
       expect(useBibleStore.getState().lineHeight).toBe(2.0)
     })
 
-    it('manages showEnglish', () => {
-      const { toggleEnglish } = useBibleStore.getState()
+    it('manages showDualVersion', () => {
+      const { toggleDualVersion } = useBibleStore.getState()
 
-      const initial = useBibleStore.getState().showEnglish
-      toggleEnglish()
-      expect(useBibleStore.getState().showEnglish).toBe(!initial)
+      const initial = useBibleStore.getState().showDualVersion
+      toggleDualVersion()
+      expect(useBibleStore.getState().showDualVersion).toBe(!initial)
     })
   })
 

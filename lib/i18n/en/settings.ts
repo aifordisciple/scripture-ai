@@ -74,5 +74,6 @@ export const settings = {
     saveSettings: 'Save Settings',
     saveFailed: 'Save failed, please try again',
     browserNotifyDenied: 'Browser notification permission denied. Please allow notifications in your browser settings.',
+    bibleVersion: 'Bible Version',
   },
 } as const

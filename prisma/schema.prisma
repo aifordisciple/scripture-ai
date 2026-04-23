@@ -164,7 +164,8 @@ model UserSetting {
   soundNotify         Boolean @default(true)  // 声音提醒
 
   // [新增] 国际化语言设置
-  locale String? // 'zh' | 'en', null = default Chinese
+  locale       String? // 'zh' | 'en', null = default Chinese
+  bibleVersion String  @default("CUV") // 'CUV' | 'KJV', defaults from locale but overridable
 }
 
 model Highlight {

@@ -9,7 +9,7 @@ import { Sidebar } from "@/components/bible/Sidebar";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen, Moon, Sun, ChevronDown, Type, Calendar } from "lucide-react";
+import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen, BookOpenCheck, Moon, Sun, ChevronDown, Type, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
@@ -143,7 +143,7 @@ export default function Home() {
     isDesktopSidebarOpen, toggleDesktopSidebar,
     isAiOpen, setAiOpen,
     showDualVersion, toggleDualVersion,
-    locale, setLocale,
+    locale, setLocale, bibleVersion, setBibleVersion,
     lineHeight, setLineHeight,
     tabs, activeTabId, setActiveTab, addTab, closeTab, updateActiveTab,
     sidebarWidth,
@@ -461,6 +461,24 @@ export default function Home() {
               </div>
             </div>
 
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground font-medium">{t('settings.bibleVersion')}</span>
+              <div className="flex bg-secondary/50 p-1 rounded-lg">
+                <button
+                  onClick={() => setBibleVersion('CUV')}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all", bibleVersion === 'CUV' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                >
+                  {locale === 'en' ? 'CUV' : '和合本'}
+                </button>
+                <button
+                  onClick={() => setBibleVersion('KJV')}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all", bibleVersion === 'KJV' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                >
+                  KJV
+                </button>
+              </div>
+            </div>
+
             <div className="pt-2">
               <SyncSettings />
             </div>
@@ -670,6 +688,9 @@ export default function Home() {
                 if (newLocale === 'en' && !showDualVersion) toggleDualVersion();
               }} className="gap-1 text-xs font-bold rounded-full">
                 {locale === 'zh' ? t('settings.chinese') : 'EN'}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-bold rounded-full">
+                <BookOpenCheck className="h-4 w-4" />{bibleVersion}
               </Button>
               <div className="mx-1 border-l h-5 border-border/50"></div>
 

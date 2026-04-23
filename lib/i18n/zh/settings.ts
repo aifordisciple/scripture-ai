@@ -74,5 +74,6 @@ export const settings = {
     saveSettings: '保存设置',
     saveFailed: '保存失败，请重试',
     browserNotifyDenied: '浏览器通知权限被拒绝。请在浏览器设置中允许通知。',
+    bibleVersion: '圣经版本',
   },
 } as const
