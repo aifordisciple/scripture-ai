@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
+import { useTranslation } from "@/lib/i18n";
 import {
   Users, Plus, ChevronLeft, Settings, Crown, Calendar,
   BookOpen, Trophy, MessageCircle, Ticket, Loader2, UserCog, BarChart3, Activity, LogIn
@@ -75,6 +76,7 @@ interface GroupPlan {
 export function GroupTab() {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { t } = useTranslation();
 
   // 从全局 store 获取选择状态（用于跨标签页保持）
   const { selectedGroupForPlan, selectedPlanId, setSelectedGroupForPlan, setSelectedPlanId } = useBibleStore();
@@ -187,7 +189,7 @@ export function GroupTab() {
       }
     } catch (error) {
       console.error("Failed to create group:", error);
-      alert("创建小组失败，请稍后重试");
+      alert(t('group.createFailed'));
     } finally {
       setCreating(false);
     }
@@ -204,7 +206,7 @@ export function GroupTab() {
       if (data.success) {
         fetchGroups();
       } else {
-        alert(data.error || "加入失败");
+        alert(data.error || t('group.joinFailed'));
       }
     } catch (error) {
       console.error("Failed to join group:", error);
@@ -212,7 +214,7 @@ export function GroupTab() {
   };
 
   const leaveGroup = async (churchId: string) => {
-    if (!confirm("确定要离开这个小组吗？")) return;
+    if (!confirm(t('group.leaveConfirm'))) return;
     try {
       const res = await fetch(`/api/church/${churchId}`, {
         method: "POST",
@@ -238,7 +240,7 @@ export function GroupTab() {
     return (
       <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8 flex flex-col items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-4" />
-        <p className="text-muted-foreground">加载中...</p>
+        <p className="text-muted-foreground">{t('group.loading')}</p>
       </div>
     );
   }
@@ -252,18 +254,18 @@ export function GroupTab() {
             <Users className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">家庭/小组读经</h1>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('group.title')}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              与家人、朋友一起读经，互相鼓励，共同成长。
+              {t('group.subtitle')}
             </p>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-center py-20">
           <LogIn className="w-16 h-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-bold text-foreground mb-2">请先登录</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2">{t('group.loginRequired')}</h2>
           <p className="text-muted-foreground text-center max-w-md mb-6">
-            登录后即可创建或加入小组，与弟兄姊妹一起读经、分享和成长。
+            {t('group.loginRequiredDesc')}
           </p>
           <Button
             onClick={() => {
@@ -272,7 +274,7 @@ export function GroupTab() {
             className="gap-2"
           >
             <LogIn className="w-4 h-4" />
-            立即登录
+            {t('group.loginNow')}
           </Button>
         </div>
       </div>
@@ -307,7 +309,7 @@ export function GroupTab() {
           }}
           className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm font-medium"
         >
-          <ChevronLeft className="w-4 h-4" /> 返回小组列表
+          <ChevronLeft className="w-4 h-4" /> {t('group.backToList')}
         </button>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
@@ -315,7 +317,7 @@ export function GroupTab() {
             <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold mb-2">
               <Users className="w-5 h-5" />
               <span className="text-sm uppercase tracking-widest">
-                {isAdmin ? "管理小组" : "我的小组"}
+                {isAdmin ? t('group.manageGroup') : t('group.myGroup')}
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground font-serif">
@@ -335,7 +337,7 @@ export function GroupTab() {
                 onClick={() => leaveGroup(selectedGroup.churchId)}
                 className="text-red-500 hover:text-red-600"
               >
-                退出小组
+                {t('group.leaveGroup')}
               </Button>
             )}
           </div>
@@ -344,23 +346,23 @@ export function GroupTab() {
         <Tabs defaultValue="plans" className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="plans" className="gap-2">
-              <Calendar className="w-4 h-4" /> 读经计划
+              <Calendar className="w-4 h-4" /> {t('group.tabPlans')}
             </TabsTrigger>
             <TabsTrigger value="activity" className="gap-2">
-              <Activity className="w-4 h-4" /> 动态
+              <Activity className="w-4 h-4" /> {t('group.tabActivity')}
             </TabsTrigger>
             <TabsTrigger value="leaderboard" className="gap-2">
-              <Trophy className="w-4 h-4" /> 排行榜
+              <Trophy className="w-4 h-4" /> {t('group.tabLeaderboard')}
             </TabsTrigger>
             <TabsTrigger value="chat" className="gap-2">
-              <MessageCircle className="w-4 h-4" /> 交流
+              <MessageCircle className="w-4 h-4" /> {t('group.tabChat')}
             </TabsTrigger>
             <TabsTrigger value="stats" className="gap-2">
-              <BarChart3 className="w-4 h-4" /> 统计
+              <BarChart3 className="w-4 h-4" /> {t('group.tabStats')}
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="manage" className="gap-2">
-                <UserCog className="w-4 h-4" /> 管理
+                <UserCog className="w-4 h-4" /> {t('group.tabManage')}
               </TabsTrigger>
             )}
           </TabsList>
@@ -375,8 +377,8 @@ export function GroupTab() {
             {groupPlans.length === 0 ? (
               <div className="text-center text-muted-foreground py-12">
                 <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>暂无读经计划</p>
-                {isAdmin && <p className="text-sm mt-2">点击上方按钮创建第一个计划</p>}
+                <p>{t('group.noPlans')}</p>
+                {isAdmin && <p className="text-sm mt-2">{t('group.createFirstPlan')}</p>}
               </div>
             ) : (
               <div className="grid gap-4">
@@ -403,7 +405,7 @@ export function GroupTab() {
                         </div>
                         {plan.source === "AI_GENERATED" && (
                           <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full">
-                            AI 生成
+                            {t('group.aiGenerated')}
                           </span>
                         )}
                       </div>
@@ -411,13 +413,13 @@ export function GroupTab() {
                         <p className="text-sm text-muted-foreground mb-3">{plan.description}</p>
                       )}
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{plan.tasks ? JSON.parse(plan.tasks).length : plan.dailyChapters.length} 天</span>
+                        <span>{t('group.days', { count: plan.tasks ? JSON.parse(plan.tasks).length : plan.dailyChapters.length })}</span>
                         <span>•</span>
-                        <span>{plan._count?.progress || 0} 人参与</span>
+                        <span>{t('group.participants', { count: plan._count?.progress || 0 })}</span>
                         {plan.mode === "CHALLENGE" && (
                           <>
                             <span>•</span>
-                            <span className="text-orange-600 dark:text-orange-400 font-medium">挑战模式</span>
+                            <span className="text-orange-600 dark:text-orange-400 font-medium">{t('group.challengeMode')}</span>
                           </>
                         )}
                       </div>
@@ -435,7 +437,7 @@ export function GroupTab() {
           <TabsContent value="leaderboard">
             {groupPlans.length > 0 ? (
               <div className="space-y-4">
-                <p className="text-muted-foreground">选择一个计划查看排行榜：</p>
+                <p className="text-muted-foreground">{t('group.selectPlanLeaderboard')}</p>
                 {groupPlans.map((plan) => (
                   <Button
                     key={plan.id}
@@ -450,7 +452,7 @@ export function GroupTab() {
             ) : (
               <div className="text-center text-muted-foreground py-12">
                 <Trophy className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>暂无排行数据</p>
+                <p>{t('group.noLeaderboard')}</p>
               </div>
             )}
           </TabsContent>
@@ -508,9 +510,9 @@ export function GroupTab() {
           <Users className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">家庭/小组读经</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('group.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            与家人、朋友一起读经，互相鼓励，共同成长。
+            {t('group.subtitle')}
           </p>
         </div>
       </div>
@@ -520,28 +522,28 @@ export function GroupTab() {
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
-              <Plus className="w-4 h-4" /> 创建小组
+              <Plus className="w-4 h-4" /> {t('group.createGroup')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>创建家庭/小组</DialogTitle>
+              <DialogTitle>{t('group.createGroupTitle')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label>小组名称</Label>
+                <Label>{t('group.groupName')}</Label>
                 <Input
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
-                  placeholder="例如：家庭读经小组"
+                  placeholder={t('group.groupNamePlaceholder')}
                 />
               </div>
               <div className="space-y-2">
-                <Label>简介（可选）</Label>
+                <Label>{t('group.groupDesc')}</Label>
                 <Input
                   value={newGroupDesc}
                   onChange={(e) => setNewGroupDesc(e.target.value)}
-                  placeholder="小组介绍..."
+                  placeholder={t('group.groupDescPlaceholder')}
                 />
               </div>
               <Button
@@ -552,7 +554,7 @@ export function GroupTab() {
                 {creating ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : null}
-                创建小组
+                {t('group.creating')}
               </Button>
             </div>
           </DialogContent>
@@ -570,7 +572,7 @@ export function GroupTab() {
           {myGroups.length > 0 && (
             <div className="mb-12">
               <h2 className="text-lg font-bold text-foreground mb-4">
-                我的小组 ({myGroups.length})
+                {t('group.myGroups', { count: myGroups.length })}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {myGroups.map((membership) => (
@@ -593,7 +595,7 @@ export function GroupTab() {
           {publicGroups.length > 0 && (
             <div>
               <h2 className="text-lg font-bold text-foreground mb-4">
-                发现公开小组
+                {t('group.discoverPublic')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {publicGroups.map((church) => (
@@ -614,8 +616,8 @@ export function GroupTab() {
           {myGroups.length === 0 && publicGroups.length === 0 && (
             <div className="text-center text-muted-foreground py-16">
               <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium mb-2">还没有加入任何小组</p>
-              <p className="text-sm">创建一个新小组，或通过邀请码加入已有的小组</p>
+              <p className="text-lg font-medium mb-2">{t('group.emptyNoGroup')}</p>
+              <p className="text-sm">{t('group.emptyHint')}</p>
             </div>
           )}
         </>

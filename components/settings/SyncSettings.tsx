@@ -2,6 +2,7 @@
 "use client";
 
 import { useBibleStore } from "@/store/useBibleStore";
+import { useTranslation } from "@/lib/i18n";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Check, AlertCircle, Cloud, CloudOff } from "lucide-react";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 export function SyncSettings() {
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const {
     syncMode,
     setSyncMode,
@@ -26,18 +28,18 @@ export function SyncSettings() {
   };
 
   const formatLastSyncTime = (time: number | null) => {
-    if (!time) return "从未同步";
+    if (!time) return t('settings.neverSynced');
     const now = Date.now();
     const diff = now - time;
-    
-    if (diff < 60000) return "刚刚";
-    if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`;
-    return new Date(time).toLocaleString('zh-CN', { 
-      month: 'numeric', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit' 
+
+    if (diff < 60000) return t('settings.justNow');
+    if (diff < 3600000) return t('settings.minutesAgo', { count: Math.floor(diff / 60000) });
+    if (diff < 86400000) return t('settings.hoursAgo', { count: Math.floor(diff / 3600000) });
+    return new Date(time).toLocaleString('zh-CN', {
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -45,10 +47,10 @@ export function SyncSettings() {
     return (
       <div className="bg-secondary/50 p-4 rounded-xl border border-border/50">
         <div className="flex items-center gap-2 mb-2 text-sm font-bold text-muted-foreground">
-          <CloudOff className="w-4 h-4" /> 数据同步
+          <CloudOff className="w-4 h-4" /> {t('settings.dataSync')}
         </div>
         <p className="text-xs text-muted-foreground">
-          登录后即可开启跨设备数据同步
+          {t('settings.loginToSync')}
         </p>
       </div>
     );
@@ -58,7 +60,7 @@ export function SyncSettings() {
     <div className="bg-secondary/50 p-4 rounded-xl border border-border/50 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-          <Cloud className="w-4 h-4 text-primary" /> 数据同步
+          <Cloud className="w-4 h-4 text-primary" /> {t('settings.dataSync')}
         </div>
         {isSyncing ? (
           <RefreshCw className="w-4 h-4 text-primary animate-spin" />
@@ -71,7 +73,7 @@ export function SyncSettings() {
 
       {/* 同步模式选择 */}
       <div className="space-y-2">
-        <span className="text-xs text-muted-foreground">冲突解决策略</span>
+        <span className="text-xs text-muted-foreground">{t('settings.conflictStrategy')}</span>
         <div className="flex gap-2">
           <button
             onClick={() => setSyncMode('merge')}
@@ -82,7 +84,7 @@ export function SyncSettings() {
                 : "bg-background text-muted-foreground hover:bg-secondary"
             )}
           >
-            智能合并
+            {t('settings.smartMerge')}
           </button>
           <button
             onClick={() => setSyncMode('overwrite')}
@@ -93,19 +95,19 @@ export function SyncSettings() {
                 : "bg-background text-muted-foreground hover:bg-secondary"
             )}
           >
-            本地覆盖
+            {t('settings.localOverwrite')}
           </button>
         </div>
         <p className="text-[10px] text-muted-foreground/70">
-          {syncMode === 'merge' 
-            ? "保留双方最新修改，自动合并冲突" 
-            : "以本地数据为准，覆盖服务器数据"}
+          {syncMode === 'merge'
+            ? t('settings.smartMergeDesc')
+            : t('settings.localOverwriteDesc')}
         </p>
       </div>
 
       {/* 同步状态 */}
       <div className="flex items-center justify-between text-xs">
-        <span className="text-muted-foreground">上次同步</span>
+        <span className="text-muted-foreground">{t('settings.lastSync')}</span>
         <span className="text-foreground font-medium">
           {formatLastSyncTime(lastSyncTime)}
         </span>
@@ -130,12 +132,12 @@ export function SyncSettings() {
         {isSyncing ? (
           <>
             <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
-            同步中...
+            {t('settings.syncingStatus')}
           </>
         ) : (
           <>
             <RefreshCw className="w-3 h-3 mr-2" />
-            立即同步
+            {t('settings.syncNow')}
           </>
         )}
       </Button>

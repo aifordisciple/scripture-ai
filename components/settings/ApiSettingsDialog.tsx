@@ -6,12 +6,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useBibleStore } from "@/store/useBibleStore";
+import { useTranslation } from "@/lib/i18n";
 import { Cpu, Server, Key, BrainCircuit, CheckCircle2, Cloud, CloudOff } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { apiConfig, setApiConfig } = useBibleStore();
   const { status } = useSession();
+  const { t } = useTranslation();
   const isLoggedIn = status === "authenticated";
 
   const [localConfig, setLocalConfig] = useState<{
@@ -140,10 +142,10 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <BrainCircuit className="w-5 h-5 text-indigo-500" />
-            AI 模型设置
+            {t('settings.aiModelSettings')}
           </DialogTitle>
           <DialogDescription>
-            选择本地或云端AI服务。未设置时默认使用本地Ollama。
+            {t('settings.aiModelSettingsDesc')}
           </DialogDescription>
         </DialogHeader>
 
@@ -154,20 +156,20 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </div>
-            <span>当前生效: {apiConfig.provider === 'local' ? '本地 Ollama' : '云端 API'}</span>
+            <span>{t('settings.currentActive')}: {apiConfig.provider === 'local' ? t('settings.localOllama') : t('settings.cloudApi')}</span>
           </div>
           <div className="flex items-center gap-2">
             {isLoggedIn && (
               <span className="flex items-center gap-1 text-xs">
                 {syncedToCloud ? (
-                  <><Cloud className="w-3 h-3 text-emerald-500" /> 已同步</>
+                  <><Cloud className="w-3 h-3 text-emerald-500" /> {t('settings.synced')}</>
                 ) : (
-                  <><CloudOff className="w-3 h-3 text-slate-400" /> 本地</>
+                  <><CloudOff className="w-3 h-3 text-slate-400" /> {t('settings.localOnly')}</>
                 )}
               </span>
             )}
             <span className="bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700 shadow-sm font-mono tracking-tight">
-              {apiConfig.model || '未知模型'}
+              {apiConfig.model || t('settings.unknownModel')}
             </span>
           </div>
         </div>
@@ -180,7 +182,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
             onClick={() => setPreset('local')}
             className="flex-1 rounded-full text-emerald-600 border-emerald-200 hover:bg-emerald-50"
           >
-            🏠 本地 Ollama
+            {t('settings.btnLocalOllama')}
           </Button>
           <Button
             variant={!isLocal ? 'default' : 'outline'}
@@ -188,7 +190,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
             onClick={() => setPreset('cloud')}
             className="flex-1 rounded-full"
           >
-            ☁️ 云端 API
+            {t('settings.btnCloudApi')}
           </Button>
         </div>
 
@@ -196,7 +198,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
           <div className="space-y-1.5">
             <label className="text-sm font-medium flex items-center gap-1">
               <Server className="w-4 h-4 text-slate-500" />
-              接口地址 (Base URL)
+              {t('settings.baseUrl')}
             </label>
             <Input
               value={localConfig.baseUrl}
@@ -208,7 +210,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
           <div className="space-y-1.5">
             <label className="text-sm font-medium flex items-center gap-1">
               <Cpu className="w-4 h-4 text-slate-500" />
-              模型名称 (Model)
+              {t('settings.modelName')}
             </label>
             <Input
               value={localConfig.model}
@@ -220,32 +222,32 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
           <div className="space-y-1.5">
             <label className="text-sm font-medium flex items-center gap-1">
               <Key className="w-4 h-4 text-slate-500" />
-              API Key {!isLocal && <span className="text-red-500">*</span>}
+              {t('settings.apiKey')} {!isLocal && <span className="text-red-500">*</span>}
             </label>
             <Input
               type="password"
               value={localConfig.apiKey}
               onChange={e => setLocalConfig({...localConfig, apiKey: e.target.value})}
               className="bg-slate-50"
-              placeholder={isLocal ? "本地无需密钥" : "sk-..."}
+              placeholder={isLocal ? t('settings.localNoKeyPlaceholder') : "sk-..."}
             />
             <p className="text-xs text-slate-400">
-              {isLocal ? "本地 Ollama 无需 API Key" : "支持 OpenAI、DeepSeek 等兼容接口"}
+              {isLocal ? t('settings.localNoKey') : t('settings.compatibleApis')}
             </p>
           </div>
         </div>
 
         <div className="flex justify-end gap-3 mt-4">
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-full">取消</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-full">{t('common.cancel')}</Button>
           <Button onClick={handleSave} disabled={isSyncing} className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md gap-1">
             {showSuccess ? (
-              <><CheckCircle2 className="w-4 h-4" /> 已应用</>
+              <><CheckCircle2 className="w-4 h-4" /> {t('settings.applied')}</>
             ) : isSyncing ? (
-              <><Cloud className="w-4 h-4 animate-pulse" /> 同步中...</>
+              <><Cloud className="w-4 h-4 animate-pulse" /> {t('settings.syncing')}</>
             ) : isLoggedIn ? (
-              <>应用并同步云端</>
+              <>{t('settings.applyAndSync')}</>
             ) : (
-              <>应用</>
+              <>{t('settings.apply')}</>
             )}
           </Button>
         </div>

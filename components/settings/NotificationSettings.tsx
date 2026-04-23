@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Loader2, Bell, Mail, Globe, Volume2 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface NotificationSettingsProps {
   open: boolean;
@@ -26,6 +27,7 @@ interface NotificationPreferences {
 }
 
 export function NotificationSettings({ open, onOpenChange }: NotificationSettingsProps) {
+  const { t } = useTranslation();
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     emailNotifyFeedback: true,
     emailNotifySystem: true,
@@ -76,11 +78,11 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
         localStorage.setItem('notification-preferences', JSON.stringify(preferences));
         onOpenChange(false);
       } else {
-        alert('保存失败，请重试');
+        alert(t('settings.saveFailed'));
       }
     } catch (error) {
       console.error('Failed to save notification settings:', error);
-      alert('保存失败，请重试');
+      alert(t('settings.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -93,7 +95,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
       const { requestBrowserNotificationPermission } = await import('@/lib/notification-service');
       const granted = await requestBrowserNotificationPermission();
       if (!granted) {
-        alert('浏览器通知权限被拒绝。请在浏览器设置中允许通知。');
+        alert(t('settings.browserNotifyDenied'));
         return;
       }
     }
@@ -113,7 +115,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bell className="w-5 h-5" />
-            通知设置
+            {t('settings.notificationSettings')}
           </DialogTitle>
         </DialogHeader>
 
@@ -127,13 +129,13 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 <Mail className="w-4 h-4" />
-                邮件通知
+                {t('settings.emailNotification')}
               </div>
 
               <div className="flex items-center justify-between pl-6">
                 <div className="space-y-0.5">
-                  <Label htmlFor="email-feedback" className="text-sm">反馈回复通知</Label>
-                  <p className="text-xs text-gray-500">当管理员回复您的反馈时，发送邮件通知</p>
+                  <Label htmlFor="email-feedback" className="text-sm">{t('settings.feedbackNotify')}</Label>
+                  <p className="text-xs text-gray-500">{t('settings.feedbackNotifyDesc')}</p>
                 </div>
                 <Switch
                   id="email-feedback"
@@ -144,8 +146,8 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
 
               <div className="flex items-center justify-between pl-6">
                 <div className="space-y-0.5">
-                  <Label htmlFor="email-system" className="text-sm">系统通知</Label>
-                  <p className="text-xs text-gray-500">接收重要的系统消息和公告</p>
+                  <Label htmlFor="email-system" className="text-sm">{t('settings.systemNotify')}</Label>
+                  <p className="text-xs text-gray-500">{t('settings.systemNotifyDesc')}</p>
                 </div>
                 <Switch
                   id="email-system"
@@ -159,13 +161,13 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 <Globe className="w-4 h-4" />
-                浏览器通知
+                {t('settings.browserNotification')}
               </div>
 
               <div className="flex items-center justify-between pl-6">
                 <div className="space-y-0.5">
-                  <Label htmlFor="browser-notify" className="text-sm">推送通知</Label>
-                  <p className="text-xs text-gray-500">在浏览器中接收实时推送通知</p>
+                  <Label htmlFor="browser-notify" className="text-sm">{t('settings.pushNotify')}</Label>
+                  <p className="text-xs text-gray-500">{t('settings.pushNotifyDesc')}</p>
                 </div>
                 <Switch
                   id="browser-notify"
@@ -179,13 +181,13 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 <Volume2 className="w-4 h-4" />
-                声音提醒
+                {t('settings.soundNotification')}
               </div>
 
               <div className="flex items-center justify-between pl-6">
                 <div className="space-y-0.5">
-                  <Label htmlFor="sound-notify" className="text-sm">通知声音</Label>
-                  <p className="text-xs text-gray-500">收到新通知时播放提示音</p>
+                  <Label htmlFor="sound-notify" className="text-sm">{t('settings.notifySound')}</Label>
+                  <p className="text-xs text-gray-500">{t('settings.notifySoundDesc')}</p>
                 </div>
                 <Switch
                   id="sound-notify"
@@ -198,11 +200,11 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
             {/* 保存按钮 */}
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                取消
+                {t('common.cancel')}
               </Button>
               <Button onClick={saveSettings} disabled={saving}>
                 {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                保存设置
+                {t('settings.saveSettings')}
               </Button>
             </div>
           </div>
