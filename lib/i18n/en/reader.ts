@@ -23,6 +23,10 @@ export const reader = {
     aiInterpretPrompt: 'Please provide an in-depth interpretation of the following scripture.',
     prayerPrompt: 'Based on the inspiration of this passage, please write a prayer for me. The prayer should include: praise for His attributes, repentance for sins, gratitude for grace, and specific petitions. The tone should be sincere and intimate.',
     fullChapter: '[{book} Ch. {chapter}] Full Chapter',
+    selectScripture: 'Select Scripture',
+    selectChapter: 'Select Chapter',
+    totalChapters: '{count} chapters',
+    noMatchingBook: 'No matching books',
   },
   sidebar: {
     title: 'Bible Contents',

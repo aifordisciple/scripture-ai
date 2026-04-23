@@ -1,0 +1,20 @@
+export const highlights = {
+  highlights: {
+    title: '我的高亮',
+    subtitle: '共标记了 {count} 节经文。点击卡片可快速定位到原文。',
+    fetchFailed: '获取经文内容失败...',
+    searchPlaceholder: '搜索经文内容、书卷、章节...',
+    matchCount: '找到 {count} 条匹配的高亮',
+    clearFilter: '清除筛选',
+    loading: '正在整理您的灵修足迹...',
+    empty: '您还没有高亮过任何经文',
+    emptyHint: '在阅读经文时选中文字即可添加高亮',
+    noMatch: '没有找到匹配的高亮',
+    noMatchHint: '尝试其他搜索词或清除颜色筛选',
+    removeHighlight: '移除高亮',
+    colorYellow: '黄色',
+    colorGreen: '绿色',
+    colorBlue: '蓝色',
+    colorRed: '红色',
+  },
+} as const

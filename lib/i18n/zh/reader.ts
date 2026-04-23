@@ -23,6 +23,10 @@ export const reader = {
     aiInterpretPrompt: '请深入解读以下经文。',
     prayerPrompt: '请基于这段经文的感动，为我写一篇祷告文。祷告应包含：对他属性的赞美、对罪的悔改、对恩典的感谢以及具体的祈求。语气要真诚、亲切。',
     fullChapter: '【{book} 第 {chapter} 章】全章',
+    selectScripture: '选择经文',
+    selectChapter: '选择章节',
+    totalChapters: '共 {count} 章',
+    noMatchingBook: '未找到匹配的书卷',
   },
   sidebar: {
     title: '圣经目录',

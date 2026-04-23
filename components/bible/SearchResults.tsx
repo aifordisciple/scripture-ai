@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { Loader2, ExternalLink, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface SearchResultsProps {
   query: string;
@@ -15,13 +16,14 @@ interface SearchResultsProps {
 }
 
 export function SearchResults({ query, mode, cachedResults, onUpdateResults }: SearchResultsProps) {
+  const t = useTranslation();
   const [results, setResults] = useState<any[]>(cachedResults || []);
   const [loading, setLoading] = useState(!cachedResults);
   const [aiSummary, setAiSummary] = useState<string>('');
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
 
   const { fontSize, lineHeight, tabs, addTab, setActiveTab, setScrollToVerse, apiConfig, locale } = useBibleStore();
-  
+
   const onUpdateResultsRef = useRef(onUpdateResults);
   useEffect(() => { onUpdateResultsRef.current = onUpdateResults; }, [onUpdateResults]);
 
@@ -87,9 +89,9 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
       <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 gap-3">
         <Loader2 className="w-8 h-8 animate-spin" />
         <p>
-            {mode === 'ai' ? "AI 正在思考并查找相关经文..." : 
-             mode === 'fuzzy' ? "正在进行语义匹配..." : 
-             "正在搜索..."}
+            {mode === 'ai' ? t('search.aiThinking') :
+             mode === 'fuzzy' ? t('search.fuzzyMatching') :
+             t('search.searching')}
         </p>
       </div>
     );
@@ -99,10 +101,10 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
     <div className="max-w-4xl mx-auto px-4 py-8 pb-32">
       <div className="mb-8 border-b pb-4 dark:border-slate-800">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-          🔍 搜索结果: "{query}"
+          🔍 {t('search.resultsFor', { query })}
         </h1>
         <p className="text-slate-500 text-sm mt-1">
-          模式: {mode === 'exact' ? '精确匹配' : mode === 'fuzzy' ? '模糊语义搜索' : 'AI 智能推荐'} • 找到 {results.length} 条结果
+          {mode === 'exact' ? t('search.modeExact') : mode === 'fuzzy' ? t('search.modeFuzzy') : t('search.modeAi')} • {t('search.foundCount', { count: results.length })}
         </p>
       </div>
 
@@ -115,7 +117,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
           >
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-indigo-500" />
-              <span className="font-semibold text-indigo-700 dark:text-indigo-300">AI 属灵洞见</span>
+              <span className="font-semibold text-indigo-700 dark:text-indigo-300">{t('search.aiInsight')}</span>
             </div>
             {isSummaryExpanded ? (
               <ChevronUp className="w-5 h-5 text-indigo-400" />
@@ -142,13 +144,13 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
 
       {results.length === 0 ? (
         <div className="text-center text-slate-500 py-10">
-          未找到相关经文，请尝试更换关键词。
+          {t('search.noResultsHint')}
         </div>
       ) : (
         <div className="space-y-4">
           {results.map((verse) => (
-            <div 
-              key={verse.id} 
+            <div
+              key={verse.id}
               className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer group border border-transparent hover:border-blue-200 dark:hover:border-blue-800"
               onClick={() => handleResultClick(verse.bookId, verse.chapter, verse.verse)}
             >
@@ -158,7 +160,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
                 </span>
                 <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <div 
+              <div
                 className="text-slate-800 dark:text-slate-300 font-serif"
                 style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
               >

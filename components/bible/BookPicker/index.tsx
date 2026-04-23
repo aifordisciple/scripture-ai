@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { X, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 import { TestamentTabs } from "./TestamentTabs";
 import { BookGrid } from "./BookGrid";
@@ -34,6 +35,8 @@ export function BookPicker({
   currentChapter,
   onSelect,
 }: BookPickerProps) {
+  const t = useTranslation();
+
   // 当前选中的约（旧约/新约）
   const [testament, setTestament] = useState<Testament>("old");
 
@@ -82,7 +85,7 @@ export function BookPicker({
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-primary" />
-              <DialogTitle className="text-lg font-bold">选择经文</DialogTitle>
+              <DialogTitle className="text-lg font-bold">{t('reader.selectScripture')}</DialogTitle>
             </div>
             <Button
               variant="ghost"
@@ -126,10 +129,10 @@ export function BookPicker({
                 >
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-medium text-muted-foreground">
-                      {selectedBook.name} · 选择章节
+                      {selectedBook.name} · {t('reader.selectChapter')}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      共 {selectedBook.chapters} 章
+                      {t('reader.totalChapters', { count: selectedBook.chapters })}
                     </span>
                   </div>
                   <ChapterGrid

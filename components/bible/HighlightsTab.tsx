@@ -8,6 +8,7 @@ import { BIBLE_BOOKS } from "@/lib/constants";
 import { Loader2, BookMarked, ChevronRight, Trash2, Search, X, Filter, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 // 高亮颜色映射表 (与 Reader.tsx 保持一致)
 const HIGHLIGHT_COLORS: Record<string, string> = {
@@ -17,12 +18,12 @@ const HIGHLIGHT_COLORS: Record<string, string> = {
   red: "border-red-400 dark:border-red-500 bg-red-100 dark:bg-red-800/40",
 };
 
-// [P1增强] 颜色名称映射
-const COLOR_NAMES: Record<string, string> = {
-  yellow: '黄色',
-  green: '绿色',
-  blue: '蓝色',
-  red: '红色',
+// [P1增强] 颜色名称 i18n key 映射
+const COLOR_NAME_KEYS: Record<string, string> = {
+  yellow: 'highlights.colorYellow',
+  green: 'highlights.colorGreen',
+  blue: 'highlights.colorBlue',
+  red: 'highlights.colorRed',
 };
 
 // [P1增强] 颜色按钮样式
@@ -44,6 +45,7 @@ interface PopulatedHighlight {
 
 export function HighlightsTab() {
   const router = useRouter();
+  const t = useTranslation();
   const { highlights, removeHighlightLocally, tabs, addTab, setActiveTab, updateActiveTab } = useBibleStore();
   const [populatedHighlights, setPopulatedHighlights] = useState<PopulatedHighlight[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +72,7 @@ export function HighlightsTab() {
           return {
             ...h,
             bookName,
-            content: verseData ? verseData.content : "获取经文内容失败..."
+            content: verseData ? verseData.content : t('highlights.fetchFailed')
           };
         });
         const results = await Promise.all(promises);
@@ -163,9 +165,9 @@ export function HighlightsTab() {
           <BookMarked className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">我的高亮</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('highlights.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            共标记了 {highlights.length} 节经文。点击卡片可快速定位到原文。
+            {t('highlights.subtitle', { count: highlights.length })}
           </p>
         </div>
       </div>
@@ -186,7 +188,7 @@ export function HighlightsTab() {
             <div className={cn("w-4 h-4 rounded-full", COLOR_BUTTON_STYLES[color])} />
             <div className="text-left">
               <div className="text-lg font-bold">{count}</div>
-              <div className="text-xs text-muted-foreground">{COLOR_NAMES[color]}</div>
+              <div className="text-xs text-muted-foreground">{t(COLOR_NAME_KEYS[color])}</div>
             </div>
           </button>
         ))}
@@ -198,7 +200,7 @@ export function HighlightsTab() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="搜索经文内容、书卷、章节..."
+            placeholder={t('highlights.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
@@ -215,13 +217,13 @@ export function HighlightsTab() {
         {(searchQuery || selectedColor) && (
           <div className="flex items-center gap-2 mt-2">
             <p className="text-xs text-muted-foreground">
-              找到 {filteredHighlights.length} 条匹配的高亮
+              {t('highlights.matchCount', { count: filteredHighlights.length })}
             </p>
             <button
               onClick={() => { setSearchQuery(''); setSelectedColor(null); }}
               className="text-xs text-primary hover:underline"
             >
-              清除筛选
+              {t('highlights.clearFilter')}
             </button>
           </div>
         )}
@@ -230,19 +232,19 @@ export function HighlightsTab() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 opacity-50">
           <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
-          <p className="text-sm">正在整理您的灵修足迹...</p>
+          <p className="text-sm">{t('highlights.loading')}</p>
         </div>
       ) : highlights.length === 0 ? (
         <div className="text-center py-20 opacity-40 select-none">
           <BookMarked className="w-16 h-16 mx-auto mb-4 stroke-[1.5]" />
-          <p className="text-lg">您还没有高亮过任何经文</p>
-          <p className="text-sm mt-2">在阅读经文时选中文字即可添加高亮</p>
+          <p className="text-lg">{t('highlights.empty')}</p>
+          <p className="text-sm mt-2">{t('highlights.emptyHint')}</p>
         </div>
       ) : filteredHighlights.length === 0 ? (
         <div className="text-center py-20 opacity-40 select-none">
           <Filter className="w-16 h-16 mx-auto mb-4 stroke-[1.5]" />
-          <p className="text-lg">没有找到匹配的高亮</p>
-          <p className="text-sm mt-2">尝试其他搜索词或清除颜色筛选</p>
+          <p className="text-lg">{t('highlights.noMatch')}</p>
+          <p className="text-sm mt-2">{t('highlights.noMatchHint')}</p>
         </div>
       ) : (
         <div className="space-y-10">
@@ -272,7 +274,7 @@ export function HighlightsTab() {
                           size="icon"
                           className="h-6 w-6 text-red-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-full"
                           onClick={(e) => handleRemove(e, item.bookId, item.chapter, item.verse)}
-                          title="移除高亮"
+                          title={t('highlights.removeHighlight')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>

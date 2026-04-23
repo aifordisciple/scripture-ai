@@ -7,6 +7,8 @@ import { search } from './search'
 import { auth } from './auth'
 import { group } from './group'
 import { atlas } from './atlas'
+import { highlights } from './highlights'
+import { shareCard } from './shareCard'
 import type { DeepStringify } from '../types'
 
 export const zh = {
@@ -19,6 +21,8 @@ export const zh = {
   ...auth,
   ...group,
   ...atlas,
+  ...highlights,
+  ...shareCard,
 } as const
 
 export type Translations = DeepStringify<typeof zh>

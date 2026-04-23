@@ -4,14 +4,17 @@
 import { cn } from "@/lib/utils";
 import { TestamentTabsProps, Testament } from "./types";
 import { motion } from "framer-motion";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * 旧约/新约切换 Tab
  */
 export function TestamentTabs({ testament, onChange }: TestamentTabsProps) {
-  const tabs: { id: Testament; label: string; count: number }[] = [
-    { id: "old", label: "旧约", count: 39 },
-    { id: "new", label: "新约", count: 27 },
+  const t = useTranslation();
+
+  const tabs: { id: Testament; labelKey: string; count: number }[] = [
+    { id: "old", labelKey: "sidebar.oldTestament", count: 39 },
+    { id: "new", labelKey: "sidebar.newTestament", count: 27 },
   ];
 
   return (
@@ -35,7 +38,7 @@ export function TestamentTabs({ testament, onChange }: TestamentTabsProps) {
                 transition={{ type: "spring", duration: 0.3 }}
               />
             )}
-            <span className="relative z-10">{tab.label}</span>
+            <span className="relative z-10">{t(tab.labelKey)}</span>
           </button>
         ))}
       </div>

@@ -1,0 +1,20 @@
+export const highlights = {
+  highlights: {
+    title: 'My Highlights',
+    subtitle: 'Marked {count} verses. Tap a card to jump to the passage.',
+    fetchFailed: 'Failed to load verse content...',
+    searchPlaceholder: 'Search content, book, chapter...',
+    matchCount: 'Found {count} matching highlights',
+    clearFilter: 'Clear Filter',
+    loading: 'Organizing your highlights...',
+    empty: 'No highlights yet',
+    emptyHint: 'Select text while reading to add highlights',
+    noMatch: 'No matching highlights',
+    noMatchHint: 'Try different keywords or clear color filter',
+    removeHighlight: 'Remove highlight',
+    colorYellow: 'Yellow',
+    colorGreen: 'Green',
+    colorBlue: 'Blue',
+    colorRed: 'Red',
+  },
+} as const
