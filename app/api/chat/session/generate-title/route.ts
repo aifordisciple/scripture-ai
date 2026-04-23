@@ -19,12 +19,13 @@ export async function POST(req: NextRequest) {
     }
 
     const { apiConfig, body } = await extractApiConfig(req);
-    const { sessionId, content, bookName, chapter, verse } = body as {
+    const { sessionId, content, bookName, chapter, verse, locale = 'zh' } = body as {
       sessionId?: string;
       content?: string;
       bookName?: string;
       chapter?: number;
       verse?: number;
+      locale?: string;
     };
 
     if (!sessionId && !content) {
@@ -50,17 +51,24 @@ export async function POST(req: NextRequest) {
     const model = await getAIModel(apiConfig);
 
     // 构建上下文提示
+    const isEn = locale === 'en';
     let contextHint = '';
     if (bookName && chapter) {
-      contextHint = `用户正在阅读《${bookName}》第${chapter}章${verse ? `第${verse}节` : ''}。`;
+      contextHint = isEn
+        ? `The user is reading ${bookName} Chapter ${chapter}${verse ? `:${verse}` : ''}.`
+        : `用户正在阅读《${bookName}》第${chapter}章${verse ? `第${verse}节` : ''}。`;
     }
+
+    const titleInstruction = isEn
+      ? `Generate a short title (max 20 characters) for the following conversation. Return only the title, no quotes or extra symbols.`
+      : `请为以下对话生成一个简短的标题（不超过15个字），只返回标题本身，不要加引号或其他符号。`;
 
     const result = await generateText({
       model,
       prompt: `${contextHint}
-请为以下对话生成一个简短的标题（不超过15个字），只返回标题本身，不要加引号或其他符号。
+${titleInstruction}
 
-对话内容：
+${isEn ? 'Conversation content:' : '对话内容：'}
 ${messageContent.substring(0, 500)}`,
       maxTokens: 30,
     });

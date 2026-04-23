@@ -181,7 +181,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
               if (primaryVerses.length > 0) {
                  const content = primaryVerses.map(v => `[${v.verse}] ${v.content}`).join('\n');
                  const context = verses.filter(v => v.version === primaryVersion).map(v => `[${v.verse}] ${v.content}`).join('\n');
-                 const ref = { bookName: primaryVerses[0].bookName, chapter: primaryVerses[0].chapter, verse: primaryVerses[0].verse };
+                 const ref = { bookName: getBookDisplayName(primaryVerses[0].bookId, locale), chapter: primaryVerses[0].chapter, verse: primaryVerses[0].verse };
 
                  state.enqueueAI(t('reader.aiInterpretPrompt'), content, context, ref);
                  state.setAiOpen(true);
@@ -201,7 +201,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             if (primaryVerses.length > 0) {
               const content = primaryVerses.map(v => `[${v.verse}] ${v.content}`).join('\n');
               const context = verses.filter(v => v.version === primaryVersion).map(v => `[${v.verse}] ${v.content}`).join('\n');
-              const ref = { bookName: primaryVerses[0].bookName, chapter: primaryVerses[0].chapter, verse: primaryVerses[0].verse };
+              const ref = { bookName: getBookDisplayName(primaryVerses[0].bookId, locale), chapter: primaryVerses[0].chapter, verse: primaryVerses[0].verse };
 
               state.enqueueAI(t('reader.prayerPrompt'), content, context, ref);
               state.setAiOpen(true);
@@ -218,7 +218,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
           const primaryVersesForSummary = verses.filter(v => v.version === primaryVersion);
           if (primaryVersesForSummary.length > 0) {
             const fullContext = primaryVersesForSummary.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
-            state.enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), t('reader.fullChapter', { book: getBookDisplayName(primaryVersesForSummary[0].bookId, locale), chapter: primaryVersesForSummary[0].chapter }), fullContext, { bookName: primaryVersesForSummary[0].bookName, chapter: primaryVersesForSummary[0].chapter, verse: 0 });
+            state.enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), t('reader.fullChapter', { book: getBookDisplayName(primaryVersesForSummary[0].bookId, locale), chapter: primaryVersesForSummary[0].chapter }), fullContext, { bookName: getBookDisplayName(primaryVersesForSummary[0].bookId, locale), chapter: primaryVersesForSummary[0].chapter, verse: 0 });
             state.setAiOpen(true);
           }
           break;
@@ -407,7 +407,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                                     e.stopPropagation();
                                     const content = mainVerse.content;
                                     const context = verses.filter(v => v.version === primaryVersion).map(v => `[${v.verse}] ${v.content}`).join('\n');
-                                    const ref = { bookName: mainVerse.bookName, chapter: mainVerse.chapter, verse: mainVerse.verse };
+                                    const ref = { bookName: getBookDisplayName(mainVerse.bookId, locale), chapter: mainVerse.chapter, verse: mainVerse.verse };
                                     enqueueAI(t('reader.aiInterpretPrompt'), content, context, ref);
                                     useBibleStore.getState().setAiOpen(true);
                                 }}

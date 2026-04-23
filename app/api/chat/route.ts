@@ -92,13 +92,27 @@ export async function POST(req: Request) {
       }
     }
 
+    // --- Resolve locale early for context template ---
+    const resolvedLocale = (locale === 'en') ? 'en' : 'zh';
+
     // --- 构造分层的 Context Prompt ---
     let userContext = "";
     if (context) {
       const focusText = context.selectedText || context.content;
       const backgroundText = context.contextText || "";
+      const isEn = resolvedLocale === 'en';
 
-      userContext = `
+      userContext = isEn ? `
+[Current Task]
+The user is reading ${context.bookName} Chapter ${context.chapter}.
+Please provide an in-depth and rigorous interpretation of the selected verses.
+
+[🎯 Selected Verses (Primary focus for interpretation)]
+${focusText}
+
+[📖 Context Reference (For background understanding only, no need to explain verse by verse)]
+${backgroundText}
+` : `
 【当前任务】
 用户正在阅读《${context.bookName}》第 ${context.chapter} 章。
 请针对用户选中的经文进行深入且严谨的解读。
@@ -119,7 +133,6 @@ ${backgroundText}
 
     // 合并 system prompt，避免多个 system 消息导致 MiniMax 等API报错
     // 结构: 系统提示词 + 用户偏好记忆 + 当前经文上下文
-    const resolvedLocale = (locale === 'en') ? 'en' : 'zh';
     let fullSystemPrompt = SYSTEM_PROMPT[resolvedLocale as keyof DualLangString] || SYSTEM_PROMPT.zh;
     if (userAIContext) {
       fullSystemPrompt += `\n\n---\n### 👤 用户个性化记忆\n${userAIContext}`;

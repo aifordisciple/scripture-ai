@@ -244,7 +244,7 @@ export function AISidebar() {
       const { ref } = aiRequestTrigger
       const verseSuffix = ref.verse > 0 ? `:${ref.verse}` : ''
       title = `${ref.bookName} ${ref.chapter}${verseSuffix}`
-      const book = BIBLE_BOOKS.find(b => b.name === ref.bookName || b.id === ref.bookName)
+      const book = BIBLE_BOOKS.find(b => b.name === ref.bookName || b.nameEn === ref.bookName || b.id === ref.bookName)
       bookId = book?.id
       chapter = ref.chapter
     } else if (firstMessage) {
