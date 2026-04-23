@@ -214,12 +214,15 @@ ${backgroundText}
 
     const chatError = ChatError.fromError(error, ChatErrorCode.UNKNOWN_ERROR);
 
+    // 429 速率限制返回 429 而非 500，让前端能区分
+    const statusCode = chatError.code === ChatErrorCode.AI_RATE_LIMITED ? 429 : 500;
+
     return new Response(JSON.stringify({
       error: chatError.userMessage,
       code: chatError.code,
       recoverable: chatError.recoverable,
     }), {
-      status: 500,
+      status: statusCode,
       headers: { 'Content-Type': 'application/json' }
     });
   }

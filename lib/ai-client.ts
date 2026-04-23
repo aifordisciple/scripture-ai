@@ -25,8 +25,17 @@ const DEFAULT_CLOUD_BASE_URL = 'https://api.minimaxi.com/v1';
 const DEFAULT_LOCAL_MODEL = 'qwen3-coder-next:latest';
 const DEFAULT_LOCAL_BASE_URL = 'http://host.docker.internal:11434/v1';
 
+// 备用 API 配置（主 API 429 时自动降级）
+const FALLBACK_CLOUD_MODEL = process.env.FALLBACK_MODEL || 'deepseek-chat';
+const FALLBACK_CLOUD_BASE_URL = process.env.FALLBACK_BASE_URL || 'https://api.deepseek.com/v1';
+const FALLBACK_CLOUD_API_KEY = process.env.FALLBACK_API_KEY || '';
+
 // 默认 provider: 'cloud' 使用云端 API，'local' 使用本地 Ollama
 const DEFAULT_PROVIDER: 'local' | 'cloud' = 'cloud';
+
+// 429 重试配置
+const MAX_RETRIES = 2;
+const RETRY_BASE_DELAY_MS = 1000; // 1s, 2s
 // ============================================================================
 
 /**
@@ -174,41 +183,79 @@ export async function getAIModel(requestConfig?: AIConfig, userId?: string): Pro
   // MiniMax compatibility: use custom fetch to filter unsupported params
   const isMiniMax = baseUrl.includes('minimax');
 
-  // 流式输出优化配置
-  // 不设置超时中断，让流自然完成，避免意外中断
-  // 通过 keep-alive 和重试机制来保证稳定性
+  // 带重试和降级的 fetch
   const customFetch = async (url: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    // 对于 MiniMax API，需要清理不支持的参数
-    if (isMiniMax && init?.body) {
-      const rawBody = init.body;
+    const makeBody = (rawBody: any, overrideModel?: string): string => {
       const body = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
 
-      // Build clean request body with only MiniMax-supported params
-      const cleanBody: Record<string, any> = {
-        model: body.model,
-        messages: body.messages,
-        stream: body.stream === true,
-      };
+      if (isMiniMax) {
+        // Build clean request body with only MiniMax-supported params
+        const cleanBody: Record<string, any> = {
+          model: overrideModel || body.model,
+          messages: body.messages,
+          stream: body.stream === true,
+        };
+        if (body.temperature !== undefined) cleanBody.temperature = body.temperature;
+        if (body.max_tokens !== undefined) cleanBody.max_tokens = body.max_tokens;
+        if (body.top_p !== undefined) cleanBody.top_p = body.top_p;
+        cleanBody.disable_thinking = true;
+        return JSON.stringify(cleanBody);
+      }
 
-      // Only add optional params if they exist
-      if (body.temperature !== undefined) cleanBody.temperature = body.temperature;
-      if (body.max_tokens !== undefined) cleanBody.max_tokens = body.max_tokens;
-      if (body.top_p !== undefined) cleanBody.top_p = body.top_p;
+      // 非 MiniMax API：如果需要覆盖 model
+      if (overrideModel) {
+        const modified = { ...body, model: overrideModel };
+        return JSON.stringify(modified);
+      }
+      return typeof rawBody === 'string' ? rawBody : JSON.stringify(body);
+    };
 
-      // MiniMax: Disable thinking/reasoning process to get direct output
-      cleanBody.disable_thinking = true;
+    const attemptRequest = async (attempt: number): Promise<Response> => {
+      const bodyStr = makeBody(init?.body);
 
-      console.log('[MiniMax] stream:', cleanBody.stream, '| model:', cleanBody.model);
+      console.log(`[AI] Request attempt ${attempt + 1}/${MAX_RETRIES + 1} | model: ${modelName} | stream: ${init?.body ? (typeof init.body === 'string' ? JSON.parse(init.body).stream : 'unknown') : 'unknown'}`);
 
-      return fetch(url, {
+      const response = await fetch(url, {
         ...init,
-        body: JSON.stringify(cleanBody),
-        // 不设置 signal，让流自然完成
+        body: bodyStr,
       });
-    }
 
-    // 其他 API 正常调用
-    return fetch(url, init);
+      // 429: 自动重试（带指数退避）
+      if (response.status === 429 && attempt < MAX_RETRIES) {
+        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
+        console.warn(`[AI] Rate limited (429), retrying in ${delay}ms... (attempt ${attempt + 1}/${MAX_RETRIES})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return attemptRequest(attempt + 1);
+      }
+
+      // 429 重试耗尽：尝试降级到备用 API
+      if (response.status === 429 && attempt >= MAX_RETRIES && FALLBACK_CLOUD_API_KEY) {
+        console.warn(`[AI] Rate limited (429) after ${MAX_RETRIES} retries, falling back to ${FALLBACK_CLOUD_BASE_URL}`);
+        const fallbackBody = makeBody(init?.body, FALLBACK_CLOUD_MODEL);
+        try {
+          const fallbackUrl = String(url).replace(new URL(baseUrl).origin, new URL(FALLBACK_CLOUD_BASE_URL).origin);
+          const fallbackResponse = await fetch(fallbackUrl, {
+            ...init,
+            body: fallbackBody,
+            headers: {
+              ...(init?.headers as Record<string, string> || {}),
+              'Authorization': `Bearer ${FALLBACK_CLOUD_API_KEY}`,
+            },
+          });
+          if (fallbackResponse.ok) {
+            console.log('[AI] Fallback API succeeded');
+            return fallbackResponse;
+          }
+          console.warn('[AI] Fallback API also failed:', fallbackResponse.status);
+        } catch (fallbackErr) {
+          console.warn('[AI] Fallback API error:', fallbackErr);
+        }
+      }
+
+      return response;
+    };
+
+    return attemptRequest(0);
   };
 
   const client = createOpenAI({

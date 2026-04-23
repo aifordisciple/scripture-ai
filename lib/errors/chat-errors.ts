@@ -114,10 +114,11 @@ export class ChatError extends Error {
       });
     }
 
-    if (message.includes('rate limit') || message.includes('429')) {
+    if (message.includes('rate limit') || message.includes('429') || message.includes('usage limit exceeded')) {
       return new ChatError(ChatErrorCode.AI_RATE_LIMITED, message, {
         recoverable: true,
         retryAction: 'wait',
+        userMessage: 'AI 服务当前使用人数较多，请稍后再试',
         cause: error instanceof Error ? error : undefined,
       });
     }
