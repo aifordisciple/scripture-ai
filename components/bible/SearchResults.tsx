@@ -20,7 +20,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
   const [aiSummary, setAiSummary] = useState<string>('');
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
 
-  const { fontSize, lineHeight, tabs, addTab, setActiveTab, setScrollToVerse, apiConfig } = useBibleStore();
+  const { fontSize, lineHeight, tabs, addTab, setActiveTab, setScrollToVerse, apiConfig, locale } = useBibleStore();
   
   const onUpdateResultsRef = useRef(onUpdateResults);
   useEffect(() => { onUpdateResultsRef.current = onUpdateResults; }, [onUpdateResults]);
@@ -38,7 +38,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
         const res = await fetch('/api/search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query, mode, apiConfig })
+          body: JSON.stringify({ query, mode, apiConfig, locale })
         });
         const json = await res.json();
         const data = json.data || [];
@@ -57,7 +57,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
       }
     }
     search();
-  }, [query, mode, cachedResults, apiConfig]);
+  }, [query, mode, cachedResults, apiConfig, locale]);
 
   const handleResultClick = (bookId: string, chapter: number, verse: number) => {
     // 1. 先设置滚动目标，Reader 加载完经文后会处理

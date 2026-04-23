@@ -20,7 +20,7 @@ interface VerseData {
 }
 
 export default function LocationVersesView({ locationId, locationName, onBack }: LocationVersesViewProps) {
-  const { fontSize, lineHeight, tabs, addTab, setActiveTab, setScrollToVerse, setBook, setChapter } = useBibleStore();
+  const { fontSize, lineHeight, tabs, addTab, setActiveTab, setScrollToVerse, setBook, setChapter, locale } = useBibleStore();
   const [verses, setVerses] = useState<VerseData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,7 +58,7 @@ export default function LocationVersesView({ locationId, locationName, onBack }:
           const searchRes = await fetch('/api/search', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: locationName, mode: 'exact' })
+            body: JSON.stringify({ query: locationName, mode: 'exact', locale })
           });
           const searchData = await searchRes.json();
           const searchResults = searchData.data || [];

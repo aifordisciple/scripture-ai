@@ -8,7 +8,8 @@ export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const { apiConfig, body } = await extractApiConfig(req);
-  const { query, mode = 'exact' } = body as { query?: string; mode?: string };
+  const { query, mode = 'exact', locale = 'zh' } = body as { query?: string; mode?: string; locale?: string };
+  const searchVersion = locale === 'en' ? 'KJV' : 'CUV';
 
   if (!query) {
     return NextResponse.json({ error: 'Missing query' }, { status: 400 });
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
       const results = await prisma.bibleVerse.findMany({
         where: {
           content: { contains: query, mode: 'insensitive' },
-          version: 'CUV'
+          version: searchVersion
         },
         take: 50,
         orderBy: { id: 'asc' }
@@ -80,7 +81,7 @@ JSON 格式：
       if (!Array.isArray(verses) || verses.length === 0) return NextResponse.json({ data: [] });
 
       const orConditions = verses.map((v: any) => ({
-          bookName: v.bookName, chapter: v.chapter, verse: v.verse, version: 'CUV'
+          bookName: v.bookName, chapter: v.chapter, verse: v.verse, version: searchVersion
       }));
 
       const results = await prisma.bibleVerse.findMany({ where: { OR: orConditions } });
@@ -106,7 +107,7 @@ JSON 格式：
       const results = await prisma.$queryRaw`
         SELECT id, book_id as "bookId", book_name as "bookName", chapter, verse, content, version
         FROM bible_verses
-        WHERE version = 'CUV'
+        WHERE version = ${searchVersion}
         ORDER BY embedding <=> ${vectorString}::vector
         LIMIT 20;
       `;
@@ -126,6 +127,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('q');
   const mode = searchParams.get('mode') || 'exact';
+  const locale = searchParams.get('locale') || 'zh';
+  const searchVersion = locale === 'en' ? 'KJV' : 'CUV';
 
   if (!query) {
     return NextResponse.json({ error: 'Missing query' }, { status: 400 });
@@ -139,7 +142,7 @@ export async function GET(request: Request) {
       const results = await prisma.bibleVerse.findMany({
         where: {
           content: { contains: query, mode: 'insensitive' },
-          version: 'CUV'
+          version: searchVersion
         },
         take: 50,
         orderBy: { id: 'asc' }
@@ -188,7 +191,7 @@ JSON 格式：
       if (!Array.isArray(verses) || verses.length === 0) return NextResponse.json({ data: [] });
 
       const orConditions = verses.map((v: any) => ({
-          bookName: v.bookName, chapter: v.chapter, verse: v.verse, version: 'CUV'
+          bookName: v.bookName, chapter: v.chapter, verse: v.verse, version: searchVersion
       }));
 
       const results = await prisma.bibleVerse.findMany({ where: { OR: orConditions } });
@@ -211,7 +214,7 @@ JSON 格式：
       const results = await prisma.$queryRaw`
         SELECT id, book_id as "bookId", book_name as "bookName", chapter, verse, content, version
         FROM bible_verses
-        WHERE version = 'CUV'
+        WHERE version = ${searchVersion}
         ORDER BY embedding <=> ${vectorString}::vector
         LIMIT 20;
       `;
