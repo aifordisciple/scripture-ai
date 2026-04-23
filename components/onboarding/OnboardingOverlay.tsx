@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronRight, ChevronLeft, Sparkles, Bot, BookOpenCheck, Maximize, Move } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
+import { useTranslation } from "@/lib/i18n";
 
 interface OnboardingStep {
   id: string;
@@ -15,43 +16,6 @@ interface OnboardingStep {
   animation?: string;
 }
 
-const ONBOARDING_STEPS: OnboardingStep[] = [
-  {
-    id: "welcome",
-    title: "发现你的灵修伙伴",
-    description: "Magic Ball 是你的智能读经助手，帮助你快速访问 AI 功能，让读经更有深度。",
-    icon: <Sparkles className="w-12 h-12 text-purple-500" />,
-  },
-  {
-    id: "swipe-left",
-    title: "左滑开启 AI 解读",
-    description: "向左滑动 Magic Ball，即可打开 AI 侧边栏，获得深度经文解读。",
-    icon: <Bot className="w-12 h-12 text-blue-500" />,
-    animation: "swipe-left",
-  },
-  {
-    id: "long-press",
-    title: "长按快捷菜单",
-    description: "长按 Magic Ball 0.4 秒，即可展开快捷菜单，快速选择 AI 解读模式。",
-    icon: <Move className="w-12 h-12 text-indigo-500" />,
-    animation: "long-press",
-  },
-  {
-    id: "swipe-up",
-    title: "上滑选择书卷",
-    description: "向上滑动 Magic Ball，快速选择要阅读的书卷和章节。",
-    icon: <BookOpenCheck className="w-12 h-12 text-emerald-500" />,
-    animation: "swipe-up",
-  },
-  {
-    id: "swipe-down",
-    title: "下滑切换全屏",
-    description: "向下滑动 Magic Ball，切换全屏模式，沉浸式读经。",
-    icon: <Maximize className="w-12 h-12 text-amber-500" />,
-    animation: "swipe-down",
-  },
-];
-
 interface OnboardingOverlayProps {
   onComplete?: () => void;
 }
@@ -59,6 +23,44 @@ interface OnboardingOverlayProps {
 export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const { setHasCompletedOnboarding, hasCompletedOnboarding } = useBibleStore();
+  const { t } = useTranslation();
+
+  const ONBOARDING_STEPS: OnboardingStep[] = [
+    {
+      id: "welcome",
+      title: t('onboarding.discoverTitle'),
+      description: t('onboarding.discoverDesc'),
+      icon: <Sparkles className="w-12 h-12 text-purple-500" />,
+    },
+    {
+      id: "swipe-left",
+      title: t('onboarding.swipeLeftTitle'),
+      description: t('onboarding.swipeLeftDesc'),
+      icon: <Bot className="w-12 h-12 text-blue-500" />,
+      animation: "swipe-left",
+    },
+    {
+      id: "long-press",
+      title: t('onboarding.longPressTitle'),
+      description: t('onboarding.longPressDesc'),
+      icon: <Move className="w-12 h-12 text-indigo-500" />,
+      animation: "long-press",
+    },
+    {
+      id: "swipe-up",
+      title: t('onboarding.swipeUpTitle'),
+      description: t('onboarding.swipeUpDesc'),
+      icon: <BookOpenCheck className="w-12 h-12 text-emerald-500" />,
+      animation: "swipe-up",
+    },
+    {
+      id: "swipe-down",
+      title: t('onboarding.swipeDownTitle'),
+      description: t('onboarding.swipeDownDesc'),
+      icon: <Maximize className="w-12 h-12 text-amber-500" />,
+      animation: "swipe-down",
+    },
+  ];
 
   // 如果已完成引导，不显示
   if (hasCompletedOnboarding) return null;
@@ -189,7 +191,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
               )}
             >
               <ChevronLeft className="w-4 h-4" />
-              上一步
+              {t('onboarding.prevStep')}
             </button>
 
             <button
@@ -201,7 +203,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
                 "active:scale-95"
               )}
             >
-              {isLastStep ? "开始使用" : "下一步"}
+              {isLastStep ? t('onboarding.getStarted') : t('onboarding.nextStep')}
               {!isLastStep && <ChevronRight className="w-4 h-4" />}
             </button>
           </div>
@@ -213,6 +215,8 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
 
 // 手势提示动画组件
 function GestureHint({ type }: { type: string }) {
+  const { t } = useTranslation();
+
   return (
     <div className="relative w-32 h-20">
       {/* Magic Ball 模拟 */}
@@ -247,7 +251,7 @@ function GestureHint({ type }: { type: string }) {
         }}
         style={getArrowPosition(type)}
       >
-        {getArrowIcon(type)}
+        {getArrowIcon(type, t)}
       </motion.div>
     </div>
   );
@@ -298,7 +302,7 @@ function getArrowPosition(type: string): React.CSSProperties {
   }
 }
 
-function getArrowIcon(type: string) {
+function getArrowIcon(type: string, t: (key: string, params?: Record<string, string | number>) => string) {
   switch (type) {
     case "swipe-left":
       return <ChevronLeft className="w-5 h-5" />;
@@ -307,7 +311,7 @@ function getArrowIcon(type: string) {
     case "swipe-down":
       return <ChevronRight className="w-5 h-5 rotate-90" />;
     case "long-press":
-      return <span className="text-xs">按住</span>;
+      return <span className="text-xs">{t('onboarding.hold')}</span>;
     default:
       return null;
   }

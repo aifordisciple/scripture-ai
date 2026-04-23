@@ -9,6 +9,7 @@ import { group } from './group'
 import { atlas } from './atlas'
 import { highlights } from './highlights'
 import { shareCard } from './shareCard'
+import { onboarding } from './onboarding'
 import type { DeepStringify } from '../types'
 
 export const zh = {
@@ -23,6 +24,7 @@ export const zh = {
   ...atlas,
   ...highlights,
   ...shareCard,
+  ...onboarding,
 } as const
 
 export type Translations = DeepStringify<typeof zh>

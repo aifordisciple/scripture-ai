@@ -13,57 +13,7 @@ import {
   CircleDot
 } from "lucide-react";
 import { OnboardingStep, OnboardingStepData } from "./shared/OnboardingStep";
-
-const WELCOME_STEPS: OnboardingStepData[] = [
-  {
-    id: "welcome",
-    title: "欢迎来到 AI读",
-    description: "你的智能读经伙伴，帮助你深入理解神的话语，建立持续的读经习惯。",
-    icon: <Sparkles className="w-12 h-12 text-purple-500" />,
-  },
-  {
-    id: "reading",
-    title: "沉浸式阅读",
-    description: "支持中英双语对照，自定义字体和行距，让阅读更加舒适。还可以高亮标记和添加笔记。",
-    icon: <BookOpen className="w-12 h-12 text-emerald-500" />,
-  },
-  {
-    id: "ai",
-    title: "AI 智能助手",
-    description: "遇到难懂的经文？AI 助手可以为你提供深度解读、背景知识和灵修建议。",
-    icon: <Bot className="w-12 h-12 text-blue-500" />,
-  },
-  {
-    id: "plan",
-    title: "读经计划",
-    description: "选择适合你的读经计划，每日打卡追踪进度，保持连续阅读的火苗。",
-    icon: <Calendar className="w-12 h-12 text-indigo-500" />,
-  },
-  {
-    id: "group",
-    title: "小组共读",
-    description: "创建或加入读经小组，与弟兄姊妹一起读经，互相鼓励，共同成长。",
-    icon: <Users className="w-12 h-12 text-pink-500" />,
-  },
-  {
-    id: "swipe",
-    title: "滑动换页",
-    description: "左右滑动可切换章节，快速浏览经文；上下滑动可滚动页面内容。",
-    icon: <MoveHorizontal className="w-12 h-12 text-cyan-500" />,
-  },
-  {
-    id: "magic-ball",
-    title: "Magic Ball 悬浮球",
-    description: "右下角悬浮球是你的智能助手。左滑打开AI解读，上滑选择书卷，下滑全屏模式，长按展开快捷菜单。",
-    icon: <CircleDot className="w-12 h-12 text-amber-500" />,
-  },
-  {
-    id: "start",
-    title: "开始你的读经之旅",
-    description: "点击左上角的书卷名称，选择你想阅读的经文。也可以使用快捷键 / 搜索。",
-    icon: <Rocket className="w-12 h-12 text-amber-500" />,
-  },
-];
+import { useTranslation } from "@/lib/i18n";
 
 interface WelcomeOnboardingProps {
   onComplete: () => void;
@@ -72,6 +22,58 @@ interface WelcomeOnboardingProps {
 
 export function WelcomeOnboarding({ onComplete, onSkip }: WelcomeOnboardingProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  const { t } = useTranslation();
+
+  const WELCOME_STEPS: OnboardingStepData[] = [
+    {
+      id: "welcome",
+      title: t('onboarding.welcomeTitle'),
+      description: t('onboarding.welcomeDesc'),
+      icon: <Sparkles className="w-12 h-12 text-purple-500" />,
+    },
+    {
+      id: "reading",
+      title: t('onboarding.immersiveReadingTitle'),
+      description: t('onboarding.immersiveReadingDesc'),
+      icon: <BookOpen className="w-12 h-12 text-emerald-500" />,
+    },
+    {
+      id: "ai",
+      title: t('onboarding.aiAssistantTitle'),
+      description: t('onboarding.aiAssistantDesc'),
+      icon: <Bot className="w-12 h-12 text-blue-500" />,
+    },
+    {
+      id: "plan",
+      title: t('onboarding.readingPlanTitle'),
+      description: t('onboarding.readingPlanDesc'),
+      icon: <Calendar className="w-12 h-12 text-indigo-500" />,
+    },
+    {
+      id: "group",
+      title: t('onboarding.groupReadingTitle'),
+      description: t('onboarding.groupReadingDesc'),
+      icon: <Users className="w-12 h-12 text-pink-500" />,
+    },
+    {
+      id: "swipe",
+      title: t('onboarding.swipeNavTitle'),
+      description: t('onboarding.swipeNavDesc'),
+      icon: <MoveHorizontal className="w-12 h-12 text-cyan-500" />,
+    },
+    {
+      id: "magic-ball",
+      title: t('onboarding.magicBallTitle'),
+      description: t('onboarding.magicBallDesc'),
+      icon: <CircleDot className="w-12 h-12 text-amber-500" />,
+    },
+    {
+      id: "start",
+      title: t('onboarding.startJourneyTitle'),
+      description: t('onboarding.startJourneyDesc'),
+      icon: <Rocket className="w-12 h-12 text-amber-500" />,
+    },
+  ];
 
   const handleNext = () => {
     if (currentStep < WELCOME_STEPS.length - 1) {
@@ -95,7 +97,7 @@ export function WelcomeOnboarding({ onComplete, onSkip }: WelcomeOnboardingProps
       onPrev={handlePrev}
       onSkip={onSkip}
       onComplete={onComplete}
-      title="功能介绍"
+      title={t('onboarding.featureGuide')}
     />
   );
 }

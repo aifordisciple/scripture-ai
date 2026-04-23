@@ -4,6 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export interface OnboardingStepData {
   id: string;
@@ -33,6 +34,7 @@ export function OnboardingStep({
   onComplete,
   title
 }: OnboardingStepProps) {
+  const { t } = useTranslation();
   const step = steps[currentStep];
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
@@ -138,7 +140,7 @@ export function OnboardingStep({
               )}
             >
               <ChevronLeft className="w-4 h-4" />
-              上一步
+              {t('onboarding.prevStep')}
             </button>
 
             <button
@@ -150,7 +152,7 @@ export function OnboardingStep({
                 "active:scale-95"
               )}
             >
-              {isLastStep ? "完成" : "下一步"}
+              {isLastStep ? t('onboarding.done') : t('onboarding.nextStep')}
               {!isLastStep && <ChevronRight className="w-4 h-4" />}
             </button>
           </div>
