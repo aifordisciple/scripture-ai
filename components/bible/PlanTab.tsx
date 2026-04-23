@@ -8,18 +8,21 @@ import { BIBLE_BOOKS } from "@/lib/constants";
 import { Calendar, CheckCircle2, Circle, BookOpen, Trash2, ArrowRight, Target, PlayCircle, Sparkles, Loader2, Medal, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export function PlanTab() {
   const router = useRouter();
   const {
     activePlans, startPlan, toggleTaskCompleted, quitPlan, tabs, addTab, setActiveTab,
     customPlans, addCustomPlan, deleteCustomPlan, catchUpPlan, setReadingPlanContext, generateAiDevotional,
-    viewingPlanId, setViewingPlanId, apiConfig, locale // [i18n] 取出 locale
+    viewingPlanId, setViewingPlanId, apiConfig // [i18n] locale no longer needed here, use useTranslation
   } = useBibleStore();
 
-  // [i18n] Locale-aware text helper
-  const t = (zh: string, en?: string) => locale === 'en' ? (en || zh) : zh;
-  const tArr = (zh: string[], en?: string[]) => locale === 'en' ? (en || zh) : zh;
+  // [i18n] i18n translation function
+  const { t } = useTranslation();
+  // [i18n] Locale-aware DualLangString helper (for plan titles, tags, descriptions that are bilingual data)
+  const tDual = (zh: string, en?: string) => useBibleStore.getState().locale === 'en' ? (en || zh) : zh;
+  const tArr = (zh: string[], en?: string[]) => useBibleStore.getState().locale === 'en' ? (en || zh) : zh;
 
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -58,7 +61,7 @@ export function PlanTab() {
              if (plan.savedDevotionals?.[task.day.toString()]) continue; // 之前已经生成过了
 
              // 找到了一个缺失导读的"天"，将其作为当前目标
-             targetTask = { planId: plan.planId, day: task.day, planTitle: t(planDetails.title, planDetails.titleEn), readings: task.readings };
+             targetTask = { planId: plan.planId, day: task.day, planTitle: tDual(planDetails.title, planDetails.titleEn), readings: task.readings };
              break;
           }
           if (targetTask) break; // 每次只锁死一个任务
@@ -115,8 +118,8 @@ export function PlanTab() {
       if (data.plan) {
         addCustomPlan(data.plan);
         setAiPrompt("");
-      } else alert("生成失败，请稍后重试");
-    } catch(e) { alert("网络错误"); }
+      } else alert(t('plan.generateFailed'));
+    } catch(e) { alert(t('plan.networkError')); }
     finally { setIsGenerating(false); }
   };
 
@@ -153,33 +156,33 @@ export function PlanTab() {
     return (
       <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
         <button onClick={() => setViewingPlanId(null)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm font-medium">
-          <ChevronLeft className="w-4 h-4" /> 返回计划大厅
+          <ChevronLeft className="w-4 h-4" /> {t('plan.backToHall')}
         </button>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold mb-2">
                 <Calendar className="w-5 h-5" />
-                <span className="text-sm uppercase tracking-widest">正在进行</span>
+                <span className="text-sm uppercase tracking-widest">{t('plan.inProgress')}</span>
              </div>
              <h1 className="text-2xl md:text-3xl font-bold text-foreground font-serif flex items-center gap-3">
-                {t(planDetails.title, planDetails.titleEn)}
+                {tDual(planDetails.title, planDetails.titleEn)}
                 {isTotallyCompleted && <Medal className="w-8 h-8 text-yellow-500 drop-shadow-md animate-bounce" />}
              </h1>
           </div>
           <Button variant="ghost" size="sm" onClick={() => {
-              if (confirm("确定要放弃当前的读经计划吗？这会清除此计划的打卡记录。")) {
+              if (confirm(t('plan.quitPlanConfirm'))) {
                   quitPlan(viewingPlanId);
                   setViewingPlanId(null);
               }
           }} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full self-start md:self-auto">
-             <Trash2 className="w-4 h-4 mr-1.5" /> 放弃计划
+             <Trash2 className="w-4 h-4 mr-1.5" /> {t('plan.quitPlan')}
           </Button>
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border dark:border-slate-800 shadow-sm mb-8">
            <div className="flex justify-between text-sm font-medium mb-2">
-              <span className="text-slate-600 dark:text-slate-300">整体进度</span>
+              <span className="text-slate-600 dark:text-slate-300">{t('plan.overallProgress')}</span>
               <span className="text-indigo-600 dark:text-indigo-400 font-bold">{progressPercent}% ({completedDaysCount}/{totalDays})</span>
            </div>
            <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -215,17 +218,17 @@ export function PlanTab() {
                 if (steps.length > 1) { // >1 因为最后一个总是 completion
                     setReadingPlanContext({
                         planId: viewingPlanId,
-                        planTitle: t(planDetails.title, planDetails.titleEn),
+                        planTitle: tDual(planDetails.title, planDetails.titleEn),
                         day,
                         stepIndex: 0,
                         steps
                     });
                 } else {
-                    alert("今天的任务已经全部完成啦！明天再来吧！");
+                    alert(t('plan.allDone'));
                 }
             }}
           >
-            <PlayCircle className="w-6 h-6" /> 继续今日阅读
+            <PlayCircle className="w-6 h-6" /> {t('plan.continueReading')}
           </Button>
           
           <Button 
@@ -235,7 +238,7 @@ export function PlanTab() {
               catchUpPlan(viewingPlanId);
             }}
           >
-            追赶进度
+            {t('plan.catchUp')}
           </Button>
         </div>
 
@@ -253,7 +256,7 @@ export function PlanTab() {
              taskDate.setDate(taskDate.getDate() + task.day - 1);
              const isToday = task.day === currentLogicDay;
              const isBehind = !isCompleted && task.day < currentLogicDay;
-             const dateStr = `${taskDate.getMonth() + 1}月${taskDate.getDate()}日`;
+             const dateStr = t('plan.dateShort', { month: taskDate.getMonth() + 1, day: taskDate.getDate() });
 
              return (
                <div key={task.day} className={cn(
@@ -271,12 +274,12 @@ export function PlanTab() {
                           {completedTasks.includes('devotional') ? <CheckCircle2 className="w-7 h-7 text-indigo-500" /> : <Circle className="w-7 h-7 text-slate-300 dark:text-slate-600 hover:text-indigo-400" />}
                         </button>
                         <div className="flex flex-col">
-                           <span className="font-bold text-lg text-slate-700 dark:text-slate-200">第 {task.day} 天</span>
+                           <span className="font-bold text-lg text-slate-700 dark:text-slate-200">{t('plan.day', { day: task.day })}</span>
                            <div className="flex items-center gap-1.5 mt-0.5">
                              <span className={cn("text-xs font-medium", isToday ? "text-indigo-600 dark:text-indigo-400" : "text-slate-500 dark:text-slate-400")}>
-                               {isToday ? "今天" : dateStr}
+                               {isToday ? t('plan.today') : dateStr}
                              </span>
-                             {isBehind && <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-bold whitespace-nowrap">已落后</span>}
+                             {isBehind && <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-bold whitespace-nowrap">{t('plan.behind')}</span>}
                            </div>
                         </div>
                      </div>
@@ -359,15 +362,15 @@ export function PlanTab() {
            <Calendar className="w-6 h-6" />
         </div>
         <div>
-           <h1 className="text-2xl font-bold text-foreground tracking-tight">读经计划</h1>
-           <p className="text-sm text-muted-foreground mt-1">安排每日灵修，你可以同时进行多个计划。</p>
+           <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('plan.title')}</h1>
+           <p className="text-sm text-muted-foreground mt-1">{t('plan.subtitle')}</p>
         </div>
       </div>
 
       {/* 我的计划 (正在进行) */}
       {inProgressPlans.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-lg font-bold text-foreground mb-4">我的计划 ({inProgressPlans.length})</h2>
+          <h2 className="text-lg font-bold text-foreground mb-4">{t('plan.myPlansCount', { count: inProgressPlans.length })}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {inProgressPlans.map((plan) => {
               const activeData = activePlans.find(p => p.planId === plan.id)!;
@@ -388,7 +391,7 @@ export function PlanTab() {
                      <button
                        onClick={(e) => {
                          e.stopPropagation();
-                         if (confirm('确定要删除此计划吗？这将同时清除所有打卡记录。')) {
+                         if (confirm(t('plan.deletePlanConfirm'))) {
                            deleteCustomPlan(plan.id);
                          }
                        }}
@@ -402,10 +405,10 @@ export function PlanTab() {
                         <Medal className="w-7 h-7 text-white" />
                      </div>
                    )}
-                   <h3 className="text-xl font-bold text-indigo-900 dark:text-indigo-300 font-serif mb-1 pr-10">{t(plan.title, plan.titleEn)}</h3>
+                   <h3 className="text-xl font-bold text-indigo-900 dark:text-indigo-300 font-serif mb-1 pr-10">{tDual(plan.title, plan.titleEn)}</h3>
                    <div className="flex justify-between items-center mt-auto pt-6">
                       <div className="flex-1 mr-4">
-                        <div className="flex justify-between text-xs mb-1 font-medium text-slate-500"><span className="text-indigo-600">{progressPercent}%</span><span>{plan.durationDays} 天</span></div>
+                        <div className="flex justify-between text-xs mb-1 font-medium text-slate-500"><span className="text-indigo-600">{progressPercent}%</span><span>{t('plan.durationDays', { count: plan.durationDays })}</span></div>
                         <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-indigo-500" style={{ width: `${progressPercent}%` }}/></div>
                        </div>
                        <Button
@@ -419,7 +422,7 @@ export function PlanTab() {
                               }
                           }}
                        >
-                          {isTotallyCompleted ? "归档至荣誉墙" : "继续打卡"}
+                          {isTotallyCompleted ? t('plan.archiveToHonor') : t('plan.continueCheckin')}
                        </Button>
                    </div>
                 </div>
@@ -433,7 +436,7 @@ export function PlanTab() {
       {archivedPlans.length > 0 && (
         <div className="mb-12">
           <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-            <Medal className="w-5 h-5 text-yellow-500" /> 荣誉墙 ({archivedPlans.length})
+            <Medal className="w-5 h-5 text-yellow-500" /> {t('plan.honorWallCount', { count: archivedPlans.length })}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {archivedPlans.map((plan) => (
@@ -447,7 +450,7 @@ export function PlanTab() {
                    <button
                      onClick={(e) => {
                        e.stopPropagation();
-                       if (confirm('确定要删除此计划吗？')) {
+                       if (confirm(t('plan.deletePlanConfirmShort'))) {
                          deleteCustomPlan(plan!.id);
                        }
                      }}
@@ -458,9 +461,9 @@ export function PlanTab() {
                  )}
                  <Medal className="w-10 h-10 text-yellow-400 mb-2 drop-shadow-sm" />
                  <h3 className="text-sm font-bold text-center font-serif text-slate-700 dark:text-slate-300 line-clamp-2 leading-snug">
-                   {t(plan!.title, plan!.titleEn)}
+                   {tDual(plan!.title, plan!.titleEn)}
                  </h3>
-                 <span className="text-[10px] text-muted-foreground mt-2 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">已完成</span>
+                 <span className="text-[10px] text-muted-foreground mt-2 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">{t('plan.completed')}</span>
               </div>
             ))}
           </div>
@@ -479,10 +482,10 @@ export function PlanTab() {
             <div className="p-2 bg-white/20 rounded-xl border border-white/30 backdrop-blur-sm shadow-inner">
                <Sparkles className="w-5 h-5 text-cyan-100" /> 
             </div>
-            AI 专属灵修定制
+            {t('plan.aiCustomTitle')}
           </h2>
           <p className="text-blue-50/90 text-sm md:text-base mb-8 max-w-2xl leading-relaxed font-medium">
-            告诉 AI 你目前正面临的挑战、想深入了解的主题，或是心中的困惑。它将为你量身打造一段专属的读经旅程。
+            {t('plan.aiCustomDesc')}
           </p>
           
           {/* 输入框与按钮的包裹层 (高透玻璃态) */}
@@ -490,7 +493,7 @@ export function PlanTab() {
             <input 
               value={aiPrompt} 
               onChange={e => setAiPrompt(e.target.value)} 
-              placeholder="例如：最近工作压力很大，总是感到焦虑..." 
+              placeholder={t('plan.aiCustomPlaceholder')} 
               disabled={isGenerating} 
               onKeyDown={(e) => e.key === 'Enter' && handleGeneratePlan()} 
               // 保持纯白输入框的超高辨识度
@@ -503,9 +506,9 @@ export function PlanTab() {
               className="bg-white hover:bg-blue-50 text-blue-700 font-bold rounded-xl px-8 py-4 h-auto shadow-lg shadow-blue-900/20 transition-all sm:w-auto w-full group border border-white"
             >
               {isGenerating ? (
-                <><Loader2 className="w-5 h-5 animate-spin mr-2 text-blue-500" /> 正在定制...</>
+                <><Loader2 className="w-5 h-5 animate-spin mr-2 text-blue-500" /> {t('plan.aiCustomGenerating')}</>
               ) : (
-                <>立即生成 <Sparkles className="w-4 h-4 ml-2 opacity-50 group-hover:opacity-100 transition-opacity text-blue-500" /></>
+                <>{t('plan.aiCustomGenerate')} <Sparkles className="w-4 h-4 ml-2 opacity-50 group-hover:opacity-100 transition-opacity text-blue-500" /></>
               )}
             </Button>
           </div>
@@ -513,7 +516,7 @@ export function PlanTab() {
       </div>
 
       {/* 探索计划 */}
-      <h2 className="text-lg font-bold text-foreground mb-4">探索更多计划</h2>
+      <h2 className="text-lg font-bold text-foreground mb-4">{t('plan.exploreMore')}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {discoverPlans.map((plan) => (
           <div key={plan.id} className="flex flex-col bg-white dark:bg-slate-900 rounded-2xl p-6 border dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative group">
@@ -522,17 +525,17 @@ export function PlanTab() {
              )}
              <div className="flex items-start justify-between mb-4 pr-6">
                 <div>
-                  <h3 className="text-lg font-bold text-foreground font-serif">{t(plan.title, plan.titleEn)}</h3>
+                  <h3 className="text-lg font-bold text-foreground font-serif">{tDual(plan.title, plan.titleEn)}</h3>
                   <div className="flex items-center gap-2 mt-2">
                      {tArr(plan.tags, plan.tagsEn)?.map((tag: string) => <span key={tag} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-md font-medium">{tag}</span>)}
-                     <span className="text-xs text-muted-foreground ml-1">{plan.durationDays} 天</span>
+                     <span className="text-xs text-muted-foreground ml-1">{t('plan.durationDays', { count: plan.durationDays })}</span>
                   </div>
                 </div>
                 <Target className="w-8 h-8 text-indigo-100 dark:text-indigo-900/50" />
              </div>
-             <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1 line-clamp-3">{t(plan.description, plan.descriptionEn)}</p>
+             <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1 line-clamp-3">{tDual(plan.description, plan.descriptionEn)}</p>
              <Button onClick={() => { startPlan(plan.id); setViewingPlanId(plan.id); }} className="w-full gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white">
-               <PlayCircle className="w-4 h-4" /> 开始计划
+               <PlayCircle className="w-4 h-4" /> {t('plan.startPlan')}
              </Button>
           </div>
         ))}

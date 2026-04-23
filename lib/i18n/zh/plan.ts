@@ -39,5 +39,10 @@ export const plan = {
     deletePlanConfirm: '确定要删除此计划吗？这将同时清除所有打卡记录。',
     deletePlanConfirmShort: '确定要删除此计划吗？',
     generateFailed: '生成失败，请稍后重试',
+    networkError: '网络错误',
+    dateShort: '{month}月{day}日',
+    myPlansCount: '我的计划 ({count})',
+    honorWallCount: '荣誉墙 ({count})',
+    durationDays: '{count} 天',
   },
 } as const

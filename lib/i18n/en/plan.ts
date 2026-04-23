@@ -39,5 +39,10 @@ export const plan = {
     deletePlanConfirm: 'Are you sure you want to delete this plan? This will also clear all check-in records.',
     deletePlanConfirmShort: 'Are you sure you want to delete this plan?',
     generateFailed: 'Generation failed, please try again later',
+    networkError: 'Network error',
+    dateShort: '{month}/{day}',
+    myPlansCount: 'My Plans ({count})',
+    honorWallCount: 'Honor Wall ({count})',
+    durationDays: '{count} days',
   },
 } as const
