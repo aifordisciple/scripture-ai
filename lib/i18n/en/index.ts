@@ -1,4 +1,4 @@
-import type { Translations } from './zh'
+import type { Translations } from '../zh'
 
 export const en: Translations = {
   common: {
@@ -81,7 +81,7 @@ export const en: Translations = {
     subtitle: 'Schedule daily devotions. You can follow multiple plans at the same time.',
     myPlans: 'My Plans',
     allPlans: 'All Plans',
-    continueReading: 'Continue Today\'s Reading',
+    continueReading: "Continue Today's Reading",
     catchUp: 'Catch Up',
     startPlan: 'Start Plan',
     day: 'Day {day}',
@@ -94,7 +94,7 @@ export const en: Translations = {
     deletePlan: 'Delete Plan',
     quitPlan: 'Quit Plan',
     quitPlanConfirm: 'Are you sure you want to quit this reading plan? This will clear all check-in records for this plan.',
-    todayTask: 'Today\'s Tasks',
+    todayTask: "Today's Tasks",
     allDone: 'All tasks for today are complete! Come back tomorrow!',
     readChapter: 'Read {book} Chapter {chapter}',
     stepRead: 'Read',
@@ -109,8 +109,8 @@ export const en: Translations = {
     inProgress: 'In Progress',
     exploreMore: 'Explore More Plans',
     aiCustomTitle: 'AI Custom Devotion',
-    aiCustomDesc: 'Tell AI about the challenges you\'re facing, topics you want to explore, or questions on your mind. It will craft a personalized Bible reading journey for you.',
-    aiCustomPlaceholder: 'e.g., I\'ve been feeling anxious about work lately...',
+    aiCustomDesc: "Tell AI about the challenges you're facing, topics you want to explore, or questions on your mind. It will craft a personalized Bible reading journey for you.",
+    aiCustomPlaceholder: "e.g., I've been feeling anxious about work lately...",
     aiCustomGenerating: 'Customizing...',
     aiCustomGenerate: 'Generate Now',
     deletePlanConfirm: 'Are you sure you want to delete this plan? This will also clear all check-in records.',
@@ -209,4 +209,7 @@ export const en: Translations = {
     results: 'Search Results',
     noResults: 'No matching verses found',
   },
+  auth: {},
+  group: {},
+  atlas: {},
 }

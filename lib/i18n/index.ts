@@ -42,4 +42,8 @@ export function useTranslation() {
   }
 }
 
+export function resolveDualLang(v: { zh: string; en: string } | string, locale: Locale): string {
+  return typeof v === 'string' ? v : (v[locale] || v.zh)
+}
+
 export type { Translations }

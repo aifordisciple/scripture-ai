@@ -1,0 +1,23 @@
+export const settings = {
+  settings: {
+    title: '设置',
+    language: '语言',
+    chinese: '中文',
+    english: 'English',
+    bilingual: '双语对照',
+    darkMode: '深色模式',
+    lightMode: '浅色模式',
+    fontSize: '字号大小',
+    lineHeight: '行间距',
+    apiConfig: 'API 配置',
+    logout: '退出登录',
+    login: '登录',
+    closeAndFinish: '完 成 并 关 闭',
+    toggleLight: '切换浅色',
+    toggleDark: '切换深色',
+    exitFullscreen: '退出',
+    enterFullscreen: '开启',
+    tts: '语音朗读',
+    readingSettings: '阅读设置',
+  },
+} as const

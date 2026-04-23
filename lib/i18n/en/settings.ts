@@ -1,0 +1,23 @@
+export const settings = {
+  settings: {
+    title: 'Settings',
+    language: 'Language',
+    chinese: 'Chinese',
+    english: 'English',
+    bilingual: 'Bilingual',
+    darkMode: 'Dark Mode',
+    lightMode: 'Light Mode',
+    fontSize: 'Font Size',
+    lineHeight: 'Line Height',
+    apiConfig: 'API Config',
+    logout: 'Log Out',
+    login: 'Log In',
+    closeAndFinish: 'Close & Finish',
+    toggleLight: 'Switch to Light',
+    toggleDark: 'Switch to Dark',
+    exitFullscreen: 'Exit',
+    enterFullscreen: 'Enter',
+    tts: 'Text-to-Speech',
+    readingSettings: 'Reading Settings',
+  },
+} as const
