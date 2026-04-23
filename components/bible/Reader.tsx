@@ -10,6 +10,7 @@ import { FloatingMenu } from "./FloatingMenu";
 import { Button } from "@/components/ui/button";
 import { CHAPTER_SUMMARY_PROMPT } from "@/lib/constants";
 import { useTranslation, resolveDualLang } from "@/lib/i18n";
+import { getBookDisplayName } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReaderSkeleton } from "@/components/skeletons/ReaderSkeleton";
 
@@ -40,6 +41,11 @@ const slideVariants = {
 export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const searchParams = useSearchParams();
   const { locale } = useTranslation();
+
+  // Version linkage: locale determines primary and secondary Bible versions
+  // zh → CUV primary, KJV secondary; en → KJV primary, CUV secondary
+  const primaryVersion = locale === 'en' ? 'KJV' : 'CUV';
+  const secondaryVersion = locale === 'en' ? 'CUV' : 'KJV';
 
   // 使用 ref 追踪 initial 值的变化，确保外部更新时能响应
   const prevInitialRef = useRef({ book: initialBook, chapter: initialChapter });
@@ -171,11 +177,11 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             } else {
               e.preventDefault();
               // 一键唤起 AI 解读
-              const cuvVerses = verses.filter(v => v.version === 'CUV' && state.selectedVerses.includes(v.verse));
-              if (cuvVerses.length > 0) {
-                 const content = cuvVerses.map(v => `[${v.verse}] ${v.content}`).join('\n');
-                 const context = verses.filter(v => v.version === 'CUV').map(v => `[${v.verse}] ${v.content}`).join('\n');
-                 const ref = { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: cuvVerses[0].verse };
+              const primaryVerses = verses.filter(v => v.version === primaryVersion && state.selectedVerses.includes(v.verse));
+              if (primaryVerses.length > 0) {
+                 const content = primaryVerses.map(v => `[${v.verse}] ${v.content}`).join('\n');
+                 const context = verses.filter(v => v.version === primaryVersion).map(v => `[${v.verse}] ${v.content}`).join('\n');
+                 const ref = { bookName: primaryVerses[0].bookName, chapter: primaryVerses[0].chapter, verse: primaryVerses[0].verse };
 
                  state.enqueueAI("请深入解读以下经文。", content, context, ref);
                  state.setAiOpen(true);
@@ -191,11 +197,11 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
           if (hasSelection) {
             e.preventDefault();
             // 祷告生成
-            const cuvVerses = verses.filter(v => v.version === 'CUV' && state.selectedVerses.includes(v.verse));
-            if (cuvVerses.length > 0) {
-              const content = cuvVerses.map(v => `[${v.verse}] ${v.content}`).join('\n');
-              const context = verses.filter(v => v.version === 'CUV').map(v => `[${v.verse}] ${v.content}`).join('\n');
-              const ref = { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: cuvVerses[0].verse };
+            const primaryVerses = verses.filter(v => v.version === primaryVersion && state.selectedVerses.includes(v.verse));
+            if (primaryVerses.length > 0) {
+              const content = primaryVerses.map(v => `[${v.verse}] ${v.content}`).join('\n');
+              const context = verses.filter(v => v.version === primaryVersion).map(v => `[${v.verse}] ${v.content}`).join('\n');
+              const ref = { bookName: primaryVerses[0].bookName, chapter: primaryVerses[0].chapter, verse: primaryVerses[0].verse };
 
               state.enqueueAI("请基于这段经文的感动，为我写一篇祷告文。祷告应包含：对他属性的赞美、对罪的悔改、对恩典的感谢以及具体的祈求。语气要真诚、亲切。", content, context, ref);
               state.setAiOpen(true);
@@ -209,10 +215,10 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         case 'S':
           e.preventDefault();
           // 章节摘要
-          const cuvVersesForSummary = verses.filter(v => v.version === 'CUV');
-          if (cuvVersesForSummary.length > 0) {
-            const fullContext = cuvVersesForSummary.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
-            state.enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), `【${cuvVersesForSummary[0].bookName} 第 ${cuvVersesForSummary[0].chapter} 章】全章`, fullContext, { bookName: cuvVersesForSummary[0].bookName, chapter: cuvVersesForSummary[0].chapter, verse: 0 });
+          const primaryVersesForSummary = verses.filter(v => v.version === primaryVersion);
+          if (primaryVersesForSummary.length > 0) {
+            const fullContext = primaryVersesForSummary.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
+            state.enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), `【${getBookDisplayName(primaryVersesForSummary[0].bookId, locale)} ${locale === 'en' ? 'Ch.' : '第'} ${primaryVersesForSummary[0].chapter} ${locale === 'en' ? '' : '章'}】${locale === 'en' ? 'Full Chapter' : '全章'}`, fullContext, { bookName: primaryVersesForSummary[0].bookName, chapter: primaryVersesForSummary[0].chapter, verse: 0 });
             state.setAiOpen(true);
           }
           break;
@@ -228,7 +234,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [book, chapter, verses, handlePrevChapter, handleNextChapter, clearSelection, setIsMenuVisible, locale]);
+  }, [book, chapter, verses, handlePrevChapter, handleNextChapter, clearSelection, setIsMenuVisible, locale, primaryVersion]);
 
 
   const { verseMap, renderList } = useMemo(() => {
@@ -246,11 +252,11 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const handleCrossRef = useCallback(() => {
     if (selectedVerses.length === 0) return;
 
-    const cuvVerses = verses.filter(v => v.version === 'CUV' && selectedVerses.includes(v.verse));
-    if (cuvVerses.length === 0) return;
+    const primaryVerses = verses.filter(v => v.version === primaryVersion && selectedVerses.includes(v.verse));
+    if (primaryVerses.length === 0) return;
 
-    const firstVerse = cuvVerses[0];
-    const content = cuvVerses.map(v => v.content).join('');
+    const firstVerse = primaryVerses[0];
+    const content = primaryVerses.map(v => v.content).join('');
 
     // 在新标签页打开串珠
     addTab({
@@ -265,17 +271,17 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     });
     setIsMenuVisible(false);
     clearSelection();
-  }, [selectedVerses, verses, addTab, setIsMenuVisible, clearSelection]);
+  }, [selectedVerses, verses, addTab, setIsMenuVisible, clearSelection, primaryVersion]);
 
   // [新增] 处理查看地图 - 打开Atlas面板并提取地点
   const handleAtlas = useCallback(() => {
     if (selectedVerses.length === 0) return;
 
-    const cuvVerses = verses.filter(v => v.version === 'CUV' && selectedVerses.includes(v.verse));
-    if (cuvVerses.length === 0) return;
+    const primaryVerses = verses.filter(v => v.version === primaryVersion && selectedVerses.includes(v.verse));
+    if (primaryVerses.length === 0) return;
 
-    const firstVerse = cuvVerses[0];
-    const verseContent = cuvVerses.map(v => v.content).join(' ');
+    const firstVerse = primaryVerses[0];
+    const verseContent = primaryVerses.map(v => v.content).join(' ');
     const verseStart = Math.min(...selectedVerses);
     const verseEnd = Math.max(...selectedVerses);
 
@@ -294,7 +300,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     setAtlasPanelOpen(true);
     setIsMenuVisible(false);
     clearSelection();
-  }, [selectedVerses, verses, addTab, setAtlasPanelOpen, setIsMenuVisible, clearSelection, setAtlasVerseContext]);
+  }, [selectedVerses, verses, addTab, setAtlasPanelOpen, setIsMenuVisible, clearSelection, setAtlasVerseContext, primaryVersion]);
 
   return (
     <div className="w-full flex flex-row relative transition-colors duration-500" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
@@ -331,20 +337,20 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                     <p className="text-lg font-medium text-destructive mb-2">{error}</p>
                     <Button variant="outline" onClick={refetch} className="mt-4">
                         <Loader2 className="w-4 h-4 mr-2" />
-                        重试
+                        {locale === 'en' ? 'Retry' : '重试'}
                     </Button>
                 </div>
             ) : renderList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
                     <BookOpenCheck className="w-16 h-16 text-muted-foreground/50 mb-4" />
-                    <p className="text-lg font-medium text-muted-foreground mb-2">此章节暂无经文内容</p>
-                    <p className="text-sm text-muted-foreground/70">可能数据库尚未加载此章节</p>
+                    <p className="text-lg font-medium text-muted-foreground mb-2">{locale === 'en' ? 'No content available for this chapter' : '此章节暂无经文内容'}</p>
+                    <p className="text-sm text-muted-foreground/70">{locale === 'en' ? 'This chapter may not be loaded in the database yet' : '可能数据库尚未加载此章节'}</p>
                 </div>
             ) : (
                 <>  
                     <div className="flex items-center justify-center mb-10 md:mb-16 relative mt-4">
                         <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground/90 select-none text-center tracking-wider">
-                            {verses[0]?.bookName || book} <span className="opacity-80 mx-1">·</span> {chapter}
+                            {getBookDisplayName(book, locale)} <span className="opacity-80 mx-1">·</span> {chapter}
                         </h1>
                     </div>
 
@@ -353,8 +359,12 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         const entry = verseMap.get(verseNum)!;
                         const cuvVerse = entry.CUV;
                         const kjvVerse = entry.KJV;
-                        
-                        if (!cuvVerse) return null;
+
+                        // Version linkage: primary verse depends on locale
+                        const mainVerse = primaryVersion === 'KJV' ? kjvVerse : cuvVerse;
+                        const altVerse = primaryVersion === 'KJV' ? cuvVerse : kjvVerse;
+
+                        if (!mainVerse) return null;
                         const isSelected = selectedVerses.includes(verseNum);
                         const highlight = highlights.find(h => h.verse === verseNum && h.bookId === book && h.chapter === parseInt(chapter));
                         const highlightClass = highlight ? HIGHLIGHT_COLORS[highlight.color] : "";
@@ -362,8 +372,8 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         return (
                         <div
                             id={`verse-${verseNum}`}
-                            key={cuvVerse.id}
-                            onClick={(e) => handleVerseClick(cuvVerse, e)}
+                            key={mainVerse.id}
+                            onClick={(e) => handleVerseClick(mainVerse, e)}
                             className={cn(
                                 "relative flex items-start px-3 md:px-5 py-2.5 rounded-2xl cursor-pointer transition-all duration-300 group/verse",
                                 isSelected ? "bg-primary/10 dark:bg-primary/20 shadow-[inset_4px_0_0_0_hsl(var(--primary))]" :
@@ -382,11 +392,11 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                                   className={cn("font-serif tracking-wide transition-colors text-justify", isSelected ? "text-foreground font-medium" : "text-foreground/90")}
                                   style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
                                 >
-                                    {cuvVerse.content}
+                                    {mainVerse.content}
                                 </div>
-                                {showEnglish && kjvVerse && (
+                                {showEnglish && altVerse && (
                                     <div className="mt-3 text-muted-foreground font-sans tracking-wide" style={{ fontSize: `${fontSize * 0.85}px`, lineHeight: 1.6 }}>
-                                        {kjvVerse.content}
+                                        {altVerse.content}
                                     </div>
                                 )}
                             </div>
@@ -395,9 +405,9 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    const content = cuvVerse.content;
-                                    const context = verses.filter(v => v.version === 'CUV').map(v => `[${v.verse}] ${v.content}`).join('\n');
-                                    const ref = { bookName: cuvVerse.bookName, chapter: cuvVerse.chapter, verse: cuvVerse.verse };
+                                    const content = mainVerse.content;
+                                    const context = verses.filter(v => v.version === primaryVersion).map(v => `[${v.verse}] ${v.content}`).join('\n');
+                                    const ref = { bookName: mainVerse.bookName, chapter: mainVerse.chapter, verse: mainVerse.verse };
                                     enqueueAI("请深入解读以下经文。", content, context, ref);
                                     useBibleStore.getState().setAiOpen(true);
                                 }}
@@ -416,10 +426,10 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            const cuvVerses = verses.filter(v => v.version === 'CUV');
-                            if (cuvVerses.length > 0) {
-                                const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
-                                enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, fullContext, { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 });
+                            const primaryVerses = verses.filter(v => v.version === primaryVersion);
+                            if (primaryVerses.length > 0) {
+                                const fullContext = primaryVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
+                                enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), `【${getBookDisplayName(primaryVerses[0].bookId, locale)} ${locale === 'en' ? 'Ch.' : '第'} ${primaryVerses[0].chapter} ${locale === 'en' ? '' : '章'}】${locale === 'en' ? 'Full Chapter' : '全章'}`, fullContext, { bookName: primaryVerses[0].bookName, chapter: primaryVerses[0].chapter, verse: 0 });
                             }
                         }} 
                         className={cn(
@@ -430,7 +440,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         )}
                     >
                         <BookOpenCheck className="w-5 h-5 text-primary group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300" />
-                        阅读第 {chapter} 章精意
+                        {locale === 'en' ? `Read Ch. ${chapter} Essence` : `阅读第 ${chapter} 章精意`}
                     </button>
                     </div>
                 </>
