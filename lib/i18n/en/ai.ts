@@ -89,6 +89,7 @@ export const ai = {
     viewCrossRef: 'View Cross Reference',
     viewAtlas: 'View Map',
     copiedToClipboard: 'Copied to clipboard',
+    copyFailed: 'Copy failed, please copy manually',
     copyVerse: 'Copy Verse',
   },
 } as const

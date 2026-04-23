@@ -89,6 +89,7 @@ export const ai = {
     viewCrossRef: '查看串珠',
     viewAtlas: '查看地图',
     copiedToClipboard: '已复制到剪贴板',
+    copyFailed: '复制失败，请手动复制',
     copyVerse: '复制经文',
   },
 } as const

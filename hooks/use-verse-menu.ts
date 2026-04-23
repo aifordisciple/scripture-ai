@@ -3,14 +3,17 @@ import { useState, useEffect } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { Verse } from './use-bible-data';
 import { useToast } from '@/components/ui/toast';
+import { getBookDisplayName } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 export function useVerseMenu(verses: Verse[]) {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [showAbove, setShowAbove] = useState(true); // 菜单显示在选中元素上方还是下方
 
-  const { selectedVerses, toggleVerseSelection, clearSelection, enqueueAI } = useBibleStore();
+  const { selectedVerses, toggleVerseSelection, clearSelection, enqueueAI, locale } = useBibleStore();
   const { addToast } = useToast();
+  const { t } = useTranslation();
 
   // 点击空白处关闭菜单
   useEffect(() => {
@@ -54,12 +57,12 @@ export function useVerseMenu(verses: Verse[]) {
 
   const handleAIExplain = () => {
     if (selectedVerses.length === 0) return;
+    const primaryVersion = locale === 'en' ? 'KJV' : 'CUV';
     const selectedVerseObjects = verses.filter(v => selectedVerses.includes(v.verse));
-    if (selectedVerseObjects.length === 0) return;
-    const cuvVerses = selectedVerseObjects.filter(v => v.version === 'CUV');
-    if (cuvVerses.length === 0) return;
+    const primaryVerses = selectedVerseObjects.filter(v => v.version === primaryVersion);
+    if (primaryVerses.length === 0) return;
 
-    const combinedContent = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
+    const combinedContent = primaryVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
 
     // 获取上下文 (前后各5节)
     const minVerseIdx = verses.findIndex(v => v.verse === Math.min(...selectedVerses));
@@ -67,12 +70,12 @@ export function useVerseMenu(verses: Verse[]) {
     const start = Math.max(0, minVerseIdx - 5);
     const end = Math.min(verses.length, maxVerseIdx + 6);
     const contextContent = verses.slice(start, end)
-        .filter(v => v.version === 'CUV')
+        .filter(v => v.version === primaryVersion)
         .map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
 
-    const firstV = cuvVerses[0];
-    enqueueAI("请详细解读这段经文，包含背景、逐节释经和现代应用。", combinedContent, contextContent, {
-        bookName: firstV.bookName, chapter: firstV.chapter, verse: firstV.verse
+    const firstV = primaryVerses[0];
+    enqueueAI(t('reader.aiInterpretPrompt'), combinedContent, contextContent, {
+        bookName: getBookDisplayName(firstV.bookId, locale), chapter: firstV.chapter, verse: firstV.verse
     });
 
     setIsMenuVisible(false);
@@ -80,16 +83,11 @@ export function useVerseMenu(verses: Verse[]) {
   };
 
   const handleCopy = async () => {
+    const primaryVersion = locale === 'en' ? 'KJV' : 'CUV';
     const selectedContent = verses
-      .filter(v => selectedVerses.includes(v.verse))
+      .filter(v => selectedVerses.includes(v.verse) && v.version === primaryVersion)
       .sort((a, b) => a.verse - b.verse)
-      .reduce((acc, curr) => {
-        const existing = acc.find(item => item.verse === curr.verse);
-        if (!existing) { acc.push(curr); }
-        else if (curr.version === 'CUV') { const index = acc.indexOf(existing); acc[index] = curr; }
-        return acc;
-      }, [] as Verse[])
-      .map(v => `${v.content} (${v.bookName} ${v.chapter}:${v.verse})`)
+      .map(v => `${v.content} (${getBookDisplayName(v.bookId, locale)} ${v.chapter}:${v.verse})`)
       .join("\n");
 
     if (!selectedContent) return;
@@ -97,7 +95,7 @@ export function useVerseMenu(verses: Verse[]) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       try {
           await navigator.clipboard.writeText(selectedContent);
-          addToast({ type: 'success', message: '已复制到剪贴板' });
+          addToast({ type: 'success', message: t('floatingMenu.copiedToClipboard') });
           return;
       } catch (err) {
           console.warn("Clipboard API failed, trying fallback...", err);
@@ -115,10 +113,10 @@ export function useVerseMenu(verses: Verse[]) {
       textarea.setSelectionRange(0, 99999);
       document.execCommand('copy');
       document.body.removeChild(textarea);
-      addToast({ type: 'success', message: '已复制到剪贴板' });
+      addToast({ type: 'success', message: t('floatingMenu.copiedToClipboard') });
     } catch (e) {
       console.error("Fallback copy failed:", e);
-      addToast({ type: 'error', message: '复制失败，请手动复制' });
+      addToast({ type: 'error', message: t('floatingMenu.copyFailed') });
     }
   };
 
