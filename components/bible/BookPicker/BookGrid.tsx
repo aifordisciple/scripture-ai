@@ -5,12 +5,15 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { BookGridProps } from "./types";
 import { motion } from "framer-motion";
+import { useBibleStore } from "@/store/useBibleStore";
 
 /**
  * 书卷网格组件
  * 4-5 列响应式布局
  */
 export function BookGrid({ books, selectedBookId, onSelect, searchQuery = "" }: BookGridProps) {
+  const locale = useBibleStore((s) => s.locale);
+
   // 搜索过滤
   const filteredBooks = useMemo(() => {
     if (!searchQuery) return books;
@@ -18,6 +21,7 @@ export function BookGrid({ books, selectedBookId, onSelect, searchQuery = "" }: 
     return books.filter(
       (book) =>
         book.name.includes(searchQuery) ||
+        (book.nameEn && book.nameEn.toLowerCase().includes(query)) ||
         book.id.toLowerCase().includes(query) ||
         book.category?.toLowerCase().includes(query)
     );
@@ -26,7 +30,7 @@ export function BookGrid({ books, selectedBookId, onSelect, searchQuery = "" }: 
   if (filteredBooks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-muted-foreground text-sm">未找到匹配的书卷</p>
+        <p className="text-muted-foreground text-sm">{locale === 'en' ? 'No matching books' : '未找到匹配的书卷'}</p>
       </div>
     );
   }
@@ -35,6 +39,7 @@ export function BookGrid({ books, selectedBookId, onSelect, searchQuery = "" }: 
     <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
       {filteredBooks.map((book, index) => {
         const isSelected = selectedBookId === book.id;
+        const displayName = locale === 'en' ? (book.nameEn || book.name) : book.name;
 
         return (
           <motion.button
@@ -51,7 +56,7 @@ export function BookGrid({ books, selectedBookId, onSelect, searchQuery = "" }: 
                 : "bg-secondary/50 text-foreground hover:bg-secondary hover:border-border hover:shadow-sm"
             )}
           >
-            <span className="block truncate">{book.name}</span>
+            <span className="block truncate">{displayName}</span>
             {/* 章节数徽章 */}
             {book.chapters && (
               <span

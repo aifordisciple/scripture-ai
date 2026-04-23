@@ -68,7 +68,8 @@ export function HighlightsTab() {
           const res = await fetch(`/api/bible?book=${h.bookId}&chapter=${h.chapter}`);
           const json = await res.json();
           const verseData = json.data?.find((v: any) => v.version === 'CUV' && v.verse === h.verse);
-          const bookName = BIBLE_BOOKS.find(b => b.id === h.bookId)?.name || h.bookId;
+          const book = BIBLE_BOOKS.find(b => b.id === h.bookId);
+          const bookName = locale === 'en' ? (book?.nameEn || book?.name || h.bookId) : (book?.name || h.bookId);
           return {
             ...h,
             bookName,

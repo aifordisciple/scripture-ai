@@ -10,7 +10,7 @@ import { Book, ChevronRight, Search, X, Library, Users } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 
 export function Sidebar() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const router = useRouter();
   const { tabs, activeTabId, updateActiveTab, isSidebarOpen, toggleSidebar, setActiveTab, addTab } = useBibleStore();
   
@@ -70,9 +70,10 @@ export function Sidebar() {
   // 渲染书卷列表的通用函数
   const renderBookList = (books: typeof BIBLE_BOOKS, title: string) => {
      // 搜索过滤逻辑
-     const filtered = books.filter(b => 
-       b.name.includes(searchQuery) || b.id.toLowerCase().includes(searchQuery.toLowerCase())
-     );
+     const filtered = books.filter(b => {
+       const displayName = locale === 'en' ? (b.nameEn || b.name) : b.name;
+       return displayName.includes(searchQuery) || b.name.includes(searchQuery) || (b.nameEn && b.nameEn.toLowerCase().includes(searchQuery.toLowerCase())) || b.id.toLowerCase().includes(searchQuery.toLowerCase());
+     });
      
      if (filtered.length === 0) return null;
 
@@ -106,7 +107,7 @@ export function Sidebar() {
                   >
                     <div className="flex items-center gap-3">
                       <Book className={cn("w-4 h-4", isActiveBook ? "text-primary" : "text-muted-foreground")} />
-                      <span className="tracking-wide">{book.name}</span>
+                      <span className="tracking-wide">{locale === 'en' ? (book.nameEn || book.name) : book.name}</span>
                     </div>
                     <ChevronRight 
                       className={cn(

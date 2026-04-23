@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { RadialMenu } from "./RadialMenu";
 import { QuickAction } from "@/store/types";
+import { useTranslation } from "@/lib/i18n";
 
 interface MagicBallProps {
   /** 打开书卷选择器的回调 */
@@ -22,6 +23,7 @@ interface MagicBallProps {
 }
 
 export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicker }: MagicBallProps) {
+  const { t, locale } = useTranslation();
   const controls = useAnimation();
   const [showHint, setShowHint] = useState<string | null>(null);
 
@@ -113,7 +115,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     if (ref.verse > 0) {
       return `${ref.bookName} ${ref.chapter}:${ref.verse}`;
     }
-    return `${ref.bookName} ${ref.chapter}章`;
+    return `${ref.bookName} ${ref.chapter}${locale === 'en' ? '' : '章'}`;
   };
 
   // 截取提示词
@@ -406,7 +408,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                 <ListOrdered className="w-4 h-4 text-blue-500" />
-                AI 解读队列
+                {t('ai.queueTitle')}
               </div>
               <button
                 onClick={closeQueuePanel}
@@ -422,7 +424,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
                     <BookOpenCheck className="w-3.5 h-3.5" />
-                    解读已完成
+                    {t('ai.interpretationDone')}
                   </span>
                 </div>
                 <button
@@ -433,7 +435,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                   }}
                   className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white text-sm font-medium shadow-sm transition-all hover:shadow-md"
                 >
-                  点击查看解读
+                  {t('ai.clickToView')}
                 </button>
               </div>
             )}
@@ -444,7 +446,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
                     <Loader2 className="w-3 h-3 animate-spin" />
-                    正在处理
+                    {t('ai.processing')}
                   </span>
                   <button
                     onClick={() => {
@@ -474,7 +476,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             {aiQueue.length > 0 && (
               <div className="max-h-48 overflow-y-auto">
                 <div className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-50/50 dark:bg-slate-800/50">
-                  等待中 ({aiQueue.length})
+                  {t('ai.waiting')} ({aiQueue.length})
                 </div>
                 {aiQueue.map((item, index) => (
                   <div
@@ -497,7 +499,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                     <button
                       onClick={() => cancelAIRequest(item.id)}
                       className="ml-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
-                      title="从队列移除"
+                      title="{t('ai.removeFromQueue')}"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -543,7 +545,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             : "translate-x-10 opacity-0 scale-50 pointer-events-none"
         )}>
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm animate-pulse-subtle">
-            <MousePointerClick className="w-4 h-4" /> 点击查看解读
+            <MousePointerClick className="w-4 h-4" /> {t('ai.clickToView')}
           </div>
           <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-purple-600"></div>
         </div>
@@ -574,9 +576,9 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
           <>
             <div className={cn("absolute transition-all duration-300 ease-out", showHint === "ai-toggle" ? "-translate-x-28 opacity-100 scale-100" : "translate-x-0 opacity-0 scale-50")}>
               {isAiOpen ? (
-                <div className="bg-slate-500 text-white px-3 py-2 rounded-full shadow-xl flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20"><X className="w-4 h-4" /> 关闭助手</div>
+                <div className="bg-slate-500 text-white px-3 py-2 rounded-full shadow-xl flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20"><X className="w-4 h-4" /> {t('ai.closeAssistant')}</div>
               ) : (
-                <div className="bg-blue-600 text-white px-3 py-2 rounded-full shadow-xl flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20"><Bot className="w-4 h-4" /> 开启解读</div>
+                <div className="bg-blue-600 text-white px-3 py-2 rounded-full shadow-xl flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20"><Bot className="w-4 h-4" /> {t('ai.openInterpretation')}</div>
               )}
             </div>
             <div className={cn("absolute transition-all duration-300 ease-out", showHint === "menu-toggle" ? "-translate-y-24 opacity-100 scale-100" : "translate-y-0 opacity-0 scale-50")}>
