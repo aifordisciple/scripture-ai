@@ -3,8 +3,8 @@
 import { memo, useRef, useCallback } from 'react'
 import { Sparkles, GraduationCap, FileText, BookMarked, Settings, LayoutList, BookOpen, Search, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { THEOLOGICAL_PROMPTS, type DualLangString } from '@/lib/constants'
-import { useTranslation } from '@/lib/i18n'
+import { THEOLOGICAL_PROMPTS } from '@/lib/constants'
+import { useTranslation, resolveDualLang } from '@/lib/i18n'
 
 export interface QuickPromptsProps {
   isLoading: boolean
@@ -45,7 +45,6 @@ export const QuickPrompts = memo(function QuickPrompts({
   customPrompts = [],
 }: QuickPromptsProps) {
   const { locale } = useTranslation()
-  const resolve = (v: DualLangString | string) => typeof v === 'string' ? v : (v[locale] || v.zh)
 
   // 滚轮横向滚动
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -133,14 +132,14 @@ export const QuickPrompts = memo(function QuickPrompts({
           displayPrompts.map(t => (
             <button
               key={t.id}
-              onClick={() => onChipClick(resolve(t.prompt))}
+              onClick={() => onChipClick(resolveDualLang(t.prompt, locale))}
               className={cn(
                 'flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-slate-700 transition-all active:scale-95 shadow-sm dark:bg-slate-800 dark:text-slate-200 hover:brightness-95 whitespace-nowrap shrink-0',
                 t.color
               )}
             >
               {getIcon(t.id)}
-              {resolve(t.label)}
+              {resolveDualLang(t.label, locale)}
             </button>
           ))
         )}

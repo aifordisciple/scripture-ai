@@ -1,5 +1,7 @@
 // lib/constants.ts
 
+import type { Locale } from './i18n';
+
 // Dual-language string type for i18n prompts
 export type DualLangString = { zh: string; en: string };
 
@@ -217,13 +219,13 @@ export const BIBLE_BOOKS = [
   { name: "启示录", id: "Rev", nameEn: "Revelation", chapters: 22, category: "预言书", categoryEn: "Prophecy", intro: "耶稣基督的启示，终局的得胜与新天新地。", introEn: "The revelation of Jesus Christ, depicting the final victory and the coming of a new heaven and earth." },
 ];
 
-export function getBookDisplayName(bookId: string, locale: 'zh' | 'en'): string {
+export function getBookDisplayName(bookId: string, locale: Locale = 'zh'): string {
   const book = BIBLE_BOOKS.find(b => b.id === bookId)
   if (!book) return bookId
   return locale === 'en' ? book.nameEn : book.name
 }
 
-export function getBookCategory(bookId: string, locale: 'zh' | 'en'): string {
+export function getBookCategory(bookId: string, locale: Locale = 'zh'): string {
   const book = BIBLE_BOOKS.find(b => b.id === bookId)
   if (!book) return ''
   return locale === 'en' ? book.categoryEn : book.category

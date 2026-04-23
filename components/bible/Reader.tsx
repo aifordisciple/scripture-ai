@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 import { Loader2, BookOpenCheck, ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon, Sparkles, AlertCircle } from "lucide-react";
 import { FloatingMenu } from "./FloatingMenu";
 import { Button } from "@/components/ui/button";
-import { CHAPTER_SUMMARY_PROMPT, type DualLangString } from "@/lib/constants";
-import { useTranslation } from "@/lib/i18n";
+import { CHAPTER_SUMMARY_PROMPT } from "@/lib/constants";
+import { useTranslation, resolveDualLang } from "@/lib/i18n";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReaderSkeleton } from "@/components/skeletons/ReaderSkeleton";
 
@@ -40,7 +40,6 @@ const slideVariants = {
 export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const searchParams = useSearchParams();
   const { locale } = useTranslation();
-  const resolveDual = (v: DualLangString | string) => typeof v === 'string' ? v : (v[locale] || v.zh);
 
   // 使用 ref 追踪 initial 值的变化，确保外部更新时能响应
   const prevInitialRef = useRef({ book: initialBook, chapter: initialChapter });
@@ -213,7 +212,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
           const cuvVersesForSummary = verses.filter(v => v.version === 'CUV');
           if (cuvVersesForSummary.length > 0) {
             const fullContext = cuvVersesForSummary.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
-            state.enqueueAI(resolveDual(CHAPTER_SUMMARY_PROMPT), `【${cuvVersesForSummary[0].bookName} 第 ${cuvVersesForSummary[0].chapter} 章】全章`, fullContext, { bookName: cuvVersesForSummary[0].bookName, chapter: cuvVersesForSummary[0].chapter, verse: 0 });
+            state.enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), `【${cuvVersesForSummary[0].bookName} 第 ${cuvVersesForSummary[0].chapter} 章】全章`, fullContext, { bookName: cuvVersesForSummary[0].bookName, chapter: cuvVersesForSummary[0].chapter, verse: 0 });
             state.setAiOpen(true);
           }
           break;
@@ -420,7 +419,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                             const cuvVerses = verses.filter(v => v.version === 'CUV');
                             if (cuvVerses.length > 0) {
                                 const fullContext = cuvVerses.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
-                                enqueueAI(resolveDual(CHAPTER_SUMMARY_PROMPT), `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, fullContext, { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 });
+                                enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), `【${cuvVerses[0].bookName} 第 ${cuvVerses[0].chapter} 章】全章`, fullContext, { bookName: cuvVerses[0].bookName, chapter: cuvVerses[0].chapter, verse: 0 });
                             }
                         }} 
                         className={cn(
