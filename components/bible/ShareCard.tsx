@@ -47,7 +47,7 @@ const FONT_OPTIONS = [
 type LayoutMode = 'classic' | 'poster' | 'card' | 'modern' | 'split' | 'frame' | 'film' | 'minimal' | 'magazine' | 'stamp';
 
 export function ShareCard() {
-  const t = useTranslation();
+  const { t } = useTranslation();
   const { isShareOpen, closeShareModal, shareData } = useBibleStore();
 
   // 核心状态

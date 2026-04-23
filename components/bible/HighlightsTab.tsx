@@ -45,7 +45,7 @@ interface PopulatedHighlight {
 
 export function HighlightsTab() {
   const router = useRouter();
-  const t = useTranslation();
+  const { t } = useTranslation();
   const { highlights, removeHighlightLocally, tabs, addTab, setActiveTab, updateActiveTab } = useBibleStore();
   const [populatedHighlights, setPopulatedHighlights] = useState<PopulatedHighlight[]>([]);
   const [isLoading, setIsLoading] = useState(false);
