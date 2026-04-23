@@ -213,8 +213,6 @@ export async function getAIModel(requestConfig?: AIConfig, userId?: string): Pro
     const attemptRequest = async (attempt: number): Promise<Response> => {
       const bodyStr = makeBody(init?.body);
 
-      console.log(`[AI] Request attempt ${attempt + 1}/${MAX_RETRIES + 1} | model: ${modelName} | stream: ${init?.body ? (typeof init.body === 'string' ? JSON.parse(init.body).stream : 'unknown') : 'unknown'}`);
-
       const response = await fetch(url, {
         ...init,
         body: bodyStr,

@@ -10,7 +10,7 @@ export function SyncProvider() {
   const { data: session } = useSession();
   const {
     setAllUserData,
-    fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
+    fontSize, lineHeight, isDarkMode, showDualVersion, activeTabId, tabs,
     highlights, notes, interactions, activePlans, streakCount, lastActiveDate, badges,
     syncMode, setSyncMode,
     lastSyncTime, setLastSyncTime,
@@ -72,7 +72,7 @@ export function SyncProvider() {
             fontSize,
             lineHeight,
             isDarkMode,
-            showEnglish,
+            showDualVersion,
             lastBook: currentBook,
             lastChapter: currentChapter,
             customPlans, // [修复] 使用解构的 customPlans 变量
@@ -123,7 +123,7 @@ export function SyncProvider() {
   }, [
      session,
      syncMode,
-     fontSize, lineHeight, isDarkMode, showEnglish, activeTabId, tabs,
+     fontSize, lineHeight, isDarkMode, showDualVersion, activeTabId, tabs,
      highlights, notes, interactions, activePlans, streakCount, lastActiveDate, badges, customPlans,
      setAllUserData, setLastSyncTime, setIsSyncing, setSyncError,
    ]);

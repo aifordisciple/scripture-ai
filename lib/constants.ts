@@ -14,6 +14,19 @@ export type DualLangPromptEntry = {
   mode?: 'tutor' | 'sermon' | 'study-guide';
 };
 
+// Bible version constants
+export const BIBLE_VERSIONS = {
+  CUV: { code: 'CUV', name: '和合本', nameEn: 'Chinese Union Version', language: 'zh' as const, isDefault: true },
+  KJV: { code: 'KJV', name: 'King James Version', nameEn: 'King James Version', language: 'en' as const, isDefault: false },
+} as const;
+
+export const DEFAULT_VERSION: Record<'zh' | 'en', 'CUV' | 'KJV'> = {
+  zh: 'CUV',
+  en: 'KJV',
+};
+
+export type BibleVersionCode = 'CUV' | 'KJV';
+
 // 1. 深度优化的 System Prompt (基于您的版本进行了增强)
 export const SYSTEM_PROMPT: DualLangString = {
   zh: `

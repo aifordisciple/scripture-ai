@@ -14,7 +14,7 @@ interface ReaderSkeletonProps {
   /**
    * 是否显示英文经文骨架
    */
-  showEnglish?: boolean;
+  showDualVersion?: boolean;
 
   /**
    * 字号缩放比例（与 Reader 保持一致）
@@ -33,7 +33,7 @@ interface ReaderSkeletonProps {
  */
 export function ReaderSkeleton({
   verseCount = 20,
-  showEnglish = false,
+  showDualVersion = false,
   fontSize = 20,
   className,
 }: ReaderSkeletonProps) {
@@ -54,7 +54,7 @@ export function ReaderSkeleton({
           <VerseSkeleton
             key={index}
             verseNum={index + 1}
-            showEnglish={showEnglish}
+            showDualVersion={showDualVersion}
             fontSize={fontSize}
             // 随机变化最后一节或部分经文的宽度，更自然
             isLast={index === verseCount - 1}
@@ -76,13 +76,13 @@ export function ReaderSkeleton({
  */
 function VerseSkeleton({
   verseNum,
-  showEnglish,
+  showDualVersion,
   fontSize,
   isLast,
   widthVariation,
 }: {
   verseNum: number;
-  showEnglish: boolean;
+  showDualVersion: boolean;
   fontSize: number;
   isLast: boolean;
   widthVariation: number;
@@ -120,7 +120,7 @@ function VerseSkeleton({
         </div>
 
         {/* 英文经文骨架 */}
-        {showEnglish && (
+        {showDualVersion && (
           <div className="mt-3 space-y-1.5">
             {Array.from({ length: getLineCount(verseNum + 10) }).map((_, lineIndex) => (
               <Skeleton
@@ -163,11 +163,11 @@ function getLineCount(verseNum: number): number {
  * 移动端专用的精简版骨架屏
  * 只显示少量经文，节省渲染资源
  */
-export function ReaderSkeletonMobile({ showEnglish = false }: { showEnglish?: boolean }) {
+export function ReaderSkeletonMobile({ showDualVersion = false }: { showDualVersion?: boolean }) {
   return (
     <ReaderSkeleton
       verseCount={12}
-      showEnglish={showEnglish}
+      showDualVersion={showDualVersion}
       fontSize={18}
     />
   );
@@ -176,11 +176,11 @@ export function ReaderSkeletonMobile({ showEnglish = false }: { showEnglish?: bo
 /**
  * 平板端骨架屏
  */
-export function ReaderSkeletonTablet({ showEnglish = false }: { showEnglish?: boolean }) {
+export function ReaderSkeletonTablet({ showDualVersion = false }: { showDualVersion?: boolean }) {
   return (
     <ReaderSkeleton
       verseCount={16}
-      showEnglish={showEnglish}
+      showDualVersion={showDualVersion}
       fontSize={20}
     />
   );

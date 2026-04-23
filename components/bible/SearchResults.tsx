@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
-import { BIBLE_BOOKS } from "@/lib/constants";
+import { getBookDisplayName } from "@/lib/constants";
 import { Loader2, ExternalLink, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
@@ -157,7 +157,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
             >
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded">
-                  {locale === 'en' ? (BIBLE_BOOKS.find(b => b.id === verse.bookId)?.nameEn || verse.bookName) : verse.bookName} {verse.chapter}:{verse.verse}
+                  {getBookDisplayName(verse.bookId, locale)} {verse.chapter}:{verse.verse}
                 </span>
                 <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>

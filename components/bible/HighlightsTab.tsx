@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
-import { BIBLE_BOOKS } from "@/lib/constants";
+import { BIBLE_BOOKS, getBookDisplayName } from "@/lib/constants";
 import { Loader2, BookMarked, ChevronRight, Trash2, Search, X, Filter, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -45,7 +45,7 @@ interface PopulatedHighlight {
 
 export function HighlightsTab() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { highlights, removeHighlightLocally, tabs, addTab, setActiveTab, updateActiveTab } = useBibleStore();
   const [populatedHighlights, setPopulatedHighlights] = useState<PopulatedHighlight[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,8 +68,7 @@ export function HighlightsTab() {
           const res = await fetch(`/api/bible?book=${h.bookId}&chapter=${h.chapter}`);
           const json = await res.json();
           const verseData = json.data?.find((v: any) => v.version === 'CUV' && v.verse === h.verse);
-          const book = BIBLE_BOOKS.find(b => b.id === h.bookId);
-          const bookName = locale === 'en' ? (book?.nameEn || book?.name || h.bookId) : (book?.name || h.bookId);
+          const bookName = getBookDisplayName(h.bookId, locale);
           return {
             ...h,
             bookName,
@@ -86,7 +85,7 @@ export function HighlightsTab() {
     }
 
     fetchHighlightContents();
-  }, [highlights]);
+  }, [highlights, locale]);
 
   // [P1增强] 过滤高亮（搜索 + 颜色筛选）
   const filteredHighlights = useMemo(() => {

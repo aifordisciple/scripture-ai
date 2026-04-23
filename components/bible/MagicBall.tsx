@@ -85,10 +85,10 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
 
   // [P0优化] AI模式快捷动作
   const aiModeActions: QuickAction[] = [
-    { id: 'ai-mode-general', label: '✨ 标准模式', prompt: '', mode: 'general', priority: 100, category: 'ai-mode' },
-    { id: 'ai-mode-tutor', label: '👨‍🏫 导师模式', prompt: '', mode: 'tutor', priority: 101, category: 'ai-mode' },
-    { id: 'ai-mode-sermon', label: '📋 讲章模式', prompt: '', mode: 'sermon', priority: 102, category: 'ai-mode' },
-    { id: 'ai-mode-study-guide', label: '📖 查经模式', prompt: '', mode: 'study-guide', priority: 103, category: 'ai-mode' },
+    { id: 'ai-mode-general', label: `✨ ${t('ai.general')}`, prompt: '', mode: 'general', priority: 100, category: 'ai-mode' },
+    { id: 'ai-mode-tutor', label: `👨‍🏫 ${t('ai.tutor')}`, prompt: '', mode: 'tutor', priority: 101, category: 'ai-mode' },
+    { id: 'ai-mode-sermon', label: `📋 ${t('ai.sermon')}`, prompt: '', mode: 'sermon', priority: 102, category: 'ai-mode' },
+    { id: 'ai-mode-study-guide', label: `📖 ${t('ai.studyGuide')}`, prompt: '', mode: 'study-guide', priority: 103, category: 'ai-mode' },
   ];
 
   // 更新上下文感知的快捷动作
@@ -455,7 +455,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                     }}
                     className="text-xs text-red-500 hover:text-red-600 dark:hover:text-red-400 font-medium"
                   >
-                    取消
+                    {t('ai.cancel')}
                   </button>
                 </div>
                 <div className="flex items-start gap-2">
@@ -499,7 +499,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                     <button
                       onClick={() => cancelAIRequest(item.id)}
                       className="ml-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
-                      title="{t('ai.removeFromQueue')}"
+                      title={t('ai.removeFromQueue')}
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -513,7 +513,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
               <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 border-t border-red-100 dark:border-red-900/30">
                 <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-xs">
                   <AlertCircle className="w-4 h-4" />
-                  <span>处理失败: {currentAiRequest.error || '未知错误'}</span>
+                  <span>{t('ai.processFailed')}: {currentAiRequest.error || t('ai.unknownError')}</span>
                 </div>
               </div>
             )}
@@ -526,7 +526,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
               }}
               className="w-full px-4 py-2.5 text-center text-xs font-medium text-blue-600 dark:text-blue-400 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors border-t border-slate-200 dark:border-slate-700"
             >
-              打开 AI 侧边栏
+              {t('ai.openAISidebar')}
             </button>
           </motion.div>
         )}

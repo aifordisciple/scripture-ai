@@ -18,7 +18,7 @@ export function useBibleData(book: string, chapter: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { clearSelection, setChapterSpeechText } = useBibleStore();
+  const { clearSelection, setChapterSpeechText, bibleVersion } = useBibleStore();
 
   const fetchData = async () => {
     setLoading(true);
@@ -35,7 +35,7 @@ export function useBibleData(book: string, chapter: string) {
       if (versesJson.data && versesJson.data.length > 0) {
           setVerses(versesJson.data);
           const fullText = versesJson.data
-              .filter((v: Verse) => v.version === 'CUV')
+              .filter((v: Verse) => v.version === bibleVersion)
               .map((v: Verse) => v.content)
               .join(" ");
           setChapterSpeechText(fullText);
@@ -45,7 +45,8 @@ export function useBibleData(book: string, chapter: string) {
       }
     } catch (err) {
       console.error("Failed to fetch bible data:", err);
-      setError("加载章节失败，请检查网络连接");
+      const locale = useBibleStore.getState().locale;
+      setError(locale === 'en' ? 'Failed to load chapter. Please check your network connection.' : '加载章节失败，请检查网络连接');
       setVerses([]);
     } finally {
       setLoading(false);

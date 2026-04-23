@@ -6,6 +6,72 @@ import { getAIModel, getEmbeddingModel, extractApiConfig } from '@/lib/ai-client
 
 export const maxDuration = 60;
 
+const AI_SEARCH_PROMPT_ZH = `你是一位精通《圣经》的属灵导师。根据用户的查询，推荐最贴切的真实经文，并给出有深度的属灵洞见。
+
+【重要】直接返回 JSON 对象，不要有任何思考过程、解释或 Markdown 标记。
+
+JSON 格式：
+{
+  "summary": "一段温暖、有逻辑、触动人心的属灵总结（150-300字），帮助用户理解这些经文如何回应他的处境",
+  "verses": [
+    { "bookId": "Gen", "chapter": 1, "verse": 1 },
+    { "bookId": "Psa", "chapter": 23, "verse": 1 }
+  ]
+}
+
+要求：
+- summary 要有温度，像一位理解你的牧者在说话
+- 推荐 15-30 节最相关的经文
+- bookId 必须是标准英文缩写（如：Gen, Exo, Lev, Num, Deu, Jos, Jdg, Rut, 1Sa, 2Sa, 1Ki, 2Ki, 1Ch, 2Ch, Ezr, Neh, Est, Job, Psa, Pro, Ecc, Sgs, Isa, Jer, Lam, Eze, Dan, Hos, Joe, Amo, Oba, Jon, Mic, Nah, Hab, Zep, Hag, Zec, Mal, Mat, Mar, Luk, Joh, Act, Rom, 1Co, 2Co, Gal, Eph, Php, Col, 1Th, 2Th, 1Ti, 2Ti, Tit, Phm, Heb, Jas, 1Pe, 2Pe, 1Jo, 2Jo, 3Jo, Jud, Rev）
+- 章和节必须是真实存在的数字`;
+
+const AI_SEARCH_PROMPT_EN = `You are a wise biblical scholar. Based on the user's query, recommend the most relevant real Bible verses and provide deep spiritual insights.
+
+【IMPORTANT】Return a JSON object directly, without any thinking process, explanation, or Markdown markers.
+
+JSON format:
+{
+  "summary": "A warm, logical, and touching spiritual summary (150-300 words) helping the user understand how these verses speak to their situation",
+  "verses": [
+    { "bookId": "Gen", "chapter": 1, "verse": 1 },
+    { "bookId": "Psa", "chapter": 23, "verse": 1 }
+  ]
+}
+
+Requirements:
+- summary should be warm, like a caring pastor speaking to you
+- Recommend 15-30 most relevant verses
+- bookId must be the standard English abbreviation (e.g., Gen, Exo, Lev, Num, Deu, Jos, Jdg, Rut, 1Sa, 2Sa, 1Ki, 2Ki, 1Ch, 2Ch, Ezr, Neh, Est, Job, Psa, Pro, Ecc, Sgs, Isa, Jer, Lam, Eze, Dan, Hos, Joe, Amo, Oba, Jon, Mic, Nah, Hab, Zep, Hag, Zec, Mal, Mat, Mar, Luk, Joh, Act, Rom, 1Co, 2Co, Gal, Eph, Php, Col, 1Th, 2Th, 1Ti, 2Ti, Tit, Phm, Heb, Jas, 1Pe, 2Pe, 1Jo, 2Jo, 3Jo, Jud, Rev)
+- Chapter and verse must be real numbers`;
+
+function cleanAIResponse(text: string): string {
+  let jsonString = text;
+  jsonString = jsonString.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  jsonString = jsonString.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+  jsonString = jsonString.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
+  jsonString = jsonString.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+  return jsonString;
+}
+
+function buildBookIdConditions(verses: any[], searchVersion: string) {
+  return verses
+    .map((v: any) => ({
+      bookId: (v.bookId || '').toUpperCase(),
+      chapter: v.chapter,
+      verse: v.verse,
+      version: searchVersion,
+    }))
+    .filter((v: any) => v.bookId);
+}
+
+function matchByBookId(verses: any[], results: any[]) {
+  return verses
+    .map((v: any) =>
+      results.find((r: any) => r.bookId === (v.bookId || '').toUpperCase() && r.chapter === v.chapter && r.verse === v.verse)
+    )
+    .filter(Boolean);
+}
+
 export async function POST(req: Request) {
   const { apiConfig, body } = await extractApiConfig(req);
   const { query, mode = 'exact', locale = 'zh' } = body as { query?: string; mode?: string; locale?: string };
@@ -16,13 +82,9 @@ export async function POST(req: Request) {
   }
 
   try {
-    // 使用集中式 AI 客户端
     const llmModel = await getAIModel(apiConfig);
 
     if (mode === 'exact') {
-      // -----------------------------------------
-      // 1. 精确搜索 (包含指定词汇)
-      // -----------------------------------------
       const results = await prisma.bibleVerse.findMany({
         where: {
           content: { contains: query, mode: 'insensitive' },
@@ -34,43 +96,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ data: results });
 
     } else if (mode === 'ai') {
-      // -----------------------------------------
-      // 2. AI 智能推荐 (大模型推理 + 数据库验真)
-      // -----------------------------------------
+      const systemPrompt = locale === 'en' ? AI_SEARCH_PROMPT_EN : AI_SEARCH_PROMPT_ZH;
 
-      // 第一步：让AI推荐经文并生成总结
       const { text } = await generateText({
         model: llmModel,
-        system: `你是一位精通《圣经》的属灵导师。根据用户的查询，推荐最贴切的真实经文，并给出有深度的属灵洞见。
-
-【重要】直接返回 JSON 对象，不要有任何思考过程、解释或 Markdown 标记。
-
-JSON 格式：
-{
-  "summary": "一段温暖、有逻辑、触动人心的属灵总结（150-300字），帮助用户理解这些经文如何回应他的处境",
-  "verses": [
-    { "bookName": "创世记", "chapter": 1, "verse": 1 },
-    { "bookName": "诗篇", "chapter": 23, "verse": 1 }
-  ]
-}
-
-要求：
-- summary 要有温度，像一位理解你的牧者在说话
-- 推荐 15-30 节最相关的经文
-- 必须使用中文书卷名（如：创世记、诗篇、马太福音、启示录等）
-- 章和节必须是真实存在的数字`,
-        prompt: `查询："${query}"`,
+        system: systemPrompt,
+        prompt: locale === 'en' ? `Query: "${query}"` : `查询："${query}"`,
         temperature: 0.7,
       });
 
-      // Clean response: remove thinking tags and markdown
-      let jsonString = text;
-      jsonString = jsonString.replace(/<think>[\s\S]*?<\/think>/gi, '');
-      jsonString = jsonString.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
-      jsonString = jsonString.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
-      jsonString = jsonString.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-
-      // Try to find JSON object in the response
+      const jsonString = cleanAIResponse(text);
       const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
       if (!jsonMatch) return NextResponse.json({ data: [] });
 
@@ -80,22 +115,15 @@ JSON 格式：
 
       if (!Array.isArray(verses) || verses.length === 0) return NextResponse.json({ data: [] });
 
-      const orConditions = verses.map((v: any) => ({
-          bookName: v.bookName, chapter: v.chapter, verse: v.verse, version: searchVersion
-      }));
-
-      const results = await prisma.bibleVerse.findMany({ where: { OR: orConditions } });
-
-      const sortedResults = verses.map((v: any) =>
-         results.find(r => r.bookName === v.bookName && r.chapter === v.chapter && r.verse === v.verse)
-      ).filter(Boolean);
+      const orConditions = buildBookIdConditions(verses, searchVersion);
+      const results = orConditions.length > 0
+        ? await prisma.bibleVerse.findMany({ where: { OR: orConditions } })
+        : [];
+      const sortedResults = matchByBookId(verses, results);
 
       return NextResponse.json({ data: sortedResults, aiSummary });
 
     } else if (mode === 'fuzzy') {
-      // -----------------------------------------
-      // 3. 模糊搜索 (基于 BGE-M3 的高精度中文向量检索)
-      // -----------------------------------------
       const embeddingModel = getEmbeddingModel('bge-m3');
       const { embedding } = await embed({
         model: embeddingModel,
@@ -135,7 +163,6 @@ export async function GET(request: Request) {
   }
 
   try {
-    // 使用集中式 AI 客户端 (环境变量模式)
     const llmModel = await getAIModel();
 
     if (mode === 'exact') {
@@ -150,37 +177,16 @@ export async function GET(request: Request) {
       return NextResponse.json({ data: results });
 
     } else if (mode === 'ai') {
+      const systemPrompt = locale === 'en' ? AI_SEARCH_PROMPT_EN : AI_SEARCH_PROMPT_ZH;
+
       const { text } = await generateText({
         model: llmModel,
-        system: `你是一位精通《圣经》的属灵导师。根据用户的查询，推荐最贴切的真实经文，并给出有深度的属灵洞见。
-
-【重要】直接返回 JSON 对象，不要有任何思考过程、解释或 Markdown 标记。
-
-JSON 格式：
-{
-  "summary": "一段温暖、有逻辑、触动人心的属灵总结（150-300字），帮助用户理解这些经文如何回应他的处境",
-  "verses": [
-    { "bookName": "创世记", "chapter": 1, "verse": 1 },
-    { "bookName": "诗篇", "chapter": 23, "verse": 1 }
-  ]
-}
-
-要求：
-- summary 要有温度，像一位理解你的牧者在说话
-- 推荐 15-30 节最相关的经文
-- 必须使用中文书卷名（如：创世记、诗篇、马太福音、启示录等）
-- 章和节必须是真实存在的数字`,
-        prompt: `查询："${query}"`,
+        system: systemPrompt,
+        prompt: locale === 'en' ? `Query: "${query}"` : `查询："${query}"`,
         temperature: 0.7,
       });
 
-      // Clean response
-      let jsonString = text;
-      jsonString = jsonString.replace(/<tool_call>[\s\S]*?<\/think>/gi, '');
-      jsonString = jsonString.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
-      jsonString = jsonString.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
-      jsonString = jsonString.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-
+      const jsonString = cleanAIResponse(text);
       const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
       if (!jsonMatch) return NextResponse.json({ data: [] });
 
@@ -190,15 +196,11 @@ JSON 格式：
 
       if (!Array.isArray(verses) || verses.length === 0) return NextResponse.json({ data: [] });
 
-      const orConditions = verses.map((v: any) => ({
-          bookName: v.bookName, chapter: v.chapter, verse: v.verse, version: searchVersion
-      }));
-
-      const results = await prisma.bibleVerse.findMany({ where: { OR: orConditions } });
-
-      const sortedResults = verses.map((v: any) =>
-         results.find(r => r.bookName === v.bookName && r.chapter === v.chapter && r.verse === v.verse)
-      ).filter(Boolean);
+      const orConditions = buildBookIdConditions(verses, searchVersion);
+      const results = orConditions.length > 0
+        ? await prisma.bibleVerse.findMany({ where: { OR: orConditions } })
+        : [];
+      const sortedResults = matchByBookId(verses, results);
 
       return NextResponse.json({ data: sortedResults, aiSummary });
 

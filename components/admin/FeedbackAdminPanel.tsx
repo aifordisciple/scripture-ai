@@ -77,14 +77,14 @@ export default function FeedbackAdminPanel() {
       if (res.ok) {
         const data = await res.json();
         setFeedbacks(data.feedbacks || []);
-        setStats(data.stats || stats);
+        setStats(data.stats || { total: 0, pending: 0, processing: 0, resolved: 0, closed: 0 });
       }
     } catch (error) {
       console.error("Failed to fetch feedbacks:", error);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchQuery, filterStatus, filterType, stats]);
+  }, [currentPage, searchQuery, filterStatus, filterType]);
 
   useEffect(() => {
     fetchFeedbacks();

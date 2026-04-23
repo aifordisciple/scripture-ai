@@ -42,10 +42,10 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   const searchParams = useSearchParams();
   const { t, locale } = useTranslation();
 
-  // Version linkage: locale determines primary and secondary Bible versions
-  // zh → CUV primary, KJV secondary; en → KJV primary, CUV secondary
-  const primaryVersion = locale === 'en' ? 'KJV' : 'CUV';
-  const secondaryVersion = locale === 'en' ? 'CUV' : 'KJV';
+  // Version linkage: bibleVersion from store (defaults from locale but overridable)
+  const bibleVersion = useBibleStore((state) => state.bibleVersion);
+  const primaryVersion = bibleVersion;
+  const secondaryVersion = bibleVersion === 'CUV' ? 'KJV' : 'CUV';
 
   // 使用 ref 追踪 initial 值的变化，确保外部更新时能响应
   const prevInitialRef = useRef({ book: initialBook, chapter: initialChapter });
@@ -62,7 +62,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }, [initialBook, initialChapter]);
 
   const {
-    fontSize, lineHeight, selectedVerses, showEnglish, highlights, enqueueAI, scrollToVerse, setScrollToVerse, clearSelection, addTab, setAtlasPanelOpen, setAtlasVerseContext
+    fontSize, lineHeight, selectedVerses, showDualVersion, highlights, enqueueAI, scrollToVerse, setScrollToVerse, clearSelection, addTab, setAtlasPanelOpen, setAtlasVerseContext
   } = useBibleStore();
 
   const { verses, loading, error, refetch } = useBibleData(book, chapter);
@@ -328,7 +328,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             {loading ? (
                 <ReaderSkeleton
                   verseCount={20}
-                  showEnglish={showEnglish}
+                  showDualVersion={showDualVersion}
                   fontSize={fontSize}
                 />
             ) : error ? (
@@ -394,7 +394,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                                 >
                                     {mainVerse.content}
                                 </div>
-                                {showEnglish && altVerse && (
+                                {showDualVersion && altVerse && (
                                     <div className="mt-3 text-muted-foreground font-sans tracking-wide" style={{ fontSize: `${fontSize * 0.85}px`, lineHeight: 1.6 }}>
                                         {altVerse.content}
                                     </div>

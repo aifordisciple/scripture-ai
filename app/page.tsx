@@ -142,7 +142,7 @@ export default function Home() {
     isSidebarOpen, toggleSidebar,
     isDesktopSidebarOpen, toggleDesktopSidebar,
     isAiOpen, setAiOpen,
-    showEnglish, toggleEnglish,
+    showDualVersion, toggleDualVersion,
     locale, setLocale,
     lineHeight, setLineHeight,
     tabs, activeTabId, setActiveTab, addTab, closeTab, updateActiveTab,
@@ -433,8 +433,8 @@ export default function Home() {
             </div>
                         <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground font-medium">{t('settings.bilingual')}</span>
-              <Button variant={showEnglish ? "default" : "secondary"} size="sm" onClick={toggleEnglish} className="rounded-full px-4">
-                {showEnglish ? t('settings.enabled') : t('settings.disabled')}
+              <Button variant={showDualVersion ? "default" : "secondary"} size="sm" onClick={toggleDualVersion} className="rounded-full px-4">
+                {showDualVersion ? t('settings.enabled') : t('settings.disabled')}
               </Button>
             </div>
             <div className="flex items-center justify-between">
@@ -452,7 +452,7 @@ export default function Home() {
                 <button
                   onClick={() => {
                     setLocale('en');
-                    if (!showEnglish) toggleEnglish();
+                    if (!showDualVersion) toggleDualVersion();
                   }}
                   className={cn("px-3 py-1 text-xs rounded-md transition-all", locale === 'en' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                 >
@@ -659,15 +659,15 @@ export default function Home() {
                 )}
               </div>
 
-              <Button variant={showEnglish ? "secondary" : "ghost"} size="sm" onClick={toggleEnglish} className="gap-1 text-xs font-bold rounded-full">
-                <Languages className="h-4 w-4" />{showEnglish ? (locale === 'zh' ? `${t('settings.chinese')}/${t('settings.english')}` : "Zh/En") : (locale === 'zh' ? t('settings.chinese') : "En")}
+              <Button variant={showDualVersion ? "secondary" : "ghost"} size="sm" onClick={toggleDualVersion} className="gap-1 text-xs font-bold rounded-full">
+                <Languages className="h-4 w-4" />{showDualVersion ? (locale === 'zh' ? `${t('settings.chinese')}/${t('settings.english')}` : "Zh/En") : (locale === 'zh' ? t('settings.chinese') : "En")}
               </Button>
 
               <Button variant={locale === 'en' ? "secondary" : "ghost"} size="sm" onClick={() => {
                 const newLocale = locale === 'zh' ? 'en' : 'zh';
                 setLocale(newLocale);
                 // 切换到英文时自动开启双语对照，切换到中文时保持用户偏好
-                if (newLocale === 'en' && !showEnglish) toggleEnglish();
+                if (newLocale === 'en' && !showDualVersion) toggleDualVersion();
               }} className="gap-1 text-xs font-bold rounded-full">
                 {locale === 'zh' ? t('settings.chinese') : 'EN'}
               </Button>

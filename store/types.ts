@@ -263,8 +263,8 @@ export interface ReaderSlice {
   setLineHeight: (height: number) => void;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
-  showEnglish: boolean; 
-  toggleEnglish: () => void; 
+  showDualVersion: boolean;
+  toggleDualVersion: () => void;
   tabs: Tab[];
   activeTabId: string;
   // [修复] 在这里补上 'highlights' | 'notes' | 'plan' | 'cross-ref' | 'group'
@@ -462,7 +462,9 @@ export interface UserDataSlice {
 
 export interface LocaleSlice {
   locale: 'zh' | 'en';
+  bibleVersion: 'CUV' | 'KJV';
   setLocale: (locale: 'zh' | 'en') => void;
+  setBibleVersion: (version: 'CUV' | 'KJV') => void;
 }
 
 // --------------------------------------------------

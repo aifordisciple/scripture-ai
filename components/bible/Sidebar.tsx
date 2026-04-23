@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
-import { BIBLE_BOOKS } from "@/lib/constants";
+import { BIBLE_BOOKS, getBookDisplayName } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Book, ChevronRight, Search, X, Library, Users } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
@@ -71,8 +71,9 @@ export function Sidebar() {
   const renderBookList = (books: typeof BIBLE_BOOKS, title: string) => {
      // 搜索过滤逻辑
      const filtered = books.filter(b => {
-       const displayName = locale === 'en' ? (b.nameEn || b.name) : b.name;
-       return displayName.includes(searchQuery) || b.name.includes(searchQuery) || (b.nameEn && b.nameEn.toLowerCase().includes(searchQuery.toLowerCase())) || b.id.toLowerCase().includes(searchQuery.toLowerCase());
+       const displayName = getBookDisplayName(b.id, locale);
+       const query = searchQuery.toLowerCase();
+       return displayName.toLowerCase().includes(query) || b.name.toLowerCase().includes(query) || (b.nameEn && b.nameEn.toLowerCase().includes(query)) || b.id.toLowerCase().includes(query);
      });
      
      if (filtered.length === 0) return null;
@@ -107,7 +108,7 @@ export function Sidebar() {
                   >
                     <div className="flex items-center gap-3">
                       <Book className={cn("w-4 h-4", isActiveBook ? "text-primary" : "text-muted-foreground")} />
-                      <span className="tracking-wide">{locale === 'en' ? (book.nameEn || book.name) : book.name}</span>
+                      <span className="tracking-wide">{getBookDisplayName(book.id, locale)}</span>
                     </div>
                     <ChevronRight 
                       className={cn(

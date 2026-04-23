@@ -12,8 +12,8 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
   isDarkMode: false,
   toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
 
-  showEnglish: false,
-  toggleEnglish: () => set((state) => ({ showEnglish: !state.showEnglish })),
+  showDualVersion: false,
+  toggleDualVersion: () => set((state) => ({ showDualVersion: !state.showDualVersion })),
 
   tabs: [{ id: 'tab-1', type: 'read', book: 'Gen', chapter: '1' }],
   activeTabId: 'tab-1',

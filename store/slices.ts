@@ -107,8 +107,8 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
   setLineHeight: (height) => set({ lineHeight: height }),
   isDarkMode: false,
   toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
-  showEnglish: false,
-  toggleEnglish: () => set((state) => ({ showEnglish: !state.showEnglish })),
+  showDualVersion: false,
+  toggleDualVersion: () => set((state) => ({ showDualVersion: !state.showDualVersion })),
   
   tabs: [{ id: 'tab-1', type: 'read', book: 'Gen', chapter: '1' }],
   activeTabId: 'tab-1',
@@ -417,7 +417,7 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
       updates.fontSize = data.settings.fontSize;
       updates.lineHeight = data.settings.lineHeight;
       updates.isDarkMode = data.settings.isDarkMode;
-      updates.showEnglish = data.settings.showEnglish;
+      updates.showDualVersion = data.settings.showEnglish;
       if (data.settings.lastBook && data.settings.lastChapter) {
          const tabs = get().tabs;
          if (tabs.length > 0 && tabs[0].type === 'read') {

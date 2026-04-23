@@ -6,13 +6,17 @@ import { SyncProvider } from "@/components/providers/SyncProvider";
 import { BadgePopup } from "@/components/bible/BadgePopup";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { ToastProvider } from "@/components/ui/toast";
+import { LocaleHtmlWrapper } from "@/components/providers/LocaleHtmlWrapper";
 
 const baseUrl = process.env.NEXTAUTH_URL || 'https://aidu.app';
 
 export const metadata: Metadata = {
-  title: "AI读 - 你的灵修伴侣",
-  description: "AI 驱动的圣经阅读与灵修助手，支持中英对照、语音朗读、高亮笔记、读经计划等功能",
-  keywords: ["圣经", "读经", "AI读经", "灵修", "和合本", "KJV", "圣经阅读", "经文解读", "每日读经", "读经计划"],
+  title: {
+    default: "AI读 - 你的灵修伴侣",
+    template: "%s | AI读",
+  },
+  description: "AI-powered Bible reading and devotional assistant with bilingual support, TTS, highlights, notes, and reading plans",
+  keywords: ["Bible", "Scripture", "AI", "devotional", "CUV", "KJV", "Bible reading", "verse interpretation", "daily reading", "reading plan", "圣经", "读经", "灵修", "和合本", "圣经阅读", "经文解读", "每日读经", "读经计划"],
   manifest: "/manifest.json",
   authors: [{ name: "AI读团队" }],
   appleWebApp: {
@@ -42,17 +46,18 @@ export const metadata: Metadata = {
     type: "website",
     url: baseUrl,
     siteName: "AI读",
-    title: "AI读 - 你的灵修伴侣",
-    description: "AI 驱动的圣经阅读与灵修助手，支持中英对照、语音朗读、高亮笔记、读经计划等功能",
+    title: "AI读 - AI-Powered Bible Reading & Devotional Assistant",
+    description: "AI-powered Bible reading and devotional assistant with bilingual support, TTS, highlights, notes, and reading plans",
     locale: "zh_CN",
+    alternateLocale: ["en_US"],
     images: [
-      { url: "/og-image.png", width: 1200, height: 630, alt: "AI读 - 智能圣经阅读助手" },
+      { url: "/og-image.png", width: 1200, height: 630, alt: "AI读 - AI-Powered Bible Reading Assistant" },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI读 - 你的灵修伴侣",
-    description: "AI 驱动的圣经阅读与灵修助手",
+    title: "AI读 - AI-Powered Bible Reading Assistant",
+    description: "AI-powered Bible reading and devotional assistant",
     images: ["/og-image.png"],
   },
 };
@@ -69,12 +74,11 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // JSON-LD 结构化数据
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "AI读",
-    "description": "AI驱动的圣经阅读与灵修助手，支持中英对照、语音朗读、高亮笔记、读经计划等功能",
+    "description": "AI-powered Bible reading and devotional assistant with bilingual support, TTS, highlights, notes, and reading plans",
     "url": baseUrl,
     "applicationCategory": "LifestyleApplication",
     "operatingSystem": "Web, iOS, Android",
@@ -86,19 +90,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       "priceCurrency": "CNY"
     },
     "featureList": [
-      "中英对照阅读",
-      "AI经文解读",
-      "语音朗读",
-      "读经计划",
-      "高亮笔记",
-      "小组共读",
-      "灵修内容"
+      "Bilingual reading (CUV/KJV)",
+      "AI verse interpretation",
+      "Text-to-speech",
+      "Reading plans",
+      "Highlights & notes",
+      "Group reading",
+      "Devotional content"
     ]
   };
 
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
-      {/* 移除了 Google Fonts 的依赖，直接使用 antialiased 启用 Tailwind 默认的无衬线系统字体 */}
+    <LocaleHtmlWrapper>
       <head>
         <script
           type="application/ld+json"
@@ -118,6 +121,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </ToastProvider>
         </AuthProvider>
       </body>
-    </html>
+    </LocaleHtmlWrapper>
   );
 }

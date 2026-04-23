@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { BookGridProps } from "./types";
 import { motion } from "framer-motion";
 import { useBibleStore } from "@/store/useBibleStore";
+import { getBookDisplayName } from "@/lib/constants";
 
 /**
  * 书卷网格组件

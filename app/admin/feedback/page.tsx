@@ -2,7 +2,7 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
-import { FeedbackAdminPanel } from '@/components/admin/FeedbackAdminPanel';
+import FeedbackAdminPanel from '@/components/admin/FeedbackAdminPanel';
 
 export default async function AdminFeedbackPage() {
   const session = await auth();

@@ -17,12 +17,11 @@ export async function POST(req: Request) {
     const file = formData.get('file') as File;
     const code = formData.get('code') as string;
     const name = formData.get('name') as string;
-    const nameEn = formData.get('nameEn') as string | null;
     const language = formData.get('language') as string || 'zh';
 
     if (!file || !code || !name) {
-      return NextResponse.json({ 
-        error: 'Missing required fields: file, code, name' 
+      return NextResponse.json({
+        error: 'Missing required fields: file, code, name'
       }, { status: 400 });
     }
 
@@ -47,38 +46,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid Bible data format' }, { status: 400 });
     }
 
-    // Check first item
     const firstVerse = bibleData[0];
     if (!firstVerse.book || !firstVerse.chapter || !firstVerse.verse || !firstVerse.content) {
-      return NextResponse.json({ 
-        error: 'Invalid verse structure. Required: book, chapter, verse, content' 
+      return NextResponse.json({
+        error: 'Invalid verse structure. Required: book, chapter, verse, content'
       }, { status: 400 });
     }
 
-    // Check if version already exists
-    const existing = await prisma.bibleVersion.findUnique({
-      where: { code },
+    // Check if version already has verses
+    const existingCount = await prisma.bibleVerse.count({
+      where: { version: code },
     });
 
-    if (existing) {
-      return NextResponse.json({ 
-        error: `Version ${code} already exists. Delete it first or use a different code.` 
+    if (existingCount > 0) {
+      return NextResponse.json({
+        error: `Version ${code} already exists. Delete it first or use a different code.`
       }, { status: 409 });
     }
 
-    // Create version record
-    const version = await prisma.bibleVersion.create({
-      data: {
-        code,
-        name,
-        nameEn,
-        language,
-        isPublic: false, // Custom versions are private by default
-      },
-    });
-
     // Prepare verses for bulk insert
-    const verses = bibleData.map((v, index) => ({
+    const verses = bibleData.map((v) => ({
       bookId: v.bookId || v.book,
       bookName: v.book,
       chapter: v.chapter,
@@ -99,8 +86,8 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       version: {
-        code: version.code,
-        name: version.name,
+        code,
+        name,
         verseCount: verses.length,
       },
     });
@@ -125,32 +112,19 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Missing version code' }, { status: 400 });
     }
 
-    // Check if version exists and is not public (to allow deleting custom versions)
-    const version = await prisma.bibleVersion.findUnique({
-      where: { code },
-    });
-
-    if (!version) {
-      return NextResponse.json({ error: 'Version not found' }, { status: 404 });
-    }
-
-    if (version.isPublic) {
-      return NextResponse.json({ 
-        error: 'Cannot delete public version' 
+    // Prevent deleting built-in versions
+    if (code === 'CUV' || code === 'KJV') {
+      return NextResponse.json({
+        error: 'Cannot delete built-in version'
       }, { status: 403 });
     }
 
-    // Delete verses first
-    await prisma.bibleVerse.deleteMany({
+    // Delete verses
+    const deleted = await prisma.bibleVerse.deleteMany({
       where: { version: code },
     });
 
-    // Delete version
-    await prisma.bibleVersion.delete({
-      where: { code },
-    });
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, deletedCount: deleted.count });
   } catch (error) {
     console.error('Delete version error:', error);
     return NextResponse.json({ error: 'Failed to delete version' }, { status: 500 });
