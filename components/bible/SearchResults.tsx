@@ -10,8 +10,7 @@ import { useTranslation } from "@/lib/i18n";
 
 interface SearchResultsProps {
   query: string;
-  // 增加 'fuzzy' 模式
-  mode: 'exact' | 'ai' | 'fuzzy';
+  mode: 'exact' | 'ai';
   cachedResults?: any[];
   onUpdateResults?: (results: any[]) => void;
 }
@@ -90,9 +89,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
       <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 gap-3">
         <Loader2 className="w-8 h-8 animate-spin" />
         <p>
-            {mode === 'ai' ? t('search.aiThinking') :
-             mode === 'fuzzy' ? t('search.fuzzyMatching') :
-             t('search.searching')}
+            {mode === 'ai' ? t('search.aiThinking') : t('search.searching')}
         </p>
       </div>
     );
@@ -105,7 +102,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
           🔍 {t('search.resultsFor', { query })}
         </h1>
         <p className="text-slate-500 text-sm mt-1">
-          {mode === 'exact' ? t('search.modeExact') : mode === 'fuzzy' ? t('search.modeFuzzy') : t('search.modeAi')} • {t('search.foundCount', { count: results.length })}
+          {mode === 'exact' ? t('search.modeExact') : t('search.modeAi')} • {t('search.foundCount', { count: results.length })}
         </p>
       </div>
 

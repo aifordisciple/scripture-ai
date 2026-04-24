@@ -18,7 +18,6 @@ export {
   search,
   searchExact,
   searchAI,
-  searchFuzzy,
   type SearchMode,
 } from './bible/search';
 

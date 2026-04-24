@@ -4,7 +4,7 @@
 import { BibleVerse, SearchResult } from '../constants';
 import { getApiBaseUrl } from './reader';
 
-export type SearchMode = 'exact' | 'ai' | 'fuzzy';
+export type SearchMode = 'exact' | 'ai';
 
 interface SearchOptions {
   mode?: SearchMode;
@@ -46,43 +46,23 @@ export async function searchAI(
   return (data.data || []).slice(0, limit);
 }
 
-// Vector similarity search - for semantic matching
-export async function searchFuzzy(
-  query: string,
-  options: SearchOptions = {}
-): Promise<BibleVerse[]> {
-  const { version = 'CUV', limit = 20 } = options;
-  const url = `${getApiBaseUrl()}/search?q=${encodeURIComponent(query)}&mode=fuzzy`;
-  
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Fuzzy search failed');
-  }
-  
-  const data = await response.json();
-  return (data.data || []).slice(0, limit);
-}
-
 // Unified search function
 export async function search(
   query: string,
   options: SearchOptions = {}
 ): Promise<SearchResult> {
   const { mode = 'exact' } = options;
-  
+
   let verses: BibleVerse[];
-  
+
   switch (mode) {
     case 'ai':
       verses = await searchAI(query, options);
       break;
-    case 'fuzzy':
-      verses = await searchFuzzy(query, options);
-      break;
     default:
       verses = await searchExact(query, options);
   }
-  
+
   return {
     verses,
     total: verses.length

@@ -1,8 +1,8 @@
 // app/api/search/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { generateText, embed } from 'ai';
-import { getAIModel, getEmbeddingModel, extractApiConfig } from '@/lib/ai-client';
+import { generateText } from 'ai';
+import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 
 export const maxDuration = 60;
 
@@ -123,23 +123,6 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ data: sortedResults, aiSummary });
 
-    } else if (mode === 'fuzzy') {
-      const embeddingModel = getEmbeddingModel('bge-m3');
-      const { embedding } = await embed({
-        model: embeddingModel,
-        value: query,
-      });
-
-      const vectorString = `[${embedding.join(',')}]`;
-
-      const results = await prisma.$queryRaw`
-        SELECT id, book_id as "bookId", book_name as "bookName", chapter, verse, content, version
-        FROM bible_verses
-        WHERE version = ${searchVersion}
-        ORDER BY embedding <=> ${vectorString}::vector
-        LIMIT 20;
-      `;
-      return NextResponse.json({ data: results });
     }
 
     return NextResponse.json({ data: [] });
@@ -204,23 +187,6 @@ export async function GET(request: Request) {
 
       return NextResponse.json({ data: sortedResults, aiSummary });
 
-    } else if (mode === 'fuzzy') {
-      const embeddingModel = getEmbeddingModel('bge-m3');
-      const { embedding } = await embed({
-        model: embeddingModel,
-        value: query,
-      });
-
-      const vectorString = `[${embedding.join(',')}]`;
-
-      const results = await prisma.$queryRaw`
-        SELECT id, book_id as "bookId", book_name as "bookName", chapter, verse, content, version
-        FROM bible_verses
-        WHERE version = ${searchVersion}
-        ORDER BY embedding <=> ${vectorString}::vector
-        LIMIT 20;
-      `;
-      return NextResponse.json({ data: results });
     }
 
     return NextResponse.json({ data: [] });

@@ -97,7 +97,7 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             )}
           >
             <span className="max-w-[120px] truncate select-none">
-              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : tab.searchMode === 'fuzzy' ? '🌊' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? `📊 ${t('tabs.dashboard')}` : tab.type === 'highlights' ? `🖍️ ${t('tabs.highlights')}` : tab.type === 'notes' ? `📝 ${t('tabs.notes')}` : tab.type === 'cross-ref' ? `🔗 ${t('tabs.crossref')}` : tab.type === 'group' ? `👥 ${t('tabs.group')}` : tab.type === 'atlas' ? `🗺️ ${t('tabs.atlas')}` : tab.type === 'insights' ? `⭐ ${t('tabs.insights')}` : tab.type === 'theme-graph' ? `🕸️ ${t('tabs.theme')}` : `📅 ${t('tabs.plan')}`}
+              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? `📊 ${t('tabs.dashboard')}` : tab.type === 'highlights' ? `🖍️ ${t('tabs.highlights')}` : tab.type === 'notes' ? `📝 ${t('tabs.notes')}` : tab.type === 'cross-ref' ? `🔗 ${t('tabs.crossref')}` : tab.type === 'group' ? `👥 ${t('tabs.group')}` : tab.type === 'atlas' ? `🗺️ ${t('tabs.atlas')}` : tab.type === 'insights' ? `⭐ ${t('tabs.insights')}` : tab.type === 'theme-graph' ? `🕸️ ${t('tabs.theme')}` : `📅 ${t('tabs.plan')}`}
             </span>
             <X
               className={cn(

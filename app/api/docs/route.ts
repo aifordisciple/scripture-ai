@@ -42,7 +42,7 @@ export async function GET() {
           description: 'Search verses by keyword with multiple search modes',
           parameters: [
             { name: 'q', in: 'query', required: true, schema: { type: 'string', example: '神爱世人' } },
-            { name: 'mode', in: 'query', schema: { type: 'string', enum: ['exact', 'fuzzy', 'ai'] } }
+            { name: 'mode', in: 'query', schema: { type: 'string', enum: ['exact', 'ai'] } }
           ]
         }
       },

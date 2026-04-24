@@ -27,7 +27,7 @@ export interface Tab {
   book?: string
   chapter?: number | string
   query?: string
-  searchMode?: 'exact' | 'ai' | 'fuzzy'
+  searchMode?: 'exact' | 'ai'
   results?: any
   crossRefSource?: any
 }

@@ -27,7 +27,7 @@ export interface Tab {
   book?: string;
   chapter?: string;
   query?: string;
-  searchMode?: 'exact' | 'ai' | 'fuzzy';
+  searchMode?: 'exact' | 'ai';
   results?: any[];
   scrollTop?: number;
   // Cross-ref specific
@@ -273,7 +273,7 @@ export interface ReaderSlice {
     book?: string;
     chapter?: string;
     query?: string;
-    searchMode?: 'exact' | 'ai' | 'fuzzy';
+    searchMode?: 'exact' | 'ai';
     crossRefSource?: {
       bookId: string;
       bookName: string;
