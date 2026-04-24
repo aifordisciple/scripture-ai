@@ -106,12 +106,9 @@ export function SyncProvider() {
 
       const data = await res.json();
       
-      if (data.ok && data.data) {
-        // 更新本地状态为服务器返回的最新数据
-        setAllUserData(data.data);
+      if (data.success) {
         setLastSyncTime(Date.now());
         console.log(`Data synced to server (${syncMode} mode)`);
-        // Don't show toast for auto-sync to avoid annoying the user
       }
     } catch (err) {
       console.error("Sync to server failed", err);
