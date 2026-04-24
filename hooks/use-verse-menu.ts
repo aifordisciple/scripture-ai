@@ -55,7 +55,7 @@ export function useVerseMenu(verses: Verse[]) {
     setIsMenuVisible(true);
   };
 
-  const handleAIExplain = () => {
+  const handleAIExplain = (customPrompt?: string) => {
     if (selectedVerses.length === 0) return;
     const primaryVersion = locale === 'en' ? 'KJV' : 'CUV';
     const selectedVerseObjects = verses.filter(v => selectedVerses.includes(v.verse));
@@ -74,7 +74,8 @@ export function useVerseMenu(verses: Verse[]) {
         .map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join("\n");
 
     const firstV = primaryVerses[0];
-    enqueueAI(t('reader.aiInterpretPrompt'), combinedContent, contextContent, {
+    const prompt = customPrompt || t('reader.aiInterpretPrompt');
+    enqueueAI(prompt, combinedContent, contextContent, {
         bookName: getBookDisplayName(firstV.bookId, locale), chapter: firstV.chapter, verse: firstV.verse
     });
 

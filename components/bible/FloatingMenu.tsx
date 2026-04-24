@@ -14,7 +14,7 @@ interface FloatingMenuProps {
   visible: boolean;
   position: { top: number; left: number };
   onClose: () => void;
-  onExplain: () => void;
+  onExplain: (customPrompt?: string) => void;
   selectedCount: number;
   currentBook: string;
   currentChapter: number;
@@ -46,7 +46,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
   const [copied, setCopied] = useState(false);
   const [showAiSubmenu, setShowAiSubmenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection } = useBibleStore();
+  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection, locale } = useBibleStore();
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -120,15 +120,16 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
     }
   };
 
-  // 处理 AI 模式选择 - 直接调用 onExplain 并关闭菜单
+  // 处理 AI 模式选择 - 传递对应模式的 prompt
   const handleAiOption = (option: typeof AI_OPTIONS[0], e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
     setShowAiSubmenu(false);
     onClose();
-    // 调用默认的解读逻辑
-    onExplain();
+    // 根据当前语言解析 prompt
+    const prompt = typeof option.prompt === 'object' ? option.prompt[locale] : option.prompt;
+    onExplain(prompt);
   };
 
   // 切换 AI 子菜单
