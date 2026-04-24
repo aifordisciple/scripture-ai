@@ -21,8 +21,6 @@ import { UserMenu } from "@/components/auth/UserMenu";
 import { SyncSettings } from "@/components/settings/SyncSettings";
 import { BookPicker } from "@/components/bible/BookPicker";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
-import { NotificationCenter } from "@/components/common/NotificationCenter";
-import { FeedbackButton } from "@/components/feedback/FeedbackButton";
 import { OnboardingManager } from "@/components/onboarding/OnboardingManager";
 import { TabContentRenderer } from "@/components/bible/TabContentRenderer";
 import { KeyboardShortcutsDialog } from "@/components/common/KeyboardShortcutsDialog";
@@ -358,7 +356,6 @@ export default function Home() {
         onCloseBookPicker={() => setIsBookPickerOpen(false)}
       />
       <InstallPrompt />
-      <FeedbackButton />
       <OnboardingManager />
 
       {/* Mobile BookPicker - 移动端经文选择器 */}
@@ -677,18 +674,6 @@ export default function Home() {
                 )}
               </div>
 
-              <Button variant={showDualVersion ? "secondary" : "ghost"} size="sm" onClick={toggleDualVersion} className="gap-1 text-xs font-bold rounded-full">
-                <Languages className="h-4 w-4" />{showDualVersion ? (locale === 'zh' ? `${t('settings.chinese')}/${t('settings.english')}` : "Zh/En") : (locale === 'zh' ? t('settings.chinese') : "En")}
-              </Button>
-
-              <Button variant={locale === 'en' ? "secondary" : "ghost"} size="sm" onClick={() => {
-                const newLocale = locale === 'zh' ? 'en' : 'zh';
-                setLocale(newLocale);
-                // 切换到英文时自动开启双语对照，切换到中文时保持用户偏好
-                if (newLocale === 'en' && !showDualVersion) toggleDualVersion();
-              }} className="gap-1 text-xs font-bold rounded-full">
-                {locale === 'zh' ? t('settings.chinese') : 'EN'}
-              </Button>
               <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-bold rounded-full">
                 <BookOpenCheck className="h-4 w-4" />{bibleVersion}
               </Button>

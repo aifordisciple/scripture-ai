@@ -9,6 +9,7 @@ export const auth = {
     myFavorites: '我的收藏',
     readingPlan: '读经计划',
     myFeedback: '我的反馈',
+    notifications: '通知',
     groupReading: '小组读经',
     feedbackManagement: '反馈管理',
     logout: '退出登录',

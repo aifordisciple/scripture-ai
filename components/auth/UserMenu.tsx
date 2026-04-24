@@ -5,9 +5,11 @@ import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, BookMarked, FileText, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageCircle, Users, BarChart3, Bookmark } from "lucide-react";
+import { UserCircle, LogOut, Settings, BookMarked, FileText, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageCircle, Users, BarChart3, Bookmark, Bell, MessageSquare } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { UserFeedbackPanel } from "@/components/feedback/UserFeedbackPanel";
+import { FeedbackDialog } from "@/components/feedback/FeedbackDialog";
+import { NotificationDialog } from "@/components/common/NotificationDialog";
 import { useGroupUnread } from "@/hooks/use-group-unread";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -30,7 +32,8 @@ export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [apiSettingsOpen, setApiSettingsOpen] = useState(false);
   const [feedbackPanelOpen, setFeedbackPanelOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);  const [isAdmin, setIsAdmin] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -154,6 +157,13 @@ export function UserMenu() {
 
           <div className="my-1 border-t dark:border-slate-800" />
 
+          {/* 通知中心 */}
+          <MenuItem
+            icon={<Bell className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
+            label={t('auth.notifications')}
+            onClick={() => { setIsOpen(false); setNotificationOpen(true); }}
+          />
+
           <MenuItem
             icon={<BookMarked className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
             label={t('auth.myHighlights')}
@@ -204,6 +214,14 @@ export function UserMenu() {
 
           <div className="my-1 border-t dark:border-slate-800" />
 
+          {/* 意见反馈 - 提交新反馈 */}
+          <MenuItem
+            icon={<MessageSquare className="w-4 h-4 text-green-600 dark:text-green-400" />}
+            label="意见反馈"
+            onClick={() => { setIsOpen(false); setFeedbackDialogOpen(true); }}
+          />
+
+          {/* 我的反馈 - 查看历史反馈 */}
           <MenuItem
             icon={<MessageCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
             label={t('auth.myFeedback')}
@@ -262,6 +280,8 @@ export function UserMenu() {
 
       <ApiSettingsDialog open={apiSettingsOpen} onOpenChange={setApiSettingsOpen} />
       <UserFeedbackPanel open={feedbackPanelOpen} onOpenChange={setFeedbackPanelOpen} />
+      <FeedbackDialog open={feedbackDialogOpen} onOpenChange={setFeedbackDialogOpen} />
+      <NotificationDialog open={notificationOpen} onOpenChange={setNotificationOpen} />
     </>
   );
 }

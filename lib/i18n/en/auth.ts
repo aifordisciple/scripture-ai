@@ -9,6 +9,7 @@ export const auth = {
     myFavorites: 'My Favorites',
     readingPlan: 'Reading Plan',
     myFeedback: 'My Feedback',
+    notifications: 'Notifications',
     groupReading: 'Group Reading',
     feedbackManagement: 'Feedback Management',
     logout: 'Log Out',
