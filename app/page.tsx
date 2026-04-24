@@ -705,8 +705,7 @@ export default function Home() {
                 <Calendar className="h-5 w-5" />
               </Button>
 
-              {/* 通知中心 */}
-              <NotificationCenter />
+              {/* Notification moved to UserMenu */}
 
                <div className="pl-1">
                  <UserMenu />
@@ -720,8 +719,7 @@ export default function Home() {
                 <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="minimal" />
               )}
 
-              {/* 通知中心 - 移动端 */}
-              <NotificationCenter />
+              {/* Notification moved to UserMenu */}
 
               <UserMenu />
 
