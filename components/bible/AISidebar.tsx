@@ -94,13 +94,18 @@ export function AISidebar() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const shouldAutoScrollRef = useRef(true)
   const loadedSessionRef = useRef<string | null>(null)
+  // 稳定的 chat key state，避免 currentSessionId 从 temp-xxx 变为真实ID 时
+  // useChat 的 SWR key 变化导致消息被重置为空
+  // 只有在显式创建新会话/切换会话时才更新
+  const [chatKey, setChatKey] = useState(`chat-${Date.now()}`)
 
   const { apiConfig } = useBibleStore()
   const { addToast } = useToast()
 
-  // useChat hook
+  // useChat hook - 使用稳定的 chatKey 作为 id，避免会话ID变化时消息丢失
   const { locale } = useBibleStore();
   const { messages, input, handleInputChange, handleSubmit, append, isLoading, stop, setMessages, error, reload, setInput } = useChat({
+    id: chatKey,
     api: '/api/chat',
     body: {
       apiConfig,
@@ -247,12 +252,13 @@ export function AISidebar() {
 
     if (isAiOpen && !currentSessionId && sessionStatus !== 'creating') {
       const tempId = `temp-${Date.now()}`
+      setChatKey(`chat-${Date.now()}`)
       setCurrentSessionId(tempId)
       setSessionStatus('idle')
       setMessages([])
       loadedSessionRef.current = tempId
     }
-  }, [isAiOpen, currentSessionId, sessionsLoading, sessionStatus, setCurrentSessionId, setMessages, setSessionStatus])
+  }, [isAiOpen, currentSessionId, sessionsLoading, sessionStatus, setCurrentSessionId, setMessages, setSessionStatus, setChatKey])
 
   // 重置状态 - 仅在切换会话时重置，关闭侧边栏时不重置
   // 避免关闭再打开时从服务器重新加载消息覆盖 useChat 内存中的消息
@@ -311,15 +317,17 @@ export function AISidebar() {
   // 会话操作
   const handleNewSession = useCallback(async () => {
     const tempId = `temp-${Date.now()}`
+    setChatKey(`chat-${Date.now()}`)  // 新会话需要新的 chat key
     setCurrentSessionId(tempId)
     setSessionStatus('idle')
     loadedSessionRef.current = tempId
     setMessages([])
     setShowSessionList(false)
     setSessionError(null)
-  }, [setCurrentSessionId, setMessages, setSessionStatus, setSessionError])
+  }, [setCurrentSessionId, setMessages, setSessionStatus, setSessionError, setChatKey])
 
   const handleSelectSession = useCallback(async (session: any) => {
+    setChatKey(`chat-${Date.now()}`)  // 切换会话需要新的 chat key
     setCurrentSessionId(session.id)
     setSessionStatus('loading')
     loadedSessionRef.current = session.id
@@ -346,7 +354,7 @@ export function AISidebar() {
       setMessagesLoading(false)
     }
     setShowSessionList(false)
-  }, [setCurrentSessionId, setMessages, setSessionStatus, setSessionError, setMessagesLoading])
+  }, [setCurrentSessionId, setMessages, setSessionStatus, setSessionError, setMessagesLoading, setChatKey])
 
   const handleDeleteSession = useCallback(async (session: any) => {
     setDeleteTargetSession(session)
@@ -475,6 +483,7 @@ export function AISidebar() {
         const savedId = await savePendingSession(currentSessionId, reference)
         if (savedId) {
           setCurrentSessionId(savedId)
+          loadedSessionRef.current = savedId  // 同步更新，避免恢复会话effect重新触发
           sessionId = savedId
         }
       }
