@@ -51,6 +51,35 @@ export function AISidebar() {
   const [isResizing, setIsResizing] = useState(false)
   const [isImmersive, setIsImmersive] = useState(false)
 
+  // 下拉菜单 ref（用于 click-outside 检测）
+  const modeSelectorRef = useRef<HTMLDivElement>(null)
+  const fontSizeSelectorRef = useRef<HTMLDivElement>(null)
+
+  // 点击外部关闭下拉菜单
+  useEffect(() => {
+    if (!showModeSelector && !showFontSizeSelector && !showSessionList) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (showModeSelector && modeSelectorRef.current && !modeSelectorRef.current.contains(target)) {
+        setShowModeSelector(false)
+      }
+      if (showFontSizeSelector && fontSizeSelectorRef.current && !fontSizeSelectorRef.current.contains(target)) {
+        setShowFontSizeSelector(false)
+      }
+      if (showSessionList) {
+        const sessionEl = document.querySelector('[data-session-selector]')
+        if (!sessionEl || !sessionEl.contains(target)) {
+          setShowSessionList(false)
+        }
+      }
+    }
+
+    // 使用 mousedown 而非 click，避免与按钮的 onClick 冲突
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showModeSelector, showFontSizeSelector, showSessionList])
+
   // 弹窗状态
   const [showRenameModal, setShowRenameModal] = useState(false)
   const [renameSessionId, setRenameSessionId] = useState<string | null>(null)
@@ -225,12 +254,9 @@ export function AISidebar() {
     }
   }, [isAiOpen, currentSessionId, sessionsLoading, sessionStatus, setCurrentSessionId, setMessages, setSessionStatus])
 
-  // 重置状态
-  useEffect(() => {
-    if (!isAiOpen) {
-      loadedSessionRef.current = null
-    }
-  }, [isAiOpen])
+  // 重置状态 - 仅在切换会话时重置，关闭侧边栏时不重置
+  // 避免关闭再打开时从服务器重新加载消息覆盖 useChat 内存中的消息
+  // loadedSessionRef 会在 handleSelectSession/handleNewSession 中正确更新
 
   // 保存临时会话
   const savePendingSession = useCallback(async (tempId: string, firstMessage?: string): Promise<string | null> => {
@@ -588,7 +614,7 @@ export function AISidebar() {
               sessions={sessions}
               currentSessionId={currentSessionId}
               showSessionList={showSessionList}
-              onToggleSessionList={() => setShowSessionList(!showSessionList)}
+              onToggleSessionList={() => { setShowSessionList(!showSessionList); setShowModeSelector(false); setShowFontSizeSelector(false); }}
               onSelectSession={handleSelectSession}
               onNewSession={handleNewSession}
               onDeleteSession={handleDeleteSession}
@@ -605,9 +631,9 @@ export function AISidebar() {
 
           <div className="flex items-center gap-1">
             {/* AI 模式选择 */}
-            <div className="relative">
+            <div className="relative" ref={modeSelectorRef}>
               <button
-                onClick={() => setShowModeSelector(!showModeSelector)}
+                onClick={() => { setShowModeSelector(!showModeSelector); setShowFontSizeSelector(false); setShowSessionList(false); }}
                 className={cn(
                   "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors",
                   aiMode === 'general' ? "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" : "",
@@ -666,9 +692,9 @@ export function AISidebar() {
             </div>
 
             {/* 字体大小选择器 */}
-            <div className="relative">
+            <div className="relative" ref={fontSizeSelectorRef}>
               <button
-                onClick={() => setShowFontSizeSelector(!showFontSizeSelector)}
+                onClick={() => { setShowFontSizeSelector(!showFontSizeSelector); setShowModeSelector(false); setShowSessionList(false); }}
                 className={cn(
                   "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors",
                   aiFontSize === 'medium' ? "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" : "text-blue-600 bg-blue-50 dark:bg-blue-900/20"

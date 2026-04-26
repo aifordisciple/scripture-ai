@@ -42,7 +42,7 @@ export function SessionSelector({
   const currentSession = sessions.find(s => s.id === currentSessionId)
 
   return (
-    <div className="relative">
+    <div className="relative" data-session-selector>
       <button
         onClick={onToggleSessionList}
         className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 font-bold select-none hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-lg transition-colors"
