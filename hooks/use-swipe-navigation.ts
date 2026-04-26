@@ -59,6 +59,13 @@ export function useSwipeNavigation(book: string, chapter: string) {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    // 检查触摸是否发生在可滚动容器内，如果是则不触发导航
+    const target = e.target as HTMLElement;
+    const scrollableParent = target.closest('[data-scroll-area], .overflow-y-auto, .overflow-auto, [role="dialog"], textarea, [contenteditable]');
+    if (scrollableParent) {
+      touchStartRef.current = null;
+      return;
+    }
     touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   };
 

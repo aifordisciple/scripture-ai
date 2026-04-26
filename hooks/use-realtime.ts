@@ -49,8 +49,14 @@ export function useRealtime(options: UseRealtimeOptions = {}) {
   });
 
   const connect = useCallback(() => {
+    // 清理旧连接和重连定时器，防止并发连接
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
+      eventSourceRef.current = null;
     }
 
     const eventSource = new EventSource('/api/events');

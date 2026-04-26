@@ -666,9 +666,17 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
     if (state.streakCount >= 30) newBadges.push("STREAK_30");
 
     state.activePlans.forEach(plan => {
-      const totalDays = BIBLE_PLANS.find(p => p.id === plan.planId)?.durationDays || 0;
-      if (totalDays > 0 && Object.keys(plan.completedTasks).length >= totalDays) {
-        newBadges.push(`PLAN_DONE_${plan.planId}`);
+      const planDef = BIBLE_PLANS.find(p => p.id === plan.planId);
+      const totalDays = planDef?.durationDays || 0;
+      // 严谨检查：每天的所有任务都已完成才算完成
+      if (totalDays > 0) {
+        const allDaysComplete = Array.from({ length: totalDays }, (_, i) => i + 1).every(day => {
+          const dayTasks = plan.completedTasks[day.toString()];
+          return Array.isArray(dayTasks) && dayTasks.length > 0;
+        });
+        if (allDaysComplete) {
+          newBadges.push(`PLAN_DONE_${plan.planId}`);
+        }
       }
     });
 
@@ -679,7 +687,12 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
       set({ badges: [...state.badges, ...newlyEarned] });
 
        if (typeof window !== 'undefined') {
-         window.dispatchEvent(new CustomEvent('badge-earned', { detail: toUnlock[0] }));
+         // 为每个新勋章分别触发事件，让BadgePopup可以依次展示
+         toUnlock.forEach((type, index) => {
+           setTimeout(() => {
+             window.dispatchEvent(new CustomEvent('badge-earned', { detail: type }));
+           }, index * 1500); // 每个勋章间隔1.5秒依次展示
+         });
        }
      }
    },

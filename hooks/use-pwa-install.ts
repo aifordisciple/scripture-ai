@@ -147,8 +147,12 @@ export function usePWAInstall(): PWAInstallState {
     }));
   }, []);
 
-  // 记录访问次数
+  // 记录访问次数 — 每次会话只计数一次，防止SPA导航重复触发
   useEffect(() => {
+    const sessionKey = 'pwa-session-counted';
+    if (sessionStorage.getItem(sessionKey)) return; // 本次会话已计数
+    sessionStorage.setItem(sessionKey, '1');
+
     const stored = localStorage.getItem(STORAGE_KEY);
     let data = stored ? JSON.parse(stored) : { visitCount: 0 };
 

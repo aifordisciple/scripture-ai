@@ -303,7 +303,7 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
                     className={cn(
-                      "flex gap-3 p-3 rounded-lg cursor-pointer transition-colors",
+                      "group flex gap-3 p-3 rounded-lg cursor-pointer transition-colors",
                       notification.read
                         ? "bg-muted/30 hover:bg-muted/50"
                         : "bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
