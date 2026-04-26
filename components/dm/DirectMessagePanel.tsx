@@ -77,12 +77,36 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
     }
   }, [open, selectedUser]);
 
-  // Load messages when user selected
+  // Load messages when user selected + mark conversation as read
   useEffect(() => {
     if (selectedUser) {
       fetchMessages(selectedUser.id);
+      markConversationRead(selectedUser.id);
     }
   }, [selectedUser]);
+
+  const markConversationRead = async (userId: string) => {
+    try {
+      const res = await fetch("/api/dm", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      if (res.ok) {
+        // Update local unread count by subtracting this conversation's unread count
+        const conv = conversations.find(c => c.userId === userId);
+        if (conv && conv.unreadCount > 0) {
+          setConversations(prev =>
+            prev.map(c =>
+              c.userId === userId ? { ...c, unreadCount: 0 } : c
+            )
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Mark conversation read error:", error);
+    }
+  };
 
   // Auto scroll to bottom
   useEffect(() => {

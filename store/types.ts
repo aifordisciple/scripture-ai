@@ -503,7 +503,7 @@ export interface GroupSlice {
 
   // 方法
   setGroupPlanContext: (ctx: GroupPlanContext | null) => void;
-  advanceGroupPlanStep: () => void;
+  advanceGroupPlanStep: () => Promise<void>;
   previousGroupPlanStep: () => void;
   toggleGroupTaskCompleted: (churchId: string, planId: string, day: number, taskId: string, action?: 'complete' | 'uncomplete') => Promise<void>;
   startGroupPlanFlow: (churchId: string, planId: string, planName: string, tasks: any[], day: number) => void;

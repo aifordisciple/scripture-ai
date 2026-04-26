@@ -88,7 +88,8 @@ export function GroupSettings({
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
         onSettingsUpdate?.({ themeColor, logoUrl, fontFamily });
-        setOpen(false);
+        // Delay closing so user can see the success indicator
+        setTimeout(() => setOpen(false), 1500);
       } else {
         alert(data.error || "保存失败");
       }

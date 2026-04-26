@@ -810,22 +810,28 @@ export const createGroupSlice: StateCreator<StoreState, [], [], GroupSlice> = (s
 
   setGroupPlanContext: (ctx) => set({ groupPlanContext: ctx }),
 
-  advanceGroupPlanStep: () => {
+  advanceGroupPlanStep: async () => {
     const state = get();
     const ctx = state.groupPlanContext;
     if (!ctx) return;
 
     const step = ctx.steps[ctx.stepIndex];
 
-    // 1. 自动打卡当前步骤（防重复触发）
+    // 1. 自动打卡当前步骤（防重复触发）- await server confirmation
     if (step.taskId !== 'completion') {
-      state.toggleGroupTaskCompleted(
-        ctx.churchId,
-        ctx.planId,
-        ctx.day,
-        step.taskId,
-        'complete'
-      );
+      try {
+        await state.toggleGroupTaskCompleted(
+          ctx.churchId,
+          ctx.planId,
+          ctx.day,
+          step.taskId,
+          'complete'
+        );
+      } catch (error) {
+        // Server failed to record completion - don't advance UI
+        console.error('Failed to complete group task, not advancing step:', error);
+        return;
+      }
     }
 
     // 2. 推进进度

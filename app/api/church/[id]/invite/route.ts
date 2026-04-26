@@ -42,7 +42,22 @@ export async function GET(req: Request, { params }: RouteParams) {
       orderBy: { createdAt: 'desc' }
     });
 
-    return NextResponse.json({ codes });
+    // Filter out expired invite codes and mark them inactive in DB
+    const now = new Date();
+    const expiredIds = codes
+      .filter(c => c.expiresAt && c.expiresAt < now && c.isActive)
+      .map(c => c.id);
+
+    if (expiredIds.length > 0) {
+      await prisma.inviteCode.updateMany({
+        where: { id: { in: expiredIds } },
+        data: { isActive: false }
+      });
+    }
+
+    const activeCodes = codes.filter(c => !c.expiresAt || c.expiresAt >= now);
+
+    return NextResponse.json({ codes: activeCodes });
   } catch (error) {
     console.error('List invite codes error:', error);
     return NextResponse.json({ error: 'Failed to list invite codes' }, { status: 500 });
@@ -127,6 +142,19 @@ export async function DELETE(req: Request, { params }: RouteParams) {
     }
 
     const { codeId } = await req.json();
+
+    // Verify the invite code belongs to this church
+    const inviteCode = await prisma.inviteCode.findUnique({
+      where: { id: codeId }
+    });
+
+    if (!inviteCode) {
+      return NextResponse.json({ error: 'Invite code not found' }, { status: 404 });
+    }
+
+    if (inviteCode.churchId !== id) {
+      return NextResponse.json({ error: 'Invite code does not belong to this church' }, { status: 403 });
+    }
 
     await prisma.inviteCode.delete({
       where: { id: codeId }
