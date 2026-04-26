@@ -49,32 +49,21 @@ export function NoteEditor() {
     }
   };
 
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   const handleSave = async () => {
     if (!noteTargetVerse || !content.trim()) return;
     setIsSaving(true);
-    
-    try {
-      // 1. 本地保存 (UI Optimistic Update)
-      if (existingNote) {
-        updateNote(existingNote.id, content);
-      } else {
-        const tempId = `temp-${Date.now()}`;
-        addNote({
-            id: tempId,
-            bookId: noteTargetVerse.bookId,
-            chapter: noteTargetVerse.chapter,
-            verse: noteTargetVerse.verse,
-            content: content
-        });
-      }
+    setSaveError(null);
 
-      // 2. 远程保存
+    try {
+      // 1. 远程保存优先（确保成功后再更新本地）
       if (session?.user) {
-        await fetch('/api/note', {
+        const res = await fetch('/api/note', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            noteId: existingNote?.id, 
+            noteId: existingNote?.id,
             book: noteTargetVerse.bookId,
             chapter: noteTargetVerse.chapter,
             verse: noteTargetVerse.verse,
@@ -82,12 +71,41 @@ export function NoteEditor() {
             action: "upsert"
           })
         });
+        if (!res.ok) {
+          throw new Error('保存失败，请重试');
+        }
+        const data = await res.json();
+        // 用服务端返回的真实ID更新本地
+        if (!existingNote && data.note?.id) {
+          addNote({
+            id: data.note.id,
+            bookId: noteTargetVerse.bookId,
+            chapter: noteTargetVerse.chapter,
+            verse: noteTargetVerse.verse,
+            content: content
+          });
+        } else if (existingNote) {
+          updateNote(existingNote.id, content);
+        }
+      } else {
+        // 未登录用户只保存本地
+        if (existingNote) {
+          updateNote(existingNote.id, content);
+        } else {
+          addNote({
+            id: `local-${Date.now()}`,
+            bookId: noteTargetVerse.bookId,
+            chapter: noteTargetVerse.chapter,
+            verse: noteTargetVerse.verse,
+            content: content
+          });
+        }
       }
-      
+
       closeNoteEditor();
     } catch (e) {
       console.error(e);
-      alert("保存失败，请重试");
+      setSaveError(e instanceof Error ? e.message : '保存失败，请重试');
     } finally {
       setIsSaving(false);
     }
@@ -122,6 +140,9 @@ export function NoteEditor() {
           />
           
           <div className="flex gap-2 justify-end shrink-0 py-2">
+            {saveError && (
+              <p className="text-sm text-red-500 flex-1 text-left">{saveError}</p>
+            )}
             <Button 
               variant="outline" 
               onClick={handleGeneratePrayer}

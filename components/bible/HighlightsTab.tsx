@@ -43,10 +43,13 @@ interface PopulatedHighlight {
   content: string;
 }
 
+import { useSession } from "next-auth/react";
+
 export function HighlightsTab() {
   const router = useRouter();
   const { t, locale } = useTranslation();
   const { highlights, removeHighlightLocally, tabs, addTab, setActiveTab, updateActiveTab } = useBibleStore();
+  const { data: session } = useSession();
   const [populatedHighlights, setPopulatedHighlights] = useState<PopulatedHighlight[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -152,10 +155,22 @@ export function HighlightsTab() {
     router.push(`/?book=${bookId}&chapter=${chapter}`);
   };
 
-  const handleRemove = (e: React.MouseEvent, bookId: string, chapter: number, verse: number) => {
+  const handleRemove = async (e: React.MouseEvent, bookId: string, chapter: number, verse: number) => {
     e.stopPropagation();
     removeHighlightLocally(bookId, chapter, verse);
     setPopulatedHighlights(prev => prev.filter(h => !(h.bookId === bookId && h.chapter === chapter && h.verse === verse)));
+    // 同步删除到服务端
+    if (session?.user) {
+      try {
+        await fetch('/api/highlight', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookId, chapter, verse, action: 'remove' })
+        });
+      } catch (err) {
+        console.error('Failed to sync highlight removal:', err);
+      }
+    }
   };
 
   return (

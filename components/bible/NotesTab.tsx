@@ -80,17 +80,23 @@ export function NotesTab() {
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (!confirm("确定要删除这条笔记吗？")) return;
-    deleteNote(id);
+
+    // 先尝试服务端删除，成功后再删除本地
     if (session?.user) {
       try {
-        await fetch('/api/note', {
+        const res = await fetch('/api/note', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ noteId: id, action: "delete" })
         });
+        if (!res.ok) throw new Error('删除失败');
+        deleteNote(id);
       } catch (err) {
         console.error("Failed to delete note remotely", err);
+        alert("删除失败，请重试");
       }
+    } else {
+      deleteNote(id);
     }
   };
 

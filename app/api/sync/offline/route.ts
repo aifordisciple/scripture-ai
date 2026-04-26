@@ -80,7 +80,8 @@ function mergeData(server: any, client: any): any {
     settings: mergeSettings(server.settings, client.settings),
     
     // Highlights: merge by ID, keep latest
-    highlights: mergeById(server.highlights || [], client.highlights || [], 'bookId-chapter-verse'),
+    // Highlights: merge by composite key (bookId-chapter-verse), keep latest
+    highlights: mergeById(server.highlights || [], client.highlights || [], 'id', (item: any) => `${item.bookId}-${item.chapter}-${item.verse}`),
     
     // Notes: merge by ID, keep latest
     notes: mergeById(server.notes || [], client.notes || [], 'id'),

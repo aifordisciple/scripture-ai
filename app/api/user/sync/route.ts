@@ -84,82 +84,160 @@ export async function POST(req: Request) {
          });
       }
 
-      // 2. 同步高亮
+      // 2. 同步高亮 (merge: 按唯一键匹配，存在则更新，不存在则创建，服务端独有项保留)
       if (Array.isArray(highlights)) {
-          await tx.highlight.deleteMany({ where: { userId: user.id } });
           const validHighlights = highlights.filter(h => h && h.bookId);
-          if (validHighlights.length > 0) {
-              await tx.highlight.createMany({
-                  data: validHighlights.map((h: any) => ({
-                      userId: user.id,
-                      bookId: String(h.bookId),
-                      chapter: Number(h.chapter) || 1,
-                      verse: Number(h.verse) || 1,
-                      color: String(h.color || 'yellow')
-                  }))
-              });
+          // 获取服务端当前高亮
+          const serverHighlights = await tx.highlight.findMany({ where: { userId: user.id } });
+          const serverMap = new Map(serverHighlights.map(h => [`${h.bookId}-${h.chapter}-${h.verse}`, h]));
+          const clientKeys = new Set<string>();
+
+          for (const h of validHighlights) {
+              const key = `${String(h.bookId)}-${Number(h.chapter) || 1}-${Number(h.verse) || 1}`;
+              clientKeys.add(key);
+              const data = {
+                  userId: user.id,
+                  bookId: String(h.bookId),
+                  chapter: Number(h.chapter) || 1,
+                  verse: Number(h.verse) || 1,
+                  color: String(h.color || 'yellow')
+              };
+              const existing = serverMap.get(key);
+              if (existing) {
+                  await tx.highlight.update({ where: { id: existing.id }, data: { color: data.color } });
+              } else {
+                  await tx.highlight.create({ data });
+              }
+          }
+          // 删除客户端已不存在的高亮（客户端明确移除的）
+          for (const [key, serverH] of serverMap) {
+              if (!clientKeys.has(key)) {
+                  await tx.highlight.delete({ where: { id: serverH.id } });
+              }
           }
       }
 
-      // 3. 同步笔记
+      // 3. 同步笔记 (merge: 按id匹配，存在则更新，不存在则创建，服务端独有项保留)
       if (Array.isArray(notes)) {
-          await tx.note.deleteMany({ where: { userId: user.id } });
           const validNotes = notes.filter(n => n && n.bookId && n.id);
-          if (validNotes.length > 0) {
-              await tx.note.createMany({
-                  data: validNotes.map((n: any) => ({
-                      id: String(n.id),
-                      userId: user.id,
-                      bookId: String(n.bookId),
-                      chapter: Number(n.chapter) || 1,
-                      verse: Number(n.verse) || 1,
-                      content: String(n.content || '')
-                  }))
-              });
+          const serverNotes = await tx.note.findMany({ where: { userId: user.id } });
+          const serverNoteMap = new Map(serverNotes.map(n => [n.id, n]));
+          const clientNoteIds = new Set<string>();
+
+          for (const n of validNotes) {
+              const noteId = String(n.id);
+              clientNoteIds.add(noteId);
+              const data = {
+                  id: noteId,
+                  userId: user.id,
+                  bookId: String(n.bookId),
+                  chapter: Number(n.chapter) || 1,
+                  verse: Number(n.verse) || 1,
+                  content: String(n.content || '')
+              };
+              if (serverNoteMap.has(noteId)) {
+                  await tx.note.update({ where: { id: noteId }, data: { content: data.content, bookId: data.bookId, chapter: data.chapter, verse: data.verse } });
+              } else {
+                  await tx.note.create({ data });
+              }
+          }
+          // 删除客户端已不存在的笔记
+          for (const [id, _] of serverNoteMap) {
+              if (!clientNoteIds.has(id)) {
+                  await tx.note.delete({ where: { id } });
+              }
           }
       }
 
-      // 4. 同步阅读记录
+      // 4. 同步阅读记录 (merge: 按唯一键匹配，count取较大值)
       if (Array.isArray(interactions)) {
-          await tx.interaction.deleteMany({ where: { userId: user.id } });
           const validInteractions = interactions.filter(i => i && i.bookId);
-          if (validInteractions.length > 0) {
-               await tx.interaction.createMany({
-                  data: validInteractions.map((i: any) => ({
-                      userId: user.id,
-                      bookId: String(i.bookId),
-                      chapter: Number(i.chapter) || 1,
-                      count: Number(i.count) || 1
-                  }))
-              });
+          const serverInteractions = await tx.interaction.findMany({ where: { userId: user.id } });
+          const serverIntMap = new Map(serverInteractions.map(i => [`${i.bookId}-${i.chapter}`, i]));
+          const clientIntKeys = new Set<string>();
+
+          for (const i of validInteractions) {
+              const key = `${String(i.bookId)}-${Number(i.chapter) || 1}`;
+              clientIntKeys.add(key);
+              const data = {
+                  userId: user.id,
+                  bookId: String(i.bookId),
+                  chapter: Number(i.chapter) || 1,
+                  count: Number(i.count) || 1
+              };
+              const existing = serverIntMap.get(key);
+              if (existing) {
+                  await tx.interaction.update({ where: { id: existing.id }, data: { count: Math.max(existing.count, data.count) } });
+              } else {
+                  await tx.interaction.create({ data });
+              }
+          }
+          // 删除客户端已不存在的阅读记录
+          for (const [key, serverI] of serverIntMap) {
+              if (!clientIntKeys.has(key)) {
+                  await tx.interaction.delete({ where: { id: serverI.id } });
+              }
           }
       }
 
-        // 5. 同步读经计划 (多计划全量覆盖同步)
+        // 5. 同步读经计划 (merge: 按planId匹配，completedTasks合并)
         if (Array.isArray(activePlans)) {
-            await tx.planProgress.deleteMany({ where: { userId: user.id } });
-            if (activePlans.length > 0) {
-                await tx.planProgress.createMany({
-                    data: activePlans.map((p: any) => ({
-                        userId: user.id,
-                        planId: String(p.planId),
-                        startDate: new Date(p.startDate || Date.now()),
-                        completedTasks: JSON.stringify(p.completedTasks || {}),
-                        savedDevotionals: JSON.stringify(p.savedDevotionals || {}),
-                        status: p.status || 'active'
-                    }))
-                });
+            const serverPlans = await tx.planProgress.findMany({ where: { userId: user.id } });
+            const serverPlanMap = new Map(serverPlans.map(p => [p.planId, p]));
+            const clientPlanIds = new Set<string>();
+
+            for (const p of activePlans) {
+                const planId = String(p.planId);
+                clientPlanIds.add(planId);
+                const existing = serverPlanMap.get(planId);
+                if (existing) {
+                    // Merge completedTasks: union of both
+                    const mergedTasks = { ...JSON.parse(existing.completedTasks || '{}'), ...JSON.parse(JSON.stringify(p.completedTasks || {})) };
+                    const mergedDevotionals = { ...JSON.parse(existing.savedDevotionals || '{}'), ...JSON.parse(JSON.stringify(p.savedDevotionals || {})) };
+                    await tx.planProgress.update({
+                        where: { id: existing.id },
+                        data: {
+                            completedTasks: JSON.stringify(mergedTasks),
+                            savedDevotionals: JSON.stringify(mergedDevotionals),
+                            status: p.status || existing.status
+                        }
+                    });
+                } else {
+                    await tx.planProgress.create({
+                        data: {
+                            userId: user.id,
+                            planId,
+                            startDate: new Date(p.startDate || Date.now()),
+                            completedTasks: JSON.stringify(p.completedTasks || {}),
+                            savedDevotionals: JSON.stringify(p.savedDevotionals || {}),
+                            status: p.status || 'active'
+                        }
+                    });
+                }
+            }
+            // 删除客户端已不存在的计划
+            for (const [planId, serverP] of serverPlanMap) {
+                if (!clientPlanIds.has(planId)) {
+                    await tx.planProgress.delete({ where: { id: serverP.id } });
+                }
             }
         }
 
-       // 6. 同步火苗统计
-       await tx.user.update({
-         where: { id: user.id },
-         data: {
-           streakCount: streakCount || 0,
-           lastActiveDate: lastActiveDate ? new Date(lastActiveDate) : null
-         }
-       });
+       // 6. 同步火苗统计 (服务端只在值更大时更新，防止被客户端的0覆盖)
+       {
+         const serverUser = await tx.user.findUnique({ where: { id: user.id }, select: { streakCount: true, lastActiveDate: true } });
+         const newStreak = Math.max(serverUser?.streakCount || 0, streakCount || 0);
+         const newLastActive = lastActiveDate
+           ? (serverUser?.lastActiveDate && serverUser.lastActiveDate.getTime() > lastActiveDate ? serverUser.lastActiveDate : new Date(lastActiveDate))
+           : serverUser?.lastActiveDate;
+         await tx.user.update({
+           where: { id: user.id },
+           data: {
+             streakCount: newStreak,
+             lastActiveDate: newLastActive
+           }
+         });
+       }
 
        // 7. 同步勋章
        if (Array.isArray(badges)) {
