@@ -29,7 +29,7 @@ export function AISidebar() {
     // 队列相关
     currentAiRequest, aiQueue, completeCurrentRequest, failCurrentRequest,
     // 会话管理
-    currentSessionId, setCurrentSessionId, sessions, setSessions, addSession, updateSession, deleteSession,
+    currentSessionId, setCurrentSessionId, sessions, setSessions, addSession, updateSession, deleteSession, replaceSessionId,
     sessionStatus, sessionError, setSessionStatus, setSessionError,
     sessionsLoading, setSessionsLoading, setMessagesLoading,
     // AI 模式
@@ -299,7 +299,8 @@ export function AISidebar() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
       const session = await res.json()
-      addSession(session)
+      // [P1-2修复] 使用replaceSessionId原子性地替换临时ID，避免消息丢失
+      replaceSessionId(tempId, session.id)
       setSessionStatus('ready')
       return session.id
     } catch (error) {
@@ -443,6 +444,16 @@ export function AISidebar() {
     }
   }
 
+  // [P1-1修复] 组件卸载时中止AI请求，防止内存泄漏和过期状态更新
+  useEffect(() => {
+    return () => {
+      if (isLoading) {
+        stop()
+        setAiGenerating(false)
+      }
+    }
+  }, [isLoading, stop, setAiGenerating])
+
   // AI 生成状态
   useEffect(() => {
     setAiGenerating(isLoading)
@@ -473,35 +484,42 @@ export function AISidebar() {
     shouldAutoScrollRef.current = true
 
     const sendMessage = async () => {
-      let sessionId = currentSessionId
+      try {
+        let sessionId = currentSessionId
 
-      if (currentSessionId?.startsWith('temp-')) {
+        if (currentSessionId?.startsWith('temp-')) {
+          let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`
+          if (aiRequestTrigger.ref.verse > 0) {
+            reference += `:${aiRequestTrigger.ref.verse}`
+          }
+          const savedId = await savePendingSession(currentSessionId, reference)
+          if (savedId) {
+            setCurrentSessionId(savedId)
+            loadedSessionRef.current = savedId  // 同步更新，避免恢复会话effect重新触发
+            sessionId = savedId
+          }
+        }
+
         let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`
         if (aiRequestTrigger.ref.verse > 0) {
           reference += `:${aiRequestTrigger.ref.verse}`
+        } else {
+          reference += t('ai.chapterSuffix')
         }
-        const savedId = await savePendingSession(currentSessionId, reference)
-        if (savedId) {
-          setCurrentSessionId(savedId)
-          loadedSessionRef.current = savedId  // 同步更新，避免恢复会话effect重新触发
-          sessionId = savedId
-        }
+
+        const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n')
+        const enrichedPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**${t('ai.myRequest')}**：${aiRequestTrigger.prompt}`
+
+        append(
+          { role: 'user', content: enrichedPrompt },
+          { body: { sessionId } }
+        )
+      } catch (error) {
+        // [P0-1修复] 确保所有错误路径都释放AI生成状态，避免队列永久阻塞
+        console.error('AI request trigger error:', error)
+        setAiGenerating(false)
+        failCurrentRequest(error instanceof Error ? error.message : t('ai.aiGenerateFailed'))
       }
-
-      let reference = `${aiRequestTrigger.ref.bookName} ${aiRequestTrigger.ref.chapter}`
-      if (aiRequestTrigger.ref.verse > 0) {
-        reference += `:${aiRequestTrigger.ref.verse}`
-      } else {
-        reference += t('ai.chapterSuffix')
-      }
-
-      const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n')
-      const enrichedPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**${t('ai.myRequest')}**：${aiRequestTrigger.prompt}`
-
-      append(
-        { role: 'user', content: enrichedPrompt },
-        { body: { sessionId } }
-      )
     }
 
     sendMessage()

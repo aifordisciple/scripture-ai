@@ -169,7 +169,15 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
   aiQueue: [],
 
   // 入队方法：如果无当前任务则立即开始，否则加入队列
+  // [P0-2修复] 添加去重检查，防止重复请求入队
   enqueueAI: (prompt, content, context, ref) => {
+    const { currentAiRequest, aiQueue } = get();
+
+    // 去重：检查队列中是否已有相同prompt的请求
+    const isDuplicate = aiQueue.some(item => item.prompt === prompt && item.content === content)
+      || (currentAiRequest?.prompt === prompt && currentAiRequest?.content === content);
+    if (isDuplicate) return;
+
     const newItem: AIQueueItem = {
       id: `ai-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       prompt,
@@ -179,8 +187,6 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
       timestamp: Date.now(),
       status: 'pending'
     };
-
-    const { currentAiRequest } = get();
 
     // 无当前任务，立即开始处理
     if (!currentAiRequest || currentAiRequest.status === 'completed' || currentAiRequest.status === 'error') {
@@ -279,9 +285,21 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
   updateSession: (id, data) => set((state) => ({
     sessions: state.sessions.map(s => s.id === id ? { ...s, ...data } : s)
   })),
-  deleteSession: (id) => set((state) => ({
-    sessions: state.sessions.filter(s => s.id !== id),
-    currentSessionId: state.currentSessionId === id ? null : state.currentSessionId
+  // [P1-3修复] 删除会话时同时清理currentSessionId，切换到上一个可用会话
+  deleteSession: (id) => set((state) => {
+    const remaining = state.sessions.filter(s => s.id !== id);
+    const newCurrentId = state.currentSessionId === id
+      ? (remaining.length > 0 ? remaining[0].id : null)
+      : state.currentSessionId;
+    return {
+      sessions: remaining,
+      currentSessionId: newCurrentId
+    };
+  }),
+  // [P1-2修复] 替换临时会话ID为真实ID，同时迁移消息Record的key
+  replaceSessionId: (tempId, realId) => set((state) => ({
+    sessions: state.sessions.map(s => s.id === tempId ? { ...s, id: realId } : s),
+    currentSessionId: state.currentSessionId === tempId ? realId : state.currentSessionId,
   })),
 
   // [新增] AI 模式

@@ -332,6 +332,7 @@ export interface AISlice {
   addSession: (session: ChatSession) => void;
   updateSession: (id: string, data: Partial<ChatSession>) => void;
   deleteSession: (id: string) => void;
+  replaceSessionId: (tempId: string, realId: string) => void;
   // [新增] AI 模式
   aiMode: 'general' | 'tutor' | 'sermon' | 'study-guide' | 'custom';
   setAiMode: (mode: 'general' | 'tutor' | 'sermon' | 'study-guide' | 'custom') => void;
