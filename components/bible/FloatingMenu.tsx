@@ -151,6 +151,16 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
 
   if (!render) return null;
 
+  // 视口边界约束：确保菜单始终在可见区域内
+  const MENU_WIDTH = 240;
+  const MENU_HEIGHT = 300; // 估计高度
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 768;
+  const clampedLeft = Math.max(MENU_WIDTH / 2, Math.min(vw - MENU_WIDTH / 2, position.left));
+  const clampedTop = showAbove
+    ? Math.max(MENU_HEIGHT, position.top)
+    : Math.min(vh - MENU_HEIGHT, position.top);
+
   // 根据位置决定 transform
   const transformStyle = showAbove
     ? "translate(-50%, -100%) translateY(-12px)"
@@ -169,8 +179,8 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"
       )}
       style={{
-        top: position.top,
-        left: position.left,
+        top: clampedTop,
+        left: clampedLeft,
         transform: transformStyle
       }}
       onClick={handleMenuClick}

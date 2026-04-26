@@ -75,6 +75,8 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     if (container) {
       container.scrollTo(0, 0);
     }
+    // 章节切换时清除经文选择，避免FloatingMenu显示错误引用
+    clearSelection();
   }, [book, chapter]);
 
   useEffect(() => {

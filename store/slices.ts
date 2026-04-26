@@ -10,7 +10,11 @@ export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set, ge
   isAuthOpen: false,
   setAuthOpen: (open) => set({ isAuthOpen: open }),
   isSidebarOpen: false,
-  toggleSidebar: (open) => set((state) => ({ isSidebarOpen: open !== undefined ? open : !state.isSidebarOpen })),
+  toggleSidebar: (open) => set((state) => {
+    const newOpen = open !== undefined ? open : !state.isSidebarOpen;
+    // 移动端互斥：打开侧边栏时关闭AI侧边栏
+    return { isSidebarOpen: newOpen, isAiOpen: newOpen ? false : state.isAiOpen };
+  }),
   isDesktopSidebarOpen: false,
   toggleDesktopSidebar: () => set((state) => ({ isDesktopSidebarOpen: !state.isDesktopSidebarOpen })),
   sidebarWidth: 480,
@@ -143,7 +147,10 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
 
 export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, get) => ({
   isAiOpen: false,
-  setAiOpen: (open) => set({ isAiOpen: open }),
+  setAiOpen: (open) => set((state) => {
+    // 移动端互斥：打开AI侧边栏时关闭主侧边栏
+    return { isAiOpen: open, isSidebarOpen: open ? false : state.isSidebarOpen };
+  }),
   isAiGenerating: false,
   setAiGenerating: (isAiGenerating) => set({ isAiGenerating }),
 
