@@ -157,10 +157,13 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
     >
       <MapController center={currentCenter} zoom={currentZoom} />
 
-      {/* 使用 ArcGIS 地图瓦片 - 国内国外都可用 */}
+      {/* 根据深色模式切换地图瓦片 */}
       <TileLayer
         attribution='&copy; <a href="https://www.esri.com">Esri</a>'
-        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+        url={isDarkMode
+          ? "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+          : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+        }
       />
 
       {/* 地点标记 */}

@@ -9,6 +9,7 @@ export function useAudioPlayer(onFinished?: () => void) {
   const [currentTime, setCurrentTime] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
   
+  const cancelledRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentTextRef = useRef<string | null>(null);
 
@@ -17,6 +18,10 @@ export function useAudioPlayer(onFinished?: () => void) {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        // 撤销ObjectURL防止内存泄漏
+        if (audioRef.current.src && audioRef.current.src.startsWith('blob:')) {
+          URL.revokeObjectURL(audioRef.current.src);
+        }
         audioRef.current = null;
       }
     };
@@ -75,14 +80,18 @@ export function useAudioPlayer(onFinished?: () => void) {
 
     // 场景2：内容变化（切换章节），重新加载
     try {
+      cancelledRef.current = false; // 重置取消标志
       setIsLoading(true);
       setIsPlaying(false);
       setCurrentTime(0);
       setDuration(0);
 
-      // 停止旧音频
+      // 停止旧音频并撤销ObjectURL
       if (audioRef.current) {
         audioRef.current.pause();
+        if (audioRef.current.src && audioRef.current.src.startsWith('blob:')) {
+          URL.revokeObjectURL(audioRef.current.src);
+        }
         audioRef.current = null;
       }
 
@@ -134,14 +143,17 @@ export function useAudioPlayer(onFinished?: () => void) {
       audio.onended = () => {
         setIsPlaying(false);
         setCurrentTime(0);
-        
+
+        // 如果音频已被取消（用户切换了章节），不触发自动播放
+        if (cancelledRef.current) return;
+
         // [新增] 拦截：如果处于计划流中，按照计划步骤前进
         const { readingPlanContext, advancePlanStep } = useBibleStore.getState();
         if (readingPlanContext) {
             advancePlanStep();
             return;
         }
-        
+
         if (onFinished) onFinished(); // 触发回调，自动播放下一章
       };
 
