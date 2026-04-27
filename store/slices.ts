@@ -527,10 +527,15 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
       if (!lastDate) {
         newStreakCount = 1;
       } else {
-        const diffTime = now.getTime() - lastDate.getTime();
-        const diffDays = diffTime / (1000 * 3600 * 24);
-        if (diffDays <= 1.5) {
+        // 统一使用午夜对齐的日期比较，与updateStreak保持一致
+        const todayMidnight = new Date(now).setHours(0,0,0,0);
+        const lastMidnight = new Date(lastDate).setHours(0,0,0,0);
+        const diffDays = Math.round((todayMidnight - lastMidnight) / 86400000);
+
+        if (diffDays === 1) {
           newStreakCount += 1;
+        } else if (diffDays === 0) {
+          // 同一天，不重复增加
         } else {
           newStreakCount = 1;
         }

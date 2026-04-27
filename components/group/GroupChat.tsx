@@ -77,7 +77,13 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
       const res = await fetch(`/api/church/${churchId}/chat?limit=50`);
       const data = await res.json();
       if (data.messages) {
-        setMessages(data.messages);
+        // 增量合并：按ID去重，避免全量替换导致闪烁
+        setMessages(prev => {
+          const existingIds = new Set(prev.map(m => m.id));
+          const newMessages = data.messages.filter((m: ChatMessage) => !existingIds.has(m.id));
+          if (newMessages.length === 0) return prev; // 无新消息，不触发重渲染
+          return [...prev, ...newMessages];
+        });
       }
     } catch (error) {
       console.error("Failed to fetch messages:", error);

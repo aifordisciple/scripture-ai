@@ -148,11 +148,43 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
   };
 
   const fetchAndSelectUser = async (userId: string) => {
-    // This could be expanded to fetch user details from a user API
-    // For now, we just set the user from conversations if available
+    // 先从已有对话列表中查找
     const conv = conversations.find(c => c.userId === userId);
     if (conv) {
       setSelectedUser(conv.user);
+      return;
+    }
+    // 不在对话列表中时，直接从API获取用户信息并创建新对话
+    try {
+      const res = await fetch(`/api/dm?userId=${userId}`);
+      const data = await res.json();
+      if (data.messages) {
+        setMessages(data.messages);
+      }
+      // 从消息中提取用户信息
+      if (data.messages && data.messages.length > 0) {
+        const otherUser = data.messages[0].sender.id === userId
+          ? data.messages[0].sender
+          : data.messages[0].receiver;
+        setSelectedUser(otherUser);
+      } else {
+        // 无历史消息，从用户API获取信息
+        const userRes = await fetch(`/api/user?id=${userId}`);
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setSelectedUser({
+            id: userId,
+            name: userData.name || userData.email || userId,
+            image: userData.image || null,
+          });
+        } else {
+          // 最终兜底：用ID作为名称
+          setSelectedUser({ id: userId, name: userId, image: null });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch user for initial conversation:', error);
+      setSelectedUser({ id: userId, name: userId, image: null });
     }
   };
 
