@@ -1,6 +1,18 @@
 export const auth = {
   auth: {
     login: '登录',
+    register: '注册',
+    welcomeBack: '欢迎回来',
+    createAccount: '创建账户',
+    emailOrPasswordError: '邮箱或密码错误',
+    registerFailed: '发生错误，请重试',
+    enterName: '昵称',
+    enterEmail: '邮箱地址',
+    enterPassword: '密码',
+    noAccount: '还没有账号？',
+    hasAccount: '已有账号？',
+    goToRegister: '去注册',
+    goToLogin: '去登录',
     dashboard: '读经统计',
     settings: '设置',
     aiModelApiSettings: 'AI 模型与接口设置',
@@ -12,6 +24,7 @@ export const auth = {
     notifications: '通知',
     groupReading: '小组读经',
     feedbackManagement: '反馈管理',
+    feedback: '意见反馈',
     logout: '退出登录',
   },
 } as const

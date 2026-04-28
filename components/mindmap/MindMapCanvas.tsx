@@ -14,13 +14,13 @@ interface LayoutOption {
   label: string;
 }
 
-// 可用的布局选项
+// 可用的布局选项 - label 使用 i18n key，由组件通过 t() 解析
 export const LAYOUT_OPTIONS: LayoutOption[] = [
-  { value: 'logicalStructure', label: '逻辑结构图' },
-  { value: 'mindMap', label: '思维导图' },
-  { value: 'organizationStructure', label: '组织结构图' },
-  { value: 'catalogOrganization', label: '目录组织图' },
-  { value: 'timeline', label: '时间轴' },
+  { value: 'logicalStructure', label: 'mindmap.layoutLogical' },
+  { value: 'mindMap', label: 'mindmap.layoutMindMap' },
+  { value: 'organizationStructure', label: 'mindmap.layoutOrganization' },
+  { value: 'catalogOrganization', label: 'mindmap.layoutCatalog' },
+  { value: 'timeline', label: 'mindmap.layoutTimeline' },
 ];
 
 interface MindMapCanvasProps {

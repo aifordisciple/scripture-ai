@@ -166,9 +166,12 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Card not found' }, { status: 404 });
     }
 
+    // [P2-8修复] 钳制 quality 到 0-5 范围，防止 SM-2 调度错误
+    const clampedQuality = Math.min(5, Math.max(0, Number(quality)));
+
     // Calculate new review parameters
     const review = calculateNextReview(
-      quality,
+      clampedQuality,
       card.repetitions,
       card.easeFactor,
       card.interval
@@ -220,6 +223,15 @@ export async function DELETE(req: Request) {
 
     if (!cardId) {
       return NextResponse.json({ error: 'Missing cardId' }, { status: 400 });
+    }
+
+    // 所有权验证：只能删除自己的记忆卡
+    const card = await prisma.memoryCard.findUnique({
+      where: { id: cardId },
+      select: { userId: true }
+    });
+    if (!card || card.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     await prisma.memoryCard.delete({

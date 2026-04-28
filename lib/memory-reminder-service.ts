@@ -88,29 +88,43 @@ export class MemoryReminderService {
       errors: 0,
     }
 
-    // 获取所有启用了通知的用户
-    const users = await prisma.user.findMany({
-      where: {
-        // 可以添加更多过滤条件
-      },
-      select: {
-        id: true,
-      },
-    })
+    // 获取所有启用了通知的用户 - 分页批处理，避免一次性加载所有用户
+    const batchSize = 100;
+    let skip = 0;
+    let hasMore = true;
 
-    for (const user of users) {
-      try {
-        result.processed++
+    while (hasMore) {
+      const users = await prisma.user.findMany({
+        where: {},
+        select: { id: true },
+        take: batchSize,
+        skip,
+      });
 
-        const dueCards = await checkDueMemoryCards(user.id)
+      if (users.length === 0) {
+        hasMore = false;
+        break;
+      }
 
-        if (dueCards.length > 0) {
-          await createMemoryReminder(user.id, dueCards.length)
-          result.notified++
+      for (const user of users) {
+        try {
+          result.processed++;
+
+          const dueCards = await checkDueMemoryCards(user.id);
+
+          if (dueCards.length > 0) {
+            await createMemoryReminder(user.id, dueCards.length);
+            result.notified++;
+          }
+        } catch (error) {
+          console.error(`[Memory Reminder] Error processing user ${user.id}:`, error);
+          result.errors++;
         }
-      } catch (error) {
-        console.error(`[Memory Reminder] Error processing user ${user.id}:`, error)
-        result.errors++
+      }
+
+      skip += batchSize;
+      if (users.length < batchSize) {
+        hasMore = false;
       }
     }
 

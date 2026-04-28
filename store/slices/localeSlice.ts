@@ -9,25 +9,20 @@ const DEFAULT_VERSION: Record<Locale, BibleVersion> = {
   en: 'KJV',
 };
 
-function detectLocale(): Locale {
-  if (typeof window === 'undefined') return 'zh';
-  const saved = localStorage.getItem('locale');
-  if (saved === 'zh' || saved === 'en') return saved as Locale;
-  const browserLang = navigator.language?.toLowerCase() || '';
-  if (browserLang.startsWith('zh')) return 'zh';
-  return 'en';
+// [P1-10修复] SSR 水合安全：初始值始终使用默认值，避免 SSR/客户端不一致
+// 客户端通过 Zustand persist 的 rehydration 机制异步覆盖为 localStorage 中的值
+// 这样确保首次渲染 SSR 和客户端输出完全一致，消除水合闪烁
+function getDefaultLocale(): Locale {
+  return 'zh';
 }
 
-function detectBibleVersion(locale: Locale): BibleVersion {
-  if (typeof window === 'undefined') return DEFAULT_VERSION[locale];
-  const saved = localStorage.getItem('bibleVersion');
-  if (saved === 'CUV' || saved === 'KJV') return saved as BibleVersion;
-  return DEFAULT_VERSION[locale];
+function getDefaultBibleVersion(): BibleVersion {
+  return 'CUV';
 }
 
 export const createLocaleSlice: StateCreator<StoreState, [], [], LocaleSlice> = (set, get) => ({
-  locale: detectLocale(),
-  bibleVersion: detectBibleVersion(detectLocale()),
+  locale: getDefaultLocale(),
+  bibleVersion: getDefaultBibleVersion(),
   setLocale: (locale) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('locale', locale);

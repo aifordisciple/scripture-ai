@@ -1,0 +1,21 @@
+export const mindmap = {
+  mindmap: {
+    layoutLogical: '逻辑结构图',
+    layoutMindMap: '思维导图',
+    layoutOrganization: '组织结构图',
+    layoutCatalog: '目录组织图',
+    layoutTimeline: '时间轴',
+    layoutDefault: '布局',
+    zoomOut: '缩小',
+    zoomIn: '放大',
+    resetView: '重置视图',
+    exportImage: '导出图片',
+    exportMD: '导出MD',
+    exportMarkdown: '导出Markdown',
+    moreActions: '更多操作',
+    close: '关闭',
+    exporting: '正在导出...',
+    exportFailed: '导出失败，请重试',
+    defaultTitle: '思维导图',
+  },
+} as const

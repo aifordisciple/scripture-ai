@@ -29,12 +29,13 @@ export async function POST(req: Request) {
     if (!user) return new NextResponse("User not found", { status: 404 });
 
     const safeSettings = {
-        fontSize: Number(data.fontSize) || 18,
-        lineHeight: Number(data.lineHeight) || 1.8,
+        // [P2-7修复] 添加边界检查，防止极端值
+        fontSize: Math.min(40, Math.max(10, Number(data.fontSize) || 18)),
+        lineHeight: Math.min(3.0, Math.max(1.0, Number(data.lineHeight) || 1.8)),
         isDarkMode: Boolean(data.isDarkMode),
         showEnglish: Boolean(data.showEnglish),
         lastBook: data.lastBook || null,
-        lastChapter: data.lastChapter ? Number(data.lastChapter) : null,
+        lastChapter: data.lastChapter ? Math.max(1, Number(data.lastChapter)) : null,
         // API 配置
         apiProvider: data.apiProvider || 'openai',
         apiBaseUrl: data.apiBaseUrl || null,

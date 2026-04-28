@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface Theme {
   id: string;
@@ -40,24 +41,25 @@ interface ThemeConnection {
   strength: number;
 }
 
-const CATEGORY_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  THEOLOGICAL: { label: "神学", color: "text-blue-600", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
-  ETHICAL: { label: "伦理", color: "text-green-600", bgColor: "bg-green-100 dark:bg-green-900/30" },
-  HISTORICAL: { label: "历史", color: "text-amber-600", bgColor: "bg-amber-100 dark:bg-amber-900/30" },
-  PROPHETIC: { label: "预言", color: "text-purple-600", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
+const CATEGORY_CONFIG: Record<string, { labelKey: string; color: string; bgColor: string }> = {
+  THEOLOGICAL: { labelKey: "bible.categoryTheological", color: "text-blue-600", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
+  ETHICAL: { labelKey: "bible.categoryEthical", color: "text-green-600", bgColor: "bg-green-100 dark:bg-green-900/30" },
+  HISTORICAL: { labelKey: "bible.categoryHistorical", color: "text-amber-600", bgColor: "bg-amber-100 dark:bg-amber-900/30" },
+  PROPHETIC: { labelKey: "bible.categoryProphetic", color: "text-purple-600", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
 };
 
-const CONNECTION_TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  PARENT: { label: "父主题", color: "text-blue-500" },
-  CHILD: { label: "子主题", color: "text-green-500" },
-  RELATED: { label: "相关", color: "text-amber-500" },
-  CONTRAST: { label: "对比", color: "text-red-500" },
-  FULFILLS: { label: "应验", color: "text-purple-500" },
+const CONNECTION_TYPE_CONFIG: Record<string, { labelKey: string; color: string }> = {
+  PARENT: { labelKey: "bible.connParent", color: "text-blue-500" },
+  CHILD: { labelKey: "bible.connChild", color: "text-green-500" },
+  RELATED: { labelKey: "bible.connRelated", color: "text-amber-500" },
+  CONTRAST: { labelKey: "bible.connContrast", color: "text-red-500" },
+  FULFILLS: { labelKey: "bible.connFulfills", color: "text-purple-500" },
 };
 
 export function ThemeGraphTab() {
   const router = useRouter();
   const { tabs, addTab, setActiveTab } = useBibleStore();
+  const { t } = useTranslation();
 
   const [themes, setThemes] = useState<Theme[]>([]);
   const [connections, setConnections] = useState<ThemeConnection[]>([]);
@@ -183,7 +185,7 @@ export function ThemeGraphTab() {
                 config.color
               )}
             >
-              {config.label}
+              {t(config.labelKey)}
             </span>
             {theme.connectionCount && theme.connectionCount > 0 && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -208,7 +210,7 @@ export function ThemeGraphTab() {
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <BookOpen className="w-3 h-3" />
-            {theme.verseCount} 节
+            {t('bible.versesUnit', { count: theme.verseCount })}
           </span>
         </div>
 
@@ -222,7 +224,7 @@ export function ThemeGraphTab() {
             {/* 关联主题 */}
             {themeConnections.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">关联主题</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2">{t('bible.relatedThemes')}</p>
                 <div className="flex flex-wrap gap-2">
                   {themeConnections.slice(0, 5).map((conn) => {
                     const connectedTheme = getConnectedTheme(conn, theme.id);
@@ -238,7 +240,7 @@ export function ThemeGraphTab() {
                         )}
                       >
                         {connectedTheme.nameZh}
-                        <span className="text-muted-foreground ml-1">({connConfig.label})</span>
+                        <span className="text-muted-foreground ml-1">({t(connConfig.labelKey)})</span>
                       </span>
                     );
                   })}
@@ -249,7 +251,7 @@ export function ThemeGraphTab() {
             {/* 关键经文 */}
             {theme.keyVerses && theme.keyVerses.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">关键经文</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2">{t('bible.keyVerses')}</p>
                 <div className="flex flex-wrap gap-1">
                   {theme.keyVerses.slice(0, 5).map((verse, idx) => (
                     <button
@@ -280,9 +282,9 @@ export function ThemeGraphTab() {
           <Network className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">主题图谱</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('bible.themeGraph')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            探索圣经主题之间的关联
+            {t('bible.exploreThemeHint')}
           </p>
         </div>
       </div>
@@ -292,7 +294,7 @@ export function ThemeGraphTab() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="搜索主题..."
+            placeholder={t('bible.searchTheme')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-10"
@@ -315,7 +317,7 @@ export function ThemeGraphTab() {
               size="sm"
               onClick={() => setSelectedCategory(null)}
             >
-              全部
+              {t('bible.allCategories')}
             </Button>
             {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
               <Button
@@ -324,7 +326,7 @@ export function ThemeGraphTab() {
                 size="sm"
                 onClick={() => setSelectedCategory(key)}
               >
-                {config.label}
+                {t(config.labelKey)}
               </Button>
             ))}
           </div>
@@ -335,15 +337,15 @@ export function ThemeGraphTab() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 opacity-50">
           <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
-          <p className="text-sm">加载中...</p>
+          <p className="text-sm">{t('bible.loadingThemes')}</p>
         </div>
       ) : filteredThemes.length === 0 ? (
         <div className="text-center py-20 opacity-40 select-none">
           <Network className="w-16 h-16 mx-auto mb-4 stroke-[1.5]" />
           <p className="text-lg">
-            {searchQuery || selectedCategory ? "没有找到匹配的主题" : "暂无主题数据"}
+            {searchQuery || selectedCategory ? t('bible.noMatchTheme') : t('bible.noThemeData')}
           </p>
-          <p className="text-sm mt-2">主题数据正在完善中</p>
+          <p className="text-sm mt-2">{t('bible.themeDataHint')}</p>
         </div>
       ) : (
         <div className="space-y-8">
@@ -358,7 +360,7 @@ export function ThemeGraphTab() {
                   )}
                 >
                   <span className={cn("w-1 h-5 rounded-full", config.bgColor)}></span>
-                  {config.label}主题
+                  {t('bible.themeCategoryLabel', { category: t(config.labelKey) })}
                   <span className="text-sm font-normal text-muted-foreground">
                     ({categoryThemes.length})
                   </span>

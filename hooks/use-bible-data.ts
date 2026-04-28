@@ -1,5 +1,5 @@
 // hooks/use-bible-data.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { BIBLE_BOOKS } from '@/lib/constants';
 
@@ -20,17 +20,36 @@ export function useBibleData(book: string, chapter: string) {
 
   const { clearSelection, setChapterSpeechText, bibleVersion } = useBibleStore();
 
-  const fetchData = async () => {
+  // 竞态条件防护：请求序号 + AbortController
+  const fetchIdRef = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const fetchData = useCallback(async () => {
+    // 递增请求序号，用于识别最新请求
+    const currentFetchId = ++fetchIdRef.current;
+
+    // 取消之前进行中的请求
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setLoading(true);
     setError(null);
     clearSelection();
     setChapterSpeechText("");
 
     try {
-      const versesRes = await fetch(`/api/bible?book=${book}&chapter=${chapter}`);
+      const versesRes = await fetch(`/api/bible?book=${book}&chapter=${chapter}`, {
+        signal: controller.signal,
+      });
       if (!versesRes.ok) throw new Error("API request failed");
 
       const versesJson = await versesRes.json();
+
+      // 只接受最新请求的结果，丢弃过时响应
+      if (currentFetchId !== fetchIdRef.current) return;
 
       if (versesJson.data && versesJson.data.length > 0) {
           setVerses(versesJson.data);
@@ -43,19 +62,33 @@ export function useBibleData(book: string, chapter: string) {
           console.warn(`No verses found for ${book} ${chapter}, Database might be empty.`);
           setVerses([]);
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      // AbortError 是正常的取消行为，不作为错误处理
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      // 只处理最新请求的错误
+      if (currentFetchId !== fetchIdRef.current) return;
+
       console.error("Failed to fetch bible data:", err);
       const locale = useBibleStore.getState().locale;
       setError(locale === 'en' ? 'Failed to load chapter. Please check your network connection.' : '加载章节失败，请检查网络连接');
       setVerses([]);
     } finally {
-      setLoading(false);
+      if (currentFetchId === fetchIdRef.current) {
+        setLoading(false);
+      }
     }
-  };
+  }, [book, chapter, clearSelection, setChapterSpeechText, bibleVersion]);
 
   useEffect(() => {
     fetchData();
-  }, [book, chapter, clearSelection, setChapterSpeechText]);
+
+    return () => {
+      // cleanup: 取消进行中的请求
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [fetchData]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

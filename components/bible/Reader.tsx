@@ -215,13 +215,15 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
         case 's':
         case 'S':
-          e.preventDefault();
-          // 章节摘要
-          const primaryVersesForSummary = verses.filter(v => v.version === primaryVersion);
-          if (primaryVersesForSummary.length > 0) {
-            const fullContext = primaryVersesForSummary.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
-            state.enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), t('reader.fullChapter', { book: getBookDisplayName(primaryVersesForSummary[0].bookId, locale), chapter: primaryVersesForSummary[0].chapter }), fullContext, { bookName: getBookDisplayName(primaryVersesForSummary[0].bookId, locale), chapter: primaryVersesForSummary[0].chapter, verse: 0 });
-            state.setAiOpen(true);
+          // 章节摘要：需要选中经文才触发，防止误触
+          if (hasSelection) {
+            e.preventDefault();
+            const primaryVersesForSummary = verses.filter(v => v.version === primaryVersion);
+            if (primaryVersesForSummary.length > 0) {
+              const fullContext = primaryVersesForSummary.map(v => `[${v.chapter}:${v.verse}] ${v.content}`).join('\n');
+              state.enqueueAI(resolveDualLang(CHAPTER_SUMMARY_PROMPT, locale), t('reader.fullChapter', { book: getBookDisplayName(primaryVersesForSummary[0].bookId, locale), chapter: primaryVersesForSummary[0].chapter }), fullContext, { bookName: getBookDisplayName(primaryVersesForSummary[0].bookId, locale), chapter: primaryVersesForSummary[0].chapter, verse: 0 });
+              state.setAiOpen(true);
+            }
           }
           break;
 

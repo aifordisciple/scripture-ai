@@ -8,6 +8,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Download, Activity, Trash2, CheckSquare, Square, BrainCircuit, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * 仪表盘控制面板 (DashboardTab)
@@ -19,6 +20,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
  */
 export function DashboardTab() {
   const router = useRouter();
+  const { t } = useTranslation();
   const {
     highlights, notes, interactions,
     updateActiveTab, addTab, tabs, setActiveTab,
@@ -54,10 +56,10 @@ export function DashboardTab() {
    */
   const handleExportTSV = () => {
     if (chartData.length === 0) {
-      alert("当前时间范围内没有数据可导出！");
+      alert(t('bible.noDataToExport'));
       return;
     }
-    const headers = ['日期', 'AI互动频次', '深度标记次数(高亮/笔记)'];
+    const headers = [t('bible.tsvHeaderDate'), t('bible.tsvHeaderAiChats'), t('bible.tsvHeaderInteractions')];
     let tsvContent = headers.join('\t') + '\n';
     
     chartData.forEach(row => {
@@ -126,29 +128,29 @@ export function DashboardTab() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl w-full max-w-sm border dark:border-slate-800">
             <h3 className="text-xl font-bold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2">
-              <Trash2 className="w-5 h-5"/> 选择要清空的数据
+              <Trash2 className="w-5 h-5"/> {t('bible.selectDataToClear')}
             </h3>
             <div className="space-y-3 mb-8">
               <button onClick={() => toggleOpt('highlights')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                  {clearOpts.highlights ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
-                 <span className="flex-1 text-sm font-medium">清空所有高亮 ({highlights.length})</span>
+                 <span className="flex-1 text-sm font-medium">{t('bible.clearAllHighlights', { count: highlights.length })}</span>
               </button>
               <button onClick={() => toggleOpt('notes')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                  {clearOpts.notes ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
-                 <span className="flex-1 text-sm font-medium">清空所有笔记 ({notes.length})</span>
+                 <span className="flex-1 text-sm font-medium">{t('bible.clearAllNotes', { count: notes.length })}</span>
               </button>
               <button onClick={() => toggleOpt('interactions')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                  {clearOpts.interactions ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
                  <span className="flex-1 text-sm font-medium text-slate-600 dark:text-slate-300">
-                    清空基础阅读足迹 <br/>
-                    <span className="text-[10px] text-slate-400 font-normal">热力图将重置，不影响高亮和笔记</span>
+                    {t('bible.clearReadingFootprint')} <br/>
+                    <span className="text-[10px] text-slate-400 font-normal">{t('bible.heatmapResetNote')}</span>
                  </span>
               </button>
             </div>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowClearMenu(false)} className="rounded-full">取消</Button>
+              <Button variant="outline" onClick={() => setShowClearMenu(false)} className="rounded-full">{t('common.cancel')}</Button>
               <Button variant="destructive" disabled={!clearOpts.highlights && !clearOpts.notes && !clearOpts.interactions} onClick={executeClear} className="rounded-full font-bold">
-                确认清空
+                {t('bible.confirmClear')}
               </Button>
             </div>
           </div>
@@ -159,9 +161,9 @@ export function DashboardTab() {
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 mb-8 mt-4 md:mt-8 w-full">
           <div className="w-full lg:w-auto">
             <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2 mb-2">
-              <Activity className="w-6 h-6 text-indigo-500" /> 数据洞察看板
+              <Activity className="w-6 h-6 text-indigo-500" /> {t('bible.dashboardTitle')}
             </h1>
-            <p className="text-sm text-slate-500">动态追踪你的阅读时长、研经足迹与 AI 互动频次。</p>
+            <p className="text-sm text-slate-500">{t('bible.dashboardSubtitle')}</p>
           </div>
           
           {/* 操作盘：手机端分两行，桌面端在一行 */}
@@ -169,9 +171,9 @@ export function DashboardTab() {
             {/* 时间跨度控制器 */}
             <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-full sm:w-auto justify-between">
               {[
-                { id: '7d', label: '近 7 天' },
-                { id: '30d', label: '近 30 天' },
-                { id: '1y', label: '近 1 年' }
+                { id: '7d', label: t('bible.last7days') },
+                { id: '30d', label: t('bible.last30days') },
+                { id: '1y', label: t('bible.last1year') }
               ].map(tab => (
                 <button 
                   key={tab.id}
@@ -186,10 +188,10 @@ export function DashboardTab() {
             {/* 功能按钮：强制并列 */}
             <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
               <Button variant="outline" size="sm" className="flex-1 sm:flex-none gap-2 rounded-full border-indigo-200 text-indigo-700 hover:bg-indigo-50" onClick={handleExportTSV}>
-                <Download className="w-4 h-4 shrink-0" /> 导出 TSV
+                <Download className="w-4 h-4 shrink-0" /> {t('bible.exportTSV')}
               </Button>
               <Button variant="ghost" size="sm" className="flex-1 sm:flex-none gap-2 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => setShowClearMenu(true)}>
-                <Trash2 className="w-4 h-4 shrink-0" /> 清空数据
+                <Trash2 className="w-4 h-4 shrink-0" /> {t('bible.clearData')}
               </Button>
             </div>
           </div>
@@ -198,20 +200,20 @@ export function DashboardTab() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
          <div className="bg-white dark:bg-slate-900 border dark:border-slate-800 p-6 rounded-2xl flex items-center gap-5 shadow-sm">
              <div className="p-4 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl"><BrainCircuit className="w-8 h-8"/></div>
-             <div><div className="text-3xl font-black">{totalAiChats}</div><div className="text-sm text-slate-500 font-medium">AI 深度探索次数</div></div>
+             <div><div className="text-3xl font-black">{totalAiChats}</div><div className="text-sm text-slate-500 font-medium">{t('bible.aiExplorationCount')}</div></div>
          </div>
          <div className="bg-white dark:bg-slate-900 border dark:border-slate-800 p-6 rounded-2xl flex items-center gap-5 shadow-sm">
              <div className="p-4 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl"><Activity className="w-8 h-8"/></div>
-             <div><div className="text-3xl font-black">{totalHighlights}</div><div className="text-sm text-slate-500 font-medium">经文研读互动数</div></div>
+             <div><div className="text-3xl font-black">{totalHighlights}</div><div className="text-sm text-slate-500 font-medium">{t('bible.studyInteractionCount')}</div></div>
          </div>
       </div>
 
       {/* 动态趋势图表 */}
       <div className="bg-white dark:bg-slate-900/50 rounded-2xl shadow-sm border dark:border-slate-800 p-6 mb-8">
-        <h3 className="text-base font-bold mb-6 flex items-center gap-2">核心交互趋势</h3>
+        <h3 className="text-base font-bold mb-6 flex items-center gap-2">{t('bible.coreTrend')}</h3>
         <div className="h-72 w-full">
             {loading ? (
-                <div className="h-full w-full flex items-center justify-center text-slate-400">正在努力加载统计数据...</div>
+                <div className="h-full w-full flex items-center justify-center text-slate-400">{t('bible.loadingStats')}</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -229,8 +231,8 @@ export function DashboardTab() {
                   <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} dy={10} minTickGap={30} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} />
                   <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Area type="monotone" dataKey="aiChats" name="AI 互动数" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorAi)" />
-                  <Area type="monotone" dataKey="interactions" name="研读记录" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorInteractions)" />
+                  <Area type="monotone" dataKey="aiChats" name={t('bible.aiInteractionLabel')} stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorAi)" />
+                  <Area type="monotone" dataKey="interactions" name={t('bible.studyRecords')} stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorInteractions)" />
                 </AreaChart>
               </ResponsiveContainer>
             )}
@@ -240,7 +242,7 @@ export function DashboardTab() {
       {/* 原本静态热力图保留在下方即可，作为"全景概览"使用 */}
       <div className="bg-white dark:bg-slate-900/50 rounded-2xl shadow-sm border dark:border-slate-800 p-4 md:p-6 overflow-x-auto">
          <h3 className="text-base font-bold mb-4 flex items-center gap-2">
-           <Clock className="w-4 h-4" /> 全年阅读全景
+           <Clock className="w-4 h-4" /> {t('bible.yearlyOverview')}
          </h3>
          <BibleHeatmap data={heatmapData} onCellClick={handleCellClick} colorTheme="indigo" />
       </div>

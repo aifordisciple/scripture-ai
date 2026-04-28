@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Sparkles, TextSearch } from "lucide-react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface SearchDialogProps {
   open: boolean;
@@ -17,6 +18,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<'exact' | 'ai'>('exact');
   const { addTab } = useBibleStore();
+  const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSearch = () => {
@@ -45,12 +47,11 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
             <Search className="w-5 h-5" />
-            经文搜索
+            {t('search.dialogTitle')}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2">
-          {/* 模式选择 */}
           <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-lg gap-1">
             <button
               onClick={() => setMode('exact')}
@@ -62,7 +63,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               )}
             >
               <TextSearch className="w-4 h-4" />
-              精确
+              {t('search.exactLabel')}
             </button>
             <button
               onClick={() => setMode('ai')}
@@ -74,7 +75,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               )}
             >
               <Sparkles className="w-4 h-4" />
-              AI 推荐
+              {t('search.aiLabel')}
             </button>
           </div>
 
@@ -82,8 +83,8 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             <textarea
               ref={textareaRef}
               placeholder={
-                mode === 'exact' ? "输入词句，如：起初神创造..." :
-                "输入处境/意图，如：关于信心与软弱\n最近感到迷茫，需要方向和力量"
+                mode === 'exact' ? t('search.exactPlaceholder') :
+                t('search.aiPlaceholder')
               }
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -93,13 +94,13 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               autoFocus
             />
             <Button onClick={handleSearch} className={cn("w-full", mode === 'ai' && "bg-blue-600 hover:bg-blue-700")}>
-              搜索
+              {t('search.searchButton')}
             </Button>
           </div>
 
           <div className="text-xs text-slate-400 min-h-[16px]">
-            {mode === 'exact' && "提示：查找包含特定关键词的经文。速度最快。"}
-            {mode === 'ai' && "提示：AI 将深度理解您的处境并推荐相关经文。支持多行输入。"}
+            {mode === 'exact' && t('search.exactHint')}
+            {mode === 'ai' && t('search.aiHint')}
           </div>
         </div>
       </DialogContent>

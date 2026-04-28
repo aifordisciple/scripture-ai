@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useTranslation } from "@/lib/i18n";
 
 interface PopulatedInsight {
   id: string;
@@ -31,6 +32,7 @@ export function InsightsTab() {
   const router = useRouter();
   const { data: session } = useSession();
   const { savedInsights, setSavedInsights, deleteSavedInsight, updateSavedInsight, tabs, addTab, setActiveTab } = useBibleStore();
+  const { t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -108,7 +110,7 @@ export function InsightsTab() {
   // 删除收藏
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!confirm("确定要删除这条收藏吗？")) return;
+    if (!confirm(t('bible.confirmDeleteInsight'))) return;
     deleteSavedInsight(id);
     await fetch(`/api/insights?id=${id}`, { method: 'DELETE' });
   };
@@ -162,9 +164,9 @@ export function InsightsTab() {
           <Bookmark className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">我的收藏</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('bible.myCollection')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            共收藏了 {savedInsights.length} 条 AI 解读
+            {t('bible.collectionCount', { count: savedInsights.length })}
           </p>
         </div>
       </div>
@@ -173,7 +175,7 @@ export function InsightsTab() {
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="搜索收藏内容..."
+          placeholder={t('bible.searchCollection')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10 pr-10"
@@ -192,13 +194,13 @@ export function InsightsTab() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 opacity-50">
           <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
-          <p className="text-sm">正在加载收藏...</p>
+          <p className="text-sm">{t('bible.loadingCollection')}</p>
         </div>
       ) : filteredInsights.length === 0 ? (
         <div className="text-center py-20 opacity-40 select-none">
           <Bookmark className="w-16 h-16 mx-auto mb-4 stroke-[1.5]" />
-          <p className="text-lg">{searchQuery ? '没有找到匹配的收藏' : '您还没有收藏任何 AI 解读'}</p>
-          <p className="text-sm mt-2">在 AI 解读中点击收藏按钮即可添加</p>
+          <p className="text-lg">{searchQuery ? t('bible.noMatchCollection') : t('bible.noCollection')}</p>
+          <p className="text-sm mt-2">{t('bible.addCollectionHint')}</p>
         </div>
       ) : (
         <div className="space-y-10">
@@ -230,7 +232,7 @@ export function InsightsTab() {
                           <button
                             onClick={(e) => { e.stopPropagation(); handleJump(item.bookId, item.chapter); }}
                             className="text-muted-foreground hover:text-primary transition-colors"
-                            title="跳转到经文"
+                            title={t('bible.jumpToVerse')}
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                           </button>
@@ -244,7 +246,7 @@ export function InsightsTab() {
                               size="icon"
                               className="h-7 w-7 text-green-500 hover:text-green-600 hover:bg-green-100 dark:hover:bg-green-900/20 rounded-full"
                               onClick={(e) => { e.stopPropagation(); handleEditSave(item.id); }}
-                              title="保存"
+                              title={t('bible.saveBtn')}
                             >
                               <Check className="w-4 h-4" />
                             </Button>
@@ -253,7 +255,7 @@ export function InsightsTab() {
                               size="icon"
                               className="h-7 w-7 text-muted-foreground hover:text-foreground rounded-full"
                               onClick={(e) => { e.stopPropagation(); handleEditCancel(); }}
-                              title="取消"
+                              title={t('bible.cancelBtn')}
                             >
                               <X className="w-4 h-4" />
                             </Button>
@@ -265,7 +267,7 @@ export function InsightsTab() {
                               size="icon"
                               className="h-7 w-7 text-muted-foreground hover:text-primary rounded-full"
                               onClick={(e) => handleEdit(e, item)}
-                              title="编辑"
+                              title={t('bible.editBtn')}
                             >
                               <Edit3 className="w-3.5 h-3.5" />
                             </Button>
@@ -274,7 +276,7 @@ export function InsightsTab() {
                               size="icon"
                               className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-full"
                               onClick={(e) => handleDelete(e, item.id)}
-                              title="删除"
+                              title={t('bible.deleteBtn')}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
@@ -291,19 +293,19 @@ export function InsightsTab() {
                     {editingId === item.id ? (
                       <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                         <Input
-                          placeholder="标题（可选）"
+                          placeholder={t('bible.titleOptional')}
                           value={editTitle}
                           onChange={(e) => setEditTitle(e.target.value)}
                           className="text-sm"
                         />
                         <textarea
-                          placeholder="内容"
+                          placeholder={t('bible.contentLabel')}
                           value={editContent}
                           onChange={(e) => setEditContent(e.target.value)}
                           className="w-full min-h-[120px] p-3 text-sm border rounded-lg bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
                         />
                         <Input
-                          placeholder="标签（用逗号分隔）"
+                          placeholder={t('bible.tagsPlaceholder')}
                           value={editTags}
                           onChange={(e) => setEditTags(e.target.value)}
                           className="text-sm"

@@ -279,13 +279,12 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     // 如果径向菜单打开，不做处理
     if (isRadialMenuOpen) return;
 
-    // [修改] 只有在解读时（正在生成或有待查看的解读）点击才显示候选解读窗口
-    // 正在生成解读 或 有解读待查看时，弹出队列面板
-    if (isAiGenerating || isAiFinishedButUnseen) {
+    // [修复] 有队列内容时（正在生成、有待查看解读、或有排队项目），点击弹出队列面板
+    if (isAiGenerating || isAiFinishedButUnseen || hasQueueContent) {
       setIsQueuePanelOpen(!isQueuePanelOpen);
       controls.start({ scale: [1, 0.9, 1], transition: { duration: 0.2 } });
     }
-    // [修改] 普通点击（无解读进行中）不做操作，避免误触
+    // 普通点击（无解读进行中且无队列内容）不做操作，避免误触
   };
 
   const handleDrag = (event: any, info: PanInfo) => {
@@ -441,7 +440,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             )}
 
             {/* 当前处理中 */}
-            {currentAiRequest && (
+            {currentAiRequest && currentAiRequest.status === 'processing' && (
               <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">

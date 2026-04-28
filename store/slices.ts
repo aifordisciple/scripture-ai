@@ -4,7 +4,7 @@ import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlic
 import { createLocaleSlice } from './slices/localeSlice';
 export { createLocaleSlice };
 import { BIBLE_PLANS } from '@/lib/plans';
-import { THEOLOGICAL_PROMPTS } from '@/lib/constants';
+import { BIBLE_BOOKS, THEOLOGICAL_PROMPTS } from '@/lib/constants';
 
 export const createUISlice: StateCreator<StoreState, [], [], UISlice> = (set, get) => ({
   isAuthOpen: false,
@@ -117,7 +117,8 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
   tabs: [{ id: 'tab-1', type: 'read', book: 'Gen', chapter: '1' }],
   activeTabId: 'tab-1',
   addTab: ({ type, book = 'Gen', chapter = '1', query, searchMode, crossRefSource }) => set((state) => {
-      const newId = `tab-${Date.now()}`;
+      // [P2-13修复] 添加随机后缀防止 Date.now() 碰撞
+      const newId = `tab-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
       const newTab: Tab = { id: newId, type };
       if (type === 'read') { newTab.book = book; newTab.chapter = chapter; }
       else if (type === 'search') { newTab.query = query; newTab.searchMode = searchMode; }
@@ -354,7 +355,7 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
   // [新增] 引导状态
   onboardingStep: null,
   setOnboardingStep: (step) => set({ onboardingStep: step }),
-  hasCompletedOnboarding: typeof window !== 'undefined' ? localStorage.getItem('magicBall_onboarding_complete') === 'true' : false,
+  hasCompletedOnboarding: false,
   setHasCompletedOnboarding: (completed) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('magicBall_onboarding_complete', String(completed));
@@ -362,14 +363,8 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
     set({ hasCompletedOnboarding: completed });
   },
 
-  // [新增] Magic Ball 位置 - 从 localStorage 初始化
-  magicBallPosition: typeof window !== 'undefined' ? (() => {
-    try {
-      const saved = localStorage.getItem('magicBall_position');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return { bottom: 150, right: 30 };
-  })() : { bottom: 150, right: 30 },
+  // [新增] Magic Ball 位置 - SSR 安全默认值，客户端通过 useEffect 初始化
+  magicBallPosition: { bottom: 150, right: 30 },
   setMagicBallPosition: (position) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('magicBall_position', JSON.stringify(position));
@@ -377,18 +372,8 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
     set({ magicBallPosition: position });
   },
 
-  // [新增] AI 字体大小
-  aiFontSize: (() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('ai_fontSize');
-        if (saved && ['small', 'medium', 'large', 'xlarge'].includes(saved)) {
-          return saved as 'small' | 'medium' | 'large' | 'xlarge';
-        }
-      } catch (e) {}
-    }
-    return 'medium';
-  })() as 'small' | 'medium' | 'large' | 'xlarge',
+  // [新增] AI 字体大小 - SSR 安全默认值
+  aiFontSize: 'medium' as 'small' | 'medium' | 'large' | 'xlarge',
   setAiFontSize: (size) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('ai_fontSize', size);
@@ -798,9 +783,18 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
         .filter(h => h.bookId === bookId)
         .map(h => h.chapter);
       const maxChapter = Math.max(...chaptersRead);
-      return { bookId, chapter: maxChapter + 1 };
+      // [P2-12修复] 检查推荐章节不超出该书卷总章数
+      const bookInfo = BIBLE_BOOKS.find(b => b.id === bookId);
+      const maxAllowed = bookInfo ? bookInfo.chapters : 150;
+      const recommendedChapter = Math.min(maxChapter + 1, maxAllowed);
+      if (recommendedChapter <= maxChapter) return null; // 已读完该书卷
+      return { bookId, chapter: recommendedChapter };
     }
 
+    // [P2-12修复] 检查 chapter + 1 不超出该书卷总章数
+    const bookInfo = BIBLE_BOOKS.find(b => b.id === bookId);
+    const maxAllowed = bookInfo ? bookInfo.chapters : 150;
+    if (chapter + 1 > maxAllowed) return null; // 已读完该书卷
     return { bookId, chapter: chapter + 1 };
   },
 });

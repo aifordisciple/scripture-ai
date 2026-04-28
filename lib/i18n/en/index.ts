@@ -10,6 +10,12 @@ import { atlas } from './atlas'
 import { highlights } from './highlights'
 import { shareCard } from './shareCard'
 import { onboarding } from './onboarding'
+import { dm } from './dm'
+import { mindmap } from './mindmap'
+import { adminFeedback } from './adminFeedback'
+import { shortcuts } from './shortcuts'
+import { feedback } from './feedback'
+import { bible } from './bible'
 import type { Translations } from '../zh'
 
 export const en: Translations = {
@@ -25,4 +31,10 @@ export const en: Translations = {
   ...highlights,
   ...shareCard,
   ...onboarding,
+  ...dm,
+  ...mindmap,
+  ...adminFeedback,
+  ...shortcuts,
+  ...feedback,
+  ...bible,
 }

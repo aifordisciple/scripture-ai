@@ -157,17 +157,22 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
   const vh = typeof window !== 'undefined' ? window.innerHeight : 768;
   const clampedLeft = Math.max(MENU_WIDTH / 2, Math.min(vw - MENU_WIDTH / 2, position.left));
-  const clampedTop = showAbove
-    ? Math.max(MENU_HEIGHT, position.top)
-    : Math.min(vh - MENU_HEIGHT, position.top);
+
+  // [P2-14修复] showAbove 时如果上方空间不足，自动切换到下方定位
+  // 菜单使用 translate(-50%, -100%)，菜单顶部 = top - MENU_HEIGHT
+  // 需要确保菜单顶部 >= 0 且箭头指示器与选区对齐
+  const effectiveShowAbove = showAbove && position.top >= MENU_HEIGHT + 12;
+  const clampedTop = effectiveShowAbove
+    ? position.top // 菜单底部对齐选区顶部，transform 会把菜单向上移
+    : Math.min(vh - MENU_HEIGHT, Math.max(0, position.top));
 
   // 根据位置决定 transform
-  const transformStyle = showAbove
+  const transformStyle = effectiveShowAbove
     ? "translate(-50%, -100%) translateY(-12px)"
     : "translate(-50%, 12px)";
 
   // 箭头位置
-  const arrowClass = showAbove
+  const arrowClass = effectiveShowAbove
     ? "absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white dark:border-t-slate-900 drop-shadow-sm"
     : "absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-white dark:border-b-slate-900 drop-shadow-sm";
 

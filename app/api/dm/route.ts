@@ -53,17 +53,20 @@ export async function GET(req: Request) {
 
       return NextResponse.json({ messages: messages.reverse() });
     } else {
-      // Get list of conversations
+      // Get list of conversations - 添加分页限制，避免加载所有消息
+      const messageLimit = 100;
       const sentMessages = await prisma.directMessage.findMany({
         where: { senderId: session.user.id },
         select: { receiverId: true, createdAt: true, content: true, read: true },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        take: messageLimit,
       });
 
       const receivedMessages = await prisma.directMessage.findMany({
         where: { receiverId: session.user.id },
         select: { senderId: true, createdAt: true, content: true, read: true },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        take: messageLimit,
       });
 
       // Build conversation list
@@ -73,6 +76,14 @@ export async function GET(req: Request) {
         lastMessageTime: Date;
         unreadCount: number;
       }>();
+
+      // [P1-8修复] 先统计每个发送者的未读消息数
+      const unreadCountMap = new Map<string, number>();
+      for (const msg of receivedMessages) {
+        if (!msg.read) {
+          unreadCountMap.set(msg.senderId, (unreadCountMap.get(msg.senderId) || 0) + 1);
+        }
+      }
 
       // Process sent messages
       for (const msg of sentMessages) {
@@ -95,14 +106,9 @@ export async function GET(req: Request) {
             userId: msg.senderId,
             lastMessage: msg.content,
             lastMessageTime: msg.createdAt,
-            unreadCount: existing?.unreadCount || 0
+            // 使用预先计算的未读计数，而非从0开始累加
+            unreadCount: unreadCountMap.get(msg.senderId) || 0
           });
-        }
-        if (!msg.read) {
-          const conv = conversationMap.get(msg.senderId);
-          if (conv) {
-            conv.unreadCount++;
-          }
         }
       }
 

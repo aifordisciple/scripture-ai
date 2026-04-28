@@ -1,165 +1,95 @@
 // lib/sse-manager.ts
-// Server-Sent Events Manager for real-time communication
+import { NextRequest } from 'next/server';
 
 interface SSEClient {
+  id: string;
   controller: ReadableStreamDefaultController;
-  encoder: TextEncoder;
   userId: string;
-  connectedAt: Date;
-}
-
-interface SSEMessage {
-  event: string;
-  data: any;
+  groups: string[]; // 用户所属群组
 }
 
 class SSEManager {
-  private clients: Map<string, SSEClient[]> = new Map();
-  private heartbeatInterval: NodeJS.Timeout | null = null;
+  private clients: Map<string, SSEClient> = new Map();
 
-  constructor() {
-    // Start heartbeat to clean up dead connections
-    this.heartbeatInterval = setInterval(() => {
-      this.sendHeartbeat();
-    }, 30000); // Every 30 seconds
+  addClient(id: string, controller: ReadableStreamDefaultController, userId: string, groups: string[] = []) {
+    this.clients.set(id, { id, controller, userId, groups });
   }
 
-  /**
-   * Add a new SSE client connection
-   */
-  addClient(userId: string, controller: ReadableStreamDefaultController): void {
-    const client: SSEClient = {
-      controller,
-      encoder: new TextEncoder(),
-      userId,
-      connectedAt: new Date()
-    };
-
-    if (!this.clients.has(userId)) {
-      this.clients.set(userId, []);
-    }
-
-    this.clients.get(userId)!.push(client);
-    console.log(`[SSE] Client connected: ${userId}. Total clients for user: ${this.clients.get(userId)!.length}`);
+  removeClient(id: string) {
+    this.clients.delete(id);
   }
 
-  /**
-   * Remove a client connection
-   */
-  removeClient(userId: string, controller: ReadableStreamDefaultController): void {
-    const userClients = this.clients.get(userId);
-    if (userClients) {
-      const index = userClients.findIndex(c => c.controller === controller);
-      if (index !== -1) {
-        userClients.splice(index, 1);
-        console.log(`[SSE] Client disconnected: ${userId}. Remaining clients: ${userClients.length}`);
-
-        if (userClients.length === 0) {
-          this.clients.delete(userId);
-        }
-      }
-    }
-  }
-
-  /**
-   * Send a message to a specific user
-   */
-  sendToUser(userId: string, event: string, data: any): boolean {
-    const userClients = this.clients.get(userId);
-    if (!userClients || userClients.length === 0) {
-      return false;
-    }
-
-    const message = this.formatMessage(event, data);
-    let sent = false;
-
-    for (const client of userClients) {
-      try {
-        client.controller.enqueue(client.encoder.encode(message));
-        sent = true;
-      } catch (error) {
-        console.error(`[SSE] Error sending to client: ${userId}`, error);
-        // Connection might be dead, remove it
-        this.removeClient(userId, client.controller);
-      }
-    }
-
-    return sent;
-  }
-
-  /**
-   * Broadcast a message to all connected clients
-   */
-  broadcast(event: string, data: any): void {
-    for (const [userId] of this.clients) {
-      this.sendToUser(userId, event, data);
-    }
-  }
-
-  /**
-   * Broadcast to all members of a church/group
-   */
-  async broadcastToGroup(churchId: string, event: string, data: any, excludeUserIds: string[] = []): Promise<void> {
-    // This would need to be called with the actual member IDs
-    // For now, we'll implement a simple version
-    for (const [userId] of this.clients) {
-      if (!excludeUserIds.includes(userId)) {
-        this.sendToUser(userId, event, { ...data, churchId });
-      }
-    }
-  }
-
-  /**
-   * Send heartbeat to keep connections alive
-   */
-  private sendHeartbeat(): void {
-    const heartbeat = this.formatMessage('heartbeat', { timestamp: Date.now() });
-
-    for (const [userId, userClients] of this.clients) {
-      for (const client of userClients) {
-        try {
-          client.controller.enqueue(client.encoder.encode(heartbeat));
-        } catch (error) {
-          // Connection is dead, remove it
-          this.removeClient(userId, client.controller);
-        }
-      }
-    }
-  }
-
-  /**
-   * Format message for SSE
-   */
-  private formatMessage(event: string, data: any): string {
-    return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-  }
-
-  /**
-   * Get the number of connected clients
-   */
-  getConnectedCount(): number {
-    let count = 0;
-    for (const clients of this.clients.values()) {
-      count += clients.length;
-    }
-    return count;
-  }
-
-  /**
-   * Get the number of unique users connected
-   */
-  getUserCount(): number {
+  getClientCount() {
     return this.clients.size;
   }
 
-  /**
-   * Check if a user is connected
-   */
-  isUserConnected(userId: string): boolean {
-    const userClients = this.clients.get(userId);
-    return userClients !== undefined && userClients.length > 0;
+  // [修复] 安全迭代：先收集再删除，避免遍历中 splice 修改数组
+  private cleanupClosedClients() {
+    const closedIds: string[] = [];
+    for (const [id, client] of this.clients) {
+      try {
+        client.controller.desiredSize; // 检查连接是否仍然活跃
+      } catch {
+        closedIds.push(id);
+      }
+    }
+    closedIds.forEach(id => this.clients.delete(id));
+  }
+
+  // [修复] 只发送给特定用户
+  sendToUser(userId: string, data: any) {
+    this.cleanupClosedClients();
+    const message = `data: ${JSON.stringify(data)}\n\n`;
+    for (const client of this.clients.values()) {
+      if (client.userId === userId) {
+        try {
+          client.controller.enqueue(new TextEncoder().encode(message));
+        } catch {
+          this.clients.delete(client.id);
+        }
+      }
+    }
+  }
+
+  // [修复] broadcastToGroup: 只广播给群组成员，而非所有用户
+  broadcastToGroup(groupId: string, data: any, excludeUserId?: string) {
+    this.cleanupClosedClients();
+    const message = `data: ${JSON.stringify(data)}\n\n`;
+    for (const client of this.clients.values()) {
+      // 检查用户是否属于该群组
+      if (!client.groups.includes(groupId)) continue;
+      // 排除发送者
+      if (excludeUserId && client.userId === excludeUserId) continue;
+      try {
+        client.controller.enqueue(new TextEncoder().encode(message));
+      } catch {
+        this.clients.delete(client.id);
+      }
+    }
+  }
+
+  // 广播给所有在线用户
+  broadcast(data: any, excludeUserId?: string) {
+    this.cleanupClosedClients();
+    const message = `data: ${JSON.stringify(data)}\n\n`;
+    for (const client of this.clients.values()) {
+      if (excludeUserId && client.userId === excludeUserId) continue;
+      try {
+        client.controller.enqueue(new TextEncoder().encode(message));
+      } catch {
+        this.clients.delete(client.id);
+      }
+    }
+  }
+
+  // 更新用户的群组列表
+  updateUserGroups(userId: string, groups: string[]) {
+    for (const client of this.clients.values()) {
+      if (client.userId === userId) {
+        client.groups = groups;
+      }
+    }
   }
 }
 
-// Singleton instance
 export const sseManager = new SSEManager();

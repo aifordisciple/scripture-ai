@@ -21,6 +21,6 @@ export {
 
 // Re-export individual slices from new files
 // These will be used as slices are migrated
-export { createUISlice as createUISliceNew } from './uiSlice'
+// [P3-5修复] 移除已删除的死代码 uiSlice.ts 的导出
 export { createReaderSlice as createReaderSliceNew } from './readerSlice'
 export { createLocaleSlice } from './localeSlice'

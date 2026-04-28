@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Wifi, WifiOff, Cloud, CloudOff, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface OfflineIndicatorProps {
   isOnline: boolean;
@@ -22,6 +23,7 @@ export function OfflineIndicator({
   className,
 }: OfflineIndicatorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div className={cn("relative", className)}>
@@ -41,11 +43,11 @@ export function OfflineIndicator({
           <WifiOff className="w-4 h-4" />
         )}
         <span className="text-sm font-medium">
-          {isOnline ? "在线" : "离线"}
+          {isOnline ? t('bible.online') : t('bible.offline')}
         </span>
         {cachedChapters > 0 && (
           <span className="text-xs opacity-75">
-            {cachedChapters}章已缓存
+            {t('bible.cachedChapters', { count: cachedChapters })}
           </span>
         )}
         {isExpanded ? (
@@ -61,17 +63,17 @@ export function OfflineIndicator({
           <div className="space-y-3">
             {/* 状态 */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">网络状态</span>
+              <span className="text-sm text-muted-foreground">{t('bible.networkStatus')}</span>
               <div className="flex items-center gap-1">
                 {isOnline ? (
                   <>
                     <Cloud className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-green-600">已连接</span>
+                    <span className="text-sm text-green-600">{t('bible.connected')}</span>
                   </>
                 ) : (
                   <>
                     <CloudOff className="w-4 h-4 text-amber-500" />
-                    <span className="text-sm text-amber-600">离线模式</span>
+                    <span className="text-sm text-amber-600">{t('bible.offlineModeLabel')}</span>
                   </>
                 )}
               </div>
@@ -79,15 +81,15 @@ export function OfflineIndicator({
 
             {/* 缓存 */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">缓存章节</span>
-              <span className="text-sm font-medium">{cachedChapters} 章</span>
+              <span className="text-sm text-muted-foreground">{t('bible.cachedChapterCount')}</span>
+              <span className="text-sm font-medium">{t('bible.cachedChapterValue', { count: cachedChapters })}</span>
             </div>
 
             {/* 待同步 */}
             {pendingSync > 0 && (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">待同步</span>
-                <span className="text-sm font-medium text-amber-600">{pendingSync} 条</span>
+                <span className="text-sm text-muted-foreground">{t('bible.pendingSync')}</span>
+                <span className="text-sm font-medium text-amber-600">{t('bible.pendingSyncValue', { count: pendingSync })}</span>
               </div>
             )}
 
@@ -102,14 +104,14 @@ export function OfflineIndicator({
                 className="w-full mt-2"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
-                立即同步
+                {t('bible.syncNow')}
               </Button>
             )}
 
             {/* 离线提示 */}
             {!isOnline && (
               <p className="text-xs text-muted-foreground pt-2 border-t dark:border-slate-800">
-                您当前处于离线模式。部分功能可能受限，数据将在恢复连接后自动同步。
+                {t('bible.offlineNotice')}
               </p>
             )}
           </div>

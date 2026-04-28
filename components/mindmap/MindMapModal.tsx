@@ -6,7 +6,9 @@ import * as Dialog from '@radix-ui/react-dialog';
 import MindMap from 'simple-mind-map/full';
 import { MindMapNode } from '@/store/types';
 import { toSimpleMindMapData } from './markdownParser';
-import { MindMapToolbar, LAYOUT_OPTIONS } from './MindMapToolbar';
+import { MindMapToolbar } from './MindMapToolbar';
+import { LAYOUT_OPTIONS } from './MindMapCanvas';
+import { useTranslation } from '@/lib/i18n';
 
 export type LayoutType = 'logicalStructure' | 'mindMap' | 'organizationStructure' | 'catalogOrganization' | 'timeline';
 
@@ -38,6 +40,7 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
   const [zoom, setZoom] = useState(1);
   const [currentLayout, setCurrentLayout] = useState<LayoutType>('logicalStructure');
   const [isExporting, setIsExporting] = useState(false);
+  const { t } = useTranslation();
 
   // 初始化/更新思维导图
   useEffect(() => {
@@ -154,6 +157,7 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
     setIsExporting(true);
     try {
       const pngData = await mindMapRef.current.export('png', true);
+      const exportTitle = title || t('mindmap.defaultTitle');
 
       // 检查是否支持 Web Share API（移动端）
       if (navigator.share && navigator.canShare) {
@@ -161,28 +165,28 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
           // 将 base64 转换为 Blob
           const response = await fetch(pngData);
           const blob = await response.blob();
-          const file = new File([blob], `mindmap-${title || 'export'}.png`, { type: 'image/png' });
+          const file = new File([blob], `mindmap-${exportTitle}.png`, { type: 'image/png' });
 
           await navigator.share({
-            title: title || '思维导图',
+            title: exportTitle,
             files: [file]
           });
         } catch (shareError) {
           // 用户取消分享或分享失败，回退到下载
           console.log('Share failed, falling back to download:', shareError);
-          downloadImage(pngData, title);
+          downloadImage(pngData, exportTitle);
         }
       } else {
         // 桌面端或不支持分享，直接下载
-        downloadImage(pngData, title);
+        downloadImage(pngData, exportTitle);
       }
     } catch (error) {
       console.error('Export failed:', error);
-      alert('导出失败，请重试');
+      alert(t('mindmap.exportFailed'));
     } finally {
       setIsExporting(false);
     }
-  }, [title, isExporting]);
+  }, [title, isExporting, t]);
 
   // 下载图片的辅助函数
   const downloadImage = (pngData: string, title: string) => {
@@ -198,30 +202,31 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
   const handleExportMarkdown = useCallback(() => {
     if (!data) return;
 
-    const markdown = `# ${title || '思维导图'}\n\n${mindMapNodeToMarkdown(data, 0)}`;
+    const exportTitle = title || t('mindmap.defaultTitle');
+    const markdown = `# ${exportTitle}\n\n${mindMapNodeToMarkdown(data, 0)}`;
 
     // 检查是否支持 Web Share API（移动端）
     if (navigator.share && navigator.canShare) {
       try {
         const blob = new Blob([markdown], { type: 'text/markdown' });
-        const file = new File([blob], `mindmap-${title || 'export'}.md`, { type: 'text/markdown' });
+        const file = new File([blob], `mindmap-${exportTitle}.md`, { type: 'text/markdown' });
 
         navigator.share({
-          title: title || '思维导图',
+          title: exportTitle,
           text: markdown,
           files: [file]
         }).catch(() => {
           // 分享失败，回退到下载
-          downloadMarkdown(markdown, title);
+          downloadMarkdown(markdown, exportTitle);
         });
       } catch {
-        downloadMarkdown(markdown, title);
+        downloadMarkdown(markdown, exportTitle);
       }
     } else {
       // 桌面端直接下载
-      downloadMarkdown(markdown, title);
+      downloadMarkdown(markdown, exportTitle);
     }
-  }, [data, title]);
+  }, [data, title, t]);
 
   // 下载 Markdown 的辅助函数
   const downloadMarkdown = (markdown: string, title: string) => {
@@ -246,7 +251,7 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
           {/* 标题栏 - 移动端固定高度 */}
           <div className="shrink-0 px-3 sm:px-4 py-2.5 sm:py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
             <Dialog.Title className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-              {title || '思维导图'}
+              {title || t('mindmap.defaultTitle')}
             </Dialog.Title>
           </div>
 
@@ -276,7 +281,7 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
           {isExporting && (
             <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10">
               <div className="bg-white dark:bg-gray-800 px-6 py-4 rounded-lg shadow-xl">
-                <span className="text-gray-700 dark:text-gray-200">正在导出...</span>
+                <span className="text-gray-700 dark:text-gray-200">{t('mindmap.exporting')}</span>
               </div>
             </div>
           )}

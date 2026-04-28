@@ -1,0 +1,21 @@
+export const mindmap = {
+  mindmap: {
+    layoutLogical: 'Logical Structure',
+    layoutMindMap: 'Mind Map',
+    layoutOrganization: 'Organization Chart',
+    layoutCatalog: 'Catalog Organization',
+    layoutTimeline: 'Timeline',
+    layoutDefault: 'Layout',
+    zoomOut: 'Zoom Out',
+    zoomIn: 'Zoom In',
+    resetView: 'Reset View',
+    exportImage: 'Export Image',
+    exportMD: 'Export MD',
+    exportMarkdown: 'Export Markdown',
+    moreActions: 'More Actions',
+    close: 'Close',
+    exporting: 'Exporting...',
+    exportFailed: 'Export failed, please try again',
+    defaultTitle: 'Mind Map',
+  },
+} as const

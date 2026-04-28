@@ -10,6 +10,12 @@ import { atlas } from './atlas'
 import { highlights } from './highlights'
 import { shareCard } from './shareCard'
 import { onboarding } from './onboarding'
+import { dm } from './dm'
+import { mindmap } from './mindmap'
+import { adminFeedback } from './adminFeedback'
+import { shortcuts } from './shortcuts'
+import { feedback } from './feedback'
+import { bible } from './bible'
 import type { DeepStringify } from '../types'
 
 export const zh = {
@@ -25,6 +31,12 @@ export const zh = {
   ...highlights,
   ...shareCard,
   ...onboarding,
+  ...dm,
+  ...mindmap,
+  ...adminFeedback,
+  ...shortcuts,
+  ...feedback,
+  ...bible,
 } as const
 
 export type Translations = DeepStringify<typeof zh>

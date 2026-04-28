@@ -5,6 +5,7 @@ import { toPng } from 'html-to-image'
 import { Flame, BookOpen, Calendar, X, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useTranslation } from '@/lib/i18n'
 
 export interface CheckInCardProps {
   streakDays: number
@@ -16,13 +17,13 @@ export interface CheckInCardProps {
 }
 
 // 获取鼓励语
-function getEncouragement(streakDays: number): string {
-  if (streakDays >= 100) return '太厉害了！百日坚持，灵命成长！'
-  if (streakDays >= 30) return '一个月坚持！继续保持！'
-  if (streakDays >= 14) return '两周坚持！习惯养成中！'
-  if (streakDays >= 7) return '一周坚持！神与你同在！'
-  if (streakDays >= 3) return '三天打卡！继续加油！'
-  return '今日读经，神恩满满！'
+function getEncouragement(streakDays: number, t: (key: string, params?: Record<string, string | number>) => string): string {
+  if (streakDays >= 100) return t('bible.encouragement100')
+  if (streakDays >= 30) return t('bible.encouragement30')
+  if (streakDays >= 14) return t('bible.encouragement14')
+  if (streakDays >= 7) return t('bible.encouragement7')
+  if (streakDays >= 3) return t('bible.encouragement3')
+  return t('bible.encouragementDefault')
 }
 
 // 获取火焰颜色
@@ -42,6 +43,7 @@ export const CheckInCard = memo(function CheckInCard({
   onClose,
 }: CheckInCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
 
   const handleShare = useCallback(async () => {
     if (!cardRef.current) return
@@ -58,7 +60,7 @@ export const CheckInCard = memo(function CheckInCard({
     }
   }, [onShare])
 
-  const encouragement = getEncouragement(streakDays)
+  const encouragement = getEncouragement(streakDays, t)
   const flameColor = getFlameColor(streakDays)
 
   return (
@@ -87,7 +89,7 @@ export const CheckInCard = memo(function CheckInCard({
                 day: 'numeric',
               })}
             </div>
-            <h2 className="text-2xl font-bold">今日打卡成功</h2>
+            <h2 className="text-2xl font-bold">{t('bible.checkInSuccess')}</h2>
           </div>
 
           {/* Streak display */}
@@ -101,16 +103,16 @@ export const CheckInCard = memo(function CheckInCard({
                   </span>
                 )}
               </div>
-              <span className="text-sm mt-1 opacity-80">连续打卡</span>
+              <span className="text-sm mt-1 opacity-80">{t('bible.consecutiveCheckIn')}</span>
             </div>
-            <div className="text-4xl font-bold">{streakDays}天</div>
+            <div className="text-4xl font-bold">{t('bible.daysUnit', { count: streakDays })}</div>
           </div>
 
           {/* Today's reading */}
           <div className="bg-white/10 rounded-xl p-4 mb-4">
             <div className="flex items-center gap-2 mb-2">
               <BookOpen className="w-4 h-4" />
-              <span className="text-sm opacity-80">今日读经</span>
+              <span className="text-sm opacity-80">{t('bible.checkInTodayReading')}</span>
             </div>
             <p className="font-bold text-lg">{todayChapter}</p>
             {todayVerse && (
@@ -125,7 +127,7 @@ export const CheckInCard = memo(function CheckInCard({
 
           {/* User signature */}
           <div className="text-center text-sm opacity-60">
-            <p>{userName} · AI读</p>
+            <p>{userName} · {t('bible.aiReader')}</p>
           </div>
         </div>
 
@@ -136,14 +138,14 @@ export const CheckInCard = memo(function CheckInCard({
             className="flex-1"
             onClick={onClose}
           >
-            关闭
+            {t('common.close')}
           </Button>
           <Button
             className="flex-1 gap-2"
             onClick={handleShare}
           >
             <Share2 className="w-4 h-4" />
-            分享
+            {t('common.share')}
           </Button>
         </div>
       </div>

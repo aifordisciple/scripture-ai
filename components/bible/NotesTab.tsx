@@ -10,11 +10,13 @@ import { useSession } from "next-auth/react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export function NotesTab() {
   const router = useRouter();
   const { notes, deleteNote, openNoteEditor, tabs, addTab, setActiveTab, updateActiveTab } = useBibleStore();
   const { data: session } = useSession();
+  const { t } = useTranslation();
 
   // [P1增强] 搜索状态
   const [searchQuery, setSearchQuery] = useState('');
@@ -79,7 +81,7 @@ export function NotesTab() {
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!confirm("确定要删除这条笔记吗？")) return;
+    if (!confirm(t('bible.confirmDeleteNote'))) return;
 
     // 先尝试服务端删除，成功后再删除本地
     if (session?.user) {
@@ -89,11 +91,11 @@ export function NotesTab() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ noteId: id, action: "delete" })
         });
-        if (!res.ok) throw new Error('删除失败');
+        if (!res.ok) throw new Error(t('bible.deleteFailed'));
         deleteNote(id);
       } catch (err) {
         console.error("Failed to delete note remotely", err);
-        alert("删除失败，请重试");
+        alert(t('bible.deleteFailed'));
       }
     } else {
       deleteNote(id);
@@ -108,13 +110,13 @@ export function NotesTab() {
   // [P1增强] 导出笔记为Markdown
   const handleExportMarkdown = () => {
     if (notes.length === 0) {
-      alert('没有笔记可导出');
+      alert(t('bible.noNotesToExport'));
       return;
     }
 
-    let markdown = '# 我的读经笔记\n\n';
-    markdown += `> 导出时间: ${new Date().toLocaleString('zh-CN')}\n\n`;
-    markdown += `> 共 ${notes.length} 条笔记\n\n---\n\n`;
+    let markdown = `# ${t('bible.exportTitle')}\n\n`;
+    markdown += `> ${t('bible.exportTime')}: ${new Date().toLocaleString('zh-CN')}\n\n`;
+    markdown += `> ${t('bible.exportNoteCount', { count: notes.length })}\n\n---\n\n`;
 
     const grouped = groupedNotes;
     Object.entries(grouped).forEach(([bookName, items]) => {
@@ -123,7 +125,7 @@ export function NotesTab() {
         markdown += `### ${item.chapter}:${item.verse}\n\n`;
         markdown += `${item.content}\n\n`;
         if (item.updatedAt) {
-          markdown += `*更新于 ${new Date(item.updatedAt).toLocaleString('zh-CN')}*\n\n`;
+          markdown += `*${t('bible.updated')} ${new Date(item.updatedAt).toLocaleString('zh-CN')}*\n\n`;
         }
         markdown += '---\n\n';
       });
@@ -133,7 +135,7 @@ export function NotesTab() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `读经笔记_${new Date().toISOString().split('T')[0]}.md`);
+    link.setAttribute('download', `${t('bible.exportFileName')}_${new Date().toISOString().split('T')[0]}.md`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -147,8 +149,8 @@ export function NotesTab() {
           <BookOpen className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">我的笔记</h1>
-          <p className="text-sm text-muted-foreground mt-1">共记录了 {notes.length} 条灵修感悟。</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('bible.myNotes')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('bible.noteCount', { count: notes.length })}</p>
         </div>
 
         {/* [P1增强] 导出按钮 */}
@@ -158,7 +160,7 @@ export function NotesTab() {
           onClick={handleExportMarkdown}
           className="gap-2 rounded-full border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/20"
         >
-          <Download className="w-4 h-4" /> 导出
+          <Download className="w-4 h-4" /> {t('bible.exportBtn')}
         </Button>
       </div>
 
@@ -168,7 +170,7 @@ export function NotesTab() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="搜索笔记内容、书卷、章节..."
+            placeholder={t('bible.searchNotesPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
@@ -184,7 +186,7 @@ export function NotesTab() {
         </div>
         {searchQuery && (
           <p className="text-xs text-muted-foreground mt-2">
-            找到 {filteredNotes.length} 条匹配的笔记
+            {t('bible.matchCount', { count: filteredNotes.length })}
           </p>
         )}
       </div>
@@ -192,13 +194,13 @@ export function NotesTab() {
       {notes.length === 0 ? (
         <div className="text-center py-20 opacity-40 select-none">
           <BookOpen className="w-16 h-16 mx-auto mb-4 stroke-[1.5]" />
-          <p className="text-lg">您还没有写过任何笔记</p>
+          <p className="text-lg">{t('bible.noNotes')}</p>
         </div>
       ) : filteredNotes.length === 0 ? (
         <div className="text-center py-20 opacity-40 select-none">
           <Search className="w-16 h-16 mx-auto mb-4 stroke-[1.5]" />
-          <p className="text-lg">没有找到匹配的笔记</p>
-          <p className="text-sm mt-2">尝试其他搜索词</p>
+          <p className="text-lg">{t('bible.noMatchNotes')}</p>
+          <p className="text-sm mt-2">{t('bible.tryOther')}</p>
         </div>
       ) : (
         <div className="space-y-8">
@@ -246,9 +248,9 @@ export function NotesTab() {
                             {needsExpand && (
                               <span className="text-xs text-muted-foreground flex items-center gap-0.5">
                                 {isExpanded ? (
-                                  <><ChevronUp className="w-3.5 h-3.5" />收起</>
+                                  <><ChevronUp className="w-3.5 h-3.5" />{t('bible.collapse')}</>
                                 ) : (
-                                  <><ChevronDown className="w-3.5 h-3.5" />展开</>
+                                  <><ChevronDown className="w-3.5 h-3.5" />{t('bible.expand')}</>
                                 )}
                               </span>
                             )}
@@ -259,7 +261,7 @@ export function NotesTab() {
                               size="icon"
                               className="h-8 w-8 text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-900/30 rounded-full"
                               onClick={(e) => handleEdit(e, item.bookId, item.chapter, item.verse)}
-                              title="编辑"
+                              title={t('bible.editBtn')}
                             >
                               <Edit3 className="w-4 h-4" />
                             </Button>
@@ -268,7 +270,7 @@ export function NotesTab() {
                               size="icon"
                               className="h-8 w-8 text-slate-400 hover:text-red-600 bg-slate-50 hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-900/30 rounded-full"
                               onClick={(e) => handleDelete(e, item.id)}
-                              title="删除"
+                              title={t('bible.deleteBtn')}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>

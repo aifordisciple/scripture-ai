@@ -27,6 +27,15 @@ function createTransporter() {
   });
 }
 
+// [P3-7修复] 缓存 transporter 实例，避免每次发送创建新连接
+let cachedTransporter: ReturnType<typeof createTransporter> | null | undefined = undefined;
+
+function getOrCreateTransporter() {
+  if (cachedTransporter !== undefined) return cachedTransporter;
+  cachedTransporter = createTransporter();
+  return cachedTransporter;
+}
+
 // Email templates
 interface EmailTemplate {
   subject: string;
@@ -205,7 +214,7 @@ export async function sendEmail(
   to: string,
   template: EmailTemplate
 ): Promise<boolean> {
-  const transporter = createTransporter();
+  const transporter = getOrCreateTransporter();
 
   if (!transporter) {
     // Development mode - log to console

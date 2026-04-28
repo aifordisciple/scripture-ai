@@ -7,6 +7,7 @@ import { Copy, Check, Bookmark, Share2, RefreshCw, User, Sparkles } from 'lucide
 import { cn } from '@/lib/utils'
 import { AudioButton } from './AudioButton'
 import { useToast } from '@/components/ui/toast'
+import { useTranslation } from '@/lib/i18n'
 
 export interface Message {
   id: string
@@ -47,6 +48,8 @@ const MessageBubble = memo(function MessageBubble({
 }) {
   const [copied, setCopied] = useState(false)
   const [bookmarked, setBookmarked] = useState(isSaved || false)
+  const { t } = useTranslation()
+  const { addToast } = useToast()
 
   // 处理 <think> 标签
   let mainText = content
@@ -73,7 +76,7 @@ const MessageBubble = memo(function MessageBubble({
       navigator.clipboard.writeText(copyText)
         .then(() => {
           setCopied(true)
-          addToast({ type: 'success', message: '已复制到剪贴板' });
+          addToast({ type: 'success', message: t('bible.copiedToClipboard') });
           setTimeout(() => setCopied(false), 2000)
         })
         .catch(() => {
@@ -87,7 +90,7 @@ const MessageBubble = memo(function MessageBubble({
           document.execCommand('copy')
           document.body.removeChild(textArea)
           setCopied(true)
-          addToast({ type: 'success', message: '已复制到剪贴板' });
+          addToast({ type: 'success', message: t('bible.copiedToClipboard') });
           setTimeout(() => setCopied(false), 2000)
         })
     }
@@ -104,7 +107,7 @@ const MessageBubble = memo(function MessageBubble({
         {role === 'user' && (
           <div className="absolute -top-5 right-0 flex items-center gap-1 text-[10px] font-medium opacity-50 select-none text-blue-400 flex-row-reverse">
             <User className="w-3 h-3" />
-            <span>你</span>
+            <span>{t('bible.you')}</span>
           </div>
         )}
 
@@ -119,7 +122,7 @@ const MessageBubble = memo(function MessageBubble({
               <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-sm">
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
-              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">AI 解读</span>
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('bible.aiInterpretation')}</span>
             </div>
 
             {isThinking && (
@@ -129,7 +132,7 @@ const MessageBubble = memo(function MessageBubble({
                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
                 </div>
-                <span className="text-slate-500 dark:text-slate-400">正在深度解读中...</span>
+                <span className="text-slate-500 dark:text-slate-400">{t('bible.deepInterpreting')}</span>
               </div>
             )}
 
@@ -156,7 +159,7 @@ const MessageBubble = memo(function MessageBubble({
                     )}
                   >
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copied ? '已复制' : '复制'}
+                    {copied ? t('bible.copied') : t('bible.copy')}
                   </button>
 
                   {onSaveInsight && (
@@ -168,7 +171,7 @@ const MessageBubble = memo(function MessageBubble({
                       )}
                     >
                       <Bookmark className={cn('w-3.5 h-3.5', bookmarked && 'fill-current')} />
-                      {bookmarked ? '已收藏' : '收藏'}
+                      {bookmarked ? t('bible.bookmarked') : t('bible.bookmark')}
                     </button>
                   )}
 
@@ -178,7 +181,7 @@ const MessageBubble = memo(function MessageBubble({
                       className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                     >
                       <Share2 className="w-3.5 h-3.5" />
-                      分享
+                      {t('bible.share')}
                     </button>
                   )}
 
@@ -188,13 +191,13 @@ const MessageBubble = memo(function MessageBubble({
                       className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
-                      重试
+                      {t('bible.retry')}
                     </button>
                   )}
                 </div>
 
                 <div onClick={(e) => e.stopPropagation()}>
-                  <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 h-8 px-2.5 text-[11px] rounded-lg" label="朗读" />
+                  <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 h-8 px-2.5 text-[11px] rounded-lg" label={t('bible.readAloud')} />
                 </div>
               </div>
             )}
@@ -211,6 +214,7 @@ const MessageBubble = memo(function MessageBubble({
 
 // 空状态组件
 function EmptyState() {
+  const { t } = useTranslation()
   return (
     <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-500 select-none opacity-60">
       <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center mb-5">
@@ -220,13 +224,14 @@ function EmptyState() {
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
       </div>
-      <p className="text-[13px] text-slate-500 dark:text-slate-400">选中经文，点击菜单即可开始</p>
+      <p className="text-[13px] text-slate-500 dark:text-slate-400">{t('bible.emptyStateHint')}</p>
     </div>
   )
 }
 
 // 错误状态组件
 function ErrorState({ error, onRetry }: { error: Error; onRetry?: () => void }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col items-center justify-center p-4 mt-2 mb-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/20">
       <svg className="w-6 h-6 text-amber-500 mb-2 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -235,15 +240,15 @@ function ErrorState({ error, onRetry }: { error: Error; onRetry?: () => void }) 
         <line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
       <span className="text-xs text-amber-600 dark:text-amber-400 text-center mb-3">
-        AI 生成已中断，可能原因：<br />
-        网络波动、服务繁忙或连接超时
+        {t('bible.errorInterrupted')}<br />
+        {t('bible.errorReasons')}
       </span>
       {onRetry && (
         <button
           onClick={onRetry}
           className="h-8 text-xs rounded-full border border-amber-200 text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/30 px-4"
         >
-          <RefreshCw className="w-3 h-3 mr-1 inline" /> 重新生成
+          <RefreshCw className="w-3 h-3 mr-1 inline" /> {t('bible.regenerate')}
         </button>
       )}
     </div>

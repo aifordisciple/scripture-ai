@@ -38,5 +38,14 @@ export const group = {
     discoverPublic: '发现公开小组',
     emptyNoGroup: '还没有加入任何小组',
     emptyHint: '创建一个新小组，或通过邀请码加入已有的小组',
+    // [P2-1] GroupChat i18n keys
+    chatTitle: '小组交流',
+    noMessages: '还没有消息，来说点什么吧！',
+    anonymousUser: '匿名用户',
+    inputPlaceholder: '输入消息...',
+    justNow: '刚刚',
+    minutesAgo: '{count}分钟前',
+    hoursAgo: '{count}小时前',
+    daysAgo: '{count}天前',
   },
 } as const

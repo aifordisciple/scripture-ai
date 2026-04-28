@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { MessageSquare, ChevronDown, Plus, X, Search, Edit, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ChatSession } from '@/store/types'
+import { useTranslation } from '@/lib/i18n'
 
 export interface SessionSelectorProps {
   sessions: ChatSession[]
@@ -27,6 +28,7 @@ export function SessionSelector({
   onRenameSession,
 }: SessionSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const { t } = useTranslation()
 
   // 过滤会话列表
   const filteredSessions = useMemo(() => {
@@ -46,11 +48,11 @@ export function SessionSelector({
       <button
         onClick={onToggleSessionList}
         className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 font-bold select-none hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-lg transition-colors"
-        aria-label="切换会话"
+        aria-label={t('bible.switchSession')}
       >
         <MessageSquare className="w-4 h-4" />
         <span className="text-sm max-w-[120px] truncate">
-          {currentSession?.title || '新对话'}
+          {currentSession?.title || t('bible.newChat')}
         </span>
         <ChevronDown className="w-3 h-3" />
       </button>
@@ -66,7 +68,7 @@ export function SessionSelector({
                 className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-colors shadow-sm"
               >
                 <Plus className="w-4 h-4" />
-                新建对话
+                {t('bible.newSession')}
               </button>
               <button
                 onClick={() => onToggleSessionList()}
@@ -84,7 +86,7 @@ export function SessionSelector({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="搜索对话..."
+                  placeholder={t('bible.searchSession')}
                   className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
                 {searchQuery && (
@@ -103,7 +105,7 @@ export function SessionSelector({
           <div className="flex-1 overflow-y-auto overscroll-contain">
             {filteredSessions.length === 0 ? (
               <div className="px-3 py-8 text-center text-slate-400 text-sm">
-                {searchQuery ? '没有找到匹配的对话' : '暂无历史对话'}
+                {searchQuery ? t('bible.noMatchSession') : t('bible.noHistorySession')}
               </div>
             ) : (
               <div className="p-2 space-y-1">
@@ -120,7 +122,7 @@ export function SessionSelector({
                   >
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate text-slate-800 dark:text-slate-200">
-                        {session.title || '未命名对话'}
+                        {session.title || t('bible.unnamedSession')}
                       </div>
                       <div className="text-xs text-slate-400 mt-0.5">
                         {new Date(session.updatedAt).toLocaleDateString('zh-CN', {
@@ -139,7 +141,7 @@ export function SessionSelector({
                           onRenameSession(session)
                         }}
                         className="p-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-all active:scale-95"
-                        title="重命名"
+                        title={t('bible.renameBtn')}
                       >
                         <Edit className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                       </button>
@@ -149,7 +151,7 @@ export function SessionSelector({
                           onDeleteSession(session)
                         }}
                         className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all active:scale-95"
-                        title="删除"
+                        title={t('bible.deleteSession')}
                       >
                         <Trash2 className="w-4 h-4 text-slate-500 dark:text-slate-400 hover:text-red-500" />
                       </button>
@@ -163,7 +165,7 @@ export function SessionSelector({
           {/* 底部统计 */}
           {sessions.length > 0 && (
             <div className="p-2 border-t dark:border-slate-700 text-center text-xs text-slate-400">
-              共 {sessions.length} 个对话
+              {t('bible.sessionCount', { count: sessions.length })}
             </div>
           )}
         </div>

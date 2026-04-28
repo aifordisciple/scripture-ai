@@ -13,10 +13,20 @@ export async function POST(req: Request) {
 
   if (action === 'delete') {
     if (noteId) {
+        // 所有权验证：只能删除自己的笔记
+        const note = await prisma.note.findUnique({ where: { id: noteId }, select: { userId: true } });
+        if (!note || note.userId !== user.id) {
+          return new NextResponse("Forbidden", { status: 403 });
+        }
         await prisma.note.delete({ where: { id: noteId } });
     }
   } else {
     if (noteId && !noteId.startsWith('temp-')) {
+        // 所有权验证：只能修改自己的笔记
+        const note = await prisma.note.findUnique({ where: { id: noteId }, select: { userId: true } });
+        if (!note || note.userId !== user.id) {
+          return new NextResponse("Forbidden", { status: 403 });
+        }
         await prisma.note.update({
             where: { id: noteId },
             data: { content }

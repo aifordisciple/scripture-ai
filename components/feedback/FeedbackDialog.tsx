@@ -29,20 +29,22 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface FeedbackDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const FEEDBACK_TYPES = [
-  { value: "BUG_REPORT", label: "Bug报告", icon: Bug, description: "报告应用中的问题或错误" },
-  { value: "FEATURE_REQUEST", label: "功能建议", icon: Lightbulb, description: "提出新功能或改进建议" },
-  { value: "QUESTION", label: "问题咨询", icon: HelpCircle, description: "使用问题或功能咨询" },
-  { value: "OTHER", label: "其他反馈", icon: MessageSquare, description: "其他类型的反馈" },
-];
+const FEEDBACK_TYPE_VALUES = [
+  { value: "BUG_REPORT", labelKey: "feedback.typeBugReport", icon: Bug, descKey: "feedback.typeBugReportDesc" },
+  { value: "FEATURE_REQUEST", labelKey: "feedback.typeFeatureRequest", icon: Lightbulb, descKey: "feedback.typeFeatureRequestDesc" },
+  { value: "QUESTION", labelKey: "feedback.typeQuestion", icon: HelpCircle, descKey: "feedback.typeQuestionDesc" },
+  { value: "OTHER", labelKey: "feedback.typeOther", icon: MessageSquare, descKey: "feedback.typeOtherDesc" },
+] as const;
 
 export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
+  const { t } = useTranslation();
   const [type, setType] = useState<string>("BUG_REPORT");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -103,7 +105,7 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
     setSubmitted(false);
   };
 
-  const selectedType = FEEDBACK_TYPES.find((t) => t.value === type);
+  const selectedType = FEEDBACK_TYPE_VALUES.find((ft) => ft.value === type);
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) resetForm(); onOpenChange(o); }}>
@@ -111,10 +113,10 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-primary" />
-            意见反馈
+            {t('feedback.dialogTitle')}
           </DialogTitle>
           <DialogDescription>
-            我们非常重视您的反馈，感谢您帮助我们改进产品
+            {t('feedback.dialogDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -125,39 +127,39 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium mb-1">提交成功</h3>
-            <p className="text-sm text-muted-foreground">感谢您的反馈，我们会尽快处理</p>
+            <h3 className="text-lg font-medium mb-1">{t('feedback.submitSuccess')}</h3>
+            <p className="text-sm text-muted-foreground">{t('feedback.submitSuccessMessage')}</p>
           </div>
         ) : (
           <div className="space-y-4">
             {/* Feedback Type */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">反馈类型</label>
+              <label className="text-sm font-medium">{t('feedback.feedbackType')}</label>
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {FEEDBACK_TYPES.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
+                  {FEEDBACK_TYPE_VALUES.map((ft) => (
+                    <SelectItem key={ft.value} value={ft.value}>
                       <div className="flex items-center gap-2">
-                        <t.icon className="w-4 h-4" />
-                        {t.label}
+                        <ft.icon className="w-4 h-4" />
+                        {t(ft.labelKey)}
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {selectedType && (
-                <p className="text-xs text-muted-foreground">{selectedType.description}</p>
+                <p className="text-xs text-muted-foreground">{t(selectedType.descKey)}</p>
               )}
             </div>
 
             {/* Title */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">标题</label>
+              <label className="text-sm font-medium">{t('feedback.titleLabel')}</label>
               <Input
-                placeholder="简要描述您的反馈"
+                placeholder={t('feedback.titlePlaceholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={100}
@@ -166,9 +168,9 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 
             {/* Content */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">详细描述</label>
+              <label className="text-sm font-medium">{t('feedback.contentLabel')}</label>
               <Textarea
-                placeholder="请详细描述您遇到的问题或建议..."
+                placeholder={t('feedback.contentPlaceholder')}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 onPaste={handlePaste}
@@ -176,7 +178,7 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
                 className="resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                支持粘贴截图 (Ctrl/Cmd + V)
+                {t('feedback.pasteScreenshot')}
               </p>
             </div>
 
@@ -205,7 +207,7 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
           {!submitted && (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                取消
+                {t('feedback.cancel')}
               </Button>
               <Button
                 onClick={handleSubmit}
@@ -214,10 +216,10 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    提交中...
+                    {t('feedback.submitting')}
                   </>
                 ) : (
-                  "提交反馈"
+                  t('feedback.submit')
                 )}
               </Button>
             </>

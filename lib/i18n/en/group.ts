@@ -38,5 +38,14 @@ export const group = {
     discoverPublic: 'Discover Public Groups',
     emptyNoGroup: "Haven't joined any group yet",
     emptyHint: 'Create a new group or join an existing one via invite code',
+    // [P2-1] GroupChat i18n keys
+    chatTitle: 'Group Chat',
+    noMessages: 'No messages yet. Say something!',
+    anonymousUser: 'Anonymous',
+    inputPlaceholder: 'Type a message...',
+    justNow: 'Just now',
+    minutesAgo: '{count}m ago',
+    hoursAgo: '{count}h ago',
+    daysAgo: '{count}d ago',
   },
 } as const

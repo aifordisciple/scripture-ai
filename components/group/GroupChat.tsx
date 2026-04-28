@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { BIBLE_BOOKS } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n";
 
 interface ChatMessage {
   id: string;
@@ -38,12 +39,12 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [input, setInput] = useState("");
+  const { t } = useTranslation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchMessages();
-    // Poll for new messages every 5 seconds
     pollIntervalRef.current = setInterval(fetchMessages, 5000);
 
     return () => {
@@ -53,7 +54,6 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
     };
   }, [churchId]);
 
-  // 标记消息为已读
   useEffect(() => {
     const markAsRead = async () => {
       try {
@@ -77,11 +77,10 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
       const res = await fetch(`/api/church/${churchId}/chat?limit=50`);
       const data = await res.json();
       if (data.messages) {
-        // 增量合并：按ID去重，避免全量替换导致闪烁
         setMessages(prev => {
           const existingIds = new Set(prev.map(m => m.id));
           const newMessages = data.messages.filter((m: ChatMessage) => !existingIds.has(m.id));
-          if (newMessages.length === 0) return prev; // 无新消息，不触发重渲染
+          if (newMessages.length === 0) return prev;
           return [...prev, ...newMessages];
         });
       }
@@ -144,6 +143,7 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
     }
   };
 
+  // [P2-1] i18n: 使用 t() 替代硬编码中文时间格式
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();
@@ -152,11 +152,11 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "刚刚";
-    if (diffMins < 60) return `${diffMins}分钟前`;
-    if (diffHours < 24) return `${diffHours}小时前`;
-    if (diffDays < 7) return `${diffDays}天前`;
-    return date.toLocaleDateString("zh-CN");
+    if (diffMins < 1) return t('group.justNow');
+    if (diffMins < 60) return t('group.minutesAgo', { count: diffMins });
+    if (diffHours < 24) return t('group.hoursAgo', { count: diffHours });
+    if (diffDays < 7) return t('group.daysAgo', { count: diffDays });
+    return date.toLocaleDateString();
   };
 
   const getBookName = (id: string) => BIBLE_BOOKS.find(b => b.id === id)?.name || id;
@@ -176,15 +176,14 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
       <CardHeader className="pb-3 shrink-0">
         <CardTitle className="text-lg flex items-center gap-2">
           <BookOpen className="w-5 h-5" />
-          小组交流
+          {t('group.chatTitle')}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col pt-0 overflow-hidden">
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-3 mb-3">
           {messages.length === 0 ? (
             <div className="text-center text-muted-foreground text-sm py-8">
-              还没有消息，来说点什么吧！
+              {t('group.noMessages')}
             </div>
           ) : (
             messages.map((msg) => (
@@ -210,7 +209,7 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
                   >
                     {msg.userId !== currentUserId && (
                       <p className="text-xs font-medium text-muted-foreground mb-1">
-                        {msg.user.name || "匿名用户"}
+                        {msg.user.name || t('group.anonymousUser')}
                       </p>
                     )}
                     {msg.type === "SHARE_VERSE" && msg.metadata && (
@@ -236,13 +235,12 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
         <div className="flex gap-2 shrink-0">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-            placeholder="输入消息..."
+            placeholder={t('group.inputPlaceholder')}
             disabled={sending}
             className="flex-1"
           />

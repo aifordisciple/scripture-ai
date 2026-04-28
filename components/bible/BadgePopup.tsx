@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { Medal, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 export function BadgePopup() {
   const [earnedType, setEarnedType] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handler = (e: CustomEvent) => setEarnedType(e.detail);
@@ -17,10 +19,10 @@ export function BadgePopup() {
 
   // 勋章名称映射
   const badgeNames: Record<string, string> = {
-    STREAK_3: "初入禾场",
-    STREAK_7: "坚持一周",
-    STREAK_30: "月度精兵",
-    STREAK_90: "季度勇士",
+    STREAK_3: t('bible.badgeStreak3'),
+    STREAK_7: t('bible.badgeStreak7'),
+    STREAK_30: t('bible.badgeStreak30'),
+    STREAK_90: t('bible.badgeStreak90'),
   };
 
   const badgeName = badgeNames[earnedType] || earnedType;
@@ -32,15 +34,15 @@ export function BadgePopup() {
           <Medal className="w-20 h-20 text-yellow-500" />
           <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-yellow-400 animate-bounce" />
         </div>
-        <h2 className="text-2xl font-bold mb-2">荣获勋章！</h2>
+        <h2 className="text-2xl font-bold mb-2">{t('bible.badgeEarned')}</h2>
         <p className="text-muted-foreground mb-6">
-          太棒了！你解锁了 <b className="text-yellow-600">{badgeName}</b> 勋章。继续保持你的灵修节奏！
+          {t('bible.badgeUnlocked', { badge: badgeName })}
         </p>
         <Button 
           onClick={() => setEarnedType(null)} 
           className="w-full rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-bold"
         >
-          收下奖励
+          {t('bible.claimReward')}
         </Button>
       </div>
     </div>

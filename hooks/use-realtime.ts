@@ -1,165 +1,94 @@
 // hooks/use-realtime.ts
-// Hook for real-time updates via SSE
-
-import { useEffect, useRef, useCallback, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 
-interface SSEEvent {
-  event: string;
-  data: any;
-}
-
-interface UseRealtimeOptions {
-  onMessage?: (event: string, data: any) => void;
+interface RealtimeOptions {
+  onMessage?: (data: any) => void;
   onNotification?: (data: any) => void;
-  onGroupMessage?: (data: any) => void;
-  onDirectMessage?: (data: any) => void;
-  onFeedbackReply?: (data: any) => void;
-  reconnectInterval?: number;
-  maxReconnectAttempts?: number;
+  onDM?: (data: any) => void;
+  onPlanUpdate?: (data: any) => void;
+  onHighlight?: (data: any) => void;
+  enabled?: boolean;
 }
 
-interface RealtimeState {
-  connected: boolean;
-  reconnectAttempts: number;
-  lastEventTime: Date | null;
-}
-
-export function useRealtime(options: UseRealtimeOptions = {}) {
-  const { status } = useSession();
-  const {
-    onMessage,
-    onNotification,
-    onGroupMessage,
-    onDirectMessage,
-    onFeedbackReply,
-    reconnectInterval = 5000,
-    maxReconnectAttempts = 10,
-  } = options;
-
+export function useRealtime(options: RealtimeOptions = {}) {
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
 
-  const [state, setState] = useState<RealtimeState>({
-    connected: false,
-    reconnectAttempts: 0,
-    lastEventTime: null,
-  });
+  // 使用 ref 存储回调选项，使 connect 有稳定引用，避免重渲染导致重连循环
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
   const connect = useCallback(() => {
-    // 清理旧连接和重连定时器，防止并发连接
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
+    // 清理旧连接
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
     }
 
-    const eventSource = new EventSource('/api/events');
-    eventSourceRef.current = eventSource;
+    // 清理重连定时器
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
 
-    eventSource.onopen = () => {
-      console.log('[SSE] Connected');
-      reconnectAttemptsRef.current = 0;
-      setState(prev => ({
-        ...prev,
-        connected: true,
-        reconnectAttempts: 0,
-      }));
-    };
+    const { userId } = useBibleStore.getState();
+    if (!userId) return;
 
-    eventSource.onerror = (error) => {
-      console.error('[SSE] Error:', error);
-      eventSource.close();
-      setState(prev => ({ ...prev, connected: false }));
+    try {
+      const es = new EventSource(`/api/sse?userId=${userId}`);
+      eventSourceRef.current = es;
 
-      // Attempt to reconnect
-      if (reconnectAttemptsRef.current < maxReconnectAttempts) {
-        reconnectAttemptsRef.current++;
-        setState(prev => ({ ...prev, reconnectAttempts: reconnectAttemptsRef.current }));
+      es.onopen = () => {
+        reconnectAttemptsRef.current = 0; // 连接成功，重置重连计数
+      };
 
-        reconnectTimeoutRef.current = setTimeout(() => {
-          console.log(`[SSE] Reconnecting... (attempt ${reconnectAttemptsRef.current})`);
-          connect();
-        }, reconnectInterval);
-      } else {
-        console.error('[SSE] Max reconnect attempts reached');
-      }
-    };
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          // 通过 ref 读取最新回调
+          const opts = optionsRef.current;
+          switch (data.type) {
+            case 'message':
+              opts.onMessage?.(data);
+              break;
+            case 'notification':
+              opts.onNotification?.(data);
+              break;
+            case 'dm':
+              opts.onDM?.(data);
+              break;
+            case 'plan_update':
+              opts.onPlanUpdate?.(data);
+              break;
+            case 'highlight':
+              opts.onHighlight?.(data);
+              break;
+          }
+        } catch (err) {
+          console.error('SSE parse error:', err);
+        }
+      };
 
-    // Handle different event types
-    eventSource.addEventListener('connected', (e) => {
-      console.log('[SSE] Connection confirmed');
-    });
+      es.onerror = () => {
+        es.close();
+        eventSourceRef.current = null;
 
-    eventSource.addEventListener('heartbeat', () => {
-      setState(prev => ({ ...prev, lastEventTime: new Date() }));
-    });
-
-    eventSource.addEventListener('notification', (e) => {
-      try {
-        const data = JSON.parse((e as MessageEvent).data);
-        onNotification?.(data);
-        onMessage?.('notification', data);
-      } catch (error) {
-        console.error('[SSE] Failed to parse notification:', error);
-      }
-    });
-
-    eventSource.addEventListener('group_message', (e) => {
-      try {
-        const data = JSON.parse((e as MessageEvent).data);
-        onGroupMessage?.(data);
-        onMessage?.('group_message', data);
-      } catch (error) {
-        console.error('[SSE] Failed to parse group message:', error);
-      }
-    });
-
-    eventSource.addEventListener('direct_message', (e) => {
-      try {
-        const data = JSON.parse((e as MessageEvent).data);
-        onDirectMessage?.(data);
-        onMessage?.('direct_message', data);
-      } catch (error) {
-        console.error('[SSE] Failed to parse direct message:', error);
-      }
-    });
-
-    eventSource.addEventListener('feedback_reply', (e) => {
-      try {
-        const data = JSON.parse((e as MessageEvent).data);
-        onFeedbackReply?.(data);
-        onMessage?.('feedback_reply', data);
-      } catch (error) {
-        console.error('[SSE] Failed to parse feedback reply:', error);
-      }
-    });
-
-    eventSource.addEventListener('plan_update', (e) => {
-      try {
-        const data = JSON.parse((e as MessageEvent).data);
-        onMessage?.('plan_update', data);
-      } catch (error) {
-        console.error('[SSE] Failed to parse plan update:', error);
-      }
-    });
-
-    // Generic message handler
-    eventSource.onmessage = (e) => {
-      try {
-        const data = JSON.parse(e.data);
-        onMessage?.('message', data);
-      } catch (error) {
-        console.error('[SSE] Failed to parse message:', error);
-      }
-    };
-
-  }, [onMessage, onNotification, onGroupMessage, onDirectMessage, onFeedbackReply, reconnectInterval, maxReconnectAttempts]);
+        // 指数退避重连，最多 10 次
+        const maxAttempts = 10;
+        if (reconnectAttemptsRef.current < maxAttempts) {
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+          reconnectAttemptsRef.current++;
+          reconnectTimeoutRef.current = setTimeout(() => {
+            connect();
+          }, delay);
+        }
+      };
+    } catch (err) {
+      console.error('SSE connection error:', err);
+    }
+  }, []); // 空依赖 - 通过 ref 和 useBibleStore.getState() 访问所有状态
 
   const disconnect = useCallback(() => {
     if (eventSourceRef.current) {
@@ -170,70 +99,34 @@ export function useRealtime(options: UseRealtimeOptions = {}) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
-    setState(prev => ({ ...prev, connected: false }));
+    reconnectAttemptsRef.current = 0;
   }, []);
 
-  // Auto-connect on mount when authenticated, disconnect on unmount or when unauthenticated
   useEffect(() => {
-    // Only connect when user is authenticated
-    if (status === 'authenticated') {
+    const { userId } = useBibleStore.getState();
+    if (userId && options.enabled !== false) {
       connect();
-    } else if (status === 'unauthenticated') {
-      disconnect();
     }
 
     return () => {
       disconnect();
     };
-  }, [connect, disconnect, status]);
+  }, [connect, disconnect, options.enabled]);
 
-  return {
-    ...state,
-    connect,
-    disconnect,
-  };
-}
+  // 监听 userId 变化，用户登录/登出时重新连接/断开
+  useEffect(() => {
+    const unsubscribe = useBibleStore.subscribe((state, prevState) => {
+      if (state.userId !== prevState.userId) {
+        if (state.userId && options.enabled !== false) {
+          connect();
+        } else {
+          disconnect();
+        }
+      }
+    });
 
-// Hook specifically for notification updates
-export function useNotificationRealtime() {
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [notifications, setNotifications] = useState<any[]>([]);
+    return unsubscribe;
+  }, [connect, disconnect, options.enabled]);
 
-  const handleNotification = useCallback((data: any) => {
-    setNotifications(prev => [data, ...prev.slice(0, 49)]); // Keep last 50
-    setUnreadCount(prev => prev + 1);
-  }, []);
-
-  const markAsRead = useCallback(() => {
-    setUnreadCount(0);
-  }, []);
-
-  useRealtime({
-    onNotification: handleNotification,
-  });
-
-  return {
-    notifications,
-    unreadCount,
-    markAsRead,
-  };
-}
-
-// Hook for group chat updates
-export function useGroupChatRealtime(churchId: string | null) {
-  const [lastMessage, setLastMessage] = useState<any>(null);
-
-  const handleGroupMessage = useCallback((data: any) => {
-    if (data.churchId === churchId) {
-      setLastMessage(data);
-    }
-  }, [churchId]);
-
-  useRealtime({
-    onGroupMessage: handleGroupMessage,
-  });
-
-  return {
-    lastMessage,
-  };
+  return { connect, disconnect };
 }

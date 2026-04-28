@@ -28,13 +28,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         if (!user) {
-          throw new Error("用户不存在");
+          throw new Error("邮箱或密码错误");
         }
 
         const isValid = await bcrypt.compare(credentials.password as string, user.password);
 
         if (!isValid) {
-          throw new Error("密码错误");
+          throw new Error("邮箱或密码错误");
         }
 
         return {

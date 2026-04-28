@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useCallback, useEffect } from "react";
+import { useTranslation } from '@/lib/i18n';
 import {
   MessageSquare,
   Search,
@@ -42,6 +44,7 @@ interface FeedbackStats {
 }
 
 export default function FeedbackAdminPanel() {
+  const { t } = useTranslation();
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [stats, setStats] = useState<FeedbackStats>({
     total: 0,
@@ -106,7 +109,7 @@ export default function FeedbackAdminPanel() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("确定要删除这条反馈吗？")) return;
+    if (!confirm(t('adminFeedback.confirmDelete'))) return;
     try {
       const res = await fetch(`/api/feedback/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -157,10 +160,10 @@ export default function FeedbackAdminPanel() {
 
   const getStatusLabel = (status: string) => {
     const map: Record<string, string> = {
-      pending: "待处理",
-      processing: "处理中",
-      resolved: "已解决",
-      closed: "已关闭",
+      pending: t('adminFeedback.statusPending'),
+      processing: t('adminFeedback.statusProcessing'),
+      resolved: t('adminFeedback.statusResolved'),
+      closed: t('adminFeedback.statusClosed'),
     };
     return map[status] || status;
   };
@@ -183,10 +186,10 @@ export default function FeedbackAdminPanel() {
 
   const getTypeLabel = (type: string) => {
     const map: Record<string, string> = {
-      bug: "Bug",
-      feature: "功能建议",
-      improvement: "改进建议",
-      other: "其他",
+      bug: t('adminFeedback.typeBug'),
+      feature: t('adminFeedback.typeFeature'),
+      improvement: t('adminFeedback.typeImprovement'),
+      other: t('adminFeedback.typeOther'),
     };
     return map[type] || type;
   };
@@ -206,9 +209,9 @@ export default function FeedbackAdminPanel() {
 
   const getPriorityLabel = (priority: string) => {
     const map: Record<string, string> = {
-      high: "高",
-      medium: "中",
-      low: "低",
+      high: t('adminFeedback.priorityHigh'),
+      medium: t('adminFeedback.priorityMedium'),
+      low: t('adminFeedback.priorityLow'),
     };
     return map[priority] || priority;
   };
@@ -218,11 +221,11 @@ export default function FeedbackAdminPanel() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
-          { label: "全部", value: stats.total, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20" },
-          { label: "待处理", value: stats.pending, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20" },
-          { label: "处理中", value: stats.processing, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
-          { label: "已解决", value: stats.resolved, color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20" },
-          { label: "已关闭", value: stats.closed, color: "text-gray-600 dark:text-gray-400", bg: "bg-gray-50 dark:bg-gray-700/30" },
+          { label: t('adminFeedback.statsAll'), value: stats.total, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20" },
+          { label: t('adminFeedback.statsPending'), value: stats.pending, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20" },
+          { label: t('adminFeedback.statsProcessing'), value: stats.processing, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
+          { label: t('adminFeedback.statsResolved'), value: stats.resolved, color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20" },
+          { label: t('adminFeedback.statsClosed'), value: stats.closed, color: "text-gray-600 dark:text-gray-400", bg: "bg-gray-50 dark:bg-gray-700/30" },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -241,7 +244,7 @@ export default function FeedbackAdminPanel() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="搜索反馈..."
+              placeholder={t('adminFeedback.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -261,11 +264,11 @@ export default function FeedbackAdminPanel() {
                 }}
                 className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm appearance-none cursor-pointer"
               >
-                <option value="all">全部状态</option>
-                <option value="pending">待处理</option>
-                <option value="processing">处理中</option>
-                <option value="resolved">已解决</option>
-                <option value="closed">已关闭</option>
+                <option value="all">{t('adminFeedback.filterAllStatus')}</option>
+                <option value="pending">{t('adminFeedback.statusPending')}</option>
+                <option value="processing">{t('adminFeedback.statusProcessing')}</option>
+                <option value="resolved">{t('adminFeedback.statusResolved')}</option>
+                <option value="closed">{t('adminFeedback.statusClosed')}</option>
               </select>
             </div>
             <select
@@ -276,17 +279,17 @@ export default function FeedbackAdminPanel() {
               }}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm appearance-none cursor-pointer"
             >
-              <option value="all">全部类型</option>
-              <option value="bug">Bug</option>
-              <option value="feature">功能建议</option>
-              <option value="improvement">改进建议</option>
-              <option value="other">其他</option>
+              <option value="all">{t('adminFeedback.filterAllType')}</option>
+              <option value="bug">{t('adminFeedback.typeBug')}</option>
+              <option value="feature">{t('adminFeedback.typeFeature')}</option>
+              <option value="improvement">{t('adminFeedback.typeImprovement')}</option>
+              <option value="other">{t('adminFeedback.typeOther')}</option>
             </select>
           </div>
           <button
             onClick={fetchFeedbacks}
             className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            title="刷新"
+            title={t('adminFeedback.refreshTitle')}
           >
             <RefreshCw className="w-5 h-5" />
           </button>
@@ -302,7 +305,7 @@ export default function FeedbackAdminPanel() {
         ) : feedbacks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-500">
             <Inbox className="w-12 h-12 mb-3" />
-            <p className="text-lg">暂无反馈</p>
+            <p className="text-lg">{t('adminFeedback.noFeedback')}</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -357,7 +360,7 @@ export default function FeedbackAdminPanel() {
         {feedbacks.length > 0 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              第 {currentPage} 页
+              {t('adminFeedback.pageIndicator', { page: currentPage })}
             </p>
             <div className="flex gap-2">
               <button
@@ -386,7 +389,7 @@ export default function FeedbackAdminPanel() {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  反馈详情
+                  {t('adminFeedback.detailTitle')}
                 </h2>
                 <button
                   onClick={() => {
@@ -405,7 +408,7 @@ export default function FeedbackAdminPanel() {
                     {getStatusLabel(selectedFeedback.status)}
                   </span>
                   <span className={`text-sm ${getPriorityColor(selectedFeedback.priority)}`}>
-                    优先级: {getPriorityLabel(selectedFeedback.priority)}
+                    {t('adminFeedback.priorityLabel')}: {getPriorityLabel(selectedFeedback.priority)}
                   </span>
                   <span className="text-sm text-gray-400 dark:text-gray-500">
                     {getTypeLabel(selectedFeedback.type)}
@@ -422,17 +425,17 @@ export default function FeedbackAdminPanel() {
                 </div>
 
                 <div className="text-xs text-gray-400 dark:text-gray-500 space-y-1">
-                  <p>提交者: {selectedFeedback.userName || selectedFeedback.userEmail}</p>
-                  <p>提交时间: {new Date(selectedFeedback.createdAt).toLocaleString()}</p>
+                  <p>{t('adminFeedback.submitter')}: {selectedFeedback.userName || selectedFeedback.userEmail}</p>
+                  <p>{t('adminFeedback.submitTime')}: {new Date(selectedFeedback.createdAt).toLocaleString()}</p>
                   {selectedFeedback.category && (
-                    <p>分类: {selectedFeedback.category}</p>
+                    <p>{t('adminFeedback.category')}: {selectedFeedback.category}</p>
                   )}
                 </div>
 
                 {selectedFeedback.adminReply && (
                   <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                     <p className="text-xs font-medium text-blue-700 dark:text-blue-400 mb-1">
-                      管理员回复
+                      {t('adminFeedback.adminReply')}
                     </p>
                     <p className="text-sm text-blue-900 dark:text-blue-200 whitespace-pre-wrap">
                       {selectedFeedback.adminReply}
@@ -448,13 +451,13 @@ export default function FeedbackAdminPanel() {
                 {/* Reply Section */}
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    回复
+                    {t('adminFeedback.replyLabel')}
                   </label>
                   <textarea
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
                     rows={4}
-                    placeholder="输入回复内容..."
+                    placeholder={t('adminFeedback.replyPlaceholder')}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
                   />
                   <div className="flex items-center justify-between mt-3">
@@ -466,7 +469,7 @@ export default function FeedbackAdminPanel() {
                           }
                           className="px-3 py-1.5 text-sm border border-blue-300 dark:border-blue-600 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         >
-                          标记处理中
+                          {t('adminFeedback.markProcessing')}
                         </button>
                       )}
                       {selectedFeedback.status === "resolved" && (
@@ -476,7 +479,7 @@ export default function FeedbackAdminPanel() {
                           }
                           className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         >
-                          关闭
+                          {t('adminFeedback.closeFeedback')}
                         </button>
                       )}
                     </div>
@@ -488,14 +491,14 @@ export default function FeedbackAdminPanel() {
                         }}
                         className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       >
-                        取消
+                        {t('adminFeedback.cancel')}
                       </button>
                       <button
                         onClick={handleReply}
                         disabled={!replyContent.trim() || submitting}
                         className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {submitting ? "提交中..." : "回复并解决"}
+                        {submitting ? t('adminFeedback.submitting') : t('adminFeedback.replyAndResolve')}
                       </button>
                     </div>
                   </div>

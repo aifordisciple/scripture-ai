@@ -3,6 +3,7 @@
 import { memo, useMemo } from 'react'
 import { Clock, Search, BookOpen, Tag } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslation } from '@/lib/i18n'
 
 export interface SearchSuggestionsProps {
   query: string
@@ -66,6 +67,7 @@ function SearchHistory({
   searches: string[]
   onSelect: (query: string) => void
 }) {
+  const { t } = useTranslation()
   if (searches.length === 0) return null
 
   const limitedSearches = searches.slice(0, MAX_HISTORY)
@@ -74,7 +76,7 @@ function SearchHistory({
     <div className="mb-2">
       <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 uppercase tracking-wide">
         <Clock className="w-3.5 h-3.5" />
-        最近搜索
+        {t('bible.recentSearches')}
       </div>
       {limitedSearches.map((search, index) => (
         <SuggestionItem
@@ -98,6 +100,7 @@ function VerseSuggestions({
   query: string
   onSelect: (suggestion: string) => void
 }) {
+  const { t } = useTranslation()
   if (suggestions.length === 0) return null
 
   const limitedSuggestions = suggestions.slice(0, MAX_SUGGESTIONS)
@@ -106,7 +109,7 @@ function VerseSuggestions({
     <div>
       <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 uppercase tracking-wide">
         <BookOpen className="w-3.5 h-3.5" />
-        经文
+        {t('bible.verses')}
       </div>
       {limitedSuggestions.map((suggestion, index) => (
         <SuggestionItem
@@ -131,6 +134,7 @@ function TopicSuggestions({
   query: string
   onSelect: (suggestion: string) => void
 }) {
+  const { t } = useTranslation()
   if (suggestions.length === 0) return null
 
   const limitedSuggestions = suggestions.slice(0, MAX_SUGGESTIONS)
@@ -139,7 +143,7 @@ function TopicSuggestions({
     <div>
       <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 uppercase tracking-wide">
         <Tag className="w-3.5 h-3.5" />
-        主题
+        {t('bible.topics')}
       </div>
       {limitedSuggestions.map((suggestion, index) => (
         <SuggestionItem
@@ -156,10 +160,11 @@ function TopicSuggestions({
 
 // 空状态
 function EmptyState() {
+  const { t } = useTranslation()
   return (
     <div className="py-6 text-center text-sm text-slate-400">
       <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
-      <p>输入关键词搜索经文</p>
+      <p>{t('bible.searchEmptyHint')}</p>
     </div>
   )
 }
@@ -173,6 +178,7 @@ export const SearchSuggestions = memo(function SearchSuggestions({
   onSelect,
   onHistorySelect,
 }: SearchSuggestionsProps) {
+  const { t } = useTranslation()
   const hasQuery = query.trim().length > 0
   const hasHistory = recentSearches.length > 0
   const hasVerseSuggestions = verseSuggestions.length > 0
@@ -194,8 +200,8 @@ export const SearchSuggestions = memo(function SearchSuggestions({
   if (!hasVerseSuggestions && !hasTopicSuggestions) {
     return (
       <div className="py-4 text-center text-sm text-slate-400">
-        <p>未找到相关结果</p>
-        <p className="text-xs mt-1">尝试其他关键词或使用AI搜索</p>
+        <p>{t('bible.noResults')}</p>
+        <p className="text-xs mt-1">{t('bible.tryOtherKeywords')}</p>
       </div>
     )
   }

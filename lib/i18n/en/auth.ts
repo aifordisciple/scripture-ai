@@ -1,6 +1,18 @@
 export const auth = {
   auth: {
     login: 'Log In',
+    register: 'Register',
+    welcomeBack: 'Welcome Back',
+    createAccount: 'Create Account',
+    emailOrPasswordError: 'Invalid email or password',
+    registerFailed: 'An error occurred, please try again',
+    enterName: 'Nickname',
+    enterEmail: 'Email address',
+    enterPassword: 'Password',
+    noAccount: "Don't have an account?",
+    hasAccount: 'Already have an account?',
+    goToRegister: 'Sign up',
+    goToLogin: 'Sign in',
     dashboard: 'Reading Stats',
     settings: 'Settings',
     aiModelApiSettings: 'AI Model & API Settings',
@@ -12,6 +24,7 @@ export const auth = {
     notifications: 'Notifications',
     groupReading: 'Group Reading',
     feedbackManagement: 'Feedback Management',
+    feedback: 'Feedback',
     logout: 'Log Out',
   },
 } as const

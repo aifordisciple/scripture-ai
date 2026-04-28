@@ -4,7 +4,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { getBookDisplayName } from "@/lib/constants";
-import { Loader2, ExternalLink, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Loader2, ExternalLink, ChevronDown, ChevronUp, Sparkles, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
 
@@ -19,6 +19,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
   const { t } = useTranslation();
   const [results, setResults] = useState<any[]>(cachedResults || []);
   const [loading, setLoading] = useState(!cachedResults);
+  const [error, setError] = useState<string | null>(null);
   const [aiSummary, setAiSummary] = useState<string>('');
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
 
@@ -36,12 +37,19 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
 
     async function search() {
       setLoading(true);
+      setError(null);
       try {
         const res = await fetch('/api/search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query, mode, apiConfig, locale })
         });
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => ({}));
+          setError(errJson.error || (locale === 'en' ? 'Search failed, please try again' : '搜索失败，请重试'));
+          setResults([]);
+          return;
+        }
         const json = await res.json();
         const data = json.data || [];
         setResults(data);
@@ -54,6 +62,8 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
         if (onUpdateResultsRef.current) onUpdateResultsRef.current(data);
       } catch (error) {
         console.error(error);
+        setError(locale === 'en' ? 'Network error, please check your connection' : '网络错误，请检查网络连接');
+        setResults([]);
       } finally {
         setLoading(false);
       }
@@ -91,6 +101,15 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
         <p>
             {mode === 'ai' ? t('search.aiThinking') : t('search.searching')}
         </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 gap-3">
+        <AlertCircle className="w-8 h-8 text-red-400" />
+        <p className="text-red-500">{error}</p>
       </div>
     );
   }

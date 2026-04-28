@@ -107,9 +107,14 @@ export async function POST(req: Request) {
 
       const jsonString = cleanAIResponse(text);
       const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) return NextResponse.json({ data: [] });
+      if (!jsonMatch) return NextResponse.json({ data: [], error: 'AI returned invalid format' });
 
-      const parsed = JSON.parse(jsonMatch[0]);
+      let parsed: any;
+      try {
+        parsed = JSON.parse(jsonMatch[0]);
+      } catch {
+        return NextResponse.json({ data: [], error: 'AI returned malformed JSON' });
+      }
       const verses = parsed.verses || [];
       const aiSummary = parsed.summary || '';
 
@@ -129,7 +134,7 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error("Search API Error:", error);
-    return NextResponse.json({ data: [] });
+    return NextResponse.json({ data: [], error: 'Search failed, please try again' }, { status: 500 });
   }
 }
 
@@ -171,9 +176,14 @@ export async function GET(request: Request) {
 
       const jsonString = cleanAIResponse(text);
       const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) return NextResponse.json({ data: [] });
+      if (!jsonMatch) return NextResponse.json({ data: [], error: 'AI returned invalid format' });
 
-      const parsed = JSON.parse(jsonMatch[0]);
+      let parsed: any;
+      try {
+        parsed = JSON.parse(jsonMatch[0]);
+      } catch {
+        return NextResponse.json({ data: [], error: 'AI returned malformed JSON' });
+      }
       const verses = parsed.verses || [];
       const aiSummary = parsed.summary || '';
 
@@ -193,6 +203,6 @@ export async function GET(request: Request) {
 
   } catch (error) {
     console.error("Search API Error:", error);
-    return NextResponse.json({ data: [] });
+    return NextResponse.json({ data: [], error: 'Search failed, please try again' }, { status: 500 });
   }
 }

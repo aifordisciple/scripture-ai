@@ -217,7 +217,7 @@ export function UserMenu() {
           {/* 意见反馈 - 提交新反馈 */}
           <MenuItem
             icon={<MessageSquare className="w-4 h-4 text-green-600 dark:text-green-400" />}
-            label="意见反馈"
+            label={t('auth.feedback')}
             onClick={() => { setIsOpen(false); setFeedbackDialogOpen(true); }}
           />
 

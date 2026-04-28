@@ -83,7 +83,10 @@ export async function generateConnectionDescriptions(
     return parsed;
   } catch (error) {
     console.error('[CrossRef AI] Failed to generate descriptions:', error);
-    return new Map();
+    // 返回带错误标记的结果，而非静默返回空 Map
+    const errorResult = new Map<string, string>();
+    errorResult.set('__error__', 'AI 服务暂时不可用，请稍后重试');
+    return errorResult;
   }
 }
 

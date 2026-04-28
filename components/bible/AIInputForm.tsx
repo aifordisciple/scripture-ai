@@ -3,6 +3,7 @@
 import { memo } from 'react'
 import { Send, StopCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from '@/lib/i18n'
 
 export interface AIInputFormProps {
   input: string
@@ -19,6 +20,7 @@ export const AIInputForm = memo(function AIInputForm({
   onSubmit,
   onStop,
 }: AIInputFormProps) {
+  const { t } = useTranslation()
   return (
     <div className="bg-white dark:bg-slate-900 flex-shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
       <div className="p-4 safe-area-bottom">
@@ -27,7 +29,7 @@ export const AIInputForm = memo(function AIInputForm({
             className="flex-1 px-4 py-3 pr-12 border border-slate-200 dark:border-slate-700 rounded-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50 dark:bg-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-900"
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
-            placeholder="追问..."
+            placeholder={t('bible.followUpPlaceholder')}
             disabled={isLoading}
           />
 
@@ -39,7 +41,7 @@ export const AIInputForm = memo(function AIInputForm({
                 variant="destructive"
                 className="h-8 w-8 rounded-full"
                 onClick={onStop}
-                aria-label="停止"
+                aria-label={t('bible.stop')}
               >
                 <StopCircle className="w-4 h-4" />
               </Button>
@@ -49,7 +51,7 @@ export const AIInputForm = memo(function AIInputForm({
                 size="icon"
                 disabled={!input.trim()}
                 className="h-8 w-8 rounded-full bg-blue-600 hover:bg-blue-700"
-                aria-label="发送"
+                aria-label={t('bible.send')}
               >
                 <Send className="w-4 h-4" />
               </Button>
@@ -58,7 +60,7 @@ export const AIInputForm = memo(function AIInputForm({
         </form>
 
         <div className="mt-2 text-[10px] text-center text-slate-400 select-none">
-          ⚠️ AI 辅助仅供参考，请依靠圣灵与圣经原文。
+          {t('bible.aiDisclaimer')}
         </div>
       </div>
     </div>

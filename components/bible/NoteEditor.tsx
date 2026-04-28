@@ -7,10 +7,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Loader2, Sparkles, Save, BookOpen } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useTranslation } from "@/lib/i18n";
 
 export function NoteEditor() {
   const { isNoteOpen, closeNoteEditor, noteTargetVerse, addNote, updateNote, notes } = useBibleStore();
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [content, setContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -40,7 +42,7 @@ export function NoteEditor() {
       });
       const data = await res.json();
       if (data.prayer) {
-        setContent(prev => prev + "\n\n🙏 **祷告文：**\n" + data.prayer);
+        setContent(prev => prev + `\n\n🙏 **${t('bible.prayerLabel')}：**\n` + data.prayer);
       }
     } catch (e) {
       console.error(e);
@@ -72,7 +74,7 @@ export function NoteEditor() {
           })
         });
         if (!res.ok) {
-          throw new Error('保存失败，请重试');
+          throw new Error(t('bible.saveFailed'));
         }
         const data = await res.json();
         // 用服务端返回的真实ID更新本地
@@ -105,7 +107,7 @@ export function NoteEditor() {
       closeNoteEditor();
     } catch (e) {
       console.error(e);
-      setSaveError(e instanceof Error ? e.message : '保存失败，请重试');
+      setSaveError(e instanceof Error ? e.message : t('bible.saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -119,7 +121,7 @@ export function NoteEditor() {
         <SheetHeader className="mb-4 shrink-0">
           <SheetTitle className="flex items-center gap-2 text-xl">
             <BookOpen className="w-5 h-5 text-blue-600" />
-            灵修笔记
+            {t('bible.devotionalNote')}
           </SheetTitle>
           <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">
             {noteTargetVerse.bookId} {noteTargetVerse.chapter}:{noteTargetVerse.verse}
@@ -129,12 +131,12 @@ export function NoteEditor() {
         <div className="flex-1 flex flex-col gap-4 min-h-0 relative">
           {/* 加入一个提示角标 */}
           <div className="absolute top-2 right-4 text-[10px] text-slate-400 pointer-events-none select-none">
-            支持 Markdown 格式
+            {t('bible.markdownHint')}
           </div>
           
           <textarea
             className="flex-1 w-full p-4 pt-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 font-sans leading-relaxed text-[15px] text-slate-700 dark:text-slate-300 shadow-inner"
-            placeholder="写下你的感动、思考或疑问..."
+            placeholder={t('bible.notePlaceholder')}
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
@@ -150,11 +152,11 @@ export function NoteEditor() {
               className="gap-2 border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-900 dark:text-purple-300 dark:hover:bg-purple-900/20 rounded-full"
             >
               {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              生成祷告
+              {t('bible.generatePrayer')}
             </Button>
             <Button onClick={handleSave} disabled={isSaving || !content.trim()} className="gap-2 bg-blue-600 hover:bg-blue-700 rounded-full font-bold px-6">
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              保存笔记
+              {t('bible.saveNote')}
             </Button>
           </div>
         </div>

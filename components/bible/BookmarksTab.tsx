@@ -8,10 +8,12 @@ import { BIBLE_BOOKS } from "@/lib/constants";
 import { Bookmark, ChevronRight, Trash2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export function BookmarksTab() {
   const router = useRouter();
   const { bookmarks, removeBookmark, tabs, addTab, setActiveTab } = useBibleStore();
+  const { t } = useTranslation();
 
   // 按书卷分组书签
   const groupedBookmarks = useMemo(() => {
@@ -59,9 +61,9 @@ export function BookmarksTab() {
           <Bookmark className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">我的书签</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('bible.myBookmarks')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            共 {bookmarks.length} 个书签。点击可快速跳转到对应章节。
+            {t('bible.bookmarkCount', { count: bookmarks.length })}
           </p>
         </div>
       </div>
@@ -69,8 +71,8 @@ export function BookmarksTab() {
       {bookmarks.length === 0 ? (
         <div className="text-center py-20 opacity-40 select-none">
           <Bookmark className="w-16 h-16 mx-auto mb-4 stroke-[1.5]" />
-          <p className="text-lg">您还没有添加书签</p>
-          <p className="text-sm mt-2">在阅读经文时点击书签图标即可添加</p>
+          <p className="text-lg">{t('bible.noBookmarks')}</p>
+          <p className="text-sm mt-2">{t('bible.addBookmarkHint')}</p>
         </div>
       ) : (
         <div className="space-y-8">
@@ -96,14 +98,14 @@ export function BookmarksTab() {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                          第 {item.chapter} 章
+                          {t('bible.chapterLabel', { chapter: item.chapter })}
                         </span>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={(e) => handleRemove(e, item.id)}
-                          title="移除书签"
+                          title={t('bible.removeBookmark')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>

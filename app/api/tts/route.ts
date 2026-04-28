@@ -1,31 +1,32 @@
 // app/api/tts/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { randomUUID } from 'crypto';
 
-const execAsync = promisify(exec);
-export const runtime = 'nodejs'; 
+const execFileAsync = promisify(execFile);
+export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   let tempFilePath = '';
-  
+
   try {
     const { text } = await req.json();
-    if (!text) return new NextResponse('Missing text', { status: 400 });
+    if (!text || typeof text !== 'string') return new NextResponse('Missing text', { status: 400 });
 
-    const safeText = text.slice(0, 5000).replace(/"/g, '\\"');
+    const safeText = text.slice(0, 5000);
     const fileName = `tts-${randomUUID()}.mp3`;
     const tempDir = process.platform === 'win32' ? path.join(process.cwd(), '.next/cache') : '/tmp';
-    
+
     if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
-    
+
     tempFilePath = path.join(tempDir, fileName);
     const scriptPath = path.join(process.cwd(), 'scripts/tts.py');
 
-    await execAsync(`python3 "${scriptPath}" "${safeText}" "${tempFilePath}"`);
+    // 使用 execFile 传递参数数组，避免 shell 解析和命令注入
+    await execFileAsync('python3', [scriptPath, safeText, tempFilePath]);
 
     const audioBuffer = fs.readFileSync(tempFilePath);
     fs.unlink(tempFilePath, () => {}); // 异步清理

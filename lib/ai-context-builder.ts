@@ -23,6 +23,7 @@ export interface UserAIContext {
     lastChapter?: number
     streakDays: number
   }
+  error?: string // [P1-6修复] 标记服务不可用
   toPromptString: () => string
 }
 
@@ -123,7 +124,7 @@ export async function buildAIContext(userId: string): Promise<UserAIContext> {
     })
   } catch (error) {
     console.error('[AI Context] Error building context:', error)
-    // 返回默认上下文
+    // [P1-6修复] 返回带错误标记的默认上下文，而非静默返回
     return createAIContextObject({
       stylePreference: {
         detailLevel: 'balanced',
@@ -133,7 +134,7 @@ export async function buildAIContext(userId: string): Promise<UserAIContext> {
       favoriteBooks: [],
       recentTopics: [],
       readingHistory: { streakDays: 0 },
-    })
+    }, 'AI 上下文服务暂时不可用，使用默认设置')
   }
 }
 
@@ -149,9 +150,10 @@ function createAIContextObject(data: {
     lastChapter?: number
     streakDays: number
   }
-}): UserAIContext {
+}, error?: string): UserAIContext {
   return {
     ...data,
+    error,
     toPromptString: () => formatContextAsPrompt(data),
   }
 }
@@ -212,9 +214,13 @@ export async function getAIContextPrompt(userId: string | null | undefined): Pro
 
   try {
     const context = await buildAIContext(userId)
+    // [P1-6修复] 如果有错误标记，返回错误提示而非空字符串
+    if (context.error) {
+      return `[注意：${context.error}]\n\n${context.toPromptString()}`
+    }
     return context.toPromptString()
   } catch (error) {
     console.error('[AI Context] Error getting context prompt:', error)
-    return ''
+    return '[注意：AI 上下文服务暂时不可用]'
   }
 }

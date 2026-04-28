@@ -42,13 +42,15 @@ const RETRY_BASE_DELAY_MS = 1000; // 1s, 2s
  * Extract API config from request body safely
  * Call this at the start of each API route
  */
-export async function extractApiConfig(req: Request): Promise<{ apiConfig?: AIConfig; body: Record<string, unknown> }> {
+export async function extractApiConfig(req: Request): Promise<{ apiConfig?: AIConfig; body: Record<string, unknown>; error?: string }> {
   try {
     const body = await req.json();
     const { apiConfig, ...rest } = body;
     return { apiConfig, body: rest };
-  } catch {
-    return { body: {} };
+  } catch (parseError) {
+    // [P1-6修复] 返回错误标记而非静默返回空body
+    console.error('[AI Client] Failed to parse request body:', parseError);
+    return { body: {}, error: '请求体解析失败' };
   }
 }
 
@@ -280,10 +282,29 @@ export function getAIModelSync(config?: AIConfig): ReturnType<ReturnType<typeof 
   // MiniMax compatibility
   const isMiniMax = baseUrl.includes('minimax');
 
+  // [P3-10修复] 同步版本也添加 MiniMax 兼容的 customFetch
+  const customFetch = async (url: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    if (isMiniMax && init?.body) {
+      const body = typeof init.body === 'string' ? JSON.parse(init.body) : init.body;
+      const cleanBody: Record<string, any> = {
+        model: body.model,
+        messages: body.messages,
+        stream: body.stream === true,
+      };
+      if (body.temperature !== undefined) cleanBody.temperature = body.temperature;
+      if (body.max_tokens !== undefined) cleanBody.max_tokens = body.max_tokens;
+      if (body.top_p !== undefined) cleanBody.top_p = body.top_p;
+      cleanBody.disable_thinking = true;
+      return fetch(url, { ...init, body: JSON.stringify(cleanBody) });
+    }
+    return fetch(url, init);
+  };
+
   const client = createOpenAI({
     baseURL: baseUrl,
     apiKey,
     compatibility: isMiniMax ? 'compatible' : 'strict',
+    fetch: isMiniMax ? customFetch : undefined,
   });
 
   return client(modelName);

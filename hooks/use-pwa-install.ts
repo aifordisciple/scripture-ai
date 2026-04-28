@@ -50,10 +50,15 @@ export function usePWAInstall(): PWAInstallState {
   const [isInstalled, setIsInstalled] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
-  // 检测 iOS Safari
-  const isIOS = typeof window !== 'undefined' &&
-    /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-    !(window as any).MSStream;
+  // 检测 iOS Safari - SSR 安全：在 useEffect 中计算而非组件顶层
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+    setIsIOS(
+      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+      !(window as any).MSStream
+    );
+  }, []);
 
   // 检测是否可以安装
   const canInstall = !!installPrompt;

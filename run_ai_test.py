@@ -12,10 +12,10 @@ async def main():
     parser.add_argument("-m", "--model", default="qwen3.5-plus", help="模型名称 (默认: minimax)")
     parser.add_argument("-b", "--base-url", default="https://coding.dashscope.aliyuncs.com/v1", help="API Base URL")
     
-    # --- 这里设置了 API Key, Username, Password 的默认参数 ---
-    parser.add_argument("-k", "--api-key", default="sk-sp-44d5669f825a46e1a7ff783464048554", help="API Key (默认使用硬编码的Key，或通过环境变量覆盖)")
-    parser.add_argument("-usr", "--username", default="admin@autonome.com", help="测试用登录账号 (默认: admin)")
-    parser.add_argument("-pwd", "--password", default="admin123", help="测试用登录密码 (默认: 123456)")
+    # --- API Key, Username, Password 从环境变量获取，不再硬编码 ---
+    parser.add_argument("-k", "--api-key", default=os.environ.get("AI_TEST_API_KEY", ""), help="API Key (从环境变量 AI_TEST_API_KEY 获取)")
+    parser.add_argument("-usr", "--username", default=os.environ.get("AI_TEST_USERNAME", ""), help="测试用登录账号 (从环境变量 AI_TEST_USERNAME 获取)")
+    parser.add_argument("-pwd", "--password", default=os.environ.get("AI_TEST_PASSWORD", ""), help="测试用登录密码 (从环境变量 AI_TEST_PASSWORD 获取)")
     # ---------------------------------------------------------
     
     parser.add_argument("-o", "--output", default="test_report.md", help="测试报告输出路径")

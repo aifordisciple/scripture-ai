@@ -3,6 +3,7 @@
 import { ZoomIn, ZoomOut, Maximize2, Download, X, FileText, Image, MoreVertical } from 'lucide-react';
 import { LayoutType, LAYOUT_OPTIONS } from './MindMapCanvas';
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from '@/lib/i18n';
 
 interface MindMapToolbarProps {
   zoom: number;
@@ -32,6 +33,7 @@ export function MindMapToolbar({
   const [showLayoutMenu, setShowLayoutMenu] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const layoutMenuRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   // 点击外部关闭菜单
   useEffect(() => {
@@ -51,8 +53,9 @@ export function MindMapToolbar({
     };
   }, []);
 
-  // 获取当前布局的中文名称
-  const currentLayoutLabel = LAYOUT_OPTIONS.find(o => o.value === currentLayout)?.label || '布局';
+  // 获取当前布局的名称
+  const currentLayoutKey = LAYOUT_OPTIONS.find(o => o.value === currentLayout)?.label || 'mindmap.layoutDefault';
+  const currentLayoutLabel = t(currentLayoutKey);
 
   return (
     <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 gap-1 sm:gap-2">
@@ -61,7 +64,7 @@ export function MindMapToolbar({
         <button
           onClick={onZoomOut}
           className="p-2 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors touch-manipulation"
-          title="缩小"
+          title={t('mindmap.zoomOut')}
         >
           <ZoomOut className="w-5 h-5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
         </button>
@@ -73,7 +76,7 @@ export function MindMapToolbar({
         <button
           onClick={onZoomIn}
           className="p-2 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors touch-manipulation"
-          title="放大"
+          title={t('mindmap.zoomIn')}
         >
           <ZoomIn className="w-5 h-5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
         </button>
@@ -81,7 +84,7 @@ export function MindMapToolbar({
         <button
           onClick={onResetZoom}
           className="p-2 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors touch-manipulation hidden sm:block"
-          title="重置视图"
+          title={t('mindmap.resetView')}
         >
           <Maximize2 className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
@@ -97,7 +100,7 @@ export function MindMapToolbar({
         >
           {LAYOUT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
-              {option.label}
+              {t(option.label)}
             </option>
           ))}
         </select>
@@ -126,7 +129,7 @@ export function MindMapToolbar({
                     : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                 }`}
               >
-                {option.label}
+                {t(option.label)}
               </button>
             ))}
           </div>
@@ -142,7 +145,7 @@ export function MindMapToolbar({
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm transition-colors"
           >
             <Image className="w-4 h-4" />
-            导出图片
+            {t('mindmap.exportImage')}
           </button>
           {onExportMarkdown && (
             <button
@@ -150,7 +153,7 @@ export function MindMapToolbar({
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-500 hover:bg-gray-600 active:bg-gray-700 text-white text-sm transition-colors"
             >
               <FileText className="w-4 h-4" />
-              导出MD
+              {t('mindmap.exportMD')}
             </button>
           )}
         </div>
@@ -160,7 +163,7 @@ export function MindMapToolbar({
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors touch-manipulation"
-            title="更多操作"
+            title={t('mindmap.moreActions')}
           >
             <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
@@ -176,7 +179,7 @@ export function MindMapToolbar({
                 className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 touch-manipulation"
               >
                 <Image className="w-4 h-4" />
-                导出图片
+                {t('mindmap.exportImage')}
               </button>
               {onExportMarkdown && (
                 <button
@@ -187,7 +190,7 @@ export function MindMapToolbar({
                   className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 touch-manipulation"
                 >
                   <FileText className="w-4 h-4" />
-                  导出Markdown
+                  {t('mindmap.exportMarkdown')}
                 </button>
               )}
               <button
@@ -198,7 +201,7 @@ export function MindMapToolbar({
                 className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 touch-manipulation sm:hidden"
               >
                 <Maximize2 className="w-4 h-4" />
-                重置视图
+                {t('mindmap.resetView')}
               </button>
             </div>
           )}
@@ -208,7 +211,7 @@ export function MindMapToolbar({
         <button
           onClick={onClose}
           className="p-2 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors touch-manipulation"
-          title="关闭"
+          title={t('mindmap.close')}
         >
           <X className="w-5 h-5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
         </button>

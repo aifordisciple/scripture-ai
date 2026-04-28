@@ -140,29 +140,31 @@ export function AISidebar() {
 
   // 屏幕防睡眠
   useEffect(() => {
-    let wakeLock: any = null
+    // [P3-3修复] 使用数组追踪所有 wake lock 引用，防止覆盖泄漏
+    const wakeLocks: any[] = []
     const requestWakeLock = async () => {
       try {
         if ('wakeLock' in navigator && isLoading) {
-          wakeLock = await (navigator as any).wakeLock.request('screen')
+          const lock = await (navigator as any).wakeLock.request('screen')
+          wakeLocks.push(lock)
         }
       } catch (err) {}
     }
-    const releaseWakeLock = async () => {
-      if (wakeLock) {
-        try { await wakeLock.release() } catch (e) {}
-        wakeLock = null
+    const releaseAllWakeLocks = async () => {
+      for (const lock of wakeLocks) {
+        try { await lock.release() } catch (e) {}
       }
+      wakeLocks.length = 0
     }
     if (isLoading) requestWakeLock()
-    else releaseWakeLock()
+    else releaseAllWakeLocks()
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && isLoading) requestWakeLock()
     }
     document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => {
-      releaseWakeLock()
+      releaseAllWakeLocks()
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [isLoading])
@@ -247,6 +249,8 @@ export function AISidebar() {
   }, [isAiOpen, currentSessionId, setMessages, setMessagesLoading, setSessionStatus, setSessionError])
 
   // 创建临时会话
+  // 注意：不再调用 setMessages([])，因为更改 chatKey 已经创建新的空 SWR 缓存条目。
+  // 之前的 setMessages([]) 会在 sendMessage effect 的 append() 之后运行，导致竞态条件清除用户消息。
   useEffect(() => {
     if (sessionsLoading) return
 
@@ -255,17 +259,22 @@ export function AISidebar() {
       setChatKey(`chat-${Date.now()}`)
       setCurrentSessionId(tempId)
       setSessionStatus('idle')
-      setMessages([])
       loadedSessionRef.current = tempId
     }
-  }, [isAiOpen, currentSessionId, sessionsLoading, sessionStatus, setCurrentSessionId, setMessages, setSessionStatus, setChatKey])
+  }, [isAiOpen, currentSessionId, sessionsLoading, sessionStatus, setCurrentSessionId, setSessionStatus, setChatKey])
 
   // 重置状态 - 仅在切换会话时重置，关闭侧边栏时不重置
   // 避免关闭再打开时从服务器重新加载消息覆盖 useChat 内存中的消息
   // loadedSessionRef 会在 handleSelectSession/handleNewSession 中正确更新
 
-  // 保存临时会话
+  // 保存临时会话 - 未登录时跳过服务器端创建，直接使用临时ID
   const savePendingSession = useCallback(async (tempId: string, firstMessage?: string): Promise<string | null> => {
+    // 未认证用户不需要创建服务器端会话，直接使用临时ID即可
+    if (status !== 'authenticated') {
+      setSessionStatus('ready')
+      return tempId
+    }
+
     setSessionStatus('creating')
 
     let title = t('ai.newChat')
@@ -313,7 +322,7 @@ export function AISidebar() {
       setSessionStatus('error')
       return null
     }
-  }, [aiMode, aiRequestTrigger, addSession, setSessionStatus, setSessionError])
+  }, [status, aiMode, aiRequestTrigger, addSession, setSessionStatus, setSessionError])
 
   // 会话操作
   const handleNewSession = useCallback(async () => {
@@ -418,7 +427,11 @@ export function AISidebar() {
 
   // 收藏消息
   const handleSaveInsight = useCallback(async (messageId: string, content: string) => {
-    if (!aiRequestTrigger) return
+    // [P3-2修复] 无触发源时显示提示而非静默失败
+    if (!aiRequestTrigger) {
+      addToast({ type: 'warning', message: t('ai.selectVerseFirst') || '请先选择经文' })
+      return
+    }
 
     const res = await fetch('/api/insights', {
       method: 'POST',
@@ -436,12 +449,15 @@ export function AISidebar() {
     addSavedInsight(insight)
   }, [aiRequestTrigger, addSavedInsight])
 
-  // 清空对话
+  // 清空对话 - [P3-1修复] 使用 toast 确认而非原生 confirm()
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
   const handleClearChat = async () => {
-    if (confirm(t('ai.clearAllConfirm'))) {
-      setMessages([])
-      await fetch('/api/chat/history', { method: 'DELETE' })
-    }
+    setShowClearConfirm(true)
+  }
+  const confirmClearChat = async () => {
+    setShowClearConfirm(false)
+    setMessages([])
+    await fetch('/api/chat/history', { method: 'DELETE' })
   }
 
   // [P1-1修复] 组件卸载时中止AI请求，防止内存泄漏和过期状态更新
@@ -476,9 +492,12 @@ export function AISidebar() {
   }
 
   // 处理 AI 请求触发
+  // [修复] 等待 currentSessionId 被设置后再发送消息，避免竞态条件
   useEffect(() => {
     if (!aiRequestTrigger) return
     if (aiRequestTrigger.timestamp === lastProcessedTimeRef.current) return
+    // 等待会话ID被创建，避免在 null sessionId 时发送消息
+    if (!currentSessionId) return
 
     lastProcessedTimeRef.current = aiRequestTrigger.timestamp
     shouldAutoScrollRef.current = true
@@ -766,6 +785,16 @@ export function AISidebar() {
             <Button variant="ghost" size="icon" onClick={handleClearChat} title={t('ai.clear')}>
               <Eraser className="w-4 h-4 text-slate-400" />
             </Button>
+            {/* [P3-1修复] 自定义确认对话框替代原生 confirm() */}
+            {showClearConfirm && (
+              <div className="absolute top-12 right-2 z-50 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-3 text-sm">
+                <p className="mb-2 text-slate-700 dark:text-slate-200">{t('ai.clearAllConfirm')}</p>
+                <div className="flex gap-2 justify-end">
+                  <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200">{t('common.cancel') || '取消'}</button>
+                  <button onClick={confirmClearChat} className="px-3 py-1 text-xs rounded-md bg-red-500 text-white hover:bg-red-600">{t('common.confirm') || '确认'}</button>
+                </div>
+              </div>
+            )}
             <Button variant="ghost" size="icon" onClick={() => { setAiOpen(false); clearSelection(); }} className="dark:text-slate-400 dark:hover:bg-slate-800">
               <X className="w-5 h-5" />
             </Button>

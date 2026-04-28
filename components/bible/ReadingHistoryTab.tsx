@@ -9,10 +9,12 @@ import { History, Clock, TrendingUp, Search, X, Trash2, ChevronRight, BookOpen }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export function ReadingHistoryTab() {
   const router = useRouter();
   const { readingHistory, clearReadingHistory, getContinueReading, tabs, addTab, setActiveTab } = useBibleStore();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
 
   // 搜索过滤
@@ -37,11 +39,11 @@ export function ReadingHistoryTab() {
     filteredHistory.forEach(h => {
       let groupKey: string;
       if (h.timestamp >= todayTimestamp) {
-        groupKey = "今天";
+        groupKey = t('bible.today');
       } else if (h.timestamp >= yesterdayTimestamp) {
-        groupKey = "昨天";
+        groupKey = t('bible.yesterday');
       } else if (h.timestamp >= weekAgoTimestamp) {
-        groupKey = "本周";
+        groupKey = t('bible.thisWeek');
       } else {
         const date = new Date(h.timestamp);
         groupKey = date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
@@ -72,13 +74,13 @@ export function ReadingHistoryTab() {
 
   // 格式化时长
   const formatDuration = (seconds: number) => {
-    if (seconds < 60) return `${seconds}秒`;
+    if (seconds < 60) return t('bible.secondsUnit', { count: seconds });
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    if (minutes < 60) return secs > 0 ? `${minutes}分${secs}秒` : `${minutes}分钟`;
+    if (minutes < 60) return secs > 0 ? t('bible.minutesSecondsUnit', { minutes, seconds: secs }) : t('bible.minutesUnit', { count: minutes });
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return mins > 0 ? `${hours}小时${mins}分钟` : `${hours}小时`;
+    return mins > 0 ? t('bible.hoursMinutesUnit', { hours, minutes: mins }) : t('bible.hoursUnit', { count: hours });
   };
 
   // 格式化时间
@@ -110,7 +112,7 @@ export function ReadingHistoryTab() {
 
   // 清除历史
   const handleClearHistory = () => {
-    if (confirm('确定要清除所有阅读历史吗？此操作无法撤销。')) {
+    if (confirm(t('bible.confirmClearHistory'))) {
       clearReadingHistory();
     }
   };
@@ -123,9 +125,9 @@ export function ReadingHistoryTab() {
           <History className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">阅读历史</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('bible.readingHistory')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            共 {readingHistory.length} 条记录
+            {t('bible.historyCount', { count: readingHistory.length })}
           </p>
         </div>
         {readingHistory.length > 0 && (
@@ -136,7 +138,7 @@ export function ReadingHistoryTab() {
             onClick={handleClearHistory}
           >
             <Trash2 className="w-4 h-4 mr-1" />
-            清除历史
+            {t('bible.clearHistory')}
           </Button>
         )}
       </div>
@@ -147,7 +149,7 @@ export function ReadingHistoryTab() {
           <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/40 border border-emerald-200 dark:border-emerald-800">
             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-1">
               <Clock className="w-4 h-4" />
-              <span className="text-xs font-medium">今日阅读</span>
+              <span className="text-xs font-medium">{t('bible.todayReading')}</span>
             </div>
             <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
               {formatDuration(todayStats.totalDuration)}
@@ -156,19 +158,19 @@ export function ReadingHistoryTab() {
           <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/40 border border-blue-200 dark:border-blue-800">
             <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-1">
               <BookOpen className="w-4 h-4" />
-              <span className="text-xs font-medium">阅读章节</span>
+              <span className="text-xs font-medium">{t('bible.readChapters')}</span>
             </div>
             <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-              {todayStats.chaptersRead} 章
+              {t('bible.chaptersUnit', { count: todayStats.chaptersRead })}
             </p>
           </div>
           <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-900/40 border border-purple-200 dark:border-purple-800">
             <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-1">
               <TrendingUp className="w-4 h-4" />
-              <span className="text-xs font-medium">阅读次数</span>
+              <span className="text-xs font-medium">{t('bible.readCount')}</span>
             </div>
             <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-              {todayStats.recordCount} 次
+              {t('bible.countUnit', { count: todayStats.recordCount })}
             </p>
           </div>
         </div>
@@ -183,14 +185,14 @@ export function ReadingHistoryTab() {
                 <ChevronRight className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">继续阅读</p>
+                <p className="text-sm text-muted-foreground">{t('bible.continueReading')}</p>
                 <p className="font-bold text-foreground">
-                  {BIBLE_BOOKS.find(b => b.id === continueReading.bookId)?.name} 第{continueReading.chapter}章
+                  {t('bible.continueReadingChapter', { book: BIBLE_BOOKS.find(b => b.id === continueReading.bookId)?.name, chapter: continueReading.chapter })}
                 </p>
               </div>
             </div>
             <Button onClick={handleContinueReading} size="sm">
-              继续阅读
+              {t('bible.continueReading')}
             </Button>
           </div>
         </div>
@@ -201,7 +203,7 @@ export function ReadingHistoryTab() {
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="搜索阅读记录..."
+            placeholder={t('bible.searchHistory')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-10"
@@ -221,8 +223,8 @@ export function ReadingHistoryTab() {
       {readingHistory.length === 0 ? (
         <div className="text-center py-20 opacity-40 select-none">
           <History className="w-16 h-16 mx-auto mb-4 stroke-[1.5]" />
-          <p className="text-lg">暂无阅读记录</p>
-          <p className="text-sm mt-2">开始阅读经文，系统将自动记录您的阅读轨迹</p>
+          <p className="text-lg">{t('bible.noHistory')}</p>
+          <p className="text-sm mt-2">{t('bible.startReadingHint')}</p>
         </div>
       ) : (
         <div className="space-y-8">

@@ -83,6 +83,11 @@ export function playNotificationSound(type: 'default' | 'success' | 'warning' | 
       audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
 
+    // [P3-8修复] 移动端 AudioContext 可能处于 suspended 状态，需要 resume
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+
     // Create oscillator for a simple beep
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();

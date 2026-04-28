@@ -5,6 +5,7 @@ import { useBibleStore } from "@/store/useBibleStore";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Sparkles, CheckCircle2, PartyPopper, Users } from "lucide-react";
 import { BIBLE_BOOKS } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n";
 
 export function GroupPlanDailyFlow() {
   const {
@@ -13,6 +14,7 @@ export function GroupPlanDailyFlow() {
     tabs,
     addTab
   } = useBibleStore();
+  const { t } = useTranslation();
 
   const step = ctx?.steps[ctx.stepIndex];
   // 使用 ref 跟踪已处理的 stepIndex，避免在 tabs 更新后重复触发 useEffect
@@ -55,12 +57,12 @@ export function GroupPlanDailyFlow() {
             <Users className="w-5 h-5 text-indigo-500" />
             <Sparkles className="w-5 h-5 text-indigo-500" />
             <span className="text-sm font-bold uppercase tracking-widest text-indigo-500">
-              {ctx.planName} • 第 {ctx.day} 天 • 灵修导读
+              {t('plan.dailyDevotionalWithPlan', { planName: ctx.planName, day: ctx.day })}
             </span>
           </div>
           <div className="flex-1 overflow-y-auto no-scrollbar pb-32">
             <p className="text-lg md:text-xl text-foreground/90 leading-relaxed font-serif whitespace-pre-wrap animate-in slide-in-from-bottom-4 duration-700">
-              {step.content || "愿神的话语成为你脚前的灯，路上的光。安静心，开始今天的经文阅读吧。"}
+              {step.content || t('plan.devotionalDefault')}
             </p>
           </div>
           <div className="pb-12 pt-6 bg-gradient-to-t from-background via-background to-transparent sticky bottom-0">
@@ -68,7 +70,7 @@ export function GroupPlanDailyFlow() {
               onClick={handleNext}
               className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-xl shadow-indigo-600/20"
             >
-              阅读今日经文 <ChevronRight className="w-5 h-5 ml-1" />
+              {t('plan.readTodayScripture')} <ChevronRight className="w-5 h-5 ml-1" />
             </Button>
           </div>
         </div>
@@ -91,18 +93,18 @@ export function GroupPlanDailyFlow() {
           <div className="flex flex-col pl-2">
             <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold tracking-widest uppercase mb-0.5 flex items-center gap-1">
               <Users className="w-3 h-3" />
-              小组读经
+              {t('plan.groupReading')}
             </span>
             <span className="text-sm font-bold text-foreground">
-              {bookName} {step.chapter}章
+              {bookName} {t('plan.chapterNum', { chapter: step.chapter ?? '' })}
             </span>
-            <span className="text-xs text-muted-foreground mt-1">进度 {currentReadingIndex}/{totalReadings}</span>
+            <span className="text-xs text-muted-foreground mt-1">{t('plan.readingProgress', { current: currentReadingIndex, total: totalReadings || 1 })}</span>
           </div>
           <Button
             onClick={handleNext}
             className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 shadow-md"
           >
-            完成并继续 <ChevronRight className="w-4 h-4 ml-1" />
+            {t('plan.completeAndContinue')} <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
       </div>
@@ -120,19 +122,19 @@ export function GroupPlanDailyFlow() {
           <PartyPopper className="absolute -top-4 -right-4 w-16 h-16 text-yellow-400 opacity-20" />
           <PartyPopper className="absolute -bottom-4 -left-4 w-16 h-16 text-yellow-400 opacity-20 transform scale-x-[-1]" />
 
-          <h2 className="text-2xl font-bold mb-2 text-foreground">今日任务完成！</h2>
+          <h2 className="text-2xl font-bold mb-2 text-foreground">{t('plan.todayTaskComplete')}</h2>
           <p className="text-muted-foreground mb-4">
-            太棒了！你已经完成了「{ctx.planName}」第 {ctx.day} 天的阅读。
+            {t('plan.completionMessage', { planTitle: ctx.planName, day: ctx.day })}
           </p>
           <p className="text-sm text-indigo-600 dark:text-indigo-400 mb-8 flex items-center justify-center gap-1">
             <Users className="w-4 h-4" />
-            进度已同步到小组排行榜
+            {t('plan.syncedToGroupLeaderboard')}
           </p>
           <Button
             onClick={handleNext}
             className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg"
           >
-            结束打卡
+            {t('plan.endCheckin')}
           </Button>
         </div>
       </div>

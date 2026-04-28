@@ -145,9 +145,9 @@ export function SyncProvider() {
     };
   }, [session, syncToServer]);
 
-  // 4. 暴露同步函数到全局（可选，用于手动触发）
+  // 4. 暴露同步函数到全局（仅开发环境）
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
       (window as any).__syncToServer = syncToServer;
     }
   }, [syncToServer]);

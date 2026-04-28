@@ -33,6 +33,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
+import { useTranslation } from "@/lib/i18n";
 
 interface Reply {
   type: 'admin' | 'user';
@@ -59,6 +60,7 @@ interface UserFeedbackPanelProps {
 }
 
 export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps) {
+  const { t } = useTranslation();
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [replyContent, setReplyContent] = useState("");
@@ -120,11 +122,11 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
         setReplyContent("");
       } else {
         const error = await res.json();
-        alert(error.error || "回复失败");
+        alert(error.error || t('feedback.replyFailed'));
       }
     } catch (error) {
       console.error("Reply error:", error);
-      alert("回复失败，请重试");
+      alert(t('feedback.replyFailedRetry'));
     } finally {
       setReplyLoading(false);
     }
@@ -146,11 +148,11 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "OPEN":
-        return "待处理";
+        return t('feedback.statusOpen');
       case "IN_PROGRESS":
-        return "处理中";
+        return t('feedback.statusInProgress');
       case "RESOLVED":
-        return "已解决";
+        return t('feedback.statusResolved');
       default:
         return status;
     }
@@ -172,13 +174,13 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
   const getTypeLabel = (type: string) => {
     switch (type) {
       case "BUG_REPORT":
-        return "Bug报告";
+        return t('feedback.typeBugLabel');
       case "FEATURE_REQUEST":
-        return "功能建议";
+        return t('feedback.typeFeatureLabel');
       case "QUESTION":
-        return "问题咨询";
+        return t('feedback.typeQuestionLabel');
       default:
-        return "其他";
+        return t('feedback.typeOtherLabel');
     }
   };
 
@@ -226,7 +228,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            我的反馈
+            {t('feedback.myFeedback')}
           </DialogTitle>
         </DialogHeader>
 
@@ -239,7 +241,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
               onClick={() => setSelectedFeedback(null)}
               className="mb-2"
             >
-              ← 返回列表
+              {t('feedback.backToList')}
             </Button>
 
             <div className="space-y-3">
@@ -258,7 +260,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             {/* 原始反馈 */}
             <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
               <div className="text-xs text-gray-500 mb-1">
-                您的反馈 · {formatTime(selectedFeedback.createdAt)}
+                {t('feedback.yourFeedback')} · {formatTime(selectedFeedback.createdAt)}
               </div>
               <p className="text-sm whitespace-pre-wrap">{selectedFeedback.content}</p>
             </div>
@@ -266,10 +268,10 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             {/* 截图 */}
             {selectedFeedback.screenshot && (
               <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                <div className="text-xs text-gray-500 mb-2">截图</div>
+                <div className="text-xs text-gray-500 mb-2">{t('feedback.screenshot')}</div>
                 <img
                   src={selectedFeedback.screenshot}
-                  alt="反馈截图"
+                  alt={t('feedback.screenshotAlt')}
                   className="max-w-full rounded-lg border max-h-48"
                 />
               </div>
@@ -279,7 +281,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             {parseReplies(selectedFeedback.replies).length > 0 && (
               <div>
                 <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  对话记录
+                  {t('feedback.conversationHistory')}
                 </div>
                 <ScrollArea className="max-h-[200px] border rounded-lg p-3">
                   {parseReplies(selectedFeedback.replies).map((reply, index) => (
@@ -295,12 +297,12 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                       <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
                         {reply.type === "admin" ? (
                           <>
-                            <Badge variant="secondary" className="text-xs py-0 h-5">管理员</Badge>
+                            <Badge variant="secondary" className="text-xs py-0 h-5">{t('feedback.admin')}</Badge>
                             {formatTime(reply.createdAt)}
                           </>
                         ) : (
                           <>
-                            <span className="text-gray-600 dark:text-gray-400">您</span>
+                            <span className="text-gray-600 dark:text-gray-400">{t('feedback.you')}</span>
                             <span>·</span>
                             {formatTime(reply.createdAt)}
                           </>
@@ -318,10 +320,10 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
               <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-center">
                 <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
                 <p className="text-sm text-green-700 dark:text-green-400 font-medium">
-                  此反馈已解决
+                  {t('feedback.feedbackResolved')}
                 </p>
                 <p className="text-xs text-green-600 dark:text-green-500 mt-1">
-                  感谢您的反馈！如有其他问题，欢迎提交新的反馈。
+                  {t('feedback.resolvedThankYou')}
                 </p>
               </div>
             ) : (
@@ -329,7 +331,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                 <Textarea
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder="继续回复..."
+                  placeholder={t('feedback.continueReply')}
                   rows={3}
                 />
                 <div className="flex justify-end">
@@ -342,7 +344,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                     ) : (
                       <Send className="w-4 h-4 mr-2" />
                     )}
-                    发送回复
+                    {t('feedback.sendReply')}
                   </Button>
                 </div>
               </div>
@@ -356,7 +358,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder="搜索反馈..."
+                  placeholder={t('feedback.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
@@ -367,10 +369,10 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">全部状态</SelectItem>
-                  <SelectItem value="OPEN">待处理</SelectItem>
-                  <SelectItem value="IN_PROGRESS">处理中</SelectItem>
-                  <SelectItem value="RESOLVED">已解决</SelectItem>
+                  <SelectItem value="all">{t('feedback.allStatus')}</SelectItem>
+                  <SelectItem value="OPEN">{t('feedback.statusOpen')}</SelectItem>
+                  <SelectItem value="IN_PROGRESS">{t('feedback.statusInProgress')}</SelectItem>
+                  <SelectItem value="RESOLVED">{t('feedback.statusResolved')}</SelectItem>
                 </SelectContent>
               </Select>
               <Button
@@ -378,7 +380,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                 size="icon"
                 onClick={fetchFeedbacks}
                 disabled={loading}
-                title="刷新"
+                title={t('feedback.refresh')}
               >
                 <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
               </Button>
@@ -386,9 +388,9 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
 
             {/* 统计信息 */}
             <div className="flex items-center gap-4 text-xs text-gray-500">
-              <span>共 {feedbacks.length} 条反馈</span>
+              <span>{t('feedback.totalFeedback', { count: feedbacks.length })}</span>
               <span>·</span>
-              <span>{feedbacks.filter(f => hasNewAdminReply(f)).length} 条有新回复</span>
+              <span>{t('feedback.newReplyCount', { count: feedbacks.filter(f => hasNewAdminReply(f)).length })}</span>
             </div>
 
             {/* 反馈列表 */}
@@ -401,7 +403,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                 <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                   <MessageSquare className="w-12 h-12 mb-2 opacity-50" />
                   <p className="text-sm">
-                    {searchQuery || statusFilter !== "all" ? "未找到匹配的反馈" : "暂无反馈记录"}
+                    {searchQuery || statusFilter !== "all" ? t('feedback.noMatchFound') : t('feedback.noFeedbackYet')}
                   </p>
                 </div>
               ) : (
@@ -424,15 +426,15 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                             <div className="flex items-center gap-2 mt-1.5">
                               {hasNewReply ? (
                                 <Badge className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                                  有新回复
+                                  {t('feedback.hasNewReply')}
                                 </Badge>
                               ) : feedback.adminReply ? (
                                 <Badge variant="outline" className="text-xs text-gray-500">
-                                  已回复
+                                  {t('feedback.replied')}
                                 </Badge>
                               ) : (
                                 <Badge variant="outline" className="text-xs text-gray-400">
-                                  待回复
+                                  {t('feedback.pendingReply')}
                                 </Badge>
                               )}
                               <Badge className={cn("text-xs", getStatusColor(feedback.status))}>
