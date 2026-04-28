@@ -4,6 +4,7 @@ import { Target, Trophy, Flame, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface ChallengeProgressProps {
   plan: {
@@ -23,6 +24,7 @@ interface ChallengeProgressProps {
 }
 
 export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
+  const { t } = useTranslation();
   const config = plan.challengeConfig
     ? JSON.parse(plan.challengeConfig)
     : null;
@@ -63,7 +65,7 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
           {plan.name}
           {isChallenge && (
             <span className="text-xs bg-orange-500 text-white px-2 py-0.5 rounded-full ml-auto">
-              挑战模式
+              {t('group.challengeMode')}
             </span>
           )}
         </CardTitle>

@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { BIBLE_BOOKS } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 /**
  * Scripture AI - 圣经研读数据热力图组件
@@ -42,6 +43,7 @@ const COLOR_SCALES = {
 export function BibleHeatmap({
   data = [], colorTheme = 'blue', cellSize = 10, cellGap = 2, onCellClick
 }: BibleHeatmapProps) {
+  const { t } = useTranslation();
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, text: '', isBelow: false });
 
   // 1. 数据映射，计算最大活跃度
@@ -87,7 +89,7 @@ export function BibleHeatmap({
       visible: true,
       x: rect.left - containerRect.left + (cellSize / 2),
       y: yPos,
-      text: `${bookName} ${chapter}章 : ${weight} 次互动`,
+      text: `${t('bible.heatmapTooltip', { book: bookName, chapter, weight })}`,
       isBelow
     });
   };

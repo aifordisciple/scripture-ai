@@ -227,5 +227,39 @@ export const bible = {
     tsvCumulativeWeight: 'Cumulative Weight: {weight}',
     clearAllHighlightNotes: 'Clear All Highlights & Notes ({count})',
     clearAllDeepNotes: 'Clear All In-depth Notes ({count})',
+
+    // CrossRefPanel & CrossRefTab
+    crossRefTitle: 'Cross References',
+    crossRefSubtitle: 'Discover connections between scriptures',
+    aiConnectionDesc: 'AI Connection Description',
+    loadFailed: 'Failed to load, please try again later',
+    crossRefFooter: 'Based on BGE-M3 vector search · Click verse to navigate',
+    crossRefFooterTab: 'Based on BGE-M3 vector search · Click verse to open in new tab',
+
+    // CrossRefBadge
+    typeQuotation: 'Quotation',
+    typeParallel: 'Parallel',
+    typeThematic: 'Thematic',
+    typeProphecy: 'Prophecy',
+    typeIllustration: 'Illustration',
+    filterAll: 'All',
+
+    // CrossRefItem
+    clickToNavigate: 'Click to navigate',
+    noRelatedVerses: 'No related verses',
+    noRelatedVersesHint: 'Cross references may not be established for this verse yet',
+
+    // AudioButton
+    stopReading: 'Stop reading',
+    readContent: 'Read content',
+
+    // HeaderPlayer
+    toggleSpeed: 'Toggle speed',
+
+    // BibleHeatmap
+    heatmapTooltip: '{bookName} Ch. {chapter} : {weight} interactions',
+
+    // BookGrid
+    noMatchingBooks: 'No matching books',
   },
 } as const

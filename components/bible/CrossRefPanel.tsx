@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { X, GitBranch, Sparkles, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   CrossRefItem,
@@ -58,6 +59,7 @@ export function CrossRefPanel({
   const [aiLoading, setAiLoading] = useState(false);
 
   const { apiConfig } = useBibleStore();
+  const { t } = useTranslation();
 
   // Fetch cross-references when source verse changes
   const fetchCrossRefs = useCallback(async () => {
@@ -92,7 +94,7 @@ export function CrossRefPanel({
       setConnections(data.connections);
     } catch (err) {
       console.error("[CrossRefPanel] Error:", err);
-      setError("加载失败，请稍后重试");
+      setError(t('bible.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -220,7 +222,7 @@ export function CrossRefPanel({
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
           <div className="flex items-center gap-2">
             <GitBranch className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-foreground">经文串珠</span>
+            <span className="font-semibold text-foreground">{t('bible.crossRefTitle')}</span>
           </div>
           <button
             onClick={onClose}
@@ -256,7 +258,7 @@ export function CrossRefPanel({
           <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span className="text-xs text-slate-600 dark:text-slate-400">AI 关联说明</span>
+              <span className="text-xs text-slate-600 dark:text-slate-400">{t('bible.aiConnectionDesc')}</span>
             </div>
             <div className="flex items-center gap-2">
               {aiLoading && (
@@ -297,7 +299,7 @@ export function CrossRefPanel({
                 onClick={fetchCrossRefs}
                 className="mt-2 text-xs text-primary hover:underline"
               >
-                重试
+                {t('common.retry')}
               </button>
             </div>
           ) : filteredConnections.length === 0 ? (
@@ -319,7 +321,7 @@ export function CrossRefPanel({
         {!loading && connections.length > 0 && (
           <div className="px-4 py-2 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
             <p className="text-xs text-slate-400 text-center">
-              基于 BGE-M3 向量检索 · 点击经文跳转阅读
+              {t('bible.crossRefFooter')}
             </p>
           </div>
         )}

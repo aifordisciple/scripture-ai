@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
+import { useTranslation } from '@/lib/i18n';
 import { ChevronLeft, ChevronRight, Play, Pause, MapPin } from 'lucide-react';
 
 interface TimelineSliderProps {
@@ -33,17 +34,18 @@ interface BibleEvent {
 
 // 圣经历史关键时间节点
 const KEY_EVENTS = [
-  { year: -2000, label: '亚伯拉罕' },
-  { year: -1446, label: '出埃及' },
-  { year: -1000, label: '大卫王朝' },
-  { year: -586, label: '被掳巴比伦' },
-  { year: -516, label: '圣殿重建' },
-  { year: -4, label: '耶稣诞生' },
-  { year: 30, label: '耶稣受难' },
-  { year: 70, label: '耶路撒冷被毁' },
+  { year: -2000, labelKey: 'atlas.keyEventAbraham' },
+  { year: -1446, labelKey: 'atlas.keyEventExodus' },
+  { year: -1000, labelKey: 'atlas.keyEventDavidDynasty' },
+  { year: -586, labelKey: 'atlas.keyEventBabylonianExile' },
+  { year: -516, labelKey: 'atlas.keyEventTempleRebuilt' },
+  { year: -4, labelKey: 'atlas.keyEventJesusBirth' },
+  { year: 30, labelKey: 'atlas.keyEventJesusCrucifixion' },
+  { year: 70, labelKey: 'atlas.keyEventJerusalemDestroyed' },
 ];
 
 export default function TimelineSlider({ year, onYearChange }: TimelineSliderProps) {
+  const { t } = useTranslation();
   const { timelineRange } = useBibleStore();
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -51,9 +53,9 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
 
   // 格式化年份显示
   const formatYear = (y: number) => {
-    if (y < 0) return `公元前 ${Math.abs(y)} 年`;
-    if (y === 0) return '公元 1 年';
-    return `公元 ${y} 年`;
+    if (y < 0) return t('atlas.bcYear', { year: Math.abs(y) });
+    if (y === 0) return t('atlas.adYear1');
+    return t('atlas.adYear', { year: y });
   };
 
   // 计算时间轴位置百分比
@@ -118,7 +120,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
               >
                 <div className="w-3 h-3 rounded-full bg-amber-500 border-2 border-white shadow" />
                 <span className="mt-2 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                  {event.label}
+                  {t(event.labelKey)}
                 </span>
               </div>
             );
@@ -128,7 +130,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
         {/* 该年份的事件列表 */}
         <div className="mt-8">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
-            该时期的事件
+            {t('atlas.eventsInPeriod')}
           </h3>
           <EventList year={year} range={50} />
         </div>
@@ -161,6 +163,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
 
 // 事件列表组件
 function EventList({ year, range }: { year: number; range: number }) {
+  const { t } = useTranslation();
   const [events, setEvents] = useState<BibleEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -217,11 +220,11 @@ function EventList({ year, range }: { year: number; range: number }) {
   };
 
   if (loading) {
-    return <div className="text-gray-500 text-sm">加载中...</div>;
+    return <div className="text-gray-500 text-sm">{t('atlas.loading')}</div>;
   }
 
   if (events.length === 0) {
-    return <div className="text-gray-500 text-sm">该时期暂无记录的事件</div>;
+    return <div className="text-gray-500 text-sm">{t('atlas.noEventsInPeriod')}</div>;
   }
 
   return (
@@ -247,10 +250,10 @@ function EventList({ year, range }: { year: number; range: number }) {
               <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {event.yearStart && (
                   <span>
-                    {event.yearStart < 0 ? '公元前' : '公元'}
+                    {event.yearStart < 0 ? t('atlas.bc') : t('atlas.ad')}
                     {Math.abs(event.yearStart)}
-                    {event.yearEnd && event.yearEnd !== event.yearStart && ` - ${event.yearEnd < 0 ? '公元前' : '公元'}${Math.abs(event.yearEnd)}`}
-                    {event.yearApprox && ' (约)'}
+                    {event.yearEnd && event.yearEnd !== event.yearStart && ` - ${event.yearEnd < 0 ? t('atlas.bc') : t('atlas.ad')}${Math.abs(event.yearEnd)}`}
+                    {event.yearApprox && t('atlas.approx')}
                   </span>
                 )}
               </div>

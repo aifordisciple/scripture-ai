@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslation } from '@/lib/i18n'
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -53,6 +54,7 @@ const NOTIFICATION_ICONS: Record<string, any> = {
 
 export function NotificationCenter({ onNotificationClick }: NotificationCenterProps) {
   const { status } = useSession();
+  const { t } = useTranslation()
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -200,11 +202,11 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "刚刚";
-    if (diffMins < 60) return `${diffMins}分钟前`;
-    if (diffHours < 24) return `${diffHours}小时前`;
-    if (diffDays < 7) return `${diffDays}天前`;
-    return date.toLocaleDateString("zh-CN");
+    if (diffMins < 1) return t('common.justNow');
+    if (diffMins < 60) return t('common.minutesAgo', { count: diffMins });
+    if (diffHours < 24) return t('common.hoursAgo', { count: diffHours });
+    if (diffDays < 7) return t('common.daysAgo', { count: diffDays });
+    return date.toLocaleDateString();
   };
 
   const getIcon = (type: string) => {
@@ -251,7 +253,7 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
           <DialogTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2">
               <Bell className="w-5 h-5" />
-              通知
+              {t('notification.title')}
             </span>
             <div className="flex items-center gap-2">
               {notifications.length > 0 && (
@@ -259,14 +261,14 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    if (confirm('确定要清除所有通知吗？')) {
+                    if (confirm(t('notification.confirmClearAll'))) {
                       clearAllNotifications();
                     }
                   }}
                   className="text-xs text-red-500 hover:text-red-600"
                 >
                   <Trash className="w-4 h-4 mr-1" />
-                  清除全部
+                  {t('notification.clearAll')}
                 </Button>
               )}
               {unreadCount > 0 && (
@@ -277,7 +279,7 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
                   className="text-xs text-muted-foreground"
                 >
                   <CheckCheck className="w-4 h-4 mr-1" />
-                  全部已读
+                  {t('notification.markAllRead')}
                 </Button>
               )}
             </div>
@@ -292,7 +294,7 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
           ) : notifications.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Bell className="w-10 h-10 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">暂无通知</p>
+              <p className="text-sm">{t('notification.noNotifications')}</p>
             </div>
           ) : (
             <div className="space-y-2 pb-4">

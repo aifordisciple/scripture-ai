@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import QRCode from "qrcode";
+import { useTranslation } from "@/lib/i18n";
 
 interface InviteCode {
   id: string;
@@ -33,6 +34,7 @@ interface InviteCodeManagerProps {
 }
 
 export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps) {
+  const { t } = useTranslation();
   const [codes, setCodes] = useState<InviteCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState<string | null>(null);
@@ -88,7 +90,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
   };
 
   const deleteCode = async (codeId: string) => {
-    if (!confirm("确定要删除此邀请码吗？")) return;
+    if (!confirm(t('group.confirmDeleteCode'))) return;
     try {
       await fetch(`/api/church/${churchId}/invite`, {
         method: "DELETE",
@@ -161,22 +163,22 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
           <CardTitle className="text-lg flex items-center justify-between">
             <span className="flex items-center gap-2">
               <Link className="w-5 h-5" />
-              邀请码
+              {t('group.inviteCodes')}
             </span>
             {isAdmin && (
               <Dialog open={createOpen} onOpenChange={setCreateOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="outline">
-                    <Plus className="w-4 h-4 mr-1" /> 创建
+                    <Plus className="w-4 h-4 mr-1" /> {t('group.create')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>创建邀请码</DialogTitle>
+                    <DialogTitle>{t('group.createInviteCode')}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 pt-4">
                     <div className="space-y-2">
-                      <Label>使用次数限制 (0 = 无限制)</Label>
+                      <Label>{t('group.maxUsesLabel')}</Label>
                       <Input
                         type="number"
                         value={newMaxUses}
@@ -185,7 +187,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>过期时间 (可选)</Label>
+                      <Label>{t('group.expiresAtLabel')}</Label>
                       <Input
                         type="datetime-local"
                         value={newExpires}
@@ -198,7 +200,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                       className="w-full"
                     >
                       {creating && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                      创建邀请码
+                      {t('group.createInviteCode')}
                     </Button>
                   </div>
                 </DialogContent>
@@ -209,7 +211,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
         <CardContent className="pt-0">
           {codes.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
-              暂无邀请码
+              {t('group.noInviteCodes')}
             </p>
           ) : (
             <div className="space-y-2">
@@ -239,11 +241,11 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                         {code.expiresAt && (
                           <Badge variant="outline" className="text-xs">
                             <Clock className="w-3 h-3 mr-1" />
-                            {expired ? "已过期" : formatDate(code.expiresAt)}
+                            {expired ? t('group.expired') : formatDate(code.expiresAt)}
                           </Badge>
                         )}
-                        {expired && <Badge variant="destructive" className="text-xs">已过期</Badge>}
-                        {exhausted && <Badge variant="destructive" className="text-xs">已用完</Badge>}
+                        {expired && <Badge variant="destructive" className="text-xs">{t('group.expired')}</Badge>}
+                        {exhausted && <Badge variant="destructive" className="text-xs">{t('group.exhausted')}</Badge>}
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -251,7 +253,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                         size="sm"
                         variant="ghost"
                         onClick={() => generateQRCode(code.code)}
-                        title="二维码"
+                        title={t('group.qrCode')}
                       >
                         <QrCode className="w-4 h-4" />
                       </Button>
@@ -259,7 +261,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                         size="sm"
                         variant="ghost"
                         onClick={() => copyCode(code.code)}
-                        title="复制链接"
+                        title={t('group.copyLink')}
                       >
                         {copied === code.code ? (
                           <Check className="w-4 h-4 text-green-500" />
@@ -273,7 +275,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                           variant="ghost"
                           onClick={() => deleteCode(code.id)}
                           className="text-red-500 hover:text-red-600"
-                          title="删除"
+                          title={t('common.delete')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -293,7 +295,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <QrCode className="w-5 h-5" />
-              邀请二维码
+              {t('group.inviteQrCode')}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center py-4">
@@ -305,7 +307,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                   className="w-64 h-64 rounded-lg border"
                 />
                 <p className="text-sm text-muted-foreground mt-3 mb-4">
-                  邀请码: <span className="font-mono font-bold">{selectedCodeForQr}</span>
+                  {t('group.inviteCode')}: <span className="font-mono font-bold">{selectedCodeForQr}</span>
                 </p>
                 <div className="flex gap-2">
                   <Button
@@ -313,11 +315,11 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                     onClick={() => selectedCodeForQr && copyCode(selectedCodeForQr)}
                   >
                     <Copy className="w-4 h-4 mr-2" />
-                    复制链接
+                    {t('group.copyLink')}
                   </Button>
                   <Button onClick={downloadQRCode}>
                     <Download className="w-4 h-4 mr-2" />
-                    下载二维码
+                    {t('group.downloadQrCode')}
                   </Button>
                 </div>
               </>

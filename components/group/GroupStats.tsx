@@ -19,6 +19,7 @@ import {
   Calendar, Trophy, Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface GroupStatsProps {
   churchId: string;
@@ -62,6 +63,7 @@ interface Stats {
 const COLORS = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'];
 
 export function GroupStats({ churchId, plans }: GroupStatsProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>("all");
@@ -96,10 +98,10 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
   };
 
   const formatDuration = (minutes: number) => {
-    if (minutes < 60) return `${minutes}分钟`;
+    if (minutes < 60) return t('group.minutesOnly', { count: minutes });
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return mins > 0 ? `${hours}小时${mins}分` : `${hours}小时`;
+    return mins > 0 ? t('group.hoursAndMinutes', { hours, mins }) : t('group.hoursOnly', { count: hours });
   };
 
   if (loading) {
@@ -116,7 +118,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
     return (
       <Card>
         <CardContent className="p-6 text-center text-muted-foreground">
-          无法加载统计数据
+          {t('group.statsLoadFailed')}
         </CardContent>
       </Card>
     );
@@ -129,7 +131,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
   }));
 
   const pieData = stats.memberStats.slice(0, 5).map((m, i) => ({
-    name: m.user?.name || "匿名用户",
+    name: m.user?.name || t('group.anonymousUser'),
     value: m.activeDays,
     color: COLORS[i % COLORS.length]
   }));
@@ -140,13 +142,13 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
       <div className="flex flex-wrap gap-4">
         {plans.length > 0 && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">计划:</span>
+            <span className="text-sm text-muted-foreground">{t('group.plan')}:</span>
             <Select value={selectedPlan} onValueChange={setSelectedPlan}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="全部计划" />
+                <SelectValue placeholder={t('group.allPlans')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部计划</SelectItem>
+                <SelectItem value="all">{t('group.allPlans')}</SelectItem>
                 {plans.map(plan => (
                   <SelectItem key={plan.id} value={plan.id}>
                     {plan.name}
@@ -157,16 +159,16 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
           </div>
         )}
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">时间范围:</span>
+          <span className="text-sm text-muted-foreground">{t('group.timeRange')}:</span>
           <Select value={daysRange} onValueChange={setDaysRange}>
             <SelectTrigger className="w-[120px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7">近 7 天</SelectItem>
-              <SelectItem value="14">近 14 天</SelectItem>
-              <SelectItem value="30">近 30 天</SelectItem>
-              <SelectItem value="90">近 90 天</SelectItem>
+              <SelectItem value="7">{t('group.last7Days')}</SelectItem>
+              <SelectItem value="14">{t('group.last14Days')}</SelectItem>
+              <SelectItem value="30">{t('group.last30Days')}</SelectItem>
+              <SelectItem value="90">{t('group.last90Days')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -178,7 +180,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <Users className="w-4 h-4" />
-              <span className="text-sm">成员数</span>
+              <span className="text-sm">{t('group.memberCountLabel')}</span>
             </div>
             <div className="text-2xl font-bold">{stats.groupInfo.memberCount}</div>
           </CardContent>
@@ -187,7 +189,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <BookOpen className="w-4 h-4" />
-              <span className="text-sm">总阅读章节</span>
+              <span className="text-sm">{t('group.totalChaptersRead')}</span>
             </div>
             <div className="text-2xl font-bold">{stats.overview.totalChaptersRead}</div>
           </CardContent>
@@ -196,16 +198,16 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <Flame className="w-4 h-4" />
-              <span className="text-sm">最长连续</span>
+              <span className="text-sm">{t('group.maxStreak')}</span>
             </div>
-            <div className="text-2xl font-bold">{stats.overview.maxStreakDays}天</div>
+            <div className="text-2xl font-bold">{t('group.daysWithCount', { count: stats.overview.maxStreakDays })}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <TrendingUp className="w-4 h-4" />
-              <span className="text-sm">平均完成率</span>
+              <span className="text-sm">{t('group.avgCompletionRate')}</span>
             </div>
             <div className="text-2xl font-bold">{stats.overview.avgCompletionRate}%</div>
           </CardContent>
@@ -217,7 +219,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="w-5 h-5" />
-            每日活动趋势
+            {t('group.dailyActivityTrend')}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
@@ -241,8 +243,8 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px'
                     }}
-                    labelFormatter={(label) => `日期: ${label}`}
-                    formatter={(value: number) => [`${value} 次活动`, '活动次数']}
+                    labelFormatter={(label) => t('group.dateLabel', { date: String(label) })}
+                    formatter={(value: number) => [t('group.activityCount', { count: value }), t('group.activityCountLabel')]}
                   />
                   <Bar
                     dataKey="count"
@@ -254,7 +256,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
             </div>
           ) : (
             <div className="text-center text-muted-foreground py-8">
-              暂无活动数据
+              {t('group.noActivityData')}
             </div>
           )}
         </CardContent>
@@ -265,7 +267,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Users className="w-5 h-5" />
-            成员活跃度排行
+            {t('group.memberActivityRanking')}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
@@ -287,7 +289,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                       {index + 1}
                     </div>
                     <div>
-                      <div className="font-medium">{member.user?.name || "匿名用户"}</div>
+                      <div className="font-medium">{member.user?.name || t('group.anonymousUser')}</div>
                       <div className="text-xs text-muted-foreground">
                         {member.lastActive
                           ? `最后活跃: ${new Date(member.lastActive).toLocaleDateString("zh-CN")}`
@@ -321,7 +323,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Trophy className="w-5 h-5" />
-              计划排行榜
+              {t('group.planLeaderboard')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">

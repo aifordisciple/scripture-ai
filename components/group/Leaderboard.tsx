@@ -5,6 +5,7 @@ import { Trophy, Medal, Crown, ChevronUp, ChevronDown, Flame, BookOpen, Calendar
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface LeaderboardEntry {
   id: string;
@@ -30,6 +31,7 @@ interface LeaderboardProps {
 }
 
 export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProps) {
+  const { t } = useTranslation();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [myEntry, setMyEntry] = useState<LeaderboardEntry | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,10 +81,10 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
   }, [sortedLeaderboard]);
 
   const sortOptions: Array<{ mode: SortMode; label: string; icon: React.ReactNode }> = [
-    { mode: 'score', label: '积分', icon: <Trophy className="w-3 h-3" /> },
-    { mode: 'chapters', label: '章节', icon: <BookOpen className="w-3 h-3" /> },
-    { mode: 'streak', label: '连续', icon: <Flame className="w-3 h-3" /> },
-    { mode: 'completed', label: '完成', icon: <Calendar className="w-3 h-3" /> },
+    { mode: 'score', label: t('group.score'), icon: <Trophy className="w-3 h-3" /> },
+    { mode: 'chapters', label: t('group.chapters'), icon: <BookOpen className="w-3 h-3" /> },
+    { mode: 'streak', label: t('group.streak'), icon: <Flame className="w-3 h-3" /> },
+    { mode: 'completed', label: t('group.completed'), icon: <Calendar className="w-3 h-3" /> },
   ];
 
   const getRankIcon = (rank: number) => {
@@ -114,13 +116,13 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
   const getDisplayValue = (entry: LeaderboardEntry) => {
     switch (sortMode) {
       case 'chapters':
-        return { value: entry.chaptersRead, unit: '章' };
+        return { value: entry.chaptersRead, unit: t('group.chaptersUnit') };
       case 'streak':
-        return { value: entry.streakDays, unit: '天' };
+        return { value: entry.streakDays, unit: t('group.daysUnit') };
       case 'completed':
-        return { value: entry.completedDays, unit: '天' };
+        return { value: entry.completedDays, unit: t('group.daysUnit') };
       default:
-        return { value: entry.score, unit: '分' };
+        return { value: entry.score, unit: t('group.scoreUnit') };
     }
   };
 
@@ -128,7 +130,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
     return (
       <Card>
         <CardContent className="p-6 text-center text-muted-foreground">
-          加载排行榜...
+          {t('group.loadingLeaderboard')}
         </CardContent>
       </Card>
     );
@@ -139,8 +141,8 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
       <Card>
         <CardContent className="p-6 text-center text-muted-foreground">
           <Trophy className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p>暂无排行数据</p>
-          <p className="text-xs mt-1">完成读经打卡后将显示在排行榜上</p>
+          <p>{t('group.noLeaderboard')}</p>
+          <p className="text-xs mt-1">{t('group.noLeaderboardHint')}</p>
         </CardContent>
       </Card>
     );
@@ -155,7 +157,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
         >
           <span className="flex items-center gap-2">
             <Trophy className="w-5 h-5 text-yellow-500" />
-            排行榜
+            {t('group.leaderboardTitle')}
           </span>
           {expanded ? (
             <ChevronUp className="w-5 h-5 text-muted-foreground" />
@@ -194,7 +196,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
                   {myEntry.rank}
                 </span>
                 <div className="flex-1">
-                  <p className="font-medium text-sm">我的排名</p>
+                  <p className="font-medium text-sm">{t('group.myRank')}</p>
                   <p className="text-xs text-muted-foreground">
                     {getDisplayValue(myEntry).value} {getDisplayValue(myEntry).unit}
                   </p>

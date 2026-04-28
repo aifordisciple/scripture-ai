@@ -17,6 +17,7 @@ import {
   Palette, Image, Type, Loader2, Save, Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface GroupSettingsProps {
   churchId: string;
@@ -30,22 +31,22 @@ interface GroupSettingsProps {
 }
 
 const PRESET_COLORS = [
-  { name: "靛蓝", value: "#6366f1" },
-  { name: "紫色", value: "#8b5cf6" },
-  { name: "粉色", value: "#ec4899" },
-  { name: "红色", value: "#ef4444" },
-  { name: "橙色", value: "#f97316" },
-  { name: "黄色", value: "#eab308" },
-  { name: "绿色", value: "#22c55e" },
-  { name: "青色", value: "#06b6d4" },
-  { name: "蓝色", value: "#3b82f6" },
-  { name: "灰色", value: "#6b7280" },
+  { nameKey: "colorIndigo", value: "#6366f1" },
+  { nameKey: "colorPurple", value: "#8b5cf6" },
+  { nameKey: "colorPink", value: "#ec4899" },
+  { nameKey: "colorRed", value: "#ef4444" },
+  { nameKey: "colorOrange", value: "#f97316" },
+  { nameKey: "colorYellow", value: "#eab308" },
+  { nameKey: "colorGreen", value: "#22c55e" },
+  { nameKey: "colorCyan", value: "#06b6d4" },
+  { nameKey: "colorBlue", value: "#3b82f6" },
+  { nameKey: "colorGray", value: "#6b7280" },
 ];
 
 const FONT_OPTIONS = [
-  { name: "衬线体", value: "serif" },
-  { name: "无衬线体", value: "sans-serif" },
-  { name: "等宽字体", value: "monospace" },
+  { nameKey: "fontSerif", value: "serif" },
+  { nameKey: "fontSansSerif", value: "sans-serif" },
+  { nameKey: "fontMonospace", value: "monospace" },
 ];
 
 export function GroupSettings({
@@ -54,6 +55,7 @@ export function GroupSettings({
   currentSettings,
   onSettingsUpdate
 }: GroupSettingsProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -91,11 +93,11 @@ export function GroupSettings({
         // Delay closing so user can see the success indicator
         setTimeout(() => setOpen(false), 1500);
       } else {
-        alert(data.error || "保存失败");
+        alert(data.error || t('group.saveFailed'));
       }
     } catch (error) {
       console.error("Failed to save settings:", error);
-      alert("保存失败，请稍后重试");
+      alert(t('group.saveFailedRetry'));
     } finally {
       setSaving(false);
     }
@@ -110,7 +112,7 @@ export function GroupSettings({
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <Palette className="w-5 h-5" />
-          小组设置
+          {t('group.groupSettings')}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
@@ -122,28 +124,28 @@ export function GroupSettings({
               style={{ backgroundColor: themeColor }}
             />
             <div>
-              <div className="font-medium">主题色</div>
+              <div className="font-medium">{t('group.themeColor')}</div>
               <div className="text-sm text-muted-foreground">
-                {PRESET_COLORS.find(c => c.value === themeColor)?.name || "自定义"}
+                {PRESET_COLORS.find(c => c.value === themeColor) ? t(`group.${PRESET_COLORS.find(c => c.value === themeColor)!.nameKey}`) : t('group.custom')}
               </div>
             </div>
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
-                编辑
+                {t('common.edit')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>小组个性化设置</DialogTitle>
+                <DialogTitle>{t('group.groupCustomization')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-6 pt-4">
                 {/* Theme Color */}
                 <div className="space-y-3">
                   <Label className="flex items-center gap-2">
                     <Palette className="w-4 h-4" />
-                    主题色
+                    {t('group.themeColor')}
                   </Label>
                   <div className="grid grid-cols-5 gap-2">
                     {PRESET_COLORS.map((color) => (
@@ -157,12 +159,12 @@ export function GroupSettings({
                             : "border-transparent hover:scale-105"
                         )}
                         style={{ backgroundColor: color.value }}
-                        title={color.name}
+                        title={t(`group.${color.nameKey}`)}
                       />
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">自定义:</span>
+                    <span className="text-sm text-muted-foreground">{t('group.custom')}:</span>
                     <input
                       type="color"
                       value={themeColor}
@@ -182,12 +184,12 @@ export function GroupSettings({
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Image className="w-4 h-4" />
-                    小组 Logo
+                    {t('group.groupLogo')}
                   </Label>
                   <Input
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
-                    placeholder="Logo 图片 URL (可选)"
+                    placeholder={t('group.logoUrlPlaceholder')}
                   />
                   {logoUrl && (
                     <div className="mt-2 p-2 bg-muted rounded-lg">
@@ -207,7 +209,7 @@ export function GroupSettings({
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Type className="w-4 h-4" />
-                    字体样式
+                    {t('group.fontStyle')}
                   </Label>
                   <div className="flex gap-2">
                     {FONT_OPTIONS.map((font) => (
@@ -218,7 +220,7 @@ export function GroupSettings({
                         onClick={() => setFontFamily(font.value)}
                         style={{ fontFamily: font.value }}
                       >
-                        {font.name}
+                        {t(`group.${font.nameKey}`)}
                       </Button>
                     ))}
                   </div>
@@ -226,7 +228,7 @@ export function GroupSettings({
               </div>
               <DialogFooter className="mt-6">
                 <Button variant="outline" onClick={() => setOpen(false)}>
-                  取消
+                  {t('common.cancel')}
                 </Button>
                 <Button onClick={saveSettings} disabled={saving}>
                   {saving ? (
@@ -236,7 +238,7 @@ export function GroupSettings({
                   ) : (
                     <Save className="w-4 h-4 mr-2" />
                   )}
-                  {saved ? "已保存" : "保存"}
+                  {saved ? t('group.saved') : t('common.save')}
                 </Button>
               </DialogFooter>
             </DialogContent>

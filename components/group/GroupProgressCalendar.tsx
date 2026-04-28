@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Calendar, CheckCircle2, Circle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 interface GroupProgressCalendarProps {
   churchId: string;
@@ -34,6 +35,7 @@ export function GroupProgressCalendar({
 }: GroupProgressCalendarProps) {
   const [progress, setProgress] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
   const [currentViewMonth, setCurrentViewMonth] = useState(() => {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
@@ -151,7 +153,7 @@ export function GroupProgressCalendar({
     month: 'long'
   });
 
-  const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+  const weekDays = [t('group.weekSun'), t('group.weekMon'), t('group.weekTue'), t('group.weekWed'), t('group.weekThu'), t('group.weekFri'), t('group.weekSat')];
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -162,11 +164,11 @@ export function GroupProgressCalendar({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Calendar className="w-5 h-5" />
-            进度日历
+            {t('group.progressCalendar')}
           </CardTitle>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="sm" onClick={goToToday} className="text-xs">
-              今天
+              {t('group.today')}
             </Button>
             <Button variant="ghost" size="icon" onClick={goToPrevMonth} className="h-8 w-8">
               <ChevronLeft className="w-4 h-4" />
@@ -242,15 +244,15 @@ export function GroupProgressCalendar({
         <div className="flex items-center justify-center gap-4 mt-4 text-xs">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded bg-green-100 dark:bg-green-900/30" />
-            <span className="text-muted-foreground">已完成</span>
+            <span className="text-muted-foreground">{t('group.completed')}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded bg-yellow-100 dark:bg-yellow-900/30" />
-            <span className="text-muted-foreground">部分完成</span>
+            <span className="text-muted-foreground">{t('group.partiallyCompleted')}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded bg-red-50 dark:bg-red-900/20" />
-            <span className="text-muted-foreground">未完成</span>
+            <span className="text-muted-foreground">{t('group.notCompleted')}</span>
           </div>
         </div>
       </CardContent>

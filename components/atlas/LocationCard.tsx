@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, MapPin, BookOpen, ChevronRight } from 'lucide-react';
 import { useBibleStore } from '@/store/useBibleStore';
+import { useTranslation } from '@/lib/i18n';
 
 interface VerseLocation {
   bookId: string;
@@ -25,6 +26,7 @@ interface LocationCardProps {
 }
 
 export default function LocationCard({ location, onClose }: LocationCardProps) {
+  const { t } = useTranslation();
   const { isDarkMode, setBook, setChapter, setAtlasPanelOpen, setActiveTab, tabs, setViewingLocationVerses } = useBibleStore();
   const [verseLocations, setVerseLocations] = useState<VerseLocation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,7 +102,7 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
         {/* 圣经意义 */}
         {location.significance && (
           <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-400 mb-1">圣经意义</div>
+            <div className="text-xs text-gray-400 mb-1">{t('atlas.biblicalSignificance')}</div>
             <p className="text-sm text-gray-700 dark:text-gray-200">
               {location.significance}
             </p>
@@ -109,10 +111,10 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
 
         {/* 相关经文 */}
         {loading ? (
-          <div className="text-xs text-gray-400">加载相关经文...</div>
+          <div className="text-xs text-gray-400">{t('atlas.loadingRelatedVerses')}</div>
         ) : verseLocations.length > 0 && (
           <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-400 mb-2">相关经文</div>
+            <div className="text-xs text-gray-400 mb-2">{t('atlas.relatedVerses')}</div>
             <div className="flex flex-wrap gap-1">
               {verseLocations.map((vl, index) => (
                 <button
@@ -142,7 +144,7 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
           className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
         >
           <BookOpen className="w-4 h-4" />
-          查看全部相关经文
+          {t('atlas.viewAllRelatedVerses')}
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

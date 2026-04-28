@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { GitBranch, Sparkles, Loader2, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import {
   CrossRefItem,
   CrossRefItemSkeleton,
@@ -50,6 +51,7 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
   const [aiLoading, setAiLoading] = useState(false);
 
   const { apiConfig } = useBibleStore();
+  const { t } = useTranslation();
 
   // Fetch cross-references
   const fetchCrossRefs = useCallback(async (source: typeof currentSource) => {
@@ -84,7 +86,7 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
       setConnections(data.connections);
     } catch (err) {
       console.error("[CrossRefTab] Error:", err);
-      setError("加载失败，请稍后重试");
+      setError(t('bible.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -185,8 +187,8 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
           <GitBranch className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-foreground">经文串珠</h1>
-          <p className="text-sm text-muted-foreground">发现经文之间的关联</p>
+          <h1 className="text-xl font-bold text-foreground">{t('bible.crossRefTitle')}</h1>
+          <p className="text-sm text-muted-foreground">{t('bible.crossRefSubtitle')}</p>
         </div>
       </div>
 
@@ -209,7 +211,7 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
       <div className="flex items-center justify-between px-4 py-3 mb-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-500" />
-          <span className="text-sm text-foreground">AI 关联说明</span>
+          <span className="text-sm text-foreground">{t('bible.aiConnectionDesc')}</span>
         </div>
         <div className="flex items-center gap-2">
           {aiLoading && (
@@ -258,7 +260,7 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
               onClick={fetchCrossRefs}
               className="mt-3 text-sm text-primary hover:underline"
             >
-              重试
+              {t('common.retry')}
             </button>
           </div>
         ) : filteredConnections.length === 0 ? (
@@ -280,7 +282,7 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
       {!loading && connections.length > 0 && (
         <div className="mt-6 pt-4 border-t">
           <p className="text-xs text-muted-foreground text-center">
-            基于 BGE-M3 向量检索 · 点击经文在新标签页打开
+            {t('bible.crossRefFooterTab')}
           </p>
         </div>
       )}

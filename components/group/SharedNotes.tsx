@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { MemberProfile } from "./MemberProfile";
+import { useTranslation } from "@/lib/i18n";
 
 interface SharedNote {
   id: string;
@@ -35,6 +36,7 @@ interface SharedNotesProps {
 }
 
 export function SharedNotes({ churchId }: SharedNotesProps) {
+  const { t } = useTranslation();
   const [notes, setNotes] = useState<SharedNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBook, setSelectedBook] = useState<string>("all");
@@ -85,7 +87,7 @@ export function SharedNotes({ churchId }: SharedNotesProps) {
         <CardTitle className="text-lg flex items-center justify-between">
           <span className="flex items-center gap-2">
             <Share2 className="w-5 h-5" />
-            共享笔记
+            {t('group.sharedNotes')}
             <span className="text-sm font-normal text-muted-foreground">
               ({notes.length})
             </span>
@@ -93,10 +95,10 @@ export function SharedNotes({ churchId }: SharedNotesProps) {
           {booksInNotes.length > 0 && (
             <Select value={selectedBook} onValueChange={setSelectedBook}>
               <SelectTrigger className="w-[140px] h-8">
-                <SelectValue placeholder="筛选书卷" />
+                <SelectValue placeholder={t('group.filterBook')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部书卷</SelectItem>
+                <SelectItem value="all">{t('group.allBooks')}</SelectItem>
                 {booksInNotes.map(bookId => (
                   <SelectItem key={bookId} value={bookId}>
                     {getBookName(bookId)}
@@ -115,8 +117,8 @@ export function SharedNotes({ churchId }: SharedNotesProps) {
         ) : notes.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             <FileText className="w-10 h-10 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">暂无共享笔记</p>
-            <p className="text-xs mt-1">成员可以在笔记页面将笔记分享到小组</p>
+            <p className="text-sm">{t('group.noSharedNotes')}</p>
+            <p className="text-xs mt-1">{t('group.noSharedNotesDesc')}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -143,7 +145,7 @@ export function SharedNotes({ churchId }: SharedNotesProps) {
                         trigger={
                           <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
                             <User className="w-3 h-3" />
-                            {note.user.name || "匿名用户"}
+                            {note.user.name || t('group.anonymousUser')}
                           </button>
                         }
                       />

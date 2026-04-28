@@ -1,282 +1,290 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useEffect, useRef, useState } from 'react';
+import { Loader2, Maximize, Minimize, Plus, Minus, Layers, MapPin } from 'lucide-react';
 import { useBibleStore } from '@/store/useBibleStore';
-
-// 修复 Leaflet 默认图标问题
-const defaultIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41],
-});
-
-L.Marker.prototype.options.icon = defaultIcon;
-
-interface Location {
-  id: string;
-  nameZh: string;
-  nameEn: string;
-  latitude: number;
-  longitude: number;
-  region?: string;
-  description?: string;
-}
+import { useTranslation } from '@/lib/i18n';
 
 interface MapViewProps {
   selectedLocationId?: string | null;
-  onLocationSelect?: (location: Location) => void;
-}
-
-// 地图控制器组件
-function MapController({ center, zoom }: { center: [number, number]; zoom: number }) {
-  const map = useMap();
-
-  useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
-
-  return null;
+  onLocationSelect?: (location: any) => void;
 }
 
 export default function MapView({ selectedLocationId, onLocationSelect }: MapViewProps) {
+  const { t } = useTranslation();
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [map, setMap] = useState<any>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showLayers, setShowLayers] = useState(false);
+  const [selectedLayer, setSelectedLayer] = useState('standard');
+  const [loading, setLoading] = useState(true);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [markers, setMarkers] = useState<any[]>([]);
+
   const {
-    isDarkMode,
     mapCenter,
     setMapCenter,
-    mapZoom,
-    setMapZoom,
+    selectedLocation,
+    setSelectedLocation,
+    setSelectedLocationId,
     timelineYear,
-    activeJourneyId,
-    journeyStep,
   } = useBibleStore();
-
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
-  const [journeyStops, setJourneyStops] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // 加载地点数据
   useEffect(() => {
+    let mounted = true;
+
     async function fetchLocations() {
       try {
-        const res = await fetch('/api/atlas/locations?limit=200');
+        const res = await fetch('/api/atlas/locations');
         const data = await res.json();
-        setLocations(data.locations || []);
+        if (mounted) {
+          setLocations(data.locations || []);
+        }
       } catch (error) {
         console.error('Failed to fetch locations:', error);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
     fetchLocations();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // 加载事件数据（根据时间线年份筛选）
+  // 加载 Leaflet 地图
   useEffect(() => {
-    async function fetchEvents() {
-      if (!timelineYear) return;
+    if (!mapRef.current || map) return;
+
+    let mapInstance: any;
+    let markerGroup: any;
+
+    async function initMap() {
       try {
-        const yearStart = timelineYear - 50;
-        const yearEnd = timelineYear + 50;
-        const res = await fetch(`/api/atlas/events?yearStart=${yearStart}&yearEnd=${yearEnd}`);
-        const data = await res.json();
-        setEvents(data.events || []);
+        // 动态导入 Leaflet
+        const L = (await import('leaflet')).default;
+
+        // 修复 Leaflet 默认图标问题
+        delete (L.Icon.Default.prototype as any)._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        });
+
+        // 需要 CSS
+        if (!document.querySelector('link[href*="leaflet"]')) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';
+          document.head.appendChild(link);
+        }
+
+        // 初始化地图
+        const center = mapCenter || [31.7683, 35.2137]; // 默认中心：耶路撒冷
+        mapInstance = L.map(mapRef.current!, {
+          center: center as [number, number],
+          zoom: 7,
+          zoomControl: false,
+        });
+
+        // 添加图层
+        const standardLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors',
+        });
+
+        standardLayer.addTo(mapInstance);
+        setMap(mapInstance);
+
+        // 创建标记组
+        markerGroup = L.layerGroup().addTo(mapInstance);
+
+        // 添加标记
+        if (locations.length > 0) {
+          addMarkers(L, mapInstance, markerGroup);
+        }
+
+        // 地图点击事件
+        mapInstance.on('click', () => {
+          setSelectedLocation(null);
+          setSelectedLocationId(null);
+        });
+
+        setLoading(false);
       } catch (error) {
-        console.error('Failed to fetch events:', error);
+        console.error('Failed to load map:', error);
+        setLoading(false);
       }
     }
-    fetchEvents();
-  }, [timelineYear]);
 
-  // 加载旅程站点数据
-  useEffect(() => {
-    async function fetchJourneyStops() {
-      if (!activeJourneyId) {
-        setJourneyStops([]);
-        return;
+    initMap();
+
+    return () => {
+      if (mapInstance) {
+        mapInstance.remove();
       }
-      try {
-        const res = await fetch(`/api/atlas/journeys?id=${activeJourneyId}`);
-        const data = await res.json();
-        setJourneyStops(data.journey?.stops || []);
-      } catch (error) {
-        console.error('Failed to fetch journey stops:', error);
+    };
+  }, [locations]);
+
+  // 添加标记
+  const addMarkers = (L: any, mapInstance: any, markerGroup: any) => {
+    markerGroup.clearLayers();
+
+    locations.forEach((location) => {
+      // 检查地点的时间范围是否与当前时间线年份匹配
+      if (timelineYear && location.yearStart && location.yearEnd) {
+        if (timelineYear < location.yearStart || timelineYear > location.yearEnd) {
+          return;
+        }
       }
-    }
-    fetchJourneyStops();
-  }, [activeJourneyId]);
 
-  // 当选中地点时，移动地图中心
-  const selectedLocation = useMemo(() => {
-    return locations.find(l => l.id === selectedLocationId);
-  }, [locations, selectedLocationId]);
+      const marker = L.marker([location.latitude, location.longitude]);
 
-  // 优先使用 mapCenter（由外部更新），其次使用选中的地点
-  const currentCenter: [number, number] = mapCenter;
-  const currentZoom = selectedLocation ? 12 : mapZoom;
+      // 弹出窗口
+      const popupContent = `
+        <div class="p-2">
+          <h3 class="font-semibold text-sm">${location.nameZh}</h3>
+          <p class="text-xs text-gray-500">${location.nameEn || ''}</p>
+          ${location.yearStart ? `<p class="text-xs text-gray-400">${location.yearStart < 0 ? t('atlas.eventYearBc', { year: Math.abs(location.yearStart) }) : t('atlas.eventYearAd', { year: location.yearStart })}</p>` : ''}
+        </div>
+      `;
+      marker.bindPopup(popupContent);
 
-  // 调试日志
-  useEffect(() => {
-    console.log('MapView - mapCenter:', mapCenter, 'selectedLocationId:', selectedLocationId, 'zoom:', currentZoom);
-  }, [mapCenter, selectedLocationId, currentZoom]);
+      marker.on('click', () => {
+        onLocationSelect?.(location);
+        setSelectedLocation(location);
+        setSelectedLocationId(location.id);
+      });
 
-  // 创建自定义图标
-  const createIcon = (isSelected: boolean) => {
-    return L.divIcon({
-      className: 'custom-marker',
-      html: `<div class="w-6 h-6 rounded-full ${isSelected ? 'bg-indigo-600' : 'bg-red-500'} border-2 border-white shadow-lg flex items-center justify-center">
-        <div class="w-2 h-2 rounded-full bg-white"></div>
-      </div>`,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
+      markerGroup.addLayer(marker);
     });
+  };
+
+  // 更新地图中心
+  useEffect(() => {
+    if (map && mapCenter) {
+      map.flyTo(mapCenter, 10, { duration: 1.5 });
+    }
+  }, [map, mapCenter]);
+
+  // 选中地点高亮
+  useEffect(() => {
+    if (!map || !selectedLocationId) return;
+    // 找到选中的地点并打开 popup
+    const loc = locations.find((l: any) => l.id === selectedLocationId);
+    if (loc) {
+      map.flyTo([loc.latitude, loc.longitude], 12, { duration: 1 });
+    }
+  }, [map, selectedLocationId, locations]);
+
+  // 全屏切换
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+    if (map) {
+      setTimeout(() => map.invalidateSize(), 300);
+    }
+  };
+
+  // 图层切换
+  const handleLayerChange = async (layer: string) => {
+    setSelectedLayer(layer);
+    if (!map) return;
+
+    try {
+      const L = (await import('leaflet')).default;
+      map.eachLayer((l: any) => {
+        if (l instanceof L.TileLayer) {
+          map.removeLayer(l);
+        }
+      });
+
+      let tileUrl: string;
+      let options: any = {};
+
+      switch (layer) {
+        case 'satellite':
+          tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+          break;
+        case 'terrain':
+          tileUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
+          break;
+        default:
+          tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+          options.attribution = '&copy; OpenStreetMap contributors';
+      }
+
+      L.tileLayer(tileUrl, options).addTo(map);
+    } catch (error) {
+      console.error('Failed to switch layer:', error);
+    }
   };
 
   if (loading) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-        <div className="text-gray-500 dark:text-gray-400">加载地点数据中...</div>
+        <Loader2 className="w-6 h-6 animate-spin text-indigo-500 mr-2" />
+        <span className="text-gray-500">{t('atlas.loadingLocationData')}</span>
       </div>
     );
   }
 
   return (
-    <MapContainer
-      center={currentCenter}
-      zoom={currentZoom}
-      className="w-full h-full"
-      style={{ background: isDarkMode ? '#1f2937' : '#f3f4f6' }}
-    >
-      <MapController center={currentCenter} zoom={currentZoom} />
+    <div className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'w-full h-full'}`}>
+      <div ref={mapRef} className="w-full h-full" />
 
-      {/* 根据深色模式切换地图瓦片 */}
-      <TileLayer
-        attribution='&copy; <a href="https://www.esri.com">Esri</a>'
-        url={isDarkMode
-          ? "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
-          : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
-        }
-      />
-
-      {/* 地点标记 */}
-      {locations.map((location) => (
-        <Marker
-          key={location.id}
-          position={[location.latitude, location.longitude]}
-          icon={createIcon(location.id === selectedLocationId)}
-          eventHandlers={{
-            click: () => {
-              onLocationSelect?.(location);
-              setMapCenter([location.latitude, location.longitude]);
-            },
-          }}
+      {/* 地图控件 */}
+      <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
+        <button
+          onClick={() => map?.zoomIn()}
+          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
         >
-          <Popup>
-            <div className="min-w-[200px]">
-              <h3 className="font-semibold text-gray-900">{location.nameZh}</h3>
-              <p className="text-sm text-gray-500">{location.nameEn}</p>
-              {location.region && (
-                <p className="text-xs text-gray-400 mt-1">{location.region}</p>
-              )}
-              {location.description && (
-                <p className="text-sm text-gray-600 mt-2">{location.description}</p>
-              )}
+          <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+        </button>
+        <button
+          onClick={() => map?.zoomOut()}
+          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
+          <Minus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+        </button>
+        <button
+          onClick={toggleFullscreen}
+          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
+          {isFullscreen ? <Minimize className="w-5 h-5 text-gray-600 dark:text-gray-300" /> : <Maximize className="w-5 h-5 text-gray-600 dark:text-gray-300" />}
+        </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowLayers(!showLayers)}
+            className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            <Layers className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          </button>
+          {showLayers && (
+            <div className="absolute right-0 top-10 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-w-[120px] border border-gray-200 dark:border-gray-700">
+              {['standard', 'satellite', 'terrain'].map((layer) => (
+                <button
+                  key={layer}
+                  onClick={() => {
+                    handleLayerChange(layer);
+                    setShowLayers(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 text-sm rounded ${
+                    selectedLayer === layer
+                      ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {layer === 'standard' ? t('atlas.tabMap') : layer === 'satellite' ? 'Satellite' : 'Terrain'}
+                </button>
+              ))}
             </div>
-          </Popup>
-        </Marker>
-      ))}
-
-      {/* 事件标记（带时间线筛选） */}
-      {events.filter(e => e.locationId).map((event) => {
-        const location = locations.find(l => l.id === event.locationId);
-        if (!location) return null;
-
-        return (
-          <Marker
-            key={event.id}
-            position={[location.latitude, location.longitude]}
-            icon={L.divIcon({
-              className: 'event-marker',
-              html: `<div class="w-4 h-4 rounded-full bg-amber-500 border-2 border-white shadow-lg animate-pulse"></div>`,
-              iconSize: [16, 16],
-              iconAnchor: [8, 8],
-            })}
-          >
-            <Popup>
-              <div className="min-w-[200px]">
-                <h3 className="font-semibold text-gray-900">{event.titleZh}</h3>
-                <p className="text-sm text-gray-500">
-                  {event.yearStart ? `${event.yearStart < 0 ? '公元前' : '公元'}${Math.abs(event.yearStart)}年` : ''}
-                </p>
-                {event.description && (
-                  <p className="text-sm text-gray-600 mt-2">{event.description}</p>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
-
-      {/* 旅程路线绘制 */}
-      {journeyStops.length > 1 && (
-        <Polyline
-          positions={journeyStops
-            .sort((a, b) => a.order - b.order)
-            .map(stop => [stop.location.latitude, stop.location.longitude] as [number, number])}
-          pathOptions={{
-            color: '#6366f1',
-            weight: 3,
-            opacity: 0.8,
-            dashArray: '10, 10',
-          }}
-        />
-      )}
-
-      {/* 旅程站点标记 */}
-      {journeyStops.map((stop, index) => {
-        const isCurrentStop = index === journeyStep;
-        const isVisited = index <= journeyStep;
-
-        return (
-          <Marker
-            key={`journey-${stop.id}`}
-            position={[stop.location.latitude, stop.location.longitude]}
-            icon={L.divIcon({
-              className: 'journey-marker',
-              html: `<div class="w-8 h-8 rounded-full ${
-                isCurrentStop
-                  ? 'bg-indigo-600 ring-4 ring-indigo-300'
-                  : isVisited
-                    ? 'bg-indigo-500'
-                    : 'bg-gray-400'
-              } border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold">
-                ${stop.order}
-              </div>`,
-              iconSize: [32, 32],
-              iconAnchor: [16, 16],
-            })}
-          >
-            <Popup>
-              <div className="min-w-[180px]">
-                <div className="text-xs text-indigo-600 font-medium">第 {stop.order} 站</div>
-                <h3 className="font-semibold text-gray-900">{stop.location.nameZh}</h3>
-                <p className="text-sm text-gray-500">{stop.location.nameEn}</p>
-                {stop.verseRef && (
-                  <p className="text-xs text-gray-400 mt-1">📖 {stop.verseRef}</p>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
-    </MapContainer>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

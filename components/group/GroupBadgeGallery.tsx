@@ -18,6 +18,7 @@ import {
   type GroupBadge
 } from "@/lib/group-badges";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface UserBadge {
   id: string;
@@ -51,6 +52,7 @@ export function GroupBadgeGallery({
   earnedBadges = [],
   stats
 }: GroupBadgeGalleryProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [selectedBadge, setSelectedBadge] = useState<GroupBadge | null>(null);
   const [badgeProgress, setBadgeProgress] = useState<Record<string, BadgeProgress>>({});
@@ -128,7 +130,7 @@ export function GroupBadgeGallery({
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <Trophy className="w-5 h-5" />
-          成就徽章
+          {t('group.badgeWall')}
           <span className="text-sm font-normal text-muted-foreground">
             ({totalEarned}/{totalBadges})
           </span>
@@ -228,7 +230,7 @@ export function GroupBadgeGallery({
                               {progress && !isEarned && (
                                 <div className="space-y-1">
                                   <div className="flex justify-between text-xs">
-                                    <span className="text-muted-foreground">进度</span>
+                                    <span className="text-muted-foreground">{t('group.progress')}</span>
                                     <span className="font-medium">
                                       {progress.current}/{progress.target}
                                     </span>
@@ -241,13 +243,13 @@ export function GroupBadgeGallery({
                                 <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
                                   <Unlock className="w-4 h-4" />
                                   <span className="text-sm">
-                                    于 {earnedDate} 获得
+                                    {t('group.earnedOn', { date: earnedDate })}
                                   </span>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <Lock className="w-4 h-4" />
-                                  <span className="text-sm">尚未获得</span>
+                                  <span className="text-sm">{t('group.notYetEarned')}</span>
                                 </div>
                               )}
                             </div>
@@ -263,7 +265,7 @@ export function GroupBadgeGallery({
             {/* Progress indicator */}
             <div className="pt-3 border-t">
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-muted-foreground">收集进度</span>
+                <span className="text-muted-foreground">{t('group.collectionProgress')}</span>
                 <span className="font-medium">{Math.round((totalEarned / totalBadges) * 100)}%</span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">

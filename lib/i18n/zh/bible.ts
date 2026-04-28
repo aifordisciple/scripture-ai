@@ -227,5 +227,39 @@ export const bible = {
     tsvCumulativeWeight: '累积权重: {weight}',
     clearAllHighlightNotes: '清空所有高亮笔记 ({count})',
     clearAllDeepNotes: '清空所有深入笔记 ({count})',
+
+    // CrossRefPanel & CrossRefTab
+    crossRefTitle: '经文串珠',
+    crossRefSubtitle: '发现经文之间的关联',
+    aiConnectionDesc: 'AI 关联说明',
+    loadFailed: '加载失败，请稍后重试',
+    crossRefFooter: '基于 BGE-M3 向量检索 · 点击经文跳转阅读',
+    crossRefFooterTab: '基于 BGE-M3 向量检索 · 点击经文在新标签页打开',
+
+    // CrossRefBadge
+    typeQuotation: '引用',
+    typeParallel: '平行',
+    typeThematic: '主题',
+    typeProphecy: '预言',
+    typeIllustration: '例证',
+    filterAll: '全部',
+
+    // CrossRefItem
+    clickToNavigate: '点击跳转',
+    noRelatedVerses: '暂无相关经文',
+    noRelatedVersesHint: '该经文可能暂未建立关联关系',
+
+    // AudioButton
+    stopReading: '停止朗读',
+    readContent: '朗读内容',
+
+    // HeaderPlayer
+    toggleSpeed: '切换倍速',
+
+    // BibleHeatmap
+    heatmapTooltip: '{bookName} {chapter}章 : {weight} 次互动',
+
+    // BookGrid
+    noMatchingBooks: '未找到匹配的书卷',
   },
 } as const

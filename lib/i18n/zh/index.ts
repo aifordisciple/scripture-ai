@@ -16,6 +16,8 @@ import { adminFeedback } from './adminFeedback'
 import { shortcuts } from './shortcuts'
 import { feedback } from './feedback'
 import { bible } from './bible'
+import { admin } from './admin'
+import { pwa } from './pwa'
 import type { DeepStringify } from '../types'
 
 export const zh = {
@@ -37,6 +39,8 @@ export const zh = {
   ...shortcuts,
   ...feedback,
   ...bible,
+  ...admin,
+  ...pwa,
 } as const
 
 export type Translations = DeepStringify<typeof zh>

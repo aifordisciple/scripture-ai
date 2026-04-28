@@ -2,6 +2,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export type ConnectionType = 'THEMATIC' | 'QUOTATION' | 'PARALLEL' | 'PROPHECY' | 'ILLUSTRATION';
 
@@ -11,30 +12,31 @@ interface CrossRefBadgeProps {
 }
 
 // Configuration for each connection type
-const TYPE_CONFIG: Record<ConnectionType, { label: string; colorClass: string }> = {
+const TYPE_CONFIG: Record<ConnectionType, { labelKey: string; colorClass: string }> = {
   QUOTATION: {
-    label: '引用',
+    labelKey: 'bible.typeQuotation',
     colorClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
   },
   PARALLEL: {
-    label: '平行',
+    labelKey: 'bible.typeParallel',
     colorClass: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
   },
   THEMATIC: {
-    label: '主题',
+    labelKey: 'bible.typeThematic',
     colorClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   },
   PROPHECY: {
-    label: '预言',
+    labelKey: 'bible.typeProphecy',
     colorClass: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
   },
   ILLUSTRATION: {
-    label: '例证',
+    labelKey: 'bible.typeIllustration',
     colorClass: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
   },
 };
 
 export function CrossRefBadge({ type, className }: CrossRefBadgeProps) {
+  const { t } = useTranslation();
   const config = TYPE_CONFIG[type];
 
   return (
@@ -45,7 +47,7 @@ export function CrossRefBadge({ type, className }: CrossRefBadgeProps) {
         className
       )}
     >
-      {config.label}
+      {t(config.labelKey)}
     </span>
   );
 }
@@ -54,9 +56,10 @@ export function CrossRefBadge({ type, className }: CrossRefBadgeProps) {
  * Get all connection types with their labels
  */
 export function getConnectionTypes(): { type: ConnectionType; label: string }[] {
+  const { t } = useTranslation();
   return Object.entries(TYPE_CONFIG).map(([type, config]) => ({
     type: type as ConnectionType,
-    label: config.label,
+    label: t(config.labelKey),
   }));
 }
 
@@ -74,17 +77,18 @@ export function CrossRefFilterTabs({
   onFilterChange,
   counts,
 }: CrossRefFilterTabsProps) {
-  const filters: { type: ConnectionType | 'ALL'; label: string }[] = [
-    { type: 'ALL', label: '全部' },
-    { type: 'QUOTATION', label: '引用' },
-    { type: 'PARALLEL', label: '平行' },
-    { type: 'THEMATIC', label: '主题' },
-    { type: 'PROPHECY', label: '预言' },
+  const { t } = useTranslation();
+  const filters: { type: ConnectionType | 'ALL'; labelKey: string }[] = [
+    { type: 'ALL', labelKey: 'bible.filterAll' },
+    { type: 'QUOTATION', labelKey: 'bible.typeQuotation' },
+    { type: 'PARALLEL', labelKey: 'bible.typeParallel' },
+    { type: 'THEMATIC', labelKey: 'bible.typeThematic' },
+    { type: 'PROPHECY', labelKey: 'bible.typeProphecy' },
   ];
 
   return (
     <div className="flex flex-wrap gap-1.5 p-2 border-b border-slate-200 dark:border-slate-700">
-      {filters.map(({ type, label }) => (
+      {filters.map(({ type, labelKey }) => (
         <button
           key={type}
           onClick={() => onFilterChange(type)}
@@ -95,7 +99,7 @@ export function CrossRefFilterTabs({
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
           )}
         >
-          {label}
+          {t(labelKey)}
           {counts && counts[type] !== undefined && (
             <span className="ml-1 opacity-70">({counts[type]})</span>
           )}

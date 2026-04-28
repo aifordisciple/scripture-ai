@@ -429,7 +429,7 @@ export function AISidebar() {
   const handleSaveInsight = useCallback(async (messageId: string, content: string) => {
     // [P3-2修复] 无触发源时显示提示而非静默失败
     if (!aiRequestTrigger) {
-      addToast({ type: 'warning', message: t('ai.selectVerseFirst') || '请先选择经文' })
+      addToast({ type: 'warning', message: t('ai.selectVerseFirst') })
       return
     }
 
@@ -790,8 +790,8 @@ export function AISidebar() {
               <div className="absolute top-12 right-2 z-50 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-3 text-sm">
                 <p className="mb-2 text-slate-700 dark:text-slate-200">{t('ai.clearAllConfirm')}</p>
                 <div className="flex gap-2 justify-end">
-                  <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200">{t('common.cancel') || '取消'}</button>
-                  <button onClick={confirmClearChat} className="px-3 py-1 text-xs rounded-md bg-red-500 text-white hover:bg-red-600">{t('common.confirm') || '确认'}</button>
+                  <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200">{t('common.cancel')}</button>
+                  <button onClick={confirmClearChat} className="px-3 py-1 text-xs rounded-md bg-red-500 text-white hover:bg-red-600">{t('common.confirm')}</button>
                 </div>
               </div>
             )}

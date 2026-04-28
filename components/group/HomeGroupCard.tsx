@@ -10,6 +10,7 @@ import {
   Flame, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface HomeGroupData {
   churchId: string;
@@ -36,6 +37,7 @@ interface HomeGroupCardProps {
 }
 
 export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
+  const { t } = useTranslation();
   const { startGroupPlanFlow, addTab, setActiveTab, tabs, apiConfig } = useBibleStore();
   const [data, setData] = useState<HomeGroupData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -229,8 +231,8 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
               <Users className="w-5 h-5" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-sm">加入读经小组</p>
-              <p className="text-xs text-muted-foreground">与家人朋友一起读经</p>
+              <p className="font-medium text-sm">{t('group.joinReadingGroup')}</p>
+              <p className="text-xs text-muted-foreground">{t('group.joinReadingGroupDesc')}</p>
             </div>
             <Button
               variant="ghost"
@@ -238,7 +240,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
               onClick={onJoinGroup || goToGroupTab}
               className="gap-1"
             >
-              加入 <ChevronRight className="w-4 h-4" />
+              {t('group.join')} <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
         </CardContent>
@@ -257,7 +259,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
             </div>
             <div className="flex-1">
               <p className="font-medium text-sm">{data.churchName}</p>
-              <p className="text-xs text-muted-foreground">暂无进行中的读经计划</p>
+              <p className="text-xs text-muted-foreground">{t('group.noActivePlan')}</p>
             </div>
             <Button
               variant="ghost"
@@ -265,7 +267,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
               onClick={goToGroupTab}
               className="gap-1"
             >
-              查看 <ChevronRight className="w-4 h-4" />
+              {t('group.view')} <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
         </CardContent>
@@ -305,7 +307,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
             <div className="flex items-center justify-between mb-1">
               <p className="font-medium text-sm truncate">{data.churchName}</p>
               <span className="text-xs text-muted-foreground">
-                第 {activePlan.day}/{activePlan.totalDays} 天
+                {t('group.dayProgress', { day: activePlan.day, total: activePlan.totalDays })}
               </span>
             </div>
 
@@ -316,7 +318,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
             {/* Progress bar */}
             <div className="space-y-1 mb-3">
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">今日进度</span>
+                <span className="text-muted-foreground">{t('group.todayProgress')}</span>
                 <span className="font-medium">{progressPercent}%</span>
               </div>
               <Progress value={progressPercent} className="h-2" />
@@ -326,11 +328,11 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
             <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
               <div className="flex items-center gap-1">
                 <BookOpen className="w-3 h-3" />
-                <span>{todayProgress.chaptersRead} 章</span>
+                <span>{t('group.chaptersCount', { count: todayProgress.chaptersRead })}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Flame className="w-3 h-3 text-orange-500" />
-                <span>{todayProgress.streakDays} 天</span>
+                <span>{t('group.daysCount', { count: todayProgress.streakDays })}</span>
               </div>
             </div>
 
@@ -343,7 +345,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
                 className="w-full gap-1"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                今日已完成
+                {t('group.todayCompleted')}
               </Button>
             ) : (
               <Button
@@ -357,7 +359,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
                 ) : (
                   <Play className="w-4 h-4" />
                 )}
-                {startingReading ? "准备中..." : "继续今日阅读"}
+                {startingReading ? t('group.preparing') : t('group.continueReading')}
               </Button>
             )}
           </div>

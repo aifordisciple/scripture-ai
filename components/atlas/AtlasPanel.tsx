@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useBibleStore } from '@/store/useBibleStore';
+import { useTranslation } from '@/lib/i18n';
 import { Map, Clock, Route, Search, Loader2, MapPin } from 'lucide-react';
 import LocationCard from './LocationCard';
 import TimelineSlider from './TimelineSlider';
@@ -15,7 +16,7 @@ const MapView = dynamic(() => import('./MapView'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-      <div className="text-gray-500">加载地图中...</div>
+      <div className="text-gray-500">...</div>
     </div>
   ),
 });
@@ -28,6 +29,7 @@ interface AtlasPanelProps {
 }
 
 export default function AtlasPanel({ onClose, initialLocationId, initialYear }: AtlasPanelProps) {
+  const { t } = useTranslation();
   const {
     atlasPanelTab,
     setAtlasPanelTab,
@@ -109,7 +111,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
         });
 
         if (!res.ok) {
-          throw new Error('提取地点失败');
+          throw new Error(t('atlas.extractFailed'));
         }
 
         const data = await res.json();
@@ -127,7 +129,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
         }
       } catch (error: any) {
         console.error('Failed to extract locations:', error);
-        setExtractionError(error.message || '提取地点失败');
+        setExtractionError(error.message || t('atlas.extractFailed'));
       } finally {
         setExtractingLocations(false);
       }
@@ -137,9 +139,9 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
   }, [verseContext, apiConfig]);
 
   const tabs = [
-    { id: 'map', label: '地图', icon: Map },
-    { id: 'timeline', label: '时间线', icon: Clock },
-    { id: 'journey', label: '旅程', icon: Route },
+    { id: 'map', label: t('atlas.tabMap'), icon: Map },
+    { id: 'timeline', label: t('atlas.tabTimeline'), icon: Clock },
+    { id: 'journey', label: t('atlas.tabJourney'), icon: Route },
   ] as const;
 
   return (
@@ -158,7 +160,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
       {extractingLocations && (
         <div className="px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800 flex items-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
-          <span className="text-sm text-amber-700 dark:text-amber-300">正在从经文中提取地点...</span>
+          <span className="text-sm text-amber-700 dark:text-amber-300">{t('atlas.extractingLocations')}</span>
         </div>
       )}
 
@@ -174,7 +176,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
         <div className="px-4 py-2 bg-green-50 dark:bg-green-900/20 border-b border-green-100 dark:border-green-800">
           <div className="text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
             <MapPin className="w-4 h-4" />
-            识别到 {extractedLocations.length} 个地点：
+            {t('atlas.identifiedLocations', { count: extractedLocations.length })}
             {extractedLocations.map((loc, idx) => (
               <button
                 key={loc.id}

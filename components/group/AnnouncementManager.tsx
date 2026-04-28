@@ -19,6 +19,7 @@ import {
   Megaphone, Plus, Pencil, Trash2, Loader2, Pin, PinOff, ChevronDown, ChevronUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface Announcement {
   id: string;
@@ -36,6 +37,7 @@ interface AnnouncementManagerProps {
 }
 
 export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerProps) {
+  const { t } = useTranslation();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -84,11 +86,11 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
         setCreateOpen(false);
         resetForm();
       } else {
-        alert(data.error || "创建失败");
+        alert(data.error || t('group.createFailedShort'));
       }
     } catch (error) {
       console.error("Failed to create announcement:", error);
-      alert("创建失败，请稍后重试");
+      alert(t('group.createFailedRetry'));
     } finally {
       setSaving(false);
     }
@@ -110,11 +112,11 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
         setEditId(null);
         resetForm();
       } else {
-        alert(data.error || "更新失败");
+        alert(data.error || t('group.updateFailedShort'));
       }
     } catch (error) {
       console.error("Failed to update announcement:", error);
-      alert("更新失败，请稍后重试");
+      alert(t('group.updateFailedRetry'));
     } finally {
       setSaving(false);
     }
@@ -133,11 +135,11 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
         setAnnouncements(prev => prev.filter(a => a.id !== deleteId));
         setDeleteId(null);
       } else {
-        alert(data.error || "删除失败");
+        alert(data.error || t('common.delete'));
       }
     } catch (error) {
       console.error("Failed to delete announcement:", error);
-      alert("删除失败，请稍后重试");
+      alert(t('group.deleteFailedRetry'));
     } finally {
       setSaving(false);
     }
@@ -219,37 +221,37 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
         <CardTitle className="text-lg flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Megaphone className="w-5 h-5" />
-            小组公告
+            {t('group.groupAnnouncements')}
           </div>
           {isAdmin && (
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-1" onClick={resetForm}>
-                  <Plus className="w-4 h-4" /> 发布公告
+                  <Plus className="w-4 h-4" /> {t('group.publishAnnouncement')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>发布公告</DialogTitle>
+                  <DialogTitle>{t('group.publishAnnouncement')}</DialogTitle>
                   <DialogDescription>
-                    向小组成员发布重要通知或信息
+                    {t('group.publishAnnouncementDesc')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 pt-4">
                   <div className="space-y-2">
-                    <Label>标题</Label>
+                    <Label>{t('group.title')}</Label>
                     <Input
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="公告标题"
+                      placeholder={t('group.announcementTitlePlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>内容</Label>
+                    <Label>{t('group.content')}</Label>
                     <Textarea
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
-                      placeholder="公告内容..."
+                      placeholder={t('group.announcementContentPlaceholder')}
                       rows={4}
                     />
                   </div>
@@ -262,20 +264,20 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                       className="rounded border-gray-300"
                     />
                     <Label htmlFor="pinned" className="text-sm font-normal">
-                      置顶此公告
+                      {t('group.pinThisAnnouncement')}
                     </Label>
                   </div>
                 </div>
                 <DialogFooter className="mt-4">
                   <Button variant="outline" onClick={() => setCreateOpen(false)}>
-                    取消
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     onClick={createAnnouncement}
                     disabled={saving || !title.trim() || !content.trim()}
                   >
                     {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                    发布
+                    {t('group.publish')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -287,7 +289,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
         {announcements.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             <Megaphone className="w-10 h-10 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">暂无公告</p>
+            <p className="text-sm">{t('group.noAnnouncements')}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -326,9 +328,9 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                             className="text-indigo-600 dark:text-indigo-400 hover:underline"
                           >
                             {isExpanded ? (
-                              <>收起 <ChevronUp className="w-3 h-3 inline" /></>
+                              <>{t('group.collapse')} <ChevronUp className="w-3 h-3 inline" /></>
                             ) : (
-                              <>展开 <ChevronDown className="w-3 h-3 inline" /></>
+                              <>{t('group.expand')} <ChevronDown className="w-3 h-3 inline" /></>
                             )}
                           </button>
                         )}
@@ -340,7 +342,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                           variant="ghost"
                           size="sm"
                           onClick={() => togglePin(announcement)}
-                          title={announcement.pinned ? "取消置顶" : "置顶"}
+                          title={announcement.pinned ? t('group.unpin') : t('group.pin')}
                         >
                           {announcement.pinned ? (
                             <PinOff className="w-4 h-4" />
@@ -376,23 +378,23 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
         <Dialog open={!!editId} onOpenChange={() => setEditId(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>编辑公告</DialogTitle>
+              <DialogTitle>{t('group.editAnnouncement')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label>标题</Label>
+                <Label>{t('group.title')}</Label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="公告标题"
+                  placeholder={t('group.announcementTitlePlaceholder')}
                 />
               </div>
               <div className="space-y-2">
-                <Label>内容</Label>
+                <Label>{t('group.content')}</Label>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="公告内容..."
+                  placeholder={t('group.announcementContentPlaceholder')}
                   rows={4}
                 />
               </div>
@@ -405,20 +407,20 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                   className="rounded border-gray-300"
                 />
                 <Label htmlFor="edit-pinned" className="text-sm font-normal">
-                  置顶此公告
+                  {t('group.pinThisAnnouncement')}
                 </Label>
               </div>
             </div>
             <DialogFooter className="mt-4">
               <Button variant="outline" onClick={() => setEditId(null)}>
-                取消
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={updateAnnouncement}
                 disabled={saving || !title.trim() || !content.trim()}
               >
                 {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                保存
+                {t('common.save')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -428,18 +430,18 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
         <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>删除公告</DialogTitle>
+              <DialogTitle>{t('group.deleteAnnouncement')}</DialogTitle>
               <DialogDescription className="pt-4">
-                确定要删除此公告吗？此操作不可撤销。
+                {t('group.deleteAnnouncementWarning')}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteId(null)}>
-                取消
+                {t('common.cancel')}
               </Button>
               <Button variant="destructive" onClick={deleteAnnouncement} disabled={saving}>
                 {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                删除
+                {t('common.delete')}
               </Button>
             </DialogFooter>
           </DialogContent>

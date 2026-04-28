@@ -4,6 +4,7 @@ import { Users, BookOpen, Crown, Lock, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface GroupCardProps {
   church: {
@@ -23,6 +24,7 @@ interface GroupCardProps {
 }
 
 export function GroupCard({ church, isMember, memberRole, onClick }: GroupCardProps) {
+  const { t } = useTranslation();
   const memberCount = church._count?.members || 0;
   const planCount = church._count?.groupPlans || 0;
 
@@ -45,26 +47,26 @@ export function GroupCard({ church, isMember, memberRole, onClick }: GroupCardPr
               <div className="flex items-center gap-2 mt-1">
                 {church.isPublic ? (
                   <Badge variant="outline" className="text-xs gap-1">
-                    <Globe className="w-3 h-3" /> 公开
+                    <Globe className="w-3 h-3" /> {t('group.public')}
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-xs gap-1">
-                    <Lock className="w-3 h-3" /> 私密
+                    <Lock className="w-3 h-3" /> {t('group.private')}
                   </Badge>
                 )}
                 {memberRole === 'OWNER' && (
                   <Badge className="text-xs gap-1 bg-yellow-500">
-                    <Crown className="w-3 h-3" /> 创建者
+                    <Crown className="w-3 h-3" /> {t('group.creator')}
                   </Badge>
                 )}
                 {memberRole === 'ADMIN' && (
-                  <Badge className="text-xs bg-primary">管理员</Badge>
+                  <Badge className="text-xs bg-primary">{t('group.admin')}</Badge>
                 )}
               </div>
             </div>
           </div>
           {isMember && (
-            <Badge variant="secondary" className="text-xs">已加入</Badge>
+            <Badge variant="secondary" className="text-xs">{t('group.joined')}</Badge>
           )}
         </div>
 
@@ -76,10 +78,10 @@ export function GroupCard({ church, isMember, memberRole, onClick }: GroupCardPr
 
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
-            <Users className="w-3.5 h-3.5" /> {memberCount} 成员
+            <Users className="w-3.5 h-3.5" /> {t('group.memberCount', { count: memberCount })}
           </span>
           <span className="flex items-center gap-1">
-            <BookOpen className="w-3.5 h-3.5" /> {planCount} 计划
+            <BookOpen className="w-3.5 h-3.5" /> {t('group.planCount', { count: planCount })}
           </span>
         </div>
       </CardContent>

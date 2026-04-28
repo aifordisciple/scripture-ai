@@ -2,6 +2,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import { CrossRefBadge, ConnectionType } from "./CrossRefBadge";
 import { ChevronRight } from "lucide-react";
 
@@ -50,6 +51,7 @@ function StrengthBar({ strength }: { strength: number }) {
 }
 
 export function CrossRefItem({ item, onClick }: CrossRefItemProps) {
+  const { t } = useTranslation();
   return (
     <div
       onClick={onClick}
@@ -88,7 +90,7 @@ export function CrossRefItem({ item, onClick }: CrossRefItemProps) {
       {/* Navigate hint */}
       <div className="flex items-center justify-end mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <span className="text-xs text-primary flex items-center gap-1">
-          点击跳转
+          {t('bible.clickToNavigate')}
           <ChevronRight className="w-3 h-3" />
         </span>
       </div>
@@ -121,16 +123,17 @@ export function CrossRefItemSkeleton() {
  * Empty state component
  */
 export function CrossRefEmpty() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
         <span className="text-2xl">🔍</span>
       </div>
       <p className="text-slate-500 dark:text-slate-400 text-sm">
-        暂无相关经文
+        {t('bible.noRelatedVerses')}
       </p>
       <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
-        该经文可能暂未建立关联关系
+        {t('bible.noRelatedVersesHint')}
       </p>
     </div>
   );

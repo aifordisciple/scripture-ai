@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import { FeedbackDialog } from "./FeedbackDialog";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface FeedbackButtonProps {
   className?: string;
@@ -13,6 +14,7 @@ interface FeedbackButtonProps {
 
 export function FeedbackButton({ className, variant = "floating" }: FeedbackButtonProps) {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   if (variant === "inline") {
     return (
@@ -24,7 +26,7 @@ export function FeedbackButton({ className, variant = "floating" }: FeedbackButt
           className={cn("gap-2", className)}
         >
           <MessageSquare className="w-4 h-4" />
-          意见反馈
+          {t('feedback.feedbackButton')}
         </Button>
         <FeedbackDialog open={open} onOpenChange={setOpen} />
       </>
@@ -45,7 +47,7 @@ export function FeedbackButton({ className, variant = "floating" }: FeedbackButt
           "transition-all duration-200",
           className
         )}
-        title="意见反馈"
+        title={t('feedback.feedbackButton')}
       >
         <MessageSquare className="w-5 h-5" />
       </Button>

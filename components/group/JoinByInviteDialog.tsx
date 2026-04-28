@@ -13,12 +13,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "@/lib/i18n";
 
 interface JoinByInviteDialogProps {
   onSuccess?: () => void;
 }
 
 export function JoinByInviteDialog({ onSuccess }: JoinByInviteDialogProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ export function JoinByInviteDialog({ onSuccess }: JoinByInviteDialogProps) {
 
   const handleJoin = async () => {
     if (!code.trim() || code.length !== 6) {
-      setError("请输入6位邀请码");
+      setError(t('group.enterInviteCode'));
       return;
     }
 
@@ -50,7 +52,7 @@ export function JoinByInviteDialog({ onSuccess }: JoinByInviteDialogProps) {
         onSuccess?.();
       }
     } catch (error) {
-      setError("网络错误，请稍后重试");
+      setError(t('common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -61,19 +63,19 @@ export function JoinByInviteDialog({ onSuccess }: JoinByInviteDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Ticket className="w-4 h-4" />
-          邀请码加入
+          {t('group.joinByCode')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>通过邀请码加入小组</DialogTitle>
+          <DialogTitle>{t('group.joinByCodeTitle')}</DialogTitle>
           <DialogDescription>
-            输入6位邀请码加入家庭或小组读经团契
+            {t('group.joinByCodeDesc')}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="code">邀请码</Label>
+            <Label htmlFor="code">{t('group.inviteCode')}</Label>
             <Input
               id="code"
               value={code}
@@ -81,7 +83,7 @@ export function JoinByInviteDialog({ onSuccess }: JoinByInviteDialogProps) {
                 setCode(e.target.value.toUpperCase().slice(0, 6));
                 setError("");
               }}
-              placeholder="输入6位邀请码"
+              placeholder={t('group.enterInviteCodePlaceholder')}
               className="text-center text-xl tracking-widest font-mono"
               maxLength={6}
             />
@@ -97,7 +99,7 @@ export function JoinByInviteDialog({ onSuccess }: JoinByInviteDialogProps) {
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
             ) : null}
-            加入小组
+            {t('group.joinGroup')}
           </Button>
         </div>
       </DialogContent>

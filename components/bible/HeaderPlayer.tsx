@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Loader2, Play, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 // 定义播放器接口（对应 useAudioPlayer 的返回值）
 export interface AudioPlayerInstance {
@@ -27,6 +28,7 @@ interface HeaderPlayerProps {
 }
 
 export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderPlayerProps) {
+  const { t } = useTranslation();
   const { 
     isPlaying, isLoading, duration, currentTime, playbackRate,
     play, seek, setRate 
@@ -135,7 +137,7 @@ export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderP
         className={cn("h-7 px-2 text-[10px] font-bold text-slate-500 hover:text-blue-600 transition-all overflow-hidden",
             duration > 0 ? "w-auto opacity-100 ml-1 border-l dark:border-slate-700 rounded-none" : "w-0 opacity-0 px-0"
         )}
-        title="切换倍速"
+        title={t('bible.togglePlaybackSpeed')}
       >
         {playbackRate}x
       </Button>

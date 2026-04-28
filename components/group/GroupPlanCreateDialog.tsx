@@ -20,6 +20,7 @@ import {
 import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
 import { BIBLE_BOOKS } from "@/lib/constants";
+import { useTranslation } from '@/lib/i18n';
 
 interface GroupPlanCreateDialogProps {
   churchId: string;
@@ -91,6 +92,7 @@ const PLAN_TEMPLATES = [
 ];
 
 export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDialogProps) {
+  const { t } = useTranslation();
   const { apiConfig } = useBibleStore();
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -138,7 +140,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       }
     } catch (error) {
       console.error("Failed to create plan:", error);
-      alert("创建计划失败，请稍后重试");
+      alert(t('group.createPlanFailed'));
     } finally {
       setCreating(false);
     }
@@ -185,7 +187,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       }
     } catch (error) {
       console.error("Failed to create plan:", error);
-      alert("创建计划失败，请稍后重试");
+      alert(t('group.createPlanFailed'));
     } finally {
       setCreating(false);
     }
@@ -199,7 +201,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       // Get the selected book info
       const selectedBook = BIBLE_BOOKS.find(b => b.id === manualStartBook);
       if (!selectedBook) {
-        alert("请选择有效的书卷");
+        alert(t('group.selectValidBook'));
         setCreating(false);
         return;
       }
@@ -253,8 +255,8 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
           source: "MANUAL",
           challengeConfig: manualMode === "CHALLENGE" ? {
             targetDays: manualDays,
-            rewardTitle: `完成${manualName}`,
-            rewardBadge: "挑战者"
+            rewardTitle: t('group.completePlanTitle', { name: manualName }),
+            rewardBadge: t('group.challenger')
           } : null
         })
       });
@@ -268,7 +270,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       }
     } catch (error) {
       console.error("Failed to create plan:", error);
-      alert("创建计划失败，请稍后重试");
+      alert(t('group.createPlanFailed'));
     } finally {
       setCreating(false);
     }
@@ -293,44 +295,44 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="gap-2">
-          <Wand2 className="w-4 h-4" /> 创建读经计划
+          <Wand2 className="w-4 h-4" /> {t('group.createReadingPlan')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>创建小组读经计划</DialogTitle>
+          <DialogTitle>{t('group.createGroupReadingPlan')}</DialogTitle>
           <DialogDescription>
-            选择一种方式创建读经计划，与小组一起阅读
+            {t('group.createPlanDesc')}
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="ai" className="gap-1">
-              <Sparkles className="w-4 h-4" /> AI 创建
+              <Sparkles className="w-4 h-4" /> {t('group.aiCreate')}
             </TabsTrigger>
             <TabsTrigger value="template" className="gap-1">
-              <BookOpen className="w-4 h-4" /> 模板
+              <BookOpen className="w-4 h-4" /> {t('group.template')}
             </TabsTrigger>
             <TabsTrigger value="manual" className="gap-1">
-              <Pencil className="w-4 h-4" /> 手动
+              <Pencil className="w-4 h-4" /> {t('group.manual')}
             </TabsTrigger>
           </TabsList>
 
           {/* AI Creation Tab */}
           <TabsContent value="ai" className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label>描述你的需求</Label>
+              <Label>{t('group.describeYourNeeds')}</Label>
               <Textarea
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="例如：我想要一个7天的读经计划，主题是&quot;战胜焦虑&quot;，每天读1-2章..."
+                placeholder={t('group.aiPromptPlaceholder')}
                 rows={3}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>计划天数</Label>
+                <Label>{t('group.planDays')}</Label>
                 <Input
                   type="number"
                   value={aiDuration}
@@ -340,7 +342,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                 />
               </div>
               <div className="space-y-2">
-                <Label>模式</Label>
+                <Label>{t('group.mode')}</Label>
                 <div className="flex gap-2">
                   <Button
                     variant={aiMode === "NORMAL" ? "default" : "outline"}
@@ -348,7 +350,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                     className="flex-1"
                     size="sm"
                   >
-                    <Target className="w-4 h-4 mr-1" /> 普通
+                    <Target className="w-4 h-4 mr-1" /> {t('group.normalMode')}
                   </Button>
                   <Button
                     variant={aiMode === "CHALLENGE" ? "default" : "outline"}
@@ -356,7 +358,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                     className="flex-1"
                     size="sm"
                   >
-                    <Trophy className="w-4 h-4 mr-1" /> 挑战
+                    <Trophy className="w-4 h-4 mr-1" /> {t('group.challengeModeShort')}
                   </Button>
                 </div>
               </div>
@@ -371,7 +373,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
               ) : (
                 <Sparkles className="w-4 h-4 mr-2" />
               )}
-              AI 生成计划
+              {t('group.aiGeneratePlan')}
             </Button>
           </TabsContent>
 
@@ -392,7 +394,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                   <div className="font-bold">{template.name}</div>
                   <div className="text-sm text-muted-foreground">{template.description}</div>
                   <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
-                    {template.durationDays} 天 • {template.readings.reduce((sum, r) => sum + r.chapters.length, 0)} 章
+                    {t('group.templateDaysChapters', { days: template.durationDays, chapters: template.readings.reduce((sum, r) => sum + r.chapters.length, 0) })}
                   </div>
                 </div>
               ))}
@@ -407,33 +409,33 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
               ) : (
                 <BookOpen className="w-4 h-4 mr-2" />
               )}
-              使用此模板
+              {t('group.useThisTemplate')}
             </Button>
           </TabsContent>
 
           {/* Manual Tab */}
           <TabsContent value="manual" className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label>计划名称</Label>
+              <Label>{t('group.planName')}</Label>
               <Input
                 value={manualName}
                 onChange={(e) => setManualName(e.target.value)}
-                placeholder="例如：创世记读经计划"
+                placeholder={t('group.planNamePlaceholder')}
               />
             </div>
             <div className="space-y-2">
-              <Label>简介（可选）</Label>
+              <Label>{t('group.planDescOptional')}</Label>
               <Input
                 value={manualDesc}
                 onChange={(e) => setManualDesc(e.target.value)}
-                placeholder="计划介绍..."
+                placeholder={t('group.planDescPlaceholder')}
               />
             </div>
 
             {/* Book and Chapter Selection */}
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-2">
-                <Label>起始书卷</Label>
+                <Label>{t('group.startBook')}</Label>
                 <select
                   value={manualStartBook}
                   onChange={(e) => {
@@ -450,7 +452,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                 </select>
               </div>
               <div className="space-y-2">
-                <Label>起始章节</Label>
+                <Label>{t('group.startChapter')}</Label>
                 <Input
                   type="number"
                   value={manualStartChapter}
@@ -465,7 +467,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                 />
               </div>
               <div className="space-y-2">
-                <Label>每日章节</Label>
+                <Label>{t('group.chaptersPerDay')}</Label>
                 <Input
                   type="number"
                   value={manualChaptersPerDay}
@@ -478,7 +480,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>计划天数</Label>
+                <Label>{t('group.planDays')}</Label>
                 <Input
                   type="number"
                   value={manualDays}
@@ -488,7 +490,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                 />
               </div>
               <div className="space-y-2">
-                <Label>模式</Label>
+                <Label>{t('group.mode')}</Label>
                 <div className="flex gap-2">
                   <Button
                     variant={manualMode === "NORMAL" ? "default" : "outline"}
@@ -496,7 +498,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                     className="flex-1"
                     size="sm"
                   >
-                    <Target className="w-4 h-4 mr-1" /> 普通
+                    <Target className="w-4 h-4 mr-1" /> {t('group.normalMode')}
                   </Button>
                   <Button
                     variant={manualMode === "CHALLENGE" ? "default" : "outline"}
@@ -504,14 +506,18 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                     className="flex-1"
                     size="sm"
                   >
-                    <Trophy className="w-4 h-4 mr-1" /> 挑战
+                    <Trophy className="w-4 h-4 mr-1" /> {t('group.challengeModeShort')}
                   </Button>
                 </div>
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              从 {BIBLE_BOOKS.find(b => b.id === manualStartBook)?.name} 第 {manualStartChapter} 章开始，
-              每日阅读 {manualChaptersPerDay} 章，共 {manualDays} 天。
+              {t('group.manualPlanSummary', {
+                book: BIBLE_BOOKS.find(b => b.id === manualStartBook)?.name || manualStartBook,
+                chapter: manualStartChapter,
+                chaptersPerDay: manualChaptersPerDay,
+                days: manualDays
+              })}
             </p>
             <Button
               onClick={createManual}
@@ -523,7 +529,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
               ) : (
                 <Pencil className="w-4 h-4 mr-2" />
               )}
-              创建计划
+              {t('group.createPlan')}
             </Button>
           </TabsContent>
         </Tabs>

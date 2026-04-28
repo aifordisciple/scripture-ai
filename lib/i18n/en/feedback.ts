@@ -54,6 +54,9 @@ export const feedback = {
     replyFailed: 'Reply failed',
     replyFailedRetry: 'Reply failed, please try again',
 
+    // FeedbackButton
+    feedbackButton: 'Feedback',
+
     // Type labels (for UserFeedbackPanel getTypeLabel)
     typeBugLabel: 'Bug Report',
     typeFeatureLabel: 'Feature Request',

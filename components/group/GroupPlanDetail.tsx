@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import { GroupPlanEditDialog } from "@/components/group/GroupPlanEditDialog";
 import { GroupProgressCalendar } from "@/components/group/GroupProgressCalendar";
 import { BehindMembersPanel } from "@/components/group/BehindMembersPanel";
@@ -44,6 +45,7 @@ interface Task {
 
 export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDetailProps) {
   const { startGroupPlanFlow, apiConfig, addTab, setActiveTab, tabs, catchUpGroupPlan, groupPlanContext } = useBibleStore();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [progress, setProgress] = useState<{
@@ -88,7 +90,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
     const startDateObj = new Date(plan.startDate);
     startDateObj.setHours(0, 0, 0, 0);
     startDateObj.setDate(startDateObj.getDate() + day - 1);
-    return `${startDateObj.getMonth() + 1}月${startDateObj.getDate()}日`;
+    return t('group.dateMonthDay', { month: startDateObj.getMonth() + 1, day: startDateObj.getDate() });
   };
 
   // Calculate overdue days (days before current day that are not completed)
@@ -320,7 +322,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={onBack}>
-          <ChevronLeft className="w-4 h-4 mr-1" /> 返回
+          <ChevronLeft className="w-4 h-4 mr-1" /> {t('group.backToList')}
         </Button>
       </div>
 
@@ -333,7 +335,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
               <Target className="w-5 h-5" />
             )}
             <span className="text-sm uppercase tracking-widest">
-              {isChallenge ? "挑战模式" : "读经计划"}
+              {isChallenge ? t('group.challengeMode') : t('group.tabPlans')}
             </span>
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground font-serif">
@@ -346,7 +348,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
         <div className="flex items-center gap-2">
           {plan.source === "AI_GENERATED" && (
             <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded-full">
-              AI 生成
+              {t('group.aiGenerated')}
             </span>
           )}
           {isAdmin && (
@@ -371,19 +373,19 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Calendar className="w-5 h-5" />
-            整体进度
+            {t('plan.overallProgress')}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">完成进度</span>
+              <span className="text-muted-foreground">{t('group.completionProgress')}</span>
               <span className="font-bold">{completionPercent}%</span>
             </div>
             <Progress value={completionPercent} className="h-3" />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{progress.completedDays}/{targetDays} 天</span>
-              <span>当前第 {currentDay} 天</span>
+              <span>{t('group.daysOfTotal', { completed: progress.completedDays, total: targetDays })}</span>
+              <span>{t('group.currentDayOf', { day: currentDay })}</span>
             </div>
           </div>
 
@@ -393,20 +395,20 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 {progress.chaptersRead}
               </div>
-              <div className="text-xs text-muted-foreground">已读章节</div>
+              <div className="text-xs text-muted-foreground">{t('group.chaptersRead')}</div>
             </div>
             <div className="text-center p-3 rounded-lg bg-white/50 dark:bg-black/20">
               <div className="text-2xl font-bold text-orange-500 flex items-center justify-center gap-1">
                 <Flame className="w-5 h-5" />
                 {progress.streakDays}
               </div>
-              <div className="text-xs text-muted-foreground">连续天数</div>
+              <div className="text-xs text-muted-foreground">{t('group.streakDays')}</div>
             </div>
             <div className="text-center p-3 rounded-lg bg-white/50 dark:bg-black/20">
               <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                 {progress.completedDays}
               </div>
-              <div className="text-xs text-muted-foreground">完成天数</div>
+              <div className="text-xs text-muted-foreground">{t('group.completedDaysLabel2')}</div>
             </div>
           </div>
 
@@ -422,7 +424,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
               ) : (
                 <Play className="w-5 h-5" />
               )}
-              {generatingDevotional ? "生成导读中..." : selectedDay ? `阅读第 ${selectedDay} 天` : "继续今日阅读"}
+              {generatingDevotional ? t('group.generatingDevotional') : selectedDay ? t('group.readDay', { day: selectedDay }) : t('group.continueTodayReading')}
             </Button>
           )}
         </CardContent>
@@ -436,10 +438,10 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
               <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="font-medium text-orange-700 dark:text-orange-300">
-                  有 {overdueDays.length} 天的任务未完成
+                  {t('group.overdueDaysTask', { count: overdueDays.length })}
                 </p>
                 <p className="text-sm text-orange-600/70 dark:text-orange-400/70 mt-1">
-                  你可以补做错过的任务，进度会同步更新。
+                  {t('group.overdueMakeupHint')}
                 </p>
                 <div className="flex flex-wrap gap-1 mt-3">
                   {overdueDays.slice(0, 5).map(day => (
@@ -450,12 +452,12 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                       onClick={() => setSelectedDay(day)}
                       className="text-xs"
                     >
-                      第 {day} 天
+                      {t('group.dayLabel', { day })}
                     </Button>
                   ))}
                   {overdueDays.length > 5 && (
                     <span className="text-xs text-muted-foreground self-center">
-                      +{overdueDays.length - 5} 更多
+                      +{overdueDays.length - 5} {t('group.more')}
                     </span>
                   )}
                 </div>
@@ -472,7 +474,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                   className="mt-3 text-orange-600 border-orange-200 hover:bg-orange-50 dark:text-orange-400 dark:border-orange-800 dark:hover:bg-orange-900/20"
                 >
                   <FastForward className="w-4 h-4 mr-1" />
-                  追赶进度
+                  {t('group.catchUpProgress')}
                 </Button>
               </div>
             </div>
@@ -491,7 +493,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                   size="sm"
                   onClick={() => setSelectedDay(null)}
                 >
-                  <ChevronLeft className="w-4 h-4 mr-1" /> 返回今日
+                  <ChevronLeft className="w-4 h-4 mr-1" /> {t('group.backToToday')}
                 </Button>
               </div>
               <div className="flex items-center gap-1">
@@ -501,16 +503,16 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                   onClick={() => setSelectedDay(Math.max(1, selectedDay - 1))}
                   disabled={selectedDay <= 1}
                 >
-                  上一 天
+                  {t('group.prevDay')}
                 </Button>
-                <span className="text-sm font-medium px-2">第 {selectedDay} 天</span>
+                <span className="text-sm font-medium px-2">{t('group.dayLabel', { day: selectedDay })}</span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setSelectedDay(Math.min(tasks.length || plan.dailyChapters.length, selectedDay + 1))}
                   disabled={selectedDay >= (tasks.length || plan.dailyChapters.length)}
                 >
-                  下一天
+                  {t('group.nextDay')}
                 </Button>
               </div>
             </div>
@@ -524,7 +526,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-indigo-500" />
-              {selectedDay ? `第 ${selectedDay} 天灵修导读` : "今日灵修导读"}
+              {selectedDay ? t('group.dayDevotional', { day: selectedDay }) : t('group.todayDevotional')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -540,7 +542,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <BookOpen className="w-5 h-5" />
-            {selectedDay ? `第 ${selectedDay} 天经文` : "今日经文"}
+            {selectedDay ? t('group.dayScripture', { day: selectedDay }) : t('group.todayScripture')}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
@@ -572,9 +574,9 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-bold truncate">{bookName} 第 {reading.chapter} 章</div>
+                    <div className="font-bold truncate">{t('group.bookChapter', { book: bookName, chapter: reading.chapter })}</div>
                     {isCompleted && (
-                      <div className="text-xs text-green-600 dark:text-green-400">已完成</div>
+                      <div className="text-xs text-green-600 dark:text-green-400">{t('group.completed')}</div>
                     )}
                   </div>
                   <Button
@@ -601,7 +603,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              每日任务
+              {t('group.dailyTasks')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -630,23 +632,23 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold">第 {task.day} 天</span>
+                        <span className="font-bold">{t('group.dayLabel', { day: task.day })}</span>
                         <span className={cn(
                           "text-xs",
                           isCurrentDay ? "text-indigo-600 dark:text-indigo-400 font-medium" : "text-muted-foreground"
                         )}>
-                          {isCurrentDay ? "今天" : taskDate}
+                          {isCurrentDay ? t('group.today') : taskDate}
                         </span>
                         {isCurrentDay && (
-                          <span className="text-xs bg-indigo-500 text-white px-1.5 py-0.5 rounded">今日</span>
+                          <span className="text-xs bg-indigo-500 text-white px-1.5 py-0.5 rounded">{t('group.todayShort')}</span>
                         )}
                         {isBehind && !isCurrentDay && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-bold">已落后</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-bold">{t('group.behind')}</span>
                         )}
                       </div>
                       {allCompleted && (
                         <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> 已完成
+                          <CheckCircle2 className="w-3 h-3" /> {t('group.completed')}
                         </span>
                       )}
                     </div>
@@ -656,7 +658,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                       <div className="mb-2 p-2 rounded bg-muted/50">
                         <div className="flex items-center gap-2 mb-1">
                           <Sparkles className="w-3 h-3 text-indigo-500" />
-                          <span className="text-xs font-medium text-muted-foreground">灵修导读</span>
+                          <span className="text-xs font-medium text-muted-foreground">{t('group.devotional')}</span>
                           {isCurrentDay && (
                             <span className={cn(
                               "text-xs px-1 py-0.5 rounded",
@@ -664,7 +666,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                                 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
                                 : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
                             )}>
-                              {devotionalCompleted ? "已读" : "未读"}
+                              {devotionalCompleted ? t('group.read') : t('group.unread')}
                             </span>
                           )}
                         </div>
@@ -690,7 +692,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                                 : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
                             )}
                           >
-                            {bookName} {r.chapter}章
+                            {t('group.bookChapterShort', { book: bookName, chapter: r.chapter })}
                             {completed && <CheckCircle2 className="w-3 h-3" />}
                             <ExternalLink className="w-3 h-3 opacity-50" />
                           </button>
@@ -729,12 +731,12 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
-              灵修导读管理
+              {t('group.devotionalManagement')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
             <p className="text-sm text-muted-foreground">
-              为每一天生成或更新灵修导读，帮助小组成员更好地理解经文。
+              {t('group.devotionalManagementDesc')}
             </p>
             <div className="flex flex-wrap gap-2">
               <Button
@@ -749,7 +751,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                 ) : (
                   <RefreshCw className="w-4 h-4" />
                 )}
-                重新生成今日导读
+                {t('group.regenerateTodayDevotional')}
               </Button>
             </div>
           </CardContent>

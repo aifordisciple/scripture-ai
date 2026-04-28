@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Volume2, Loader2, StopCircle } from "lucide-react";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface AudioButtonProps {
   text: string;
@@ -45,13 +46,14 @@ function cleanMarkdown(text: string): string {
     .trim();
 }
 
-export function AudioButton({ 
-  text, 
-  className, 
-  variant = "ghost", 
+export function AudioButton({
+  text,
+  className,
+  variant = "ghost",
   size = "icon",
-  label 
+  label
 }: AudioButtonProps) {
+  const { t } = useTranslation();
   const { isPlaying, isLoading, play, stop } = useAudioPlayer();
   const [isThisPlaying, setIsThisPlaying] = useState(false);
 
@@ -82,7 +84,7 @@ export function AudioButton({
       size={size}
       className={cn("transition-colors", className, isThisPlaying && "text-blue-600 bg-blue-50 dark:bg-blue-900/20")}
       onClick={handleToggle}
-      title={isThisPlaying ? "停止朗读" : "朗读内容"}
+      title={isThisPlaying ? t('bible.stopReading') : t('bible.readContent')}
       disabled={isLoading && !isThisPlaying}
     >
       {isLoading && isThisPlaying ? (

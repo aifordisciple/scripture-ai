@@ -22,6 +22,7 @@ import {
   Users, Crown, Shield, MoreVertical, UserMinus, Loader2, Trash2, AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface Member {
   id: string;
@@ -44,6 +45,7 @@ interface MemberManagerProps {
 }
 
 export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: MemberManagerProps) {
+  const { t } = useTranslation();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -70,7 +72,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
   };
 
   const kickMember = async (userId: string) => {
-    if (!confirm("确定要移除该成员吗？")) return;
+    if (!confirm(t('group.confirmKickMember'))) return;
 
     setProcessing(userId);
     try {
@@ -83,11 +85,11 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
       if (data.success) {
         setMembers(prev => prev.filter(m => m.userId !== userId));
       } else {
-        alert(data.error || "操作失败");
+        alert(data.error || t('group.operationFailed'));
       }
     } catch (error) {
       console.error("Failed to kick member:", error);
-      alert("操作失败，请稍后重试");
+      alert(t('group.operationFailedRetry'));
     } finally {
       setProcessing(null);
     }
@@ -107,11 +109,11 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
           m.userId === userId ? { ...m, role } : m
         ));
       } else {
-        alert(data.error || "操作失败");
+        alert(data.error || t('group.operationFailed'));
       }
     } catch (error) {
       console.error("Failed to set role:", error);
-      alert("操作失败，请稍后重试");
+      alert(t('group.operationFailedRetry'));
     } finally {
       setProcessing(null);
     }
@@ -130,11 +132,11 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
         setDisbandOpen(false);
         onGroupDisbanded?.();
       } else {
-        alert(data.error || "解散失败");
+        alert(data.error || t('group.disbandFailed'));
       }
     } catch (error) {
       console.error("Failed to disband group:", error);
-      alert("解散失败，请稍后重试");
+      alert(t('group.disbandFailedRetry'));
     } finally {
       setDisbanding(false);
     }
@@ -149,18 +151,18 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
       case "OWNER":
         return (
           <span className="inline-flex items-center gap-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full">
-            <Crown className="w-3 h-3" /> 创建者
+            <Crown className="w-3 h-3" /> {t('group.roleOwner')}
           </span>
         );
       case "ADMIN":
         return (
           <span className="inline-flex items-center gap-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
-            <Shield className="w-3 h-3" /> 管理员
+            <Shield className="w-3 h-3" /> {t('group.roleAdmin')}
           </span>
         );
       default:
         return (
-          <span className="text-xs text-muted-foreground">成员</span>
+          <span className="text-xs text-muted-foreground">{t('group.roleMember')}</span>
         );
     }
   };
@@ -180,9 +182,9 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <Users className="w-5 h-5" />
-          成员管理
+          {t('group.memberManage')}
           <span className="text-sm font-normal text-muted-foreground">
-            ({members.length} 人)
+            ({t('group.memberCount', { count: members.length })})
           </span>
         </CardTitle>
       </CardHeader>
@@ -213,11 +215,11 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                   )}
                 </div>
                 <div>
-                  <div className="font-medium">{member.user.name || "匿名用户"}</div>
+                  <div className="font-medium">{member.user.name || t('group.anonymousUser')}</div>
                   <div className="flex items-center gap-2">
                     {getRoleBadge(member.role)}
                     <span className="text-xs text-muted-foreground">
-                      加入于 {formatDate(member.joinedAt)}
+                      {t('group.joinedAt', { date: formatDate(member.joinedAt) })}
                     </span>
                   </div>
                 </div>
@@ -246,7 +248,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                         className="text-indigo-600"
                       >
                         <Shield className="w-4 h-4 mr-2" />
-                        设为管理员
+                        {t('group.setAsAdmin')}
                       </DropdownMenuItem>
                     )}
                     {isOwner && member.role === "ADMIN" && (
@@ -254,7 +256,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                         onClick={() => setRole(member.userId, "MEMBER")}
                       >
                         <Users className="w-4 h-4 mr-2" />
-                        取消管理员
+                        {t('group.removeAdmin')}
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem
@@ -262,7 +264,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                       className="text-red-600"
                     >
                       <UserMinus className="w-4 h-4 mr-2" />
-                      移除成员
+                      {t('group.removeMember')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -278,17 +280,17 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
               <DialogTrigger asChild>
                 <Button variant="destructive" size="sm" className="gap-2">
                   <Trash2 className="w-4 h-4" />
-                  解散小组
+                  {t('group.disbandGroup')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2 text-red-600">
                     <AlertTriangle className="w-5 h-5" />
-                    确定要解散小组吗？
+                    {t('group.confirmDisbandGroup')}
                   </DialogTitle>
                   <DialogDescription className="pt-4">
-                    此操作不可撤销。解散后，所有成员将被移除，所有读经计划和进度数据将被删除。
+                    {t('group.disbandGroupDesc')}
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="gap-2 sm:gap-0">
@@ -296,7 +298,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                     variant="outline"
                     onClick={() => setDisbandOpen(false)}
                   >
-                    取消
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     variant="destructive"
@@ -308,7 +310,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                     ) : (
                       <Trash2 className="w-4 h-4 mr-2" />
                     )}
-                    确认解散
+                    {t('group.confirmDisband')}
                   </Button>
                 </DialogFooter>
               </DialogContent>

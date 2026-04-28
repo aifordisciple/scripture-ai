@@ -8,6 +8,7 @@ import {
   Bell, Heart, MessageSquare, ChevronDown, ChevronUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,7 @@ interface BehindMembersPanelProps {
 }
 
 export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [behindMembers, setBehindMembers] = useState<BehindMember[]>([]);
   const [stats, setStats] = useState({
@@ -89,13 +91,13 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
       const data = await res.json();
       if (data.success) {
         // Show success feedback
-        alert("提醒已发送！");
+        alert(t('group.reminderSent'));
       } else {
-        alert(data.error || "发送失败");
+        alert(data.error || t('group.sendFailed'));
       }
     } catch (error) {
       console.error("Failed to send reminder:", error);
-      alert("发送失败，请重试");
+      alert(t('group.sendFailedRetry'));
     } finally {
       setSendingReminder(null);
     }
@@ -111,10 +113,10 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
   };
 
   const formatLastActive = (lastActiveDate: string | null, daysSinceActive: number) => {
-    if (!lastActiveDate) return "从未活跃";
-    if (daysSinceActive === 0) return "今天";
-    if (daysSinceActive === 1) return "昨天";
-    return `${daysSinceActive} 天前`;
+    if (!lastActiveDate) return t('group.neverActive');
+    if (daysSinceActive === 0) return t('group.today');
+    if (daysSinceActive === 1) return t('group.yesterday');
+    return t('group.daysAgo', { count: daysSinceActive });
   };
 
   const getActivityColor = (daysSinceActive: number) => {
@@ -145,10 +147,10 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
             </div>
             <div>
               <p className="font-medium text-green-700 dark:text-green-300">
-                太棒了！所有成员都跟上了进度
+                {t('group.allMembersOnTrack')}
               </p>
               <p className="text-sm text-green-600 dark:text-green-400">
-                {stats.onTrackCount} 位成员正在按时阅读
+                {t('group.onTrackCountDesc', { count: stats.onTrackCount })}
               </p>
             </div>
           </div>
@@ -163,7 +165,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-orange-500" />
-            进度落后成员
+            {t('group.behindMembersTitle')}
           </CardTitle>
           <Button
             variant="ghost"
@@ -175,18 +177,18 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
           </Button>
         </div>
         <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
-          <span>当前第 {currentDay} 天</span>
+          <span>{t('group.currentDay', { day: currentDay })}</span>
           <span>•</span>
-          <span className="text-orange-500">{stats.behindCount} 人落后</span>
+          <span className="text-orange-500">{t('group.behindCount', { count: stats.behindCount })}</span>
           <span>•</span>
-          <span className="text-green-500">{stats.onTrackCount} 人正常</span>
+          <span className="text-green-500">{t('group.onTrackCount', { count: stats.onTrackCount })}</span>
         </div>
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-3">
           {behindMembers.map((member) => {
             const isExpanded = expandedMember === member.user.id;
-            const userName = member.user.name || member.user.email?.split('@')[0] || "匿名用户";
+            const userName = member.user.name || member.user.email?.split('@')[0] || t('group.anonymousUser');
 
             return (
               <div
@@ -218,13 +220,13 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                     <div className="flex items-center gap-2">
                       <span className="font-medium truncate">{userName}</span>
                       <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full">
-                        落后 {member.behindDays.length} 天
+                        {t('group.daysBehind', { count: member.behindDays.length })}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                      <span>已完成 {member.completedDays} 天</span>
+                      <span>{t('group.completedDaysCount', { count: member.completedDays })}</span>
                       <span className={getActivityColor(member.daysSinceActive)}>
-                        最后活跃: {formatLastActive(member.lastActiveDate, member.daysSinceActive)}
+                        {t('group.lastActive', { date: formatLastActive(member.lastActiveDate, member.daysSinceActive) })}
                       </span>
                     </div>
                   </div>
@@ -242,19 +244,19 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                   <div className="p-3 border-t bg-card space-y-3">
                     {/* Behind days detail */}
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground mb-2">落后的天数：</p>
+                      <p className="text-xs font-medium text-muted-foreground mb-2">{t('group.behindDaysLabel')}</p>
                       <div className="flex flex-wrap gap-1">
                         {member.behindDays.slice(0, 10).map(day => (
                           <span
                             key={day}
                             className="text-xs px-2 py-1 rounded bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
                           >
-                            第 {day} 天
+                            {t('group.dayNumber', { number: day })}
                           </span>
                         ))}
                         {member.behindDays.length > 10 && (
                           <span className="text-xs px-2 py-1 text-muted-foreground">
-                            +{member.behindDays.length - 10} 更多
+                            +{member.behindDays.length - 10} {t('group.more')}
                           </span>
                         )}
                       </div>
@@ -274,7 +276,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                         ) : (
                           <Bell className="w-3 h-3" />
                         )}
-                        发送提醒
+                        {t('group.sendReminder')}
                       </Button>
                       <Button
                         size="sm"
@@ -284,7 +286,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                         className="gap-1"
                       >
                         <Heart className="w-3 h-3" />
-                        发送鼓励
+                        {t('group.sendEncouragement')}
                       </Button>
                       <Button
                         size="sm"
@@ -296,7 +298,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                         className="gap-1"
                       >
                         <MessageSquare className="w-3 h-3" />
-                        自定义消息
+                        {t('group.customMessage')}
                       </Button>
                     </div>
                   </div>
@@ -309,13 +311,13 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
         {/* Quick actions for all */}
         {behindMembers.length > 1 && (
           <div className="mt-4 pt-4 border-t">
-            <p className="text-xs text-muted-foreground mb-2">批量操作：</p>
+            <p className="text-xs text-muted-foreground mb-2">{t('group.batchActions')}</p>
             <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
                 variant="outline"
                 onClick={async () => {
-                  if (confirm(`确定要向 ${behindMembers.length} 位落后成员发送提醒吗？`)) {
+                  if (confirm(t('group.confirmBatchRemind', { count: behindMembers.length }))) {
                     for (const member of behindMembers) {
                       await sendReminder(member.user.id, 'reminder');
                     }
@@ -324,7 +326,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                 className="gap-1"
               >
                 <Send className="w-3 h-3" />
-                全部提醒
+                {t('group.remindAll')}
               </Button>
             </div>
           </div>
@@ -335,21 +337,21 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
       <Dialog open={remindDialogOpen} onOpenChange={setRemindDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>发送自定义消息</DialogTitle>
+            <DialogTitle>{t('group.sendCustomMessage')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label>收件人</Label>
+              <Label>{t('group.recipient')}</Label>
               <p className="text-sm text-muted-foreground">
                 {selectedMember?.user.name || selectedMember?.user.email}
               </p>
             </div>
             <div className="space-y-2">
-              <Label>消息内容</Label>
+              <Label>{t('group.messageContent')}</Label>
               <Textarea
                 value={customMessage}
                 onChange={(e) => setCustomMessage(e.target.value)}
-                placeholder="输入你的消息..."
+                placeholder={t('group.messagePlaceholder')}
                 rows={4}
               />
             </div>
@@ -358,13 +360,13 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                 variant="outline"
                 onClick={() => setRemindDialogOpen(false)}
               >
-                取消
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={handleCustomSend}
                 disabled={!customMessage.trim()}
               >
-                发送
+                {t('common.send')}
               </Button>
             </div>
           </div>

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Pencil, Trash2, Loader2, MoreVertical, Target, Trophy, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from '@/lib/i18n';
 
 interface GroupPlanEditDialogProps {
   churchId: string;
@@ -44,6 +45,7 @@ export function GroupPlanEditDialog({
   onUpdate,
   onDelete
 }: GroupPlanEditDialogProps) {
+  const { t } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -78,11 +80,11 @@ export function GroupPlanEditDialog({
         onUpdate(data.plan);
         setEditOpen(false);
       } else {
-        alert(data.error || "保存失败");
+        alert(data.error || t('group.saveFailed'));
       }
     } catch (error) {
       console.error("Failed to save plan:", error);
-      alert("保存失败，请稍后重试");
+      alert(t('group.saveFailedRetry'));
     } finally {
       setSaving(false);
     }
@@ -99,11 +101,11 @@ export function GroupPlanEditDialog({
         setDeleteOpen(false);
         onDelete();
       } else {
-        alert(data.error || "删除失败");
+        alert(data.error || t('common.delete'));
       }
     } catch (error) {
       console.error("Failed to delete plan:", error);
-      alert("删除失败，请稍后重试");
+      alert(t('group.deleteFailedRetry'));
     } finally {
       setDeleting(false);
     }
@@ -129,14 +131,14 @@ export function GroupPlanEditDialog({
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={openEditDialog}>
             <Pencil className="w-4 h-4 mr-2" />
-            编辑计划
+            {t('group.editPlan')}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setDeleteOpen(true)}
             className="text-red-600"
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            删除计划
+            {t('group.deletePlan')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -145,32 +147,32 @@ export function GroupPlanEditDialog({
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>编辑读经计划</DialogTitle>
+            <DialogTitle>{t('group.editReadingPlan')}</DialogTitle>
             <DialogDescription>
-              修改计划的名称、描述和其他设置
+              {t('group.editPlanDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label>计划名称</Label>
+              <Label>{t('group.planName')}</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="例如：创世记读经计划"
+                placeholder={t('group.planNamePlaceholder')}
               />
             </div>
             <div className="space-y-2">
-              <Label>简介（可选）</Label>
+              <Label>{t('group.planDescOptional')}</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="计划介绍..."
+                placeholder={t('group.planDescPlaceholder')}
                 rows={2}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>开始日期</Label>
+                <Label>{t('group.startDate')}</Label>
                 <Input
                   type="date"
                   value={startDate}
@@ -178,7 +180,7 @@ export function GroupPlanEditDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label>模式</Label>
+                <Label>{t('group.mode')}</Label>
                 <div className="flex gap-2">
                   <Button
                     variant={mode === "NORMAL" ? "default" : "outline"}
@@ -186,7 +188,7 @@ export function GroupPlanEditDialog({
                     className="flex-1"
                     size="sm"
                   >
-                    <Target className="w-4 h-4 mr-1" /> 普通
+                    <Target className="w-4 h-4 mr-1" /> {t('group.normalMode')}
                   </Button>
                   <Button
                     variant={mode === "CHALLENGE" ? "default" : "outline"}
@@ -194,7 +196,7 @@ export function GroupPlanEditDialog({
                     className="flex-1"
                     size="sm"
                   >
-                    <Trophy className="w-4 h-4 mr-1" /> 挑战
+                    <Trophy className="w-4 h-4 mr-1" /> {t('group.challengeModeShort')}
                   </Button>
                 </div>
               </div>
@@ -202,13 +204,13 @@ export function GroupPlanEditDialog({
           </div>
           <DialogFooter className="gap-2 sm:gap-0 mt-4">
             <Button variant="outline" onClick={() => setEditOpen(false)}>
-              取消
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleSave} disabled={saving || !name.trim()}>
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               ) : null}
-              保存
+              {t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -220,15 +222,15 @@ export function GroupPlanEditDialog({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="w-5 h-5" />
-              确定要删除此计划吗？
+              {t('group.confirmDeletePlan')}
             </DialogTitle>
             <DialogDescription className="pt-4">
-              删除后，所有成员的进度数据将被永久删除，此操作不可撤销。
+              {t('group.deletePlanWarning')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setDeleteOpen(false)}>
-              取消
+              {t('common.cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -240,7 +242,7 @@ export function GroupPlanEditDialog({
               ) : (
                 <Trash2 className="w-4 h-4 mr-2" />
               )}
-              确认删除
+              {t('group.confirmDelete')}
             </Button>
           </DialogFooter>
         </DialogContent>

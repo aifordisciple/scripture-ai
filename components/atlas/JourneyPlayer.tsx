@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
+import { useTranslation } from '@/lib/i18n';
 import { Play, Pause, SkipBack, SkipForward, ChevronRight } from 'lucide-react';
 
 interface JourneyPlayerProps {
@@ -30,6 +31,7 @@ interface Journey {
 }
 
 export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPlayerProps) {
+  const { t } = useTranslation();
   const { journeyStep, setJourneyStep, isPlayingJourney, setIsPlayingJourney, setMapCenter, setMapZoom } = useBibleStore();
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [selectedJourney, setSelectedJourney] = useState<Journey | null>(null);
@@ -112,7 +114,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center text-gray-500">
-        加载旅程数据中...
+        {t('atlas.loadingJourneyData')}
       </div>
     );
   }
@@ -122,7 +124,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
     return (
       <div className="h-full overflow-y-auto p-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          选择旅程
+          {t('atlas.selectJourney')}
         </h3>
         <div className="space-y-3">
           {journeys.map((journey) => (
@@ -135,10 +137,10 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
                 {journey.titleZh}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {journey.stops.length} 站
+                {t('atlas.stopsCount', { count: journey.stops.length })}
                 {journey.yearStart && (
                   <span className="ml-2">
-                    ({journey.yearStart < 0 ? '公元前' : '公元'}{Math.abs(journey.yearStart)})
+                    ({journey.yearStart < 0 ? t('atlas.bc') : t('atlas.ad')}{Math.abs(journey.yearStart)})
                   </span>
                 )}
               </div>
@@ -148,7 +150,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
 
         {journeys.length === 0 && (
           <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-            暂无旅程数据
+            {t('atlas.noJourneyData')}
           </div>
         )}
       </div>
@@ -164,13 +166,13 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
           onClick={() => setSelectedJourney(null)}
           className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline mb-2"
         >
-          ← 返回列表
+          {t('atlas.returnToList')}
         </button>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           {selectedJourney.titleZh}
         </h3>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          第 {journeyStep + 1} / {selectedJourney.stops.length} 站
+          {t('atlas.journeyStep', { current: journeyStep + 1, total: selectedJourney.stops.length })}
         </div>
       </div>
 

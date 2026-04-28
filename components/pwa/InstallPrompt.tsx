@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { usePWAInstall, dismissInstallPrompt } from "@/hooks/use-pwa-install";
 import { IosInstallGuide } from "./IosInstallGuide";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * PWA 安装提示组件
@@ -22,6 +23,7 @@ export function InstallPrompt() {
   const { canInstall, isIOS, isInstalled, isStandalone, promptInstall, shouldShowPrompt, markPromptShown } = usePWAInstall();
   const [isVisible, setIsVisible] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
+  const { t } = useTranslation();
 
   // 检查是否应该显示提示
   useEffect(() => {
@@ -86,10 +88,10 @@ export function InstallPrompt() {
                 {/* 内容 */}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-foreground text-sm mb-1">
-                    添加到主屏幕
+                    {t('pwa.addToHomeScreen')}
                   </h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    安装 AI读，获得更流畅的阅读体验，支持离线访问
+                    {t('pwa.installDesc')}
                   </p>
                 </div>
 
@@ -110,7 +112,7 @@ export function InstallPrompt() {
                   onClick={handleDismiss}
                   className="flex-1 rounded-full text-xs"
                 >
-                  暂不需要
+                  {t('pwa.notNow')}
                 </Button>
                 <Button
                   size="sm"
@@ -118,7 +120,7 @@ export function InstallPrompt() {
                   className="flex-1 rounded-full text-xs gap-1.5"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  {isIOS ? "查看教程" : "立即安装"}
+                  {isIOS ? t('pwa.viewTutorial') : t('pwa.installNow')}
                 </Button>
               </div>
             </div>

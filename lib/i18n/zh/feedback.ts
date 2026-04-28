@@ -54,6 +54,9 @@ export const feedback = {
     replyFailed: '回复失败',
     replyFailedRetry: '回复失败，请重试',
 
+    // FeedbackButton
+    feedbackButton: '意见反馈',
+
     // Type labels (for UserFeedbackPanel getTypeLabel)
     typeBugLabel: 'Bug报告',
     typeFeatureLabel: '功能建议',

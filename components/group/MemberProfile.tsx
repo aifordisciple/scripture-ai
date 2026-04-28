@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BIBLE_BOOKS } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n";
 
 interface MemberProfileProps {
   userId: string;
@@ -80,6 +81,7 @@ const BADGE_ICONS: Record<string, string> = {
 };
 
 export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<MemberData | null>(null);
@@ -126,13 +128,13 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
         {trigger || (
           <Button variant="ghost" size="sm">
             <User className="w-4 h-4 mr-2" />
-            查看资料
+            {t('group.viewProfile')}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>成员资料</DialogTitle>
+          <DialogTitle>{t('group.memberProfile')}</DialogTitle>
         </DialogHeader>
 
         {loading ? (
@@ -155,13 +157,13 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                 )}
               </div>
               <div>
-                <h2 className="text-xl font-bold">{data.user.name || "匿名用户"}</h2>
+                <h2 className="text-xl font-bold">{data.user.name || t('group.anonymousUser')}</h2>
                 <p className="text-sm text-muted-foreground">
-                  加入于 {formatDate(data.user.createdAt)}
+                  {t('group.joinedAt', { date: formatDate(data.user.createdAt) })}
                 </p>
                 {data.user.lastActiveDate && (
                   <p className="text-xs text-muted-foreground">
-                    最后活跃: {formatDate(data.user.lastActiveDate)}
+                    {t('group.lastActive', { date: formatDate(data.user.lastActiveDate!) })}
                   </p>
                 )}
               </div>
@@ -173,28 +175,28 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                 <CardContent className="pt-4 text-center">
                   <BookOpen className="w-5 h-5 mx-auto mb-1 text-indigo-500" />
                   <div className="text-xl font-bold">{data.stats.totalChaptersRead}</div>
-                  <div className="text-xs text-muted-foreground">阅读章节</div>
+                  <div className="text-xs text-muted-foreground">{t('group.chaptersRead')}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-4 text-center">
                   <BookOpen className="w-5 h-5 mx-auto mb-1 text-green-500" />
                   <div className="text-xl font-bold">{data.stats.uniqueBooksRead}</div>
-                  <div className="text-xs text-muted-foreground">已读书卷</div>
+                  <div className="text-xs text-muted-foreground">{t('group.booksRead')}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-4 text-center">
                   <Flame className="w-5 h-5 mx-auto mb-1 text-orange-500" />
                   <div className="text-xl font-bold">{data.stats.streakDays}</div>
-                  <div className="text-xs text-muted-foreground">连续天数</div>
+                  <div className="text-xs text-muted-foreground">{t('group.streakDays')}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-4 text-center">
                   <Trophy className="w-5 h-5 mx-auto mb-1 text-amber-500" />
                   <div className="text-xl font-bold">{data.stats.totalScore}</div>
-                  <div className="text-xs text-muted-foreground">总积分</div>
+                  <div className="text-xs text-muted-foreground">{t('group.totalScore')}</div>
                 </CardContent>
               </Card>
             </div>
@@ -205,7 +207,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Star className="w-5 h-5" />
-                    获得的徽章 ({data.badges.length})
+                    {t('group.earnedBadges', { count: data.badges.length })}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
@@ -231,7 +233,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Calendar className="w-5 h-5" />
-                    参与的计划
+                    {t('group.joinedPlans')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
@@ -244,12 +246,12 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                         <div>
                           <div className="font-medium">{progress.planName}</div>
                           <div className="text-sm text-muted-foreground">
-                            已读 {progress.chaptersRead} 章 · 连续 {progress.streakDays} 天
+                            {t('group.readChaptersStreak', { chapters: progress.chaptersRead, streak: progress.streakDays })}
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="text-sm font-bold text-green-600 dark:text-green-400">
-                            {progress.completedDays} 天完成
+                            {t('group.daysCompleted', { count: progress.completedDays })}
                           </div>
                         </div>
                       </div>
@@ -265,7 +267,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <FileText className="w-5 h-5" />
-                    公开的笔记 ({data.sharedNotes.length})
+                    {t('group.publicNotes', { count: data.sharedNotes.length })}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
@@ -295,7 +297,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
-            无法加载用户资料
+            {t('group.failedLoadProfile')}
           </div>
         )}
       </DialogContent>

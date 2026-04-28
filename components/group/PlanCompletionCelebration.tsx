@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, Star, PartyPopper, X, Download } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface PlanCompletionCelebrationProps {
   isOpen: boolean;
@@ -69,6 +70,7 @@ export function PlanCompletionCelebration({
   stats,
   churchName
 }: PlanCompletionCelebrationProps) {
+  const { t } = useTranslation();
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
@@ -107,7 +109,7 @@ export function PlanCompletionCelebration({
     ctx.fillStyle = '#92400e';
     ctx.font = 'bold 48px serif';
     ctx.textAlign = 'center';
-    ctx.fillText('读经计划完成证书', 400, 120);
+    ctx.fillText(t('group.completionCertificate'), 400, 120);
 
     // Trophy emoji (as text)
     ctx.font = '64px serif';
@@ -121,9 +123,9 @@ export function PlanCompletionCelebration({
     // Stats
     ctx.font = '24px sans-serif';
     ctx.fillStyle = '#92400e';
-    ctx.fillText(`完成天数: ${stats.completedDays} 天`, 400, 350);
-    ctx.fillText(`阅读章节: ${stats.chaptersRead} 章`, 400, 390);
-    ctx.fillText(`连续打卡: ${stats.streakDays} 天`, 400, 430);
+    ctx.fillText(t('group.completedDaysLabel', { count: stats.completedDays }), 400, 350);
+    ctx.fillText(t('group.chaptersReadLabel', { count: stats.chaptersRead }), 400, 390);
+    ctx.fillText(t('group.streakDaysLabel', { count: stats.streakDays }), 400, 430);
 
     // Church name
     if (churchName) {
@@ -144,7 +146,7 @@ export function PlanCompletionCelebration({
 
     // Download
     const link = document.createElement('a');
-    link.download = `${planName}-完成证书.png`;
+    link.download = `${planName}-${t('group.certificateFileName')}.png`;
     link.href = canvas.toDataURL();
     link.click();
   };
@@ -198,7 +200,7 @@ export function PlanCompletionCelebration({
                     transition={{ delay: 0.3 }}
                   >
                     <h2 className="text-2xl font-bold text-amber-800 dark:text-amber-200 mb-2">
-                      🎉 恭喜完成！
+                      🎉 {t('group.congratulations')}
                     </h2>
                     <p className="text-lg text-amber-700 dark:text-amber-300 font-medium mb-4">
                       {planName}
@@ -216,20 +218,20 @@ export function PlanCompletionCelebration({
                       <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
                         {stats.completedDays}
                       </div>
-                      <div className="text-xs text-muted-foreground">天数</div>
+                      <div className="text-xs text-muted-foreground">{t('group.statDays')}</div>
                     </div>
                     <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
                       <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
                         {stats.chaptersRead}
                       </div>
-                      <div className="text-xs text-muted-foreground">章节</div>
+                      <div className="text-xs text-muted-foreground">{t('group.statChapters')}</div>
                     </div>
                     <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
                       <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1">
                         <Star className="w-4 h-4" />
                         {stats.streakDays}
                       </div>
-                      <div className="text-xs text-muted-foreground">连续</div>
+                      <div className="text-xs text-muted-foreground">{t('group.statStreak')}</div>
                     </div>
                   </motion.div>
 
@@ -253,8 +255,8 @@ export function PlanCompletionCelebration({
                     className="text-sm text-amber-700 dark:text-amber-300 mb-6"
                   >
                     {stats.memberCount && stats.memberCount > 1
-                      ? `与 ${stats.memberCount} 位组员共同完成了这个读经计划！`
-                      : "你完成了一个读经计划！继续保持，养成每日读经的好习惯。"}
+                      ? t('group.completedWithMembers', { count: stats.memberCount })
+                      : t('group.completedSolo')}
                   </motion.p>
 
                   {/* Action buttons */}
@@ -270,14 +272,14 @@ export function PlanCompletionCelebration({
                       className="flex-1 gap-1"
                     >
                       <Download className="w-4 h-4" />
-                      下载证书
+                      {t('group.downloadCertificate')}
                     </Button>
                     <Button
                       onClick={onClose}
                       className="flex-1 gap-1 bg-amber-500 hover:bg-amber-600"
                     >
                       <PartyPopper className="w-4 h-4" />
-                      太棒了！
+                      {t('group.awesome')}
                     </Button>
                   </motion.div>
                 </CardContent>

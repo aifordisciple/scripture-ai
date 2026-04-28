@@ -9,6 +9,7 @@ import {
   Loader2, ChevronDown, User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import { BIBLE_BOOKS } from "@/lib/constants";
 
 interface Activity {
@@ -42,6 +43,7 @@ interface GroupActivityFeedProps {
 }
 
 export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) {
+  const { t } = useTranslation();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -136,7 +138,7 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
   };
 
   const getActivityText = (activity: Activity) => {
-    const userName = activity.user.name || "匿名用户";
+    const userName = activity.user.name || t('group.anonymousUser');
     const bookName = activity.bookId
       ? BIBLE_BOOKS.find(b => b.id === activity.bookId)?.name || activity.bookId
       : "";
@@ -146,16 +148,16 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
         return (
           <>
             <span className="font-medium">{userName}</span>
-            <span className="text-muted-foreground"> 完成了第 {activity.day} 天的灵修导读</span>
+            <span className="text-muted-foreground"> {t('group.completedDayDevotional', { day: activity.day })}</span>
           </>
         );
       case "reading":
         return (
           <>
             <span className="font-medium">{userName}</span>
-            <span className="text-muted-foreground"> 阅读了 </span>
+            <span className="text-muted-foreground"> {t('group.readBook')}</span>
             <span className="font-medium text-green-600 dark:text-green-400">
-              {bookName} 第 {activity.chapter} 章
+              {t('group.bookChapter', { book: bookName, chapter: activity.chapter })}
             </span>
           </>
         );
@@ -163,14 +165,14 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
         return (
           <>
             <span className="font-medium">{userName}</span>
-            <span className="text-muted-foreground"> 完成了第 {activity.day} 天的全部任务 🎉</span>
+            <span className="text-muted-foreground"> {t('group.completedDayAll', { day: activity.day })} 🎉</span>
           </>
         );
       default:
         return (
           <>
             <span className="font-medium">{userName}</span>
-            <span className="text-muted-foreground"> 完成了一项任务</span>
+            <span className="text-muted-foreground"> {t('group.completedTask')}</span>
           </>
         );
     }
@@ -184,10 +186,10 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "刚刚";
-    if (diffMins < 60) return `${diffMins} 分钟前`;
-    if (diffHours < 24) return `${diffHours} 小时前`;
-    if (diffDays < 7) return `${diffDays} 天前`;
+    if (diffMins < 1) return t('group.justNow');
+    if (diffMins < 60) return t('group.minutesAgo', { count: diffMins });
+    if (diffHours < 24) return t('group.hoursAgo', { count: diffHours });
+    if (diffDays < 7) return t('group.daysAgo', { count: diffDays });
     return date.toLocaleDateString("zh-CN");
   };
 
@@ -203,8 +205,8 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
     return (
       <div className="text-center py-8 text-muted-foreground">
         <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-        <p>暂无打卡动态</p>
-        <p className="text-sm mt-1">完成今日读经后会在这里显示</p>
+        <p>{t('group.noCheckinActivity')}</p>
+        <p className="text-sm mt-1">{t('group.noCheckinActivityHint')}</p>
       </div>
     );
   }
@@ -213,7 +215,7 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
     <div className="space-y-3">
       {/* Summary */}
       <div className="text-sm text-muted-foreground mb-4">
-        共 {total} 条动态
+        {t('group.totalActivities', { count: total })}
       </div>
 
       {/* Activity List */}
@@ -241,7 +243,7 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
                 <div className="flex items-center gap-2 mb-1">
                   {getActivityIcon(activity.taskType)}
                   <span className="text-xs text-muted-foreground">
-                    {activity.plan.name} · 第 {activity.day} 天
+                    {activity.plan.name} · {t('group.dayX', { day: activity.day })}
                   </span>
                 </div>
                 <p className="text-sm mb-2">

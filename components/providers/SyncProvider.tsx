@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useRef, useCallback } from "react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useToast } from "@/components/ui/toast";
+import { t } from "@/lib/i18n";
 
 export function SyncProvider() {
   const { data: session } = useSession();
@@ -41,8 +42,8 @@ export function SyncProvider() {
         })
         .catch((err) => {
           console.error("Sync failed", err);
-          setSyncError("同步失败，请稍后重试");
-          addToast({ type: 'error', message: '同步失败，请检查网络连接' });
+          setSyncError(t('common.tabs.syncFailedRetry'));
+          addToast({ type: 'error', message: t('common.tabs.syncFailedNetwork') });
         })
         .finally(() => {
           setIsSyncing(false);
@@ -112,8 +113,8 @@ export function SyncProvider() {
       }
     } catch (err) {
       console.error("Sync to server failed", err);
-      setSyncError("同步到服务器失败");
-      addToast({ type: 'error', message: '同步失败，请稍后重试' });
+      setSyncError(t('common.tabs.syncToServerFailed'));
+      addToast({ type: 'error', message: t('common.tabs.syncFailedRetry') });
     } finally {
       setIsSyncing(false);
     }
