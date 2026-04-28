@@ -21,8 +21,9 @@ import {
   Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import { formatDistanceToNow } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import { zhCN, enUS } from "date-fns/locale";
 
 interface Conversation {
   userId: string;
@@ -68,6 +69,7 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
   const [loading, setLoading] = useState(false);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { t, locale } = useTranslation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load conversations
@@ -224,7 +226,8 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
 
   const formatTime = (date: Date | string) => {
     const d = typeof date === "string" ? new Date(date) : date;
-    return formatDistanceToNow(d, { addSuffix: true, locale: zhCN });
+    // [P2-1修复] 根据用户语言选择 date-fns locale
+    return formatDistanceToNow(d, { addSuffix: true, locale: locale === 'zh' ? zhCN : enUS });
   };
 
   const getInitials = (name: string | null) => {
@@ -254,13 +257,13 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
                 <AvatarFallback>{getInitials(selectedUser.name)}</AvatarFallback>
               </Avatar>
               <SheetTitle className="text-left">
-                {selectedUser.name || "用户"}
+                {selectedUser.name || t('dm.user')}
               </SheetTitle>
             </div>
           ) : (
             <SheetTitle className="flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
-              私信
+              {t('dm.title')}
             </SheetTitle>
           )}
         </SheetHeader>
@@ -276,7 +279,7 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
               ) : messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                   <MessageCircle className="w-12 h-12 mb-2 opacity-50" />
-                  <p className="text-sm">开始和 {selectedUser.name || "用户"} 聊天</p>
+                  <p className="text-sm">{t('dm.startChat', { name: selectedUser.name || t('dm.user') })}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -320,7 +323,7 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
             <div className="p-4 border-t">
               <div className="flex gap-2">
                 <Input
-                  placeholder="输入消息..."
+                  placeholder={t('dm.inputPlaceholder')}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -340,7 +343,7 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="搜索联系人..."
+                  placeholder={t('dm.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
@@ -357,7 +360,7 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-4">
                   <MessageCircle className="w-12 h-12 mb-2 opacity-50" />
                   <p className="text-sm">
-                    {searchQuery ? "未找到联系人" : "暂无私信"}
+                    {searchQuery ? t('dm.noContactsFound') : t('dm.noConversations')}
                   </p>
                 </div>
               ) : (
@@ -375,7 +378,7 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <p className="font-medium truncate">
-                            {conv.user.name || "用户"}
+                            {conv.user.name || t('dm.user')}
                           </p>
                           <span className="text-xs text-muted-foreground">
                             {formatTime(conv.lastMessageTime)}

@@ -240,8 +240,13 @@ export async function PUT(req: Request) {
       }
       updateData.adminReply = adminReply;
 
-      // Add to replies history
-      const replies = existingFeedback.replies ? JSON.parse(existingFeedback.replies) : [];
+      // [P2-19修复] 安全解析 replies JSON，防止畸形数据导致 500
+      let replies: any[] = [];
+      try {
+        replies = existingFeedback.replies ? JSON.parse(existingFeedback.replies) : [];
+      } catch {
+        replies = [];
+      }
       replies.push({
         type: 'admin',
         content: adminReply,
@@ -258,13 +263,19 @@ export async function PUT(req: Request) {
       updateData.userReply = userReply;
 
       // Add to replies history
-      const replies = existingFeedback.replies ? JSON.parse(existingFeedback.replies) : [];
-      replies.push({
+      // [P2-19修复] 安全解析 replies JSON，防止畸形数据导致 500
+      let userReplies: any[] = [];
+      try {
+        userReplies = existingFeedback.replies ? JSON.parse(existingFeedback.replies) : [];
+      } catch {
+        userReplies = [];
+      }
+      userReplies.push({
         type: 'user',
         content: userReply,
         createdAt: new Date().toISOString()
       });
-      updateData.replies = JSON.stringify(replies);
+      updateData.replies = JSON.stringify(userReplies);
 
       // Reopen feedback if it was resolved
       if (existingFeedback.status === 'RESOLVED') {

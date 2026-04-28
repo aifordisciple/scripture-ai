@@ -32,7 +32,49 @@ export const useBibleStore = create<StoreState>()(
     }),
     {
       name: 'bible-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => {
+        // 包装 localStorage，处理 quota exceeded 错误
+        return {
+          getItem: (name: string) => {
+            try {
+              return localStorage.getItem(name);
+            } catch {
+              return null;
+            }
+          },
+          setItem: (name: string, value: string) => {
+            try {
+              localStorage.setItem(name, value);
+            } catch {
+              // [P2-16修复] localStorage 配额超出时，尝试释放空间后重试
+              console.warn('[Store] localStorage quota exceeded, attempting cleanup');
+              try {
+                // 清理其他 bible 相关的旧存储键来释放空间
+                const keysToRemove: string[] = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                  const key = localStorage.key(i);
+                  if (key && key !== name && (key.startsWith('bible-') || key.startsWith('zustand-'))) {
+                    keysToRemove.push(key);
+                  }
+                }
+                for (const key of keysToRemove) {
+                  localStorage.removeItem(key);
+                }
+                localStorage.setItem(name, value);
+              } catch {
+                console.error('[Store] Failed to write to localStorage even after cleanup');
+              }
+            }
+          },
+          removeItem: (name: string) => {
+            try {
+              localStorage.removeItem(name);
+            } catch {
+              // ignore
+            }
+          },
+        };
+      }),
       // 控制哪些状态不要保存到 localStorage 中
       partialize: (state) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars

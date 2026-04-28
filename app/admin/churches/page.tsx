@@ -40,6 +40,7 @@ export default function AdminChurchesPage() {
   const [search, setSearch] = useState('');
   const [isPublicFilter, setIsPublicFilter] = useState<string>('');
   const [page, setPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchChurches();
@@ -47,6 +48,7 @@ export default function AdminChurchesPage() {
 
   const fetchChurches = async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -60,6 +62,7 @@ export default function AdminChurchesPage() {
       setData(json);
     } catch (err) {
       console.error(err);
+      setError('加载教会列表失败，请刷新页面重试');
     } finally {
       setLoading(false);
     }
@@ -75,6 +78,16 @@ export default function AdminChurchesPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  // [P2-18修复] 显示错误状态UI
+  if (error && !data) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <div className="text-red-500 text-lg">{error}</div>
+        <button onClick={fetchChurches} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">重试</button>
       </div>
     );
   }

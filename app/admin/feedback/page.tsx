@@ -21,9 +21,10 @@ export default async function AdminFeedbackPage() {
     redirect('/');
   }
 
-  // Get initial feedbacks
+  // Get initial feedbacks - [P3-9修复] 添加分页限制
   const feedbacks = await prisma.feedback.findMany({
     orderBy: { createdAt: 'desc' },
+    take: 50,
     include: {
       user: {
         select: { id: true, name: true, email: true, image: true }

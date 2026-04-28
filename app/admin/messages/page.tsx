@@ -68,6 +68,7 @@ export default function AdminMessagesPage() {
   const [sending, setSending] = useState(false);
   const [sendToAll, setSendToAll] = useState(false);
   const [messagePage, setMessagePage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (tab === 'send') {
@@ -79,6 +80,7 @@ export default function AdminMessagesPage() {
 
   const fetchUsers = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`/api/admin/users?limit=50${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`);
       if (!res.ok) throw new Error('Failed to fetch users');
@@ -86,6 +88,7 @@ export default function AdminMessagesPage() {
       setUsers(json);
     } catch (err) {
       console.error(err);
+      setError('加载用户列表失败，请刷新页面重试');
     } finally {
       setLoading(false);
     }
@@ -93,6 +96,7 @@ export default function AdminMessagesPage() {
 
   const fetchMessages = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`/api/admin/messages?page=${messagePage}&limit=20`);
       if (!res.ok) throw new Error('Failed to fetch messages');
@@ -100,6 +104,7 @@ export default function AdminMessagesPage() {
       setMessages(json);
     } catch (err) {
       console.error(err);
+      setError('加载消息列表失败，请刷新页面重试');
     } finally {
       setLoading(false);
     }
@@ -222,6 +227,14 @@ export default function AdminMessagesPage() {
 
       {tab === 'send' && (
         <>
+          {/* [P2-18修复] 错误状态 */}
+          {error && !users && (
+            <div className="flex flex-col items-center justify-center py-12 gap-4 bg-white rounded-lg shadow">
+              <div className="text-red-500">{error}</div>
+              <button onClick={fetchUsers} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">重试</button>
+            </div>
+          )}
+
           {/* 搜索和批量操作 */}
           <div className="bg-white rounded-lg shadow p-3 md:p-4">
             <div className="flex flex-col md:flex-row md:flex-wrap items-stretch md:items-center gap-3 md:gap-4">
@@ -400,7 +413,13 @@ export default function AdminMessagesPage() {
 
       {tab === 'history' && (
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          {loading ? (
+          {/* [P2-18修复] 错误状态 */}
+          {error && !messages ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-4">
+              <div className="text-red-500">{error}</div>
+              <button onClick={fetchMessages} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">重试</button>
+            </div>
+          ) : loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
             </div>

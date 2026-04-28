@@ -38,20 +38,13 @@ export async function POST(req: Request) {
       where: { userId: user.id, bookId, chapter, verse }
     });
   } else {
-    const existing = await prisma.highlight.findFirst({
-        where: { userId: user.id, bookId, chapter, verse }
+    // [P2-2修复] 使用 upsert 替代 findFirst + create/update，防止并发创建重复高亮
+    // @@unique([userId, bookId, chapter, verse]) 约束保证 upsert 正确匹配
+    await prisma.highlight.upsert({
+      where: { userId_bookId_chapter_verse: { userId: user.id, bookId, chapter, verse } },
+      update: { color },
+      create: { userId: user.id, bookId, chapter, verse, color }
     });
-
-    if (existing) {
-        await prisma.highlight.update({
-            where: { id: existing.id },
-            data: { color }
-        });
-    } else {
-        await prisma.highlight.create({
-            data: { userId: user.id, bookId, chapter, verse, color }
-        });
-    }
   }
 
   return NextResponse.json({ success: true });
