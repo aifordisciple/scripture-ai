@@ -9,6 +9,8 @@ import { Calendar, CheckCircle2, Circle, BookOpen, Trash2, ArrowRight, Target, P
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export function PlanTab() {
   const router = useRouter();
@@ -20,6 +22,27 @@ export function PlanTab() {
 
   // [i18n] i18n translation function
   const { t } = useTranslation();
+  const { addToast } = useToast();
+
+  // ConfirmDialog state for quit/delete plan confirmations
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeletePlanId, setPendingDeletePlanId] = useState<string | null>(null);
+  const [pendingDeleteAction, setPendingDeleteAction] = useState<((id: string) => void) | null>(null);
+
+  const executeQuitPlan = () => {
+    quitPlan(viewingPlanId);
+    setViewingPlanId(null);
+    setShowQuitConfirm(false);
+  };
+
+  const executeDeletePlan = () => {
+    if (!pendingDeletePlanId || !pendingDeleteAction) return;
+    pendingDeleteAction(pendingDeletePlanId);
+    setShowDeleteConfirm(false);
+    setPendingDeletePlanId(null);
+    setPendingDeleteAction(null);
+  };
   // [i18n] Locale-aware DualLangString helper (for plan titles, tags, descriptions that are bilingual data)
   const tDual = (zh: string, en?: string) => useBibleStore.getState().locale === 'en' ? (en || zh) : zh;
   const tArr = (zh: string[], en?: string[]) => useBibleStore.getState().locale === 'en' ? (en || zh) : zh;
@@ -38,12 +61,14 @@ export function PlanTab() {
 
   // [新增] 智能全局静默队列：自动把所有天数的导读全部生成出来
   const bgTaskRunning = useRef(false);
+  const [bgGenerating, setBgGenerating] = useState(false);
 
   useEffect(() => {
     if (bgTaskRunning.current) return;
 
     const runQueue = async () => {
       bgTaskRunning.current = true;
+      setBgGenerating(true);
       let hasMore = true;
 
       while (hasMore && bgTaskRunning.current) {
@@ -118,8 +143,8 @@ export function PlanTab() {
       if (data.plan) {
         addCustomPlan(data.plan);
         setAiPrompt("");
-      } else alert(t('plan.generateFailed'));
-    } catch(e) { alert(t('plan.networkError')); }
+      } else addToast({ type: 'error', message: t('plan.generateFailed') });
+    } catch(e) { addToast({ type: 'error', message: t('plan.networkError') }); }
     finally { setIsGenerating(false); }
   };
 
@@ -171,10 +196,7 @@ export function PlanTab() {
              </h1>
           </div>
           <Button variant="ghost" size="sm" onClick={() => {
-              if (confirm(t('plan.quitPlanConfirm'))) {
-                  quitPlan(viewingPlanId);
-                  setViewingPlanId(null);
-              }
+              setShowQuitConfirm(true);
           }} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full self-start md:self-auto">
              <Trash2 className="w-4 h-4 mr-1.5" /> {t('plan.quitPlan')}
           </Button>
@@ -224,7 +246,7 @@ export function PlanTab() {
                         steps
                     });
                 } else {
-                    alert(t('plan.allDone'));
+                    addToast({ type: 'success', message: t('plan.allDone') });
                 }
             }}
           >
@@ -269,7 +291,7 @@ export function PlanTab() {
                      <div className="flex items-center gap-4 md:w-36 shrink-0">
                         <button
                           onClick={() => toggleTaskCompleted(viewingPlanId, task.day, 'devotional')}
-                          className="shrink-0 hover:scale-110 transition-transform focus:outline-none"
+                          className="shrink-0 hover:scale-110 transition-transform focus-visible:ring-2 focus-visible:ring-indigo-400"
                         >
                           {completedTasks.includes('devotional') ? <CheckCircle2 className="w-7 h-7 text-indigo-500" /> : <Circle className="w-7 h-7 text-slate-300 dark:text-slate-600 hover:text-indigo-400" />}
                         </button>
@@ -303,7 +325,7 @@ export function PlanTab() {
                                   e.stopPropagation();
                                   toggleTaskCompleted(viewingPlanId, task.day, taskKey);
                                 }}
-                                className="shrink-0 hover:scale-110 transition-transform focus:outline-none flex items-center justify-center"
+                                className="shrink-0 hover:scale-110 transition-transform focus-visible:ring-2 focus-visible:ring-indigo-400 flex items-center justify-center"
                               >
                                 {isTaskCompleted ? (
                                   <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -344,6 +366,16 @@ export function PlanTab() {
              );
           })}
         </div>
+        <ConfirmDialog
+          open={showQuitConfirm}
+          onOpenChange={setShowQuitConfirm}
+          title={t('common.confirm')}
+          description={t('plan.quitPlanConfirm')}
+          confirmLabel={t('common.confirm')}
+          cancelLabel={t('common.cancel')}
+          variant="destructive"
+          onConfirm={executeQuitPlan}
+        />
       </div>
     );
   }
@@ -365,6 +397,12 @@ export function PlanTab() {
            <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('plan.title')}</h1>
            <p className="text-sm text-muted-foreground mt-1">{t('plan.subtitle')}</p>
         </div>
+        {bgGenerating && (
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground ml-auto">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            {t('plan.generatingDevotionals')}
+          </span>
+        )}
       </div>
 
       {/* 我的计划 (正在进行) */}
@@ -385,15 +423,15 @@ export function PlanTab() {
               const isTotallyCompleted = completedDaysCount >= plan.durationDays;
 
               return (
-                <div key={plan.id} className="relative flex flex-col bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-indigo-100 dark:border-indigo-900 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group" onClick={() => setViewingPlanId(plan.id)}>
+                <div key={plan.id} role="button" tabIndex={0} className="relative flex flex-col bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-indigo-100 dark:border-indigo-900 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group" onClick={() => setViewingPlanId(plan.id)}>
                    {/* 自定义计划删除按钮 */}
                    {plan.id.startsWith('custom-') && (
                      <button
                        onClick={(e) => {
                          e.stopPropagation();
-                         if (confirm(t('plan.deletePlanConfirm'))) {
-                           deleteCustomPlan(plan.id);
-                         }
+                         setPendingDeletePlanId(plan.id);
+                         setPendingDeleteAction(() => deleteCustomPlan);
+                         setShowDeleteConfirm(true);
                        }}
                        className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                      >
@@ -450,9 +488,9 @@ export function PlanTab() {
                    <button
                      onClick={(e) => {
                        e.stopPropagation();
-                       if (confirm(t('plan.deletePlanConfirmShort'))) {
-                         deleteCustomPlan(plan!.id);
-                       }
+                       setPendingDeletePlanId(plan!.id);
+                       setPendingDeleteAction(() => deleteCustomPlan);
+                       setShowDeleteConfirm(true);
                      }}
                      className="absolute top-2 right-2 p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                    >
@@ -497,7 +535,7 @@ export function PlanTab() {
               disabled={isGenerating} 
               onKeyDown={(e) => e.key === 'Enter' && handleGeneratePlan()} 
               // 保持纯白输入框的超高辨识度
-              className="flex-1 bg-white dark:bg-slate-800 rounded-xl px-5 py-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-300/50 text-base shadow-sm transition-all" 
+              className="flex-1 bg-white dark:bg-slate-800 rounded-xl px-5 py-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-indigo-400 focus:ring-2 focus:ring-cyan-300/50 text-base shadow-sm transition-all" 
             />
             <Button 
               onClick={handleGeneratePlan} 
@@ -540,6 +578,16 @@ export function PlanTab() {
           </div>
         ))}
       </div>
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title={t('common.confirm')}
+        description={t('plan.deletePlanConfirm')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        variant="destructive"
+        onConfirm={executeDeletePlan}
+      />
     </div>
   );
 }

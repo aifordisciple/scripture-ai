@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Dialog,
   DialogContent,
@@ -40,6 +42,7 @@ interface BehindMembersPanelProps {
 
 export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps) {
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [behindMembers, setBehindMembers] = useState<BehindMember[]>([]);
   const [stats, setStats] = useState({
@@ -53,6 +56,8 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
   const [customMessage, setCustomMessage] = useState("");
   const [remindDialogOpen, setRemindDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<BehindMember | null>(null);
+  const [showBatchConfirm, setShowBatchConfirm] = useState(false);
+  const [pendingBatchAction, setPendingBatchAction] = useState<(() => void) | null>(null);
 
   const fetchBehindMembers = useCallback(async () => {
     setLoading(true);
@@ -91,13 +96,13 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
       const data = await res.json();
       if (data.success) {
         // Show success feedback
-        alert(t('group.reminderSent'));
+        addToast({ type: 'success', message: t('group.reminderSent') });
       } else {
-        alert(data.error || t('group.sendFailed'));
+        addToast({ type: 'error', message: data.error || t('group.sendFailed') });
       }
     } catch (error) {
       console.error("Failed to send reminder:", error);
-      alert(t('group.sendFailedRetry'));
+      addToast({ type: 'error', message: t('group.sendFailedRetry') });
     } finally {
       setSendingReminder(null);
     }
@@ -164,7 +169,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-orange-500" />
+            <Heart className="w-5 h-5 text-pink-500" />
             {t('group.behindMembersTitle')}
           </CardTitle>
           <Button
@@ -316,12 +321,13 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
               <Button
                 size="sm"
                 variant="outline"
-                onClick={async () => {
-                  if (confirm(t('group.confirmBatchRemind', { count: behindMembers.length }))) {
+                onClick={() => {
+                  setPendingBatchAction(() => async () => {
                     for (const member of behindMembers) {
                       await sendReminder(member.user.id, 'reminder');
                     }
-                  }
+                  });
+                  setShowBatchConfirm(true);
                 }}
                 className="gap-1"
               >
@@ -372,6 +378,16 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
           </div>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog
+        open={showBatchConfirm}
+        onOpenChange={setShowBatchConfirm}
+        title={t('group.remindAll')}
+        description={t('group.confirmBatchRemind', { count: behindMembers.length })}
+        onConfirm={() => {
+          pendingBatchAction?.();
+          setShowBatchConfirm(false);
+        }}
+      />
     </Card>
   );
 }

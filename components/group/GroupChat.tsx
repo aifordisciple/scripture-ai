@@ -235,16 +235,27 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="flex gap-2 shrink-0">
-          <Input
+        <div className="flex gap-2 shrink-0 items-end">
+          <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+            onChange={(e) => {
+              setInput(e.target.value);
+              // 自动增长高度
+              e.target.style.height = 'auto';
+              e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
             placeholder={t('group.inputPlaceholder')}
             disabled={sending}
-            className="flex-1"
+            rows={1}
+            className="flex-1 resize-none max-h-32 rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
-          <Button onClick={sendMessage} disabled={sending || !input.trim()} size="icon">
+          <Button onClick={sendMessage} disabled={sending || !input.trim()} size="icon" className="shrink-0">
             {sending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (

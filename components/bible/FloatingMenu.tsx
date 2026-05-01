@@ -193,23 +193,22 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
       onPointerDown={handleMenuClick}
     >
       {/* 1. 颜色选择区 */}
-      <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-medium text-slate-400">{t('floatingMenu.mark')}</span>
-        <div className="flex gap-2">
-            {COLORS.map((c) => (
-            <button
-                key={c.id}
-                onClick={(e) => { handleMenuClick(e); handleHighlight(c.id); }}
-                className={cn(
-                "w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center",
-                c.bg, c.border
-                )}
-                aria-label={c.id === 'none' ? t('floatingMenu.clearHighlight') : t('floatingMenu.highlightColor', { color: c.id })}
-            >
-                {c.icon && <X className="w-3 h-3 text-slate-500" />}
-            </button>
-            ))}
-        </div>
+      <div className="flex items-center justify-center gap-1.5">
+          {COLORS.map((c) => (
+          <button
+              key={c.id}
+              onClick={(e) => { handleMenuClick(e); handleHighlight(c.id); }}
+              className={cn(
+              "relative w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center",
+              // 触摸目标保持44px，视觉圆圈28px
+              "before:absolute before:inset-0 before:-m-[9px] before:rounded-full before:content-['']",
+              c.bg, c.border
+              )}
+              aria-label={c.id === 'none' ? t('floatingMenu.clearHighlight') : t('floatingMenu.highlightColor', { color: c.id })}
+          >
+              {c.icon && <X className="w-3 h-3 text-slate-500" />}
+          </button>
+          ))}
       </div>
 
       {/* 2. AI 解读按钮 - 点击主按钮直接解读，下拉箭头展开更多选项 */}
@@ -304,12 +303,12 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
       </div>
 
       {/* 3. 次要操作区 (笔记、分享、串珠、地图、主题、复制) - 6列 */}
-      <div className="grid grid-cols-6 gap-1 pt-1 border-t dark:border-slate-800">
+      <div className="grid grid-cols-5 gap-1 pt-1 border-t dark:border-slate-800">
         <button
           onClick={(e) => { handleMenuClick(e); handleNote(); }}
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
-          className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           aria-label={t('floatingMenu.addNote')}
         >
           <PenLine className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
@@ -320,7 +319,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onClick={(e) => { handleMenuClick(e); handleShare(); }}
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
-          className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           aria-label={t('floatingMenu.shareVerse')}
         >
           <Share2 className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
@@ -332,7 +331,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onClick={(e) => { handleMenuClick(e); onCrossRef(); }}
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
-            className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             aria-label={t('floatingMenu.viewCrossRef')}
           >
             <GitBranch className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
@@ -345,7 +344,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onClick={(e) => { handleMenuClick(e); onAtlas(); }}
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
-            className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             aria-label={t('floatingMenu.viewAtlas')}
           >
             <Map className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mb-1" />
@@ -357,7 +356,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onClick={(e) => { handleMenuClick(e); handleCopyClick(); }}
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
-          className="flex flex-col items-center py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           aria-label={copied ? t('floatingMenu.copiedToClipboard') : t('floatingMenu.copyVerse')}
         >
           <Copy className={cn("w-4 h-4 mb-1", copied ? "text-green-600" : "text-slate-500 dark:text-slate-400")} />

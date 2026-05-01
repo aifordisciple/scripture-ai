@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { useToast } from '@/components/ui/toast';
 
 interface GroupSettingsProps {
   churchId: string;
@@ -56,7 +57,7 @@ export function GroupSettings({
   onSettingsUpdate
 }: GroupSettingsProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const { addToast } = useToast();  const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -93,11 +94,11 @@ export function GroupSettings({
         // Delay closing so user can see the success indicator
         setTimeout(() => setOpen(false), 1500);
       } else {
-        alert(data.error || t('group.saveFailed'));
+        addToast({ type: 'error', message: data.error || t('group.saveFailed') });
       }
     } catch (error) {
       console.error("Failed to save settings:", error);
-      alert(t('group.saveFailedRetry'));
+      addToast({ type: 'error', message: t('group.saveFailedRetry') });
     } finally {
       setSaving(false);
     }

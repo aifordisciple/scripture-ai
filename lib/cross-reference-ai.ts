@@ -22,8 +22,8 @@ export interface SourceVerse {
   content: string;
 }
 
-// Chinese labels for connection types
-const TYPE_LABELS: Record<ConnectionType, string> = {
+// Locale-aware labels for connection types
+const TYPE_LABELS_ZH: Record<ConnectionType, string> = {
   QUOTATION: '引用',
   PARALLEL: '平行',
   THEMATIC: '主题',
@@ -31,8 +31,16 @@ const TYPE_LABELS: Record<ConnectionType, string> = {
   ILLUSTRATION: '例证',
 };
 
-// Prompt for generating connection descriptions - optimized for concise output
-const CROSS_REF_PROMPT = `你是圣经研读助手。为以下关联经文各生成一句不超过25字的说明。
+const TYPE_LABELS_EN: Record<ConnectionType, string> = {
+  QUOTATION: 'Quotation',
+  PARALLEL: 'Parallel',
+  THEMATIC: 'Thematic',
+  PROPHECY: 'Prophecy',
+  ILLUSTRATION: 'Illustration',
+};
+
+// Locale-aware prompts
+const CROSS_REF_PROMPT_ZH = `你是圣经研读助手。为以下关联经文各生成一句不超过25字的说明。
 
 源经文：{source}
 
@@ -44,13 +52,26 @@ const CROSS_REF_PROMPT = `你是圣经研读助手。为以下关联经文各生
 约翰福音 1:1|两处经文都论及太初之道
 诗篇 33:6|都以神的话语为创造媒介`;
 
+const CROSS_REF_PROMPT_EN = `You are a Bible study assistant. Generate a brief description (under 30 words) for each cross-reference below.
+
+Source verse: {source}
+
+Cross-reference list:
+{connections}
+
+Output format: "Book Chapter:Verse|Description", one per line, no thinking process or extra content.
+Example:
+John 1:1|Both verses discuss the Word in the beginning
+Psalm 33:6|Both use God's word as the creative medium`;
+
 /**
  * Generate AI descriptions for cross-references
  */
 export async function generateConnectionDescriptions(
   sourceVerse: SourceVerse,
   connections: ConnectionForAI[],
-  apiConfig?: AIConfig
+  apiConfig?: AIConfig,
+  locale: string = 'zh'
 ): Promise<Map<string, string>> {
   if (connections.length === 0) {
     return new Map();
@@ -66,7 +87,8 @@ export async function generateConnectionDescriptions(
       .map((c) => `${c.bookName} ${c.chapter}:${c.verse}`)
       .join('\n');
 
-    const prompt = CROSS_REF_PROMPT
+    const promptTemplate = locale === 'en' ? CROSS_REF_PROMPT_EN : CROSS_REF_PROMPT_ZH;
+    const prompt = promptTemplate
       .replace('{source}', `${sourceVerse.bookName} ${sourceVerse.chapter}:${sourceVerse.verse}`)
       .replace('{connections}', connectionList);
 
@@ -166,17 +188,28 @@ function parseDescriptions(text: string): Map<string, string> {
 export async function generateSingleDescription(
   sourceVerse: SourceVerse,
   targetVerse: ConnectionForAI,
-  apiConfig?: AIConfig
+  apiConfig?: AIConfig,
+  locale: string = 'zh'
 ): Promise<string> {
   try {
     const model = await getAIModel(apiConfig);
 
+    const typeLabels = locale === 'en' ? TYPE_LABELS_EN : TYPE_LABELS_ZH;
+    const isEn = locale === 'en';
+
     const { text } = await generateText({
       model,
-      prompt: `请用不超过30字说明以下两段经文的关联：
+      prompt: isEn
+        ? `Briefly describe (under 30 words) the connection between these two verses:
+Source: ${sourceVerse.bookName} ${sourceVerse.chapter}:${sourceVerse.verse} - ${sourceVerse.content.slice(0, 50)}
+Target: ${targetVerse.bookName} ${targetVerse.chapter}:${targetVerse.verse} - ${targetVerse.content.slice(0, 50)}
+Connection type: ${typeLabels[targetVerse.type]}
+
+Output only the description:`
+        : `请用不超过30字说明以下两段经文的关联：
 源经文：${sourceVerse.bookName} ${sourceVerse.chapter}:${sourceVerse.verse} - ${sourceVerse.content.slice(0, 50)}
 目标经文：${targetVerse.bookName} ${targetVerse.chapter}:${targetVerse.verse} - ${targetVerse.content.slice(0, 50)}
-关联类型：${TYPE_LABELS[targetVerse.type]}
+关联类型：${typeLabels[targetVerse.type]}
 
 直接输出说明文字，不要其他内容：`,
       temperature: 0.3,

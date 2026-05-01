@@ -10,12 +10,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { formatDateClient, formatTimeClient } from "@/lib/locale";
 
 export function ReadingHistoryTab() {
   const router = useRouter();
   const { readingHistory, clearReadingHistory, getContinueReading, tabs, addTab, setActiveTab } = useBibleStore();
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+
+  // ConfirmDialog state for clear history confirmation
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // 搜索过滤
   const filteredHistory = useMemo(() => {
@@ -46,7 +53,7 @@ export function ReadingHistoryTab() {
         groupKey = t('bible.thisWeek');
       } else {
         const date = new Date(h.timestamp);
-        groupKey = date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
+        groupKey = formatDateClient(date, { month: 'long', day: 'numeric' });
       }
 
       if (!groups[groupKey]) groups[groupKey] = [];
@@ -86,7 +93,7 @@ export function ReadingHistoryTab() {
   // 格式化时间
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    return formatTimeClient(date, { hour: '2-digit', minute: '2-digit' });
   };
 
   // 跳转到章节
@@ -112,9 +119,12 @@ export function ReadingHistoryTab() {
 
   // 清除历史
   const handleClearHistory = () => {
-    if (confirm(t('bible.confirmClearHistory'))) {
-      clearReadingHistory();
-    }
+    setShowClearConfirm(true);
+  };
+
+  const executeClearHistory = () => {
+    clearReadingHistory();
+    setShowClearConfirm(false);
   };
 
   return (
@@ -270,6 +280,16 @@ export function ReadingHistoryTab() {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={showClearConfirm}
+        onOpenChange={setShowClearConfirm}
+        title={t('common.confirm')}
+        description={t('bible.confirmClearHistory')}
+        confirmLabel={t('common.confirm')}
+        cancelLabel={t('common.cancel')}
+        variant="destructive"
+        onConfirm={executeClearHistory}
+      />
     </div>
   );
 }

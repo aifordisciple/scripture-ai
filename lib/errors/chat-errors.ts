@@ -5,6 +5,8 @@
  * 用于统一错误处理和用户反馈
  */
 
+import { t } from '@/lib/i18n'
+
 export enum ChatErrorCode {
   // 会话相关错误
   SESSION_LOAD_FAILED = 'SESSION_LOAD_FAILED',
@@ -65,25 +67,25 @@ export class ChatError extends Error {
   private getDefaultUserMessage(code: ChatErrorCode): string {
     switch (code) {
       case ChatErrorCode.SESSION_LOAD_FAILED:
-        return '无法加载对话历史，请检查网络连接';
+        return t('ai.chat.sessionLoadFailed');
       case ChatErrorCode.SESSION_CREATE_FAILED:
-        return '创建对话失败，请重试';
+        return t('ai.chat.sessionCreateFailed');
       case ChatErrorCode.SESSION_NOT_FOUND:
-        return '对话不存在或已被删除';
+        return t('ai.chat.sessionNotFound');
       case ChatErrorCode.MESSAGE_SAVE_FAILED:
-        return '消息保存失败，请重试';
+        return t('ai.chat.messageSaveFailed');
       case ChatErrorCode.MESSAGE_LOAD_FAILED:
-        return '无法加载消息，请检查网络连接';
+        return t('ai.chat.messageLoadFailed');
       case ChatErrorCode.NETWORK_ERROR:
-        return '网络连接失败，请检查网络设置';
+        return t('common.networkError');
       case ChatErrorCode.TIMEOUT_ERROR:
-        return '请求超时，请重试';
+        return t('ai.chat.timeoutError');
       case ChatErrorCode.AI_GENERATION_FAILED:
-        return 'AI 生成失败，请重试';
+        return t('ai.chat.generationFailed');
       case ChatErrorCode.AI_RATE_LIMITED:
-        return '请求过于频繁，请稍后再试';
+        return t('ai.chat.rateLimited');
       default:
-        return '发生未知错误，请重试';
+        return t('common.error');
     }
   }
 
@@ -118,7 +120,7 @@ export class ChatError extends Error {
       return new ChatError(ChatErrorCode.AI_RATE_LIMITED, message, {
         recoverable: true,
         retryAction: 'wait',
-        userMessage: 'AI 服务当前使用人数较多，请稍后再试',
+        userMessage: 'AI service is currently busy, please try again later',
         cause: error instanceof Error ? error : undefined,
       });
     }

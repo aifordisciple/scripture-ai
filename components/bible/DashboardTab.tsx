@@ -4,11 +4,12 @@
 import { useRouter } from "next/navigation";
 import { useBibleStore } from "@/store/useBibleStore";
 import { BibleHeatmap } from "@/components/bible/BibleHeatmap";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { Download, Activity, Trash2, CheckSquare, Square, BrainCircuit, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTranslation } from "@/lib/i18n";
+import { useToast } from '@/components/ui/toast';
 
 /**
  * 仪表盘控制面板 (DashboardTab)
@@ -21,6 +22,19 @@ import { useTranslation } from "@/lib/i18n";
 export function DashboardTab() {
   const router = useRouter();
   const { t } = useTranslation();
+
+  // 读取 CSS 变量获取主题色，确保图表跟随暗色/亮色模式
+  const getThemeColor = useCallback((varName: string, fallback: string) => {
+    if (typeof window === 'undefined') return fallback;
+    const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    return value || fallback;
+  }, []);
+
+  // 图表主色（从 CSS 变量读取）
+  const chartColor1 = getThemeColor('--chart-1', '#6366f1'); // indigo
+  const chartColor2 = getThemeColor('--chart-2', '#3b82f6'); // blue
+  const chartGridColor = getThemeColor('--border', '#e2e8f0');
+  const chartTickColor = getThemeColor('--muted-foreground', '#94a3b8');
   const {
     highlights, notes, interactions,
     updateActiveTab, addTab, tabs, setActiveTab,
@@ -32,6 +46,8 @@ export function DashboardTab() {
   const [loading, setLoading] = useState(false);
   const [showClearMenu, setShowClearMenu] = useState(false);
   const [clearOpts, setClearOpts] = useState({ highlights: false, notes: false, interactions: false });
+
+  const { addToast } = useToast();
 
   // 根据过滤参数联动后端聚合服务
   useEffect(() => {
@@ -56,7 +72,7 @@ export function DashboardTab() {
    */
   const handleExportTSV = () => {
     if (chartData.length === 0) {
-      alert(t('bible.noDataToExport'));
+      addToast({ type: 'warning', message: t('bible.noDataToExport') });
       return;
     }
     const headers = [t('bible.tsvHeaderDate'), t('bible.tsvHeaderAiChats'), t('bible.tsvHeaderInteractions')];

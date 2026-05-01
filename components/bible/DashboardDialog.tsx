@@ -9,9 +9,11 @@ import { Download, Activity, Trash2, CheckSquare, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
+import { useToast } from '@/components/ui/toast';
 
 export function DashboardDialog() {
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const router = useRouter();
   const { 
     isDashboardOpen, setDashboardOpen, 
@@ -36,7 +38,7 @@ export function DashboardDialog() {
     ];
 
     if (dataToExport.length === 0) {
-      alert(t('bible.noDataToExportDialog'));
+      addToast({ type: 'warning', message: t('bible.noDataToExportDialog') });
       return;
     }
 

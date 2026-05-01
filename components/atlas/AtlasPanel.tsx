@@ -43,7 +43,6 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
     isAtlasPanelOpen,
     setAtlasPanelOpen,
     setMapCenter,
-    apiConfig,
     // 从 store 读取经文上下文
     atlasVerseContext,
     // 查看地点相关经文状态
@@ -81,20 +80,9 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
   useEffect(() => {
     if (!verseContext?.verseContent) return;
 
-    console.log('AtlasPanel - verseContext:', verseContext);
-
     async function extractLocations() {
       setExtractingLocations(true);
       setExtractionError(null);
-
-      // 获取完整的 apiConfig，确保包含 apiKey
-      const currentApiConfig = useBibleStore.getState().apiConfig;
-      console.log('AtlasPanel - apiConfig:', {
-        provider: currentApiConfig.provider,
-        baseUrl: currentApiConfig.baseUrl,
-        hasApiKey: !!currentApiConfig.apiKey,
-        model: currentApiConfig.model,
-      });
 
       try {
         const res = await fetch('/api/atlas/ai-extract', {
@@ -106,7 +94,6 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
             verseStart: verseContext.verseStart,
             verseEnd: verseContext.verseEnd,
             verseContent: verseContext.verseContent,
-            apiConfig: currentApiConfig,
           }),
         });
 
@@ -136,7 +123,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
     }
 
     extractLocations();
-  }, [verseContext, apiConfig]);
+  }, [verseContext]);
 
   const tabs = [
     { id: 'map', label: t('atlas.tabMap'), icon: Map },

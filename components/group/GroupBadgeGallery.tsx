@@ -18,7 +18,8 @@ import {
   type GroupBadge
 } from "@/lib/group-badges";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation, t } from "@/lib/i18n";
+import { formatDateClient } from "@/lib/locale";
 
 interface UserBadge {
   id: string;
@@ -96,7 +97,7 @@ export function GroupBadgeGallery({
 
   const getEarnedDate = (badgeId: string): string | null => {
     const badge = earnedBadges.find(b => b.type === badgeId);
-    return badge ? new Date(badge.earnedAt).toLocaleDateString("zh-CN") : null;
+    return badge ? formatDateClient(new Date(badge.earnedAt)) : null;
   };
 
   const getRequirementIcon = (type: string) => {
@@ -187,7 +188,7 @@ export function GroupBadgeGallery({
                                 {badge.icon}
                               </span>
                               <span className="text-[9px] font-medium text-center px-1 truncate w-full">
-                                {badge.name}
+                                {t(badge.nameKey)}
                               </span>
                               {!isEarned && (
                                 <Lock className="absolute top-1 right-1 w-3 h-3 text-muted-foreground/50" />
@@ -203,11 +204,11 @@ export function GroupBadgeGallery({
                                 )}>
                                   {badge.icon}
                                 </span>
-                                {badge.name}
+                                {t(badge.nameKey)}
                               </DialogTitle>
                             </DialogHeader>
                             <div className="space-y-4 pt-2">
-                              <p className="text-muted-foreground">{badge.description}</p>
+                              <p className="text-muted-foreground">{t(badge.descKey)}</p>
 
                               <div className="flex items-center gap-2">
                                 <span
@@ -285,13 +286,13 @@ export function GroupBadgeGallery({
 function getRequirementUnit(type: string): string {
   switch (type) {
     case 'STREAK':
-      return '天连续';
+      return t('group.reqUnitStreak');
     case 'COMPLETED_DAYS':
-      return '天完成';
+      return t('group.reqUnitDays');
     case 'CHAPTERS_READ':
-      return '章';
+      return t('group.reqUnitChapters');
     case 'PLAN_COMPLETE':
-      return '个计划';
+      return t('group.reqUnitPlan');
     default:
       return '';
   }

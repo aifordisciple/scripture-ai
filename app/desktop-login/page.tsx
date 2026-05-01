@@ -101,8 +101,9 @@ export default function DesktopLoginPage() {
           return { token, userId: session.user.id };
         }
 
-        // Fallback: create a simple token from session
-        // In production, use proper JWT token from your auth system
+        // SECURITY WARNING: This base64 fallback is NOT secure — it can be trivially decoded.
+        // In production, replace with a properly signed JWT from the server.
+        // TODO: Remove this fallback and require server-issued tokens only.
         const token = btoa(JSON.stringify({
           userId: session.user.id,
           email: session.user.email,

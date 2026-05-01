@@ -13,7 +13,7 @@ import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Ma
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
-import { BIBLE_BOOKS } from "@/lib/constants";
+import { BIBLE_BOOKS, getBookDisplayName } from "@/lib/constants";
 import { useTranslation } from "@/lib/i18n";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { useGroupUnread } from "@/hooks/use-group-unread";
@@ -37,7 +37,7 @@ const GroupPlanDailyFlow = dynamic(() => import("@/components/group/GroupPlanDai
 
 // --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
 const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -95,12 +95,12 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             )}
           >
             <span className="max-w-[120px] truncate select-none">
-              {tab.type === 'read' ? `${tab.book} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? `📊 ${t('tabs.dashboard')}` : tab.type === 'highlights' ? `🖍️ ${t('tabs.highlights')}` : tab.type === 'notes' ? `📝 ${t('tabs.notes')}` : tab.type === 'cross-ref' ? `🔗 ${t('tabs.crossref')}` : tab.type === 'group' ? `👥 ${t('tabs.group')}` : tab.type === 'atlas' ? `🗺️ ${t('tabs.atlas')}` : tab.type === 'insights' ? `⭐ ${t('tabs.insights')}` : tab.type === 'theme-graph' ? `🕸️ ${t('tabs.theme')}` : `📅 ${t('tabs.plan')}`}
+              {tab.type === 'read' ? `${getBookDisplayName(tab.book, locale)} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? `📊 ${t('tabs.dashboard')}` : tab.type === 'highlights' ? `🖍️ ${t('tabs.highlights')}` : tab.type === 'notes' ? `📝 ${t('tabs.notes')}` : tab.type === 'cross-ref' ? `🔗 ${t('tabs.crossref')}` : tab.type === 'group' ? `👥 ${t('tabs.group')}` : tab.type === 'atlas' ? `🗺️ ${t('tabs.atlas')}` : tab.type === 'insights' ? `⭐ ${t('tabs.insights')}` : tab.type === 'theme-graph' ? `🕸️ ${t('tabs.theme')}` : `📅 ${t('tabs.plan')}`}
             </span>
             <X
               className={cn(
                 "w-3.5 h-3.5 hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors flex-shrink-0 p-0.5",
-                activeTabId === tab.id ? "opacity-60 hover:opacity-100" : "opacity-0 group-hover/tab:opacity-60"
+                activeTabId === tab.id ? "opacity-60 hover:opacity-100" : "opacity-40 hover:opacity-100"
               )}
               onClick={(e) => { e.stopPropagation(); onCloseTab(tab.id); }}
             />
@@ -336,7 +336,7 @@ export default function Home() {
   const toggleLineHeight = () => {
     if (lineHeight <= 1.6) setLineHeight(1.8);
     else if (lineHeight <= 1.8) setLineHeight(2.2);
-    else setLineHeight(1.6);
+    else setLineHeight(1.4);
   };
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
@@ -417,13 +417,13 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground font-medium">{t('settings.lineHeight')}</span>
               <div className="flex bg-secondary/50 p-1 rounded-lg">
-                {[1.1, 1.8, 2.2].map(lh => (
+                {[1.4, 1.8, 2.2].map(lh => (
                   <button
                     key={lh}
                     onClick={() => setLineHeight(lh)}
                     className={cn("px-3 py-1 text-xs rounded-md transition-all", lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                   >
-                    {lh === 1.1 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
+                    {lh === 1.4 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
                   </button>
                 ))}
               </div>
@@ -465,7 +465,7 @@ export default function Home() {
                   onClick={() => setBibleVersion('CUV')}
                   className={cn("px-3 py-1 text-xs rounded-md transition-all", bibleVersion === 'CUV' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                 >
-                  {locale === 'en' ? 'CUV' : '和合本'}
+                  {t('common.bibleVersionCUV')}
                 </button>
                 <button
                   onClick={() => setBibleVersion('KJV')}
@@ -502,7 +502,7 @@ export default function Home() {
         )}
       >
         
-        {/* Header */}
+        {/* Header - 仅 Header 可隐藏 */}
         <div
           className={cn(
             "absolute top-0 left-0 right-0 z-30 p-2 md:p-4 pointer-events-none transition-transform duration-300 ease-in-out",
@@ -636,7 +636,7 @@ export default function Home() {
                           {t('settings.lineHeight')}
                         </span>
                         <div className="flex bg-secondary/50 p-1 rounded-lg">
-                          {[1.1, 1.8, 2.2].map(lh => (
+                          {[1.4, 1.8, 2.2].map(lh => (
                             <button
                               key={lh}
                               onClick={() => setLineHeight(lh)}
@@ -645,7 +645,7 @@ export default function Home() {
                                 lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                               )}
                             >
-                              {lh === 1.1 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
+                              {lh === 1.4 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
                             </button>
                           ))}
                         </div>
@@ -740,11 +740,10 @@ export default function Home() {
           />
         </div>
 
-        {/* Mobile Tab Bar */}
+        {/* Mobile Tab Bar - 始终可见，防止导航丢失 */}
         <div
           className={cn(
-            "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out",
-            isNavVisible ? "translate-y-0" : "translate-y-[120%]"
+            "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"
           )}
         >
             <TabList 

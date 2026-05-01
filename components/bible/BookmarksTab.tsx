@@ -9,6 +9,7 @@ import { Bookmark, ChevronRight, Trash2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { formatDateClient } from "@/lib/locale";
 
 export function BookmarksTab() {
   const router = useRouter();
@@ -51,7 +52,7 @@ export function BookmarksTab() {
   // 格式化时间
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+    return formatDateClient(date, { month: 'short', day: 'numeric' });
   };
 
   return (
@@ -103,7 +104,7 @@ export function BookmarksTab() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="h-6 w-6 text-slate-400 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                           onClick={(e) => handleRemove(e, item.id)}
                           title={t('bible.removeBookmark')}
                         >

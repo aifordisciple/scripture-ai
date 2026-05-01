@@ -15,6 +15,7 @@ import {
   Trophy, Calendar, Users, AlertCircle, MessageSquare, Mail, Trash
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useRealtime } from "@/hooks/use-realtime";
 import {
   notify,
@@ -60,6 +61,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
   const [loading, setLoading] = useState(true);
   const [browserNotifyEnabled, setBrowserNotifyEnabled] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const handleRealtimeNotification = useCallback((data: any) => {
     setNotifications(prev => [data, ...prev.slice(0, 49)]);
@@ -222,6 +224,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
@@ -236,9 +239,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    if (confirm(t('notification.confirmClearAll'))) {
-                      clearAllNotifications();
-                    }
+                    setShowClearConfirm(true);
                   }}
                   className="text-xs text-red-500 hover:text-red-600"
                 >
@@ -329,5 +330,16 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
         </div>
       </DialogContent>
     </Dialog>
+      <ConfirmDialog
+        open={showClearConfirm}
+        onOpenChange={setShowClearConfirm}
+        title={t('notification.clearAll')}
+        description={t('notification.confirmClearAll')}
+        onConfirm={() => {
+          clearAllNotifications();
+          setShowClearConfirm(false);
+        }}
+      />
+    </>
   );
 }

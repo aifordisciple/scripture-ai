@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus, Trash2, Edit, Star, StarOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useTranslation } from '@/lib/i18n';
 import type { CustomPrompt } from '@/store/types';
 
 // 表单弹窗组件
@@ -118,9 +121,13 @@ function PromptFormModal({
 export default function PromptsSettingsPage() {
   const { status } = useSession();
   const { customPrompts, setCustomPrompts } = useBibleStore();
+  const { addToast } = useToast();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPrompt, setEditingPrompt] = useState<CustomPrompt | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   // 加载用户的自定义提示词
   useEffect(() => {
@@ -186,7 +193,8 @@ export default function PromptsSettingsPage() {
 
   // 删除提示词
   const handleDelete = useCallback(async (id: string) => {
-    if (!confirm('确定要删除这个自定义问题吗？')) return;
+    setPendingDeleteId(id);
+    setShowDeleteConfirm(true);
     try {
       const res = await fetch(`/api/prompts?id=${id}`, {
         method: 'DELETE',
@@ -227,6 +235,7 @@ export default function PromptsSettingsPage() {
   }, [customPrompts, setCustomPrompts]);
 
   return (
+    <>
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Unauthenticated state */}
       {status === 'unauthenticated' && (
@@ -401,5 +410,18 @@ export default function PromptsSettingsPage() {
         </>
       )}
     </div>
+    <ConfirmDialog
+      open={showDeleteConfirm}
+      onOpenChange={setShowDeleteConfirm}
+      title={t('settings.confirmDeletePrompt')}
+      description={t('settings.deletePromptWarning')}
+      onConfirm={() => {
+        if (pendingDeleteId) {
+          deletePrompt(pendingDeleteId);
+          setPendingDeleteId(null);
+        }
+      }}
+    />
+    </>
   );
 }

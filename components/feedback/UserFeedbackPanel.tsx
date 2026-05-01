@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { useTranslation } from "@/lib/i18n";
+import { useToast } from '@/components/ui/toast';
 
 interface Reply {
   type: 'admin' | 'user';
@@ -61,6 +62,7 @@ interface UserFeedbackPanelProps {
 
 export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps) {
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [replyContent, setReplyContent] = useState("");
@@ -122,11 +124,11 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
         setReplyContent("");
       } else {
         const error = await res.json();
-        alert(error.error || t('feedback.replyFailed'));
+        addToast({ type: 'error', message: error.error || t('feedback.replyFailed') });
       }
     } catch (error) {
       console.error("Reply error:", error);
-      alert(t('feedback.replyFailedRetry'));
+      addToast({ type: 'error', message: t('feedback.replyFailedRetry') });
     } finally {
       setReplyLoading(false);
     }

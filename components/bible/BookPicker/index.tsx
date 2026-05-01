@@ -5,7 +5,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { X, BookOpen } from "lucide-react";
+import { X, BookOpen, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/lib/i18n";
@@ -43,10 +43,20 @@ export function BookPicker({
   // 当前选中的书卷
   const [selectedBook, setSelectedBook] = useState<BookInfo | null>(null);
 
-  // 当前书卷列表
+  // 搜索关键词
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // 当前书卷列表（含搜索过滤）
   const books = useMemo(() => {
-    return testament === "old" ? OLD_TESTAMENT : NEW_TESTAMENT;
-  }, [testament]);
+    const source = testament === "old" ? OLD_TESTAMENT : NEW_TESTAMENT;
+    if (!searchQuery.trim()) return source;
+    const q = searchQuery.trim().toLowerCase();
+    return source.filter(b =>
+      b.id.toLowerCase().includes(q) ||
+      b.name.toLowerCase().includes(q) ||
+      (b.nameEn && b.nameEn.toLowerCase().includes(q))
+    );
+  }, [testament, searchQuery]);
 
   // 根据当前阅读位置初始化状态
   useEffect(() => {
@@ -78,7 +88,7 @@ export function BookPicker({
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
       <DialogContent className="w-screen h-screen max-w-none max-h-none p-0 bg-background/95 backdrop-blur-sm rounded-none border-none" showCloseButton={false}>
         {/* 顶部标题栏 */}
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/50">
@@ -100,6 +110,28 @@ export function BookPicker({
           {/* 旧约/新约切换 */}
           <div className="px-4 pb-3">
             <TestamentTabs testament={testament} onChange={setTestament} />
+          </div>
+
+          {/* 搜索框 */}
+          <div className="px-4 pb-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('reader.searchPlaceholder')}
+                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border/50 bg-secondary/30 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 placeholder:text-muted-foreground"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

@@ -258,6 +258,8 @@ export const bible = {
 
     // BibleHeatmap
     heatmapTooltip: '{bookName} {chapter}章 : {weight} 次互动',
+    heatmapLess: '少',
+    heatmapMore: '多',
 
     // BookGrid
     noMatchingBooks: '未找到匹配的书卷',

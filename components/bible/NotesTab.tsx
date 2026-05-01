@@ -11,12 +11,20 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { getClientLocale } from "@/lib/locale";
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export function NotesTab() {
   const router = useRouter();
   const { notes, deleteNote, openNoteEditor, tabs, addTab, setActiveTab, updateActiveTab } = useBibleStore();
   const { data: session } = useSession();
   const { t } = useTranslation();
+  const { addToast } = useToast();
+
+  // ConfirmDialog state for delete confirmation
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   // [P1增强] 搜索状态
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,7 +89,13 @@ export function NotesTab() {
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!confirm(t('bible.confirmDeleteNote'))) return;
+    setPendingDeleteId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const executeDelete = async () => {
+    if (!pendingDeleteId) return;
+    const id = pendingDeleteId;
 
     // 先尝试服务端删除，成功后再删除本地
     if (session?.user) {
@@ -95,11 +109,13 @@ export function NotesTab() {
         deleteNote(id);
       } catch (err) {
         console.error("Failed to delete note remotely", err);
-        alert(t('bible.deleteFailed'));
+        addToast({ type: 'error', message: t('bible.deleteFailed') });
       }
     } else {
       deleteNote(id);
     }
+    setShowDeleteConfirm(false);
+    setPendingDeleteId(null);
   };
 
   const handleEdit = (e: React.MouseEvent, bookId: string, chapter: number, verse: number) => {
@@ -110,12 +126,12 @@ export function NotesTab() {
   // [P1增强] 导出笔记为Markdown
   const handleExportMarkdown = () => {
     if (notes.length === 0) {
-      alert(t('bible.noNotesToExport'));
+      addToast({ type: 'warning', message: t('bible.noNotesToExport') });
       return;
     }
 
     let markdown = `# ${t('bible.exportTitle')}\n\n`;
-    markdown += `> ${t('bible.exportTime')}: ${new Date().toLocaleString('zh-CN')}\n\n`;
+    markdown += `> ${t('bible.exportTime')}: ${new Date().toLocaleString(getClientLocale())}\n\n`;
     markdown += `> ${t('bible.exportNoteCount', { count: notes.length })}\n\n---\n\n`;
 
     const grouped = groupedNotes;
@@ -125,7 +141,7 @@ export function NotesTab() {
         markdown += `### ${item.chapter}:${item.verse}\n\n`;
         markdown += `${item.content}\n\n`;
         if (item.updatedAt) {
-          markdown += `*${t('bible.updated')} ${new Date(item.updatedAt).toLocaleString('zh-CN')}*\n\n`;
+          markdown += `*${t('bible.updated')} ${new Date(item.updatedAt).toLocaleString(getClientLocale())}*\n\n`;
         }
         markdown += '---\n\n';
       });
@@ -295,6 +311,16 @@ export function NotesTab() {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title={t('common.confirm')}
+        description={t('bible.confirmDeleteNote')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        variant="destructive"
+        onConfirm={executeDelete}
+      />
     </div>
   );
 }

@@ -18,6 +18,7 @@ import { feedback } from './feedback'
 import { bible } from './bible'
 import { admin } from './admin'
 import { pwa } from './pwa'
+import dashboard from './dashboard'
 import type { Translations } from '../zh'
 
 export const en: Translations = {
@@ -41,4 +42,5 @@ export const en: Translations = {
   ...bible,
   ...admin,
   ...pwa,
+  dashboard,
 }

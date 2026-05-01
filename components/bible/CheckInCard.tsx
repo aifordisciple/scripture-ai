@@ -6,6 +6,7 @@ import { Flame, BookOpen, Calendar, X, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/lib/i18n'
+import { formatDateClient } from '@/lib/locale'
 
 export interface CheckInCardProps {
   streakDays: number
@@ -83,7 +84,7 @@ export const CheckInCard = memo(function CheckInCard({
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-sm mb-3">
               <Calendar className="w-4 h-4" />
-              {new Date().toLocaleDateString('zh-CN', {
+              {formatDateClient(new Date(), {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -97,7 +98,7 @@ export const CheckInCard = memo(function CheckInCard({
             <div className="flex flex-col items-center">
               <div className={cn('relative', flameColor)}>
                 <Flame className="w-16 h-16 fill-current animate-pulse" />
-                {streakDays >= 7 && (
+                {streakDays >= 1 && (
                   <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
                     {streakDays}
                   </span>

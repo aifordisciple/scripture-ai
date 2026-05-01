@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useTranslation } from "@/lib/i18n";
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Users, Plus, ChevronLeft, Settings, Crown, Calendar,
   BookOpen, Trophy, MessageCircle, Ticket, Loader2, UserCog, BarChart3, Activity, LogIn
@@ -77,6 +79,7 @@ export function GroupTab() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { t } = useTranslation();
+  const { addToast } = useToast();
 
   // 从全局 store 获取选择状态（用于跨标签页保持）
   const { selectedGroupForPlan, selectedPlanId, setSelectedGroupForPlan, setSelectedPlanId } = useBibleStore();
@@ -89,6 +92,8 @@ export function GroupTab() {
   const [creating, setCreating] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [pendingLeaveAction, setPendingLeaveAction] = useState<(() => void) | null>(null);
 
   // 从全局 store 恢复选中的小组和计划
   const selectedGroup = selectedGroupForPlan ? {
@@ -176,7 +181,7 @@ export function GroupTab() {
       });
       const data = await res.json();
       if (data.error) {
-        alert(data.error);
+        addToast({ type: 'error', message: data.error });
       } else if (data.church) {
         setMyGroups(prev => [{
           churchId: data.church.id,
@@ -189,7 +194,7 @@ export function GroupTab() {
       }
     } catch (error) {
       console.error("Failed to create group:", error);
-      alert(t('group.createFailed'));
+      addToast({ type: 'error', message: t('group.createFailed') });
     } finally {
       setCreating(false);
     }
@@ -206,29 +211,31 @@ export function GroupTab() {
       if (data.success) {
         fetchGroups();
       } else {
-        alert(data.error || t('group.joinFailed'));
+        addToast({ type: 'error', message: data.error || t('group.joinFailed') });
       }
     } catch (error) {
       console.error("Failed to join group:", error);
     }
   };
 
-  const leaveGroup = async (churchId: string) => {
-    if (!confirm(t('group.leaveConfirm'))) return;
-    try {
-      const res = await fetch(`/api/church/${churchId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "leave" })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setSelectedGroupForPlan(null);
-        fetchGroups();
+  const leaveGroup = (churchId: string) => {
+    setPendingLeaveAction(() => async () => {
+      try {
+        const res = await fetch(`/api/church/${churchId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "leave" })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setSelectedGroupForPlan(null);
+          fetchGroups();
+        }
+      } catch (error) {
+        console.error("Failed to leave group:", error);
       }
-    } catch (error) {
-      console.error("Failed to leave group:", error);
-    }
+    });
+    setShowLeaveConfirm(true);
   };
 
   const handlePlanCreated = (plan: GroupPlan) => {
@@ -344,7 +351,7 @@ export function GroupTab() {
         </div>
 
         <Tabs defaultValue="plans" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6">
             <TabsTrigger value="plans" className="gap-2">
               <Calendar className="w-4 h-4" /> {t('group.tabPlans')}
             </TabsTrigger>

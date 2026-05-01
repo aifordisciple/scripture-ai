@@ -5,6 +5,9 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { QuickAction } from "@/store/types";
+import { Puzzle, Scroll, Search, Lightbulb, Hand, GraduationCap, BookOpen, Sparkles, X } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
+import type { DualLangString } from "@/lib/constants";
 
 interface RadialMenuProps {
   isOpen: boolean;
@@ -25,22 +28,22 @@ const getMenuPosition = (index: number, total: number, radius: number) => {
   };
 };
 
-// 图标映射
-const ACTION_ICONS: Record<string, string> = {
-  detail: "🧩",
-  context: "📜",
-  original: "🔍",
-  application: "💡",
-  prayer: "🙏",
-  explain_to_kid: "👶",
-  tutor: "👨‍🏫",
-  sermon: "📋",
-  "study-guide": "📖",
+// 图标映射 (Lucide React 组件，跨平台一致)
+const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  detail: Puzzle,
+  context: Scroll,
+  original: Search,
+  application: Lightbulb,
+  prayer: Hand,
+  explain_to_kid: GraduationCap,
+  tutor: GraduationCap,
+  sermon: BookOpen,
+  "study-guide": Scroll,
   // [P0优化] AI模式选项
-  "ai-mode-general": "✨",
-  "ai-mode-tutor": "👨‍🏫",
-  "ai-mode-sermon": "📋",
-  "ai-mode-study-guide": "📖",
+  "ai-mode-general": Sparkles,
+  "ai-mode-tutor": GraduationCap,
+  "ai-mode-sermon": BookOpen,
+  "ai-mode-study-guide": Scroll,
 };
 
 // 颜色映射
@@ -62,7 +65,14 @@ const ACTION_COLORS: Record<string, string> = {
 };
 
 export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: RadialMenuProps) {
+  const { locale } = useTranslation();
   const radius = 80; // 径向菜单半径
+
+  // 解析 label (支持 string 和 DualLangString)
+  const resolveLabel = (label: string | DualLangString): string => {
+    if (typeof label === 'string') return label;
+    return label[locale as keyof DualLangString] || label.zh || label.en || '';
+  };
 
   return (
     <AnimatePresence>
@@ -95,13 +105,13 @@ export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: Rad
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
               className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl flex items-center justify-center"
             >
-              <span className="text-white text-2xl">✨</span>
+              <Sparkles className="w-7 h-7 text-white" />
             </motion.div>
 
             {/* 菜单项 */}
             {actions.map((action, index) => {
               const pos = getMenuPosition(index, actions.length, radius);
-              const icon = ACTION_ICONS[action.id] || "💬";
+              const IconComponent = ACTION_ICONS[action.id] || Sparkles;
               const colorClass = ACTION_COLORS[action.id] || "from-slate-500 to-slate-600";
 
               return (
@@ -137,11 +147,11 @@ export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: Rad
                     "transition-transform duration-150",
                     "border-2 border-white/30"
                   )}
-                  title={action.label.replace(/^[^\s]+\s/, "")} // 移除emoji前缀
+                  title={resolveLabel(action.label)}
                 >
-                  <span className="text-lg mb-0.5">{icon}</span>
+                  <IconComponent className="w-5 h-5 mb-0.5" />
                   <span className="text-[9px] leading-tight text-center px-1 line-clamp-1">
-                    {action.label.replace(/^[^\s]+\s/, "")}
+                    {resolveLabel(action.label)}
                   </span>
                 </motion.button>
               );
@@ -168,7 +178,7 @@ export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: Rad
                 y: getMenuPosition(actions.length, actions.length + 1, radius).y,
               }}
             >
-              <span className="text-sm">✕</span>
+              <X className="w-4 h-4" />
             </motion.button>
           </div>
         </>

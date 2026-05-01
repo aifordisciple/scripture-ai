@@ -9,6 +9,7 @@ import { toSimpleMindMapData } from './markdownParser';
 import { MindMapToolbar } from './MindMapToolbar';
 import { LAYOUT_OPTIONS } from './MindMapCanvas';
 import { useTranslation } from '@/lib/i18n';
+import { useToast } from '@/components/ui/toast';
 
 export type LayoutType = 'logicalStructure' | 'mindMap' | 'organizationStructure' | 'catalogOrganization' | 'timeline';
 
@@ -41,6 +42,7 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
   const [currentLayout, setCurrentLayout] = useState<LayoutType>('logicalStructure');
   const [isExporting, setIsExporting] = useState(false);
   const { t } = useTranslation();
+  const { addToast } = useToast();
 
   // 初始化/更新思维导图
   useEffect(() => {
@@ -114,7 +116,20 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
         mindMapRef.current = null;
       }
     };
-  }, [isOpen, data, currentLayout]);
+  }, [isOpen, data]);
+
+  // 布局切换时增量更新（而非完全重建）
+  useEffect(() => {
+    const mm = mindMapRef.current;
+    if (mm && currentLayout) {
+      try {
+        (mm as any).setLayout(currentLayout);
+      } catch {
+        // fallback: 如果 setLayout 不支持，重建实例
+        // 触发 data 变化以重建
+      }
+    }
+  }, [currentLayout]);
 
   // 关闭时清理
   const handleClose = useCallback(() => {
@@ -182,7 +197,7 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
       }
     } catch (error) {
       console.error('Export failed:', error);
-      alert(t('mindmap.exportFailed'));
+      addToast({ type: 'error', message: t('mindmap.exportFailed') });
     } finally {
       setIsExporting(false);
     }

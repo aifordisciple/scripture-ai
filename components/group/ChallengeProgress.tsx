@@ -74,13 +74,13 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
         {/* Main progress */}
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">整体进度</span>
+            <span className="text-muted-foreground">{t('group.overallProgress')}</span>
             <span className="font-bold">{completionPercent}%</span>
           </div>
           <Progress value={completionPercent} className="h-3" />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{progress.completedDays}/{targetDays} 天</span>
-            <span>{daysRemaining > 0 ? `剩余 ${daysRemaining} 天` : "已结束"}</span>
+            <span>{t('group.daysOfTotal', { completed: progress.completedDays, total: targetDays })}</span>
+            <span>{daysRemaining > 0 ? t('group.daysRemaining', { count: daysRemaining }) : t('group.ended')}</span>
           </div>
         </div>
 
@@ -90,20 +90,20 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
             <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
               {progress.chaptersRead}
             </div>
-            <div className="text-xs text-muted-foreground">已读章节</div>
+            <div className="text-xs text-muted-foreground">{t('group.chaptersRead')}</div>
           </div>
           <div className="text-center p-3 rounded-lg bg-white/50 dark:bg-black/20">
             <div className="text-2xl font-bold text-orange-500 flex items-center justify-center gap-1">
               <Flame className="w-5 h-5" />
               {progress.streakDays}
             </div>
-            <div className="text-xs text-muted-foreground">连续天数</div>
+            <div className="text-xs text-muted-foreground">{t('group.streakDays')}</div>
           </div>
           <div className="text-center p-3 rounded-lg bg-white/50 dark:bg-black/20">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {progress.completedDays}
             </div>
-            <div className="text-xs text-muted-foreground">完成天数</div>
+            <div className="text-xs text-muted-foreground">{t('group.completedDaysLabel')}</div>
           </div>
         </div>
 
@@ -113,10 +113,10 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-600" />
               <div>
-                <p className="font-medium text-sm">奖励: {rewardTitle}</p>
+                <p className="font-medium text-sm">{t('group.rewardLabel', { title: rewardTitle })}</p>
                 {rewardBadge && (
                   <p className="text-xs text-muted-foreground">
-                    完成后获得「{rewardBadge}」勋章
+                    {t('group.badgeRewardDesc', { badge: rewardBadge })}
                   </p>
                 )}
               </div>
@@ -128,7 +128,7 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
         {progress.streakDays >= 3 && (
           <div className="text-center p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
             <p className="text-sm font-medium text-orange-700 dark:text-orange-300">
-              🔥 太棒了！已连续打卡 {progress.streakDays} 天，继续坚持！
+              🔥 {t('group.streakEncouragement', { count: progress.streakDays })}
             </p>
           </div>
         )}

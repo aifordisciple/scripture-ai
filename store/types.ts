@@ -301,6 +301,8 @@ export interface AISlice {
   aiQueue: AIQueueItem[];
   enqueueAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
   cancelAIRequest: (id: string) => void;
+  shouldAbortStream: boolean;
+  clearAbortStream: () => void;
   clearAIQueue: () => void;
   startProcessingNext: () => void;
   completeCurrentRequest: () => void;

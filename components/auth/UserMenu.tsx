@@ -5,9 +5,8 @@ import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, BookMarked, FileText, Loader2, LayoutDashboard, Calendar, BrainCircuit, Flame, Shield, MessageCircle, Users, BarChart3, Bookmark, Bell, MessageSquare } from "lucide-react";
+import { UserCircle, LogOut, Settings, Loader2, Calendar, BrainCircuit, Flame, Shield, Users, BarChart3, Bell, MessageSquare } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
-import { UserFeedbackPanel } from "@/components/feedback/UserFeedbackPanel";
 import { FeedbackDialog } from "@/components/feedback/FeedbackDialog";
 import { NotificationDialog } from "@/components/common/NotificationDialog";
 import { useGroupUnread } from "@/hooks/use-group-unread";
@@ -31,7 +30,6 @@ export function UserMenu() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [apiSettingsOpen, setApiSettingsOpen] = useState(false);
-  const [feedbackPanelOpen, setFeedbackPanelOpen] = useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);  const [isAdmin, setIsAdmin] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
@@ -114,12 +112,21 @@ export function UserMenu() {
           className="fixed bg-white dark:bg-slate-900 rounded-xl shadow-xl border dark:border-slate-800 py-2 z-[9999] animate-in fade-in zoom-in-95 duration-200 w-56"
           style={{ top: menuPosition.top, right: menuPosition.right }}
         >
-          <div className="px-4 py-3 border-b dark:border-slate-800 mb-2 bg-slate-50/50 dark:bg-slate-800/20">
-            <p className="font-bold text-sm text-slate-800 dark:text-slate-100 truncate">{session.user?.name}</p>
-            <p className="text-xs text-slate-500 truncate mt-0.5">{session.user?.email}</p>
+          <div className="px-4 py-3 border-b dark:border-slate-800 mb-2 bg-slate-50/50 dark:bg-slate-800/20 flex items-center gap-3">
+            {session.user?.image ? (
+              <img src={session.user.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center shrink-0">
+                <span className="font-bold text-blue-700 dark:text-blue-200">{userInitial}</span>
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="font-bold text-sm text-slate-800 dark:text-slate-100 truncate">{session.user?.name}</p>
+              <p className="text-xs text-slate-500 truncate mt-0.5">{session.user?.email}</p>
+            </div>
           </div>
 
-          {/* 读经统计入口 */}
+          {/* 快捷入口 */}
           <div className="px-2 mb-2">
             <button
               onClick={() => {
@@ -133,14 +140,12 @@ export function UserMenu() {
             >
               <BarChart3 className="w-4 h-4" />
               <span className="flex-1 text-left">{t('auth.dashboard')}</span>
-              {/* 火焰徽章 - 显示连续阅读天数 */}
               {streakCount > 0 && (
                 <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-100 dark:bg-orange-900/40 rounded-full">
                   <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
                   <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{streakCount}</span>
                 </div>
               )}
-              <span className="text-[10px] bg-blue-200 dark:bg-blue-800 px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-300">D</span>
             </button>
           </div>
 
@@ -165,42 +170,6 @@ export function UserMenu() {
           />
 
           <MenuItem
-            icon={<BookMarked className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
-            label={t('auth.myHighlights')}
-            onClick={() => {
-              setIsOpen(false);
-              const { tabs, setActiveTab, addTab } = useBibleStore.getState();
-              const existTab = tabs.find(t => t.type === 'highlights');
-              if (existTab) setActiveTab(existTab.id);
-              else addTab({ type: 'highlights' });
-            }}
-          />
-          <MenuItem
-            icon={<FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
-            label={t('auth.myNotes')}
-            onClick={() => {
-              setIsOpen(false);
-              const { tabs, setActiveTab, addTab } = useBibleStore.getState();
-              const existTab = tabs.find(t => t.type === 'notes');
-              if (existTab) setActiveTab(existTab.id);
-              else addTab({ type: 'notes' });
-            }}
-          />
-          <MenuItem
-            icon={<Bookmark className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
-            label={t('auth.myFavorites')}
-            onClick={() => {
-              setIsOpen(false);
-              const { tabs, setActiveTab, addTab } = useBibleStore.getState();
-              const existTab = tabs.find(t => t.type === 'insights');
-              if (existTab) setActiveTab(existTab.id);
-              else addTab({ type: 'insights' });
-            }}
-          />
-
-          <div className="my-1 border-t dark:border-slate-800" />
-
-          <MenuItem
             icon={<Calendar className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
             label={t('auth.readingPlan')}
             onClick={() => {
@@ -209,25 +178,6 @@ export function UserMenu() {
               const existTab = tabs.find(t => t.type === 'plan');
               if (existTab) setActiveTab(existTab.id);
               else addTab({ type: 'plan' });
-            }}
-          />
-
-          <div className="my-1 border-t dark:border-slate-800" />
-
-          {/* 意见反馈 - 提交新反馈 */}
-          <MenuItem
-            icon={<MessageSquare className="w-4 h-4 text-green-600 dark:text-green-400" />}
-            label={t('auth.feedback')}
-            onClick={() => { setIsOpen(false); setFeedbackDialogOpen(true); }}
-          />
-
-          {/* 我的反馈 - 查看历史反馈 */}
-          <MenuItem
-            icon={<MessageCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
-            label={t('auth.myFeedback')}
-            onClick={() => {
-              setIsOpen(false);
-              setFeedbackPanelOpen(true);
             }}
           />
 
@@ -249,9 +199,17 @@ export function UserMenu() {
 
           <div className="my-1 border-t dark:border-slate-800" />
 
-          {/* Admin Menu Items */}
+          {/* 反馈 */}
+          <MenuItem
+            icon={<MessageSquare className="w-4 h-4 text-green-600 dark:text-green-400" />}
+            label={t('auth.feedback')}
+            onClick={() => { setIsOpen(false); setFeedbackDialogOpen(true); }}
+          />
+
+          {/* Admin */}
           {isAdmin && (
             <>
+              <div className="my-1 border-t dark:border-slate-800" />
               <Link href="/admin/feedback" onClick={() => setIsOpen(false)}>
                 <div className="w-full flex items-center gap-3 px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left">
                   <Shield className="w-4 h-4 text-purple-600 dark:text-purple-400" />
@@ -259,7 +217,6 @@ export function UserMenu() {
                   <span className="ml-auto text-[10px] bg-purple-200 dark:bg-purple-800 px-1.5 py-0.5 rounded text-purple-600 dark:text-purple-300">Admin</span>
                 </div>
               </Link>
-              <div className="my-1 border-t dark:border-slate-800" />
             </>
           )}
 
@@ -279,7 +236,6 @@ export function UserMenu() {
       )}
 
       <ApiSettingsDialog open={apiSettingsOpen} onOpenChange={setApiSettingsOpen} />
-      <UserFeedbackPanel open={feedbackPanelOpen} onOpenChange={setFeedbackPanelOpen} />
       <FeedbackDialog open={feedbackDialogOpen} onOpenChange={setFeedbackDialogOpen} />
       <NotificationDialog open={notificationOpen} onOpenChange={setNotificationOpen} />
     </>

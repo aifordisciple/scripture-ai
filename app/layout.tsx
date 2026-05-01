@@ -1,5 +1,6 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
@@ -10,63 +11,88 @@ import { LocaleHtmlWrapper } from "@/components/providers/LocaleHtmlWrapper";
 
 const baseUrl = process.env.NEXTAUTH_URL || 'https://aidu.app';
 
-export const metadata: Metadata = {
-  title: {
-    default: "AI读 - 你的灵修伴侣",
+const i18nMeta = {
+  zh: {
+    title: "AI读 - 你的灵修伴侣",
     template: "%s | AI读",
-  },
-  description: "AI-powered Bible reading and devotional assistant with bilingual support, TTS, highlights, notes, and reading plans",
-  keywords: ["Bible", "Scripture", "AI", "devotional", "CUV", "KJV", "Bible reading", "verse interpretation", "daily reading", "reading plan", "圣经", "读经", "灵修", "和合本", "圣经阅读", "经文解读", "每日读经", "读经计划"],
-  manifest: "/manifest.json",
-  authors: [{ name: "AI读团队" }],
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "AI读",
-    startupImage: [
-      "/icon-512x512.png",
-    ],
-  },
-  icons: {
-    icon: [
-      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [
-      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
-    ],
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  alternates: {
-    canonical: baseUrl,
-  },
-  openGraph: {
-    type: "website",
-    url: baseUrl,
     siteName: "AI读",
-    title: "AI读 - AI-Powered Bible Reading & Devotional Assistant",
+    ogTitle: "AI读 - AI-Powered Bible Reading & Devotional Assistant",
+    description: "AI驱动的圣经阅读与灵修助手，支持中英双语、语音朗读、高亮笔记、读经计划",
+    ogAlt: "AI读 - AI-Powered Bible Reading Assistant",
+  },
+  en: {
+    title: "Scripture AI - Your Devotional Companion",
+    template: "%s | Scripture AI",
+    siteName: "Scripture AI",
+    ogTitle: "Scripture AI - AI-Powered Bible Reading & Devotional Assistant",
     description: "AI-powered Bible reading and devotional assistant with bilingual support, TTS, highlights, notes, and reading plans",
-    locale: "zh_CN",
-    alternateLocale: ["en_US"],
-    images: [
-      { url: "/og-image.png", width: 1200, height: 630, alt: "AI读 - AI-Powered Bible Reading Assistant" },
-    ],
+    ogAlt: "Scripture AI - AI-Powered Bible Reading Assistant",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "AI读 - AI-Powered Bible Reading Assistant",
-    description: "AI-powered Bible reading and devotional assistant",
-    images: ["/og-image.png"],
-  },
-};
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const cookieStore = await cookies();
+  const locale = cookieStore.get('locale')?.value || 'zh';
+  const meta = i18nMeta[locale as keyof typeof i18nMeta] || i18nMeta.zh;
+
+  return {
+    title: {
+      default: meta.title,
+      template: meta.template,
+    },
+    description: meta.description,
+    keywords: ["Bible", "Scripture", "AI", "devotional", "CUV", "KJV", "Bible reading", "verse interpretation", "daily reading", "reading plan", "圣经", "读经", "灵修", "和合本", "圣经阅读", "经文解读", "每日读经", "读经计划"],
+    manifest: "/manifest.json",
+    authors: [{ name: "Scripture AI Team" }],
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: meta.siteName,
+      startupImage: [
+        "/icon-512x512.png",
+      ],
+    },
+    icons: {
+      icon: [
+        { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
+      ],
+      apple: [
+        { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      ],
+    },
+    formatDetection: {
+      telephone: false,
+    },
+    alternates: {
+      canonical: baseUrl,
+    },
+    openGraph: {
+      type: "website",
+      url: baseUrl,
+      siteName: meta.siteName,
+      title: meta.ogTitle,
+      description: meta.description,
+      locale: locale === 'en' ? "en_US" : "zh_CN",
+      alternateLocale: locale === 'en' ? ["zh_CN"] : ["en_US"],
+      images: [
+        { url: "/og-image.png", width: 1200, height: 630, alt: meta.ogAlt },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: meta.ogTitle,
+      description: meta.description,
+      images: ["/og-image.png"],
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
@@ -109,6 +135,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="antialiased">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md">
+          Skip to content
+        </a>
         <AuthProvider>
           <ToastProvider>
            {children}

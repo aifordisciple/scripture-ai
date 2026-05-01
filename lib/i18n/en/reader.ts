@@ -36,6 +36,6 @@ export const reader = {
     chapters: 'Ch.',
     familyGroup: 'Family/Group Reading',
     familyGroupDesc: 'Read the Bible with family and friends',
-    brandName: 'ScriptureAI',
+    brandName: 'Scripture AI',
   },
 } as const

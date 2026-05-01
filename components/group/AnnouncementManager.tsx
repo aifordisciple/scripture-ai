@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { formatDateClient } from "@/lib/locale";
+import { useToast } from '@/components/ui/toast';
 
 interface Announcement {
   id: string;
@@ -38,6 +40,7 @@ interface AnnouncementManagerProps {
 
 export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerProps) {
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -86,11 +89,11 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
         setCreateOpen(false);
         resetForm();
       } else {
-        alert(data.error || t('group.createFailedShort'));
+        addToast({ type: 'error', message: data.error || t('group.createFailedShort') });
       }
     } catch (error) {
       console.error("Failed to create announcement:", error);
-      alert(t('group.createFailedRetry'));
+      addToast({ type: 'error', message: t('group.createFailedRetry') });
     } finally {
       setSaving(false);
     }
@@ -112,11 +115,11 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
         setEditId(null);
         resetForm();
       } else {
-        alert(data.error || t('group.updateFailedShort'));
+        addToast({ type: 'error', message: data.error || t('group.updateFailedShort') });
       }
     } catch (error) {
       console.error("Failed to update announcement:", error);
-      alert(t('group.updateFailedRetry'));
+      addToast({ type: 'error', message: t('group.updateFailedRetry') });
     } finally {
       setSaving(false);
     }
@@ -135,11 +138,11 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
         setAnnouncements(prev => prev.filter(a => a.id !== deleteId));
         setDeleteId(null);
       } else {
-        alert(data.error || t('common.delete'));
+        addToast({ type: 'error', message: data.error || t('common.delete') });
       }
     } catch (error) {
       console.error("Failed to delete announcement:", error);
-      alert(t('group.deleteFailedRetry'));
+      addToast({ type: 'error', message: t('group.deleteFailedRetry') });
     } finally {
       setSaving(false);
     }
@@ -197,8 +200,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("zh-CN", {
+    return formatDateClient(new Date(dateStr), {
       year: "numeric",
       month: "long",
       day: "numeric"

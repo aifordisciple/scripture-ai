@@ -20,6 +20,22 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
 
   addTab: ({ type, book = 'Gen', chapter = '1', query, searchMode, crossRefSource }) =>
     set((state) => {
+      // [P2-2修复] Tab 数量上限为 10
+      if (state.tabs.length >= MAX_TABS) {
+        // 替换最久未用的非活跃 tab
+        const replaceTarget = state.tabs.find((t) => t.id !== state.activeTabId)
+        if (!replaceTarget) return state // 所有 tab 都是活跃的，不添加
+        const newTabs = state.tabs.filter((t) => t.id !== replaceTarget.id)
+        const newId = `tab-${Date.now()}`
+        const newTab: Tab = { id: newId, type }
+        if (type === 'read') { newTab.book = book; newTab.chapter = chapter }
+        else if (type === 'search') { newTab.query = query; newTab.searchMode = searchMode }
+        else if (type === 'cross-ref' && crossRefSource) { newTab.crossRefSource = crossRefSource }
+        else if (type === 'atlas') { newTab.atlasData = {} }
+        else if (type === 'theme-graph') { newTab.themeGraphData = {} }
+        return { tabs: [...newTabs, newTab], activeTabId: newId }
+      }
+
       const newId = `tab-${Date.now()}`
       const newTab: Tab = { id: newId, type }
 
@@ -43,10 +59,13 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
   closeTab: (id) =>
     set((state) => {
       if (state.tabs.length <= 1) return state
+      const closedIndex = state.tabs.findIndex((t) => t.id === id)
       const newTabs = state.tabs.filter((t) => t.id !== id)
       let newActiveId = state.activeTabId
       if (id === state.activeTabId) {
-        newActiveId = newTabs[newTabs.length - 1].id
+        // 激活相邻 tab（优先左侧），而非跳至末尾
+        const siblingIndex = Math.min(closedIndex, newTabs.length - 1)
+        newActiveId = newTabs[siblingIndex].id
       }
       return { tabs: newTabs, activeTabId: newActiveId }
     }),

@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Loader2, Bell, Mail, Globe, Volume2 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
+import { useToast } from '@/components/ui/toast';
 
 interface NotificationSettingsProps {
   open: boolean;
@@ -28,6 +29,7 @@ interface NotificationPreferences {
 
 export function NotificationSettings({ open, onOpenChange }: NotificationSettingsProps) {
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     emailNotifyFeedback: true,
     emailNotifySystem: true,
@@ -78,11 +80,11 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
         localStorage.setItem('notification-preferences', JSON.stringify(preferences));
         onOpenChange(false);
       } else {
-        alert(t('settings.saveFailed'));
+        addToast({ type: 'error', message: t('settings.saveFailed') });
       }
     } catch (error) {
       console.error('Failed to save notification settings:', error);
-      alert(t('settings.saveFailed'));
+      addToast({ type: 'error', message: t('settings.saveFailed') });
     } finally {
       setSaving(false);
     }
@@ -95,7 +97,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
       const { requestBrowserNotificationPermission } = await import('@/lib/notification-service');
       const granted = await requestBrowserNotificationPermission();
       if (!granted) {
-        alert(t('settings.browserNotifyDenied'));
+        addToast({ type: 'warning', message: t('settings.browserNotifyDenied') });
         return;
       }
     }

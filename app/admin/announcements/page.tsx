@@ -4,6 +4,10 @@
 import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, X, Check, AlertTriangle, Info, Bell, BellRing } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDateClient } from '@/lib/locale';
+import { useTranslation } from '@/lib/i18n';
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Announcement {
   id: string;
@@ -33,6 +37,10 @@ interface AnnouncementsResponse {
 }
 
 export default function AdminAnnouncementsPage() {
+  const { t } = useTranslation();
+  const { addToast } = useToast();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [data, setData] = useState<AnnouncementsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +71,7 @@ export default function AdminAnnouncementsPage() {
       setData(json);
     } catch (err) {
       console.error(err);
-      setError('加载公告失败，请刷新页面重试');
+      setError(t('admin.loadAnnouncementsFailed'));
     } finally {
       setLoading(false);
     }
@@ -112,7 +120,7 @@ export default function AdminAnnouncementsPage() {
 
   const handleSave = async () => {
     if (!formData.title || !formData.content) {
-      alert('请填写标题和内容');
+      addToast({ type: 'error', message: t('admin.fillTitleAndContent') });
       return;
     }
 
@@ -136,14 +144,20 @@ export default function AdminAnnouncementsPage() {
       fetchAnnouncements();
     } catch (err) {
       console.error(err);
-      alert('保存失败');
+      addToast({ type: 'error', message: t('admin.saveFailed') });
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除此公告吗？')) return;
+  const handleDelete = (id: string) => {
+    setPendingDeleteId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteAnnouncement = async () => {
+    if (!pendingDeleteId) return;
+    setShowDeleteConfirm(false);
 
     try {
       const res = await fetch(`/api/admin/announcements?id=${id}`, {
@@ -153,7 +167,7 @@ export default function AdminAnnouncementsPage() {
       fetchAnnouncements();
     } catch (err) {
       console.error(err);
-      alert('删除失败');
+      addToast({ type: 'error', message: t('admin.deleteFailed') });
     }
   };
 
@@ -188,11 +202,11 @@ export default function AdminAnnouncementsPage() {
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'WARNING':
-        return '警告';
+        return t('admin.warning');
       case 'MAINTENANCE':
-        return '维护';
+        return t('admin.maintenance');
       default:
-        return '通知';
+        return t('admin.info');
     }
   };
 
@@ -220,22 +234,23 @@ export default function AdminAnnouncementsPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <div className="text-red-500 text-lg">{error}</div>
-        <button onClick={fetchAnnouncements} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">重试</button>
+        <button onClick={fetchAnnouncements} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{t('admin.retry')}</button>
       </div>
     );
   }
 
   return (
+    <>
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">公告管理</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('admin.announcementManagement')}</h1>
         <button
           onClick={() => openEditor()}
           className="flex items-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm md:text-base"
         >
           <Plus size={18} />
-          <span className="hidden sm:inline">新建公告</span>
-          <span className="sm:hidden">新建</span>
+          <span className="hidden sm:inline">{t('admin.newAnnouncement')}</span>
+          <span className="sm:hidden">{t('admin.newBtn')}</span>
         </button>
       </div>
 
@@ -245,11 +260,11 @@ export default function AdminAnnouncementsPage() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">公告</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.announcement')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.type')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.time')}</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -275,11 +290,11 @@ export default function AdminAnnouncementsPage() {
                           : "bg-gray-100 text-gray-500"
                       )}
                     >
-                      {announcement.isActive ? '已启用' : '已禁用'}
+                      {announcement.isActive ? t('admin.enabled') : t('admin.disabled')}
                     </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(announcement.createdAt).toLocaleDateString('zh-CN')}
+                    {formatDateClient(new Date(announcement.createdAt))}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
@@ -303,7 +318,7 @@ export default function AdminAnnouncementsPage() {
 
         {data && data.announcements.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            暂无公告
+            {t('admin.noAnnouncements')}
           </div>
         )}
       </div>
@@ -327,7 +342,7 @@ export default function AdminAnnouncementsPage() {
                       ? "bg-green-100 text-green-700"
                       : "bg-gray-100 text-gray-500"
                   )}>
-                    {announcement.isActive ? '已启用' : '已禁用'}
+                    {announcement.isActive ? t('admin.enabled') : t('admin.disabled')}
                   </span>
                 </div>
                 <h3 className="font-medium text-gray-900 truncate">{announcement.title}</h3>
@@ -336,14 +351,14 @@ export default function AdminAnnouncementsPage() {
             </div>
             <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
               <span className="text-xs text-gray-400">
-                {new Date(announcement.createdAt).toLocaleDateString('zh-CN')}
+                {formatDateClient(new Date(announcement.createdAt))}
               </span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => toggleActive(announcement)}
                   className="text-xs px-2 py-1 rounded text-gray-600 hover:bg-gray-100"
                 >
-                  {announcement.isActive ? '禁用' : '启用'}
+                  {announcement.isActive ? t('admin.disable') : t('admin.enable')}
                 </button>
                 <button
                   onClick={() => openEditor(announcement)}
@@ -364,7 +379,7 @@ export default function AdminAnnouncementsPage() {
 
         {data && data.announcements.length === 0 && (
           <div className="text-center py-12 text-gray-500 bg-white rounded-lg">
-            暂无公告
+            {t('admin.noAnnouncements')}
           </div>
         )}
       </div>
@@ -375,7 +390,7 @@ export default function AdminAnnouncementsPage() {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
               <h3 className="text-lg font-semibold">
-                {editingId ? '编辑公告' : '新建公告'}
+                {editingId ? t('admin.editAnnouncement') : t('admin.newAnnouncement')}
               </h3>
               <button onClick={closeEditor} className="text-gray-400 hover:text-gray-600">
                 <X size={20} />
@@ -384,57 +399,57 @@ export default function AdminAnnouncementsPage() {
 
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.title')}</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="请输入公告标题"
+                  placeholder={t('admin.announcementTitlePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">内容</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.content')}</label>
                 <textarea
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="请输入公告内容"
+                  placeholder={t('admin.announcementContentPlaceholder')}
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">类型</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.type')}</label>
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   >
-                    <option value="INFO">通知</option>
-                    <option value="WARNING">警告</option>
-                    <option value="MAINTENANCE">维护</option>
+                    <option value="INFO">{t('admin.info')}</option>
+                    <option value="WARNING">{t('admin.warning')}</option>
+                    <option value="MAINTENANCE">{t('admin.maintenance')}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">状态</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.status')}</label>
                   <select
                     value={formData.isActive ? 'true' : 'false'}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   >
-                    <option value="true">启用</option>
-                    <option value="false">禁用</option>
+                    <option value="true">{t('admin.enable')}</option>
+                    <option value="false">{t('admin.disable')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">开始时间（可选）</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.startTimeOptional')}</label>
                   <input
                     type="datetime-local"
                     value={formData.startsAt}
@@ -444,7 +459,7 @@ export default function AdminAnnouncementsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">结束时间（可选）</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.endTimeOptional')}</label>
                   <input
                     type="datetime-local"
                     value={formData.endsAt}
@@ -466,7 +481,7 @@ export default function AdminAnnouncementsPage() {
                   />
                   <label htmlFor="sendNotification" className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                     <BellRing size={16} className="text-indigo-600" />
-                    发布时推送通知给所有用户
+                    {t('admin.pushNotificationOnPublish')}
                   </label>
                 </div>
               )}
@@ -477,19 +492,27 @@ export default function AdminAnnouncementsPage() {
                 onClick={closeEditor}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
               >
-                取消
+                {t('admin.cancel')}
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
               >
-                {saving ? '保存中...' : '保存'}
+                {saving ? t('admin.saving') : t('admin.save')}
               </button>
             </div>
           </div>
         </div>
       )}
     </div>
+    <ConfirmDialog
+      open={showDeleteConfirm}
+      onOpenChange={setShowDeleteConfirm}
+      title={t('admin.confirmDeleteAnnouncement')}
+      description={t('admin.deleteAnnouncementWarning')}
+      onConfirm={confirmDeleteAnnouncement}
+    />
+    </>
   );
 }

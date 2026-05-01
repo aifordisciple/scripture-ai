@@ -36,7 +36,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
   const [myEntry, setMyEntry] = useState<LeaderboardEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(true);
-  const [sortMode, setSortMode] = useState<SortMode>('score');
+  const [sortMode, setSortMode] = useState<SortMode>('completed');
 
   useEffect(() => {
     fetchLeaderboard();
@@ -221,7 +221,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
                   {getRankIcon(entry.rank)}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">
-                      {entry.user.name || "匿名用户"}
+                      {entry.user.name || t('group.anonymousUser')}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span className="flex items-center gap-0.5">
@@ -236,7 +236,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
                       <span>·</span>
                       <span className="flex items-center gap-0.5">
                         <Calendar className="w-3 h-3" />
-                        {entry.completedDays}天
+                        {entry.completedDays}{t('group.daysUnit')}
                       </span>
                     </div>
                   </div>
@@ -252,7 +252,12 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
           </div>
 
           <p className="text-[10px] text-muted-foreground text-center pt-2">
-            积分 = 章节数×10 + 连续天数×50 + 完成天数×100
+            {t('group.scoreFormula')}
+          </p>
+
+          {/* 鼓励文案 */}
+          <p className="text-xs text-muted-foreground/70 text-center pt-1 italic">
+            {t('group.leaderboardEncouragement')}
           </p>
         </CardContent>
       )}

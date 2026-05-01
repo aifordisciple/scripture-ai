@@ -3,6 +3,7 @@
 
 import { useBibleStore } from "@/store/useBibleStore";
 import { useTranslation } from "@/lib/i18n";
+import { getClientLocale } from "@/lib/locale";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Check, AlertCircle, Cloud, CloudOff } from "lucide-react";
@@ -35,7 +36,7 @@ export function SyncSettings() {
     if (diff < 60000) return t('settings.justNow');
     if (diff < 3600000) return t('settings.minutesAgo', { count: Math.floor(diff / 60000) });
     if (diff < 86400000) return t('settings.hoursAgo', { count: Math.floor(diff / 3600000) });
-    return new Date(time).toLocaleString('zh-CN', {
+    return new Date(time).toLocaleString(getClientLocale(), {
       month: 'numeric',
       day: 'numeric',
       hour: '2-digit',

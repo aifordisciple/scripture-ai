@@ -17,6 +17,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import QRCode from "qrcode";
 import { useTranslation } from "@/lib/i18n";
+import { formatDateClient } from "@/lib/locale";
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface InviteCode {
   id: string;
@@ -35,6 +38,9 @@ interface InviteCodeManagerProps {
 
 export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps) {
   const { t } = useTranslation();
+  const { addToast } = useToast();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingCodeId, setPendingCodeId] = useState<string | null>(null);
   const [codes, setCodes] = useState<InviteCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState<string | null>(null);
@@ -90,7 +96,14 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
   };
 
   const deleteCode = async (codeId: string) => {
-    if (!confirm(t('group.confirmDeleteCode'))) return;
+    setPendingCodeId(codeId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteCode = async () => {
+    const codeId = pendingCodeId;
+    if (!codeId) return;
+    setShowDeleteConfirm(false);
     try {
       await fetch(`/api/church/${churchId}/invite`, {
         method: "DELETE",
@@ -98,8 +111,10 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
         body: JSON.stringify({ codeId })
       });
       setCodes(prev => prev.filter(c => c.id !== codeId));
+      setPendingCodeId(null);
     } catch (error) {
       console.error("Failed to delete invite code:", error);
+      addToast({ type: 'error', message: t('group.deleteFailedRetry') });
     }
   };
 
@@ -138,7 +153,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("zh-CN");
+    return formatDateClient(new Date(dateStr));
   };
 
   const isExpired = (expiresAt: string | null) => {
@@ -327,6 +342,18 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title={t('common.delete')}
+        description={t('group.confirmDeleteCode')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        variant="destructive"
+        onConfirm={confirmDeleteCode}
+      />
     </>
   );
 }

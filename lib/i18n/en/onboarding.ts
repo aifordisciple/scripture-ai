@@ -22,7 +22,7 @@ export const onboarding: Translations['onboarding'] = {
 
   // WelcomeOnboarding
   featureGuide: 'Feature Guide',
-  welcomeTitle: 'Welcome to AI Read',
+  welcomeTitle: 'Welcome to Scripture AI',
   welcomeDesc: 'Your smart Bible reading companion, helping you deeply understand God\'s Word and build consistent reading habits.',
   immersiveReadingTitle: 'Immersive Reading',
   immersiveReadingDesc: 'Supports bilingual comparison, custom font and line spacing for comfortable reading. You can also highlight verses and add notes.',

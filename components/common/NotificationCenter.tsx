@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRealtime } from "@/hooks/use-realtime";
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   notify,
   getNotificationType,
@@ -61,6 +62,7 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
   const [open, setOpen] = useState(false);
   const [browserNotifyEnabled, setBrowserNotifyEnabled] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Handle real-time notifications
   const handleRealtimeNotification = useCallback((data: any) => {
@@ -237,6 +239,7 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
@@ -261,9 +264,7 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    if (confirm(t('notification.confirmClearAll'))) {
-                      clearAllNotifications();
-                    }
+                    setShowClearConfirm(true);
                   }}
                   className="text-xs text-red-500 hover:text-red-600"
                 >
@@ -354,5 +355,15 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
         </div>
       </DialogContent>
     </Dialog>
+    <ConfirmDialog
+      open={showClearConfirm}
+      onOpenChange={setShowClearConfirm}
+      title={t('notification.clearAll')}
+      description={t('notification.confirmClearAll')}
+      onConfirm={() => {
+        clearAllNotifications();
+        setShowClearConfirm(false);
+      }}
+    />
   );
 }

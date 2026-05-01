@@ -23,6 +23,7 @@ import {
 import { Pencil, Trash2, Loader2, MoreVertical, Target, Trophy, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from '@/lib/i18n';
+import { useToast } from '@/components/ui/toast';
 
 interface GroupPlanEditDialogProps {
   churchId: string;
@@ -46,6 +47,7 @@ export function GroupPlanEditDialog({
   onDelete
 }: GroupPlanEditDialogProps) {
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -80,11 +82,11 @@ export function GroupPlanEditDialog({
         onUpdate(data.plan);
         setEditOpen(false);
       } else {
-        alert(data.error || t('group.saveFailed'));
+        addToast({ type: 'error', message: data.error || t('group.saveFailed') });
       }
     } catch (error) {
       console.error("Failed to save plan:", error);
-      alert(t('group.saveFailedRetry'));
+      addToast({ type: 'error', message: t('group.saveFailedRetry') });
     } finally {
       setSaving(false);
     }
@@ -101,11 +103,11 @@ export function GroupPlanEditDialog({
         setDeleteOpen(false);
         onDelete();
       } else {
-        alert(data.error || t('common.delete'));
+        addToast({ type: 'error', message: data.error || t('common.delete') });
       }
     } catch (error) {
       console.error("Failed to delete plan:", error);
-      alert(t('group.deleteFailedRetry'));
+      addToast({ type: 'error', message: t('group.deleteFailedRetry') });
     } finally {
       setDeleting(false);
     }

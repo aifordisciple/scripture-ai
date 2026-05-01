@@ -2,6 +2,7 @@ export const plan = {
   plan: {
     title: 'Reading Plans',
     subtitle: 'Schedule daily devotions. You can follow multiple plans at the same time.',
+    generatingDevotionals: 'Generating devotionals...',
     myPlans: 'My Plans',
     allPlans: 'All Plans',
     continueReading: "Continue Today's Reading",

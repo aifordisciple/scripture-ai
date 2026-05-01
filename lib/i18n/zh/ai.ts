@@ -63,6 +63,17 @@ export const ai = {
     openAISidebar: '打开 AI 侧边栏',
     closeAssistant: '关闭助手',
     openInterpretation: '开启解读',
+    // ChatError i18n keys (P0-4 fix)
+    chat: {
+      sessionLoadFailed: '加载对话历史失败，请检查网络连接',
+      sessionCreateFailed: '创建对话失败，请重试',
+      sessionNotFound: '对话未找到或已被删除',
+      messageSaveFailed: '保存消息失败，请重试',
+      messageLoadFailed: '加载消息失败，请检查网络连接',
+      timeoutError: '请求超时，请重试',
+      generationFailed: 'AI 生成失败，请重试',
+      rateLimited: '请求过于频繁，请稍后再试',
+    },
   },
   floatingMenu: {
     copy: '复制',

@@ -16,6 +16,7 @@ import {
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { MemberProfile } from "./MemberProfile";
 import { useTranslation } from "@/lib/i18n";
+import { formatDateClient } from "@/lib/locale";
 
 interface SharedNote {
   id: string;
@@ -66,8 +67,7 @@ export function SharedNotes({ churchId }: SharedNotesProps) {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("zh-CN", {
+    return formatDateClient(new Date(dateStr), {
       year: "numeric",
       month: "short",
       day: "numeric"

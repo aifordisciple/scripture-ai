@@ -6,6 +6,9 @@ import { cn } from "@/lib/utils";
 import { ChapterGridProps } from "./types";
 import { motion } from "framer-motion";
 
+// 动画总时长上限 300ms，避免 Psalms 150章需 1.5s
+const MAX_ANIMATION_DURATION = 0.3;
+
 /**
  * 章节网格组件
  * 8 列紧凑布局，支持快速选择
@@ -26,7 +29,7 @@ export function ChapterGrid({ chapters, selectedChapter, onSelect }: ChapterGrid
             key={chapter}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.01, duration: 0.1 }}
+            transition={{ delay: (index / chapters) * MAX_ANIMATION_DURATION, duration: 0.1 }}
             onClick={() => onSelect(chapter)}
             className={cn(
               "aspect-square flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-150",

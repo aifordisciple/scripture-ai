@@ -46,7 +46,8 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
           const cloudConfig = {
             provider: provider as 'local' | 'cloud',
             baseUrl: data.apiBaseUrl || (provider === 'local' ? 'http://host.docker.internal:11434/v1' : 'https://api.minimaxi.com/v1'),
-            apiKey: data.apiKey || 'sk-cp-q9pAztav67XjDz0H1rvF9bqP0u6Ejwrp4-bw7tZJo8-E2yCSTYCgJlePKkFe8GC1PWxIjxwfU2R5dDhwAt2C5YJxV_bFmH7JMT7-sJCIEPLPkRIOJUYe2Kg',
+            // SECURITY: Never use hardcoded API keys. Use server-side config or user-provided keys only.
+            apiKey: data.apiKey || '',
             model: data.apiModel || (provider === 'local' ? 'qwen3-coder-next:latest' : 'MiniMax-M2.7-highspeed'),
           };
           setLocalConfig(cloudConfig);
@@ -125,10 +126,12 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
         model: 'qwen3-coder-next:latest'
       });
     } else {
+      // SECURITY: Cloud preset no longer contains hardcoded API key.
+      // User must provide their own key, or it will be loaded from server-side config.
       setLocalConfig({
         provider: 'cloud',
         baseUrl: 'https://api.minimaxi.com/v1',
-        apiKey: 'sk-cp-q9pAztav67XjDz0H1rvF9bqP0u6Ejwrp4-bw7tZJo8-E2yCSTYCgJlePKkFe8GC1PWxIjxwfU2R5dDhwAt2C5YJxV_bFmH7JMT7-sJCIEPLPkRIOJUYe2Kg',
+        apiKey: '',
         model: 'MiniMax-M2.7-highspeed'
       });
     }

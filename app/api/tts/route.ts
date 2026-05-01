@@ -25,8 +25,10 @@ export async function POST(req: NextRequest) {
     tempFilePath = path.join(tempDir, fileName);
     const scriptPath = path.join(process.cwd(), 'scripts/tts.py');
 
-    // 使用 execFile 传递参数数组，避免 shell 解析和命令注入
-    await execFileAsync('python3', [scriptPath, safeText, tempFilePath]);
+    // 优先使用项目 venv 中的 python，回退到系统 python3
+    const venvPython = path.join(process.cwd(), '.venv/bin/python3');
+    const pythonBin = fs.existsSync(venvPython) ? venvPython : 'python3';
+    await execFileAsync(pythonBin, [scriptPath, safeText, tempFilePath]);
 
     const audioBuffer = fs.readFileSync(tempFilePath);
     fs.unlink(tempFilePath, () => {}); // 异步清理

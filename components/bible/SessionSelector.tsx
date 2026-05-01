@@ -5,6 +5,7 @@ import { MessageSquare, ChevronDown, Plus, X, Search, Edit, Trash2 } from 'lucid
 import { cn } from '@/lib/utils'
 import type { ChatSession } from '@/store/types'
 import { useTranslation } from '@/lib/i18n'
+import { formatDateClient } from '@/lib/locale'
 
 export interface SessionSelectorProps {
   sessions: ChatSession[]
@@ -125,7 +126,7 @@ export function SessionSelector({
                         {session.title || t('bible.unnamedSession')}
                       </div>
                       <div className="text-xs text-slate-400 mt-0.5">
-                        {new Date(session.updatedAt).toLocaleDateString('zh-CN', {
+                        {formatDateClient(new Date(session.updatedAt), {
                           month: 'short',
                           day: 'numeric',
                           hour: '2-digit',

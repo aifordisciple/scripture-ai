@@ -21,6 +21,7 @@ import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { useTranslation } from '@/lib/i18n';
+import { useToast } from '@/components/ui/toast';
 
 interface GroupPlanCreateDialogProps {
   churchId: string;
@@ -93,6 +94,7 @@ const PLAN_TEMPLATES = [
 
 export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDialogProps) {
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const { apiConfig } = useBibleStore();
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -132,7 +134,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       });
       const data = await res.json();
       if (data.error) {
-        alert(data.error);
+        addToast({ type: 'error', message: data.error });
       } else if (data.plan) {
         onSuccess(data.plan);
         setOpen(false);
@@ -140,7 +142,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       }
     } catch (error) {
       console.error("Failed to create plan:", error);
-      alert(t('group.createPlanFailed'));
+      addToast({ type: 'error', message: t('group.createPlanFailed') });
     } finally {
       setCreating(false);
     }
@@ -179,7 +181,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       });
       const data = await res.json();
       if (data.error) {
-        alert(data.error);
+        addToast({ type: 'error', message: data.error });
       } else if (data.plan) {
         onSuccess(data.plan);
         setOpen(false);
@@ -187,7 +189,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       }
     } catch (error) {
       console.error("Failed to create plan:", error);
-      alert(t('group.createPlanFailed'));
+      addToast({ type: 'error', message: t('group.createPlanFailed') });
     } finally {
       setCreating(false);
     }
@@ -201,7 +203,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       // Get the selected book info
       const selectedBook = BIBLE_BOOKS.find(b => b.id === manualStartBook);
       if (!selectedBook) {
-        alert(t('group.selectValidBook'));
+        addToast({ type: 'error', message: t('group.selectValidBook') });
         setCreating(false);
         return;
       }
@@ -262,7 +264,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       });
       const data = await res.json();
       if (data.error) {
-        alert(data.error);
+        addToast({ type: 'error', message: data.error });
       } else if (data.plan) {
         onSuccess(data.plan);
         setOpen(false);
@@ -270,7 +272,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
       }
     } catch (error) {
       console.error("Failed to create plan:", error);
-      alert(t('group.createPlanFailed'));
+      addToast({ type: 'error', message: t('group.createPlanFailed') });
     } finally {
       setCreating(false);
     }

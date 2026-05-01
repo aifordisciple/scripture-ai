@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, Star, PartyPopper, X, Download } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
+import { formatDateClient } from "@/lib/locale";
 
 interface PlanCompletionCelebrationProps {
   isOpen: boolean;
@@ -137,7 +138,7 @@ export function PlanCompletionCelebration({
     // Date
     ctx.font = '18px sans-serif';
     ctx.fillStyle = '#a16207';
-    const today = new Date().toLocaleDateString('zh-CN', {
+    const today = formatDateClient(new Date(), {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -203,7 +204,7 @@ export function PlanCompletionCelebration({
                       🎉 {t('group.congratulations')}
                     </h2>
                     <p className="text-lg text-amber-700 dark:text-amber-300 font-medium mb-4">
-                      {planName}
+                      {t('group.youCompletedPlan', { planName })}
                     </p>
                   </motion.div>
 

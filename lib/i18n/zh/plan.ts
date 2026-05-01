@@ -2,6 +2,7 @@ export const plan = {
   plan: {
     title: '读经计划',
     subtitle: '安排每日灵修，你可以同时进行多个计划。',
+    generatingDevotionals: '正在生成灵修导读...',
     myPlans: '我的计划',
     allPlans: '全部计划',
     continueReading: '继续今日阅读',

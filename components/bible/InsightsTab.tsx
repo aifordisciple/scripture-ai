@@ -13,6 +13,9 @@ import { useSession } from "next-auth/react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useTranslation } from "@/lib/i18n";
+import { getClientLocale } from "@/lib/locale";
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface PopulatedInsight {
   id: string;
@@ -33,6 +36,11 @@ export function InsightsTab() {
   const { data: session } = useSession();
   const { savedInsights, setSavedInsights, deleteSavedInsight, updateSavedInsight, tabs, addTab, setActiveTab } = useBibleStore();
   const { t } = useTranslation();
+  const { addToast } = useToast();
+
+  // ConfirmDialog state for delete confirmation
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -108,11 +116,19 @@ export function InsightsTab() {
   };
 
   // 删除收藏
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!confirm(t('bible.confirmDeleteInsight'))) return;
+    setPendingDeleteId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const executeDeleteInsight = async () => {
+    if (!pendingDeleteId) return;
+    const id = pendingDeleteId;
     deleteSavedInsight(id);
     await fetch(`/api/insights?id=${id}`, { method: 'DELETE' });
+    setShowDeleteConfirm(false);
+    setPendingDeleteId(null);
   };
 
   // 开始编辑
@@ -344,7 +360,7 @@ export function InsightsTab() {
                     {/* 时间 */}
                     {editingId !== item.id && (
                       <p className="text-[10px] text-muted-foreground/60 mt-2">
-                        {new Date(item.updatedAt || item.createdAt).toLocaleString('zh-CN')}
+                        {new Date(item.updatedAt || item.createdAt).toLocaleString(getClientLocale())}
                       </p>
                     )}
                   </div>
@@ -354,6 +370,16 @@ export function InsightsTab() {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title={t('common.confirm')}
+        description={t('bible.confirmDeleteInsight')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        variant="destructive"
+        onConfirm={executeDeleteInsight}
+      />
     </div>
   );
 }

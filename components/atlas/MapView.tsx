@@ -13,13 +13,13 @@ interface MapViewProps {
 export default function MapView({ selectedLocationId, onLocationSelect }: MapViewProps) {
   const { t } = useTranslation();
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markerGroupRef = useRef<any>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showLayers, setShowLayers] = useState(false);
   const [selectedLayer, setSelectedLayer] = useState('standard');
   const [loading, setLoading] = useState(true);
   const [locations, setLocations] = useState<any[]>([]);
-  const [markers, setMarkers] = useState<any[]>([]);
 
   const {
     mapCenter,
@@ -56,19 +56,17 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
     };
   }, []);
 
-  // 加载 Leaflet 地图
+  // 加载 Leaflet 地图（仅初始化一次）
   useEffect(() => {
-    if (!mapRef.current || map) return;
+    if (!mapRef.current || mapInstanceRef.current) return;
 
     let mapInstance: any;
     let markerGroup: any;
 
     async function initMap() {
       try {
-        // 动态导入 Leaflet
         const L = (await import('leaflet')).default;
 
-        // 修复 Leaflet 默认图标问题
         delete (L.Icon.Default.prototype as any)._getIconUrl;
         L.Icon.Default.mergeOptions({
           iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -76,7 +74,6 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
           shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
         });
 
-        // 需要 CSS
         if (!document.querySelector('link[href*="leaflet"]')) {
           const link = document.createElement('link');
           link.rel = 'stylesheet';
@@ -84,31 +81,22 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
           document.head.appendChild(link);
         }
 
-        // 初始化地图
-        const center = mapCenter || [31.7683, 35.2137]; // 默认中心：耶路撒冷
+        const center = mapCenter || [31.7683, 35.2137];
         mapInstance = L.map(mapRef.current!, {
           center: center as [number, number],
           zoom: 7,
           zoomControl: false,
         });
 
-        // 添加图层
         const standardLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; OpenStreetMap contributors',
         });
-
         standardLayer.addTo(mapInstance);
-        setMap(mapInstance);
 
-        // 创建标记组
         markerGroup = L.layerGroup().addTo(mapInstance);
+        markerGroupRef.current = markerGroup;
+        mapInstanceRef.current = mapInstance;
 
-        // 添加标记
-        if (locations.length > 0) {
-          addMarkers(L, mapInstance, markerGroup);
-        }
-
-        // 地图点击事件
         mapInstance.on('click', () => {
           setSelectedLocation(null);
           setSelectedLocationId(null);
@@ -126,64 +114,72 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
     return () => {
       if (mapInstance) {
         mapInstance.remove();
+        mapInstanceRef.current = null;
+        markerGroupRef.current = null;
       }
     };
-  }, [locations]);
+  }, []); // 仅初始化一次
 
-  // 添加标记
-  const addMarkers = (L: any, mapInstance: any, markerGroup: any) => {
-    markerGroup.clearLayers();
+  // 增量更新标记（locations 或 timelineYear 变化时）
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    const markerGroup = markerGroupRef.current;
+    if (!map || !markerGroup || locations.length === 0) return;
 
-    locations.forEach((location) => {
-      // 检查地点的时间范围是否与当前时间线年份匹配
-      if (timelineYear && location.yearStart && location.yearEnd) {
-        if (timelineYear < location.yearStart || timelineYear > location.yearEnd) {
-          return;
+    const updateMarkers = async () => {
+      const L = (await import('leaflet')).default;
+      markerGroup.clearLayers();
+
+      locations.forEach((location) => {
+        if (timelineYear && location.yearStart && location.yearEnd) {
+          if (timelineYear < location.yearStart || timelineYear > location.yearEnd) {
+            return;
+          }
         }
-      }
 
-      const marker = L.marker([location.latitude, location.longitude]);
-
-      // 弹出窗口
-      const popupContent = `
-        <div class="p-2">
-          <h3 class="font-semibold text-sm">${location.nameZh}</h3>
-          <p class="text-xs text-gray-500">${location.nameEn || ''}</p>
-          ${location.yearStart ? `<p class="text-xs text-gray-400">${location.yearStart < 0 ? t('atlas.eventYearBc', { year: Math.abs(location.yearStart) }) : t('atlas.eventYearAd', { year: location.yearStart })}</p>` : ''}
-        </div>
-      `;
-      marker.bindPopup(popupContent);
-
-      marker.on('click', () => {
-        onLocationSelect?.(location);
-        setSelectedLocation(location);
-        setSelectedLocationId(location.id);
+        const marker = L.marker([location.latitude, location.longitude]);
+        const popupContent = `
+          <div class="p-2">
+            <h3 class="font-semibold text-sm">${location.nameZh}</h3>
+            <p class="text-xs text-gray-500">${location.nameEn || ''}</p>
+            ${location.yearStart ? `<p class="text-xs text-gray-400">${location.yearStart < 0 ? t('atlas.eventYearBc', { year: Math.abs(location.yearStart) }) : t('atlas.eventYearAd', { year: location.yearStart })}</p>` : ''}
+          </div>
+        `;
+        marker.bindPopup(popupContent);
+        marker.on('click', () => {
+          onLocationSelect?.(location);
+          setSelectedLocation(location);
+          setSelectedLocationId(location.id);
+        });
+        markerGroup.addLayer(marker);
       });
+    };
 
-      markerGroup.addLayer(marker);
-    });
-  };
+    updateMarkers();
+  }, [locations, timelineYear, onLocationSelect, t, setSelectedLocation, setSelectedLocationId]);
 
   // 更新地图中心
   useEffect(() => {
+    const map = mapInstanceRef.current;
     if (map && mapCenter) {
       map.flyTo(mapCenter, 10, { duration: 1.5 });
     }
-  }, [map, mapCenter]);
+  }, [mapCenter]);
 
   // 选中地点高亮
   useEffect(() => {
+    const map = mapInstanceRef.current;
     if (!map || !selectedLocationId) return;
-    // 找到选中的地点并打开 popup
     const loc = locations.find((l: any) => l.id === selectedLocationId);
     if (loc) {
       map.flyTo([loc.latitude, loc.longitude], 12, { duration: 1 });
     }
-  }, [map, selectedLocationId, locations]);
+  }, [selectedLocationId, locations]);
 
   // 全屏切换
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
+    const map = mapInstanceRef.current;
     if (map) {
       setTimeout(() => map.invalidateSize(), 300);
     }
@@ -192,6 +188,7 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
   // 图层切换
   const handleLayerChange = async (layer: string) => {
     setSelectedLayer(layer);
+    const map = mapInstanceRef.current;
     if (!map) return;
 
     try {
@@ -217,7 +214,7 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
           options.attribution = '&copy; OpenStreetMap contributors';
       }
 
-      L.tileLayer(tileUrl, options).addTo(map);
+      L.tileLayer(tileUrl, options).addTo(mapInstanceRef.current!);
     } catch (error) {
       console.error('Failed to switch layer:', error);
     }
@@ -239,13 +236,13 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
       {/* 地图控件 */}
       <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
         <button
-          onClick={() => map?.zoomIn()}
+          onClick={() => mapInstanceRef.current?.zoomIn()}
           className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
         <button
-          onClick={() => map?.zoomOut()}
+          onClick={() => mapInstanceRef.current?.zoomOut()}
           className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           <Minus className="w-5 h-5 text-gray-600 dark:text-gray-300" />

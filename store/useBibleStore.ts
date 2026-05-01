@@ -79,8 +79,11 @@ export const useBibleStore = create<StoreState>()(
       partialize: (state) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { sessions, currentSessionId, currentAiRequest, aiQueue, ...rest } = state;
+        // 安全：apiKey 不持久化到 localStorage，仅保存 hasApiKey 标志
+        const safeApiConfig = { ...rest.apiConfig, apiKey: '' };
         return {
           ...rest,
+          apiConfig: safeApiConfig,
           // UI状态重置
           isAuthOpen: false,
           isShareOpen: false,

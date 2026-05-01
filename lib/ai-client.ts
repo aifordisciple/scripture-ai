@@ -5,6 +5,7 @@
 
 import { createOpenAI } from '@ai-sdk/openai';
 import { auth } from '@/lib/auth';
+import { ChatError, ChatErrorCode } from '@/lib/errors/chat-errors';
 
 // Types
 export interface AIConfig {
@@ -50,7 +51,7 @@ export async function extractApiConfig(req: Request): Promise<{ apiConfig?: AICo
   } catch (parseError) {
     // [P1-6修复] 返回错误标记而非静默返回空body
     console.error('[AI Client] Failed to parse request body:', parseError);
-    return { body: {}, error: '请求体解析失败' };
+    return { body: {}, error: 'Failed to parse request body' };
   }
 }
 
@@ -215,10 +216,29 @@ export async function getAIModel(requestConfig?: AIConfig, userId?: string): Pro
     const attemptRequest = async (attempt: number): Promise<Response> => {
       const bodyStr = makeBody(init?.body);
 
-      const response = await fetch(url, {
-        ...init,
-        body: bodyStr,
-      });
+      // P1-9: Add 30s timeout with AbortController
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          ...init,
+          body: bodyStr,
+          signal: controller.signal,
+        });
+      } catch (fetchError: unknown) {
+        clearTimeout(timeoutId);
+        // Convert to ChatError for better error handling
+        if (fetchError instanceof DOMException && fetchError.name === 'AbortError') {
+          throw new ChatError(ChatErrorCode.TIMEOUT_ERROR, 'Request timed out after 30s', {
+            recoverable: true,
+            retryAction: 'retry',
+          });
+        }
+        throw ChatError.fromError(fetchError, ChatErrorCode.NETWORK_ERROR);
+      }
+      clearTimeout(timeoutId);
 
       // 429: 自动重试（带指数退避）
       if (response.status === 429 && attempt < MAX_RETRIES) {

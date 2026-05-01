@@ -4,6 +4,10 @@
 import { useEffect, useState } from 'react';
 import { Search, ChevronLeft, ChevronRight, Shield, User, MoreVertical, X, Ban, CheckCircle, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDateClient } from '@/lib/locale';
+import { useTranslation } from '@/lib/i18n';
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -44,6 +48,8 @@ interface UsersResponse {
 }
 
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
+  const { addToast } = useToast();
   const [data, setData] = useState<UsersResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -77,7 +83,7 @@ export default function AdminUsersPage() {
       setData(json);
     } catch (err) {
       console.error(err);
-      setError('加载用户列表失败，请刷新页面重试');
+      setError(t('admin.loadUsersFailed'));
     } finally {
       setLoading(false);
     }
@@ -102,7 +108,7 @@ export default function AdminUsersPage() {
       fetchUsers();
     } catch (err) {
       console.error(err);
-      alert('更新失败');
+      addToast({ type: 'error', message: t('admin.updateFailed') });
     } finally {
       setUpdating(null);
     }
@@ -134,7 +140,7 @@ export default function AdminUsersPage() {
       fetchUsers();
     } catch (err) {
       console.error(err);
-      alert('禁言失败');
+      addToast({ type: 'error', message: t('admin.muteFailed') });
     } finally {
       setUpdating(null);
     }
@@ -153,7 +159,7 @@ export default function AdminUsersPage() {
       fetchUsers();
     } catch (err) {
       console.error(err);
-      alert('解除禁言失败');
+      addToast({ type: 'error', message: t('admin.unmuteFailed') });
     } finally {
       setUpdating(null);
     }
@@ -172,14 +178,14 @@ export default function AdminUsersPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <div className="text-red-500 text-lg">{error}</div>
-        <button onClick={fetchUsers} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">重试</button>
+        <button onClick={fetchUsers} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{t('admin.retry')}</button>
       </div>
     );
   }
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <h1 className="text-xl md:text-2xl font-bold text-gray-900">用户管理</h1>
+      <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('admin.userManagement')}</h1>
 
       {/* 搜索和筛选 */}
       <div className="bg-white rounded-lg shadow p-3 md:p-4">
@@ -188,7 +194,7 @@ export default function AdminUsersPage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="搜索用户名或邮箱..."
+              placeholder={t('admin.searchNameOrEmail')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -200,15 +206,16 @@ export default function AdminUsersPage() {
               onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
               className="flex-1 md:flex-none px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <option value="">全部角色</option>
-              <option value="user">普通用户</option>
-              <option value="admin">管理员</option>
+              <option value="">{t('admin.allRoles')}</option>
+              <option value="user">{t('admin.userRole')}</option>
+              <option value="admin">{t('admin.adminRole')}</option>
             </select>
             <button
               type="submit"
               className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 whitespace-nowrap"
             >
-              搜索
+              {t('admin.search')}
+
             </button>
           </div>
         </form>
@@ -220,12 +227,12 @@ export default function AdminUsersPage() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">角色</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">统计</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">注册时间</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.user')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.role')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.stats')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.registered')}</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -241,7 +248,7 @@ export default function AdminUsersPage() {
                         )}
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{user.name || '未设置'}</div>
+                        <div className="text-sm font-medium text-gray-900">{user.name || t('admin.notSet')}</div>
                         <div className="text-sm text-gray-500">{user.email}</div>
                       </div>
                     </div>
@@ -253,28 +260,28 @@ export default function AdminUsersPage() {
                         ? "bg-purple-100 text-purple-700"
                         : "bg-gray-100 text-gray-700"
                     )}>
-                      {user.role === 'admin' ? '管理员' : '用户'}
+                      {user.role === 'admin' ? t('admin.adminRole') : t('admin.userRole')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {user.isMuted ? (
                       <div className="flex items-center gap-1">
                         <Ban className="w-4 h-4 text-red-500" />
-                        <span className="text-xs text-red-600">已禁言</span>
+                        <span className="text-xs text-red-600">{t('admin.muted')}</span>
                       </div>
                     ) : (
-                      <span className="text-xs text-green-600">正常</span>
+                      <span className="text-xs text-green-600">{t('admin.normal')}</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex gap-3">
-                      <span title="高亮">{user._count.highlights} 高亮</span>
-                      <span title="笔记">{user._count.notes} 笔记</span>
-                      <span title="小组">{user._count.churchMemberships} 小组</span>
+                      <span title={t('admin.highlights')}>{user._count.highlights} {t('admin.highlights')}</span>
+                      <span title={t('admin.notes')}>{user._count.notes} {t('admin.notes')}</span>
+                      <span title={t('admin.groups')}>{user._count.churchMemberships} {t('admin.groups')}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(user.createdAt).toLocaleDateString('zh-CN')}
+                    {formatDateClient(new Date(user.createdAt))}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
@@ -285,7 +292,7 @@ export default function AdminUsersPage() {
                           className="px-3 py-1 rounded text-sm text-green-600 hover:bg-green-50 disabled:opacity-50"
                         >
                           <CheckCircle className="w-4 h-4 inline mr-1" />
-                          解除禁言
+                          {t('admin.unmute')}
                         </button>
                       ) : (
                         <button
@@ -294,7 +301,7 @@ export default function AdminUsersPage() {
                           className="px-3 py-1 rounded text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
                         >
                           <Ban className="w-4 h-4 inline mr-1" />
-                          禁言
+                          {t('admin.mute')}
                         </button>
                       )}
                       <button
@@ -308,7 +315,7 @@ export default function AdminUsersPage() {
                           updating === user.id && "opacity-50 cursor-not-allowed"
                         )}
                       >
-                        {user.role === 'admin' ? '取消管理员' : '设为管理员'}
+                        {user.role === 'admin' ? t('admin.removeAdmin') : t('admin.setAdmin')}
                       </button>
                     </div>
                   </td>
@@ -333,7 +340,7 @@ export default function AdminUsersPage() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-medium text-gray-900 truncate">{user.name || '未设置'}</div>
+                  <div className="font-medium text-gray-900 truncate">{user.name || t('admin.notSet')}</div>
                   <div className="text-sm text-gray-500 truncate">{user.email}</div>
                 </div>
               </div>
@@ -344,25 +351,25 @@ export default function AdminUsersPage() {
                     ? "bg-purple-100 text-purple-700"
                     : "bg-gray-100 text-gray-700"
                 )}>
-                  {user.role === 'admin' ? '管理员' : '用户'}
+                  {user.role === 'admin' ? t('admin.adminRole') : t('admin.userRole')}
                 </span>
                 {user.isMuted && (
                   <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
-                    已禁言
+                    {t('admin.muted')}
                   </span>
                 )}
               </div>
             </div>
 
             <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
-              <span>{user._count.highlights} 高亮</span>
-              <span>{user._count.notes} 笔记</span>
-              <span>{user._count.churchMemberships} 小组</span>
+              <span>{user._count.highlights} {t('admin.highlights')}</span>
+              <span>{user._count.notes} {t('admin.notes')}</span>
+              <span>{user._count.churchMemberships} {t('admin.groups')}</span>
             </div>
 
             <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2">
               <div className="text-xs text-gray-400">
-                注册: {new Date(user.createdAt).toLocaleDateString('zh-CN')}
+                {t('admin.registeredColon')} {formatDateClient(new Date(user.createdAt))}
               </div>
               <div className="flex gap-2">
                 {user.isMuted ? (
@@ -371,7 +378,7 @@ export default function AdminUsersPage() {
                     disabled={updating === user.id}
                     className="px-3 py-1.5 rounded text-sm font-medium text-green-600 bg-green-50 hover:bg-green-100 disabled:opacity-50"
                   >
-                    解除禁言
+                    {t('admin.unmute')}
                   </button>
                 ) : (
                   <button
@@ -379,7 +386,7 @@ export default function AdminUsersPage() {
                     disabled={updating === user.id}
                     className="px-3 py-1.5 rounded text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 disabled:opacity-50"
                   >
-                    禁言
+                    {t('admin.mute')}
                   </button>
                 )}
                 <button
@@ -393,7 +400,7 @@ export default function AdminUsersPage() {
                     updating === user.id && "opacity-50 cursor-not-allowed"
                   )}
                 >
-                  {user.role === 'admin' ? '取消管理员' : '设为管理员'}
+                  {user.role === 'admin' ? t('admin.removeAdmin') : t('admin.setAdmin')}
                 </button>
               </div>
             </div>
@@ -405,7 +412,7 @@ export default function AdminUsersPage() {
       {data && data.pagination.totalPages > 1 && (
         <div className="bg-white rounded-lg shadow px-4 py-3 flex items-center justify-between border-t border-gray-200">
           <div className="text-sm text-gray-700">
-            共 {data.pagination.total} 条
+            {t('admin.totalCount', { count: data.pagination.total })}
           </div>
           <div className="flex gap-2">
             <button
@@ -433,18 +440,18 @@ export default function AdminUsersPage() {
       <Dialog open={muteDialogOpen} onOpenChange={setMuteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>禁言用户</DialogTitle>
+            <DialogTitle>{t('admin.muteUser')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-gray-500">
-              确定要禁言用户 <strong>{muteUser?.name || muteUser?.email}</strong> 吗？禁言后该用户将无法发送私信或回复消息。
+              {t('admin.confirmMuteUser')} <strong>{muteUser?.name || muteUser?.email}</strong> {t('admin.muteUserConsequence')}
             </p>
             <div>
-              <label className="text-sm font-medium">禁言原因</label>
+              <label className="text-sm font-medium">{t('admin.muteReason')}</label>
               <Textarea
                 value={muteReason}
                 onChange={(e) => setMuteReason(e.target.value)}
-                placeholder="请输入禁言原因（可选）"
+                placeholder={t('admin.muteReasonPlaceholder')}
                 rows={3}
                 className="mt-1"
               />
@@ -452,14 +459,14 @@ export default function AdminUsersPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setMuteDialogOpen(false)}>
-              取消
+              {t('admin.cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={handleMuteUser}
               disabled={updating === muteUser?.id}
             >
-              {updating === muteUser?.id ? '处理中...' : '确认禁言'}
+              {updating === muteUser?.id ? t('admin.processing') : t('admin.confirmMute')}
             </Button>
           </DialogFooter>
         </DialogContent>

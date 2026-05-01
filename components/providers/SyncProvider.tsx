@@ -42,8 +42,8 @@ export function SyncProvider() {
         })
         .catch((err) => {
           console.error("Sync failed", err);
-          setSyncError(t('common.tabs.syncFailedRetry'));
-          addToast({ type: 'error', message: t('common.tabs.syncFailedNetwork') });
+          setSyncError(t('common.syncFailedRetry'));
+          addToast({ type: 'error', message: t('common.syncFailedNetwork') });
         })
         .finally(() => {
           setIsSyncing(false);
@@ -113,8 +113,8 @@ export function SyncProvider() {
       }
     } catch (err) {
       console.error("Sync to server failed", err);
-      setSyncError(t('common.tabs.syncToServerFailed'));
-      addToast({ type: 'error', message: t('common.tabs.syncFailedRetry') });
+      setSyncError(t('common.syncToServerFailed'));
+      addToast({ type: 'error', message: t('common.syncFailedRetry') });
     } finally {
       setIsSyncing(false);
     }

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { formatDateClient } from "@/lib/locale";
 import { BIBLE_BOOKS } from "@/lib/constants";
 
 interface Activity {
@@ -190,7 +191,7 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
     if (diffMins < 60) return t('group.minutesAgo', { count: diffMins });
     if (diffHours < 24) return t('group.hoursAgo', { count: diffHours });
     if (diffDays < 7) return t('group.daysAgo', { count: diffDays });
-    return date.toLocaleDateString("zh-CN");
+    return formatDateClient(date);
   };
 
   if (loading) {
@@ -278,14 +279,14 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
                     <Heart className="w-3 h-3 inline mr-1 text-red-500 fill-current" />
                     {activity.likes.slice(0, 3).map((l, i) => (
                       <span key={l.id}>
-                        {l.userName || "匿名"}
+                        {l.userName || t('group.anonymous')}
                         {i < Math.min(activity.likes.length, 3) - 1 && "、"}
                       </span>
                     ))}
                     {activity.likes.length > 3 && (
-                      <span> 等 {activity.likeCount} 人</span>
+                      <span> {t('group.andOthers', { count: activity.likeCount })}</span>
                     )}
-                    <span> 觉得很棒</span>
+                    <span> {t('group.feelsGreat')}</span>
                   </div>
                 )}
               </div>

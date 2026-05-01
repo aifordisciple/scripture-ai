@@ -83,6 +83,7 @@ export function Sidebar() {
          <div className="flex items-center gap-2 px-6 mb-3 opacity-60">
            <div className="h-[1px] flex-1 bg-border"></div>
            <h3 className="text-[11px] font-bold text-foreground uppercase tracking-widest">{title}</h3>
+           <span className="text-[10px] text-muted-foreground">{filtered.length}</span>
            <div className="h-[1px] flex-1 bg-border"></div>
          </div>
          
@@ -123,7 +124,7 @@ export function Sidebar() {
                   <div 
                     className={cn(
                       "overflow-hidden transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)", 
-                      isExpanded ? "max-h-[800px] opacity-100 mt-2 mb-2" : "max-h-0 opacity-0 m-0"
+                      isExpanded ? "max-h-[min(800px,70vh)] opacity-100 mt-2 mb-2" : "max-h-0 opacity-0 m-0"
                     )}
                   >
                     <div className="grid grid-cols-5 gap-2 p-3 bg-secondary/40 dark:bg-black/20 rounded-2xl mx-1 border border-border/50">
@@ -190,6 +191,21 @@ export function Sidebar() {
       <div className="flex-1 overflow-y-auto no-scrollbar pt-6 pb-28">
          {renderBookList(oldTestament, t('sidebar.oldTestament'))}
          {renderBookList(newTestament, t('sidebar.newTestament'))}
+
+         {/* 搜索无结果提示 */}
+         {searchQuery && !oldTestament.some(b => {
+           const displayName = getBookDisplayName(b.id, locale);
+           const query = searchQuery.toLowerCase();
+           return displayName.toLowerCase().includes(query) || b.name.toLowerCase().includes(query) || (b.nameEn && b.nameEn.toLowerCase().includes(query)) || b.id.toLowerCase().includes(query);
+         }) && !newTestament.some(b => {
+           const displayName = getBookDisplayName(b.id, locale);
+           const query = searchQuery.toLowerCase();
+           return displayName.toLowerCase().includes(query) || b.name.toLowerCase().includes(query) || (b.nameEn && b.nameEn.toLowerCase().includes(query)) || b.id.toLowerCase().includes(query);
+         }) && (
+           <div className="text-center text-muted-foreground text-sm py-8">
+             {t('sidebar.noSearchResults')}
+           </div>
+         )}
          
          {/* 底部留白插画或签名空间 */}
          {searchQuery === "" && (

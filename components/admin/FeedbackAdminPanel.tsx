@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from '@/lib/i18n';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   MessageSquare,
   Search,
@@ -64,6 +65,8 @@ export default function FeedbackAdminPanel() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const pageSize = 10;
 
   const fetchFeedbacks = useCallback(async () => {
@@ -109,7 +112,14 @@ export default function FeedbackAdminPanel() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('adminFeedback.confirmDelete'))) return;
+    setPendingDeleteId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    const id = pendingDeleteId;
+    if (!id) return;
+    setShowDeleteConfirm(false);
     try {
       const res = await fetch(`/api/feedback/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -217,6 +227,7 @@ export default function FeedbackAdminPanel() {
   };
 
   return (
+    <>
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -509,5 +520,13 @@ export default function FeedbackAdminPanel() {
         </div>
       )}
     </div>
+    <ConfirmDialog
+      open={showDeleteConfirm}
+      onOpenChange={setShowDeleteConfirm}
+      title={t('common.delete')}
+      description={t('adminFeedback.confirmDelete')}
+      onConfirm={confirmDelete}
+    />
+    </>
   );
 }

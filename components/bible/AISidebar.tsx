@@ -27,7 +27,8 @@ export function AISidebar() {
     sidebarWidth, setSidebarWidth,
     setAiGenerating,
     // 队列相关
-    currentAiRequest, aiQueue, completeCurrentRequest, failCurrentRequest,
+    currentAiRequest, aiQueue, completeCurrentRequest, failCurrentRequest, cancelAIRequest,
+    shouldAbortStream, clearAbortStream, startProcessingNext,
     // 会话管理
     currentSessionId, setCurrentSessionId, sessions, setSessions, addSession, updateSession, deleteSession, replaceSessionId,
     sessionStatus, sessionError, setSessionStatus, setSessionError,
@@ -122,12 +123,18 @@ export function AISidebar() {
     streamProtocol: 'data',
     onError: (error) => {
       console.error("AI Error:", error)
-      setAiGenerating(false)
-      failCurrentRequest(error.message || t('ai.aiGenerateFailed'))
+      // 延迟到下一个事件循环，避免在useChat的渲染周期中触发Zustand set()导致React error #185
+      setTimeout(() => {
+        setAiGenerating(false)
+        failCurrentRequest(error.message || t('ai.aiGenerateFailed'))
+      }, 0)
     },
     onFinish: () => {
-      setAiGenerating(false)
-      completeCurrentRequest()
+      // 延迟到下一个事件循环，避免在useChat的渲染周期中触发Zustand set()导致React error #185
+      setTimeout(() => {
+        setAiGenerating(false)
+        completeCurrentRequest()
+      }, 0)
     }
   })
 
@@ -449,7 +456,7 @@ export function AISidebar() {
     addSavedInsight(insight)
   }, [aiRequestTrigger, addSavedInsight])
 
-  // 清空对话 - [P3-1修复] 使用 toast 确认而非原生 confirm()
+  // 清空当前会话对话 - 仅删除当前 session 的历史
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const handleClearChat = async () => {
     setShowClearConfirm(true)
@@ -457,7 +464,10 @@ export function AISidebar() {
   const confirmClearChat = async () => {
     setShowClearConfirm(false)
     setMessages([])
-    await fetch('/api/chat/history', { method: 'DELETE' })
+    // 仅删除当前会话的历史，而非全部
+    if (currentSessionId && !currentSessionId.startsWith('temp-')) {
+      await fetch(`/api/chat/history?sessionId=${currentSessionId}`, { method: 'DELETE' })
+    }
   }
 
   // [P1-1修复] 组件卸载时中止AI请求，防止内存泄漏和过期状态更新
@@ -465,15 +475,36 @@ export function AISidebar() {
     return () => {
       if (isLoading) {
         stop()
+        if (currentAiRequest) {
+          cancelAIRequest(currentAiRequest.id)
+        }
         setAiGenerating(false)
       }
     }
-  }, [isLoading, stop, setAiGenerating])
+  }, [isLoading, stop, setAiGenerating, currentAiRequest, cancelAIRequest])
 
   // AI 生成状态
+  // 使用setTimeout避免在effect执行期间触发连锁Zustand set()导致React error #185
   useEffect(() => {
-    setAiGenerating(isLoading)
-  }, [isLoading, setAiGenerating])
+    if (isLoading) {
+      setTimeout(() => setAiGenerating(true), 0)
+    } else if (!currentAiRequest || currentAiRequest.status !== 'processing') {
+      setTimeout(() => setAiGenerating(false), 0)
+    }
+  }, [isLoading, setAiGenerating, currentAiRequest])
+
+  // 处理流中止请求（从MagicBall等外部组件触发的取消）
+  useEffect(() => {
+    if (!shouldAbortStream) return;
+    // 全部延迟到下一个事件循环，避免在effect执行期间触发连锁状态更新导致React error #185
+    setTimeout(() => {
+      stop();
+      clearAbortStream();
+      if (aiQueue.length > 0) {
+        startProcessingNext();
+      }
+    }, 0);
+  }, [shouldAbortStream, stop, aiQueue, startProcessingNext, clearAbortStream])
 
   // 自动滚动
   useEffect(() => {
@@ -529,15 +560,20 @@ export function AISidebar() {
         const displayQuote = aiRequestTrigger.content.split('\n').map(line => `> ${line}`).join('\n')
         const enrichedPrompt = `**📖 ${reference}**\n\n${displayQuote}\n\n**${t('ai.myRequest')}**：${aiRequestTrigger.prompt}`
 
-        append(
-          { role: 'user', content: enrichedPrompt },
-          { body: { sessionId } }
-        )
+        // 延迟append，避免在effect执行期间触发useChat的SWR mutate导致React error #185
+        setTimeout(() => {
+          append(
+            { role: 'user', content: enrichedPrompt },
+            { body: { sessionId } }
+          )
+        }, 0)
       } catch (error) {
         // [P0-1修复] 确保所有错误路径都释放AI生成状态，避免队列永久阻塞
         console.error('AI request trigger error:', error)
-        setAiGenerating(false)
-        failCurrentRequest(error instanceof Error ? error.message : t('ai.aiGenerateFailed'))
+        setTimeout(() => {
+          setAiGenerating(false)
+          failCurrentRequest(error instanceof Error ? error.message : t('ai.aiGenerateFailed'))
+        }, 0)
       }
     }
 
@@ -642,10 +678,11 @@ export function AISidebar() {
           isResizing && "transition-none"
         )}
       >
-        {/* 调整大小手柄 */}
+        {/* 调整大小手柄 — 支持鼠标和触摸 */}
         <div
           onMouseDown={startResizing}
-          className="hidden md:block absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-400/50 transition-colors z-50 group"
+          onTouchStart={startResizing}
+          className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-400/50 transition-colors z-50 group"
         >
           <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-slate-200 dark:bg-slate-700 rounded group-hover:bg-blue-500 transition-colors" />
         </div>
@@ -860,7 +897,14 @@ export function AISidebar() {
               handleInputChange(event)
             }}
             onSubmit={handleFormSubmit}
-            onStop={stop}
+            onStop={() => {
+              // 统一通过cancelAIRequest处理，shouldAbortStream effect会调用stop()并推进队列
+              if (currentAiRequest) {
+                cancelAIRequest(currentAiRequest.id)
+              } else {
+                stop()
+              }
+            }}
           />
         </div>
 

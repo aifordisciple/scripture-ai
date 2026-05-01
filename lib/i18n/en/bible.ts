@@ -258,6 +258,8 @@ export const bible = {
 
     // BibleHeatmap
     heatmapTooltip: '{bookName} Ch. {chapter} : {weight} interactions',
+    heatmapLess: 'Less',
+    heatmapMore: 'More',
 
     // BookGrid
     noMatchingBooks: 'No matching books',

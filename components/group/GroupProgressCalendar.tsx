@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Calendar, CheckCircle2, Circle, X } from "lu
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/lib/i18n";
+import { formatDateClient } from "@/lib/locale";
 
 interface GroupProgressCalendarProps {
   churchId: string;
@@ -148,7 +149,7 @@ export function GroupProgressCalendar({
     setCurrentViewMonth({ year: now.getFullYear(), month: now.getMonth() });
   };
 
-  const monthName = new Date(currentViewMonth.year, currentViewMonth.month).toLocaleDateString('zh-CN', {
+  const monthName = formatDateClient(new Date(currentViewMonth.year, currentViewMonth.month), {
     year: 'numeric',
     month: 'long'
   });
@@ -157,6 +158,16 @@ export function GroupProgressCalendar({
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="py-8 flex items-center justify-center">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

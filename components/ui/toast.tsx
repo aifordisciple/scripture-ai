@@ -82,7 +82,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       <button
         onClick={() => onRemove(toast.id)}
         className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-        aria-label="关闭提示"
+        aria-label="Close notification"
       >
         <X className="w-4 h-4" />
       </button>
@@ -104,7 +104,7 @@ export function ToastContainer({ className }: ToastContainerProps) {
         className
       )}
       aria-live="polite"
-      aria-label="通知"
+      aria-label="Notifications"
     >
       <AnimatePresence mode="popLayout">
         {toasts.map((toast) => (

@@ -154,6 +154,8 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
   }),
   isAiGenerating: false,
   setAiGenerating: (isAiGenerating) => set({ isAiGenerating }),
+  shouldAbortStream: false,
+  clearAbortStream: () => set({ shouldAbortStream: false }),
 
   // [新增] 会话状态机 - 简化状态管理
   sessionStatus: 'idle',
@@ -179,7 +181,7 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
   // 入队方法：如果无当前任务则立即开始，否则加入队列
   // [P0-2修复] 添加去重检查，防止重复请求入队
   enqueueAI: (prompt, content, context, ref) => {
-    const { currentAiRequest, aiQueue } = get();
+    const { currentAiRequest, aiQueue, isAiOpen } = get();
 
     // 去重：检查队列中是否已有相同prompt的请求
     const isDuplicate = aiQueue.some(item => item.prompt === prompt && item.content === content)
@@ -200,11 +202,17 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
     if (!currentAiRequest || currentAiRequest.status === 'completed' || currentAiRequest.status === 'error') {
       set({
         currentAiRequest: { ...newItem, status: 'processing' },
-        aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() } // 兼容旧代码
+        aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() }, // 兼容旧代码
+        // 自动打开AI侧边栏，避免isAiOpen与aiRequestTrigger的竞态条件
+        ...(!isAiOpen ? { isAiOpen: true } : {})
       });
     } else {
       // 有任务进行中，加入队列
-      set({ aiQueue: [...get().aiQueue, newItem] });
+      set({
+        aiQueue: [...get().aiQueue, newItem],
+        // 自动打开AI侧边栏
+        ...(!isAiOpen ? { isAiOpen: true } : {})
+      });
     }
   },
 
@@ -213,13 +221,21 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
     const { currentAiRequest, aiQueue } = get();
 
     if (currentAiRequest?.id === id) {
-      // 取消当前处理的请求，开始下一个
-      set({
-        currentAiRequest: { ...currentAiRequest, status: 'cancelled' },
-        isAiGenerating: false
-      });
-      // 延迟触发下一个
-      setTimeout(() => get().startProcessingNext(), 100);
+      if (aiQueue.length > 0) {
+        // 有排队项：标记取消 + 请求中止流，保持isAiGenerating避免动画抖动
+        set({
+          currentAiRequest: { ...currentAiRequest, status: 'cancelled' },
+          shouldAbortStream: true,
+          isAiGenerating: true
+        });
+      } else {
+        // 无排队项：标记取消 + 请求中止流
+        set({
+          currentAiRequest: { ...currentAiRequest, status: 'cancelled' },
+          shouldAbortStream: true,
+          isAiGenerating: false
+        });
+      }
     } else {
       // 从队列中移除
       set({ aiQueue: aiQueue.filter(item => item.id !== id) });

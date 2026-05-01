@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { formatDateClient } from "@/lib/locale";
+import { useToast } from '@/components/ui/toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Member {
   id: string;
@@ -46,11 +49,14 @@ interface MemberManagerProps {
 
 export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: MemberManagerProps) {
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
   const [disbandOpen, setDisbandOpen] = useState(false);
   const [disbanding, setDisbanding] = useState(false);
+  const [showKickConfirm, setShowKickConfirm] = useState(false);
+  const [pendingKickAction, setPendingKickAction] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     fetchMembers();
@@ -72,27 +78,28 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
   };
 
   const kickMember = async (userId: string) => {
-    if (!confirm(t('group.confirmKickMember'))) return;
-
-    setProcessing(userId);
-    try {
-      const res = await fetch(`/api/church/${churchId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "kick", targetUserId: userId })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setMembers(prev => prev.filter(m => m.userId !== userId));
-      } else {
-        alert(data.error || t('group.operationFailed'));
+    setPendingKickAction(() => async () => {
+      setProcessing(userId);
+      try {
+        const res = await fetch(`/api/church/${churchId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "kick", targetUserId: userId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setMembers(prev => prev.filter(m => m.userId !== userId));
+        } else {
+          addToast({ type: 'error', message: data.error || t('group.operationFailed') });
+        }
+      } catch (error) {
+        console.error("Failed to kick member:", error);
+        addToast({ type: 'error', message: t('group.operationFailedRetry') });
+      } finally {
+        setProcessing(null);
       }
-    } catch (error) {
-      console.error("Failed to kick member:", error);
-      alert(t('group.operationFailedRetry'));
-    } finally {
-      setProcessing(null);
-    }
+    });
+    setShowKickConfirm(true);
   };
 
   const setRole = async (userId: string, role: string) => {
@@ -109,11 +116,11 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
           m.userId === userId ? { ...m, role } : m
         ));
       } else {
-        alert(data.error || t('group.operationFailed'));
+        addToast({ type: 'error', message: data.error || t('group.operationFailed') });
       }
     } catch (error) {
       console.error("Failed to set role:", error);
-      alert(t('group.operationFailedRetry'));
+      addToast({ type: 'error', message: t('group.operationFailedRetry') });
     } finally {
       setProcessing(null);
     }
@@ -132,18 +139,18 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
         setDisbandOpen(false);
         onGroupDisbanded?.();
       } else {
-        alert(data.error || t('group.disbandFailed'));
+        addToast({ type: 'error', message: data.error || t('group.disbandFailed') });
       }
     } catch (error) {
       console.error("Failed to disband group:", error);
-      alert(t('group.disbandFailedRetry'));
+      addToast({ type: 'error', message: t('group.disbandFailedRetry') });
     } finally {
       setDisbanding(false);
     }
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("zh-CN");
+    return formatDateClient(new Date(dateStr));
   };
 
   const getRoleBadge = (role: string) => {
@@ -178,6 +185,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
   }
 
   return (
+    <>
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
@@ -319,5 +327,16 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
         )}
       </CardContent>
     </Card>
+      <ConfirmDialog
+        open={showKickConfirm}
+        onOpenChange={setShowKickConfirm}
+        title={t('group.removeMember')}
+        description={t('group.confirmKickMember')}
+        onConfirm={() => {
+          pendingKickAction?.();
+          setShowKickConfirm(false);
+        }}
+      />
+    </>
   );
 }

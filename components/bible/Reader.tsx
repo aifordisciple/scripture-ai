@@ -358,7 +358,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         </h1>
                     </div>
 
-                    <div className="space-y-1 md:space-y-2">
+                    <div className="space-y-0.5 md:space-y-2">
                     {renderList.map((verseNum) => {
                         const entry = verseMap.get(verseNum)!;
                         const cuvVerse = entry.CUV;
@@ -385,15 +385,15 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                             )}
                         >
                             <span
-                              className={cn("font-sans font-semibold mr-4 select-none shrink-0 mt-[0.3em] transition-opacity duration-300", isSelected ? "text-primary opacity-100" : "text-foreground/30 group-hover/verse:text-foreground/50")}
-                              style={{ fontSize: fontSize * 0.55 }}
+                              className={cn("font-sans font-semibold mr-4 select-none shrink-0 mt-[0.3em] transition-opacity duration-300", isSelected ? "text-primary opacity-100" : "text-foreground/50 group-hover/verse:text-foreground/70")}
+                              style={{ fontSize: Math.max(fontSize * 0.55, 10) }}
                             >
                                 {verseNum}
                             </span>
 
                             <div className="flex-1 min-w-0">
                                 <div
-                                  className={cn("font-serif tracking-wide transition-colors text-justify", isSelected ? "text-foreground font-medium" : "text-foreground/90")}
+                                  className={cn("font-serif tracking-wide transition-colors text-start", isSelected ? "text-foreground font-medium" : "text-foreground/90")}
                                   style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
                                 >
                                     {mainVerse.content}
@@ -405,7 +405,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                                 )}
                             </div>
 
-                            {/* [新增] AI 解读快捷按钮 - 悬浮显示 */}
+                            {/* [新增] AI 解读快捷按钮 - 仅桌面端悬浮显示 */}
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -415,7 +415,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                                     enqueueAI(t('reader.aiInterpretPrompt'), content, context, ref);
                                     useBibleStore.getState().setAiOpen(true);
                                 }}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/verse:opacity-100 transition-all duration-200 p-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-500 dark:text-blue-400 hover:scale-110 active:scale-95"
+                                className="hidden md:block absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/verse:opacity-100 transition-all duration-200 p-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-500 dark:text-blue-400 hover:scale-110 active:scale-95"
                                 title={t('reader.aiInterpret')}
                             >
                                 <Sparkles className="w-3.5 h-3.5" />

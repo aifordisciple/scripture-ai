@@ -1,0 +1,31 @@
+// lib/i18n/en/dashboard.ts
+const dashboard = {
+  title: 'Personal Devotional Map',
+  backToReading: 'Back to Reading',
+  totalReadingDays: 'Total Reading Days',
+  totalChapters: 'Total Chapters Read',
+  currentStreak: 'Current Streak',
+  longestStreak: 'Longest Streak',
+  recentActivity: 'Recent Activity',
+  exportData: 'Export Data',
+  noDataToExport: 'No data to export',
+  exportSuccess: 'Export successful',
+  exportFailed: 'Export failed',
+  readingTrend: 'Reading Trend',
+  last7Days: 'Last 7 Days',
+  last30Days: 'Last 30 Days',
+  last90Days: 'Last 90 Days',
+  chapters: 'chapters',
+  day: 'day',
+  noActivity: 'No activity records',
+  bookDistribution: 'Book Distribution',
+  readingHeatmap: 'Reading Heatmap',
+  streakRecord: 'Streak Record',
+  days: 'days',
+  today: 'Today',
+  yesterday: 'Yesterday',
+  thisWeek: 'This Week',
+  thisMonth: 'This Month',
+};
+
+export default dashboard;

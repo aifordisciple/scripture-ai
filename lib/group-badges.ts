@@ -1,10 +1,11 @@
 // lib/group-badges.ts
 // Group achievement badges definition and helper functions
+// Badge names/descriptions use i18n keys for localization
 
 export interface GroupBadge {
   id: string;
-  name: string;
-  description: string;
+  nameKey: string;
+  descKey: string;
   icon: string;
   color: string;
   requirement: {
@@ -18,8 +19,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   // Streak badges
   {
     id: 'streak_3',
-    name: '初热之火',
-    description: '连续打卡 3 天',
+    nameKey: 'group.badges.streak7.name',
+    descKey: 'group.badges.streak7.desc',
     icon: '🔥',
     color: '#FF6B35',
     requirement: { type: 'STREAK', value: 3 },
@@ -27,8 +28,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'streak_7',
-    name: '坚持不懈',
-    description: '连续打卡 7 天',
+    nameKey: 'group.badges.streak7.name',
+    descKey: 'group.badges.streak7.desc',
     icon: '🔥',
     color: '#FF8C42',
     requirement: { type: 'STREAK', value: 7 },
@@ -36,8 +37,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'streak_14',
-    name: '稳定同行',
-    description: '连续打卡 14 天',
+    nameKey: 'group.badges.streak30.name',
+    descKey: 'group.badges.streak30.desc',
     icon: '🔥',
     color: '#FFA15C',
     requirement: { type: 'STREAK', value: 14 },
@@ -45,8 +46,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'streak_30',
-    name: '月度忠心',
-    description: '连续打卡 30 天',
+    nameKey: 'group.badges.streak30.name',
+    descKey: 'group.badges.streak30.desc',
     icon: '🔥',
     color: '#FFB366',
     requirement: { type: 'STREAK', value: 30 },
@@ -54,8 +55,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'streak_100',
-    name: '百日坚持',
-    description: '连续打卡 100 天',
+    nameKey: 'group.badges.streak100.name',
+    descKey: 'group.badges.streak100.desc',
     icon: '🔥',
     color: '#FF6B00',
     requirement: { type: 'STREAK', value: 100 },
@@ -65,8 +66,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   // Completed days badges
   {
     id: 'completed_7',
-    name: '周度完成者',
-    description: '累计完成 7 天阅读任务',
+    nameKey: 'group.badges.firstPlan.name',
+    descKey: 'group.badges.firstPlan.desc',
     icon: '📖',
     color: '#4CAF50',
     requirement: { type: 'COMPLETED_DAYS', value: 7 },
@@ -74,8 +75,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'completed_30',
-    name: '月度完成者',
-    description: '累计完成 30 天阅读任务',
+    nameKey: 'group.badges.plan5.name',
+    descKey: 'group.badges.plan5.desc',
     icon: '📖',
     color: '#45A049',
     requirement: { type: 'COMPLETED_DAYS', value: 30 },
@@ -83,8 +84,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'completed_100',
-    name: '百日完成者',
-    description: '累计完成 100 天阅读任务',
+    nameKey: 'group.badges.plan20.name',
+    descKey: 'group.badges.plan20.desc',
     icon: '📖',
     color: '#2E7D32',
     requirement: { type: 'COMPLETED_DAYS', value: 100 },
@@ -94,8 +95,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   // Chapters read badges
   {
     id: 'chapters_50',
-    name: '经文探索者',
-    description: '累计阅读 50 章经文',
+    nameKey: 'group.badges.firstHighlight.name',
+    descKey: 'group.badges.firstHighlight.desc',
     icon: '📚',
     color: '#2196F3',
     requirement: { type: 'CHAPTERS_READ', value: 50 },
@@ -103,8 +104,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'chapters_100',
-    name: '经文爱好者',
-    description: '累计阅读 100 章经文',
+    nameKey: 'group.badges.highlight100.name',
+    descKey: 'group.badges.highlight100.desc',
     icon: '📚',
     color: '#1E88E5',
     requirement: { type: 'CHAPTERS_READ', value: 100 },
@@ -112,8 +113,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'chapters_365',
-    name: '经文大师',
-    description: '累计阅读 365 章经文',
+    nameKey: 'group.badges.highlight500.name',
+    descKey: 'group.badges.highlight500.desc',
     icon: '📚',
     color: '#1565C0',
     requirement: { type: 'CHAPTERS_READ', value: 365 },
@@ -121,8 +122,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'chapters_1000',
-    name: '经文专家',
-    description: '累计阅读 1000 章经文',
+    nameKey: 'group.badges.highlight500.name',
+    descKey: 'group.badges.highlight500.desc',
     icon: '📚',
     color: '#0D47A1',
     requirement: { type: 'CHAPTERS_READ', value: 1000 },
@@ -132,8 +133,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   // Plan complete badges
   {
     id: 'plan_complete_1',
-    name: '计划完成者',
-    description: '完成 1 个读经计划',
+    nameKey: 'group.badges.firstPlan.name',
+    descKey: 'group.badges.firstPlan.desc',
     icon: '🏆',
     color: '#FFD700',
     requirement: { type: 'PLAN_COMPLETE', value: 1 },
@@ -141,8 +142,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'plan_complete_5',
-    name: '计划达人',
-    description: '完成 5 个读经计划',
+    nameKey: 'group.badges.plan5.name',
+    descKey: 'group.badges.plan5.desc',
     icon: '🏆',
     color: '#FFC107',
     requirement: { type: 'PLAN_COMPLETE', value: 5 },
@@ -150,8 +151,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   },
   {
     id: 'plan_complete_10',
-    name: '计划大师',
-    description: '完成 10 个读经计划',
+    nameKey: 'group.badges.plan20.name',
+    descKey: 'group.badges.plan20.desc',
     icon: '🏆',
     color: '#FF9800',
     requirement: { type: 'PLAN_COMPLETE', value: 10 },
@@ -161,8 +162,8 @@ export const GROUP_BADGES: GroupBadge[] = [
   // Early bird badge
   {
     id: 'early_bird',
-    name: '早起鸟儿',
-    description: '在早上 6 点前完成阅读',
+    nameKey: 'group.badges.firstShare.name',
+    descKey: 'group.badges.firstShare.desc',
     icon: '🌅',
     color: '#FFB300',
     requirement: { type: 'EARLY_BIRD', value: 1 },
@@ -235,18 +236,25 @@ export function getRarityColor(rarity: string): string {
   }
 }
 
-// Get rarity label
-export function getRarityLabel(rarity: string): string {
+// Get rarity label i18n key (use t() to render)
+export function getRarityLabelKey(rarity: string): string {
   switch (rarity) {
     case 'COMMON':
-      return '普通';
+      return 'group.badges.rarity.common';
     case 'RARE':
-      return '稀有';
+      return 'group.badges.rarity.rare';
     case 'EPIC':
-      return '史诗';
+      return 'group.badges.rarity.epic';
     case 'LEGENDARY':
-      return '传说';
+      return 'group.badges.rarity.legendary';
     default:
-      return '普通';
+      return 'group.badges.rarity.common';
   }
+}
+
+// Backward-compatible: get rarity label using t() function
+import { t } from '@/lib/i18n';
+
+export function getRarityLabel(rarity: string): string {
+  return t(getRarityLabelKey(rarity));
 }

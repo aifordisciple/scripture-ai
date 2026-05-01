@@ -75,5 +75,7 @@ export const settings = {
     saveFailed: '保存失败，请重试',
     browserNotifyDenied: '浏览器通知权限被拒绝。请在浏览器设置中允许通知。',
     bibleVersion: '圣经版本',
+    confirmDeletePrompt: '确定要删除这个自定义问题吗？',
+    deletePromptWarning: '删除后无法恢复，请确认操作。',
   },
 } as const

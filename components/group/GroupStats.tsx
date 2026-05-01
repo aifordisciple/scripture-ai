@@ -292,18 +292,18 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                       <div className="font-medium">{member.user?.name || t('group.anonymousUser')}</div>
                       <div className="text-xs text-muted-foreground">
                         {member.lastActive
-                          ? `最后活跃: ${new Date(member.lastActive).toLocaleDateString("zh-CN")}`
-                          : "暂无活动"
+                          ? t('group.lastActiveAt', { time: new Date(member.lastActive).toLocaleDateString() })
+                          : t('group.noActivity')
                         }
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="font-bold text-primary">
-                      {member.activeDays} 天
+                      {t('group.daysCount', { count: member.activeDays })}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      活跃天数
+                      {t('group.activeDaysLabel')}
                     </div>
                   </div>
                 </div>
@@ -311,7 +311,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
             </div>
           ) : (
             <div className="text-center text-muted-foreground py-8">
-              暂无成员活动数据
+              {t('group.noMemberActivityData')}
             </div>
           )}
         </CardContent>
@@ -348,25 +348,25 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                     )}>
                       {index + 1}
                     </div>
-                    <span className="font-medium">{entry.user.name || "匿名用户"}</span>
+                    <span className="font-medium">{entry.user.name || t('group.anonymousUser')}</span>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
                     <div className="text-center">
                       <div className="font-bold text-primary">
                         {entry.score}
                       </div>
-                      <div className="text-xs text-muted-foreground">积分</div>
+                      <div className="text-xs text-muted-foreground">{t('group.score')}</div>
                     </div>
                     <div className="text-center">
                       <div className="font-bold">{entry.chaptersRead}</div>
-                      <div className="text-xs text-muted-foreground">章节</div>
+                      <div className="text-xs text-muted-foreground">{t('group.chapters')}</div>
                     </div>
                     <div className="text-center">
                       <div className="font-bold flex items-center gap-1">
                         <Flame className="w-3 h-3 text-orange-500" />
                         {entry.streakDays}
                       </div>
-                      <div className="text-xs text-muted-foreground">连续</div>
+                      <div className="text-xs text-muted-foreground">{t('group.streak')}</div>
                     </div>
                   </div>
                 </div>

@@ -249,7 +249,7 @@ export function getBookCategory(bookId: string, locale: Locale = 'zh'): string {
 export const THEOLOGICAL_PROMPTS: DualLangPromptEntry[] = [
   {
     id: 'detail',
-    label: { zh: "🧩 深度解读", en: "🧩 Deep Exegesis" },
+    label: { zh: "深度解读", en: "Deep Exegesis" },
     // 依然简洁，依赖 SYSTEM_PROMPT 的格式规范
     prompt: {
       zh: "请详细解读这段经文。请包含：背景与情境、核心词原文分析（希腊文/希伯来文）、神学要点以及现代应用。",
@@ -259,7 +259,7 @@ export const THEOLOGICAL_PROMPTS: DualLangPromptEntry[] = [
   },
   {
     id: 'context',
-    label: { zh: "📜 历史地理背景", en: "📜 Historical & Geographical Context" },
+    label: { zh: "历史地理背景", en: "Historical & Geographical Context" },
     prompt: {
       zh: "请专注于这段经文的历史和地理背景。作者是谁？写给谁？当时的文化、地理或政治环境如何影响我们对这段话的理解？地理知识尽量详细些。",
       en: "Please focus on the historical and geographical background of this passage. Who is the author? Who is the audience? How did the cultural, geographical, or political environment of the time influence our understanding of these words? Please provide detailed geographical information."
@@ -268,7 +268,7 @@ export const THEOLOGICAL_PROMPTS: DualLangPromptEntry[] = [
   },
   {
     id: 'original',
-    label: { zh: "🔍 原文词义", en: "🔍 Original Word Study" },
+    label: { zh: "原文词义", en: "Original Word Study" },
     prompt: {
       zh: "请从这段经文中挑选 1-2 个最具神学意义的希伯来文或希腊文单词。解释它们的 Strong's 编号、原意、词根，以及这个词如何丰富了经文的含义。",
       en: "Please select 1-2 Hebrew or Greek words with the greatest theological significance from this passage. Explain their Strong's numbers, original meanings, roots, and how each word enriches the meaning of the passage."
@@ -277,7 +277,7 @@ export const THEOLOGICAL_PROMPTS: DualLangPromptEntry[] = [
   },
   {
     id: 'application',
-    label: { zh: "💡 生活应用", en: "💡 Life Application" },
+    label: { zh: "生活应用", en: "Life Application" },
     prompt: {
       zh: "不要过于理论化，请给出 3 个切实可行的现代生活应用建议。这些建议应针对现代人的职场挑战、家庭关系或个人心理健康，并符合圣经原则。",
       en: "Avoid being overly theoretical. Please provide 3 practical, actionable suggestions for modern life application. These should address workplace challenges, family relationships, or personal mental health, and align with biblical principles."
@@ -286,7 +286,7 @@ export const THEOLOGICAL_PROMPTS: DualLangPromptEntry[] = [
   },
   {
     id: 'prayer',
-    label: { zh: "🙏 祷告回应", en: "🙏 Prayer Response" },
+    label: { zh: "祷告回应", en: "Prayer Response" },
     prompt: {
       zh: "请基于这段经文的感动，为我写一篇祷告文。祷告应包含：对他属性的赞美、对罪的悔改、对恩典的感谢以及具体的祈求。语气要真诚、亲切。",
       en: "Based on the inspiration of this passage, please write a prayer for me. The prayer should include: praise for God's attributes, repentance for sin, gratitude for grace, and specific petitions. The tone should be sincere and intimate."
@@ -295,7 +295,7 @@ export const THEOLOGICAL_PROMPTS: DualLangPromptEntry[] = [
   },
   {
     id: 'explain_to_kid',
-    label: { zh: "👶 儿童/初信讲解", en: "👶 For Kids & New Believers" },
+    label: { zh: "儿童/初信讲解", en: "For Kids & New Believers" },
     prompt: {
       zh: "请用最简单、生动的语言（适合 10 岁儿童或初信者）解释这段经文的核心意思。可以使用生活中的比喻来帮助理解。",
       en: "Please explain the core meaning of this passage in the simplest, most vivid language (suitable for a 10-year-old child or a new believer). Feel free to use everyday analogies to aid understanding."
@@ -305,7 +305,7 @@ export const THEOLOGICAL_PROMPTS: DualLangPromptEntry[] = [
   // [新增] 高级 AI 模式入口
   {
     id: 'tutor',
-    label: { zh: "👨‍🏫 苏格拉底导师", en: "👨‍🏫 Socratic Tutor" },
+    label: { zh: "苏格拉底导师", en: "Socratic Tutor" },
     prompt: {
       zh: "请采用苏格拉底式提问法，引导我深入思考这段经文。不要直接给出答案，而是通过提问帮助我发现真理。每次只问一个问题，等待我的回应。",
       en: "Please use the Socratic method to guide me in thinking deeply about this passage. Do not give direct answers; instead, help me discover truth through questions. Ask only one question at a time and wait for my response."
@@ -315,7 +315,7 @@ export const THEOLOGICAL_PROMPTS: DualLangPromptEntry[] = [
   },
   {
     id: 'sermon',
-    label: { zh: "📋 讲章生成", en: "📋 Sermon Outline" },
+    label: { zh: "讲章生成", en: "Sermon Outline" },
     prompt: {
       zh: "请基于这段经文，生成一份讲章大纲。包含：引言、2-3个主要论点（每点包含经文分析、例证和应用）、结语。适合主日讲道使用。",
       en: "Please generate a sermon outline based on this passage. Include: an introduction, 2-3 main points (each with scriptural analysis, illustrations, and application), and a conclusion. Suitable for Sunday preaching."
@@ -325,7 +325,7 @@ export const THEOLOGICAL_PROMPTS: DualLangPromptEntry[] = [
   },
   {
     id: 'study-guide',
-    label: { zh: "📖 查经材料", en: "📖 Study Guide" },
+    label: { zh: "查经材料", en: "Study Guide" },
     prompt: {
       zh: "请为小组查经生成一份讨论材料。包含：破冰问题、观察性问题、解释性问题、应用性问题，以及结束祷告指引。",
       en: "Please generate a discussion guide for a small group Bible study. Include: icebreaker questions, observation questions, interpretation questions, application questions, and a closing prayer guide."

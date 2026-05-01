@@ -55,7 +55,7 @@ async function matchLocationsFromDatabase(verseContent: string) {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    const { bookId, chapter, verseStart, verseEnd, verseContent, apiConfig } = data;
+    const { bookId, chapter, verseStart, verseEnd, verseContent } = data;
 
     if (!verseContent) {
       return NextResponse.json({ error: 'Missing verse content' }, { status: 400 });
@@ -88,30 +88,10 @@ export async function POST(request: NextRequest) {
     // 调用AI提取地点
     const prompt = EXTRACT_LOCATION_PROMPT.replace('{verseContent}', verseContent);
 
-    // 获取API配置 - 优先使用前端传递的 apiConfig，其次使用环境变量
-    const baseUrl = apiConfig?.baseUrl || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
-    const apiKey = apiConfig?.apiKey || process.env.OPENAI_API_KEY;
-    const model = apiConfig?.model || process.env.AI_MODEL || 'MiniMax-M2.5';
-
-    // 日志：显示配置来源
-    console.log('AI Extract - Config source:', {
-      userConfig: apiConfig ? {
-        provider: apiConfig.provider,
-        baseUrl: apiConfig.baseUrl,
-        hasApiKey: !!apiConfig.apiKey,
-        model: apiConfig.model,
-      } : 'none',
-      envConfig: {
-        baseUrl: process.env.OPENAI_BASE_URL,
-        hasApiKey: !!process.env.OPENAI_API_KEY,
-        model: process.env.AI_MODEL,
-      },
-      actualConfig: {
-        baseUrl,
-        hasApiKey: !!apiKey,
-        model,
-      }
-    });
+    // 获取API配置 - 从环境变量读取（不再从客户端传递 apiKey）
+    const baseUrl = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
+    const apiKey = process.env.OPENAI_API_KEY;
+    const model = process.env.AI_MODEL || 'MiniMax-M2.5';
 
     if (!apiKey) {
       console.error('No API key configured');

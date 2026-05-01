@@ -1,5 +1,5 @@
 // components/bible/BibleHeatmap.tsx
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { BIBLE_BOOKS } from '@/lib/constants';
 import { useTranslation } from '@/lib/i18n';
@@ -74,11 +74,11 @@ export function BibleHeatmap({
   const handleMouseEnter = (e: React.MouseEvent, bookName: string, chapter: number, weight: number) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const containerRect = e.currentTarget.closest('.heatmap-container')?.getBoundingClientRect() || { left: 0, top: 0 };
-    
+
     // 计算提示框位置
     let yPos = rect.top - containerRect.top - 8;
     let isBelow = false;
-    
+
     // 边缘防溢出：如果处于容器顶部（如创世记），则将提示框向下翻转显示
     if (yPos < 20) {
         yPos = rect.top - containerRect.top + cellSize + 12;
@@ -93,6 +93,45 @@ export function BibleHeatmap({
       isBelow
     });
   };
+
+  // 触摸设备：点击显示 tooltip，点击其他区域关闭
+  const handleTouchStart = useCallback((e: React.TouchEvent, bookName: string, chapter: number, weight: number) => {
+    const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const containerRect = e.currentTarget.closest('.heatmap-container')?.getBoundingClientRect() || { left: 0, top: 0 };
+
+    let yPos = rect.top - containerRect.top - 8;
+    let isBelow = false;
+    if (yPos < 20) {
+      yPos = rect.top - containerRect.top + cellSize + 12;
+      isBelow = true;
+    }
+
+    setTooltip({
+      visible: true,
+      x: rect.left - containerRect.left + (cellSize / 2),
+      y: yPos,
+      text: `${t('bible.heatmapTooltip', { book: bookName, chapter, weight })}`,
+      isBelow
+    });
+  }, [t, cellSize]);
+
+  // 点击外部关闭 tooltip（触摸设备）
+  useEffect(() => {
+    if (!tooltip.visible) return;
+    const dismiss = (e: TouchEvent | MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.heatmap-cell')) {
+        setTooltip(prev => ({ ...prev, visible: false }));
+      }
+    };
+    document.addEventListener('touchstart', dismiss, { passive: true });
+    document.addEventListener('mousedown', dismiss);
+    return () => {
+      document.removeEventListener('touchstart', dismiss);
+      document.removeEventListener('mousedown', dismiss);
+    };
+  }, [tooltip.visible]);
 
   return (
     <div className="relative w-full overflow-x-auto no-scrollbar py-4 heatmap-container">
@@ -120,14 +159,18 @@ export function BibleHeatmap({
                     key={`${book.id}-${chapter}`}
                     style={{ width: `${cellSize}px`, height: `${cellSize}px`, flexShrink: 0 }}
                     className={cn(
-                      "rounded-[2px] cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-foreground/50",
+                      "heatmap-cell relative rounded-[2px] cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-foreground/50",
                       colorClass,
                       weight > 0 ? "hover:scale-125 hover:z-10 shadow-sm" : ""
                     )}
                     onMouseEnter={(e) => handleMouseEnter(e, book.name, chapter, weight)}
                     onMouseLeave={() => setTooltip(prev => ({ ...prev, visible: false }))}
+                    onTouchStart={(e) => handleTouchStart(e, book.name, chapter, weight)}
                     onClick={() => onCellClick && onCellClick(book.id, chapter)}
-                  />
+                  >
+                    {/* Invisible touch target for mobile — meets 44px minimum */}
+                    <div className="md:hidden absolute inset-0 -m-[17px]" />
+                  </div>
                 );
               })}
             </div>
@@ -137,7 +180,7 @@ export function BibleHeatmap({
 
       {/* 悬浮提示框 */}
       {tooltip.visible && (
-        <div 
+        <div
           className={cn(
              "absolute z-50 px-2.5 py-1.5 text-xs font-bold text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded shadow-xl pointer-events-none transform -translate-x-1/2 whitespace-nowrap animate-in fade-in zoom-in-95 duration-100",
              tooltip.isBelow ? "translate-y-0" : "-translate-y-full"
@@ -151,6 +194,18 @@ export function BibleHeatmap({
           )} />
         </div>
       )}
+
+      {/* 颜色图例 */}
+      <div className="flex items-center justify-end gap-1 mt-2 text-[10px] text-muted-foreground">
+        <span>{t('bible.heatmapLess')}</span>
+        {scaleColors.map((colorClass, i) => (
+          <div
+            key={i}
+            className={cn("w-3 h-3 rounded-[1px]", colorClass)}
+          />
+        ))}
+        <span>{t('bible.heatmapMore')}</span>
+      </div>
     </div>
   );
 }

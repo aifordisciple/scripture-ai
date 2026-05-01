@@ -1,0 +1,31 @@
+// lib/i18n/zh/dashboard.ts
+const dashboard = {
+  title: '个人灵修图谱',
+  backToReading: '返回阅读',
+  totalReadingDays: '累计读经天数',
+  totalChapters: '累计阅读章数',
+  currentStreak: '当前连续天数',
+  longestStreak: '最长连续天数',
+  recentActivity: '最近活动',
+  exportData: '导出数据',
+  noDataToExport: '暂无数据可导出',
+  exportSuccess: '导出成功',
+  exportFailed: '导出失败',
+  readingTrend: '阅读趋势',
+  last7Days: '近7天',
+  last30Days: '近30天',
+  last90Days: '近90天',
+  chapters: '章',
+  day: '天',
+  noActivity: '暂无活动记录',
+  bookDistribution: '书卷分布',
+  readingHeatmap: '阅读热力图',
+  streakRecord: '连续记录',
+  days: '天',
+  today: '今天',
+  yesterday: '昨天',
+  thisWeek: '本周',
+  thisMonth: '本月',
+};
+
+export default dashboard;

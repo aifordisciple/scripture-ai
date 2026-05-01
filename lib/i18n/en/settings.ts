@@ -75,5 +75,7 @@ export const settings = {
     saveFailed: 'Save failed, please try again',
     browserNotifyDenied: 'Browser notification permission denied. Please allow notifications in your browser settings.',
     bibleVersion: 'Bible Version',
+    confirmDeletePrompt: 'Are you sure you want to delete this custom prompt?',
+    deletePromptWarning: 'This action cannot be undone.',
   },
 } as const

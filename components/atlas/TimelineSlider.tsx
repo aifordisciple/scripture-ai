@@ -68,6 +68,23 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
     setIsPlaying(!isPlaying);
   };
 
+  // 自动播放效果：每1.5秒推进10年，到达maxYear自动停止
+  useEffect(() => {
+    if (!isPlaying) return;
+    if (year >= maxYear) {
+      setIsPlaying(false);
+      return;
+    }
+    const interval = setInterval(() => {
+      if (year >= maxYear) {
+        setIsPlaying(false);
+        return;
+      }
+      onYearChange(Math.min(year + 10, maxYear));
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [isPlaying, year, maxYear, onYearChange]);
+
   // 步进
   const step = (direction: 'forward' | 'backward') => {
     const stepSize = 10;

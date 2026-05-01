@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useBibleStore } from '@/store/useBibleStore';
 import { BIBLE_BOOKS } from '@/lib/constants';
+import { t } from '@/lib/i18n';
 
 export interface Verse {
   id: number;
@@ -69,8 +70,7 @@ export function useBibleData(book: string, chapter: string) {
       if (currentFetchId !== fetchIdRef.current) return;
 
       console.error("Failed to fetch bible data:", err);
-      const locale = useBibleStore.getState().locale;
-      setError(locale === 'en' ? 'Failed to load chapter. Please check your network connection.' : '加载章节失败，请检查网络连接');
+      setError(t('common.networkError'));
       setVerses([]);
     } finally {
       if (currentFetchId === fetchIdRef.current) {

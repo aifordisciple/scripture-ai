@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { useTranslation } from "@/lib/i18n";
+import { useToast } from '@/components/ui/toast';
 
 // --- 资源库 ---
 const UNSPLASH_PRESETS = [
@@ -48,7 +49,8 @@ type LayoutMode = 'classic' | 'poster' | 'card' | 'modern' | 'split' | 'frame' |
 
 export function ShareCard() {
   const { t } = useTranslation();
-  const { isShareOpen, closeShareModal, shareData } = useBibleStore();
+  const { addToast } = useToast();
+  const { isShareOpen, closeShareModal, shareData, bibleVersion } = useBibleStore();
 
   // 核心状态
   const [step, setStep] = useState<'edit' | 'result'>('edit');
@@ -104,7 +106,7 @@ export function ShareCard() {
         try {
           const res = await fetch(`/api/bible?book=${shareData?.book}&chapter=${shareData?.chapter}`);
           const json = await res.json();
-          const verses = json.data.filter((v: any) => shareData?.verses.includes(v.verse) && v.version === 'CUV');
+          const verses = json.data.filter((v: any) => shareData?.verses.includes(v.verse) && v.version === (bibleVersion || 'CUV'));
           setVerseContent(verses.map((v: any) => v.content));
           if (verses.length > 0 && verses[0].bookName) setBookName(verses[0].bookName);
         } catch (e) { console.error(e); }
@@ -210,7 +212,7 @@ export function ShareCard() {
 
     } catch (e) {
         console.error("Generate failed:", e);
-        alert(t('shareCard.generateFailed'));
+        addToast({ type: 'error', message: t('shareCard.generateFailed') });
     } finally {
         setLoading(false);
     }

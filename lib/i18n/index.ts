@@ -30,8 +30,16 @@ export function t(key: string, params?: Record<string, string | number>): string
   const locale = useBibleStore.getState().locale
   const dict = translations[locale] || translations.zh
   const value = getNestedValue(dict as unknown as Record<string, unknown>, key)
-  if (!value) return key
-  return interpolate(value, params)
+  if (value) return interpolate(value, params)
+
+  // Fallback: if key is missing in current locale, try zh (primary locale)
+  if (locale !== 'zh') {
+    const zhValue = getNestedValue(translations.zh as unknown as Record<string, unknown>, key)
+    if (zhValue) return interpolate(zhValue, params)
+  }
+
+  // Last resort: return the key path so users see something meaningful
+  return key
 }
 
 export function useTranslation() {

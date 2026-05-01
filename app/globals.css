@@ -178,8 +178,8 @@
   --secondary: oklch(0.24 0.03 265);
   --secondary-foreground: oklch(0.98 0.005 247);
   --muted: oklch(0.24 0.03 265);
-  --muted-foreground: oklch(0.75 0.02 265);  /* 更清晰的次要文字 */
-  --accent: oklch(0.30 0.04 265);  /* 增强交互元素可见性 */
+  --muted-foreground: oklch(0.82 0.02 265);  /* WCAG AA ≥4.5:1 对比度 */
+  --accent: oklch(0.40 0.04 265);  /* WCAG AA ≥4.5:1 对比度 */
   --accent-foreground: oklch(0.98 0.005 247);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(0.28 0.03 265);
@@ -225,18 +225,18 @@
 
 /* 玻璃拟态辅助类 (Glassmorphism) */
 .glass-panel {
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: oklch(var(--background) / 0.7);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid oklch(var(--border) / 0.4);
+  box-shadow: 0 1px 2px 0 oklch(var(--foreground) / 0.05);
   transition: background-color 300ms ease, border-color 300ms ease;
 }
 
 /* 玻璃拟态暗色模式 */
 .dark .glass-panel {
-  background-color: rgba(15, 23, 42, 0.6);
-  border-color: rgba(30, 41, 59, 0.5);
+  background-color: oklch(var(--background) / 0.6);
+  border-color: oklch(var(--border) / 0.5);
 }
 
 /* 隐藏滚动条但保留滚动功能 */
@@ -256,8 +256,8 @@
 
 /* 经文跳转呼吸灯动画 */
 @keyframes highlight-pulse {
-  0% { background-color: rgba(59, 130, 246, 0.4); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-  30% { background-color: rgba(59, 130, 246, 0.2); box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+  0% { background-color: oklch(var(--primary) / 0.4); box-shadow: 0 0 15px oklch(var(--primary) / 0.4); }
+  30% { background-color: oklch(var(--primary) / 0.2); box-shadow: 0 0 10px oklch(var(--primary) / 0.2); }
   100% { background-color: transparent; box-shadow: none; }
 }
 
@@ -276,30 +276,33 @@
    自定义全局精美滚动条 (Modern Scrollbar)
    ========================================= */
 
-/* Firefox 兼容 */
-* {
+/* Firefox 兼容 — 限制为 body 和自定义滚动容器，避免影响 input/select */
+body, .custom-scroll {
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
 }
 
-.dark * {
+.dark body, .dark .custom-scroll {
   scrollbar-color: rgba(71, 85, 105, 0.5) transparent;
 }
 
-/* Chrome, Edge, Safari (Webkit) 兼容 */
-::-webkit-scrollbar {
+/* Chrome, Edge, Safari (Webkit) 兼容 — 限制为 body 和自定义滚动容器 */
+body::-webkit-scrollbar,
+.custom-scroll::-webkit-scrollbar {
   width: 8px;  /* 垂直滚动条宽度 */
   height: 8px; /* 水平滚动条高度 */
 }
 
 /* 滚动条轨道 (透明) */
-::-webkit-scrollbar-track {
+body::-webkit-scrollbar-track,
+.custom-scroll::-webkit-scrollbar-track {
   background: transparent;
   border-radius: 8px;
 }
 
 /* 滚动条滑块 (默认浅色) */
-::-webkit-scrollbar-thumb {
+body::-webkit-scrollbar-thumb,
+.custom-scroll::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.4);
   border-radius: 8px;
   border: 2px solid transparent; /* 制造悬浮内边距感 */
@@ -307,20 +310,23 @@
 }
 
 /* 滚动条滑块 - 悬浮加深 */
-::-webkit-scrollbar-thumb:hover {
+body::-webkit-scrollbar-thumb:hover,
+.custom-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 116, 139, 0.6);
   border: 1px solid transparent;
   background-clip: padding-box;
 }
 
 /* 滚动条暗色模式适配 */
-.dark ::-webkit-scrollbar-thumb {
+.dark body::-webkit-scrollbar-thumb,
+.dark .custom-scroll::-webkit-scrollbar-thumb {
   background: rgba(71, 85, 105, 0.5);
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
+.dark body::-webkit-scrollbar-thumb:hover,
+.dark .custom-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 116, 139, 0.8);
   border: 1px solid transparent;
   background-clip: padding-box;
@@ -437,15 +443,27 @@
 
 /* 过渡工具类 */
 .transition-fast {
-  transition: all var(--duration-fast) var(--ease-default);
+  transition: color var(--duration-fast) var(--ease-default),
+              background-color var(--duration-fast) var(--ease-default),
+              border-color var(--duration-fast) var(--ease-default),
+              opacity var(--duration-fast) var(--ease-default),
+              transform var(--duration-fast) var(--ease-default);
 }
 
 .transition-normal {
-  transition: all var(--duration-normal) var(--ease-default);
+  transition: color var(--duration-normal) var(--ease-default),
+              background-color var(--duration-normal) var(--ease-default),
+              border-color var(--duration-normal) var(--ease-default),
+              opacity var(--duration-normal) var(--ease-default),
+              transform var(--duration-normal) var(--ease-default);
 }
 
 .transition-slow {
-  transition: all var(--duration-slow) var(--ease-default);
+  transition: color var(--duration-slow) var(--ease-default),
+              background-color var(--duration-slow) var(--ease-default),
+              border-color var(--duration-slow) var(--ease-default),
+              opacity var(--duration-slow) var(--ease-default),
+              transform var(--duration-slow) var(--ease-default);
 }
 
 .transition-colors-fast {
@@ -585,7 +603,7 @@
   margin-top: 0.75rem;
   margin-bottom: 0.75rem;
   line-height: 1.75;
-  text-align: justify;
+  text-align: start;
 }
 
 /* 引用块样式 - 经文引用风格 */
@@ -811,9 +829,13 @@
   border-radius: 50% !important;
 }
 
-/* 强制 Sheet/Dialog 组件最高层级 */
-[data-slot="sheet-portal"],
-[data-slot="sheet-overlay"],
+/* Sheet/Dialog 组件层级 — 使用 z-modal 变量保持体系一致 */
+[data-slot="sheet-portal"] {
+  z-index: var(--z-modal) !important;
+}
+[data-slot="sheet-overlay"] {
+  z-index: var(--z-modal-backdrop) !important;
+}
 [data-slot="sheet-content"] {
-  z-index: 9999 !important;
+  z-index: var(--z-modal) !important;
 }

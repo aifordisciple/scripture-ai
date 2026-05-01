@@ -4,6 +4,8 @@
 import { useEffect, useState } from 'react';
 import { Search, Send, X, Mail, User, Users, Loader2, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/toast';
+import { useTranslation } from '@/lib/i18n';
 
 interface UserItem {
   id: string;
@@ -54,6 +56,8 @@ interface MessagesResponse {
 type TabType = 'send' | 'history';
 
 export default function AdminMessagesPage() {
+  const { t } = useTranslation();
+  const { addToast } = useToast();
   const [tab, setTab] = useState<TabType>('send');
   const [users, setUsers] = useState<UsersResponse | null>(null);
   const [messages, setMessages] = useState<MessagesResponse | null>(null);
@@ -88,7 +92,7 @@ export default function AdminMessagesPage() {
       setUsers(json);
     } catch (err) {
       console.error(err);
-      setError('加载用户列表失败，请刷新页面重试');
+      setError(t('admin.loadUsersFailedRefresh'));
     } finally {
       setLoading(false);
     }
@@ -104,7 +108,7 @@ export default function AdminMessagesPage() {
       setMessages(json);
     } catch (err) {
       console.error(err);
-      setError('加载消息列表失败，请刷新页面重试');
+      setError(t('admin.loadMessagesFailedRefresh'));
     } finally {
       setLoading(false);
     }
@@ -142,12 +146,12 @@ export default function AdminMessagesPage() {
 
   const handleSend = async () => {
     if (!composeData.title || !composeData.content) {
-      alert('请填写标题和内容');
+      addToast({ type: 'error', message: t('admin.fillTitleAndContent') });
       return;
     }
 
     if (!sendToAll && selectedUsers.length === 0) {
-      alert('请选择至少一个用户');
+      addToast({ type: 'error', message: t('admin.selectAtLeastOneUser') });
       return;
     }
 
@@ -167,13 +171,13 @@ export default function AdminMessagesPage() {
       if (!res.ok) throw new Error('Failed to send messages');
 
       const result = await res.json();
-      alert(`成功发送 ${result.sentCount} 条私信`);
+      addToast({ type: 'success', message: t('admin.sentCountMessages', { count: result.sentCount }) });
       closeCompose();
       setSelectedUsers([]);
       setTab('history');
     } catch (err) {
       console.error(err);
-      alert('发送失败');
+      addToast({ type: 'error', message: t('admin.sendFailed') });
     } finally {
       setSending(false);
     }
@@ -192,7 +196,7 @@ export default function AdminMessagesPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">私信管理</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('admin.messageManagement')}</h1>
       </div>
 
       {/* Tab 切换 */}
@@ -208,7 +212,7 @@ export default function AdminMessagesPage() {
             )}
           >
             <Send size={16} className="inline mr-1 md:mr-2" />
-            发送私信
+            {t('admin.sendMessage')}
           </button>
           <button
             onClick={() => setTab('history')}
@@ -220,7 +224,7 @@ export default function AdminMessagesPage() {
             )}
           >
             <Mail size={16} className="inline mr-1 md:mr-2" />
-            发送历史
+            {t('admin.sendHistory')}
           </button>
         </nav>
       </div>
@@ -231,7 +235,7 @@ export default function AdminMessagesPage() {
           {error && !users && (
             <div className="flex flex-col items-center justify-center py-12 gap-4 bg-white rounded-lg shadow">
               <div className="text-red-500">{error}</div>
-              <button onClick={fetchUsers} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">重试</button>
+              <button onClick={fetchUsers} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{t('admin.retry')}</button>
             </div>
           )}
 
@@ -245,7 +249,7 @@ export default function AdminMessagesPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  placeholder="搜索用户..."
+                  placeholder={t('admin.searchUsers')}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
@@ -254,7 +258,7 @@ export default function AdminMessagesPage() {
                   onClick={handleSearch}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
                 >
-                  搜索
+                  {t('admin.search')}
                 </button>
               </div>
               <div className="flex gap-2 md:ml-auto">
@@ -264,7 +268,7 @@ export default function AdminMessagesPage() {
                   className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
                 >
                   <User size={16} />
-                  <span className="hidden sm:inline">发送给选中</span>
+                  <span className="hidden sm:inline">{t('admin.sendToSelected')}</span>
                   <span>({selectedUsers.length})</span>
                 </button>
                 <button
@@ -272,8 +276,8 @@ export default function AdminMessagesPage() {
                   className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm md:text-base"
                 >
                   <Users size={16} />
-                  <span className="hidden sm:inline">发送给所有用户</span>
-                  <span className="sm:hidden">全部用户</span>
+                  <span className="hidden sm:inline">{t('admin.sendToAllUsers')}</span>
+                  <span className="sm:hidden">{t('admin.allUsers')}</span>
                 </button>
               </div>
             </div>
@@ -303,9 +307,9 @@ export default function AdminMessagesPage() {
                           }}
                         />
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">邮箱</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">注册时间</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.user')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.email')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.registered')}</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -335,7 +339,7 @@ export default function AdminMessagesPage() {
                               )}
                             </div>
                             <div className="text-sm font-medium text-gray-900">
-                              {user.name || '未设置'}
+                              {user.name || t('admin.notSet')}
                             </div>
                           </div>
                         </td>
@@ -354,7 +358,7 @@ export default function AdminMessagesPage() {
 
             {users && users.users.length === 0 && (
               <div className="text-center py-12 text-gray-500">
-                暂无用户
+                {t('admin.noUsers')}
               </div>
             )}
           </div>
@@ -384,7 +388,7 @@ export default function AdminMessagesPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 truncate">{user.name || '未设置'}</div>
+                      <div className="font-medium text-gray-900 truncate">{user.name || t('admin.notSet')}</div>
                       <div className="text-sm text-gray-500 truncate">{user.email}</div>
                     </div>
                     <div className={cn(
@@ -404,7 +408,7 @@ export default function AdminMessagesPage() {
 
             {users && users.users.length === 0 && (
               <div className="text-center py-12 text-gray-500 bg-white rounded-lg">
-                暂无用户
+                {t('admin.noUsers')}
               </div>
             )}
           </div>
@@ -417,7 +421,7 @@ export default function AdminMessagesPage() {
           {error && !messages ? (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
               <div className="text-red-500">{error}</div>
-              <button onClick={fetchMessages} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">重试</button>
+              <button onClick={fetchMessages} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{t('admin.retry')}</button>
             </div>
           ) : loading ? (
             <div className="flex items-center justify-center py-12">
@@ -430,9 +434,9 @@ export default function AdminMessagesPage() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">私信内容</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">接收用户</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">发送时间</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.messageContent')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.recipient')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.sentAt')}</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -443,7 +447,7 @@ export default function AdminMessagesPage() {
                           <div className="text-sm text-gray-500 line-clamp-2 mt-1">{msg.content}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{msg.user.name || '未设置'}</div>
+                          <div className="text-sm text-gray-900">{msg.user.name || t('admin.notSet')}</div>
                           <div className="text-xs text-gray-500">{msg.user.email}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -462,7 +466,7 @@ export default function AdminMessagesPage() {
                     <div className="font-medium text-gray-900">{msg.title}</div>
                     <div className="text-sm text-gray-500 line-clamp-2 mt-1">{msg.content}</div>
                     <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
-                      <span>接收: {msg.user.name || msg.user.email}</span>
+                      <span>{t('admin.toColon')} {msg.user.name || msg.user.email}</span>
                       <span>{formatDate(msg.createdAt)}</span>
                     </div>
                   </div>
@@ -473,7 +477,7 @@ export default function AdminMessagesPage() {
               {messages && messages.pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between px-4 md:px-6 py-4 border-t">
                   <div className="text-sm text-gray-500">
-                    共 {messages.pagination.total} 条
+                    {t('admin.totalCount', { count: messages.pagination.total })}
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -501,7 +505,7 @@ export default function AdminMessagesPage() {
 
           {messages && messages.messages.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              暂无发送记录
+              {t('admin.noSentMessages')}
             </div>
           )}
         </div>
@@ -513,7 +517,7 @@ export default function AdminMessagesPage() {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
               <h3 className="text-lg font-semibold">
-                {sendToAll ? '发送给所有用户' : `发送给 ${selectedUsers.length} 位用户`}
+                {sendToAll ? t('admin.sendToAllUsers') : t('admin.sendToCountUsers', { count: selectedUsers.length })}
               </h3>
               <button onClick={closeCompose} className="text-gray-400 hover:text-gray-600">
                 <X size={20} />
@@ -530,31 +534,31 @@ export default function AdminMessagesPage() {
                   ))}
                   {selectedUsers.length > 5 && (
                     <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                      +{selectedUsers.length - 5} 更多
+                      +{selectedUsers.length - 5} {t('admin.more')}
                     </span>
                   )}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.title')}</label>
                 <input
                   type="text"
                   value={composeData.title}
                   onChange={(e) => setComposeData({ ...composeData, title: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="请输入私信标题"
+                  placeholder={t('admin.messageTitlePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">内容</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.content')}</label>
                 <textarea
                   value={composeData.content}
                   onChange={(e) => setComposeData({ ...composeData, content: e.target.value })}
                   rows={6}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="请输入私信内容"
+                  placeholder={t('admin.messageContentPlaceholder')}
                 />
               </div>
             </div>
@@ -564,14 +568,14 @@ export default function AdminMessagesPage() {
                 onClick={closeCompose}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
               >
-                取消
+                {t('admin.cancel')}
               </button>
               <button
                 onClick={handleSend}
                 disabled={sending}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
               >
-                {sending ? '发送中...' : '发送'}
+                {sending ? t('admin.sending') : t('admin.send')}
               </button>
             </div>
           </div>

@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BIBLE_BOOKS } from "@/lib/constants";
 import { useTranslation } from "@/lib/i18n";
+import { formatDateClient } from "@/lib/locale";
 
 interface MemberProfileProps {
   userId: string;
@@ -111,7 +112,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("zh-CN");
+    return formatDateClient(new Date(dateStr));
   };
 
   const getBookName = (bookId: string) => {
