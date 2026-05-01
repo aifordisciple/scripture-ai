@@ -199,7 +199,7 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
     };
 
     // 无当前任务，立即开始处理
-    if (!currentAiRequest || currentAiRequest.status === 'completed' || currentAiRequest.status === 'error') {
+    if (!currentAiRequest || currentAiRequest.status === 'completed' || currentAiRequest.status === 'error' || currentAiRequest.status === 'cancelled') {
       set({
         currentAiRequest: { ...newItem, status: 'processing' },
         aiRequestTrigger: { prompt, content, context, ref, timestamp: Date.now() }, // 兼容旧代码
@@ -232,9 +232,9 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
         // 异步启动下一个请求
         setTimeout(() => get().startProcessingNext(), 0);
       } else {
-        // 无排队项：直接取消+中止信号
+        // 无排队项：清空当前请求+中止信号
         set({
-          currentAiRequest: { ...currentAiRequest, status: 'cancelled' },
+          currentAiRequest: null,
           isAiGenerating: false,
           shouldAbortStream: true
         });
