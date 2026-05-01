@@ -221,19 +221,22 @@ export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, ge
     const { currentAiRequest, aiQueue } = get();
 
     if (currentAiRequest?.id === id) {
+      // 设置中止信号，AISidebar的useEffect会异步调用stop()
       if (aiQueue.length > 0) {
-        // 有排队项：标记取消 + 请求中止流，保持isAiGenerating避免动画抖动
+        // 有排队项：标记取消+中止信号，保持isAiGenerating避免动画抖动
         set({
           currentAiRequest: { ...currentAiRequest, status: 'cancelled' },
-          shouldAbortStream: true,
-          isAiGenerating: true
+          isAiGenerating: true,
+          shouldAbortStream: true
         });
+        // 异步启动下一个请求
+        setTimeout(() => get().startProcessingNext(), 0);
       } else {
-        // 无排队项：标记取消 + 请求中止流
+        // 无排队项：直接取消+中止信号
         set({
           currentAiRequest: { ...currentAiRequest, status: 'cancelled' },
-          shouldAbortStream: true,
-          isAiGenerating: false
+          isAiGenerating: false,
+          shouldAbortStream: true
         });
       }
     } else {

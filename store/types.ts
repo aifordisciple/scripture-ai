@@ -301,6 +301,7 @@ export interface AISlice {
   aiQueue: AIQueueItem[];
   enqueueAI: (prompt: string, content: string, context: string, ref: VerseRef) => void;
   cancelAIRequest: (id: string) => void;
+  // 流中止信号：AISidebar通过useEffect监听此标志，异步调用stop()
   shouldAbortStream: boolean;
   clearAbortStream: () => void;
   clearAIQueue: () => void;

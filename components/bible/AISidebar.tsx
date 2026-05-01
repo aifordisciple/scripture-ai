@@ -475,13 +475,10 @@ export function AISidebar() {
     return () => {
       if (isLoading) {
         stop()
-        if (currentAiRequest) {
-          cancelAIRequest(currentAiRequest.id)
-        }
         setAiGenerating(false)
       }
     }
-  }, [isLoading, stop, setAiGenerating, currentAiRequest, cancelAIRequest])
+  }, [isLoading, stop, setAiGenerating])
 
   // AI 生成状态
   // 使用setTimeout避免在effect执行期间触发连锁Zustand set()导致React error #185
@@ -493,18 +490,20 @@ export function AISidebar() {
     }
   }, [isLoading, setAiGenerating, currentAiRequest])
 
-  // 处理流中止请求（从MagicBall等外部组件触发的取消）
+  // 监听流中止信号，异步调用stop()避免React error #185
+  // 关键：cancelAIRequest只设置Zustand标志，stop()在AISidebar自己的effect中异步调用
+  // 这样避免了跨组件同步setState导致的渲染冲突
   useEffect(() => {
-    if (!shouldAbortStream) return;
-    // 全部延迟到下一个事件循环，避免在effect执行期间触发连锁状态更新导致React error #185
-    setTimeout(() => {
-      stop();
-      clearAbortStream();
-      if (aiQueue.length > 0) {
-        startProcessingNext();
-      }
-    }, 0);
-  }, [shouldAbortStream, stop, aiQueue, startProcessingNext, clearAbortStream])
+    if (shouldAbortStream) {
+      // 使用setTimeout确保stop()在下一个事件循环中执行，
+      // 完全脱离当前渲染周期
+      const timer = setTimeout(() => {
+        stop();
+        clearAbortStream();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldAbortStream, stop, clearAbortStream])
 
   // 自动滚动
   useEffect(() => {
