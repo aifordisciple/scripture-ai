@@ -15,6 +15,7 @@ export interface AudioPlayerInstance {
   duration: number;
   currentTime: number;
   playbackRate: number;
+  ttsMode?: 'server' | 'browser';
   play: (text: string) => void;
   seek: (time: number) => void;
   setRate: (rate: number) => void;

@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
     // 优先使用项目 venv 中的 python，回退到系统 python3
     const venvPython = path.join(process.cwd(), '.venv/bin/python3');
     const pythonBin = fs.existsSync(venvPython) ? venvPython : 'python3';
-    await execFileAsync(pythonBin, [scriptPath, safeText, tempFilePath]);
+    const { stderr } = await execFileAsync(pythonBin, [scriptPath, safeText, tempFilePath], { timeout: 30000 });
+    if (stderr) console.warn('[TTS] Python stderr:', stderr);
 
     const audioBuffer = fs.readFileSync(tempFilePath);
     fs.unlink(tempFilePath, () => {}); // 异步清理
@@ -41,8 +42,8 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('TTS Error:', error);
+    console.error('TTS Error:', error?.message || error);
     if (tempFilePath && fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-    return new NextResponse(JSON.stringify({ error: 'TTS Failed' }), { status: 500 });
+    return new NextResponse(JSON.stringify({ error: 'TTS Failed', detail: error?.message || String(error) }), { status: 500 });
   }
 }

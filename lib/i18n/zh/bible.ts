@@ -6,6 +6,7 @@ export const bible = {
     copied: '已复制',
     copy: '复制',
     copiedToClipboard: '已复制到剪贴板',
+    copyFailed: '复制失败，请手动复制',
     bookmarked: '已收藏',
     bookmark: '收藏',
     share: '分享',

@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm'
 import { Copy, Check, Bookmark, Share2, RefreshCw, User, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AudioButton } from './AudioButton'
+import { useToast } from '@/components/ui/toast'
 import { useTranslation } from '@/lib/i18n'
 
 export interface Message {
@@ -47,6 +48,7 @@ const MessageBubble = memo(function MessageBubble({
   const [copied, setCopied] = useState(false)
   const [bookmarked, setBookmarked] = useState(isSaved || false)
   const { t } = useTranslation()
+  const { addToast } = useToast()
   const { role, content } = message
 
   // 处理 <think> 标签
@@ -70,24 +72,52 @@ const MessageBubble = memo(function MessageBubble({
     e.stopPropagation()
     const copyText = mainText || content
 
+    const fallbackCopy = () => {
+      const textArea = document.createElement('textarea')
+      textArea.value = copyText
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-9999px'
+      textArea.style.top = '-9999px'
+      textArea.style.opacity = '0'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      let success = false
+      try {
+        success = document.execCommand('copy')
+      } catch {
+        success = false
+      }
+      document.body.removeChild(textArea)
+      return success
+    }
+
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(copyText)
         .then(() => {
           setCopied(true)
+          addToast({ type: 'success', message: t('bible.copiedToClipboard') });
           setTimeout(() => setCopied(false), 2000)
         })
         .catch(() => {
-          const textArea = document.createElement('textarea')
-          textArea.value = copyText
-          textArea.style.position = 'fixed'
-          textArea.style.left = '-9999px'
-          document.body.appendChild(textArea)
-          textArea.select()
-          document.execCommand('copy')
-          document.body.removeChild(textArea)
-          setCopied(true)
-          setTimeout(() => setCopied(false), 2000)
+          const success = fallbackCopy()
+          if (success) {
+            setCopied(true)
+            addToast({ type: 'success', message: t('bible.copiedToClipboard') });
+            setTimeout(() => setCopied(false), 2000)
+          } else {
+            addToast({ type: 'error', message: t('bible.copyFailed') || '复制失败' });
+          }
         })
+    } else {
+      const success = fallbackCopy()
+      if (success) {
+        setCopied(true)
+        addToast({ type: 'success', message: t('bible.copiedToClipboard') });
+        setTimeout(() => setCopied(false), 2000)
+      } else {
+        addToast({ type: 'error', message: t('bible.copyFailed') || '复制失败' });
+      }
     }
   }
 

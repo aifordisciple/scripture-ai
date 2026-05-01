@@ -72,6 +72,26 @@ const MessageBubble = memo(function MessageBubble({
     e.stopPropagation()
     const copyText = mainText || content
 
+    const fallbackCopy = () => {
+      const textArea = document.createElement('textarea')
+      textArea.value = copyText
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-9999px'
+      textArea.style.top = '-9999px'
+      textArea.style.opacity = '0'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      let success = false
+      try {
+        success = document.execCommand('copy')
+      } catch {
+        success = false
+      }
+      document.body.removeChild(textArea)
+      return success
+    }
+
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(copyText)
         .then(() => {
@@ -80,19 +100,24 @@ const MessageBubble = memo(function MessageBubble({
           setTimeout(() => setCopied(false), 2000)
         })
         .catch(() => {
-          // Fallback copy
-          const textArea = document.createElement('textarea')
-          textArea.value = copyText
-          textArea.style.position = 'fixed'
-          textArea.style.left = '-9999px'
-          document.body.appendChild(textArea)
-          textArea.select()
-          document.execCommand('copy')
-          document.body.removeChild(textArea)
-          setCopied(true)
-          addToast({ type: 'success', message: t('bible.copiedToClipboard') });
-          setTimeout(() => setCopied(false), 2000)
+          const success = fallbackCopy()
+          if (success) {
+            setCopied(true)
+            addToast({ type: 'success', message: t('bible.copiedToClipboard') });
+            setTimeout(() => setCopied(false), 2000)
+          } else {
+            addToast({ type: 'error', message: t('bible.copyFailed') || '复制失败' });
+          }
         })
+    } else {
+      const success = fallbackCopy()
+      if (success) {
+        setCopied(true)
+        addToast({ type: 'success', message: t('bible.copiedToClipboard') });
+        setTimeout(() => setCopied(false), 2000)
+      } else {
+        addToast({ type: 'error', message: t('bible.copyFailed') || '复制失败' });
+      }
     }
   }
 

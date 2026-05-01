@@ -6,6 +6,7 @@ export const bible = {
     copied: 'Copied',
     copy: 'Copy',
     copiedToClipboard: 'Copied to clipboard',
+    copyFailed: 'Copy failed, please copy manually',
     bookmarked: 'Saved',
     bookmark: 'Save',
     share: 'Share',
