@@ -19,6 +19,7 @@ import { bible } from './bible'
 import { admin } from './admin'
 import { pwa } from './pwa'
 import dashboard from './dashboard'
+import { sermon } from './sermon'
 import type { DeepStringify } from '../types'
 
 export const zh = {
@@ -43,6 +44,7 @@ export const zh = {
   ...admin,
   ...pwa,
   dashboard,
+  ...sermon,
 } as const
 
 export type Translations = DeepStringify<typeof zh>

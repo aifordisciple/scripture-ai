@@ -19,6 +19,7 @@ import { bible } from './bible'
 import { admin } from './admin'
 import { pwa } from './pwa'
 import dashboard from './dashboard'
+import { sermon } from './sermon'
 import type { Translations } from '../zh'
 
 export const en: Translations = {
@@ -43,4 +44,5 @@ export const en: Translations = {
   ...admin,
   ...pwa,
   dashboard,
+  ...sermon,
 }

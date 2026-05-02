@@ -122,6 +122,11 @@ model User {
 
   // [新增] 管理员操作日志
   adminLogs AdminLog[]
+
+  // 讲章
+  sermons        Sermon[]
+  sermonFolders  SermonFolder[]
+  sermonTemplates SermonTemplate[]
 }
 
 model UserSetting {
@@ -1101,4 +1106,82 @@ model PageView {
   @@index([path])
   @@index([sessionId])
   @@map("page_views")
+}
+
+// ==================================================
+// 讲章系统模型
+// ==================================================
+
+enum SermonStyle {
+  EXPOSITORY
+  TOPICAL
+  NARRATIVE
+  FREE
+}
+
+enum SermonStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Sermon {
+  id              String       @id @default(cuid())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title           String       @default("")
+  content         String       @default("{}") @db.Text
+  folderId        String?
+
+  style           SermonStyle  @default(FREE)
+  status          SermonStatus @default(DRAFT)
+  sermonDate      DateTime?
+
+  verseRefs       String       @default("[]") @db.Text
+  tags            String[]
+
+  aiChatHistory   String?      @db.Text
+
+  wordCount       Int          @default(0)
+  estimatedMinutes Int?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([userId, folderId])
+  @@index([userId, status])
+  @@index([userId, createdAt])
+}
+
+model SermonFolder {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name      String
+  parentId  String?
+  sortOrder Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, parentId])
+}
+
+model SermonTemplate {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  style       SermonStyle @default(FREE)
+  structure   String   @default("{}") @db.Text
+  isDefault   Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }

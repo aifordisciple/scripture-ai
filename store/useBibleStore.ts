@@ -11,7 +11,8 @@ import {
   createGroupSlice,
   createAtlasSlice,
   createDMSlice,
-  createLocaleSlice
+  createLocaleSlice,
+  createSermonSlice
 } from './slices';
 
 // --------------------------------------------------
@@ -29,6 +30,7 @@ export const useBibleStore = create<StoreState>()(
       ...createAtlasSlice(...a),
       ...createDMSlice(...a),
       ...createLocaleSlice(...a),
+      ...createSermonSlice(...a),
     }),
     {
       name: 'bible-storage',
@@ -121,6 +123,12 @@ export const useBibleStore = create<StoreState>()(
           aiQueue: [],
           sessionStatus: 'idle',
           sessionError: null,
+          // Sermon 状态不持久化
+          currentSermon: null,
+          sermons: [],
+          sermonFolders: [],
+          isSermonSaving: false,
+          sermonsLoading: false,
         };
       },
     }

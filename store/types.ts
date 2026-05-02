@@ -23,7 +23,7 @@ export interface SessionError {
 
 export interface Tab {
   id: string;
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plan' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights' | 'bookmarks';
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plan' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights' | 'bookmarks' | 'sermon';
   book?: string;
   chapter?: string;
   query?: string;
@@ -225,6 +225,34 @@ export interface OnboardingStatus {
   group: OnboardingState;
 }
 
+// 讲章数据结构
+export interface SermonData {
+  id: string;
+  title: string;
+  content: string;
+  folderId: string | null;
+  style: 'EXPOSITORY' | 'TOPICAL' | 'NARRATIVE' | 'FREE';
+  status: 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED';
+  sermonDate: string | null;
+  verseRefs: string;
+  tags: string[];
+  wordCount: number;
+  estimatedMinutes: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SermonFolderData {
+  id: string;
+  name: string;
+  parentId: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type SermonPanelType = 'list' | 'ai' | 'verse' | 'template' | 'review' | 'settings';
+
 export interface UISlice {
   isAuthOpen: boolean;
   setAuthOpen: (open: boolean) => void;
@@ -269,7 +297,7 @@ export interface ReaderSlice {
   activeTabId: string;
   // [修复] 在这里补上 'highlights' | 'notes' | 'plan' | 'cross-ref' | 'group'
   addTab: (params: {
-    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plan' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights';
+    type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'plan' | 'cross-ref' | 'group' | 'atlas' | 'theme-graph' | 'insights' | 'sermon';
     book?: string;
     chapter?: string;
     query?: string;
@@ -471,10 +499,31 @@ export interface LocaleSlice {
   setBibleVersion: (version: 'CUV' | 'KJV') => void;
 }
 
+export interface SermonSlice {
+  currentSermon: SermonData | null;
+  setCurrentSermon: (sermon: SermonData | null) => void;
+  sermons: SermonData[];
+  setSermons: (sermons: SermonData[]) => void;
+  sermonFolders: SermonFolderData[];
+  setSermonFolders: (folders: SermonFolderData[]) => void;
+  activeSermonPanel: SermonPanelType;
+  setActiveSermonPanel: (panel: SermonPanelType) => void;
+  sermonSearchQuery: string;
+  setSermonSearchQuery: (query: string) => void;
+  sermonSelectedFolderId: string | null;
+  setSermonSelectedFolderId: (id: string | null) => void;
+  sermonSelectedTags: string[];
+  setSermonSelectedTags: (tags: string[]) => void;
+  isSermonSaving: boolean;
+  setIsSermonSaving: (saving: boolean) => void;
+  sermonsLoading: boolean;
+  setSermonsLoading: (loading: boolean) => void;
+}
+
 // --------------------------------------------------
 // 3. 聚合总状态类型
 // --------------------------------------------------
-export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & DMSlice & LocaleSlice;
+export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & DMSlice & LocaleSlice & SermonSlice;
 
 // --------------------------------------------------
 // 4. 小组读经计划状态 (GroupSlice)

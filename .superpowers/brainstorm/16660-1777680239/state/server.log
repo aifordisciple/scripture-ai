@@ -1,0 +1,5 @@
+{"type":"server-started","port":54344,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:54344","screen_dir":"/opt/data1/public/software/systools/bibleAI/scripture-ai/.superpowers/brainstorm/16660-1777680239/content","state_dir":"/opt/data1/public/software/systools/bibleAI/scripture-ai/.superpowers/brainstorm/16660-1777680239/state"}
+{"type":"screen-added","file":"/opt/data1/public/software/systools/bibleAI/scripture-ai/.superpowers/brainstorm/16660-1777680239/content/layout.html"}
+{"type":"screen-added","file":"/opt/data1/public/software/systools/bibleAI/scripture-ai/.superpowers/brainstorm/16660-1777680239/content/architecture.html"}
+{"type":"screen-added","file":"/opt/data1/public/software/systools/bibleAI/scripture-ai/.superpowers/brainstorm/16660-1777680239/content/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}

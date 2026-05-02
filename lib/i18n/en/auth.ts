@@ -23,6 +23,7 @@ export const auth = {
     myFeedback: 'My Feedback',
     notifications: 'Notifications',
     groupReading: 'Group Reading',
+    mySermons: 'My Sermons',
     feedbackManagement: 'Feedback Management',
     feedback: 'Feedback',
     logout: 'Log Out',

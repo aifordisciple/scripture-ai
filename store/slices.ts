@@ -1,8 +1,10 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, SessionStatus, SessionError, ReadingHistoryData, LocaleSlice } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, SessionStatus, SessionError, ReadingHistoryData, LocaleSlice, SermonSlice } from './types';
 import { createLocaleSlice } from './slices/localeSlice';
 export { createLocaleSlice };
+import { createSermonSlice } from './slices/sermonSlice';
+export { createSermonSlice };
 import { BIBLE_PLANS } from '@/lib/plans';
 import { BIBLE_BOOKS, THEOLOGICAL_PROMPTS } from '@/lib/constants';
 

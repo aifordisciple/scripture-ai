@@ -1,0 +1,140 @@
+<h2>讲章编辑器 — 整体架构设计</h2>
+<p class="subtitle">基于讨论结果的综合方案</p>
+
+<div class="section">
+<h3>1. 界面布局：全屏编辑 + 图标侧栏</h3>
+<div class="mockup">
+  <div class="mockup-header">整体架构</div>
+  <div class="mockup-body" style="display:flex;height:400px;">
+    <div style="width:40px;background:#1e293b;display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:8px;">
+      <div style="color:#60a5fa;font-size:16px;" title="讲章列表">📚</div>
+      <div style="color:#94a3b8;font-size:16px;" title="AI 助手">🤖</div>
+      <div style="color:#94a3b8;font-size:16px;" title="经文参考">📖</div>
+      <div style="color:#94a3b8;font-size:16px;" title="模板">📋</div>
+      <div style="color:#94a3b8;font-size:16px;" title="审查">✅</div>
+      <div style="margin-top:auto;color:#94a3b8;font-size:16px;" title="设置">⚙️</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;background:white;">
+      <div style="border-bottom:1px solid #e2e8f0;padding:10px 20px;display:flex;align-items:center;gap:10px;">
+        <span style="font-weight:700;font-size:15px;">起初的神</span>
+        <span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;">释经式</span>
+        <span style="font-size:10px;background:#f0fdf4;color:#166534;padding:2px 8px;border-radius:4px;">2025-05-04</span>
+        <span style="font-size:10px;background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:4px;">创1:1-3</span>
+        <span style="margin-left:auto;font-size:10px;color:#94a3b8;">自动保存 ✓</span>
+      </div>
+      <div style="flex:1;padding:24px 48px;overflow-y:auto;max-width:760px;margin:0 auto;width:100%;">
+        <div style="font-size:22px;font-weight:700;margin-bottom:16px;color:#0f172a;">起初的神 — 从混沌到秩序</div>
+        <div style="background:#f0f9ff;border-left:3px solid #3b82f6;padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:20px;font-size:12px;color:#1e40af;">
+          📖 <strong>创世记 1:1-3</strong>（CUV）<br>
+          「起初，神创造天地。地是空虚混沌，渊面黑暗；神的灵运行在水面上。神说：要有光，就有了光。」
+        </div>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;color:#1e293b;">一、引言：从混沌到秩序</div>
+        <div style="color:#334155;margin-bottom:16px;line-height:1.9;">当我们打开圣经的第一页，看到的是一幅令人震撼的画面——在一切存在之先，神已经在那里。希伯来文"בְּרֵאשִׁית"（bereshith）不仅仅指向一个时间点，更指向一切意义的起源...</div>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;color:#1e293b;">二、神说：话语的权能</div>
+        <div style="color:#334155;margin-bottom:16px;line-height:1.9;">「神说：要有光」——创造不是通过挣扎，不是通过争战，而是通过话语。这揭示了神话语的绝对权能...</div>
+        <div style="font-size:17px;font-weight:600;margin-bottom:8px;color:#1e293b;">三、从黑暗到光明：恩典的预表</div>
+        <div style="color:#94a3b8;font-style:italic;line-height:1.9;">（待展开...）</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+<h3>2. 工作流：双入口汇合</h3>
+<div class="mockup">
+  <div class="mockup-body" style="padding:20px;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px;">
+      <div style="background:#eff6ff;border:2px solid #3b82f6;border-radius:12px;padding:14px 20px;text-align:center;min-width:140px;">
+        <div style="font-size:20px;margin-bottom:4px;">📖</div>
+        <div style="font-weight:600;font-size:13px;color:#1d4ed8;">从经文开始</div>
+        <div style="font-size:10px;color:#64748b;margin-top:4px;">选经文 → AI分析<br>→ 提炼主题</div>
+      </div>
+      <div style="font-size:18px;color:#94a3b8;">或</div>
+      <div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;padding:14px 20px;text-align:center;min-width:140px;">
+        <div style="font-size:20px;margin-bottom:4px;">💡</div>
+        <div style="font-weight:600;font-size:13px;color:#92400e;">从主题开始</div>
+        <div style="font-size:10px;color:#64748b;margin-top:4px;">定主题 → AI推荐经文<br>→ 选定经文</div>
+      </div>
+    </div>
+    <div style="text-align:center;color:#94a3b8;margin-bottom:16px;">⬇ 汇合 ⬇</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <div style="background:#f1f5f9;border-radius:8px;padding:8px 14px;font-size:11px;color:#475569;">🤖 AI 大纲生成</div>
+      <div style="color:#94a3b8;">→</div>
+      <div style="background:#f1f5f9;border-radius:8px;padding:8px 14px;font-size:11px;color:#475569;">✏️ 自由写作 + AI辅助</div>
+      <div style="color:#94a3b8;">→</div>
+      <div style="background:#f1f5f9;border-radius:8px;padding:8px 14px;font-size:11px;color:#475569;">✅ AI 审查反馈</div>
+      <div style="color:#94a3b8;">→</div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:8px 14px;font-size:11px;color:#166534;">🎉 完成</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+<h3>3. 侧面板功能</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+    <div style="font-weight:600;font-size:13px;margin-bottom:6px;">📚 讲章列表</div>
+    <div style="font-size:11px;color:#64748b;line-height:1.6;">
+      • 文件夹分类树（主日讲道/查经/培灵会...）<br>
+      • 标签筛选（释经式/创世记/2025...）<br>
+      • 搜索、排序（日期/标题/状态）<br>
+      • 新建/删除/移动讲章
+    </div>
+  </div>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+    <div style="font-weight:600;font-size:13px;margin-bottom:6px;">🤖 AI 助手</div>
+    <div style="font-size:11px;color:#64748b;line-height:1.6;">
+      • 深度对话（经文分析/神学讨论）<br>
+      • 上下文感知（自动关联当前讲章）<br>
+      • 一键插入建议到编辑器<br>
+      • 快捷指令（续写/润色/扩展）
+    </div>
+  </div>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+    <div style="font-weight:600;font-size:13px;margin-bottom:6px;">📖 经文参考</div>
+    <div style="font-size:11px;color:#64748b;line-height:1.6;">
+      • 关联经文全文显示（CUV/KJV）<br>
+      • 交叉引用链<br>
+      • 原文词义（希伯来/希腊语）<br>
+      • 经文内联插入到编辑器
+    </div>
+  </div>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+    <div style="font-weight:600;font-size:13px;margin-bottom:6px;">📋 模板</div>
+    <div style="font-size:11px;color:#64748b;line-height:1.6;">
+      • 预置模板（释经式/主题式/叙事式）<br>
+      • 自定义模板保存<br>
+      • 从已有讲章创建模板
+    </div>
+  </div>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;grid-column:1/3;">
+    <div style="font-weight:600;font-size:13px;margin-bottom:6px;">✅ 讲章审查</div>
+    <div style="font-size:11px;color:#64748b;line-height:1.6;">
+      • 释经准确性检查 • 逻辑连贯性分析 • 福音焦点检测 • 应用落地建议 • 时间预估（字数→讲道时长）• 生成讲道摘要/讨论问题
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+<h3>4. 编辑器内联 AI 操作</h3>
+<div class="mockup">
+  <div class="mockup-body" style="padding:16px;">
+    <div style="font-size:12px;color:#334155;line-height:1.8;position:relative;">
+      <span>「神说：要有光」——创造不是通过挣扎，而是通过话语。</span>
+      <span style="background:#dbeafe;border-radius:2px;padding:0 2px;">这揭示了神话语的绝对权能</span>
+      <span style="color:#94a3b8;">|</span>
+    </div>
+    <div style="display:inline-flex;gap:4px;margin-top:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:4px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+      <button class="mock-button" style="font-size:10px;padding:4px 10px;">✨ 续写</button>
+      <button class="mock-button" style="font-size:10px;padding:4px 10px;">📝 润色</button>
+      <button class="mock-button" style="font-size:10px;padding:4px 10px;">📖 插经文</button>
+      <button class="mock-button" style="font-size:10px;padding:4px 10px;">💡 补例证</button>
+      <button class="mock-button" style="font-size:10px;padding:4px 10px;">🔗 交叉引用</button>
+    </div>
+    <div style="font-size:10px;color:#94a3b8;margin-top:8px;">选中文字后弹出浮动工具栏，AI 操作结果直接插入编辑器</div>
+  </div>
+</div>
+</div>
