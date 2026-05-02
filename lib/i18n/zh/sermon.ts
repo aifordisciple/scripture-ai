@@ -43,5 +43,39 @@ export const sermon = {
     templateExpositoryDesc: '经文→背景→释义→应用→结语',
     templateTopicalDesc: '主题→经文依据→论证→应用→呼召',
     templateNarrativeDesc: '故事→转折→启示→应用',
+    templateFreeDesc: '自由写作，无固定结构',
+    templateApply: '应用模板',
+    templateApplyConfirm: '应用模板将替换当前编辑器内容，确定继续？',
+
+    // AI 面板
+    aiPanelTitle: 'AI 助手',
+    aiPlaceholder: '输入问题或指令...',
+    aiQuickContinue: '续写',
+    aiQuickPolish: '润色',
+    aiQuickVerse: '插经文',
+    aiQuickExample: '加例证',
+    aiQuickCrossRef: '交叉引用',
+    aiQuickApplication: '生成应用',
+    aiInsertToEditor: '插入到编辑器',
+    aiThinking: '思考中...',
+    aiNoSermon: '请先选择一篇讲章',
+
+    // 内联 AI 操作
+    inlineContinue: '续写',
+    inlinePolish: '润色',
+    inlineVerse: '插经文',
+    inlineExample: '加例证',
+    inlineCrossRef: '交叉引用',
+    inlineProcessing: '处理中...',
+
+    // 经文面板
+    versePanelTitle: '经文参考',
+    verseNoRefs: '暂无关联经文，请在讲章中添加经文引用',
+    verseInsert: '插入',
+    verseLoading: '加载中...',
+
+    // 模板面板
+    templatePanelTitle: '讲章模板',
+    templatePreset: '预置模板',
   },
 } as const

@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useCallback, useRef } from 'react'
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEffect, useCallback, useRef, useState } from 'react'
+import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Highlight from '@tiptap/extension-highlight'
@@ -9,6 +9,7 @@ import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { SermonEditorHeader } from './SermonEditorHeader'
+import { SermonEditorProvider } from './SermonEditorContext'
 import {
   Bold,
   Italic,
@@ -18,6 +19,12 @@ import {
   ListOrdered,
   Quote,
   Highlighter,
+  Sparkles,
+  PenLine,
+  BookOpen,
+  Lightbulb,
+  Link2,
+  Loader2,
 } from 'lucide-react'
 
 export function SermonEditor() {
@@ -28,15 +35,18 @@ export function SermonEditor() {
     setIsSermonSaving,
     setSermons,
     sermons,
+    apiConfig,
+    locale,
+    sermonAiActionLoading,
+    setSermonAiActionLoading,
   } = useBibleStore()
 
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [aiAction, setAiAction] = useState<string | null>(null)
 
-  // 自动保存
+  // Auto-save
   const autoSave = useCallback(async (content: string) => {
     if (!currentSermon) return
-
-    // 计算字数
     const text = JSON.parse(content).content
       ?.map((node: any) => node.content?.map((c: any) => c.text || '').join('') || '')
       .join('\n') || ''
@@ -58,10 +68,9 @@ export function SermonEditor() {
         }),
       })
       const data = await res.json()
-      // 更新列表中的讲章
       setSermons(sermons.map(s => s.id === currentSermon.id ? { ...s, wordCount, updatedAt: data.data.updatedAt } : s))
     } catch {
-      // 静默处理
+      // Silent
     } finally {
       setIsSermonSaving(false)
     }
@@ -81,8 +90,6 @@ export function SermonEditor() {
     onUpdate: ({ editor }) => {
       const json = JSON.stringify(editor.getJSON())
       setCurrentSermon({ ...currentSermon!, content: json })
-
-      // Debounce 自动保存
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
       saveTimerRef.current = setTimeout(() => autoSave(json), 2000)
     },
@@ -93,7 +100,7 @@ export function SermonEditor() {
     },
   })
 
-  // 当切换讲章时更新编辑器内容
+  // Update editor content when switching sermons
   useEffect(() => {
     if (editor && currentSermon) {
       const content = typeof currentSermon.content === 'string'
@@ -101,79 +108,150 @@ export function SermonEditor() {
         : currentSermon.content
       editor.commands.setContent(content, false)
     }
-  }, [currentSermon?.id]) // 只在切换讲章时更新，不在每次 content 变化时更新
+  }, [currentSermon?.id])
 
-  // 清理定时器
+  // Cleanup timer
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     }
   }, [])
 
+  // Inline AI action handler
+  const handleAiAction = async (action: string) => {
+    if (!editor || sermonAiActionLoading) return
+    const { from, to } = editor.state.selection
+    if (from === to) return
+    const selectedText = editor.state.doc.textBetween(from, to, '\n')
+    if (!selectedText.trim()) return
+
+    setSermonAiActionLoading(true)
+    setAiAction(action)
+    try {
+      const res = await fetch('/api/sermon/ai-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          selectedText,
+          verseRefs: currentSermon?.verseRefs,
+          style: currentSermon?.style,
+          locale,
+          apiConfig,
+        }),
+      })
+      const data = await res.json()
+      if (data.result) {
+        // Replace selection with AI result
+        editor.chain().focus().insertContent(data.result).run()
+      }
+    } catch {
+      // Silent
+    } finally {
+      setSermonAiActionLoading(false)
+      setAiAction(null)
+    }
+  }
+
   if (!currentSermon || !editor) return null
 
+  const inlineActions = [
+    { action: 'continue', icon: Sparkles, label: t('sermon.inlineContinue') },
+    { action: 'polish', icon: PenLine, label: t('sermon.inlinePolish') },
+    { action: 'insert-verse', icon: BookOpen, label: t('sermon.inlineVerse') },
+    { action: 'add-example', icon: Lightbulb, label: t('sermon.inlineExample') },
+    { action: 'cross-ref', icon: Link2, label: t('sermon.inlineCrossRef') },
+  ]
+
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* 头部元数据 */}
-      <SermonEditorHeader />
+    <SermonEditorProvider editor={editor}>
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Header */}
+        <SermonEditorHeader />
 
-      {/* 工具栏 */}
-      <div className="border-b border-slate-200 dark:border-slate-800 px-4 py-1.5 flex items-center gap-1">
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          isActive={editor.isActive('bold')}
-          icon={<Bold className="w-3.5 h-3.5" />}
-        />
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          isActive={editor.isActive('italic')}
-          icon={<Italic className="w-3.5 h-3.5" />}
-        />
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          isActive={editor.isActive('heading', { level: 2 })}
-          icon={<Heading2 className="w-3.5 h-3.5" />}
-        />
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          isActive={editor.isActive('heading', { level: 3 })}
-          icon={<Heading3 className="w-3.5 h-3.5" />}
-        />
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          isActive={editor.isActive('bulletList')}
-          icon={<List className="w-3.5 h-3.5" />}
-        />
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          isActive={editor.isActive('orderedList')}
-          icon={<ListOrdered className="w-3.5 h-3.5" />}
-        />
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          isActive={editor.isActive('blockquote')}
-          icon={<Quote className="w-3.5 h-3.5" />}
-        />
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHighlight().run()}
-          isActive={editor.isActive('highlight')}
-          icon={<Highlighter className="w-3.5 h-3.5" />}
-        />
-      </div>
+        {/* Toolbar */}
+        <div className="border-b border-slate-200 dark:border-slate-800 px-4 py-1.5 flex items-center gap-1">
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            isActive={editor.isActive('bold')}
+            icon={<Bold className="w-3.5 h-3.5" />}
+          />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            isActive={editor.isActive('italic')}
+            icon={<Italic className="w-3.5 h-3.5" />}
+          />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            isActive={editor.isActive('heading', { level: 2 })}
+            icon={<Heading2 className="w-3.5 h-3.5" />}
+          />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            isActive={editor.isActive('heading', { level: 3 })}
+            icon={<Heading3 className="w-3.5 h-3.5" />}
+          />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            isActive={editor.isActive('bulletList')}
+            icon={<List className="w-3.5 h-3.5" />}
+          />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            isActive={editor.isActive('orderedList')}
+            icon={<ListOrdered className="w-3.5 h-3.5" />}
+          />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            isActive={editor.isActive('blockquote')}
+            icon={<Quote className="w-3.5 h-3.5" />}
+          />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleHighlight().run()}
+            isActive={editor.isActive('highlight')}
+            icon={<Highlighter className="w-3.5 h-3.5" />}
+          />
+        </div>
 
-      {/* 编辑器内容 */}
-      <div className="flex-1 overflow-y-auto px-8 py-6">
-        <div className="max-w-3xl mx-auto">
-          <EditorContent editor={editor} />
+        {/* Editor Content */}
+        <div className="flex-1 overflow-y-auto px-8 py-6">
+          <div className="max-w-3xl mx-auto">
+            <EditorContent editor={editor} />
+
+            {/* BubbleMenu for inline AI actions */}
+            <BubbleMenu
+              editor={editor}
+              tippyOptions={{ duration: 150, placement: 'top' }}
+              className="flex items-center gap-0.5 rounded-lg bg-slate-800 dark:bg-slate-700 border border-slate-600 shadow-lg px-1 py-0.5"
+            >
+              {sermonAiActionLoading ? (
+                <div className="flex items-center gap-1 px-2 py-1 text-[10px] text-white">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  {t('sermon.inlineProcessing')}
+                </div>
+              ) : (
+                inlineActions.map(({ action, icon: Icon, label }) => (
+                  <button
+                    key={action}
+                    onClick={() => handleAiAction(action)}
+                    className="flex items-center gap-0.5 px-1.5 py-1 text-[10px] text-slate-200 hover:text-white hover:bg-slate-600 rounded transition-colors"
+                    title={label}
+                  >
+                    <Icon className="w-3 h-3" />
+                  </button>
+                ))
+              )}
+            </BubbleMenu>
+          </div>
+        </div>
+
+        {/* Status Bar */}
+        <div className="border-t border-slate-200 dark:border-slate-800 px-4 py-1 flex items-center gap-4 text-[10px] text-slate-400">
+          <span>{currentSermon.wordCount}字</span>
+          <span>~{Math.max(1, Math.round(currentSermon.wordCount / 250))}分钟讲道时长</span>
         </div>
       </div>
-
-      {/* 底部状态栏 */}
-      <div className="border-t border-slate-200 dark:border-slate-800 px-4 py-1 flex items-center gap-4 text-[10px] text-slate-400">
-        <span>{currentSermon.wordCount}字</span>
-        <span>~{Math.max(1, Math.round(currentSermon.wordCount / 250))}分钟讲道时长</span>
-      </div>
-    </div>
+    </SermonEditorProvider>
   )
 }
 

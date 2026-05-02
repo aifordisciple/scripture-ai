@@ -518,6 +518,14 @@ export interface SermonSlice {
   setIsSermonSaving: (saving: boolean) => void;
   sermonsLoading: boolean;
   setSermonsLoading: (loading: boolean) => void;
+  // AI 面板状态
+  sermonAiLoading: boolean;
+  setSermonAiLoading: (loading: boolean) => void;
+  sermonAiError: string | null;
+  setSermonAiError: (error: string | null) => void;
+  // 内联 AI 操作状态
+  sermonAiActionLoading: boolean;
+  setSermonAiActionLoading: (loading: boolean) => void;
 }
 
 // --------------------------------------------------

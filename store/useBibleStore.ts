@@ -129,6 +129,9 @@ export const useBibleStore = create<StoreState>()(
           sermonFolders: [],
           isSermonSaving: false,
           sermonsLoading: false,
+          sermonAiLoading: false,
+          sermonAiError: null,
+          sermonAiActionLoading: false,
         };
       },
     }

@@ -43,5 +43,39 @@ export const sermon = {
     templateExpositoryDesc: 'Verse→Context→Exposition→Application→Conclusion',
     templateTopicalDesc: 'Topic→Scripture→Argument→Application→Invitation',
     templateNarrativeDesc: 'Story→Turning Point→Insight→Application',
+    templateFreeDesc: 'Free writing, no fixed structure',
+    templateApply: 'Apply Template',
+    templateApplyConfirm: 'Applying the template will replace the current editor content. Continue?',
+
+    // AI Panel
+    aiPanelTitle: 'AI Assistant',
+    aiPlaceholder: 'Type a question or instruction...',
+    aiQuickContinue: 'Continue',
+    aiQuickPolish: 'Polish',
+    aiQuickVerse: 'Insert Verse',
+    aiQuickExample: 'Add Example',
+    aiQuickCrossRef: 'Cross-Ref',
+    aiQuickApplication: 'Application',
+    aiInsertToEditor: 'Insert to Editor',
+    aiThinking: 'Thinking...',
+    aiNoSermon: 'Please select a sermon first',
+
+    // Inline AI Actions
+    inlineContinue: 'Continue',
+    inlinePolish: 'Polish',
+    inlineVerse: 'Insert Verse',
+    inlineExample: 'Add Example',
+    inlineCrossRef: 'Cross-Ref',
+    inlineProcessing: 'Processing...',
+
+    // Verse Panel
+    versePanelTitle: 'Verse References',
+    verseNoRefs: 'No linked verses yet. Add verse references to your sermon.',
+    verseInsert: 'Insert',
+    verseLoading: 'Loading...',
+
+    // Template Panel
+    templatePanelTitle: 'Sermon Templates',
+    templatePreset: 'Preset Templates',
   },
 } as const
