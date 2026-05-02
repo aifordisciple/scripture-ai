@@ -102,7 +102,7 @@ export function SermonEditorHeader() {
             onChange={(e) => handleFolderChange(e.target.value)}
             className="text-[10px] px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
-            <option value="">根目录</option>
+            <option value="">{t('sermon.rootFolder')}</option>
             {sermonFolders.map(f => (
               <option key={f.id} value={f.id}>{f.name}</option>
             ))}

@@ -291,7 +291,7 @@ export function SermonListPanel() {
               <div className="flex items-center gap-2 text-[10px] text-slate-400">
                 <span>{styleLabel(sermon.style)}</span>
                 {sermon.sermonDate && <span>{new Date(sermon.sermonDate).toLocaleDateString()}</span>}
-                <span>{sermon.wordCount}字</span>
+                <span>{sermon.wordCount}{t('sermon.editorWords')}</span>
               </div>
             </button>
           ))
@@ -324,7 +324,7 @@ export function SermonListPanel() {
             className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
           >
             <Trash2 className="w-3 h-3" />
-            删除
+            {t('sermon.delete')}
           </button>
         </div>
       )}

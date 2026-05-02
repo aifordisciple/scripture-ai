@@ -40,6 +40,9 @@ export const sermon = {
     templateExpository: '释经式讲章',
     templateTopical: '主题式讲章',
     templateNarrative: '叙事式讲章',
+    templateExpositoryTitle: '释经式讲章模板',
+    templateTopicalTitle: '主题式讲章模板',
+    templateNarrativeTitle: '叙事式讲章模板',
     templateExpositoryDesc: '经文→背景→释义→应用→结语',
     templateTopicalDesc: '主题→经文依据→论证→应用→呼召',
     templateNarrativeDesc: '故事→转折→启示→应用',
@@ -126,5 +129,25 @@ export const sermon = {
     // 阅读页创建讲章
     createSermonFromReading: '创建讲章',
     createSermonFromReadingDesc: '从选中经文创建新讲章',
+
+    // 编辑器状态栏
+    editorWords: '字',
+    editorMinutes: '分钟讲道时长',
+
+    // 设置面板信息
+    settingsInfo: '讲章信息',
+    settingsTitle: '标题',
+    settingsWordCount: '字数',
+    settingsStatus: '状态',
+    settingsCreatedAt: '创建时间',
+
+    // 通用操作
+    cancel: '取消',
+    create: '创建',
+    confirmDelete: '确认删除',
+    exportSermon: '导出讲章',
+    deleteSermon: '删除讲章',
+    rootFolder: '根目录',
+    delete: '删除',
   },
 } as const

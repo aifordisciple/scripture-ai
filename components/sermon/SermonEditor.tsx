@@ -268,8 +268,8 @@ export function SermonEditor() {
 
         {/* Status Bar */}
         <div className="border-t border-slate-200 dark:border-slate-800 px-4 py-1 flex items-center gap-4 text-[10px] text-slate-400">
-          <span>{currentSermon.wordCount}字</span>
-          <span>~{Math.max(1, Math.round(currentSermon.wordCount / 250))}分钟讲道时长</span>
+          <span>{currentSermon.wordCount}{t('sermon.editorWords')}</span>
+          <span>~{Math.max(1, Math.round(currentSermon.wordCount / 250))}{t('sermon.editorMinutes')}</span>
         </div>
       </div>
     </SermonEditorProvider>
