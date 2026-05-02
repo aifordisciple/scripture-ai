@@ -131,7 +131,7 @@ export const useBibleStore = create<StoreState>()(
           sermonsLoading: false,
           sermonAiLoading: false,
           sermonAiError: null,
-          sermonAiActionLoading: false,
+          sermonAiActionLoading: false, sermonReviewData: null, sermonReviewLoading: false, sermonInitialVerseRefs: '',
         };
       },
     }

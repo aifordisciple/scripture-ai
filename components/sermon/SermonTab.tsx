@@ -52,29 +52,29 @@ export function SermonTab() {
   const showPanel = activeSermonPanel !== 'list' || true // Always show panel area
 
   return (
-    <div className="flex h-full bg-white dark:bg-slate-950">
-      {/* Icon Sidebar */}
-      <SermonSidebar />
+    <SermonEditorProvider>
+      <div className="flex h-full bg-white dark:bg-slate-950">
+        {/* Icon Sidebar */}
+        <SermonSidebar />
 
-      {/* Panel Area */}
-      <div className={cn(
-        'border-r border-slate-200 dark:border-slate-800 transition-all duration-200 overflow-hidden',
-        activeSermonPanel === 'list' ? 'w-[280px]' : 'w-[300px]'
-      )}>
-        {activeSermonPanel === 'list' && <SermonListPanel />}
-        {activeSermonPanel === 'ai' && <SermonAIPanel />}
-        {activeSermonPanel === 'verse' && <SermonVersePanel />}
-        {activeSermonPanel === 'template' && <SermonTemplatePanel />}
-        {activeSermonPanel === 'review' && <SermonReviewPanel />}
-        {activeSermonPanel === 'settings' && <SermonSettingsPanel />}
-      </div>
+        {/* Panel Area */}
+        <div className={cn(
+          'border-r border-slate-200 dark:border-slate-800 transition-all duration-200 overflow-hidden',
+          activeSermonPanel === 'list' ? 'w-[280px]' : 'w-[300px]'
+        )}>
+          {activeSermonPanel === 'list' && <SermonListPanel />}
+          {activeSermonPanel === 'ai' && <SermonAIPanel />}
+          {activeSermonPanel === 'verse' && <SermonVersePanel />}
+          {activeSermonPanel === 'template' && <SermonTemplatePanel />}
+          {activeSermonPanel === 'review' && <SermonReviewPanel />}
+          {activeSermonPanel === 'settings' && <SermonSettingsPanel />}
+        </div>
 
-      {/* Main Editor Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <SermonEditorProvider editor={null}>
+        {/* Main Editor Area */}
+        <div className="flex-1 flex flex-col min-w-0">
           {currentSermon ? <SermonEditor /> : <SermonEmptyState />}
-        </SermonEditorProvider>
+        </div>
       </div>
-    </div>
+    </SermonEditorProvider>
   )
 }

@@ -9,7 +9,7 @@ import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { SermonEditorHeader } from './SermonEditorHeader'
-import { SermonEditorProvider } from './SermonEditorContext'
+import { useSetSermonEditor } from './SermonEditorContext'
 import {
   Bold,
   Italic,
@@ -43,6 +43,7 @@ export function SermonEditor() {
 
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const [aiAction, setAiAction] = useState<string | null>(null)
+  const setSermonEditor = useSetSermonEditor()
 
   // Auto-save
   const autoSave = useCallback(async (content: string) => {
@@ -99,6 +100,12 @@ export function SermonEditor() {
       },
     },
   })
+
+  // Sync editor instance to context so panels can access it
+  useEffect(() => {
+    setSermonEditor(editor)
+    return () => setSermonEditor(null)
+  }, [editor, setSermonEditor])
 
   // Update editor content when switching sermons
   useEffect(() => {

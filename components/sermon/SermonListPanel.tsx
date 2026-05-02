@@ -330,7 +330,7 @@ export function SermonListPanel() {
       )}
 
       {/* 新建讲章对话框 */}
-      {showNewDialog && <NewSermonDialog onClose={() => setShowNewDialog(false)} />}
+      <NewSermonDialog open={showNewDialog} onClose={() => setShowNewDialog(false)} />
     </div>
   )
 }

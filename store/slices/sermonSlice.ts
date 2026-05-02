@@ -26,4 +26,10 @@ export const createSermonSlice: StateCreator<StoreState, [], [], SermonSlice> = 
   setSermonAiError: (error) => set({ sermonAiError: error }),
   sermonAiActionLoading: false,
   setSermonAiActionLoading: (loading) => set({ sermonAiActionLoading: loading }),
+  sermonReviewData: null,
+  setSermonReviewData: (data) => set({ sermonReviewData: data }),
+  sermonReviewLoading: false,
+  setSermonReviewLoading: (loading) => set({ sermonReviewLoading: loading }),
+  sermonInitialVerseRefs: '',
+  setSermonInitialVerseRefs: (refs) => set({ sermonInitialVerseRefs: refs }),
 });

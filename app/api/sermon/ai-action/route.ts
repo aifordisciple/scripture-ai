@@ -2,11 +2,22 @@ import { generateText } from 'ai';
 import { auth } from '@/lib/auth';
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 import { SERMON_ACTION_PROMPTS, type DualLangString } from '@/lib/constants';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    }
+
+    const rateLimit = checkRateLimit(`sermon-action-${session.user.id}`, 60_000, 20);
+    if (!rateLimit.allowed) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), { status: 429 });
+    }
+
     const { apiConfig, body } = await extractApiConfig(req);
     const { action, selectedText, verseRefs, style, locale = 'zh' } = body as {
       action: 'continue' | 'polish' | 'insert-verse' | 'add-example' | 'cross-ref';
@@ -20,8 +31,7 @@ export async function POST(req: Request) {
       return new Response(JSON.stringify({ error: 'Missing action or selectedText' }), { status: 400 });
     }
 
-    const session = await auth();
-    const model = await getAIModel(apiConfig, session?.user?.id);
+    const model = await getAIModel(apiConfig, session.user.id);
 
     const resolvedLocale = (locale === 'en' ? 'en' : 'zh') as keyof DualLangString;
     const actionPrompt = SERMON_ACTION_PROMPTS[action]?.[resolvedLocale] || SERMON_ACTION_PROMPTS[action]?.zh;

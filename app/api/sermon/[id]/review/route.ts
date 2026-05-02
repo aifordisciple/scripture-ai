@@ -1,18 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
 import { generateText } from 'ai'
 import { extractApiConfig, getAIModel } from '@/lib/ai-client'
 import { SERMON_REVIEW_PROMPT } from '@/lib/constants'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const rateLimit = checkRateLimit(`sermon-review-${session.user.id}`, 60_000, 10)
+  if (!rateLimit.allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+  }
+
   const { id } = await params
   const body = await request.json()
   const { apiConfig: rawConfig, locale } = body
 
-  const sermon = await prisma.sermon.findUnique({ where: { id } })
+  const sermon = await prisma.sermon.findFirst({
+    where: { id, userId: session.user.id },
+  })
   if (!sermon) {
     return NextResponse.json({ error: 'Sermon not found' }, { status: 404 })
   }
@@ -33,7 +47,7 @@ export async function POST(
   }
 
   const apiConfig = extractApiConfig(rawConfig)
-  const model = getAIModel(apiConfig)
+  const model = await getAIModel(apiConfig, session.user.id)
 
   const lang = locale === 'en' ? 'en' : 'zh'
   const promptTemplate = SERMON_REVIEW_PROMPT[lang]

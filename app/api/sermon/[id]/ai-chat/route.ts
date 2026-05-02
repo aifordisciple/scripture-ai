@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 import { SERMON_CHAT_PROMPT, type DualLangString } from '@/lib/constants';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const maxDuration = 180;
 
@@ -52,6 +53,16 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    }
+
+    const rateLimit = checkRateLimit(`sermon-chat-${session.user.id}`, 60_000, 20);
+    if (!rateLimit.allowed) {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), { status: 429 });
+    }
+
     const { id } = await params;
     const { apiConfig, body } = await extractApiConfig(req);
     const { messages, locale = 'zh' } = body as {
@@ -63,13 +74,12 @@ export async function POST(
       return new Response(JSON.stringify({ error: 'Missing messages' }), { status: 400 });
     }
 
-    const session = await auth();
-    const model = await getAIModel(apiConfig, session?.user?.id);
+    const model = await getAIModel(apiConfig, session.user.id);
 
-    // Load sermon context from database
-    const sermon = await prisma.sermon.findUnique({
-      where: { id },
-      select: { title: true, verseRefs: true, style: true, content: true, userId: true },
+    // Load sermon context from database - verify ownership
+    const sermon = await prisma.sermon.findFirst({
+      where: { id, userId: session.user.id },
+      select: { title: true, verseRefs: true, style: true, content: true },
     });
 
     if (!sermon) {
