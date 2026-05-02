@@ -55,23 +55,23 @@ export function SermonAIPanel() {
   if (!currentSermon) {
     return (
       <div className="h-full flex items-center justify-center p-4">
-        <p className="text-xs text-slate-400">{t('sermon.aiNoSermon')}</p>
+        <p className="text-xs text-muted-foreground">{t('sermon.aiNoSermon')}</p>
       </div>
     )
   }
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-900">
+    <div className="h-full flex flex-col bg-secondary">
       {/* Header */}
-      <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800">
+      <div className="px-3 py-2 border-b border-border">
         <div className="flex items-center gap-1.5">
-          <Bot className="w-3.5 h-3.5 text-blue-500" />
-          <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{t('sermon.aiPanelTitle')}</span>
+          <Bot className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-medium text-foreground/90">{t('sermon.aiPanelTitle')}</span>
         </div>
       </div>
 
       {/* Quick Prompts */}
-      <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800 flex flex-wrap gap-1">
+      <div className="px-3 py-2 border-b border-border flex flex-wrap gap-1">
         {quickPrompts.map(({ key, icon: Icon, promptKey }) => (
           <button
             key={key}
@@ -81,7 +81,7 @@ export function SermonAIPanel() {
               }
             }}
             disabled={isLoading}
-            className="inline-flex items-center gap-1 px-2 py-1 text-[10px] rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-1 px-2 py-1 text-[10px] rounded-full bg-card border border-border text-muted-foreground hover:bg-primary/10 hover:text-primary disabled:opacity-50 transition-colors"
           >
             <Icon className="w-2.5 h-2.5" />
             {t(`sermon.${key}`)}
@@ -92,8 +92,8 @@ export function SermonAIPanel() {
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-2 space-y-3">
         {messages.length === 0 && (
-          <div className="text-center py-8 text-xs text-slate-400">
-            <Bot className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+          <div className="text-center py-8 text-xs text-muted-foreground">
+            <Bot className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
             <p>{t('sermon.aiPlaceholder')}</p>
           </div>
         )}
@@ -101,8 +101,8 @@ export function SermonAIPanel() {
           <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] rounded-lg px-2.5 py-1.5 text-xs leading-relaxed ${
               msg.role === 'user'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card border border-border text-foreground/90'
             }`}>
               <div className="whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                 {msg.role === 'assistant' ? (
@@ -114,7 +114,7 @@ export function SermonAIPanel() {
               {msg.role === 'assistant' && (
                 <button
                   onClick={() => handleInsertToEditor(msg.content)}
-                  className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-blue-500 hover:text-blue-600"
+                  className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-primary hover:text-primary/80"
                 >
                   <ClipboardPaste className="w-2.5 h-2.5" />
                   {t('sermon.aiInsertToEditor')}
@@ -125,7 +125,7 @@ export function SermonAIPanel() {
         ))}
         {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
           <div className="flex justify-start">
-            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-400">
+            <div className="bg-card border border-border rounded-lg px-2.5 py-1.5 text-xs text-muted-foreground">
               {t('sermon.aiThinking')}
             </div>
           </div>
@@ -133,7 +133,7 @@ export function SermonAIPanel() {
       </div>
 
       {/* Input */}
-      <div className="px-3 py-2 border-t border-slate-200 dark:border-slate-800">
+      <div className="px-3 py-2 border-t border-border">
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -146,14 +146,14 @@ export function SermonAIPanel() {
             onChange={handleInputChange}
             placeholder={t('sermon.aiPlaceholder')}
             disabled={isLoading}
-            className="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+            className="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-border bg-card focus:outline-none focus:ring-1 focus:ring-primary/40 disabled:opacity-50"
           />
           {isLoading ? (
-            <button type="button" onClick={() => stop()} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
+            <button type="button" onClick={() => stop()} className="p-1.5 rounded-lg text-destructive hover:bg-destructive/10">
               <StopCircle className="w-4 h-4" />
             </button>
           ) : (
-            <button type="submit" disabled={!input.trim()} className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-30">
+            <button type="submit" disabled={!input.trim()} className="p-1.5 rounded-lg text-primary hover:bg-primary/10 disabled:opacity-30">
               <Send className="w-4 h-4" />
             </button>
           )}

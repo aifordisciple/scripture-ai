@@ -158,46 +158,46 @@ export function SermonVersePanel() {
   }, [editor])
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-900">
-      <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800">
+    <div className="h-full flex flex-col bg-secondary">
+      <div className="px-3 py-2 border-b border-border">
         <div className="flex items-center gap-1.5">
-          <BookMarked className="w-3.5 h-3.5 text-blue-500" />
-          <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{t('sermon.versePanelTitle')}</span>
+          <BookMarked className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-medium text-foreground/90">{t('sermon.versePanelTitle')}</span>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-3">
         {loading && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         )}
         {!loading && verseData.length === 0 && (
-          <div className="text-center py-8 text-xs text-slate-400">
-            <BookMarked className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+          <div className="text-center py-8 text-xs text-muted-foreground">
+            <BookMarked className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
             <p>{t('sermon.verseNoRefs')}</p>
           </div>
         )}
         {verseData.map((ref, i) => (
-          <div key={i} className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5">
+          <div key={i} className="rounded-lg border border-border bg-card p-2.5">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-medium text-blue-600 dark:text-blue-400">
+              <span className="text-[10px] font-medium text-primary">
                 {ref.bookId} {ref.chapter}:{ref.verseStart}{ref.verseEnd > ref.verseStart ? `-${ref.verseEnd}` : ''}
               </span>
               <button
                 onClick={() => handleInsert(ref.text || '')}
-                className="inline-flex items-center gap-0.5 text-[10px] text-blue-500 hover:text-blue-600"
+                className="inline-flex items-center gap-0.5 text-[10px] text-primary hover:text-primary/80"
               >
                 <ClipboardPaste className="w-2.5 h-2.5" />
                 {t('sermon.verseInsert')}
               </button>
             </div>
             {ref.text ? (
-              <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-400 whitespace-pre-wrap border-l-2 border-blue-300 dark:border-blue-700 pl-2">
+              <p className="text-[11px] leading-relaxed text-muted-foreground whitespace-pre-wrap border-l-2 border-primary/40 pl-2">
                 {ref.text}
               </p>
             ) : (
-              <p className="text-[10px] text-slate-400">{t('sermon.verseLoading')}</p>
+              <p className="text-[10px] text-muted-foreground">{t('sermon.verseLoading')}</p>
             )}
           </div>
         ))}

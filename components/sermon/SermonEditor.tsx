@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useCallback, useRef, useState } from 'react'
-import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react'
+import { useEditor, EditorContent } from '@tiptap/react'
+import { BubbleMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Highlight from '@tiptap/extension-highlight'
@@ -220,7 +221,7 @@ export function SermonEditor() {
         <SermonEditorHeader />
 
         {/* Toolbar */}
-        <div className="border-b border-slate-200 dark:border-slate-800 px-4 py-1.5 flex items-center gap-1">
+        <div className="border-b border-border px-4 py-1.5 flex items-center gap-1">
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             isActive={editor.isActive('bold')}
@@ -264,7 +265,7 @@ export function SermonEditor() {
         </div>
 
         {/* Editor Content */}
-        <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-8 py-6 bg-background">
           <div className="max-w-3xl mx-auto">
             <EditorContent editor={editor} />
 
@@ -272,10 +273,10 @@ export function SermonEditor() {
             <BubbleMenu
               editor={editor}
               tippyOptions={{ duration: 150, placement: 'top' }}
-              className="flex items-center gap-0.5 rounded-lg bg-slate-800 dark:bg-slate-700 border border-slate-600 shadow-lg px-1 py-0.5"
+              className="flex items-center gap-0.5 rounded-lg bg-primary border border-primary-foreground/20 shadow-lg px-1 py-0.5"
             >
               {sermonAiActionLoading ? (
-                <div className="flex items-center gap-1 px-2 py-1 text-[10px] text-white">
+                <div className="flex items-center gap-1 px-2 py-1 text-[10px] text-primary-foreground">
                   <Loader2 className="w-3 h-3 animate-spin" />
                   {t('sermon.inlineProcessing')}
                 </div>
@@ -284,7 +285,7 @@ export function SermonEditor() {
                   <button
                     key={action}
                     onClick={() => handleAiAction(action)}
-                    className="flex items-center gap-0.5 px-1.5 py-1 text-[10px] text-slate-200 hover:text-white hover:bg-slate-600 rounded transition-colors"
+                    className="flex items-center gap-0.5 px-1.5 py-1 text-[10px] text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10 rounded transition-colors"
                     title={label}
                   >
                     <Icon className="w-3 h-3" />
@@ -296,7 +297,7 @@ export function SermonEditor() {
         </div>
 
         {/* Status Bar */}
-        <div className="border-t border-slate-200 dark:border-slate-800 px-4 py-1 flex items-center gap-4 text-[10px] text-slate-400">
+        <div className="border-t border-border px-4 py-1 flex items-center gap-4 text-[10px] text-muted-foreground">
           <span>{currentSermon.wordCount}{t('sermon.editorWords')}</span>
           <span>~{Math.max(1, Math.round(currentSermon.wordCount / 250))}{t('sermon.editorMinutes')}</span>
         </div>
@@ -312,8 +313,8 @@ function ToolbarButton({ onClick, isActive, icon }: { onClick: () => void; isAct
       className={cn(
         'w-7 h-7 rounded-md flex items-center justify-center transition-colors',
         isActive
-          ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-          : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+          ? 'bg-primary/10 text-primary'
+          : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
       )}
     >
       {icon}

@@ -1,126 +1,127 @@
 'use client'
 
+import { useState } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
-import { FileText, Plus } from 'lucide-react'
 import { useSermonEditor } from './SermonEditorContext'
+import { LayoutTemplate, Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-interface TemplateSection {
-  heading: string
-  prompts: string[]
-}
-
-interface SermonTemplate {
+interface Template {
   id: string
-  titleKey: string
+  nameKey: string
   descKey: string
-  sections: Record<string, TemplateSection[]>
+  style: string
+  sections: { title: string; placeholder: string }[]
 }
 
-const TEMPLATES: SermonTemplate[] = [
+const TEMPLATES: Template[] = [
   {
     id: 'expository',
-    titleKey: 'sermon.templateExpositoryTitle',
-    descKey: 'sermon.templateExpositoryDesc',
-    sections: {
-      zh: [
-        { heading: '引言', prompts: ['经文背景介绍', '讲道主题预告'] },
-        { heading: '经文解析', prompts: ['上下文分析', '关键词解释', '原文亮光'] },
-        { heading: '神学应用', prompts: ['核心真理', '与福音的联系', '生活应用'] },
-        { heading: '结语', prompts: ['总结要点', '呼召与回应'] },
-      ],
-      en: [
-        { heading: 'Introduction', prompts: ['Scripture background', 'Sermon theme preview'] },
-        { heading: 'Exegesis', prompts: ['Context analysis', 'Key word study', 'Original language insights'] },
-        { heading: 'Theological Application', prompts: ['Core truth', 'Gospel connection', 'Life application'] },
-        { heading: 'Conclusion', prompts: ['Summary points', 'Call to response'] },
-      ],
-    },
+    nameKey: 'templateExpository',
+    descKey: 'templateExpositoryDesc',
+    style: 'EXPOSITORY',
+    sections: [
+      { title: '📖 引言', placeholder: '经文背景与上下文' },
+      { title: '📝 经文释义', placeholder: '逐节解释经文含义' },
+      { title: '💡 核心信息', placeholder: '提炼主要属灵真理' },
+      { title: '🔗 生活应用', placeholder: '如何应用到日常生活中' },
+      { title: '🙏 结语', placeholder: '总结与呼召' },
+    ],
   },
   {
     id: 'topical',
-    titleKey: 'sermon.templateTopicalTitle',
-    descKey: 'sermon.templateTopicalDesc',
-    sections: {
-      zh: [
-        { heading: '主题引入', prompts: ['主题陈述', '生活情境引入'] },
-        { heading: '经文论证', prompts: ['第一处经文', '第二处经文', '第三处经文'] },
-        { heading: '综合应用', prompts: ['主题总结', '实践步骤', '祷告回应'] },
-      ],
-      en: [
-        { heading: 'Topic Introduction', prompts: ['Topic statement', 'Life scenario hook'] },
-        { heading: 'Scripture Arguments', prompts: ['First scripture', 'Second scripture', 'Third scripture'] },
-        { heading: 'Application', prompts: ['Topic summary', 'Practical steps', 'Prayer response'] },
-      ],
-    },
+    nameKey: 'templateTopical',
+    descKey: 'templateTopicalDesc',
+    style: 'TOPICAL',
+    sections: [
+      { title: '📖 主题引入', placeholder: '引出今日主题' },
+      { title: '📝 论点一', placeholder: '第一个分论点与经文依据' },
+      { title: '📝 论点二', placeholder: '第二个分论点与经文依据' },
+      { title: '📝 论点三', placeholder: '第三个分论点与经文依据' },
+      { title: '🔗 生活应用', placeholder: '如何应用到日常生活中' },
+      { title: '🙏 结语', placeholder: '总结与呼召' },
+    ],
   },
   {
     id: 'narrative',
-    titleKey: 'sermon.templateNarrativeTitle',
-    descKey: 'sermon.templateNarrativeDesc',
-    sections: {
-      zh: [
-        { heading: '故事背景', prompts: ['人物介绍', '时代背景', '情节铺垫'] },
-        { heading: '故事发展', prompts: ['冲突与张力', '转折点', '神的介入'] },
-        { heading: '属灵教训', prompts: ['核心信息', '今日应用', '个人反思'] },
-      ],
-      en: [
-        { heading: 'Story Background', prompts: ['Character introduction', 'Historical context', 'Plot setup'] },
-        { heading: 'Story Development', prompts: ['Conflict and tension', 'Turning point', "God's intervention"] },
-        { heading: 'Spiritual Lessons', prompts: ['Core message', 'Modern application', 'Personal reflection'] },
-      ],
-    },
+    nameKey: 'templateNarrative',
+    descKey: 'templateNarrativeDesc',
+    style: 'NARRATIVE',
+    sections: [
+      { title: '📖 故事背景', placeholder: '叙述故事的历史背景' },
+      { title: '👥 人物分析', placeholder: '分析关键人物及其选择' },
+      { title: '💡 属灵教训', placeholder: '从故事中提炼属灵真理' },
+      { title: '🔗 现代意义', placeholder: '故事对今日的启示' },
+      { title: '🙏 结语', placeholder: '总结与呼召' },
+    ],
+  },
+  {
+    id: 'free',
+    nameKey: 'templateFree',
+    descKey: 'templateFreeDesc',
+    style: 'FREE',
+    sections: [
+      { title: '📖 开场', placeholder: '自由发挥' },
+      { title: '📝 正文', placeholder: '自由发挥' },
+      { title: '🙏 结语', placeholder: '自由发挥' },
+    ],
   },
 ]
 
 export function SermonTemplatePanel() {
   const { t } = useTranslation()
-  const { locale } = useBibleStore()
+  const { currentSermon } = useBibleStore()
   const editor = useSermonEditor()
-  const lang = locale === 'en' ? 'en' : 'zh'
+  const [appliedId, setAppliedId] = useState<string | null>(null)
 
-  const insertTemplate = (template: SermonTemplate) => {
+  const handleApply = (template: Template) => {
     if (!editor) return
-    const sections = template.sections[lang]
-    let html = `<h2>${template.sections[lang][0]?.heading || ''}</h2>`
-    sections.forEach((section) => {
-      html += `<h3>${section.heading}</h3>`
-      section.prompts.forEach((prompt) => {
-        html += `<p>${prompt}...</p>`
-      })
-    })
-    editor.commands.setContent(html)
+    const html = template.sections
+      .map(s => `<h2>${s.title}</h2><p>${s.placeholder}</p>`)
+      .join('')
+    editor.chain().focus().setContent(html).run()
+    setAppliedId(template.id)
+    setTimeout(() => setAppliedId(null), 2000)
   }
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800">
+    <div className="h-full flex flex-col bg-secondary">
+      <div className="px-3 py-2 border-b border-border">
         <div className="flex items-center gap-1.5">
-          <FileText className="w-3.5 h-3.5 text-blue-500" />
-          <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{t('sermon.templatePanelTitle')}</span>
+          <LayoutTemplate className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-medium text-foreground/90">{t('sermon.templatePanelTitle')}</span>
         </div>
       </div>
 
-      {/* Templates */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
-        {TEMPLATES.map((template) => (
+      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
+        {TEMPLATES.map(template => (
           <button
             key={template.id}
-            onClick={() => insertTemplate(template)}
-            className="w-full text-left p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+            onClick={() => handleApply(template)}
+            className={cn(
+              'w-full text-left rounded-lg border p-2.5 transition-colors',
+              appliedId === template.id
+                ? 'border-primary bg-primary/10'
+                : 'border-border bg-card hover:border-primary/40 hover:bg-primary/5'
+            )}
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{t(template.titleKey)}</span>
-              <Plus className="w-3.5 h-3.5 text-blue-500" />
+              <span className="text-xs font-medium text-foreground/90">{t(`sermon.${template.nameKey}`)}</span>
+              {appliedId === template.id && <Check className="w-3.5 h-3.5 text-primary" />}
             </div>
-            <p className="text-[10px] text-slate-400">{t(template.descKey)}</p>
-            <div className="flex flex-wrap gap-1 mt-2">
-              {template.sections[lang].map((section, i) => (
-                <span key={i} className="px-1.5 py-0.5 rounded text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
-                  {section.heading}
+            <p className="text-[10px] text-muted-foreground leading-relaxed">{t(`sermon.${template.descKey}`)}</p>
+            <div className="mt-1.5 flex flex-wrap gap-1">
+              {template.sections.slice(0, 3).map((s, i) => (
+                <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                  {s.title}
                 </span>
               ))}
+              {template.sections.length > 3 && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                  +{template.sections.length - 3}
+                </span>
+              )}
             </div>
           </button>
         ))}
