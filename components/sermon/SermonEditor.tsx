@@ -42,16 +42,28 @@ export function SermonEditor() {
   } = useBibleStore()
 
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const sermonsRef = useRef(sermons)
+  sermonsRef.current = sermons
+  const currentSermonRef = useRef(currentSermon)
+  currentSermonRef.current = currentSermon
   const [aiAction, setAiAction] = useState<string | null>(null)
   const setSermonEditor = useSetSermonEditor()
 
-  // Auto-save
+  // Auto-save - uses refs to avoid stale closure
   const autoSave = useCallback(async (content: string) => {
-    if (!currentSermon) return
-    const text = JSON.parse(content).content
-      ?.map((node: any) => node.content?.map((c: any) => c.text || '').join('') || '')
-      .join('\n') || ''
-    const wordCount = text.length
+    const sermon = currentSermonRef.current
+    if (!sermon) return
+    let wordCount = 0
+    try {
+      const parsed = JSON.parse(content)
+      const text = parsed?.content
+        ?.map((node: any) => node.content?.map((c: any) => c.text || '').join('') || '')
+        .join('\n') || ''
+      wordCount = text.length
+    } catch {
+      // Fallback: count raw string length
+      wordCount = content.length
+    }
 
     setIsSermonSaving(true)
     try {
@@ -59,23 +71,24 @@ export function SermonEditor() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: currentSermon.id,
+          id: sermon.id,
           content,
           wordCount,
-          title: currentSermon.title,
-          tags: currentSermon.tags,
-          style: currentSermon.style,
-          status: currentSermon.status,
+          title: sermon.title,
+          tags: sermon.tags,
+          style: sermon.style,
+          status: sermon.status,
         }),
       })
       const data = await res.json()
-      setSermons(sermons.map(s => s.id === currentSermon.id ? { ...s, wordCount, updatedAt: data.data.updatedAt } : s))
-    } catch {
-      // Silent
+      const currentSermons = sermonsRef.current
+      setSermons(currentSermons.map(s => s.id === sermon.id ? { ...s, wordCount, updatedAt: data.data?.updatedAt } : s))
+    } catch (error) {
+      console.error('[SermonEditor] Auto-save failed:', error)
     } finally {
       setIsSermonSaving(false)
     }
-  }, [currentSermon, setIsSermonSaving, setSermons, sermons])
+  }, [setIsSermonSaving, setSermons])
 
   const editor = useEditor({
     extensions: [
@@ -107,8 +120,9 @@ export function SermonEditor() {
     return () => setSermonEditor(null)
   }, [editor, setSermonEditor])
 
-  // Update editor content when switching sermons
+  // Update editor content when switching sermons + clear pending save
   useEffect(() => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     if (editor && currentSermon) {
       const content = typeof currentSermon.content === 'string'
         ? JSON.parse(currentSermon.content)
@@ -152,8 +166,8 @@ export function SermonEditor() {
         // Replace selection with AI result
         editor.chain().focus().insertContent(data.result).run()
       }
-    } catch {
-      // Silent
+    } catch (error) {
+      console.error('[SermonEditor] AI action failed:', error)
     } finally {
       setSermonAiActionLoading(false)
       setAiAction(null)

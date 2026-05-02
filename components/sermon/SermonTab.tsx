@@ -40,8 +40,8 @@ export function SermonTab() {
         const foldersData = await foldersRes.json()
         setSermons(sermonsData.data || [])
         setSermonFolders(foldersData.data || [])
-      } catch {
-        // Silent
+      } catch (error) {
+        console.error('[SermonTab] Failed to load sermons:', error)
       } finally {
         setSermonsLoading(false)
       }

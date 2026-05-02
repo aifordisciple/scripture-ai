@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useChat } from 'ai/react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
@@ -12,9 +12,19 @@ export function SermonAIPanel() {
   const { currentSermon, apiConfig, locale } = useBibleStore()
   const editor = useSermonEditor()
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [chatKey, setChatKey] = useState(0)
+  const prevSermonIdRef = useRef(currentSermon?.id)
+
+  // Reset chat when switching sermons
+  useEffect(() => {
+    if (currentSermon?.id !== prevSermonIdRef.current) {
+      prevSermonIdRef.current = currentSermon?.id
+      setChatKey(prev => prev + 1)
+    }
+  }, [currentSermon?.id])
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, stop, error } = useChat({
-    id: `sermon-ai-${currentSermon?.id || 'none'}`,
+    id: `sermon-ai-${currentSermon?.id || 'none'}-${chatKey}`,
     api: currentSermon ? `/api/sermon/${currentSermon.id}/ai-chat` : '',
     body: { apiConfig, locale },
     streamProtocol: 'data',

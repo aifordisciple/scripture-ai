@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
+import { useEffect, useRef } from 'react'
 import { CheckCircle2, Loader2, Star, FileText, MessageCircle, HandHeart, ChevronDown, ChevronRight } from 'lucide-react'
 import type { SermonReviewData } from '@/store/types'
 
@@ -31,6 +32,15 @@ export function SermonReviewPanel() {
   const { t } = useTranslation()
   const { currentSermon, apiConfig, locale, sermonReviewData, setSermonReviewData, sermonReviewLoading, setSermonReviewLoading } = useBibleStore()
   const [expandedSub, setExpandedSub] = useState<string | null>(null)
+  const prevSermonIdRef = useRef(currentSermon?.id)
+
+  // Clear review data when switching sermons
+  useEffect(() => {
+    if (currentSermon?.id !== prevSermonIdRef.current) {
+      prevSermonIdRef.current = currentSermon?.id
+      setSermonReviewData(null)
+    }
+  }, [currentSermon?.id, setSermonReviewData])
 
   const handleGenerateReview = async () => {
     if (!currentSermon || sermonReviewLoading) return
@@ -46,8 +56,8 @@ export function SermonReviewPanel() {
       if (data.data) {
         setSermonReviewData(data.data as SermonReviewData)
       }
-    } catch {
-      // Silent
+    } catch (error) {
+      console.error('[SermonReview] Failed to generate review:', error)
     } finally {
       setSermonReviewLoading(false)
     }
