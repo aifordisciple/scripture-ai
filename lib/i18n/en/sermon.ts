@@ -77,5 +77,54 @@ export const sermon = {
     // Template Panel
     templatePanelTitle: 'Sermon Templates',
     templatePreset: 'Preset Templates',
+
+    // Review Panel
+    reviewPanelTitle: 'Sermon Review',
+    reviewGenerate: 'Generate Review',
+    reviewGenerating: 'AI Reviewing...',
+    reviewNoSermon: 'Please select a sermon first',
+    reviewNoContent: 'Sermon is empty, cannot review',
+    reviewExegesis: 'Exegetical Accuracy',
+    reviewExegesisDesc: 'Check if exegesis is biblically grounded, avoid over-spiritualization',
+    reviewLogic: 'Logical Coherence',
+    reviewLogicDesc: 'Analyze if the logical chain between arguments is clear',
+    reviewGospel: 'Gospel Focus',
+    reviewGospelDesc: 'Check if the sermon points to Christ and the gospel',
+    reviewApplication: 'Application Quality',
+    reviewApplicationDesc: 'Are applications specific, actionable, and relevant',
+    reviewTiming: 'Time Estimate',
+    reviewTimingDesc: 'Estimate sermon duration based on word count',
+    reviewScore: 'Score',
+    reviewSuggestion: 'Suggestion',
+    reviewSummary: 'Sermon Summary',
+    reviewDiscussion: 'Discussion Questions',
+    reviewPrayer: 'Prayer Points',
+    reviewGenerateSub: 'Generate',
+    reviewOverallScore: 'Overall Score',
+
+    // Settings Panel
+    settingsPanelTitle: 'Sermon Settings',
+    settingsDefaultStyle: 'Default Sermon Style',
+    settingsAutoSave: 'Auto Save',
+    settingsAutoSaveDesc: 'Automatically save sermon content while editing',
+    settingsAiPreference: 'AI Preference',
+    settingsAiPreferenceDesc: 'AI assistant response style',
+    settingsAiFormal: 'Formal',
+    settingsAiCasual: 'Warm',
+    settingsAiScholarly: 'Scholarly',
+
+    // Dual-entry workflow
+    createFromVerse: 'Create from Verse',
+    createFromTopic: 'Create from Topic',
+    createFromVerseDesc: 'Select verses, AI will analyze and generate sermon outline',
+    createFromTopicDesc: 'Enter a topic, AI will recommend related verses',
+    topicInput: 'Enter sermon topic or direction',
+    aiRecommendVerses: 'AI Recommended Verses',
+    selectVerses: 'Select Verses',
+    verseSelected: 'Verses Selected',
+
+    // Create sermon from reading page
+    createSermonFromReading: 'Create Sermon',
+    createSermonFromReadingDesc: 'Create a new sermon from selected verses',
   },
 } as const

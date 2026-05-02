@@ -77,5 +77,54 @@ export const sermon = {
     // 模板面板
     templatePanelTitle: '讲章模板',
     templatePreset: '预置模板',
+
+    // 审查面板
+    reviewPanelTitle: '讲章审查',
+    reviewGenerate: '生成审查报告',
+    reviewGenerating: 'AI 审查中...',
+    reviewNoSermon: '请先选择一篇讲章',
+    reviewNoContent: '讲章内容为空，无法审查',
+    reviewExegesis: '释经准确性',
+    reviewExegesisDesc: '检查释经是否有圣经依据，是否过度灵意化',
+    reviewLogic: '逻辑连贯性',
+    reviewLogicDesc: '分析论点之间的逻辑链条是否清晰',
+    reviewGospel: '福音焦点',
+    reviewGospelDesc: '检查讲章是否指向基督和福音',
+    reviewApplication: '应用落地',
+    reviewApplicationDesc: '应用是否具体、可操作、贴近生活',
+    reviewTiming: '时间预估',
+    reviewTimingDesc: '根据字数估算讲道时长',
+    reviewScore: '评分',
+    reviewSuggestion: '建议',
+    reviewSummary: '讲道摘要',
+    reviewDiscussion: '讨论问题',
+    reviewPrayer: '祷告要点',
+    reviewGenerateSub: '生成',
+    reviewOverallScore: '综合评分',
+
+    // 设置面板
+    settingsPanelTitle: '讲章设置',
+    settingsDefaultStyle: '默认讲道风格',
+    settingsAutoSave: '自动保存',
+    settingsAutoSaveDesc: '编辑时自动保存讲章内容',
+    settingsAiPreference: 'AI 偏好',
+    settingsAiPreferenceDesc: 'AI 助手的回复风格',
+    settingsAiFormal: '正式',
+    settingsAiCasual: '亲切',
+    settingsAiScholarly: '学术',
+
+    // 双入口工作流
+    createFromVerse: '从经文创建讲章',
+    createFromTopic: '从主题创建讲章',
+    createFromVerseDesc: '选择经文后，AI 将分析并生成讲章大纲',
+    createFromTopicDesc: '输入主题方向，AI 将推荐相关经文',
+    topicInput: '输入讲章主题或方向',
+    aiRecommendVerses: 'AI 推荐经文',
+    selectVerses: '选择经文',
+    verseSelected: '已选择经文',
+
+    // 阅读页创建讲章
+    createSermonFromReading: '创建讲章',
+    createSermonFromReadingDesc: '从选中经文创建新讲章',
   },
 } as const

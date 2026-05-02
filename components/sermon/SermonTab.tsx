@@ -10,6 +10,8 @@ import { SermonEmptyState } from './SermonEmptyState'
 import { SermonAIPanel } from './SermonAIPanel'
 import { SermonVersePanel } from './SermonVersePanel'
 import { SermonTemplatePanel } from './SermonTemplatePanel'
+import { SermonReviewPanel } from './SermonReviewPanel'
+import { SermonSettingsPanel } from './SermonSettingsPanel'
 import { SermonEditorProvider } from './SermonEditorContext'
 import { cn } from '@/lib/utils'
 
@@ -63,16 +65,8 @@ export function SermonTab() {
         {activeSermonPanel === 'ai' && <SermonAIPanel />}
         {activeSermonPanel === 'verse' && <SermonVersePanel />}
         {activeSermonPanel === 'template' && <SermonTemplatePanel />}
-        {activeSermonPanel === 'review' && (
-          <div className="h-full flex items-center justify-center p-4">
-            <p className="text-xs text-slate-400">Review (Phase 3)</p>
-          </div>
-        )}
-        {activeSermonPanel === 'settings' && (
-          <div className="h-full flex items-center justify-center p-4">
-            <p className="text-xs text-slate-400">Settings (Phase 3)</p>
-          </div>
-        )}
+        {activeSermonPanel === 'review' && <SermonReviewPanel />}
+        {activeSermonPanel === 'settings' && <SermonSettingsPanel />}
       </div>
 
       {/* Main Editor Area */}

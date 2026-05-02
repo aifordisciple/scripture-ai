@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp, Map } from "lucide-react";
+import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp, Map, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useSession } from "next-auth/react";
@@ -46,7 +46,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
   const [copied, setCopied] = useState(false);
   const [showAiSubmenu, setShowAiSubmenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection, locale } = useBibleStore();
+  const { selectedVerses, addHighlightLocally, removeHighlightLocally, openNoteEditor, openShareModal, clearSelection, locale, addTab } = useBibleStore();
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -147,6 +147,21 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
     e.nativeEvent.stopImmediatePropagation();
     onClose();
     onExplain();
+  };
+
+  // 创建讲章
+  const handleCreateSermon = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    const verseStart = Math.min(...selectedVerses);
+    const verseEnd = Math.max(...selectedVerses);
+    const verseRefs = `${currentBook} ${currentChapter}:${verseStart}${verseEnd > verseStart ? `-${verseEnd}` : ''}`;
+    addTab({ type: 'sermon' });
+    // Store verseRefs for NewSermonDialog to pick up
+    useBibleStore.getState().setSermonInitialVerseRefs(verseRefs);
+    clearSelection();
+    onClose();
   };
 
   if (!render) return null;
@@ -302,8 +317,8 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
         </AnimatePresence>
       </div>
 
-      {/* 3. 次要操作区 (笔记、分享、串珠、地图、主题、复制) - 6列 */}
-      <div className="grid grid-cols-5 gap-1 pt-1 border-t dark:border-slate-800">
+      {/* 3. 次要操作区 (笔记、分享、串珠、地图、讲章、复制) */}
+      <div className="grid grid-cols-6 gap-1 pt-1 border-t dark:border-slate-800">
         <button
           onClick={(e) => { handleMenuClick(e); handleNote(); }}
           onMouseDown={handleMenuClick}
@@ -351,6 +366,17 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             <span className="text-[10px] text-slate-500">{t('floatingMenu.atlas')}</span>
           </button>
         )}
+
+        <button
+          onClick={handleCreateSermon}
+          onMouseDown={handleMenuClick}
+          onPointerDown={handleMenuClick}
+          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          aria-label={t('sermon.createSermonFromReading')}
+        >
+          <FileText className="w-4 h-4 text-purple-500 dark:text-purple-400 mb-1" />
+          <span className="text-[10px] text-slate-500">{t('sermon.createSermonFromReading')}</span>
+        </button>
 
         <button
           onClick={(e) => { handleMenuClick(e); handleCopyClick(); }}

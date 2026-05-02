@@ -253,6 +253,22 @@ export interface SermonFolderData {
 
 export type SermonPanelType = 'list' | 'ai' | 'verse' | 'template' | 'review' | 'settings';
 
+export interface SermonReviewItem {
+  key: string;
+  label: string;
+  score: number;
+  suggestion: string;
+}
+
+export interface SermonReviewData {
+  items: SermonReviewItem[];
+  overallScore: number;
+  summary: string;
+  discussionQuestions: string;
+  prayerPoints: string;
+  estimatedMinutes: number;
+}
+
 export interface UISlice {
   isAuthOpen: boolean;
   setAuthOpen: (open: boolean) => void;
@@ -526,6 +542,14 @@ export interface SermonSlice {
   // 内联 AI 操作状态
   sermonAiActionLoading: boolean;
   setSermonAiActionLoading: (loading: boolean) => void;
+  // 审查面板状态
+  sermonReviewData: SermonReviewData | null;
+  setSermonReviewData: (data: SermonReviewData | null) => void;
+  sermonReviewLoading: boolean;
+  setSermonReviewLoading: (loading: boolean) => void;
+  // 从阅读页创建讲章时传入的经文
+  sermonInitialVerseRefs: string;
+  setSermonInitialVerseRefs: (refs: string) => void;
 }
 
 // --------------------------------------------------
