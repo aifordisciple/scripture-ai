@@ -16,6 +16,7 @@ export const auth = {
     dashboard: 'Reading Stats',
     settings: 'Settings',
     aiModelApiSettings: 'AI Model & API Settings',
+    myMenu: 'My',
     myHighlights: 'My Highlights',
     myNotes: 'My Notes',
     myFavorites: 'My Favorites',

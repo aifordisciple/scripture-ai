@@ -16,6 +16,7 @@ export const auth = {
     dashboard: '读经统计',
     settings: '设置',
     aiModelApiSettings: 'AI 模型与接口设置',
+    myMenu: '我的',
     myHighlights: '我的高亮',
     myNotes: '我的笔记',
     myFavorites: '我的收藏',
