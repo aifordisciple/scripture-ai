@@ -67,5 +67,6 @@ export const common = {
     highlights: 'My Highlights',
     notes: 'My Notes',
     search: 'Search Results',
+    sermon: 'My Sermons',
   },
 } as const

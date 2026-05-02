@@ -20,10 +20,12 @@ const BookmarksTab = dynamic(() => import('@/components/bible/BookmarksTab').the
 const ReadingHistoryTab = dynamic(() => import('@/components/bible/ReadingHistoryTab').then(mod => ({ default: mod.ReadingHistoryTab })), { ssr: false })
 // [P2增强] 主题图谱Tab
 const ThemeGraphTab = dynamic(() => import('@/components/bible/ThemeGraphTab').then(mod => ({ default: mod.ThemeGraphTab })), { ssr: false })
+// 讲章Tab
+const SermonTab = dynamic(() => import('@/components/sermon/SermonTab').then(m => ({ default: m.SermonTab })), { ssr: false })
 
 export interface Tab {
   id: string
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'cross-ref' | 'group' | 'atlas' | 'insights' | 'plan' | 'bookmarks' | 'reading-history' | 'theme-graph'
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'cross-ref' | 'group' | 'atlas' | 'insights' | 'plan' | 'bookmarks' | 'reading-history' | 'theme-graph' | 'sermon'
   book?: string
   chapter?: number | string
   query?: string
@@ -108,6 +110,9 @@ const TabContent = memo(function TabContent({
 
       {/* [P2增强] 主题图谱Tab */}
       {tab.type === 'theme-graph' && <ThemeGraphTab key={tab.id} />}
+
+      {/* 讲章Tab */}
+      {tab.type === 'sermon' && <SermonTab key={tab.id} />}
     </div>
   )
 })

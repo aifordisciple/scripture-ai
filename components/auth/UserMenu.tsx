@@ -5,7 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, Loader2, Calendar, BrainCircuit, Flame, Shield, Users, BarChart3, Bell, MessageSquare } from "lucide-react";
+import { UserCircle, LogOut, Settings, Loader2, Calendar, BrainCircuit, Flame, Shield, Users, BarChart3, Bell, MessageSquare, BookOpen } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { FeedbackDialog } from "@/components/feedback/FeedbackDialog";
 import { NotificationDialog } from "@/components/common/NotificationDialog";
@@ -178,6 +178,18 @@ export function UserMenu() {
               const existTab = tabs.find(t => t.type === 'plan');
               if (existTab) setActiveTab(existTab.id);
               else addTab({ type: 'plan' });
+            }}
+          />
+
+          <MenuItem
+            icon={<BookOpen className="w-4 h-4 text-orange-600 dark:text-orange-400" />}
+            label={t('auth.mySermons')}
+            onClick={() => {
+              setIsOpen(false);
+              const { tabs, setActiveTab, addTab } = useBibleStore.getState();
+              const existTab = tabs.find((t: any) => t.type === 'sermon');
+              if (existTab) setActiveTab(existTab.id);
+              else addTab({ type: 'sermon' as any });
             }}
           />
 

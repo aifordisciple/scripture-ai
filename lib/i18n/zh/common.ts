@@ -67,5 +67,6 @@ export const common = {
     highlights: '我的高亮',
     notes: '我的笔记',
     search: '搜索结果',
+    sermon: '我的讲章',
   },
 } as const
