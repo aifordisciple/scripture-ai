@@ -100,7 +100,25 @@ export function SermonEditor() {
       }),
       Highlight,
     ],
-    content: currentSermon ? (typeof currentSermon.content === 'string' ? JSON.parse(currentSermon.content) : currentSermon.content) : '',
+    content: (() => {
+      if (!currentSermon) return ''
+      const raw = currentSermon.content
+      if (!raw || raw.trim() === '' || raw.trim() === '{}') return ''
+      if (typeof raw === 'string') {
+        try {
+          const parsed = JSON.parse(raw)
+          // Valid Tiptap JSON must have a `type` field (e.g. "doc")
+          if (typeof parsed === 'object' && parsed !== null && parsed.type) return parsed
+          // Parsed to something without `type` — invalid for Tiptap
+          return ''
+        } catch {
+          // Not valid JSON — treat as plain HTML/text for Tiptap
+          return raw
+        }
+      }
+      if (typeof raw === 'object' && raw !== null && raw.type) return raw
+      return ''
+    })(),
     onUpdate: ({ editor }) => {
       const json = JSON.stringify(editor.getJSON())
       setCurrentSermon({ ...currentSermon!, content: json })
@@ -124,9 +142,20 @@ export function SermonEditor() {
   useEffect(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     if (editor && currentSermon) {
-      const content = typeof currentSermon.content === 'string'
-        ? JSON.parse(currentSermon.content)
-        : currentSermon.content
+      const raw = currentSermon.content
+      let content: any = ''
+      if (raw && raw.trim() !== '' && raw.trim() !== '{}') {
+        if (typeof raw === 'string') {
+          try {
+            const parsed = JSON.parse(raw)
+            if (typeof parsed === 'object' && parsed !== null && parsed.type) content = parsed
+          } catch {
+            content = raw
+          }
+        } else if (typeof raw === 'object' && raw !== null && raw.type) {
+          content = raw
+        }
+      }
       editor.commands.setContent(content, false)
     }
   }, [currentSermon?.id])
@@ -185,7 +214,7 @@ export function SermonEditor() {
   ]
 
   return (
-    <SermonEditorProvider editor={editor}>
+    <>
       <div className="flex-1 flex flex-col min-h-0">
         {/* Header */}
         <SermonEditorHeader />
@@ -272,7 +301,7 @@ export function SermonEditor() {
           <span>~{Math.max(1, Math.round(currentSermon.wordCount / 250))}{t('sermon.editorMinutes')}</span>
         </div>
       </div>
-    </SermonEditorProvider>
+    </>
   )
 }
 

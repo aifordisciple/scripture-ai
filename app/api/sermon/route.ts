@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     data: {
       userId: user.id,
       title: body.title || "",
-      content: body.content || "{}",
+      content: body.content || "",
       folderId: body.folderId || null,
       style: body.style || "FREE",
       status: body.status || "DRAFT",
