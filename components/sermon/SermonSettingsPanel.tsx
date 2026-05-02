@@ -7,7 +7,7 @@ import { useState } from 'react'
 
 export function SermonSettingsPanel() {
   const { t } = useTranslation()
-  const { currentSermon, deleteSermon, sermons, setSermons } = useBibleStore()
+  const { currentSermon, sermons, setSermons } = useBibleStore()
   const [autoSave, setAutoSave] = useState(true)
   const [aiPreference, setAiPreference] = useState<'formal' | 'casual' | 'scholarly'>('casual')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)

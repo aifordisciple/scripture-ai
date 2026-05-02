@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
-import { useEffect, useRef } from 'react'
 import { CheckCircle2, Loader2, Star, FileText, MessageCircle, HandHeart, ChevronDown, ChevronRight } from 'lucide-react'
 import type { SermonReviewData } from '@/store/types'
 
