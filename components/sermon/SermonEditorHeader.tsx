@@ -12,30 +12,30 @@ export function SermonEditorHeader() {
 
   if (!currentSermon) return null
 
-  const handleTitleChange = (title: string) => {
+  const handleTitleChange = useCallback((title: string) => {
     setCurrentSermon({ ...currentSermon, title })
-  }
+  }, [currentSermon, setCurrentSermon])
 
-  const handleStyleChange = (style: string) => {
+  const handleStyleChange = useCallback((style: string) => {
     setCurrentSermon({ ...currentSermon, style: style as any })
-  }
+  }, [currentSermon, setCurrentSermon])
 
-  const handleDateChange = (date: string) => {
+  const handleDateChange = useCallback((date: string) => {
     setCurrentSermon({ ...currentSermon, sermonDate: date || null })
-  }
+  }, [currentSermon, setCurrentSermon])
 
-  const handleFolderChange = (folderId: string) => {
+  const handleFolderChange = useCallback((folderId: string) => {
     setCurrentSermon({ ...currentSermon, folderId: folderId || null })
-  }
+  }, [currentSermon, setCurrentSermon])
 
-  const handleAddTag = (tag: string) => {
+  const handleAddTag = useCallback((tag: string) => {
     if (!tag.trim() || currentSermon.tags.includes(tag.trim())) return
     setCurrentSermon({ ...currentSermon, tags: [...currentSermon.tags, tag.trim()] })
-  }
+  }, [currentSermon, setCurrentSermon])
 
-  const handleRemoveTag = (tag: string) => {
+  const handleRemoveTag = useCallback((tag: string) => {
     setCurrentSermon({ ...currentSermon, tags: currentSermon.tags.filter(t => t !== tag) })
-  }
+  }, [currentSermon, setCurrentSermon])
 
   const styleOptions = [
     { value: 'EXPOSITORY', label: t('sermon.expository') },

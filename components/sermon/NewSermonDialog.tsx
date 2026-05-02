@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { BookOpen, Lightbulb, Loader2, X, Plus, Check } from 'lucide-react'
@@ -22,6 +22,7 @@ interface NewSermonDialogProps {
 export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDialogProps) {
   const { t } = useTranslation()
   const { apiConfig, locale, setSermons, sermons, setCurrentSermon, setActiveSermonPanel } = useBibleStore()
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   const [mode, setMode] = useState<'verse' | 'topic'>(initialVerseRefs ? 'verse' : 'verse')
   const [title, setTitle] = useState('')
@@ -31,6 +32,33 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
   const [loading, setLoading] = useState(false)
   const [recommendedVerses, setRecommendedVerses] = useState<RecommendedVerse[]>([])
   const [selectedVerses, setSelectedVerses] = useState<Set<number>>(new Set())
+
+  // Escape key handler
+  useEffect(() => {
+    if (!open) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open, onClose])
+
+  // Focus trap: focus first focusable element on open
+  useEffect(() => {
+    if (!open || !dialogRef.current) return
+    const focusable = dialogRef.current.querySelector<HTMLElement>(
+      'input, button, select, textarea, [tabindex]'
+    )
+    focusable?.focus()
+  }, [open])
+
+  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }, [onClose])
 
   if (!open) return null
 
@@ -94,8 +122,8 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-[420px] max-h-[85vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={handleOverlayClick}>
+      <div ref={dialogRef} className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-[420px] max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
           <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">{t('sermon.newSermon')}</h3>

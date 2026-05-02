@@ -17,7 +17,7 @@ const dimensionIcons: Record<string, React.ReactNode> = {
 
 function ScoreBar({ score }: { score: number }) {
   const pct = Math.min(100, Math.max(0, score * 10))
-  const color = score >= 8 ? 'bg-green-500' : score >= 6 ? 'bg-yellow-500' : 'bg-red-500'
+  const color = score >= 9 ? 'bg-green-500' : score >= 7 ? 'bg-teal-500' : score >= 4 ? 'bg-yellow-500' : 'bg-red-500'
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
@@ -42,7 +42,7 @@ export function SermonReviewPanel() {
     }
   }, [currentSermon?.id, setSermonReviewData])
 
-  const handleGenerateReview = async () => {
+  const handleGenerateReview = useCallback(async () => {
     if (!currentSermon || sermonReviewLoading) return
     setSermonReviewLoading(true)
     setSermonReviewData(null)
@@ -61,11 +61,11 @@ export function SermonReviewPanel() {
     } finally {
       setSermonReviewLoading(false)
     }
-  }
+  }, [currentSermon, sermonReviewLoading, apiConfig, locale, setSermonReviewLoading, setSermonReviewData])
 
-  const toggleSub = (key: string) => {
-    setExpandedSub(expandedSub === key ? null : key)
-  }
+  const toggleSub = useCallback((key: string) => {
+    setExpandedSub(prev => prev === key ? null : key)
+  }, [])
 
   if (!currentSermon) {
     return (

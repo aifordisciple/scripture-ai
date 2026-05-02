@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { useSermonEditor } from './SermonEditorContext'
@@ -152,10 +152,10 @@ export function SermonVersePanel() {
     })
   }, [currentSermon?.verseRefs])
 
-  const handleInsert = (text: string) => {
+  const handleInsert = useCallback((text: string) => {
     if (!editor || !text) return
     editor.chain().focus().insertContent(text).run()
-  }
+  }, [editor])
 
   return (
     <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-900">

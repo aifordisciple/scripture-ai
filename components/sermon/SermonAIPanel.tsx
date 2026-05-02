@@ -44,12 +44,12 @@ export function SermonAIPanel() {
   }
 
   const quickPrompts = [
-    { key: 'aiQuickContinue', icon: Sparkles, prompt: t('sermon.aiQuickContinue') + '...' },
-    { key: 'aiQuickPolish', icon: PenLine, prompt: t('sermon.aiQuickPolish') + '...' },
-    { key: 'aiQuickVerse', icon: BookOpen, prompt: t('sermon.aiQuickVerse') + '...' },
-    { key: 'aiQuickExample', icon: Lightbulb, prompt: t('sermon.aiQuickExample') + '...' },
-    { key: 'aiQuickCrossRef', icon: Link2, prompt: t('sermon.aiQuickCrossRef') + '...' },
-    { key: 'aiQuickApplication', icon: Target, prompt: t('sermon.aiQuickApplication') + '...' },
+    { key: 'aiQuickContinue', icon: Sparkles, promptKey: 'aiQuickContinuePrompt' },
+    { key: 'aiQuickPolish', icon: PenLine, promptKey: 'aiQuickPolishPrompt' },
+    { key: 'aiQuickVerse', icon: BookOpen, promptKey: 'aiQuickVersePrompt' },
+    { key: 'aiQuickExample', icon: Lightbulb, promptKey: 'aiQuickExamplePrompt' },
+    { key: 'aiQuickCrossRef', icon: Link2, promptKey: 'aiQuickCrossRefPrompt' },
+    { key: 'aiQuickApplication', icon: Target, promptKey: 'aiQuickApplicationPrompt' },
   ]
 
   if (!currentSermon) {
@@ -72,12 +72,12 @@ export function SermonAIPanel() {
 
       {/* Quick Prompts */}
       <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800 flex flex-wrap gap-1">
-        {quickPrompts.map(({ key, icon: Icon, prompt }) => (
+        {quickPrompts.map(({ key, icon: Icon, promptKey }) => (
           <button
             key={key}
             onClick={() => {
               if (!isLoading) {
-                handleSubmit(undefined, { content: prompt } as any)
+                handleSubmit(undefined, { content: t(`sermon.${promptKey}`) } as any)
               }
             }}
             disabled={isLoading}
