@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useCallback, useRef, useEffect, useState } from 'react';
-import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import React, { useCallback, useMemo, useState } from 'react';
+import CodeMirror from '@uiw/react-codemirror';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
 import { history, historyKeymap } from '@codemirror/commands';
@@ -26,34 +26,18 @@ export default function CodeMirrorEditor({
   isDark,
   onSave,
 }: CodeMirrorEditorProps) {
-  const cmRef = useRef<ReactCodeMirrorRef>(null);
   const [editorView, setEditorView] = useState<CMEditorView | null>(null);
-  const isInternalChange = useRef(false);
-
-  // Sync external content changes to editor (e.g. when switching sermons)
-  useEffect(() => {
-    const view = cmRef.current?.view;
-    if (!view) return;
-    const currentDoc = view.state.doc.toString();
-    if (currentDoc !== content) {
-      isInternalChange.current = true;
-      view.dispatch({
-        changes: { from: 0, to: view.state.doc.length, insert: content },
-      });
-    }
-  }, [content]);
 
   // Handle content change from CodeMirror
   const handleChange = useCallback(
-    (value: string, viewUpdate: any) => {
-      // Always notify parent of content changes
+    (value: string) => {
       onChange(value);
     },
     [onChange]
   );
 
   // Build extensions - stable reference via useMemo
-  const extensions = React.useMemo(
+  const extensions = useMemo(
     () => [
       markdown({ base: markdownLanguage, codeLanguages: languages }),
       history({ newGroupDelay: 500 }),
@@ -88,7 +72,6 @@ export default function CodeMirrorEditor({
       <EditorToolbar editorView={editorView} isDark={isDark} />
       <div className="flex-1" style={{ minHeight: 0, overflow: 'auto' }}>
         <CodeMirror
-          ref={cmRef}
           value={content}
           onChange={handleChange}
           onCreateEditor={onCreateEditor}

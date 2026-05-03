@@ -39,6 +39,8 @@ export function SermonEditor() {
     if (currentSermon) {
       const md = ensureMarkdown(currentSermon.content)
       setMarkdownContent(md)
+    } else {
+      setMarkdownContent('')
     }
   }, [currentSermon?.id])
 
@@ -77,7 +79,7 @@ export function SermonEditor() {
   const handleContentChange = useCallback((content: string) => {
     setMarkdownContent(content)
     const sermon = currentSermonRef.current
-    if (sermon) {
+    if (sermon && sermon.content !== content) {
       setCurrentSermon({ ...sermon, content })
     }
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)

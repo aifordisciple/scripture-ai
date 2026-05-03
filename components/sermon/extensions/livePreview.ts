@@ -263,110 +263,119 @@ function buildDecorations(view: EditorView): DecorationSet {
 
   let fenced: FencedState | null = null;
 
-  for (let i = 1; i <= doc.lines; i++) {
-    const line = doc.line(i);
-    const isActive = activeLines.has(i);
+  try {
+    for (let i = 1; i <= doc.lines; i++) {
+      const line = doc.line(i);
+      const isActive = activeLines.has(i);
 
-    // Inside a fenced block
-    if (fenced) {
-      fenced.contentLines.push(line.text);
-      if (line.text.trim() === '```') {
-        // End of fenced block
-        if (!isActive && !activeLines.has(fenced.startLineNum)) {
-          // Replace entire fenced block with preview widget
-          const content = fenced.contentLines.slice(0, -1).join('\n'); // exclude closing ```
+      // Inside a fenced block
+      if (fenced) {
+        fenced.contentLines.push(line.text);
+        if (line.text.trim() === '```') {
+          // End of fenced block
+          if (!isActive && !activeLines.has(fenced.startLineNum)) {
+            // Replace entire fenced block with preview widget
+            const startLine = doc.line(fenced.startLineNum);
+            // Validate range before creating decoration
+            if (startLine.from <= line.to) {
+              const content = fenced.contentLines.slice(0, -1).join('\n'); // exclude closing ```
+              const widget = Decoration.replace({
+                widget: new FencedBlockPreviewWidget(fenced.label, content, fenced.color, fenced.icon),
+                block: true,
+                inclusive: true,
+              });
+              decorations.push(widget.range(startLine.from, line.to));
+            }
+          }
+          fenced = null;
+        }
+        continue;
+      }
+
+      // Not inside a fenced block
+      const kind = classifyLine(line.text, i, state, line.from);
+
+      // Start of a fenced block?
+      if (kind.type === 'fencedStart') {
+        fenced = {
+          active: true,
+          label: kind.label,
+          color: kind.color,
+          icon: kind.icon,
+          contentLines: [line.text],
+          startLineNum: i,
+        };
+        continue;
+      }
+
+      // If cursor is on this line, show raw Markdown (no decoration)
+      if (isActive) continue;
+
+      // Apply preview decoration based on line kind
+      switch (kind.type) {
+        case 'heading': {
           const widget = Decoration.replace({
-            widget: new FencedBlockPreviewWidget(fenced.label, content, fenced.color, fenced.icon),
+            widget: new HeadingPreviewWidget(kind.level, kind.text),
             block: true,
             inclusive: true,
           });
-          decorations.push(widget.range(
-            doc.line(fenced.startLineNum).from,
-            line.to
-          ));
+          decorations.push(widget.range(line.from, line.to));
+          break;
         }
-        fenced = null;
+        case 'hr': {
+          const widget = Decoration.replace({
+            widget: new HrPreviewWidget(),
+            block: true,
+            inclusive: true,
+          });
+          decorations.push(widget.range(line.from, line.to));
+          break;
+        }
+        case 'blockquote': {
+          const widget = Decoration.replace({
+            widget: new BlockquotePreviewWidget(kind.text),
+            block: true,
+            inclusive: true,
+          });
+          decorations.push(widget.range(line.from, line.to));
+          break;
+        }
+        case 'paragraph': {
+          // Skip empty paragraphs to avoid invalid decorations
+          if (!kind.text) continue;
+          const widget = Decoration.replace({
+            widget: new ParagraphPreviewWidget(kind.text),
+            block: true,
+            inclusive: true,
+          });
+          decorations.push(widget.range(line.from, line.to));
+          break;
+        }
+        case 'bulletItem': {
+          const widget = Decoration.replace({
+            widget: new ListItemPreviewWidget(kind.text, false, 0),
+            block: true,
+            inclusive: true,
+          });
+          decorations.push(widget.range(line.from, line.to));
+          break;
+        }
+        case 'orderedItem': {
+          const widget = Decoration.replace({
+            widget: new ListItemPreviewWidget(kind.text, true, kind.index),
+            block: true,
+            inclusive: true,
+          });
+          decorations.push(widget.range(line.from, line.to));
+          break;
+        }
+        // empty, other, fencedEnd — no decoration
       }
-      continue;
     }
-
-    // Not inside a fenced block
-    const kind = classifyLine(line.text, i, state, line.from);
-
-    // Start of a fenced block?
-    if (kind.type === 'fencedStart') {
-      fenced = {
-        active: true,
-        label: kind.label,
-        color: kind.color,
-        icon: kind.icon,
-        contentLines: [line.text],
-        startLineNum: i,
-      };
-      continue;
-    }
-
-    // If cursor is on this line, show raw Markdown (no decoration)
-    if (isActive) continue;
-
-    // Apply preview decoration based on line kind
-    switch (kind.type) {
-      case 'heading': {
-        const widget = Decoration.replace({
-          widget: new HeadingPreviewWidget(kind.level, kind.text),
-          block: true,
-          inclusive: true,
-        });
-        decorations.push(widget.range(line.from, line.to));
-        break;
-      }
-      case 'hr': {
-        const widget = Decoration.replace({
-          widget: new HrPreviewWidget(),
-          block: true,
-          inclusive: true,
-        });
-        decorations.push(widget.range(line.from, line.to));
-        break;
-      }
-      case 'blockquote': {
-        const widget = Decoration.replace({
-          widget: new BlockquotePreviewWidget(kind.text),
-          block: true,
-          inclusive: true,
-        });
-        decorations.push(widget.range(line.from, line.to));
-        break;
-      }
-      case 'paragraph': {
-        const widget = Decoration.replace({
-          widget: new ParagraphPreviewWidget(kind.text),
-          block: true,
-          inclusive: true,
-        });
-        decorations.push(widget.range(line.from, line.to));
-        break;
-      }
-      case 'bulletItem': {
-        const widget = Decoration.replace({
-          widget: new ListItemPreviewWidget(kind.text, false, 0),
-          block: true,
-          inclusive: true,
-        });
-        decorations.push(widget.range(line.from, line.to));
-        break;
-      }
-      case 'orderedItem': {
-        const widget = Decoration.replace({
-          widget: new ListItemPreviewWidget(kind.text, true, kind.index),
-          block: true,
-          inclusive: true,
-        });
-        decorations.push(widget.range(line.from, line.to));
-        break;
-      }
-      // empty, other, fencedEnd — no decoration
-    }
+  } catch (e) {
+    // If decoration building fails, return empty set to prevent crash
+    console.error('[livePreview] buildDecorations error:', e);
+    return Decoration.none;
   }
 
   return Decoration.set(decorations, true);

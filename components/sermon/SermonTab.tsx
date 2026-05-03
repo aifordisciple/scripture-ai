@@ -14,6 +14,7 @@ import { SermonReviewPanel } from './SermonReviewPanel'
 import { SermonSettingsPanel } from './SermonSettingsPanel'
 import { SermonEditorProvider } from './SermonEditorContext'
 import { cn } from '@/lib/utils'
+import { SermonErrorBoundary } from './SermonErrorBoundary'
 
 export function SermonTab() {
   const { t } = useTranslation()
@@ -71,7 +72,9 @@ export function SermonTab() {
         {/* Main Editor Area */}
         <div className="flex-1 flex flex-col min-w-0">
           {currentSermon ? (
-            <SermonEditor />
+            <SermonErrorBoundary>
+              <SermonEditor />
+            </SermonErrorBoundary>
           ) : (
             <SermonEmptyState />
           )}
