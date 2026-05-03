@@ -34,7 +34,7 @@ class HeadingPreviewWidget extends WidgetType {
     };
     wrap.style.cssText = `
       display:block; font-size: ${sizes[this.level] || '1em'};
-      font-weight: 700; margin: 0.5em 0 0.25em;
+      font-weight: 700; margin: 0.3em 0 0.1em;
       line-height: 1.35; cursor: text; color: inherit;
     `;
     wrap.textContent = this.text;
@@ -50,7 +50,7 @@ class HrPreviewWidget extends WidgetType {
   toDOM(): HTMLElement {
     const el = document.createElement('hr');
     el.setAttribute('contenteditable', 'false');
-    el.style.cssText = 'display:block;border:none;border-top:1px solid #d1d5db;margin:14px 0;cursor:text;';
+    el.style.cssText = 'display:block;border:none;border-top:1px solid #d1d5db;margin:6px 0;cursor:text;';
     return el;
   }
   eq() { return true; }
@@ -63,7 +63,7 @@ class BlockquotePreviewWidget extends WidgetType {
     const el = document.createElement('blockquote');
     el.setAttribute('contenteditable', 'false');
     el.style.cssText = `
-      display:block;border-left:3px solid #6b7280;padding-left:12px;margin:4px 0;
+      display:block;border-left:3px solid #6b7280;padding-left:12px;margin:2px 0;
       color:#6b7280;font-style:italic;cursor:text;
     `;
     el.textContent = this.text;
@@ -78,7 +78,7 @@ class ParagraphPreviewWidget extends WidgetType {
   toDOM(): HTMLElement {
     const el = document.createElement('p');
     el.setAttribute('contenteditable', 'false');
-    el.style.cssText = 'display:block;margin:0.4em 0;cursor:text;';
+    el.style.cssText = 'display:block;margin:0.1em 0;cursor:text;';
     el.innerHTML = renderInlineMarkdown(this.text);
     return el;
   }
@@ -91,7 +91,7 @@ class ListItemPreviewWidget extends WidgetType {
   toDOM(): HTMLElement {
     const el = document.createElement('div');
     el.setAttribute('contenteditable', 'false');
-    el.style.cssText = 'display:block;margin:0.15em 0 0.15em 1.5em;cursor:text;';
+    el.style.cssText = 'display:block;margin:0.05em 0 0.05em 1.5em;cursor:text;';
     const marker = this.ordered ? `${this.index}. ` : '• ';
     el.innerHTML = `<span style="margin-right:0.3em">${marker}</span>${renderInlineMarkdown(this.text)}`;
     return el;
@@ -107,7 +107,7 @@ class FencedBlockPreviewWidget extends WidgetType {
     wrap.setAttribute('contenteditable', 'false');
     wrap.style.cssText = `
       display:block;border-left:3px solid ${this.color};border-radius:4px;
-      padding:8px 12px;margin:4px 0;cursor:text;
+      padding:6px 10px;margin:2px 0;cursor:text;
       background:${this.color}11;
     `;
     const header = document.createElement('div');
