@@ -279,12 +279,15 @@ function buildDecorations(view: EditorView): DecorationSet {
             // Validate range before creating decoration
             if (startLine.from <= line.to) {
               const content = fenced.contentLines.slice(0, -1).join('\n'); // exclude closing ```
-              const widget = Decoration.replace({
+              const widget = Decoration.widget({
                 widget: new FencedBlockPreviewWidget(fenced.label, content, fenced.color, fenced.icon),
                 block: true,
-                inclusive: true,
+                side: 1,
               });
-              decorations.push(widget.range(startLine.from, line.to));
+              // Hide the raw markdown lines
+              const hide = Decoration.replace({ inclusive: true });
+              decorations.push(hide.range(startLine.from, line.to));
+              decorations.push(widget.range(line.to));
             }
           }
           fenced = null;
@@ -314,59 +317,72 @@ function buildDecorations(view: EditorView): DecorationSet {
       // Apply preview decoration based on line kind
       switch (kind.type) {
         case 'heading': {
-          const widget = Decoration.replace({
+          const widget = Decoration.widget({
             widget: new HeadingPreviewWidget(kind.level, kind.text),
             block: true,
-            inclusive: true,
+            side: 1,
           });
-          decorations.push(widget.range(line.from, line.to));
+          // Hide the raw markdown line
+          const hide = Decoration.replace({ inclusive: true });
+          decorations.push(hide.range(line.from, line.to));
+          decorations.push(widget.range(line.to));
           break;
         }
         case 'hr': {
-          const widget = Decoration.replace({
+          const widget = Decoration.widget({
             widget: new HrPreviewWidget(),
             block: true,
-            inclusive: true,
+            side: 1,
           });
-          decorations.push(widget.range(line.from, line.to));
+          const hide = Decoration.replace({ inclusive: true });
+          decorations.push(hide.range(line.from, line.to));
+          decorations.push(widget.range(line.to));
           break;
         }
         case 'blockquote': {
-          const widget = Decoration.replace({
+          const widget = Decoration.widget({
             widget: new BlockquotePreviewWidget(kind.text),
             block: true,
-            inclusive: true,
+            side: 1,
           });
-          decorations.push(widget.range(line.from, line.to));
+          const hide = Decoration.replace({ inclusive: true });
+          decorations.push(hide.range(line.from, line.to));
+          decorations.push(widget.range(line.to));
           break;
         }
         case 'paragraph': {
           // Skip empty paragraphs to avoid invalid decorations
           if (!kind.text) continue;
-          const widget = Decoration.replace({
+          const widget = Decoration.widget({
             widget: new ParagraphPreviewWidget(kind.text),
             block: true,
-            inclusive: true,
+            side: 1,
           });
-          decorations.push(widget.range(line.from, line.to));
+          const hide = Decoration.replace({ inclusive: true });
+          decorations.push(hide.range(line.from, line.to));
+          decorations.push(widget.range(line.to));
           break;
         }
         case 'bulletItem': {
-          const widget = Decoration.replace({
+          const widget = Decoration.widget({
             widget: new ListItemPreviewWidget(kind.text, false, 0),
             block: true,
-            inclusive: true,
+            side: 1,
           });
-          decorations.push(widget.range(line.from, line.to));
+          const hide = Decoration.replace({ inclusive: true });
+          decorations.push(hide.range(line.from, line.to));
+          decorations.push(widget.range(line.to));
           break;
         }
         case 'orderedItem': {
-          const widget = Decoration.replace({
+          const widget = Decoration.widget({
             widget: new ListItemPreviewWidget(kind.text, true, kind.index),
             block: true,
-            inclusive: true,
+            side: 1,
           });
-          decorations.push(widget.range(line.from, line.to));
+          const hide = Decoration.replace({ inclusive: true });
+          decorations.push(hide.range(line.from, line.to));
+          decorations.push(widget.range(line.to));
           break;
         }
         // empty, other, fencedEnd — no decoration
