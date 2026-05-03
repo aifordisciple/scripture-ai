@@ -105,10 +105,16 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
         // Fetch verse text from API
         const res = await fetch(`/api/bible?book=${ref.bookId}&chapter=${ref.chapter}`)
         const data = await res.json()
-        const verses: Array<{ verse: number; text: string }> = data.data || []
-        // Filter to selected range
-        const filtered = verses.filter(v => v.verse >= ref.verseStart && v.verse <= ref.verseEnd)
-        const verseText = filtered.map(v => `${v.verse} ${v.text}`).join('\n')
+        const verses: Array<{ verse: number; content: string; version?: string }> = data.data || []
+        // Filter to selected range, deduplicate by verse number (take first version only)
+        const seen = new Set<number>()
+        const filtered = verses.filter(v => {
+          if (v.verse < ref.verseStart || v.verse > ref.verseEnd) return false
+          if (seen.has(v.verse)) return false
+          seen.add(v.verse)
+          return true
+        })
+        const verseText = filtered.map(v => `${v.verse} ${v.content}`).join('\n')
         const displayRef = formatRef(ref)
         blocks.push(generateVerseBlock(displayRef, verseText || '...'))
       }
