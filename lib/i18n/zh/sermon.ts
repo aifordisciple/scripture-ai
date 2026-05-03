@@ -157,5 +157,16 @@ export const sermon = {
     deleteSermon: '删除讲章',
     rootFolder: '根目录',
     delete: '删除',
+
+    // 经文选择弹窗
+    versePickerTitle: '选择经文',
+    versePickerSelectBook: '选择书卷',
+    versePickerSelectChapter: '选择章节',
+    versePickerSelectVerse: '选择经文',
+    versePickerAdd: '添加',
+    versePickerInsert: '插入经文',
+    versePickerNoSelection: '未选择经文',
+    versePickerRangeHint: '点击起始经文，再点击结束经文选择范围',
+    versePickerSearchBook: '搜索书卷...',
   },
 } as const

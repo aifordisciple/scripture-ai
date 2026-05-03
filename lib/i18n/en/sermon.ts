@@ -137,5 +137,16 @@ export const sermon = {
     // Create sermon from reading page
     createSermonFromReading: 'Create Sermon',
     createSermonFromReadingDesc: 'Create a new sermon from selected verses',
+
+    // Verse Picker Popover
+    versePickerTitle: 'Select Verse',
+    versePickerSelectBook: 'Select Book',
+    versePickerSelectChapter: 'Select Chapter',
+    versePickerSelectVerse: 'Select Verse',
+    versePickerAdd: 'Add',
+    versePickerInsert: 'Insert Verses',
+    versePickerNoSelection: 'No verses selected',
+    versePickerRangeHint: 'Click start verse, then end verse to select a range',
+    versePickerSearchBook: 'Search books...',
   },
 } as const

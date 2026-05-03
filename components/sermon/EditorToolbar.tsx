@@ -19,7 +19,8 @@ import {
   LayoutTemplate,
 } from 'lucide-react';
 import { undo, redo } from '@codemirror/commands';
-import { generateVerseBlock, generateSectionBlock, SectionType } from '@/lib/sermon-markdown';
+import { generateSectionBlock, SectionType } from '@/lib/sermon-markdown';
+import VersePickerPopover from './VersePickerPopover';
 
 interface EditorToolbarProps {
   editorView: EditorView | null;
@@ -129,18 +130,17 @@ export default function EditorToolbar({ editorView, isDark }: EditorToolbarProps
       action: (view) => insertBlock(view, '---'),
       separator: true,
     },
-    {
-      icon: <BookOpen size={16} />,
-      label: '经文',
-      action: (view) => insertBlock(view, generateVerseBlock('经文引用', '经文内容')),
-      separator: true,
-    },
+    // Verse button is handled separately via VersePickerPopover
     {
       icon: <LayoutTemplate size={16} />,
       label: '段落',
       action: (view) => insertBlock(view, generateSectionBlock('introduction', '段落内容')),
     },
   ];
+
+  const btnStyle = {
+    color: isDark ? '#d1d5db' : '#4b5563',
+  };
 
   return (
     <div
@@ -150,19 +150,37 @@ export default function EditorToolbar({ editorView, isDark }: EditorToolbarProps
         borderColor: isDark ? '#374151' : '#e5e7eb',
       }}
     >
-      {buttons.map((btn, i) => (
-        <React.Fragment key={i}>
-          {btn.separator && <div className="w-px h-5 mx-1" style={{ backgroundColor: isDark ? '#374151' : '#e5e7eb' }} />}
-          <button
-            onClick={() => btn.action(editorView)}
-            title={btn.label}
-            className="p-1.5 rounded hover:bg-blue-500/10 transition-colors"
-            style={{ color: isDark ? '#d1d5db' : '#4b5563' }}
-          >
-            {btn.icon}
-          </button>
-        </React.Fragment>
-      ))}
+      {buttons.map((btn, i) => {
+        // Insert verse picker before the last button (段落)
+        const isLast = i === buttons.length - 1
+        return (
+          <React.Fragment key={i}>
+            {isLast && (
+              <>
+                <div className="w-px h-5 mx-1" style={{ backgroundColor: isDark ? '#374151' : '#e5e7eb' }} />
+                <VersePickerPopover editorView={editorView} isDark={isDark}>
+                  <button
+                    title="经文"
+                    className="p-1.5 rounded hover:bg-blue-500/10 transition-colors"
+                    style={btnStyle}
+                  >
+                    <BookOpen size={16} />
+                  </button>
+                </VersePickerPopover>
+              </>
+            )}
+            {btn.separator && <div className="w-px h-5 mx-1" style={{ backgroundColor: isDark ? '#374151' : '#e5e7eb' }} />}
+            <button
+              onClick={() => btn.action(editorView)}
+              title={btn.label}
+              className="p-1.5 rounded hover:bg-blue-500/10 transition-colors"
+              style={btnStyle}
+            >
+              {btn.icon}
+            </button>
+          </React.Fragment>
+        )
+      })}
     </div>
   );
 }
