@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
-import { useSermonEditor } from './SermonEditorContext'
 import { LayoutTemplate, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -71,16 +70,15 @@ const TEMPLATES: Template[] = [
 
 export function SermonTemplatePanel() {
   const { t } = useTranslation()
-  const { currentSermon } = useBibleStore()
-  const editor = useSermonEditor()
+  const { currentSermon, setCurrentSermon } = useBibleStore()
   const [appliedId, setAppliedId] = useState<string | null>(null)
 
   const handleApply = (template: Template) => {
-    if (!editor) return
-    const html = template.sections
-      .map(s => `<h2>${s.title}</h2><p>${s.placeholder}</p>`)
-      .join('')
-    editor.chain().focus().setContent(html).run()
+    if (!currentSermon) return
+    const markdown = template.sections
+      .map(s => `## ${s.title}\n\n${s.placeholder}`)
+      .join('\n\n')
+    setCurrentSermon({ ...currentSermon, content: markdown })
     setAppliedId(template.id)
     setTimeout(() => setAppliedId(null), 2000)
   }

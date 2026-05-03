@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
-import { BookOpen, Lightbulb, Loader2, X, Plus, Check } from 'lucide-react'
+import { BIBLE_BOOKS, getBookDisplayName } from '@/lib/constants'
+import { BookOpen, Lightbulb, Loader2, X, Plus, Check, Search, ChevronRight, ChevronLeft } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface RecommendedVerse {
   bookId: string
@@ -19,6 +21,9 @@ interface NewSermonDialogProps {
   initialVerseRefs?: string
 }
 
+// Steps for the verse selector
+type VerseSelectorStep = 'book' | 'chapter' | 'verse'
+
 export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDialogProps) {
   const { t } = useTranslation()
   const { apiConfig, locale, setSermons, sermons, setCurrentSermon, setActiveSermonPanel } = useBibleStore()
@@ -33,31 +38,41 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
   const [recommendedVerses, setRecommendedVerses] = useState<RecommendedVerse[]>([])
   const [selectedVerses, setSelectedVerses] = useState<Set<number>>(new Set())
 
+  // Verse selector state
+  const [showVerseSelector, setShowVerseSelector] = useState(false)
+  const [selectorStep, setSelectorStep] = useState<VerseSelectorStep>('book')
+  const [selectedBook, setSelectedBook] = useState<string | null>(null)
+  const [selectedChapter, setSelectedChapter] = useState<number | null>(null)
+  const [verseStart, setVerseStart] = useState<number | null>(null)
+  const [verseEnd, setVerseEnd] = useState<number | null>(null)
+  const [verseSearch, setVerseSearch] = useState('')
+  const [selectedRefs, setSelectedRefs] = useState<Array<{ bookId: string; chapter: number; verseStart: number; verseEnd: number }>>([])
+
   // Escape key handler
   useEffect(() => {
     if (!open) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose()
+        if (showVerseSelector) {
+          setShowVerseSelector(false)
+        } else {
+          onClose()
+        }
       }
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [open, onClose])
+  }, [open, onClose, showVerseSelector])
 
-  // Focus trap: focus first focusable element on open
+  // Focus trap
   useEffect(() => {
     if (!open || !dialogRef.current) return
-    const focusable = dialogRef.current.querySelector<HTMLElement>(
-      'input, button, select, textarea, [tabindex]'
-    )
+    const focusable = dialogRef.current.querySelector<HTMLElement>('input, button, select, textarea, [tabindex]')
     focusable?.focus()
   }, [open])
 
   const handleOverlayClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose()
-    }
+    if (e.target === e.currentTarget) onClose()
   }, [onClose])
 
   if (!open) return null
@@ -105,7 +120,12 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
       const res = await fetch('/api/sermon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, verseRefs: finalVerseRefs, style }),
+        body: JSON.stringify({
+          title,
+          verseRefs: finalVerseRefs,
+          style,
+          content: `# ${title}\n\n\`\`\`section:introduction\n## 引言\n\n\`\`\`\n\n\`\`\`section:main_point\n## 要点\n\n\`\`\`\n\n\`\`\`section:conclusion\n## 结论\n\n\`\`\`\n`,
+        }),
       })
       const data = await res.json()
       if (data.data) {
@@ -121,37 +141,91 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
     }
   }
 
+  // Add a selected verse range from the visual selector
+  const addSelectedRef = () => {
+    if (!selectedBook || !selectedChapter || !verseStart) return
+    const end = verseEnd || verseStart
+    const newRef = { bookId: selectedBook, chapter: selectedChapter, verseStart, verseEnd: end }
+    setSelectedRefs(prev => [...prev, newRef])
+    // Update the verseRefs text
+    const refsText = [...selectedRefs, newRef]
+      .map(r => `${r.bookId} ${r.chapter}:${r.verseStart}${r.verseEnd > r.verseStart ? `-${r.verseEnd}` : ''}`)
+      .join('; ')
+    setVerseRefs(refsText)
+    // Reset selector
+    setShowVerseSelector(false)
+    setSelectorStep('book')
+    setSelectedBook(null)
+    setSelectedChapter(null)
+    setVerseStart(null)
+    setVerseEnd(null)
+  }
+
+  const removeSelectedRef = (idx: number) => {
+    const next = selectedRefs.filter((_, i) => i !== idx)
+    setSelectedRefs(next)
+    const refsText = next
+      .map(r => `${r.bookId} ${r.chapter}:${r.verseStart}${r.verseEnd > r.verseStart ? `-${r.verseEnd}` : ''}`)
+      .join('; ')
+    setVerseRefs(refsText)
+  }
+
+  // Get the selected book's data
+  const selectedBookData = useMemo(() => {
+    return BIBLE_BOOKS.find(b => b.id === selectedBook)
+  }, [selectedBook])
+
+  // Filter books by search
+  const filteredBooks = useMemo(() => {
+    if (!verseSearch) return BIBLE_BOOKS
+    const q = verseSearch.toLowerCase()
+    return BIBLE_BOOKS.filter(b =>
+      b.name.includes(q) ||
+      (b.nameEn && b.nameEn.toLowerCase().includes(q)) ||
+      b.id.toLowerCase().includes(q) ||
+      (getBookDisplayName(b.id, locale)).toLowerCase().includes(q)
+    )
+  }, [verseSearch, locale])
+
+  const oldTestament = filteredBooks.slice(0, 39)
+  const newTestament = filteredBooks.slice(39)
+
+  // Get max verse count for a chapter (approximate - we'll show 1-50 as range)
+  const MAX_VERSE = 50
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={handleOverlayClick}>
-      <div ref={dialogRef} className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-[420px] max-h-[85vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={handleOverlayClick}>
+      <div ref={dialogRef} className="bg-card rounded-xl shadow-2xl w-[480px] max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
-          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">{t('sermon.newSermon')}</h3>
-          <button onClick={onClose} className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <h3 className="text-sm font-semibold text-foreground">{t('sermon.newSermon')}</h3>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-secondary text-muted-foreground">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Mode Tabs */}
-        <div className="flex border-b border-slate-200 dark:border-slate-800">
+        <div className="flex border-b border-border">
           <button
             onClick={() => setMode('verse')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors ${
+            className={cn(
+              'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors',
               mode === 'verse'
-                ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                : 'text-slate-400 hover:text-slate-600'
-            }`}
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             <BookOpen className="w-3.5 h-3.5" />
             {t('sermon.createFromVerse')}
           </button>
           <button
             onClick={() => setMode('topic')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors ${
+            className={cn(
+              'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors',
               mode === 'topic'
-                ? 'text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                : 'text-slate-400 hover:text-slate-600'
-            }`}
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             <Lightbulb className="w-3.5 h-3.5" />
             {t('sermon.createFromTopic')}
@@ -162,26 +236,57 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
           {/* Title */}
           <div>
-            <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{t('sermon.sermonTitle')}</label>
+            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t('sermon.sermonTitle')}</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('sermon.sermonTitlePlaceholder')}
-              className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
             />
           </div>
 
           {/* Verse Mode */}
           {mode === 'verse' && (
             <div>
-              <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{t('sermon.verseRefsLabel')}</label>
-              <input
-                value={verseRefs}
-                onChange={(e) => setVerseRefs(e.target.value)}
-                placeholder="Rom 8:28-30; Psa 23:1-6"
-                className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-[10px] text-slate-400 mt-1">{t('sermon.createFromVerseDesc')}</p>
+              <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t('sermon.verseRefsLabel')}</label>
+              <div className="mt-1 flex gap-1.5">
+                <input
+                  value={verseRefs}
+                  onChange={(e) => setVerseRefs(e.target.value)}
+                  placeholder="Rom 8:28-30; Psa 23:1-6"
+                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
+                />
+                <button
+                  onClick={() => {
+                    setShowVerseSelector(true)
+                    setSelectorStep('book')
+                    setVerseSearch('')
+                  }}
+                  className="px-3 py-2 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors flex items-center gap-1"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  {locale === 'en' ? 'Pick' : '选择'}
+                </button>
+              </div>
+
+              {/* Selected verse chips */}
+              {selectedRefs.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {selectedRefs.map((ref, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary"
+                    >
+                      {getBookDisplayName(ref.bookId, locale)} {ref.chapter}:{ref.verseStart}{ref.verseEnd > ref.verseStart ? `-${ref.verseEnd}` : ''}
+                      <button onClick={() => removeSelectedRef(i)} className="hover:text-destructive">
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <p className="text-[10px] text-muted-foreground mt-1">{t('sermon.createFromVerseDesc')}</p>
             </div>
           )}
 
@@ -189,51 +294,53 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
           {mode === 'topic' && (
             <>
               <div>
-                <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{t('sermon.topicInput')}</label>
+                <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t('sermon.topicInput')}</label>
                 <div className="mt-1 flex gap-1.5">
                   <input
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
                     placeholder={t('sermon.topicInput')}
-                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
                   />
                   <button
                     onClick={handleRecommendVerses}
                     disabled={!topic.trim() || loading}
-                    className="px-3 py-2 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition-colors"
+                    className="px-3 py-2 rounded-lg text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 transition-colors"
                   >
                     {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : t('sermon.aiRecommendVerses')}
                   </button>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1">{t('sermon.createFromTopicDesc')}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">{t('sermon.createFromTopicDesc')}</p>
               </div>
 
               {/* Recommended Verses */}
               {recommendedVerses.length > 0 && (
                 <div>
-                  <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{t('sermon.selectVerses')}</label>
+                  <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t('sermon.selectVerses')}</label>
                   <div className="mt-1 space-y-1.5">
                     {recommendedVerses.map((v, i) => (
                       <button
-                        key={i}
+              key={i}
                         onClick={() => toggleVerse(i)}
-                        className={`w-full text-left px-3 py-2 rounded-lg border text-xs transition-colors ${
+                        className={cn(
+                          'w-full text-left px-3 py-2 rounded-lg border text-xs transition-colors',
                           selectedVerses.has(i)
-                            ? 'border-blue-300 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700'
-                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'
-                        }`}
+                            ? 'border-primary/40 bg-primary/10'
+                            : 'border-border bg-card'
+                        )}
                       >
                         <div className="flex items-center gap-2">
-                          <div className={`w-4 h-4 rounded-md flex items-center justify-center ${
-                            selectedVerses.has(i) ? 'bg-blue-600 text-white' : 'border border-slate-300 dark:border-slate-600'
-                          }`}>
+                          <div className={cn(
+                            'w-4 h-4 rounded-md flex items-center justify-center',
+                            selectedVerses.has(i) ? 'bg-primary text-primary-foreground' : 'border border-border'
+                          )}>
                             {selectedVerses.has(i) && <Check className="w-2.5 h-2.5" />}
                           </div>
-                          <span className="font-medium text-slate-700 dark:text-slate-300">
+                          <span className="font-medium text-foreground/90">
                             {v.bookId} {v.chapter}:{v.verseStart}{v.verseEnd > v.verseStart ? `-${v.verseEnd}` : ''}
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-1 ml-6">{v.reason}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1 ml-6">{v.reason}</p>
                       </button>
                     ))}
                   </div>
@@ -244,17 +351,18 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
 
           {/* Style */}
           <div>
-            <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{t('sermon.sermonStyle')}</label>
+            <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t('sermon.sermonStyle')}</label>
             <div className="mt-1 grid grid-cols-3 gap-1.5">
               {(['EXPOSITORY', 'TOPICAL', 'NARRATIVE'] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => setStyle(s)}
-                  className={`py-2 rounded-lg text-[11px] font-medium transition-colors ${
+                  className={cn(
+                    'py-2 rounded-lg text-[11px] font-medium transition-colors',
                     style === s
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-secondary'
+                  )}
                 >
                   {t(`sermon.${s.toLowerCase()}`)}
                 </button>
@@ -264,23 +372,255 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
+        <div className="px-4 py-3 border-t border-border flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="px-4 py-2 text-xs font-medium rounded-lg text-muted-foreground hover:bg-secondary transition-colors"
           >
             {t('sermon.cancel')}
           </button>
           <button
             onClick={handleCreate}
             disabled={!title.trim() || loading}
-            className="px-4 py-2 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition-colors flex items-center gap-1.5"
+            className="px-4 py-2 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 transition-colors flex items-center gap-1.5"
           >
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
             {t('sermon.create')}
           </button>
         </div>
       </div>
+
+      {/* ===== Visual Verse Selector Overlay ===== */}
+      {showVerseSelector && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowVerseSelector(false)}>
+          <div
+            className="bg-card rounded-xl shadow-2xl w-[520px] max-h-[80vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Selector Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <div className="flex items-center gap-2">
+                {selectorStep !== 'book' && (
+                  <button
+                    onClick={() => {
+                      if (selectorStep === 'verse') {
+                        setSelectorStep('chapter')
+                        setVerseStart(null)
+                        setVerseEnd(null)
+                      } else if (selectorStep === 'chapter') {
+                        setSelectorStep('book')
+                        setSelectedBook(null)
+                        setSelectedChapter(null)
+                      }
+                    }}
+                    className="p-1 rounded-md hover:bg-secondary text-muted-foreground"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                )}
+                <h3 className="text-sm font-semibold text-foreground">
+                  {selectorStep === 'book' && (locale === 'en' ? 'Select Book' : '选择书卷')}
+                  {selectorStep === 'chapter' && (locale === 'en' ? `Select Chapter — ${getBookDisplayName(selectedBook!, locale)}` : `选择章节 — ${getBookDisplayName(selectedBook!, locale)}`)}
+                  {selectorStep === 'verse' && (locale === 'en' ? `Select Verses — ${getBookDisplayName(selectedBook!, locale)} ${selectedChapter}` : `选择经文 — ${getBookDisplayName(selectedBook!, locale)} ${selectedChapter}章`)}
+                </h3>
+              </div>
+              <button onClick={() => setShowVerseSelector(false)} className="p-1 rounded-md hover:bg-secondary text-muted-foreground">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Search (book step only) */}
+            {selectorStep === 'book' && (
+              <div className="px-4 py-2 border-b border-border">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <input
+                    value={verseSearch}
+                    onChange={(e) => setVerseSearch(e.target.value)}
+                    placeholder={locale === 'en' ? 'Search books...' : '搜索书卷...'}
+                    className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-border bg-card focus:outline-none focus:ring-1 focus:ring-primary/40"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Selector Body */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {/* Book Selection */}
+              {selectorStep === 'book' && (
+                <>
+                  {oldTestament.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="h-px flex-1 bg-border" />
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                          {locale === 'en' ? 'Old Testament' : '旧约'}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">{oldTestament.length}</span>
+                        <div className="h-px flex-1 bg-border" />
+                      </div>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {oldTestament.map(book => (
+                          <button
+                            key={book.id}
+                            onClick={() => {
+                              setSelectedBook(book.id)
+                              setSelectorStep('chapter')
+                            }}
+                            className={cn(
+                              'px-2 py-2 rounded-lg text-xs transition-colors text-center',
+                              selectedBook === book.id
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-secondary hover:bg-primary/10 hover:text-primary text-foreground/80'
+                            )}
+                          >
+                            {getBookDisplayName(book.id, locale)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {newTestament.length > 0 && (
+                    <div className="mb-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="h-px flex-1 bg-border" />
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                          {locale === 'en' ? 'New Testament' : '新约'}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">{newTestament.length}</span>
+                        <div className="h-px flex-1 bg-border" />
+                      </div>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {newTestament.map(book => (
+                          <button
+                            key={book.id}
+                            onClick={() => {
+                              setSelectedBook(book.id)
+                              setSelectorStep('chapter')
+                            }}
+                            className={cn(
+                              'px-2 py-2 rounded-lg text-xs transition-colors text-center',
+                              selectedBook === book.id
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-secondary hover:bg-primary/10 hover:text-primary text-foreground/80'
+                            )}
+                          >
+                            {getBookDisplayName(book.id, locale)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Chapter Selection */}
+              {selectorStep === 'chapter' && selectedBookData && (
+                <div className="grid grid-cols-5 gap-2">
+                  {Array.from({ length: selectedBookData.chapters }, (_, i) => i + 1).map(ch => (
+                    <button
+                      key={ch}
+                      onClick={() => {
+                        setSelectedChapter(ch)
+                        setSelectorStep('verse')
+                      }}
+                      className={cn(
+                        'aspect-square flex items-center justify-center rounded-xl text-sm transition-all',
+                        selectedChapter === ch
+                          ? 'bg-primary text-primary-foreground font-bold scale-105 shadow-sm'
+                          : 'bg-secondary text-foreground/80 hover:bg-primary/10 hover:text-primary hover:scale-110 border border-border/60'
+                      )}
+                    >
+                      {ch}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Verse Selection */}
+              {selectorStep === 'verse' && selectedBook && selectedChapter && (
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-2">
+                    {locale === 'en' ? 'Tap start verse, then tap end verse to select a range' : '点击起始经文，再点击结束经文选择范围'}
+                  </p>
+                  <div className="grid grid-cols-6 gap-1.5">
+                    {Array.from({ length: MAX_VERSE }, (_, i) => i + 1).map(v => {
+                      const isSelected = verseStart !== null && v >= verseStart && v <= (verseEnd || verseStart)
+                      const isStart = v === verseStart
+                      const isEnd = v === (verseEnd || verseStart)
+                      return (
+                        <button
+                          key={v}
+                          onClick={() => {
+                            if (verseStart === null || (verseStart !== null && verseEnd !== null)) {
+                              // Start new selection
+                              setVerseStart(v)
+                              setVerseEnd(null)
+                            } else if (verseEnd === null) {
+                              // Set end verse
+                              if (v >= verseStart) {
+                                setVerseEnd(v)
+                              } else {
+                                // Swap if end < start
+                                setVerseEnd(verseStart)
+                                setVerseStart(v)
+                              }
+                            }
+                          }}
+                          className={cn(
+                            'aspect-square flex items-center justify-center rounded-lg text-xs transition-all',
+                            isStart && 'bg-primary text-primary-foreground font-bold rounded-l-lg',
+                            isEnd && !isStart && 'bg-primary text-primary-foreground font-bold rounded-r-lg',
+                            isSelected && !isStart && !isEnd && 'bg-primary/20 text-primary',
+                            !isSelected && 'bg-secondary text-foreground/70 hover:bg-primary/10 hover:text-primary border border-border/40'
+                          )}
+                        >
+                          {v}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Selection preview */}
+                  {verseStart !== null && (
+                    <div className="mt-3 p-2 rounded-lg bg-primary/10 border border-primary/20">
+                      <p className="text-xs text-primary font-medium">
+                        {getBookDisplayName(selectedBook, locale)} {selectedChapter}:{verseStart}{verseEnd && verseEnd > verseStart ? `-${verseEnd}` : ''}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Selector Footer */}
+            <div className="px-4 py-3 border-t border-border flex justify-between items-center">
+              <div className="text-[10px] text-muted-foreground">
+                {selectedRefs.length > 0 && (
+                  <span>{locale === 'en' ? `${selectedRefs.length} verse(s) selected` : `已选 ${selectedRefs.length} 处经文`}</span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowVerseSelector(false)}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted-foreground hover:bg-secondary transition-colors"
+                >
+                  {locale === 'en' ? 'Cancel' : '取消'}
+                </button>
+                {selectorStep === 'verse' && verseStart !== null && (
+                  <button
+                    onClick={addSelectedRef}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" />
+                    {locale === 'en' ? 'Add' : '添加'}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

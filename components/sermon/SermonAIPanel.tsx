@@ -4,15 +4,13 @@ import { useRef, useEffect, useState } from 'react'
 import { useChat } from 'ai/react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
-import { useSermonEditor } from './SermonEditorContext'
 import { Bot, Send, StopCircle, ClipboardPaste, Sparkles, PenLine, BookOpen, Lightbulb, Link2, Target } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 export function SermonAIPanel() {
   const { t } = useTranslation()
-  const { currentSermon, apiConfig, locale } = useBibleStore()
-  const editor = useSermonEditor()
+  const { currentSermon, setCurrentSermon, apiConfig, locale } = useBibleStore()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [chatKey, setChatKey] = useState(0)
   const prevSermonIdRef = useRef(currentSermon?.id)
@@ -39,8 +37,9 @@ export function SermonAIPanel() {
   }, [messages])
 
   const handleInsertToEditor = (content: string) => {
-    if (!editor) return
-    editor.chain().focus().insertContent(content).run()
+    if (!currentSermon) return
+    const newContent = currentSermon.content ? `${currentSermon.content}\n\n${content}` : content
+    setCurrentSermon({ ...currentSermon, content: newContent })
   }
 
   const quickPrompts = [

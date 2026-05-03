@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isTiptapJson } from "@/lib/sermon-markdown";
+import { tiptapToMarkdown } from "@/lib/tiptap-to-markdown";
 
 export async function GET(req: Request) {
   const session = await auth();
@@ -25,13 +27,19 @@ export async function GET(req: Request) {
     where,
     orderBy: { updatedAt: "desc" },
     select: {
-      id: true, title: true, folderId: true, style: true, status: true,
+      id: true, title: true, content: true, folderId: true, style: true, status: true,
       sermonDate: true, verseRefs: true, tags: true, wordCount: true,
       estimatedMinutes: true, createdAt: true, updatedAt: true,
     },
   });
 
-  return NextResponse.json({ data: sermons });
+  // Convert any legacy Tiptap JSON content to Markdown
+  const convertedSermons = sermons.map(s => ({
+    ...s,
+    content: s.content && isTiptapJson(s.content) ? tiptapToMarkdown(s.content) : s.content,
+  }));
+
+  return NextResponse.json({ data: convertedSermons });
 }
 
 export async function POST(req: Request) {

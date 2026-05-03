@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
-import { useSermonEditor } from './SermonEditorContext'
 import { BookMarked, ClipboardPaste, Loader2 } from 'lucide-react'
 
 interface VerseRefData {
@@ -113,8 +112,7 @@ function parseVerseRefs(refs: string): VerseRefData[] {
 
 export function SermonVersePanel() {
   const { t } = useTranslation()
-  const { currentSermon } = useBibleStore()
-  const editor = useSermonEditor()
+  const { currentSermon, setCurrentSermon } = useBibleStore()
   const [verseData, setVerseData] = useState<VerseRefData[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -153,9 +151,10 @@ export function SermonVersePanel() {
   }, [currentSermon?.verseRefs])
 
   const handleInsert = useCallback((text: string) => {
-    if (!editor || !text) return
-    editor.chain().focus().insertContent(text).run()
-  }, [editor])
+    if (!currentSermon || !text) return
+    const newContent = currentSermon.content ? `${currentSermon.content}\n\n${text}` : text
+    setCurrentSermon({ ...currentSermon, content: newContent })
+  }, [currentSermon, setCurrentSermon])
 
   return (
     <div className="h-full flex flex-col bg-secondary">
