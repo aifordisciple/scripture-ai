@@ -78,11 +78,8 @@ export const sermonEditorTheme = (isDark: boolean): Extension => {
       fontSize: '0.9em',
     },
     // Fenced code block background
-    '&light .cm-line.cm-fencedcode, &light .cm-block-comment': {
-      backgroundColor: 'rgba(0,0,0,0.03)',
-    },
-    '&dark .cm-line.cm-fencedcode, &dark .cm-block-comment': {
-      backgroundColor: 'rgba(255,255,255,0.03)',
+    '.cm-line.cm-fencedcode, .cm-block-comment': {
+      backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
     },
   });
 };
