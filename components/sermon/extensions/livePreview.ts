@@ -7,7 +7,8 @@
  * is shown for editing.
  *
  * IMPORTANT: CodeMirror 6 forbids block decorations in ViewPlugin.
- * We use inline widgets (block: false) styled with display:block via CSS.
+ * We use inline widgets (block: false) as <span> elements that inherit
+ * the editor's lineHeight, matching Obsidian's seamless live preview.
  */
 import {
   Decoration,
@@ -19,23 +20,24 @@ import {
 } from '@codemirror/view';
 import { EditorState, Extension, Range } from '@codemirror/state';
 
-// ─── Preview Widgets (all inline, styled as block via CSS) ────────
+// ─── Preview Widgets (all inline <span>, inherit editor lineHeight) ────────
 
 class HeadingPreviewWidget extends WidgetType {
   constructor(readonly level: number, readonly text: string) {
     super();
   }
   toDOM(): HTMLElement {
-    const wrap = document.createElement('div');
+    const wrap = document.createElement('span');
     wrap.className = 'cm-livepreview-heading';
     wrap.setAttribute('contenteditable', 'false');
+    const weights: Record<number, number> = { 1: 700, 2: 700, 3: 600, 4: 600, 5: 500, 6: 500 };
     const sizes: Record<number, string> = {
-      1: '1.75em', 2: '1.45em', 3: '1.2em', 4: '1.05em', 5: '0.95em', 6: '0.9em',
+      1: '1.4em', 2: '1.2em', 3: '1.05em', 4: '1em', 5: '0.95em', 6: '0.9em',
     };
     wrap.style.cssText = `
-      display:block; font-size: ${sizes[this.level] || '1em'};
-      font-weight: 700; margin: 0.3em 0 0.1em;
-      line-height: 1.35; cursor: text; color: inherit;
+      font-size: ${sizes[this.level] || '1em'};
+      font-weight: ${weights[this.level] || 600};
+      cursor: text; color: inherit;
     `;
     wrap.textContent = this.text;
     return wrap;
@@ -48,9 +50,10 @@ class HeadingPreviewWidget extends WidgetType {
 
 class HrPreviewWidget extends WidgetType {
   toDOM(): HTMLElement {
-    const el = document.createElement('hr');
+    const el = document.createElement('span');
+    el.className = 'cm-livepreview-hr';
     el.setAttribute('contenteditable', 'false');
-    el.style.cssText = 'display:block;border:none;border-top:1px solid #d1d5db;margin:6px 0;cursor:text;';
+    el.style.cssText = 'display:inline-block;width:100%;border-top:1px solid #d1d5db;vertical-align:middle;cursor:text;';
     return el;
   }
   eq() { return true; }
@@ -60,12 +63,10 @@ class HrPreviewWidget extends WidgetType {
 class BlockquotePreviewWidget extends WidgetType {
   constructor(readonly text: string) { super(); }
   toDOM(): HTMLElement {
-    const el = document.createElement('blockquote');
+    const el = document.createElement('span');
+    el.className = 'cm-livepreview-blockquote';
     el.setAttribute('contenteditable', 'false');
-    el.style.cssText = `
-      display:block;border-left:3px solid #6b7280;padding-left:12px;margin:2px 0;
-      color:#6b7280;font-style:italic;cursor:text;
-    `;
+    el.style.cssText = 'border-left:3px solid #6b7280;padding-left:12px;color:#6b7280;font-style:italic;cursor:text;';
     el.textContent = this.text;
     return el;
   }
@@ -76,9 +77,10 @@ class BlockquotePreviewWidget extends WidgetType {
 class ParagraphPreviewWidget extends WidgetType {
   constructor(readonly text: string) { super(); }
   toDOM(): HTMLElement {
-    const el = document.createElement('p');
+    const el = document.createElement('span');
+    el.className = 'cm-livepreview-paragraph';
     el.setAttribute('contenteditable', 'false');
-    el.style.cssText = 'display:block;margin:0.1em 0;cursor:text;';
+    el.style.cssText = 'cursor:text;';
     el.innerHTML = renderInlineMarkdown(this.text);
     return el;
   }
@@ -89,9 +91,10 @@ class ParagraphPreviewWidget extends WidgetType {
 class ListItemPreviewWidget extends WidgetType {
   constructor(readonly text: string, readonly ordered: boolean, readonly index: number) { super(); }
   toDOM(): HTMLElement {
-    const el = document.createElement('div');
+    const el = document.createElement('span');
+    el.className = 'cm-livepreview-listitem';
     el.setAttribute('contenteditable', 'false');
-    el.style.cssText = 'display:block;margin:0.05em 0 0.05em 1.5em;cursor:text;';
+    el.style.cssText = 'padding-left:1.5em;cursor:text;';
     const marker = this.ordered ? `${this.index}. ` : '• ';
     el.innerHTML = `<span style="margin-right:0.3em">${marker}</span>${renderInlineMarkdown(this.text)}`;
     return el;
@@ -103,18 +106,15 @@ class ListItemPreviewWidget extends WidgetType {
 class FencedBlockPreviewWidget extends WidgetType {
   constructor(readonly label: string, readonly content: string, readonly color: string, readonly icon: string) { super(); }
   toDOM(): HTMLElement {
-    const wrap = document.createElement('div');
+    const wrap = document.createElement('span');
+    wrap.className = 'cm-livepreview-fenced';
     wrap.setAttribute('contenteditable', 'false');
-    wrap.style.cssText = `
-      display:block;border-left:3px solid ${this.color};border-radius:4px;
-      padding:6px 10px;margin:2px 0;cursor:text;
-      background:${this.color}11;
-    `;
-    const header = document.createElement('div');
-    header.style.cssText = `font-weight:600;font-size:0.85em;margin-bottom:4px;color:${this.color};`;
+    wrap.style.cssText = `border-left:3px solid ${this.color};border-radius:4px;padding:2px 10px;cursor:text;background:${this.color}11;`;
+    const header = document.createElement('span');
+    header.style.cssText = `font-weight:600;font-size:0.85em;margin-right:6px;color:${this.color};`;
     header.textContent = `${this.icon} ${this.label}`;
-    const body = document.createElement('div');
-    body.style.cssText = 'line-height:1.6;white-space:pre-wrap;';
+    const body = document.createElement('span');
+    body.style.cssText = 'white-space:pre-wrap;';
     body.textContent = this.content;
     wrap.appendChild(header);
     wrap.appendChild(body);
