@@ -1,13 +1,10 @@
 /**
  * CodeMirror extension for Obsidian-like seamless live preview
  *
- * Strategy: For each non-active line, use Decoration.replace to hide
- * the raw markdown text, and Decoration.widget (at line end, side: 1)
- * to insert the preview widget. The replace and widget are at different
- * positions so they don't conflict.
- *
- * For fenced blocks: each line gets its own replace (no cross-line),
- * and the first line gets the widget at its end.
+ * Strategy: Use Decoration.line to add a CSS class to preview lines,
+ * Decoration.widget to insert preview content, and CSS to hide the
+ * raw markdown text within those lines. This avoids all issues with
+ * Decoration.replace crossing line breaks in ViewPlugin.
  */
 import {
   Decoration,
@@ -25,7 +22,7 @@ class HeadingPreviewWidget extends WidgetType {
   constructor(readonly level: number, readonly text: string) { super(); }
   toDOM(): HTMLElement {
     const wrap = document.createElement('span');
-    wrap.className = 'cm-livepreview-heading';
+    wrap.className = 'cm-preview-widget';
     wrap.setAttribute('contenteditable', 'false');
     const weights: Record<number, number> = { 1: 700, 2: 700, 3: 600, 4: 600, 5: 500, 6: 500 };
     const sizes: Record<number, string> = {
@@ -42,7 +39,7 @@ class HeadingPreviewWidget extends WidgetType {
 class HrPreviewWidget extends WidgetType {
   toDOM(): HTMLElement {
     const el = document.createElement('span');
-    el.className = 'cm-livepreview-hr';
+    el.className = 'cm-preview-widget';
     el.setAttribute('contenteditable', 'false');
     el.style.cssText = 'display:inline-block;width:100%;border-top:1px solid #d1d5db;vertical-align:middle;cursor:text;';
     return el;
@@ -55,7 +52,7 @@ class BlockquotePreviewWidget extends WidgetType {
   constructor(readonly text: string) { super(); }
   toDOM(): HTMLElement {
     const el = document.createElement('span');
-    el.className = 'cm-livepreview-blockquote';
+    el.className = 'cm-preview-widget';
     el.setAttribute('contenteditable', 'false');
     el.style.cssText = 'border-left:3px solid #6b7280;padding-left:12px;color:#6b7280;font-style:italic;cursor:text;';
     el.textContent = this.text;
@@ -69,7 +66,7 @@ class ParagraphPreviewWidget extends WidgetType {
   constructor(readonly text: string) { super(); }
   toDOM(): HTMLElement {
     const el = document.createElement('span');
-    el.className = 'cm-livepreview-paragraph';
+    el.className = 'cm-preview-widget';
     el.setAttribute('contenteditable', 'false');
     el.style.cssText = 'cursor:text;';
     el.innerHTML = renderInlineMarkdown(this.text);
@@ -83,7 +80,7 @@ class ListItemPreviewWidget extends WidgetType {
   constructor(readonly text: string, readonly ordered: boolean, readonly index: number) { super(); }
   toDOM(): HTMLElement {
     const el = document.createElement('span');
-    el.className = 'cm-livepreview-listitem';
+    el.className = 'cm-preview-widget';
     el.setAttribute('contenteditable', 'false');
     el.style.cssText = 'padding-left:1.5em;cursor:text;';
     const marker = this.ordered ? `${this.index}. ` : '• ';
@@ -98,7 +95,7 @@ class FencedBlockPreviewWidget extends WidgetType {
   constructor(readonly label: string, readonly content: string, readonly color: string, readonly icon: string) { super(); }
   toDOM(): HTMLElement {
     const wrap = document.createElement('span');
-    wrap.className = 'cm-livepreview-fenced';
+    wrap.className = 'cm-preview-widget';
     wrap.setAttribute('contenteditable', 'false');
     wrap.style.cssText = `border-left:3px solid ${this.color};border-radius:4px;padding:2px 10px;cursor:text;background:${this.color}11;`;
     const header = document.createElement('span');
@@ -190,6 +187,8 @@ function classifyLine(text: string): LineKind {
 
 // ─── Decoration Builder ──────────────────────────────────────────
 
+const previewLine = Decoration.line({ class: 'cm-preview-line' });
+
 function getActiveLines(view: EditorView): Set<number> {
   const lines = new Set<number>();
   for (const sel of view.state.selection.ranges) {
@@ -206,23 +205,6 @@ interface FencedState {
   icon: string;
   contentLines: string[];
   startLineNum: number;
-}
-
-/**
- * Hide a line's content and show a preview widget instead.
- * - Decoration.replace: hides raw text (line.from → line.to, within one line)
- * - Decoration.widget: inserts preview at line end (side: 1, after replace)
- */
-function hideAndPreview(
-  decorations: Range<Decoration>[],
-  lineFrom: number,
-  lineTo: number,
-  widget: WidgetType,
-): void {
-  // Hide the raw markdown text
-  decorations.push(Decoration.replace({}).range(lineFrom, lineTo));
-  // Show preview widget at line end
-  decorations.push(Decoration.widget({ widget, side: 1 }).range(lineTo));
 }
 
 function buildDecorations(view: EditorView): DecorationSet {
@@ -244,15 +226,13 @@ function buildDecorations(view: EditorView): DecorationSet {
           if (!isActive && !activeLines.has(fenced.startLineNum)) {
             const content = fenced.contentLines.slice(0, -1).join('\n');
             const widget = new FencedBlockPreviewWidget(fenced.label, content, fenced.color, fenced.icon);
-            // First line: hide + widget
-            const startLine = doc.line(fenced.startLineNum);
-            decorations.push(Decoration.replace({}).range(startLine.from, startLine.to));
-            decorations.push(Decoration.widget({ widget, side: 1 }).range(startLine.to));
-            // Remaining lines: just hide
-            for (let j = fenced.startLineNum + 1; j <= endLineNum; j++) {
-              const l = doc.line(j);
-              decorations.push(Decoration.replace({}).range(l.from, l.to));
+            // Mark all lines as preview lines (CSS hides their text)
+            for (let j = fenced.startLineNum; j <= endLineNum; j++) {
+              decorations.push(previewLine.range(doc.line(j).from));
             }
+            // Insert preview widget at the start of the first line
+            const startLine = doc.line(fenced.startLineNum);
+            decorations.push(Decoration.widget({ widget, side: -1 }).range(startLine.from));
           }
           fenced = null;
         }
@@ -276,23 +256,29 @@ function buildDecorations(view: EditorView): DecorationSet {
 
       switch (kind.type) {
         case 'heading':
-          hideAndPreview(decorations, line.from, line.to, new HeadingPreviewWidget(kind.level, kind.text));
+          decorations.push(previewLine.range(line.from));
+          decorations.push(Decoration.widget({ widget: new HeadingPreviewWidget(kind.level, kind.text), side: -1 }).range(line.from));
           break;
         case 'hr':
-          hideAndPreview(decorations, line.from, line.to, new HrPreviewWidget());
+          decorations.push(previewLine.range(line.from));
+          decorations.push(Decoration.widget({ widget: new HrPreviewWidget(), side: -1 }).range(line.from));
           break;
         case 'blockquote':
-          hideAndPreview(decorations, line.from, line.to, new BlockquotePreviewWidget(kind.text));
+          decorations.push(previewLine.range(line.from));
+          decorations.push(Decoration.widget({ widget: new BlockquotePreviewWidget(kind.text), side: -1 }).range(line.from));
           break;
         case 'paragraph':
           if (!kind.text) continue;
-          hideAndPreview(decorations, line.from, line.to, new ParagraphPreviewWidget(kind.text));
+          decorations.push(previewLine.range(line.from));
+          decorations.push(Decoration.widget({ widget: new ParagraphPreviewWidget(kind.text), side: -1 }).range(line.from));
           break;
         case 'bulletItem':
-          hideAndPreview(decorations, line.from, line.to, new ListItemPreviewWidget(kind.text, false, 0));
+          decorations.push(previewLine.range(line.from));
+          decorations.push(Decoration.widget({ widget: new ListItemPreviewWidget(kind.text, false, 0), side: -1 }).range(line.from));
           break;
         case 'orderedItem':
-          hideAndPreview(decorations, line.from, line.to, new ListItemPreviewWidget(kind.text, true, kind.index));
+          decorations.push(previewLine.range(line.from));
+          decorations.push(Decoration.widget({ widget: new ListItemPreviewWidget(kind.text, true, kind.index), side: -1 }).range(line.from));
           break;
       }
     }
@@ -319,6 +305,21 @@ const livePreviewPlugin = ViewPlugin.fromClass(
   { decorations: (v) => v.decorations }
 );
 
+// ─── CSS: hide raw text in preview lines, show only widgets ────────
+
+const livePreviewTheme = EditorView.baseTheme({
+  // In preview lines, hide everything except our preview widgets
+  '.cm-preview-line': {
+    position: 'relative',
+  },
+  '.cm-preview-line > *': {
+    display: 'none',
+  },
+  '.cm-preview-line > .cm-preview-widget': {
+    display: 'inline',
+  },
+});
+
 export function livePreviewExtension(): Extension {
-  return [livePreviewPlugin];
+  return [livePreviewPlugin, livePreviewTheme];
 }
