@@ -10,9 +10,11 @@
  *   - Block decorations (block:true) in ViewPlugin
  *   - Replace decorations that cross line breaks in ViewPlugin
  *
- * Strategy: Use Decoration.widget to insert preview, and
- * Decoration.mark with a CSS class to hide the raw text.
- * Each line is handled independently — no cross-line replaces.
+ * Strategy: Use Decoration.replace per-line (from=line.from to line.to,
+ * which does NOT include the line break) to hide raw text, and
+ * Decoration.widget to insert preview. Fenced blocks are handled
+ * line-by-line — each line gets its own replace + the first line
+ * gets the preview widget.
  */
 import {
   Decoration,
@@ -23,10 +25,6 @@ import {
   WidgetType,
 } from '@codemirror/view';
 import { EditorState, Extension, Range } from '@codemirror/state';
-
-// ─── Hide-text decoration (mark-based, no line-break crossing) ────
-
-const hideMark = Decoration.mark({ class: 'cm-livepreview-hidden' });
 
 // ─── Preview Widgets (all inline <span>, inherit editor lineHeight) ────────
 
@@ -238,11 +236,12 @@ interface FencedState {
 }
 
 /**
- * Add decorations for a single line: hide raw text + show preview widget.
- * Uses Decoration.mark (not replace) to avoid crossing line breaks.
- * The widget is inserted at line start, the mark hides the raw text.
+ * Replace a single line's content with a preview widget.
+ * Uses Decoration.replace (from line.from to line.to — does NOT
+ * include the line break, so it won't cross line boundaries).
+ * Then inserts the preview widget at line start.
  */
-function decorateLine(
+function replaceLineWithWidget(
   decorations: Range<Decoration>[],
   lineFrom: number,
   lineTo: number,
@@ -250,17 +249,15 @@ function decorateLine(
 ): void {
   // Insert preview widget at line start
   decorations.push(Decoration.widget({ widget, side: -1 }).range(lineFrom));
-  // Hide raw text using mark decoration (stays within the line)
-  // lineTo is the position of the line break; we only hide up to lineTo
-  // which is the last character position of the line content
-  decorations.push(hideMark.range(lineFrom, lineTo));
+  // Replace the line content (not including line break)
+  decorations.push(Decoration.replace({ inclusive: true }).range(lineFrom, lineTo));
 }
 
 /**
- * Add decorations for fenced block lines: hide each line individually.
- * The preview widget is inserted at the start line.
+ * Decorate a fenced block: replace each line individually (no cross-line
+ * replace), and insert a single preview widget at the start line.
  */
-function decorateFencedLines(
+function decorateFencedBlock(
   decorations: Range<Decoration>[],
   view: EditorView,
   startLineNum: number,
@@ -273,10 +270,10 @@ function decorateFencedLines(
   const startLine = doc.line(startLineNum);
   decorations.push(Decoration.widget({ widget, side: -1 }).range(startLine.from));
 
-  // Hide each line individually (no cross-line replace)
+  // Replace each line individually — line.to does NOT include the line break
   for (let i = startLineNum; i <= endLineNum; i++) {
     const line = doc.line(i);
-    decorations.push(hideMark.range(line.from, line.to));
+    decorations.push(Decoration.replace({ inclusive: true }).range(line.from, line.to));
   }
 }
 
@@ -301,7 +298,7 @@ function buildDecorations(view: EditorView): DecorationSet {
           const endLineNum = i;
           if (!isActive && !activeLines.has(fenced.startLineNum)) {
             const content = fenced.contentLines.slice(0, -1).join('\n');
-            decorateFencedLines(
+            decorateFencedBlock(
               decorations,
               view,
               fenced.startLineNum,
@@ -332,38 +329,38 @@ function buildDecorations(view: EditorView): DecorationSet {
 
       switch (kind.type) {
         case 'heading':
-          decorateLine(
+          replaceLineWithWidget(
             decorations, line.from, line.to,
             new HeadingPreviewWidget(kind.level, kind.text),
           );
           break;
         case 'hr':
-          decorateLine(
+          replaceLineWithWidget(
             decorations, line.from, line.to,
             new HrPreviewWidget(),
           );
           break;
         case 'blockquote':
-          decorateLine(
+          replaceLineWithWidget(
             decorations, line.from, line.to,
             new BlockquotePreviewWidget(kind.text),
           );
           break;
         case 'paragraph':
           if (!kind.text) continue;
-          decorateLine(
+          replaceLineWithWidget(
             decorations, line.from, line.to,
             new ParagraphPreviewWidget(kind.text),
           );
           break;
         case 'bulletItem':
-          decorateLine(
+          replaceLineWithWidget(
             decorations, line.from, line.to,
             new ListItemPreviewWidget(kind.text, false, 0),
           );
           break;
         case 'orderedItem':
-          decorateLine(
+          replaceLineWithWidget(
             decorations, line.from, line.to,
             new ListItemPreviewWidget(kind.text, true, kind.index),
           );
@@ -397,19 +394,6 @@ const livePreviewPlugin = ViewPlugin.fromClass(
   { decorations: (v) => v.decorations }
 );
 
-// ─── CSS to hide marked text ─────────────────────────────────────
-
-const livePreviewTheme = EditorView.baseTheme({
-  '.cm-livepreview-hidden': {
-    fontSize: '0',
-    lineHeight: '0',
-    display: 'inline',
-    color: 'transparent !important',
-    position: 'absolute',
-    pointerEvents: 'none',
-  },
-});
-
 export function livePreviewExtension(): Extension {
-  return [livePreviewPlugin, livePreviewTheme];
+  return [livePreviewPlugin];
 }
