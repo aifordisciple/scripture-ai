@@ -10,11 +10,11 @@
  *   - Block decorations (block:true) in ViewPlugin
  *   - Replace decorations that cross line breaks in ViewPlugin
  *
- * Strategy: Use Decoration.replace per-line (from=line.from to line.to,
- * which does NOT include the line break) to hide raw text, and
- * Decoration.widget to insert preview. Fenced blocks are handled
- * line-by-line — each line gets its own replace + the first line
- * gets the preview widget.
+ * Strategy: Use Decoration.replace({ widget }) per-line to atomically
+ * replace line content with a preview widget. line.from to line.to
+ * does NOT include the line break, so each replace stays within one line.
+ * Fenced blocks: first line gets replace+widget, remaining lines get
+ * plain replace to hide content.
  */
 import {
   Decoration,
@@ -237,9 +237,9 @@ interface FencedState {
 
 /**
  * Replace a single line's content with a preview widget.
- * Uses Decoration.replace (from line.from to line.to — does NOT
- * include the line break, so it won't cross line boundaries).
- * Then inserts the preview widget at line start.
+ * Uses Decoration.replace({ widget }) to atomically replace the line
+ * content with the widget. line.from to line.to does NOT include the
+ * line break character, so this stays within one line.
  */
 function replaceLineWithWidget(
   decorations: Range<Decoration>[],
@@ -247,15 +247,15 @@ function replaceLineWithWidget(
   lineTo: number,
   widget: WidgetType,
 ): void {
-  // Insert preview widget at line start
-  decorations.push(Decoration.widget({ widget, side: -1 }).range(lineFrom));
-  // Replace the line content (not including line break)
-  decorations.push(Decoration.replace({ inclusive: true }).range(lineFrom, lineTo));
+  decorations.push(
+    Decoration.replace({ widget }).range(lineFrom, lineTo)
+  );
 }
 
 /**
- * Decorate a fenced block: replace each line individually (no cross-line
- * replace), and insert a single preview widget at the start line.
+ * Decorate a fenced block: replace the first line with a preview widget,
+ * and replace each subsequent line with empty content to hide it.
+ * Each Decoration.replace stays within its own line (no cross-line).
  */
 function decorateFencedBlock(
   decorations: Range<Decoration>[],
@@ -266,14 +266,18 @@ function decorateFencedBlock(
 ): void {
   const doc = view.state.doc;
 
-  // Insert preview widget at the start of the fenced block
+  // First line: replace with preview widget
   const startLine = doc.line(startLineNum);
-  decorations.push(Decoration.widget({ widget, side: -1 }).range(startLine.from));
+  decorations.push(
+    Decoration.replace({ widget }).range(startLine.from, startLine.to)
+  );
 
-  // Replace each line individually — line.to does NOT include the line break
-  for (let i = startLineNum; i <= endLineNum; i++) {
+  // Remaining lines (including the closing ```): replace with empty
+  for (let i = startLineNum + 1; i <= endLineNum; i++) {
     const line = doc.line(i);
-    decorations.push(Decoration.replace({ inclusive: true }).range(line.from, line.to));
+    decorations.push(
+      Decoration.replace({ inclusive: true }).range(line.from, line.to)
+    );
   }
 }
 
