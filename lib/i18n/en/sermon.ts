@@ -13,6 +13,8 @@ export const sermon = {
     sortByTitle: 'Sort by Title',
     noSermons: 'No sermons yet',
     noSermonsDesc: 'Click "New Sermon" to start preparing',
+    emptyTitle: 'Start Writing',
+    emptyDesc: 'Select a sermon from the list, or create a new one to begin',
     deleteConfirm: 'Are you sure you want to delete this sermon?',
     deleteFolderConfirm: 'Delete this folder? Sermons will move to root.',
     editorPlaceholder: 'Start writing your sermon...',
