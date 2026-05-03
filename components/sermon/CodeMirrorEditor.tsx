@@ -18,6 +18,8 @@ interface CodeMirrorEditorProps {
   onChange: (content: string) => void;
   isDark: boolean;
   onSave: () => void;
+  fontSize: number;
+  lineHeight: number;
 }
 
 export default function CodeMirrorEditor({
@@ -25,6 +27,8 @@ export default function CodeMirrorEditor({
   onChange,
   isDark,
   onSave,
+  fontSize,
+  lineHeight,
 }: CodeMirrorEditorProps) {
   const [editorView, setEditorView] = useState<CMEditorView | null>(null);
 
@@ -46,7 +50,7 @@ export default function CodeMirrorEditor({
       markdown({ base: markdownLanguage, codeLanguages: languages }),
       history({ newGroupDelay: 500 }),
       livePreviewExtension(),
-      sermonEditorTheme(isDark),
+      sermonEditorTheme(isDark, fontSize, lineHeight),
       autocompletion(),
       keymap.of([
         ...defaultKeymap,
@@ -63,7 +67,7 @@ export default function CodeMirrorEditor({
       ]),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isDark]
+    [isDark, fontSize, lineHeight]
   );
 
   // Capture editorView after mount

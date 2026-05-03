@@ -5,7 +5,16 @@
 import { EditorView } from '@codemirror/view';
 import { Extension } from '@codemirror/state';
 
-export const sermonEditorTheme = (isDark: boolean): Extension => {
+export const DEFAULT_FONT_SIZE = 15;
+export const DEFAULT_LINE_HEIGHT = 2.0;
+export const MIN_FONT_SIZE = 12;
+export const MAX_FONT_SIZE = 24;
+export const MIN_LINE_HEIGHT = 1.2;
+export const MAX_LINE_HEIGHT = 3.5;
+export const FONT_SIZE_STEP = 1;
+export const LINE_HEIGHT_STEP = 0.2;
+
+export const sermonEditorTheme = (isDark: boolean, fontSize: number = DEFAULT_FONT_SIZE, lineHeight: number = DEFAULT_LINE_HEIGHT): Extension => {
   const bg = isDark ? '#0f172a' : '#ffffff';
   const fg = isDark ? '#e2e8f0' : '#1e293b';
   const gutterBg = isDark ? '#1e293b' : '#f8fafc';
@@ -17,8 +26,8 @@ export const sermonEditorTheme = (isDark: boolean): Extension => {
 
   return EditorView.theme({
     '&': {
-      fontSize: '15px',
-      lineHeight: '2.0',
+      fontSize: `${fontSize}px`,
+      lineHeight: `${lineHeight}`,
       height: '100%',
       backgroundColor: bg,
       color: fg,

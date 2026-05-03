@@ -7,6 +7,7 @@ import { SermonEditorHeader } from './SermonEditorHeader'
 import CodeMirrorEditor from './CodeMirrorEditor'
 import { isTiptapJson } from '@/lib/sermon-markdown'
 import { tiptapToMarkdown } from '@/lib/tiptap-to-markdown'
+import { DEFAULT_FONT_SIZE, DEFAULT_LINE_HEIGHT } from './extensions/theme'
 
 /** Convert content to Markdown: if it's Tiptap JSON, convert; otherwise return as-is */
 function ensureMarkdown(raw: string): string {
@@ -33,6 +34,8 @@ export function SermonEditor() {
   currentSermonRef.current = currentSermon
 
   const [markdownContent, setMarkdownContent] = useState('')
+  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE)
+  const [lineHeight, setLineHeight] = useState(DEFAULT_LINE_HEIGHT)
 
   // Sync content when switching sermons
   useEffect(() => {
@@ -121,6 +124,8 @@ export function SermonEditor() {
           onChange={handleContentChange}
           isDark={isDarkMode}
           onSave={handleSave}
+          fontSize={fontSize}
+          lineHeight={lineHeight}
         />
       </div>
 
@@ -128,6 +133,30 @@ export function SermonEditor() {
       <div className="border-t border-border px-4 py-1 flex items-center gap-4 text-[10px] text-muted-foreground">
         <span>{charCount}{t('sermon.editorWords')}</span>
         <span>~{Math.max(1, Math.round(charCount / 300))}{t('sermon.editorMinutes')}</span>
+        <div className="flex-1" />
+        <button
+          onClick={() => setFontSize(s => Math.max(12, s - 1))}
+          className="px-1 hover:text-foreground transition-colors"
+          title="减小字号"
+        >A-</button>
+        <span className="text-[10px]">{fontSize}px</span>
+        <button
+          onClick={() => setFontSize(s => Math.min(24, s + 1))}
+          className="px-1 hover:text-foreground transition-colors"
+          title="增大字号"
+        >A+</button>
+        <span className="mx-1 text-border">|</span>
+        <button
+          onClick={() => setLineHeight(h => Math.round(Math.max(1.2, h - 0.2) * 10) / 10)}
+          className="px-1 hover:text-foreground transition-colors"
+          title="减小行距"
+        >≡-</button>
+        <span className="text-[10px]">{lineHeight.toFixed(1)}</span>
+        <button
+          onClick={() => setLineHeight(h => Math.round(Math.min(3.5, h + 0.2) * 10) / 10)}
+          className="px-1 hover:text-foreground transition-colors"
+          title="增大行距"
+        >≡+</button>
       </div>
     </div>
   )
