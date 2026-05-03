@@ -6,9 +6,13 @@
  * cursor enters that line, the preview is removed and raw Markdown
  * is shown for editing.
  *
- * IMPORTANT: CodeMirror 6 forbids block decorations in ViewPlugin.
- * We use inline widgets (block: false) as <span> elements that inherit
- * the editor's lineHeight, matching Obsidian's seamless live preview.
+ * IMPORTANT: CodeMirror 6 forbids:
+ *   - Block decorations (block:true) in ViewPlugin
+ *   - Replace decorations that cross line breaks in ViewPlugin
+ *
+ * Strategy: Use Decoration.widget to insert preview, and
+ * Decoration.mark with a CSS class to hide the raw text.
+ * Each line is handled independently — no cross-line replaces.
  */
 import {
   Decoration,
@@ -20,12 +24,14 @@ import {
 } from '@codemirror/view';
 import { EditorState, Extension, Range } from '@codemirror/state';
 
+// ─── Hide-text decoration (mark-based, no line-break crossing) ────
+
+const hideMark = Decoration.mark({ class: 'cm-livepreview-hidden' });
+
 // ─── Preview Widgets (all inline <span>, inherit editor lineHeight) ────────
 
 class HeadingPreviewWidget extends WidgetType {
-  constructor(readonly level: number, readonly text: string) {
-    super();
-  }
+  constructor(readonly level: number, readonly text: string) { super(); }
   toDOM(): HTMLElement {
     const wrap = document.createElement('span');
     wrap.className = 'cm-livepreview-heading';
@@ -34,17 +40,11 @@ class HeadingPreviewWidget extends WidgetType {
     const sizes: Record<number, string> = {
       1: '1.4em', 2: '1.2em', 3: '1.05em', 4: '1em', 5: '0.95em', 6: '0.9em',
     };
-    wrap.style.cssText = `
-      font-size: ${sizes[this.level] || '1em'};
-      font-weight: ${weights[this.level] || 600};
-      cursor: text; color: inherit;
-    `;
+    wrap.style.cssText = `font-size:${sizes[this.level] || '1em'};font-weight:${weights[this.level] || 600};cursor:text;color:inherit;`;
     wrap.textContent = this.text;
     return wrap;
   }
-  eq(other: HeadingPreviewWidget) {
-    return this.level === other.level && this.text === other.text;
-  }
+  eq(other: HeadingPreviewWidget) { return this.level === other.level && this.text === other.text; }
   ignoreEvent() { return false; }
 }
 
@@ -130,15 +130,10 @@ class FencedBlockPreviewWidget extends WidgetType {
 
 function renderInlineMarkdown(text: string): string {
   let html = escapeHtml(text);
-  // Bold
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  // Italic
   html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  // Strikethrough
   html = html.replace(/~~(.+?)~~/g, '<del>$1</del>');
-  // Inline code
   html = html.replace(/`(.+?)`/g, '<code style="background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px;font-size:0.9em">$1</code>');
-  // Links
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a style="color:#3b82f6;text-decoration:underline" href="$2">$1</a>');
   return html;
 }
@@ -177,35 +172,29 @@ function classifyLine(text: string, _lineNum: number, state: EditorState, lineFr
 
   if (trimmed === '') return { type: 'empty' };
 
-  // Heading: # H1, ## H2, etc.
   const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
   if (headingMatch) {
     return { type: 'heading', level: headingMatch[1].length, text: headingMatch[2].trim() };
   }
 
-  // Horizontal rule: --- or *** or ___
   if (/^[-*_]{3,}\s*$/.test(trimmed)) {
     return { type: 'hr' };
   }
 
-  // Blockquote: > text
   if (/^>\s?/.test(trimmed)) {
     return { type: 'blockquote', text: trimmed.replace(/^>\s?/, '') };
   }
 
-  // Bullet list: - text or * text or + text
   const bulletMatch = trimmed.match(/^[-*+]\s+(.+)$/);
   if (bulletMatch) {
     return { type: 'bulletItem', text: bulletMatch[1] };
   }
 
-  // Ordered list: 1. text
   const orderedMatch = trimmed.match(/^(\d+)\.\s+(.+)$/);
   if (orderedMatch) {
     return { type: 'orderedItem', text: orderedMatch[2], index: parseInt(orderedMatch[1]) };
   }
 
-  // Fenced block start: ```verse:Ref or ```section:type
   const verseMatch = trimmed.match(/^```verse:(.+)$/);
   if (verseMatch) {
     return { type: 'fencedStart', label: verseMatch[1].trim(), color: '#3b82f6', icon: '📖' };
@@ -218,18 +207,15 @@ function classifyLine(text: string, _lineNum: number, state: EditorState, lineFr
     return { type: 'fencedStart', label: info.label, color: info.color, icon: '📑' };
   }
 
-  // Fenced block end: ```
   if (trimmed === '```') {
     return { type: 'fencedEnd' };
   }
 
-  // Regular paragraph
   return { type: 'paragraph', text: trimmed };
 }
 
 // ─── Decoration Builder ──────────────────────────────────────────
 
-/** Get the set of line numbers that the cursor is on */
 function getActiveLines(view: EditorView): Set<number> {
   const lines = new Set<number>();
   for (const sel of view.state.selection.ranges) {
@@ -242,7 +228,6 @@ function getActiveLines(view: EditorView): Set<number> {
   return lines;
 }
 
-/** Track fenced block state across lines */
 interface FencedState {
   active: boolean;
   label: string;
@@ -253,21 +238,46 @@ interface FencedState {
 }
 
 /**
- * Replace a line's content with an inline widget.
- * Uses Decoration.replace to hide the raw line, then Decoration.widget
- * to insert the preview. Both are inline (no block:true) — the widget
- * element uses display:block in its CSS to visually occupy full width.
+ * Add decorations for a single line: hide raw text + show preview widget.
+ * Uses Decoration.mark (not replace) to avoid crossing line breaks.
+ * The widget is inserted at line start, the mark hides the raw text.
  */
-function replaceLineWithWidget(
+function decorateLine(
   decorations: Range<Decoration>[],
-  from: number,
-  to: number,
+  lineFrom: number,
+  lineTo: number,
   widget: WidgetType,
 ): void {
-  // Hide the raw markdown text
-  decorations.push(Decoration.replace({ inclusive: true }).range(from, to));
-  // Insert inline widget at line end (display:block in toDOM)
-  decorations.push(Decoration.widget({ widget, side: 1 }).range(to));
+  // Insert preview widget at line start
+  decorations.push(Decoration.widget({ widget, side: -1 }).range(lineFrom));
+  // Hide raw text using mark decoration (stays within the line)
+  // lineTo is the position of the line break; we only hide up to lineTo
+  // which is the last character position of the line content
+  decorations.push(hideMark.range(lineFrom, lineTo));
+}
+
+/**
+ * Add decorations for fenced block lines: hide each line individually.
+ * The preview widget is inserted at the start line.
+ */
+function decorateFencedLines(
+  decorations: Range<Decoration>[],
+  view: EditorView,
+  startLineNum: number,
+  endLineNum: number,
+  widget: WidgetType,
+): void {
+  const doc = view.state.doc;
+
+  // Insert preview widget at the start of the fenced block
+  const startLine = doc.line(startLineNum);
+  decorations.push(Decoration.widget({ widget, side: -1 }).range(startLine.from));
+
+  // Hide each line individually (no cross-line replace)
+  for (let i = startLineNum; i <= endLineNum; i++) {
+    const line = doc.line(i);
+    decorations.push(hideMark.range(line.from, line.to));
+  }
 }
 
 function buildDecorations(view: EditorView): DecorationSet {
@@ -288,27 +298,24 @@ function buildDecorations(view: EditorView): DecorationSet {
         fenced.contentLines.push(line.text);
         if (line.text.trim() === '```') {
           // End of fenced block
+          const endLineNum = i;
           if (!isActive && !activeLines.has(fenced.startLineNum)) {
-            const startLine = doc.line(fenced.startLineNum);
-            if (startLine.from <= line.to) {
-              const content = fenced.contentLines.slice(0, -1).join('\n');
-              replaceLineWithWidget(
-                decorations,
-                startLine.from,
-                line.to,
-                new FencedBlockPreviewWidget(fenced.label, content, fenced.color, fenced.icon),
-              );
-            }
+            const content = fenced.contentLines.slice(0, -1).join('\n');
+            decorateFencedLines(
+              decorations,
+              view,
+              fenced.startLineNum,
+              endLineNum,
+              new FencedBlockPreviewWidget(fenced.label, content, fenced.color, fenced.icon),
+            );
           }
           fenced = null;
         }
         continue;
       }
 
-      // Not inside a fenced block
       const kind = classifyLine(line.text, i, state, line.from);
 
-      // Start of a fenced block?
       if (kind.type === 'fencedStart') {
         fenced = {
           active: true,
@@ -321,49 +328,46 @@ function buildDecorations(view: EditorView): DecorationSet {
         continue;
       }
 
-      // If cursor is on this line, show raw Markdown (no decoration)
       if (isActive) continue;
 
-      // Apply preview decoration based on line kind
       switch (kind.type) {
         case 'heading':
-          replaceLineWithWidget(
+          decorateLine(
             decorations, line.from, line.to,
             new HeadingPreviewWidget(kind.level, kind.text),
           );
           break;
         case 'hr':
-          replaceLineWithWidget(
+          decorateLine(
             decorations, line.from, line.to,
             new HrPreviewWidget(),
           );
           break;
         case 'blockquote':
-          replaceLineWithWidget(
+          decorateLine(
             decorations, line.from, line.to,
             new BlockquotePreviewWidget(kind.text),
           );
           break;
         case 'paragraph':
           if (!kind.text) continue;
-          replaceLineWithWidget(
+          decorateLine(
             decorations, line.from, line.to,
             new ParagraphPreviewWidget(kind.text),
           );
           break;
         case 'bulletItem':
-          replaceLineWithWidget(
+          decorateLine(
             decorations, line.from, line.to,
             new ListItemPreviewWidget(kind.text, false, 0),
           );
           break;
         case 'orderedItem':
-          replaceLineWithWidget(
+          decorateLine(
             decorations, line.from, line.to,
             new ListItemPreviewWidget(kind.text, true, kind.index),
           );
           break;
-        // empty, other, fencedEnd — no decoration
       }
     }
   } catch (e) {
@@ -393,6 +397,19 @@ const livePreviewPlugin = ViewPlugin.fromClass(
   { decorations: (v) => v.decorations }
 );
 
+// ─── CSS to hide marked text ─────────────────────────────────────
+
+const livePreviewTheme = EditorView.baseTheme({
+  '.cm-livepreview-hidden': {
+    fontSize: '0',
+    lineHeight: '0',
+    display: 'inline',
+    color: 'transparent !important',
+    position: 'absolute',
+    pointerEvents: 'none',
+  },
+});
+
 export function livePreviewExtension(): Extension {
-  return [livePreviewPlugin];
+  return [livePreviewPlugin, livePreviewTheme];
 }
