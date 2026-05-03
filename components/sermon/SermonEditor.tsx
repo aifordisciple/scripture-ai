@@ -80,11 +80,14 @@ export function SermonEditor() {
     setMarkdownContent(content)
     const sermon = currentSermonRef.current
     if (sermon && sermon.content !== content) {
-      setCurrentSermon({ ...sermon, content })
+      const updated = { ...sermon, content }
+      setCurrentSermon(updated)
+      // Sync content to sermons list so switching sermons doesn't lose edits
+      setSermons(sermonsRef.current.map(s => s.id === sermon.id ? updated : s))
     }
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(() => autoSave(content), 1500)
-  }, [setCurrentSermon, autoSave])
+  }, [setCurrentSermon, setSermons, autoSave])
 
   // Manual save handler for Cmd+S
   const handleSave = useCallback(() => {

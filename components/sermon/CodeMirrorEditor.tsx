@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
@@ -37,6 +37,10 @@ export default function CodeMirrorEditor({
   );
 
   // Build extensions - stable reference via useMemo
+  // Note: onSave is captured via ref to avoid extension rebuild on every render
+  const onSaveRef = useRef(onSave);
+  onSaveRef.current = onSave;
+
   const extensions = useMemo(
     () => [
       markdown({ base: markdownLanguage, codeLanguages: languages }),
@@ -52,7 +56,7 @@ export default function CodeMirrorEditor({
         {
           key: 'Mod-s',
           run: () => {
-            onSave();
+            onSaveRef.current();
             return true;
           },
         },
