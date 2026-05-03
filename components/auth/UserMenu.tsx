@@ -35,10 +35,19 @@ export function UserMenu() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [subMenuOpen, setSubMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const subMenuRef = useRef<HTMLDivElement>(null);
   const subMenuTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 检测移动端
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // 更新菜单位置
   useEffect(() => {
@@ -63,17 +72,22 @@ export function UserMenu() {
 
   // 点击外部关闭菜单
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
       if (
-        menuRef.current && !menuRef.current.contains(event.target as Node) &&
-        buttonRef.current && !buttonRef.current.contains(event.target as Node)
+        menuRef.current && !menuRef.current.contains(target) &&
+        buttonRef.current && !buttonRef.current.contains(target)
       ) {
         setIsOpen(false);
         setSubMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   // 加载中
@@ -129,11 +143,30 @@ export function UserMenu() {
       </Button>
 
       {isOpen && createPortal(
-        <div
-          ref={menuRef}
-          className="fixed bg-white dark:bg-slate-900 rounded-xl shadow-xl border dark:border-slate-800 py-2 z-[9999] animate-in fade-in zoom-in-95 duration-200 w-56"
-          style={{ top: menuPosition.top, right: menuPosition.right }}
-        >
+        <>
+          {/* 移动端遮罩 */}
+          {isMobile && (
+            <div
+              className="fixed inset-0 bg-black/30 z-[9998] animate-in fade-in duration-200"
+              onClick={() => { setIsOpen(false); setSubMenuOpen(false); }}
+            />
+          )}
+          <div
+            ref={menuRef}
+            className={cn(
+              "fixed bg-white dark:bg-slate-900 rounded-xl shadow-xl border dark:border-slate-800 py-2 z-[9999] animate-in duration-200",
+              isMobile
+                ? "bottom-0 left-0 right-0 rounded-b-none max-h-[80vh] overflow-y-auto slide-in-from-bottom duration-300 w-full"
+                : "fade-in zoom-in-95 w-56"
+            )}
+            style={!isMobile ? { top: menuPosition.top, right: menuPosition.right } : undefined}
+          >
+          {/* 移动端拖拽指示条 */}
+          {isMobile && (
+            <div className="flex justify-center py-2">
+              <div className="w-10 h-1 bg-slate-300 dark:bg-slate-600 rounded-full" />
+            </div>
+          )}
           <div className="px-4 py-3 border-b dark:border-slate-800 mb-2 bg-slate-50/50 dark:bg-slate-800/20 flex items-center gap-3">
             {session.user?.image ? (
               <img src={session.user.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
@@ -205,26 +238,51 @@ export function UserMenu() {
           <div className="my-1 border-t dark:border-slate-800" />
 
           {/* "我的" 子菜单 */}
-          <div
-            className="relative"
-            onMouseEnter={() => {
-              if (subMenuTimerRef.current) clearTimeout(subMenuTimerRef.current);
-              setSubMenuOpen(true);
-            }}
-            onMouseLeave={() => {
-              subMenuTimerRef.current = setTimeout(() => setSubMenuOpen(false), 150);
-            }}
-          >
+          <div className="relative">
             <button
               className="w-full flex items-center gap-3 px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left"
+              onClick={() => {
+                if (isMobile) {
+                  setSubMenuOpen(!subMenuOpen);
+                }
+              }}
+              onMouseEnter={() => {
+                if (!isMobile) {
+                  if (subMenuTimerRef.current) clearTimeout(subMenuTimerRef.current);
+                  setSubMenuOpen(true);
+                }
+              }}
+              onMouseLeave={() => {
+                if (!isMobile) {
+                  subMenuTimerRef.current = setTimeout(() => setSubMenuOpen(false), 150);
+                }
+              }}
             >
               <UserCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               <span className="flex-1">{t('auth.myMenu')}</span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              <ChevronRight className={cn(
+                "w-3.5 h-3.5 text-slate-400 transition-transform duration-200",
+                subMenuOpen && isMobile && "rotate-90"
+              )} />
             </button>
 
-            {/* Sub-menu panel */}
-            {subMenuOpen && (
+            {/* Sub-menu: 移动端内联展开，桌面端左侧飞出 */}
+            {subMenuOpen && isMobile && (
+              <div className="bg-slate-50/80 dark:bg-slate-800/30 border-t border-b dark:border-slate-800">
+                {mySubMenuItems.map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() => openTab(item.key)}
+                    className="w-full flex items-center gap-3 px-5 pl-9 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left"
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {subMenuOpen && !isMobile && (
               <div
                 ref={subMenuRef}
                 className="absolute right-full top-0 mr-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border dark:border-slate-800 py-2 z-[10000] w-44 animate-in fade-in zoom-in-95 duration-150"
@@ -283,7 +341,8 @@ export function UserMenu() {
             }}
             className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
           />
-        </div>,
+        </div>
+        </>,
         document.body
       )}
 
