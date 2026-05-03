@@ -18,7 +18,7 @@ export const sermonEditorTheme = (isDark: boolean): Extension => {
   return EditorView.theme({
     '&': {
       fontSize: '15px',
-      lineHeight: '1.75',
+      lineHeight: '2.0',
       height: '100%',
       backgroundColor: bg,
       color: fg,
