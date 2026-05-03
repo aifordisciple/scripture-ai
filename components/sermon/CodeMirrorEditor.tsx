@@ -9,8 +9,6 @@ import { keymap, EditorView as CMEditorView } from '@codemirror/view';
 import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { autocompletion } from '@codemirror/autocomplete';
 import { searchKeymap } from '@codemirror/search';
-import { verseBlockExtension } from './extensions/verseBlock';
-import { sectionBlockExtension } from './extensions/sectionBlock';
 import { livePreviewExtension } from './extensions/livePreview';
 import { sermonEditorTheme } from './extensions/theme';
 import EditorToolbar from './EditorToolbar';
@@ -59,8 +57,6 @@ export default function CodeMirrorEditor({
     () => [
       markdown({ base: markdownLanguage, codeLanguages: languages }),
       history({ newGroupDelay: 500 }),
-      verseBlockExtension(),
-      sectionBlockExtension(),
       livePreviewExtension(),
       sermonEditorTheme(isDark),
       autocompletion(),
