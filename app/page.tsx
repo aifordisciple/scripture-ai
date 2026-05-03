@@ -88,10 +88,10 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             key={tab.id}
             onClick={() => onSwitchTab(tab.id)}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full md:rounded-lg text-sm md:text-xs font-medium cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group/tab shrink-0",
+              "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full text-sm md:text-xs font-medium cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group/tab shrink-0",
               activeTabId === tab.id
-                ? "bg-white dark:bg-slate-800 border-primary/20 text-primary shadow-sm"
-                : "bg-transparent border-transparent text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5"
+                ? "bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border-primary/20 text-primary shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.5)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.05)]"
+                : "bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-lg border-white/20 dark:border-white/10 text-muted-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.1] hover:shadow-[0_1px_4px_rgba(0,0,0,0.04)]"
             )}
           >
             <span className="max-w-[120px] truncate select-none">
