@@ -30,38 +30,31 @@ export default function CodeMirrorEditor({
 }: CodeMirrorEditorProps) {
   const cmRef = useRef<ReactCodeMirrorRef>(null);
   const [editorView, setEditorView] = useState<CMEditorView | null>(null);
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInternalChange = useRef(false);
 
-  // Get editor view from ref
+  // Sync external content changes to editor (e.g. when switching sermons)
   useEffect(() => {
-    if (cmRef.current?.view) {
-      setEditorView(cmRef.current.view);
+    const view = cmRef.current?.view;
+    if (!view) return;
+    const currentDoc = view.state.doc.toString();
+    if (currentDoc !== content) {
+      isInternalChange.current = true;
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: content },
+      });
     }
-  }, [cmRef.current?.view]);
+  }, [content]);
 
-  // Debounced onChange handler
+  // Handle content change from CodeMirror
   const handleChange = useCallback(
-    (value: string) => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-      debounceTimerRef.current = setTimeout(() => {
-        onChange(value);
-      }, 300);
+    (value: string, viewUpdate: any) => {
+      // Always notify parent of content changes
+      onChange(value);
     },
     [onChange]
   );
 
-  // Cleanup debounce timer on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, []);
-
-  // Build extensions
+  // Build extensions - stable reference via useMemo
   const extensions = React.useMemo(
     () => [
       markdown({ base: markdownLanguage, codeLanguages: languages }),
@@ -84,23 +77,25 @@ export default function CodeMirrorEditor({
           },
         },
       ]),
-      CMEditorView.updateListener.of((update) => {
-        if (update.view !== editorView) {
-          setEditorView(update.view);
-        }
-      }),
     ],
-    [isDark, onSave, editorView]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isDark]
   );
 
+  // Capture editorView after mount
+  const onCreateEditor = useCallback((view: CMEditorView) => {
+    setEditorView(view);
+  }, []);
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={{ minHeight: 0 }}>
       <EditorToolbar editorView={editorView} isDark={isDark} />
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1" style={{ minHeight: 0, overflow: 'auto' }}>
         <CodeMirror
           ref={cmRef}
           value={content}
           onChange={handleChange}
+          onCreateEditor={onCreateEditor}
           extensions={extensions}
           theme={isDark ? 'dark' : 'light'}
           basicSetup={{
@@ -115,8 +110,6 @@ export default function CodeMirrorEditor({
             search: false,
             autocompletion: false,
           }}
-          className="h-full"
-          style={{ height: '100%' }}
         />
       </div>
     </div>

@@ -12,6 +12,13 @@ export const sermonEditorTheme = (isDark: boolean): Extension => {
       lineHeight: '1.7',
       height: '100%',
     },
+    '.cm-editor': {
+      height: '100%',
+    },
+    '.cm-scroller': {
+      overflow: 'auto',
+      fontFamily: 'inherit',
+    },
     '.cm-content': {
       padding: '16px 0',
       fontFamily: '"Noto Serif SC", "Noto Serif", Georgia, serif',

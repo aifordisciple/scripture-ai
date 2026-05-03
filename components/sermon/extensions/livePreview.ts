@@ -13,15 +13,16 @@ import {
 import { EditorState, Extension, Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 
+/** Widget for rendering a heading */
 class HeadingWidget extends WidgetType {
   constructor(readonly level: number, readonly text: string) {
     super();
   }
 
   toDOM(): HTMLElement {
-    const el = document.createElement(`h${this.level}` as keyof HTMLElementTagNameMap);
+    const el = document.createElement('div');
     el.className = 'cm-preview-widget';
-    el.textContent = this.text;
+    el.setAttribute('contenteditable', 'false');
 
     const sizes: Record<number, string> = {
       1: '1.8em', 2: '1.5em', 3: '1.25em', 4: '1.1em', 5: '1em', 6: '0.9em',
@@ -29,10 +30,11 @@ class HeadingWidget extends WidgetType {
     el.style.cssText = `
       font-size: ${sizes[this.level] || '1em'};
       font-weight: 700;
-      margin: 0.5em 0 0.3em;
+      margin: 0.6em 0 0.3em;
       line-height: 1.3;
       cursor: text;
     `;
+    el.textContent = this.text;
     return el;
   }
 
@@ -45,6 +47,25 @@ class HeadingWidget extends WidgetType {
   }
 }
 
+/** Widget for rendering a horizontal rule */
+class HorizontalRuleWidget extends WidgetType {
+  toDOM(): HTMLElement {
+    const el = document.createElement('hr');
+    el.className = 'cm-preview-widget';
+    el.style.cssText = 'border: none; border-top: 1px solid #d1d5db; margin: 16px 0; cursor: text;';
+    return el;
+  }
+
+  eq(): boolean {
+    return true;
+  }
+
+  ignoreEvent(): boolean {
+    return false;
+  }
+}
+
+/** Widget for rendering a blockquote */
 class BlockquoteWidget extends WidgetType {
   constructor(readonly text: string) {
     super();
@@ -53,6 +74,7 @@ class BlockquoteWidget extends WidgetType {
   toDOM(): HTMLElement {
     const el = document.createElement('blockquote');
     el.className = 'cm-preview-widget';
+    el.setAttribute('contenteditable', 'false');
     el.style.cssText = `
       border-left: 3px solid #6b7280;
       padding-left: 12px;
@@ -74,29 +96,7 @@ class BlockquoteWidget extends WidgetType {
   }
 }
 
-class HorizontalRuleWidget extends WidgetType {
-  toDOM(): HTMLElement {
-    const el = document.createElement('hr');
-    el.className = 'cm-preview-widget';
-    el.style.cssText = 'border: none; border-top: 1px solid #d1d5db; margin: 16px 0; cursor: text;';
-    return el;
-  }
-
-  eq(): boolean {
-    return true;
-  }
-
-  ignoreEvent(): boolean {
-    return false;
-  }
-}
-
-function getNodeLineRange(state: EditorState, from: number, to: number): { from: number; to: number } {
-  const startLine = state.doc.lineAt(from);
-  const endLine = state.doc.lineAt(to);
-  return { from: startLine.from, to: endLine.to };
-}
-
+/** Check if cursor is inside a given range */
 function isCursorInRange(view: EditorView, from: number, to: number): boolean {
   for (const range of view.state.selection.ranges) {
     if (range.from >= from && range.from <= to) return true;
@@ -106,52 +106,102 @@ function isCursorInRange(view: EditorView, from: number, to: number): boolean {
   return false;
 }
 
-function getNodeText(state: EditorState, from: number, to: number): string {
-  return state.doc.sliceString(from, to);
+/** Get heading level from HeaderMark node text (count # chars) */
+function getHeadingLevel(text: string): number {
+  const match = text.match(/^(#{1,6})\s/);
+  return match ? match[1].length : 1;
 }
 
+/** Strip heading markers and get clean text */
+function getHeadingText(text: string): string {
+  return text.replace(/^#{1,6}\s+/, '').trim();
+}
+
+/** Build live preview decorations */
 function buildLivePreviewDecorations(view: EditorView): DecorationSet {
   const decorations: Range<Decoration>[] = [];
   const state = view.state;
+  const doc = state.doc;
+
+  // Track verse/section block ranges to skip
+  const skipRanges: { from: number; to: number }[] = [];
+  for (let i = 1; i <= doc.lines; i++) {
+    const line = doc.line(i);
+    if (line.text.match(/^```(verse|section):/)) {
+      const startFrom = line.from;
+      let endLine = i + 1;
+      while (endLine <= doc.lines && doc.line(endLine).text.trim() !== '```') {
+        endLine++;
+      }
+      const endTo = endLine <= doc.lines ? doc.line(endLine).to : doc.line(doc.lines).to;
+      skipRanges.push({ from: startFrom, to: endTo });
+      i = endLine;
+    }
+  }
+
+  /** Check if position is inside a skip range */
+  function isInSkipRange(from: number, to: number): boolean {
+    return skipRanges.some(r => from >= r.from && to <= r.to);
+  }
 
   syntaxTree(state).iterate({
     enter(node) {
-      const lineText = state.doc.lineAt(node.from).text;
-      if (lineText.startsWith('```verse:') || lineText.startsWith('```section:')) {
-        return false;
-      }
+      // ATXHeading is the node type used by @codemirror/lang-markdown
+      if (node.name === 'ATXHeading') {
+        const lineFrom = doc.lineAt(node.from).from;
+        const lineTo = doc.lineAt(node.to).to;
 
-      switch (node.name) {
-        case 'ATXHeading1':
-        case 'ATXHeading2':
-        case 'ATXHeading3':
-        case 'ATXHeading4':
-        case 'ATXHeading5':
-        case 'ATXHeading6': {
-          const level = parseInt(node.name.slice(-1));
-          const range = getNodeLineRange(state, node.from, node.to);
-          if (!isCursorInRange(view, range.from, range.to)) {
-            const rawText = getNodeText(state, node.from, node.to);
-            const headingText = rawText.replace(/^#{1,6}\s+/, '').trim();
+        if (isInSkipRange(lineFrom, lineTo)) return;
+
+        if (!isCursorInRange(view, lineFrom, lineTo)) {
+          const rawText = doc.sliceString(lineFrom, lineTo);
+          const level = getHeadingLevel(rawText);
+          const headingText = getHeadingText(rawText);
+
+          if (headingText) {
             const widget = Decoration.replace({
               widget: new HeadingWidget(level, headingText),
               block: true,
             });
-            decorations.push(widget.range(range.from, range.to));
+            decorations.push(widget.range(lineFrom, lineTo));
           }
-          break;
         }
+      }
 
-        case 'HorizontalRule': {
-          const range = getNodeLineRange(state, node.from, node.to);
-          if (!isCursorInRange(view, range.from, range.to)) {
+      if (node.name === 'HorizontalRule') {
+        const lineFrom = doc.lineAt(node.from).from;
+        const lineTo = doc.lineAt(node.to).to;
+
+        if (isInSkipRange(lineFrom, lineTo)) return;
+
+        if (!isCursorInRange(view, lineFrom, lineTo)) {
+          const widget = Decoration.replace({
+            widget: new HorizontalRuleWidget(),
+            block: true,
+          });
+          decorations.push(widget.range(lineFrom, lineTo));
+        }
+      }
+
+      // Blockquote - the node name is "Blockquote"
+      if (node.name === 'Blockquote') {
+        const lineFrom = doc.lineAt(node.from).from;
+        const lineTo = doc.lineAt(node.to).to;
+
+        if (isInSkipRange(lineFrom, lineTo)) return;
+
+        if (!isCursorInRange(view, lineFrom, lineTo)) {
+          const rawText = doc.sliceString(lineFrom, lineTo);
+          // Strip > markers from each line
+          const cleanText = rawText.split('\n').map(l => l.replace(/^>\s?/, '')).join('\n').trim();
+
+          if (cleanText) {
             const widget = Decoration.replace({
-              widget: new HorizontalRuleWidget(),
+              widget: new BlockquoteWidget(cleanText),
               block: true,
             });
-            decorations.push(widget.range(range.from, range.to));
+            decorations.push(widget.range(lineFrom, lineTo));
           }
-          break;
         }
       }
     },
@@ -160,6 +210,7 @@ function buildLivePreviewDecorations(view: EditorView): DecorationSet {
   return Decoration.set(decorations, true);
 }
 
+/** View plugin for live preview */
 const livePreviewPlugin = ViewPlugin.fromClass(
   class {
     decorations: DecorationSet;

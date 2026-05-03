@@ -46,7 +46,7 @@ export function SermonEditor() {
   const autoSave = useCallback(async (content: string) => {
     const sermon = currentSermonRef.current
     if (!sermon) return
-    const wordCount = content.split(/\s+/).filter(Boolean).length
+    const wordCount = content.length
 
     setIsSermonSaving(true)
     try {
@@ -76,12 +76,13 @@ export function SermonEditor() {
   // Handle content change from CodeMirror
   const handleContentChange = useCallback((content: string) => {
     setMarkdownContent(content)
-    if (currentSermon) {
-      setCurrentSermon({ ...currentSermon, content })
+    const sermon = currentSermonRef.current
+    if (sermon) {
+      setCurrentSermon({ ...sermon, content })
     }
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    saveTimerRef.current = setTimeout(() => autoSave(content), 2000)
-  }, [currentSermon, setCurrentSermon, autoSave])
+    saveTimerRef.current = setTimeout(() => autoSave(content), 1500)
+  }, [setCurrentSermon, autoSave])
 
   // Manual save handler for Cmd+S
   const handleSave = useCallback(() => {
@@ -101,7 +102,7 @@ export function SermonEditor() {
 
   if (!currentSermon) return null
 
-  const wordCount = markdownContent.split(/\s+/).filter(Boolean).length
+  const charCount = markdownContent.length
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -109,7 +110,7 @@ export function SermonEditor() {
       <SermonEditorHeader />
 
       {/* CodeMirror Editor */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 min-h-0">
         <CodeMirrorEditor
           content={markdownContent}
           onChange={handleContentChange}
@@ -120,8 +121,8 @@ export function SermonEditor() {
 
       {/* Status Bar */}
       <div className="border-t border-border px-4 py-1 flex items-center gap-4 text-[10px] text-muted-foreground">
-        <span>{wordCount}{t('sermon.editorWords')}</span>
-        <span>~{Math.max(1, Math.round(wordCount / 250))}{t('sermon.editorMinutes')}</span>
+        <span>{charCount}{t('sermon.editorWords')}</span>
+        <span>~{Math.max(1, Math.round(charCount / 300))}{t('sermon.editorMinutes')}</span>
       </div>
     </div>
   )
