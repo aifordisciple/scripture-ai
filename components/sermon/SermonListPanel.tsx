@@ -281,18 +281,19 @@ export function SermonListPanel() {
                 setContextMenu({ type: 'sermon', id: sermon.id, x: e.clientX, y: e.clientY })
               }}
               className={cn(
-                'group cursor-pointer rounded-2xl p-5 transition-all',
-                'bg-white dark:bg-slate-900 shadow-sm hover:shadow-md',
-                'border border-slate-100 dark:border-slate-800',
+                'group cursor-pointer rounded-2xl p-6 transition-all duration-300',
+                'bg-white dark:bg-slate-900 shadow-sm',
+                'border border-slate-200/60 dark:border-slate-800',
+                'hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800/50 hover:-translate-y-0.5',
                 currentSermon?.id === sermon.id
                   ? 'ring-2 ring-indigo-500/40 border-indigo-200 dark:border-indigo-800'
                   : ''
               )}
             >
               {/* 顶部：元数据层 */}
-              <div className="flex justify-between items-center mb-3">
+              <div className="flex justify-between items-center">
                 {sermon.verseRefs ? (
-                  <span className="text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-1 rounded-md text-xs font-semibold">
+                  <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10 dark:bg-indigo-400/10 dark:text-indigo-400 dark:ring-indigo-400/20">
                     {sermon.verseRefs}
                   </span>
                 ) : (
@@ -300,31 +301,31 @@ export function SermonListPanel() {
                     {sermon.status === 'DRAFT' ? t('sermon.draft') : sermon.status === 'IN_PROGRESS' ? t('sermon.inProgress') : t('sermon.completed')}
                   </span>
                 )}
-                <span className="text-slate-400 dark:text-slate-500 text-xs">
+                <span className="text-xs text-slate-400 font-medium">
                   {sermon.sermonDate ? new Date(sermon.sermonDate).toLocaleDateString() : new Date(sermon.createdAt).toLocaleDateString()}
                 </span>
               </div>
 
               {/* 中部：核心内容层 */}
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight mb-1">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight mt-3 mb-2 leading-tight group-hover:text-indigo-600 transition-colors">
                 {sermon.title || t('sermon.untitled')}
               </h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-1">
+              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                 {styleLabel(sermon.style)}{sermon.wordCount > 0 ? ` · ${sermon.wordCount}${t('sermon.editorWords')}` : ''}
               </p>
 
               {/* 底部：操作层 */}
-              <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-50 dark:border-slate-800/50">
-                <span className="text-indigo-600 dark:text-indigo-400 text-sm font-medium flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-sm font-semibold text-indigo-600 flex items-center gap-1.5 group/btn">
                   {t('sermon.viewDetail')}
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
                 </span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
                     handleDeleteSermon(sermon.id)
                   }}
-                  className="text-slate-300 hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400 transition-colors p-2 -mr-2"
+                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors -mr-2"
                   title={t('sermon.delete')}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
