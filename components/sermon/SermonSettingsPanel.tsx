@@ -8,8 +8,7 @@ import { cn } from '@/lib/utils'
 
 export function SermonSettingsPanel() {
   const { t } = useTranslation()
-  const { currentSermon, sermons, setSermons, setCurrentSermon, sermonAutoSave, setSermonAutoSave } = useBibleStore()
-  const [aiPreference, setAiPreference] = useState<'formal' | 'casual' | 'scholarly'>('casual')
+  const { currentSermon, sermons, setSermons, setCurrentSermon, sermonAutoSave, setSermonAutoSave, sermonAiPreference, setSermonAiPreference } = useBibleStore()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleExport = () => {
@@ -58,17 +57,30 @@ export function SermonSettingsPanel() {
           <p className="text-xs font-medium text-foreground/90 mb-2">{t('sermon.settingsDefaultStyle')}</p>
           <div className="grid grid-cols-2 gap-1.5">
             {(['EXPOSITORY', 'TOPICAL', 'NARRATIVE', 'FREE'] as const).map((style) => (
-              <div
+              <button
                 key={style}
+                onClick={async () => {
+                  if (!currentSermon || currentSermon.style === style) return
+                  const updated = { ...currentSermon, style }
+                  setCurrentSermon(updated)
+                  try {
+                    await fetch('/api/sermon', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ id: currentSermon.id, style }),
+                    })
+                    setSermons(sermons.map(s => s.id === currentSermon.id ? updated : s))
+                  } catch {}
+                }}
                 className={cn(
                   'px-2 py-1.5 rounded-md text-[10px] font-medium text-center transition-colors',
                   currentSermon?.style === style
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary'
                 )}
               >
                 {t(`sermon.${style.toLowerCase()}`)}
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -106,10 +118,10 @@ export function SermonSettingsPanel() {
             ].map(({ key, label }) => (
               <button
                 key={key}
-                onClick={() => setAiPreference(key)}
+                onClick={() => setSermonAiPreference(key)}
                 className={cn(
                   'px-2 py-1 rounded-md text-[10px] font-medium transition-colors',
-                  aiPreference === key
+                  sermonAiPreference === key
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground'
                 )}

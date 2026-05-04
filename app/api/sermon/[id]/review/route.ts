@@ -31,16 +31,8 @@ export async function POST(
     return NextResponse.json({ error: 'Sermon not found' }, { status: 404 })
   }
 
-  // Extract plain text from content
-  let contentText = ''
-  try {
-    const parsed = typeof sermon.content === 'string' ? JSON.parse(sermon.content) : sermon.content
-    contentText = parsed?.content
-      ?.map((node: any) => node.content?.map((c: any) => c.text || '').join('') || '')
-      .join('\n') || ''
-  } catch {
-    contentText = String(sermon.content || '')
-  }
+  // Extract plain text from content (now Markdown, not Tiptap JSON)
+  const contentText = String(sermon.content || '')
 
   if (!contentText.trim()) {
     return NextResponse.json({ error: 'Sermon content is empty' }, { status: 400 })

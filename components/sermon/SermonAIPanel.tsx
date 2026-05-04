@@ -25,7 +25,7 @@ export function SermonAIPanel() {
     }
   }, [currentSermon?.id])
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, stop, error } = useChat({
+  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, stop, error } = useChat({
     id: `sermon-ai-${currentSermon?.id || 'none'}-${chatKey}`,
     api: currentSermon ? `/api/sermon/${currentSermon.id}/ai-chat` : '',
     body: { apiConfig, locale },
@@ -78,7 +78,9 @@ export function SermonAIPanel() {
             key={key}
             onClick={() => {
               if (!isLoading) {
-                handleSubmit(undefined, { content: t(`sermon.${promptKey}`) } as any)
+                const promptText = t(`sermon.${promptKey}`)
+                setInput(promptText)
+                setTimeout(() => handleSubmit(), 0)
               }
             }}
             disabled={isLoading}

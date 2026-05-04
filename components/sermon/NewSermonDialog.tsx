@@ -29,11 +29,11 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
   const { apiConfig, locale, setSermons, sermons, setCurrentSermon, setActiveSermonPanel } = useBibleStore()
   const dialogRef = useRef<HTMLDivElement>(null)
 
-  const [mode, setMode] = useState<'verse' | 'topic'>(initialVerseRefs ? 'verse' : 'verse')
+  const [mode, setMode] = useState<'verse' | 'topic'>('verse')
   const [title, setTitle] = useState('')
-  const [verseRefs, setVerseRefs] = useState(initialVerseRefs || '')
+  const [verseRefs, setVerseRefs] = useState('')
   const [topic, setTopic] = useState('')
-  const [style, setStyle] = useState<'EXPOSITORY' | 'TOPICAL' | 'NARRATIVE'>('EXPOSITORY')
+  const [style, setStyle] = useState<'EXPOSITORY' | 'TOPICAL' | 'NARRATIVE' | 'FREE'>('EXPOSITORY')
   const [loading, setLoading] = useState(false)
   const [recommendedVerses, setRecommendedVerses] = useState<RecommendedVerse[]>([])
   const [selectedVerses, setSelectedVerses] = useState<Set<number>>(new Set())
@@ -47,6 +47,21 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
   const [verseEnd, setVerseEnd] = useState<number | null>(null)
   const [verseSearch, setVerseSearch] = useState('')
   const [selectedRefs, setSelectedRefs] = useState<Array<{ bookId: string; chapter: number; verseStart: number; verseEnd: number }>>([])
+
+  // Reset dialog state when opening
+  useEffect(() => {
+    if (open) {
+      setTitle('')
+      setVerseRefs(initialVerseRefs || '')
+      setTopic('')
+      setStyle('EXPOSITORY')
+      setMode('verse')
+      setLoading(false)
+      setRecommendedVerses([])
+      setSelectedVerses(new Set())
+      setSelectedRefs([])
+    }
+  }, [open, initialVerseRefs])
 
   // Escape key handler
   useEffect(() => {
@@ -352,8 +367,8 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
           {/* Style */}
           <div>
             <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t('sermon.sermonStyle')}</label>
-            <div className="mt-1 grid grid-cols-3 gap-1.5">
-              {(['EXPOSITORY', 'TOPICAL', 'NARRATIVE'] as const).map((s) => (
+            <div className="mt-1 grid grid-cols-4 gap-1.5">
+              {(['EXPOSITORY', 'TOPICAL', 'NARRATIVE', 'FREE'] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => setStyle(s)}

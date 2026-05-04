@@ -553,6 +553,9 @@ export interface SermonSlice {
   // Auto-save toggle
   sermonAutoSave: boolean;
   setSermonAutoSave: (enabled: boolean) => void;
+  // AI preference
+  sermonAiPreference: 'formal' | 'casual' | 'scholarly';
+  setSermonAiPreference: (pref: 'formal' | 'casual' | 'scholarly') => void;
 }
 
 // --------------------------------------------------

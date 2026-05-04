@@ -34,4 +34,6 @@ export const createSermonSlice: StateCreator<StoreState, [], [], SermonSlice> = 
   setSermonInitialVerseRefs: (refs) => set({ sermonInitialVerseRefs: refs }),
   sermonAutoSave: true,
   setSermonAutoSave: (enabled) => set({ sermonAutoSave: enabled }),
+  sermonAiPreference: 'casual',
+  setSermonAiPreference: (pref) => set({ sermonAiPreference: pref }),
 });

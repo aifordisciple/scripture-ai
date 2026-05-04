@@ -18,20 +18,8 @@ function buildSermonContext(sermon: { title: string; verseRefs: string; style: s
   const lang = locale === 'en' ? 'en' : 'zh';
   const styleLabel = styleMap[sermon.style]?.[lang] || sermon.style;
 
-  // Extract text from Tiptap JSON content (max ~2000 chars)
-  let contentExcerpt = '';
-  try {
-    const json = JSON.parse(sermon.content);
-    const texts: string[] = [];
-    const extractText = (node: any) => {
-      if (node.text) texts.push(node.text);
-      if (node.content) node.content.forEach(extractText);
-    };
-    if (json.content) json.content.forEach(extractText);
-    contentExcerpt = texts.join('\n').slice(0, 2000);
-  } catch {
-    contentExcerpt = sermon.content.slice(0, 2000);
-  }
+  // Extract text from Markdown content (max ~2000 chars)
+  const contentExcerpt = sermon.content.slice(0, 2000)
 
   if (lang === 'zh') {
     return `### 当前讲章上下文

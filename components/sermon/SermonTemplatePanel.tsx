@@ -70,7 +70,7 @@ const TEMPLATES: Template[] = [
 
 export function SermonTemplatePanel() {
   const { t } = useTranslation()
-  const { currentSermon, setCurrentSermon } = useBibleStore()
+  const { currentSermon, setCurrentSermon, sermons, setSermons } = useBibleStore()
   const [appliedId, setAppliedId] = useState<string | null>(null)
 
   const handleApply = (template: Template) => {
@@ -79,7 +79,10 @@ export function SermonTemplatePanel() {
       .map(s => `## ${s.title}\n\n${s.placeholder}`)
       .join('\n\n')
     // Replace editor content by updating currentSermon (triggers re-sync)
-    setCurrentSermon({ ...currentSermon, content: markdown })
+    const updated = { ...currentSermon, content: markdown }
+    setCurrentSermon(updated)
+    // Sync to sermons list so switching sermons doesn't lose template content
+    setSermons(sermons.map(s => s.id === currentSermon.id ? updated : s))
     setAppliedId(template.id)
     setTimeout(() => setAppliedId(null), 2000)
   }

@@ -15,6 +15,10 @@ export function SermonEditorHeader() {
   const titleRef = useRef<HTMLInputElement>(null)
   const statusMenuRef = useRef<HTMLDivElement>(null)
 
+  // Use ref to avoid stale closure on sermons
+  const sermonsRef = useRef(sermons)
+  sermonsRef.current = sermons
+
   useEffect(() => {
     if (editingTitle && titleRef.current) titleRef.current.focus()
   }, [editingTitle])
@@ -43,7 +47,7 @@ export function SermonEditorHeader() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: currentSermon.id, title: titleDraft.trim() }),
         })
-        setSermons(sermons.map(s => s.id === currentSermon.id ? updated : s))
+        setSermons(sermonsRef.current.map(s => s.id === currentSermon.id ? updated : s))
       } catch {
         // 静默处理
       }
@@ -60,7 +64,7 @@ export function SermonEditorHeader() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: currentSermon.id, status }),
       })
-      setSermons(sermons.map(s => s.id === currentSermon.id ? updated : s))
+      setSermons(sermonsRef.current.map(s => s.id === currentSermon.id ? updated : s))
     } catch {
       // 静默处理
     }
