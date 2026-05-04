@@ -48,9 +48,10 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
   const [verseSearch, setVerseSearch] = useState('')
   const [selectedRefs, setSelectedRefs] = useState<Array<{ bookId: string; chapter: number; verseStart: number; verseEnd: number }>>([])
 
-  // Reset dialog state when opening
+  // Reset dialog state when opening (only on open transition false→true)
+  const prevOpenRef = useRef(false)
   useEffect(() => {
-    if (open) {
+    if (open && !prevOpenRef.current) {
       setTitle('')
       setVerseRefs(initialVerseRefs || '')
       setTopic('')
@@ -61,6 +62,7 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
       setSelectedVerses(new Set())
       setSelectedRefs([])
     }
+    prevOpenRef.current = open
   }, [open, initialVerseRefs])
 
   // Escape key handler
