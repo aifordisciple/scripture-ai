@@ -282,7 +282,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                     <div className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
                       index === 0 ? "bg-amber-100 text-amber-700" :
-                      index === 1 ? "bg-gray-100 text-gray-700" :
+                      index === 1 ? "bg-slate-100 text-slate-700" :
                       index === 2 ? "bg-orange-100 text-orange-700" :
                       "bg-muted text-muted-foreground"
                     )}>
@@ -334,7 +334,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                   className={cn(
                     "flex items-center justify-between p-3 rounded-lg",
                     index === 0 && "bg-amber-50 dark:bg-amber-900/20",
-                    index === 1 && "bg-gray-50 dark:bg-gray-900/20",
+                    index === 1 && "bg-slate-50 dark:bg-slate-900/20",
                     index === 2 && "bg-orange-50 dark:bg-orange-900/20"
                   )}
                 >
@@ -342,7 +342,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                     <div className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
                       index === 0 ? "bg-amber-100 text-amber-700" :
-                      index === 1 ? "bg-gray-100 text-gray-700" :
+                      index === 1 ? "bg-slate-100 text-slate-700" :
                       index === 2 ? "bg-orange-100 text-orange-700" :
                       "bg-muted text-muted-foreground"
                     )}>

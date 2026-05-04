@@ -263,7 +263,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                       id="pinned"
                       checked={pinned}
                       onChange={(e) => setPinned(e.target.checked)}
-                      className="rounded border-gray-300"
+                      className="rounded border-slate-300"
                     />
                     <Label htmlFor="pinned" className="text-sm font-normal">
                       {t('group.pinThisAnnouncement')}
@@ -406,7 +406,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                   id="edit-pinned"
                   checked={pinned}
                   onChange={(e) => setPinned(e.target.checked)}
-                  className="rounded border-gray-300"
+                  className="rounded border-slate-300"
                 />
                 <Label htmlFor="edit-pinned" className="text-sm font-normal">
                   {t('group.pinThisAnnouncement')}

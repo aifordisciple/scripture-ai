@@ -113,7 +113,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-500">
+      <div className="h-full flex items-center justify-center text-slate-500">
         {t('atlas.loadingJourneyData')}
       </div>
     );
@@ -123,7 +123,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
   if (!selectedJourney) {
     return (
       <div className="h-full overflow-y-auto p-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
           {t('atlas.selectJourney')}
         </h3>
         <div className="space-y-3">
@@ -131,12 +131,12 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
             <button
               key={journey.id}
               onClick={() => handleSelectJourney(journey)}
-              className="w-full p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="w-full p-4 bg-slate-50 dark:bg-slate-800 rounded-lg text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             >
-              <div className="font-medium text-gray-900 dark:text-white">
+              <div className="font-medium text-slate-900 dark:text-white">
                 {journey.titleZh}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 {t('atlas.stopsCount', { count: journey.stops.length })}
                 {journey.yearStart && (
                   <span className="ml-2">
@@ -149,7 +149,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
         </div>
 
         {journeys.length === 0 && (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+          <div className="text-center text-slate-500 dark:text-slate-400 py-8">
             {t('atlas.noJourneyData')}
           </div>
         )}
@@ -161,17 +161,17 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
   return (
     <div className="h-full flex flex-col">
       {/* 旅程标题 */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-700">
         <button
           onClick={() => setSelectedJourney(null)}
           className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline mb-2"
         >
           {t('atlas.returnToList')}
         </button>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
           {selectedJourney.titleZh}
         </h3>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-sm text-slate-500 dark:text-slate-400">
           {t('atlas.journeyStep', { current: journeyStep + 1, total: selectedJourney.stops.length })}
         </div>
       </div>
@@ -185,16 +185,16 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
                 {journeyStep + 1}
               </div>
               <div>
-                <div className="font-semibold text-gray-900 dark:text-white">
+                <div className="font-semibold text-slate-900 dark:text-white">
                   {selectedJourney.stops[journeyStep].location.nameZh}
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="text-sm text-slate-500 dark:text-slate-400">
                   {selectedJourney.stops[journeyStep].location.nameEn}
                 </div>
               </div>
             </div>
             {selectedJourney.stops[journeyStep].verseRef && (
-              <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+              <div className="text-sm text-slate-600 dark:text-slate-300 mt-2">
                 📖 {selectedJourney.stops[journeyStep].verseRef}
               </div>
             )}
@@ -214,18 +214,18 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
               className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
                 index === journeyStep
                   ? 'bg-indigo-100 dark:bg-indigo-900/50'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                  : 'hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
                 index === journeyStep
                   ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                  : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}>
                 {index + 1}
               </div>
               <div className="flex-1 text-left">
-                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                <div className="text-sm font-medium text-slate-900 dark:text-white">
                   {stop.location.nameZh}
                 </div>
               </div>
@@ -238,11 +238,11 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
       </div>
 
       {/* 播放控制 */}
-      <div className="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-center gap-4 p-4 border-t border-slate-200 dark:border-slate-700">
         <button
           onClick={() => handleStepChange('prev')}
           disabled={journeyStep === 0}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 disabled:opacity-50"
+          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-50"
         >
           <SkipBack className="w-5 h-5" />
         </button>
@@ -255,7 +255,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
         <button
           onClick={() => handleStepChange('next')}
           disabled={journeyStep === selectedJourney.stops.length - 1}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 disabled:opacity-50"
+          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-50"
         >
           <SkipForward className="w-5 h-5" />
         </button>

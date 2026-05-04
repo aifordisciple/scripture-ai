@@ -80,26 +80,26 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  /* 亮色模式：柔和护眼羊皮纸色调 (#FBF9F6 质感) */
-  --background: oklch(0.98 0.006 86);
-  --foreground: oklch(0.21 0.034 264);
-  --card: oklch(1 0 0);
+  --radius: 0.75rem;
+  /* 亮色模式：slate-50 底层 + 纯白内容区 */
+  --background: oklch(0.975 0.006 264); /* slate-50 */
+  --foreground: oklch(0.21 0.034 264);  /* slate-900 */
+  --card: oklch(1 0 0);                 /* white */
   --card-foreground: oklch(0.21 0.034 264);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.21 0.034 264);
-  --primary: oklch(0.55 0.15 260); /* 沉稳的阅读蓝 */
+  --primary: oklch(0.511 0.262 276);   /* indigo-600 */
   --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.95 0.008 86); /* 贴合纸张的次要色 */
+  --secondary: oklch(0.963 0.006 264); /* slate-100 */
   --secondary-foreground: oklch(0.21 0.034 264);
-  --muted: oklch(0.95 0.008 86);
+  --muted: oklch(0.963 0.006 264);
   --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.95 0.008 86);
+  --accent: oklch(0.963 0.006 264);
   --accent-foreground: oklch(0.21 0.034 264);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.01 86);
-  --input: oklch(0.92 0.01 86);
-  --ring: oklch(0.55 0.15 260);
+  --border: oklch(0.918 0.006 264);     /* slate-200/60 */
+  --input: oklch(0.918 0.006 264);
+  --ring: oklch(0.511 0.262 276);
 
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -107,14 +107,14 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
 
-  --sidebar: oklch(0.98 0.006 86);
+  --sidebar: oklch(0.975 0.006 264);  /* slate-50 */
   --sidebar-foreground: oklch(0.21 0.034 264);
-  --sidebar-primary: oklch(0.55 0.15 260);
+  --sidebar-primary: oklch(0.511 0.262 276); /* indigo-600 */
   --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.95 0.008 86);
+  --sidebar-accent: oklch(0.963 0.006 264); /* slate-100 */
   --sidebar-accent-foreground: oklch(0.21 0.034 264);
-  --sidebar-border: oklch(0.92 0.01 86);
-  --sidebar-ring: oklch(0.55 0.15 260);
+  --sidebar-border: oklch(0.918 0.006 264); /* slate-200/60 */
+  --sidebar-ring: oklch(0.511 0.262 276);
 
   /* === 间距系统 === */
   --spacing-0: 0;
@@ -166,25 +166,25 @@
 }
 
 .dark {
-  /* 暗色模式：深邃的午夜蓝，降低对比度防刺眼 */
-  --background: oklch(0.16 0.03 265);
-  --foreground: oklch(0.98 0.005 247);  /* 更亮的文字 */
-  --card: oklch(0.20 0.03 265);
-  --card-foreground: oklch(0.98 0.005 247);
-  --popover: oklch(0.20 0.03 265);
-  --popover-foreground: oklch(0.98 0.005 247);
-  --primary: oklch(0.70 0.14 260);
-  --primary-foreground: oklch(0.16 0.03 265);
-  --secondary: oklch(0.24 0.03 265);
-  --secondary-foreground: oklch(0.98 0.005 247);
-  --muted: oklch(0.24 0.03 265);
-  --muted-foreground: oklch(0.82 0.02 265);  /* WCAG AA ≥4.5:1 对比度 */
-  --accent: oklch(0.40 0.04 265);  /* WCAG AA ≥4.5:1 对比度 */
-  --accent-foreground: oklch(0.98 0.005 247);
+  /* 暗色模式：slate-950 底层 + slate-900 内容区 */
+  --background: oklch(0.15 0.017 264);  /* slate-950 */
+  --foreground: oklch(0.929 0.013 255.508);
+  --card: oklch(0.19 0.02 264);         /* slate-900 */
+  --card-foreground: oklch(0.929 0.013 255.508);
+  --popover: oklch(0.19 0.02 264);
+  --popover-foreground: oklch(0.929 0.013 255.508);
+  --primary: oklch(0.585 0.233 277);    /* indigo-500 */
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.25 0.02 264);    /* slate-800 */
+  --secondary-foreground: oklch(0.929 0.013 255.508);
+  --muted: oklch(0.25 0.02 264);
+  --muted-foreground: oklch(0.704 0.015 255.508);
+  --accent: oklch(0.25 0.02 264);
+  --accent-foreground: oklch(0.929 0.013 255.508);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.28 0.03 265);
-  --input: oklch(0.28 0.03 265);
-  --ring: oklch(0.70 0.14 260);
+  --border: oklch(0.28 0.017 264);      /* slate-800/60 */
+  --input: oklch(0.28 0.017 264);
+  --ring: oklch(0.585 0.233 277);
 
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
@@ -192,14 +192,14 @@
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
 
-  --sidebar: oklch(0.16 0.03 265);
-  --sidebar-foreground: oklch(0.98 0.005 247);
-  --sidebar-primary: oklch(0.70 0.14 260);
-  --sidebar-primary-foreground: oklch(0.16 0.03 265);
-  --sidebar-accent: oklch(0.24 0.03 265);
-  --sidebar-accent-foreground: oklch(0.98 0.005 247);
-  --sidebar-border: oklch(0.28 0.03 265);
-  --sidebar-ring: oklch(0.70 0.14 260);
+  --sidebar: oklch(0.15 0.017 264);  /* slate-950 */
+  --sidebar-foreground: oklch(0.929 0.013 255.508);
+  --sidebar-primary: oklch(0.585 0.233 277); /* indigo-500 */
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.25 0.02 264); /* slate-800 */
+  --sidebar-accent-foreground: oklch(0.929 0.013 255.508);
+  --sidebar-border: oklch(0.28 0.017 264); /* slate-800/60 */
+  --sidebar-ring: oklch(0.585 0.233 277);
 
   /* 深色模式阴影调整 */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
@@ -225,18 +225,45 @@
 
 /* 玻璃拟态辅助类 (Glassmorphism) */
 .glass-panel {
-  background-color: oklch(var(--background) / 0.7);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid oklch(var(--border) / 0.4);
-  box-shadow: 0 1px 2px 0 oklch(var(--foreground) / 0.05);
+  background-color: oklch(1 0 0 / 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid oklch(0.918 0.006 264 / 0.6);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
   transition: background-color 300ms ease, border-color 300ms ease;
 }
 
 /* 玻璃拟态暗色模式 */
 .dark .glass-panel {
-  background-color: oklch(var(--background) / 0.6);
-  border-color: oklch(var(--border) / 0.5);
+  background-color: oklch(0.15 0.017 264 / 0.8);
+  border-color: oklch(0.28 0.017 264 / 0.6);
+}
+
+/* 顶部导航栏/底部悬浮操作区专用 */
+.glass-nav {
+  background-color: oklch(1 0 0 / 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid oklch(0.918 0.006 264 / 0.6);
+}
+
+.dark .glass-nav {
+  background-color: oklch(0.15 0.017 264 / 0.8);
+  border-bottom-color: oklch(0.28 0.017 264 / 0.6);
+}
+
+/* 可点击卡片交互基类 */
+.card-interactive {
+  @apply cursor-pointer transition-all duration-300;
+}
+
+.card-interactive:hover {
+  @apply shadow-md -translate-y-0.5;
+}
+
+/* 按钮按压反馈 */
+.btn-press {
+  @apply transition-all duration-200 active:scale-95;
 }
 
 /* 隐藏滚动条但保留滚动功能 */
@@ -523,35 +550,35 @@ body::-webkit-scrollbar-thumb:hover,
 
 /* AI解读 prose 样式增强 */
 .prose.prose-slate {
-  /* 基础文本 */
-  --tw-prose-body: oklch(0.35 0.04 265);
-  --tw-prose-headings: oklch(0.21 0.04 265);
-  --tw-prose-links: oklch(0.55 0.15 260);
-  --tw-prose-bold: oklch(0.21 0.04 265);
+  /* 基础文本 — slate 色阶 */
+  --tw-prose-body: oklch(0.35 0.02 264);
+  --tw-prose-headings: oklch(0.21 0.034 264);
+  --tw-prose-links: oklch(0.511 0.262 276); /* indigo-600 */
+  --tw-prose-bold: oklch(0.21 0.034 264);
   --tw-prose-quotes: oklch(0.554 0.046 257);
-  --tw-prose-quote-borders: oklch(0.55 0.15 260);
-  --tw-prose-code: oklch(0.55 0.15 260);
+  --tw-prose-quote-borders: oklch(0.511 0.262 276);
+  --tw-prose-code: oklch(0.511 0.262 276);
   --tw-prose-counters: oklch(0.554 0.046 257);
-  --tw-prose-bullets: oklch(0.55 0.15 260);
-  --tw-prose-hr: oklch(0.92 0.01 86);
-  --tw-prose-th-borders: oklch(0.85 0.01 86);
-  --tw-prose-td-borders: oklch(0.92 0.01 86);
+  --tw-prose-bullets: oklch(0.511 0.262 276);
+  --tw-prose-hr: oklch(0.918 0.006 264);   /* slate-200 */
+  --tw-prose-th-borders: oklch(0.878 0.006 264);
+  --tw-prose-td-borders: oklch(0.918 0.006 264);
 }
 
 .dark .prose.prose-slate,
 .dark .prose.prose-invert {
-  --tw-prose-body: oklch(0.85 0.01 265);
-  --tw-prose-headings: oklch(0.98 0.005 247);
-  --tw-prose-links: oklch(0.70 0.14 260);
-  --tw-prose-bold: oklch(0.98 0.005 247);
-  --tw-prose-quotes: oklch(0.75 0.02 265);
-  --tw-prose-quote-borders: oklch(0.70 0.14 260);
-  --tw-prose-code: oklch(0.70 0.14 260);
-  --tw-prose-counters: oklch(0.75 0.02 265);
-  --tw-prose-bullets: oklch(0.70 0.14 260);
-  --tw-prose-hr: oklch(0.28 0.03 265);
-  --tw-prose-th-borders: oklch(0.35 0.03 265);
-  --tw-prose-td-borders: oklch(0.28 0.03 265);
+  --tw-prose-body: oklch(0.75 0.015 264);
+  --tw-prose-headings: oklch(0.929 0.013 255.508);
+  --tw-prose-links: oklch(0.585 0.233 277); /* indigo-500 */
+  --tw-prose-bold: oklch(0.929 0.013 255.508);
+  --tw-prose-quotes: oklch(0.704 0.015 264);
+  --tw-prose-quote-borders: oklch(0.585 0.233 277);
+  --tw-prose-code: oklch(0.585 0.233 277);
+  --tw-prose-counters: oklch(0.704 0.015 264);
+  --tw-prose-bullets: oklch(0.585 0.233 277);
+  --tw-prose-hr: oklch(0.28 0.017 264);    /* slate-800 */
+  --tw-prose-th-borders: oklch(0.35 0.017 264);
+  --tw-prose-td-borders: oklch(0.28 0.017 264);
 }
 
 /* 标题样式 - 清晰的层次结构 */

@@ -260,7 +260,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             </div>
 
             {/* 原始反馈 */}
-            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg">
               <div className="text-xs text-gray-500 mb-1">
                 {t('feedback.yourFeedback')} · {formatTime(selectedFeedback.createdAt)}
               </div>
@@ -269,7 +269,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
 
             {/* 截图 */}
             {selectedFeedback.screenshot && (
-              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+              <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg">
                 <div className="text-xs text-gray-500 mb-2">{t('feedback.screenshot')}</div>
                 <img
                   src={selectedFeedback.screenshot}

@@ -141,8 +141,8 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
         const popupContent = `
           <div class="p-2">
             <h3 class="font-semibold text-sm">${location.nameZh}</h3>
-            <p class="text-xs text-gray-500">${location.nameEn || ''}</p>
-            ${location.yearStart ? `<p class="text-xs text-gray-400">${location.yearStart < 0 ? t('atlas.eventYearBc', { year: Math.abs(location.yearStart) }) : t('atlas.eventYearAd', { year: location.yearStart })}</p>` : ''}
+            <p class="text-xs text-slate-500">${location.nameEn || ''}</p>
+            ${location.yearStart ? `<p class="text-xs text-slate-400">${location.yearStart < 0 ? t('atlas.eventYearBc', { year: Math.abs(location.yearStart) }) : t('atlas.eventYearAd', { year: location.yearStart })}</p>` : ''}
           </div>
         `;
         marker.bindPopup(popupContent);
@@ -222,9 +222,9 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
 
   if (loading) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+      <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800">
         <Loader2 className="w-6 h-6 animate-spin text-indigo-500 mr-2" />
-        <span className="text-gray-500">{t('atlas.loadingLocationData')}</span>
+        <span className="text-slate-500">{t('atlas.loadingLocationData')}</span>
       </div>
     );
   }
@@ -237,31 +237,31 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
       <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
         <button
           onClick={() => mapInstanceRef.current?.zoomIn()}
-          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg hover:bg-slate-50 dark:hover:bg-slate-700"
         >
-          <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          <Plus className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
         <button
           onClick={() => mapInstanceRef.current?.zoomOut()}
-          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg hover:bg-slate-50 dark:hover:bg-slate-700"
         >
-          <Minus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          <Minus className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
         <button
           onClick={toggleFullscreen}
-          className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg hover:bg-slate-50 dark:hover:bg-slate-700"
         >
-          {isFullscreen ? <Minimize className="w-5 h-5 text-gray-600 dark:text-gray-300" /> : <Maximize className="w-5 h-5 text-gray-600 dark:text-gray-300" />}
+          {isFullscreen ? <Minimize className="w-5 h-5 text-slate-600 dark:text-slate-300" /> : <Maximize className="w-5 h-5 text-slate-600 dark:text-slate-300" />}
         </button>
         <div className="relative">
           <button
             onClick={() => setShowLayers(!showLayers)}
-            className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg hover:bg-slate-50 dark:hover:bg-slate-700"
           >
-            <Layers className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <Layers className="w-5 h-5 text-slate-600 dark:text-slate-300" />
           </button>
           {showLayers && (
-            <div className="absolute right-0 top-10 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-w-[120px] border border-gray-200 dark:border-gray-700">
+            <div className="absolute right-0 top-10 bg-white dark:bg-slate-800 rounded-lg shadow-xl p-2 min-w-[120px] border border-slate-200 dark:border-slate-700">
               {['standard', 'satellite', 'terrain'].map((layer) => (
                 <button
                   key={layer}
@@ -272,7 +272,7 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
                   className={`w-full text-left px-3 py-2 text-sm rounded ${
                     selectedLayer === layer
                       ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                   }`}
                 >
                   {layer === 'standard' ? t('atlas.tabMap') : layer === 'satellite' ? 'Satellite' : 'Terrain'}

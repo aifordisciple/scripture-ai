@@ -199,7 +199,7 @@ export default function DesktopLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-900 p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
@@ -212,7 +212,7 @@ export default function DesktopLoginPage() {
         </div>
 
         {/* Login Form Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-700">
           <h2 className="text-xl font-semibold text-center mb-6 text-slate-900 dark:text-white">
             {isLogin ? "登录账户" : "创建账户"}
           </h2>

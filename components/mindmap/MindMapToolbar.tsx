@@ -58,35 +58,35 @@ export function MindMapToolbar({
   const currentLayoutLabel = t(currentLayoutKey);
 
   return (
-    <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 gap-1 sm:gap-2">
+    <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 gap-1 sm:gap-2">
       {/* 左侧：缩放控制 */}
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         <button
           onClick={onZoomOut}
-          className="p-2 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors touch-manipulation"
+          className="p-2 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 transition-colors touch-manipulation"
           title={t('mindmap.zoomOut')}
         >
-          <ZoomOut className="w-5 h-5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
+          <ZoomOut className="w-5 h-5 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-300" />
         </button>
 
-        <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 min-w-[40px] sm:min-w-[60px] text-center font-medium">
+        <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 min-w-[40px] sm:min-w-[60px] text-center font-medium">
           {zoomPercent}%
         </span>
 
         <button
           onClick={onZoomIn}
-          className="p-2 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors touch-manipulation"
+          className="p-2 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 transition-colors touch-manipulation"
           title={t('mindmap.zoomIn')}
         >
-          <ZoomIn className="w-5 h-5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
+          <ZoomIn className="w-5 h-5 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-300" />
         </button>
 
         <button
           onClick={onResetZoom}
-          className="p-2 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors touch-manipulation hidden sm:block"
+          className="p-2 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 transition-colors touch-manipulation hidden sm:block"
           title={t('mindmap.resetView')}
         >
-          <Maximize2 className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          <Maximize2 className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
       </div>
 
@@ -96,7 +96,7 @@ export function MindMapToolbar({
         <select
           value={currentLayout}
           onChange={(e) => onLayoutChange(e.target.value as LayoutType)}
-          className="hidden sm:block px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="hidden sm:block px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {LAYOUT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -108,14 +108,14 @@ export function MindMapToolbar({
         {/* 移动端：点击弹窗选择 */}
         <button
           onClick={() => setShowLayoutMenu(!showLayoutMenu)}
-          className="sm:hidden px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-200 touch-manipulation"
+          className="sm:hidden px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-slate-700 dark:text-slate-200 touch-manipulation"
         >
           {currentLayoutLabel}
         </button>
 
         {/* 移动端布局选择弹窗 */}
         {showLayoutMenu && (
-          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 z-50 overflow-hidden">
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-50 overflow-hidden">
             {LAYOUT_OPTIONS.map((option) => (
               <button
                 key={option.value}
@@ -126,7 +126,7 @@ export function MindMapToolbar({
                 className={`w-full px-4 py-3 text-left text-sm touch-manipulation ${
                   currentLayout === option.value
                     ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                 }`}
               >
                 {t(option.label)}
@@ -150,7 +150,7 @@ export function MindMapToolbar({
           {onExportMarkdown && (
             <button
               onClick={onExportMarkdown}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-500 hover:bg-gray-600 active:bg-gray-700 text-white text-sm transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-500 hover:bg-slate-600 active:bg-slate-700 text-white text-sm transition-colors"
             >
               <FileText className="w-4 h-4" />
               {t('mindmap.exportMD')}
@@ -162,21 +162,21 @@ export function MindMapToolbar({
         <div className="sm:hidden relative" ref={exportMenuRef}>
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors touch-manipulation"
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 transition-colors touch-manipulation"
             title={t('mindmap.moreActions')}
           >
-            <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <MoreVertical className="w-5 h-5 text-slate-600 dark:text-slate-300" />
           </button>
 
           {/* 移动端导出菜单 */}
           {showExportMenu && (
-            <div className="absolute top-full right-0 mt-2 w-36 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 z-50 overflow-hidden">
+            <div className="absolute top-full right-0 mt-2 w-36 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-50 overflow-hidden">
               <button
                 onClick={() => {
                   onExport();
                   setShowExportMenu(false);
                 }}
-                className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 touch-manipulation"
+                className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 touch-manipulation"
               >
                 <Image className="w-4 h-4" />
                 {t('mindmap.exportImage')}
@@ -187,7 +187,7 @@ export function MindMapToolbar({
                     onExportMarkdown();
                     setShowExportMenu(false);
                   }}
-                  className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 touch-manipulation"
+                  className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 touch-manipulation"
                 >
                   <FileText className="w-4 h-4" />
                   {t('mindmap.exportMarkdown')}
@@ -198,7 +198,7 @@ export function MindMapToolbar({
                   onResetZoom();
                   setShowExportMenu(false);
                 }}
-                className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 touch-manipulation sm:hidden"
+                className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 touch-manipulation sm:hidden"
               >
                 <Maximize2 className="w-4 h-4" />
                 {t('mindmap.resetView')}
@@ -210,10 +210,10 @@ export function MindMapToolbar({
         {/* 关闭按钮 - 移动端加大触摸区域 */}
         <button
           onClick={onClose}
-          className="p-2 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors touch-manipulation"
+          className="p-2 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 transition-colors touch-manipulation"
           title={t('mindmap.close')}
         >
-          <X className="w-5 h-5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
+          <X className="w-5 h-5 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-300" />
         </button>
       </div>
     </div>

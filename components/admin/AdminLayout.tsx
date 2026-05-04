@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-slate-50 flex">
       {/* 移动端遮罩 */}
       {mobileMenuOpen && (
         <div
@@ -68,7 +68,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "bg-white border-r border-gray-200 flex flex-col transition-all duration-300",
+          "bg-white border-r border-slate-200 flex flex-col transition-all duration-300",
           "fixed md:relative z-50 h-full",
           // 桌面端
           collapsed ? "md:w-16" : "md:w-64",
@@ -77,21 +77,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200">
           {!collapsed && (
             <span className="font-bold text-lg text-indigo-600">管理后台</span>
           )}
           {/* 移动端关闭按钮 */}
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 md:hidden"
+            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 md:hidden transition-colors"
           >
             <X size={20} />
           </button>
           {/* 桌面端折叠按钮 */}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hidden md:block"
+            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hidden md:block transition-colors"
           >
             {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
           </button>
@@ -111,7 +111,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
                       isActive
                         ? "bg-indigo-50 text-indigo-600"
-                        : "text-gray-600 hover:bg-gray-100"
+                        : "text-slate-600 hover:bg-slate-100"
                     )}
                     title={collapsed ? item.label : undefined}
                   >
@@ -125,10 +125,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 p-4">
+        <div className="border-t border-slate-200 p-4">
           <Link
             href="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
             title={collapsed ? "返回前台" : undefined}
           >
             <Home size={20} className="shrink-0" />
@@ -140,24 +140,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-4 md:px-6 shrink-0">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-4 md:px-6 shrink-0">
           {/* 移动端菜单按钮 */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 md:hidden mr-3"
+            className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 md:hidden mr-3 transition-colors"
           >
             <Menu size={22} />
           </button>
 
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm overflow-x-auto">
-            <Link href="/admin" className="text-gray-500 hover:text-gray-700 whitespace-nowrap">
+            <Link href="/admin" className="text-slate-500 hover:text-slate-700 whitespace-nowrap">
               管理后台
             </Link>
             {pathname !== '/admin' && (
               <>
-                <span className="text-gray-400">/</span>
-                <span className="text-gray-900 font-medium whitespace-nowrap">
+                <span className="text-slate-400">/</span>
+                <span className="text-slate-900 font-medium whitespace-nowrap">
                   {navItems.find(item => item.href === pathname)?.label || ''}
                 </span>
               </>

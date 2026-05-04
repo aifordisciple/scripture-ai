@@ -26,7 +26,7 @@ export const AIInputForm = memo(function AIInputForm({
       <div className="p-4 safe-area-bottom">
         <form onSubmit={onSubmit} className="flex gap-2 items-end relative" role="form">
           <textarea
-            className="flex-1 px-4 py-3 pr-12 border border-slate-200 dark:border-slate-700 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-slate-50 dark:bg-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-900 resize-none max-h-32"
+            className="flex-1 px-4 py-3 pr-12 border border-slate-200 dark:border-slate-700 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 resize-none max-h-32"
             value={input}
             onChange={(e) => {
               onInputChange(e.target.value)

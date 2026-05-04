@@ -664,7 +664,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                               "text-xs px-1 py-0.5 rounded",
                               devotionalCompleted
                                 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                                : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                             )}>
                               {devotionalCompleted ? t('group.read') : t('group.unread')}
                             </span>
@@ -689,7 +689,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                               "text-xs px-2 py-1 rounded transition-colors hover:opacity-80 flex items-center gap-1",
                               completed
                                 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                                : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
                             )}
                           >
                             {t('group.bookChapterShort', { book: bookName, chapter: r.chapter })}

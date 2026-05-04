@@ -99,7 +99,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
     <div className="h-full flex flex-col p-4">
       {/* 当前年份显示 */}
       <div className="text-center mb-6">
-        <div className="text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="text-3xl font-bold text-slate-900 dark:text-white">
           {formatYear(year)}
         </div>
       </div>
@@ -108,7 +108,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
       <div className="flex-1 overflow-y-auto">
         <div className="relative py-8">
           {/* 时间线 */}
-          <div className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+          <div className="relative h-2 bg-slate-200 dark:bg-slate-700 rounded-full">
             {/* 当前位置指示器 */}
             <div
               className="absolute top-0 h-2 bg-indigo-600 rounded-full transition-all duration-300"
@@ -136,7 +136,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
                 style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
               >
                 <div className="w-3 h-3 rounded-full bg-amber-500 border-2 border-white shadow" />
-                <span className="mt-2 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                <span className="mt-2 text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
                   {t(event.labelKey)}
                 </span>
               </div>
@@ -146,7 +146,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
 
         {/* 该年份的事件列表 */}
         <div className="mt-8">
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
+          <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">
             {t('atlas.eventsInPeriod')}
           </h3>
           <EventList year={year} range={50} />
@@ -154,10 +154,10 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
       </div>
 
       {/* 控制按钮 */}
-      <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
         <button
           onClick={() => step('backward')}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
@@ -169,7 +169,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
         </button>
         <button
           onClick={() => step('forward')}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
@@ -237,11 +237,11 @@ function EventList({ year, range }: { year: number; range: number }) {
   };
 
   if (loading) {
-    return <div className="text-gray-500 text-sm">{t('atlas.loading')}</div>;
+    return <div className="text-slate-500 text-sm">{t('atlas.loading')}</div>;
   }
 
   if (events.length === 0) {
-    return <div className="text-gray-500 text-sm">{t('atlas.noEventsInPeriod')}</div>;
+    return <div className="text-slate-500 text-sm">{t('atlas.noEventsInPeriod')}</div>;
   }
 
   return (
@@ -250,21 +250,21 @@ function EventList({ year, range }: { year: number; range: number }) {
         <div
           key={event.id}
           onClick={() => handleEventClick(event)}
-          className={`p-3 bg-gray-50 dark:bg-gray-800 rounded-lg transition-colors ${
+          className={`p-3 bg-slate-50 dark:bg-slate-800 rounded-xl transition-colors ${
             event.locationId
-              ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+              ? 'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700'
               : 'cursor-default'
           }`}
         >
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
-              <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+              <div className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
                 {event.titleZh}
                 {event.locationId && (
                   <MapPin className="w-3.5 h-3.5 text-indigo-500" />
                 )}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 {event.yearStart && (
                   <span>
                     {event.yearStart < 0 ? t('atlas.bc') : t('atlas.ad')}
@@ -275,7 +275,7 @@ function EventList({ year, range }: { year: number; range: number }) {
                 )}
               </div>
               {event.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">
+                <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
                   {event.description}
                 </p>
               )}

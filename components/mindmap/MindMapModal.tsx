@@ -262,10 +262,10 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed inset-0 sm:inset-4 md:inset-8 bg-white dark:bg-gray-900 sm:rounded-xl shadow-2xl z-50 flex flex-col overflow-hidden">
+        <Dialog.Content className="fixed inset-0 sm:inset-4 md:inset-8 bg-white dark:bg-slate-900 sm:rounded-xl shadow-2xl z-50 flex flex-col overflow-hidden">
           {/* 标题栏 - 移动端固定高度 */}
-          <div className="shrink-0 px-3 sm:px-4 py-2.5 sm:py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-            <Dialog.Title className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+          <div className="shrink-0 px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+            <Dialog.Title className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white truncate">
               {title || t('mindmap.defaultTitle')}
             </Dialog.Title>
           </div>
@@ -284,7 +284,7 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
           />
 
           {/* 画布容器 - 移动端全屏 */}
-          <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-800 touch-pan-x touch-pan-y">
+          <div className="flex-1 overflow-hidden bg-slate-50 dark:bg-slate-800 touch-pan-x touch-pan-y">
             <div
               ref={containerRef}
               className="w-full h-full"
@@ -295,8 +295,8 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
           {/* 导出中状态提示 */}
           {isExporting && (
             <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10">
-              <div className="bg-white dark:bg-gray-800 px-6 py-4 rounded-lg shadow-xl">
-                <span className="text-gray-700 dark:text-gray-200">{t('mindmap.exporting')}</span>
+              <div className="bg-white dark:bg-slate-800 px-6 py-4 rounded-lg shadow-xl">
+                <span className="text-slate-700 dark:text-slate-200">{t('mindmap.exporting')}</span>
               </div>
             </div>
           )}

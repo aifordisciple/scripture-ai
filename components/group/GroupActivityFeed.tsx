@@ -134,7 +134,7 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
       case "completion":
         return <CheckCircle2 className="w-4 h-4 text-orange-500" />;
       default:
-        return <CheckCircle2 className="w-4 h-4 text-gray-500" />;
+        return <CheckCircle2 className="w-4 h-4 text-slate-500" />;
     }
   };
 
