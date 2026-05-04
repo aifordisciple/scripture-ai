@@ -234,7 +234,7 @@ export default function AdminAnnouncementsPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <div className="text-red-500 text-lg">{error}</div>
-        <button onClick={fetchAnnouncements} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{t('admin.retry')}</button>
+        <button onClick={fetchAnnouncements} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">{t('admin.retry')}</button>
       </div>
     );
   }
@@ -246,7 +246,7 @@ export default function AdminAnnouncementsPage() {
         <h1 className="text-xl md:text-2xl font-bold text-slate-900">{t('admin.announcementManagement')}</h1>
         <button
           onClick={() => openEditor()}
-          className="flex items-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm md:text-base"
+          className="flex items-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm md:text-base"
         >
           <Plus size={18} />
           <span className="hidden sm:inline">{t('admin.newAnnouncement')}</span>
@@ -299,13 +299,13 @@ export default function AdminAnnouncementsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => openEditor(announcement)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-3"
+                      className="text-indigo-600 hover:text-indigo-900 mr-3 transition-colors"
                     >
                       <Edit2 size={16} />
                     </button>
                     <button
                       onClick={() => handleDelete(announcement.id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-600 hover:text-red-900 transition-colors"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -356,19 +356,19 @@ export default function AdminAnnouncementsPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => toggleActive(announcement)}
-                  className="text-xs px-2 py-1 rounded text-slate-600 hover:bg-slate-100"
+                  className="text-xs px-2 py-1 rounded text-slate-600 hover:bg-slate-100 transition-colors"
                 >
                   {announcement.isActive ? t('admin.disable') : t('admin.enable')}
                 </button>
                 <button
                   onClick={() => openEditor(announcement)}
-                  className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded"
+                  className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
                 >
                   <Edit2 size={16} />
                 </button>
                 <button
                   onClick={() => handleDelete(announcement.id)}
-                  className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                  className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -392,7 +392,7 @@ export default function AdminAnnouncementsPage() {
               <h3 className="text-lg font-semibold">
                 {editingId ? t('admin.editAnnouncement') : t('admin.newAnnouncement')}
               </h3>
-              <button onClick={closeEditor} className="text-slate-400 hover:text-slate-600">
+              <button onClick={closeEditor} className="text-slate-400 hover:text-slate-600 transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -490,14 +490,14 @@ export default function AdminAnnouncementsPage() {
             <div className="flex justify-end gap-3 p-4 border-t sticky bottom-0 bg-white">
               <button
                 onClick={closeEditor}
-                className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200"
+                className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
               >
                 {t('admin.cancel')}
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
               >
                 {saving ? t('admin.saving') : t('admin.save')}
               </button>

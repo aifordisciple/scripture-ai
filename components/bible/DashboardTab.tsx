@@ -142,20 +142,20 @@ export function DashboardTab() {
       
       {showClearMenu && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl w-full max-w-sm border dark:border-slate-800">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl shadow-black/15 w-full max-w-sm border dark:border-slate-800">
             <h3 className="text-xl font-bold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2">
               <Trash2 className="w-5 h-5"/> {t('bible.selectDataToClear')}
             </h3>
             <div className="space-y-3 mb-8">
-              <button onClick={() => toggleOpt('highlights')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <button onClick={() => toggleOpt('highlights')} className="flex items-center gap-3 w-full text-left p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                  {clearOpts.highlights ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
                  <span className="flex-1 text-sm font-medium">{t('bible.clearAllHighlights', { count: highlights.length })}</span>
               </button>
-              <button onClick={() => toggleOpt('notes')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <button onClick={() => toggleOpt('notes')} className="flex items-center gap-3 w-full text-left p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                  {clearOpts.notes ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
                  <span className="flex-1 text-sm font-medium">{t('bible.clearAllNotes', { count: notes.length })}</span>
               </button>
-              <button onClick={() => toggleOpt('interactions')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <button onClick={() => toggleOpt('interactions')} className="flex items-center gap-3 w-full text-left p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                  {clearOpts.interactions ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
                  <span className="flex-1 text-sm font-medium text-slate-600 dark:text-slate-300">
                     {t('bible.clearReadingFootprint')} <br/>
@@ -194,7 +194,7 @@ export function DashboardTab() {
                 <button 
                   key={tab.id}
                   onClick={() => setTimeRange(tab.id as any)}
-                  className={`flex-1 sm:flex-none px-4 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all ${timeRange === tab.id ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                  className={`flex-1 sm:flex-none px-4 py-1.5 text-xs sm:text-sm font-medium rounded-xl transition-all ${timeRange === tab.id ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                 >
                   {tab.label}
                 </button>

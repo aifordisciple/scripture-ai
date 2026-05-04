@@ -671,7 +671,7 @@ export function AISidebar() {
         ref={sidebarRef}
         style={{ '--sidebar-width': `${sidebarWidth}px` } as any}
         className={cn(
-          "fixed inset-y-0 right-0 z-50 bg-white dark:bg-slate-900 shadow-2xl border-l dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out",
+          "fixed inset-y-0 right-0 z-50 bg-white dark:bg-slate-900 shadow-2xl shadow-black/15 border-l dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out",
           "w-full md:w-[var(--sidebar-width)]",
           isAiOpen ? "translate-x-0" : "translate-x-full",
           isResizing && "transition-none"
@@ -717,7 +717,7 @@ export function AISidebar() {
               <button
                 onClick={() => { setShowModeSelector(!showModeSelector); setShowFontSizeSelector(false); setShowSessionList(false); }}
                 className={cn(
-                  "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors",
+                  "flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-medium transition-colors",
                   aiMode === 'general' ? "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" : "",
                   aiMode === 'tutor' ? "text-violet-600 bg-violet-50 dark:bg-violet-900/20" : "",
                   aiMode === 'sermon' ? "text-orange-600 bg-orange-50 dark:bg-orange-900/20" : "",
@@ -745,7 +745,7 @@ export function AISidebar() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="fixed top-20 right-20 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-[200] overflow-hidden"
+                    className="fixed top-20 right-20 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-black/10 border dark:border-slate-700 z-[200] overflow-hidden"
                   >
                     {[
                       { mode: 'general' as const, icon: Sparkles, label: t('ai.generalDesc'), color: 'text-slate-600' },
@@ -778,7 +778,7 @@ export function AISidebar() {
               <button
                 onClick={() => { setShowFontSizeSelector(!showFontSizeSelector); setShowModeSelector(false); setShowSessionList(false); }}
                 className={cn(
-                  "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors",
+                  "flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-medium transition-colors",
                   aiFontSize === 'medium' ? "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" : "text-blue-600 bg-blue-50 dark:bg-blue-900/20"
                 )}
                 title={t('ai.fontSize')}
@@ -792,7 +792,7 @@ export function AISidebar() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="fixed top-20 right-32 w-32 bg-white dark:bg-slate-800 rounded-lg shadow-xl border dark:border-slate-700 z-[200] overflow-hidden"
+                    className="fixed top-20 right-32 w-32 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-black/10 border dark:border-slate-700 z-[200] overflow-hidden"
                   >
                     {[
                       { size: 'small' as const, label: t('ai.fontSmall') },
@@ -823,11 +823,11 @@ export function AISidebar() {
             </Button>
             {/* [P3-1修复] 自定义确认对话框替代原生 confirm() */}
             {showClearConfirm && (
-              <div className="absolute top-12 right-2 z-50 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-3 text-sm">
+              <div className="absolute top-12 right-2 z-50 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-black/10 border border-slate-200 dark:border-slate-700 p-3 text-sm">
                 <p className="mb-2 text-slate-700 dark:text-slate-200">{t('ai.clearAllConfirm')}</p>
                 <div className="flex gap-2 justify-end">
-                  <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200">{t('common.cancel')}</button>
-                  <button onClick={confirmClearChat} className="px-3 py-1 text-xs rounded-md bg-red-500 text-white hover:bg-red-600">{t('common.confirm')}</button>
+                  <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200">{t('common.cancel')}</button>
+                  <button onClick={confirmClearChat} className="px-3 py-1 text-xs rounded-lg bg-red-500 text-white hover:bg-red-600">{t('common.confirm')}</button>
                 </div>
               </div>
             )}
@@ -862,7 +862,7 @@ export function AISidebar() {
 
           {isImmersive && (
             <div className="fixed top-6 left-1/2 -translate-x-1/2 md:left-auto md:right-[calc(var(--sidebar-width)/2)] md:translate-x-1/2 z-50 pointer-events-none animate-in fade-in duration-500">
-              <div className="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
+              <div className="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full shadow-lg shadow-black/10 backdrop-blur-sm flex items-center gap-1">
                 {t('ai.immersiveHint')}
               </div>
             </div>
@@ -963,7 +963,7 @@ function RenameModal({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-5 w-full max-w-sm"
+          className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-black/10 p-5 w-full max-w-sm"
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
@@ -1039,7 +1039,7 @@ function DeleteConfirmModal({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-5 w-full max-w-sm"
+          className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-black/10 p-5 w-full max-w-sm"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-3 mb-4">

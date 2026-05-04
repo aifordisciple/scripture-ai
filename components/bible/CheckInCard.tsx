@@ -70,7 +70,7 @@ export const CheckInCard = memo(function CheckInCard({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute -top-2 -right-2 z-10 w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full shadow-lg"
+          className="absolute -top-2 -right-2 z-10 w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full shadow-lg shadow-black/10"
         >
           <X className="w-4 h-4 text-slate-500" />
         </button>
@@ -78,7 +78,7 @@ export const CheckInCard = memo(function CheckInCard({
         {/* Card content - for image generation */}
         <div
           ref={cardRef}
-          className="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-2xl"
+          className="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-2xl shadow-black/15"
         >
           {/* Header */}
           <div className="text-center mb-6">

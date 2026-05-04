@@ -29,7 +29,7 @@ export function BadgePopup() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl border-4 border-yellow-400 text-center max-w-sm mx-4 animate-in zoom-in-95 duration-500">
+      <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl shadow-black/15 border-4 border-yellow-400 text-center max-w-sm mx-4 animate-in zoom-in-95 duration-500">
         <div className="relative inline-block mb-4">
           <Medal className="w-20 h-20 text-yellow-500" />
           <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-yellow-400 animate-bounce" />

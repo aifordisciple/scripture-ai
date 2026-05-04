@@ -103,7 +103,7 @@ export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: Rad
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl flex items-center justify-center"
+              className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl shadow-black/10 flex items-center justify-center"
             >
               <Sparkles className="w-7 h-7 text-white" />
             </motion.div>

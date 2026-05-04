@@ -15,8 +15,8 @@ import LocationVersesView from './LocationVersesView';
 const MapView = dynamic(() => import('./MapView'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-      <div className="text-gray-500">...</div>
+    <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800">
+      <div className="text-slate-500">...</div>
     </div>
   ),
 });
@@ -132,7 +132,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
   ] as const;
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900">
       {/* 经文信息提示 */}
       {verseContext && (
         <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800">
@@ -182,7 +182,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
       )}
 
       {/* 搜索栏 */}
-      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+      <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
         <LocationSearch onSelectLocation={(loc) => {
           setSelectedLocation(loc);
           setSelectedLocationId(loc.id);
@@ -192,7 +192,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
       </div>
 
       {/* Tab 切换 */}
-      <div className="flex border-b border-gray-200 dark:border-gray-700">
+      <div className="flex border-b border-slate-200 dark:border-slate-700">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -200,7 +200,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
             className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
               atlasPanelTab === tab.id
                 ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
             <tab.icon className="w-4 h-4" />

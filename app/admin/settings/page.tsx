@@ -223,7 +223,7 @@ export default function AdminSettingsPage() {
 
         {/* 分页 */}
         {logs && logs.pagination.totalPages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+          <div className="bg-white dark:bg-slate-900 px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
             <div className="text-sm text-slate-700">
               共 {logs.pagination.total} 条记录
             </div>

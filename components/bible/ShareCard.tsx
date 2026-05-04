@@ -246,7 +246,7 @@ export function ShareCard() {
                         <img
                             src={resultImg}
                             alt="Result"
-                            className="max-h-full w-auto object-contain shadow-2xl rounded-lg border border-white/10"
+                            className="max-h-full w-auto object-contain shadow-2xl shadow-black/15 rounded-xl border border-white/10"
                         />
                     </div>
 
@@ -285,7 +285,7 @@ export function ShareCard() {
                 <div
                     ref={cardRef}
                     className={cn(
-                        "w-[340px] min-h-[540px] shadow-2xl relative flex flex-col transition-all duration-300 overflow-hidden bg-white",
+                        "w-[340px] min-h-[540px] shadow-2xl shadow-black/15 relative flex flex-col transition-all duration-300 overflow-hidden bg-white",
                         layoutMode === 'card' ? "p-6" : "p-0",
                         layoutMode === 'frame' ? "p-3" : "",
                     )}
@@ -311,7 +311,7 @@ export function ShareCard() {
 
                     <div className={cn(
                         "relative z-10 flex flex-col h-full transition-all",
-                        layoutMode === 'card' ? "bg-white shadow-lg p-8 rounded-lg" : "p-8",
+                        layoutMode === 'card' ? "bg-white shadow-lg shadow-black/10 p-8 rounded-xl" : "p-8",
                         layoutMode === 'split' ? "pt-[60%] px-8 pb-8" : "",
                         layoutMode === 'poster' || layoutMode === 'film' ? "justify-end pb-12" : "justify-center",
                         layoutMode === 'frame' ? "border border-current" : "",
@@ -409,7 +409,7 @@ export function ShareCard() {
                                         <button
                                             key={i}
                                             onClick={() => handleBgSelect(url)}
-                                            className={cn("w-full aspect-square rounded-md bg-cover bg-center border-2 hover:border-blue-500 hover:scale-105 transition-all shadow-sm relative", selectedBgUrl === url ? "border-blue-500 ring-2 ring-blue-200" : "border-transparent")}
+                                            className={cn("w-full aspect-square rounded-lg bg-cover bg-center border-2 hover:border-blue-500 hover:scale-105 transition-all shadow-sm relative", selectedBgUrl === url ? "border-blue-500 ring-2 ring-blue-200" : "border-transparent")}
                                             style={{ backgroundImage: `url(${url})` }}
                                         >
                                             {selectedBgUrl === url && loading && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><Loader2 className="w-4 h-4 animate-spin text-white"/></div>}
@@ -488,7 +488,7 @@ export function ShareCard() {
                 </div>
 
                 <div className="p-4 border-t dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0">
-                    <Button onClick={generateImage} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all hover:scale-[1.02]">
+                    <Button onClick={generateImage} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-black/10 transition-all hover:scale-[1.02]">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ImageIcon className="w-4 h-4 mr-2" />}
                         {loading ? loadingText : t('shareCard.generateBtn')}
                     </Button>
@@ -502,7 +502,7 @@ export function ShareCard() {
 
 function LayoutButton({ mode, current, set, label, icon }: any) {
     return (
-        <button onClick={() => set(mode)} className={cn("p-3 border rounded-lg hover:bg-slate-50 flex flex-col items-center gap-2 transition-all", current === mode && "border-blue-500 bg-blue-50/50 ring-1 ring-blue-500 text-blue-600")}>
+        <button onClick={() => set(mode)} className={cn("p-3 border rounded-xl hover:bg-slate-50 flex flex-col items-center gap-2 transition-all", current === mode && "border-blue-500 bg-blue-50/50 ring-1 ring-blue-500 text-blue-600")}>
             <div className={cn("text-slate-500", current === mode && "text-blue-500")}>{icon}</div>
             <span className="text-xs font-medium">{label}</span>
         </button>

@@ -323,7 +323,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onClick={(e) => { handleMenuClick(e); handleNote(); }}
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
-          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           aria-label={t('floatingMenu.addNote')}
         >
           <PenLine className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
@@ -334,7 +334,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onClick={(e) => { handleMenuClick(e); handleShare(); }}
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
-          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           aria-label={t('floatingMenu.shareVerse')}
         >
           <Share2 className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
@@ -346,7 +346,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onClick={(e) => { handleMenuClick(e); onCrossRef(); }}
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
-            className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             aria-label={t('floatingMenu.viewCrossRef')}
           >
             <GitBranch className="w-4 h-4 text-slate-500 dark:text-slate-400 mb-1" />
@@ -359,7 +359,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onClick={(e) => { handleMenuClick(e); onAtlas(); }}
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
-            className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             aria-label={t('floatingMenu.viewAtlas')}
           >
             <Map className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mb-1" />
@@ -371,7 +371,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onClick={handleCreateSermon}
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
-          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           aria-label={t('sermon.createSermonFromReading')}
         >
           <FileText className="w-4 h-4 text-purple-500 dark:text-purple-400 mb-1" />
@@ -382,7 +382,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           onClick={(e) => { handleMenuClick(e); handleCopyClick(); }}
           onMouseDown={handleMenuClick}
           onPointerDown={handleMenuClick}
-          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           aria-label={copied ? t('floatingMenu.copiedToClipboard') : t('floatingMenu.copyVerse')}
         >
           <Copy className={cn("w-4 h-4 mb-1", copied ? "text-green-600" : "text-slate-500 dark:text-slate-400")} />

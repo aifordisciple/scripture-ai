@@ -209,7 +209,7 @@ export function CrossRefPanel({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ duration: 0.2 }}
-        className="fixed z-50 max-w-[calc(100vw-20px)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"
+        className="fixed z-50 max-w-[calc(100vw-20px)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl shadow-black/15 border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"
         style={{
           top: adjustedTop,
           left: adjustedLeft,
@@ -226,7 +226,7 @@ export function CrossRefPanel({
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="p-1 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
           >
             <X className="w-4 h-4 text-slate-500" />
           </button>

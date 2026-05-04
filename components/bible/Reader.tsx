@@ -440,7 +440,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                           "group inline-flex items-center gap-2.5 px-8 py-3.5 glass-panel rounded-full",
                           "bg-card/60 hover:bg-card text-foreground font-medium text-sm",
                           // 核心动画类名：悬浮上浮投影放大，点击时回缩(scale-95)
-                          "transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1.5 active:scale-95 active:translate-y-0 active:shadow-sm"
+                          "transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1.5 active:scale-95 active:translate-y-0 active:shadow-sm"
                         )}
                     >
                         <BookOpenCheck className="w-5 h-5 text-primary group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300" />
