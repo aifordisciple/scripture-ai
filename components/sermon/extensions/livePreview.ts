@@ -1,10 +1,14 @@
 /**
  * CodeMirror extension for Obsidian-like seamless live preview
  *
- * Strategy: Use Decoration.line to add a CSS class to preview lines,
- * Decoration.widget to insert preview content, and CSS to hide the
- * raw markdown text within those lines. This avoids all issues with
- * Decoration.replace crossing line breaks in ViewPlugin.
+ * Strategy: Use Decoration.replace to replace raw markdown text with
+ * preview widgets. This is more robust than the previous approach of
+ * Decoration.widget + CSS hiding, which could fail when CodeMirror's
+ * internal DOM structure prevented the CSS cascade from hiding the
+ * original text (causing "ABCABC" duplication).
+ *
+ * With Decoration.replace, CodeMirror itself removes the original text
+ * from the DOM, so there is no possibility of duplication.
  */
 import {
   Decoration,
@@ -187,8 +191,6 @@ function classifyLine(text: string): LineKind {
 
 // ─── Decoration Builder ──────────────────────────────────────────
 
-const previewLine = Decoration.line({ class: 'cm-preview-line' });
-
 function getActiveLines(view: EditorView): Set<number> {
   const lines = new Set<number>();
   for (const sel of view.state.selection.ranges) {
@@ -226,13 +228,16 @@ function buildDecorations(view: EditorView): DecorationSet {
           if (!isActive && !activeLines.has(fenced.startLineNum)) {
             const content = fenced.contentLines.slice(0, -1).join('\n');
             const widget = new FencedBlockPreviewWidget(fenced.label, content, fenced.color, fenced.icon);
-            // Mark all lines as preview lines (CSS hides their text)
-            for (let j = fenced.startLineNum; j <= endLineNum; j++) {
-              decorations.push(previewLine.range(doc.line(j).from));
-            }
-            // Insert preview widget at the start of the first line
+            // Replace the entire fenced block (from start of opening line to end of closing line)
             const startLine = doc.line(fenced.startLineNum);
-            decorations.push(Decoration.widget({ widget, side: -1 }).range(startLine.from));
+            const endLine = doc.line(endLineNum);
+            decorations.push(
+              Decoration.replace({
+                widget,
+                inclusive: false,
+                block: true,
+              }).range(startLine.from, endLine.to)
+            );
           }
           fenced = null;
         }
@@ -256,29 +261,59 @@ function buildDecorations(view: EditorView): DecorationSet {
 
       switch (kind.type) {
         case 'heading':
-          decorations.push(previewLine.range(line.from));
-          decorations.push(Decoration.widget({ widget: new HeadingPreviewWidget(kind.level, kind.text), side: -1 }).range(line.from));
+          decorations.push(
+            Decoration.replace({
+              widget: new HeadingPreviewWidget(kind.level, kind.text),
+              inclusive: false,
+              block: false,
+            }).range(line.from, line.to)
+          );
           break;
         case 'hr':
-          decorations.push(previewLine.range(line.from));
-          decorations.push(Decoration.widget({ widget: new HrPreviewWidget(), side: -1 }).range(line.from));
+          decorations.push(
+            Decoration.replace({
+              widget: new HrPreviewWidget(),
+              inclusive: false,
+              block: false,
+            }).range(line.from, line.to)
+          );
           break;
         case 'blockquote':
-          decorations.push(previewLine.range(line.from));
-          decorations.push(Decoration.widget({ widget: new BlockquotePreviewWidget(kind.text), side: -1 }).range(line.from));
+          decorations.push(
+            Decoration.replace({
+              widget: new BlockquotePreviewWidget(kind.text),
+              inclusive: false,
+              block: false,
+            }).range(line.from, line.to)
+          );
           break;
         case 'paragraph':
           if (!kind.text) continue;
-          decorations.push(previewLine.range(line.from));
-          decorations.push(Decoration.widget({ widget: new ParagraphPreviewWidget(kind.text), side: -1 }).range(line.from));
+          decorations.push(
+            Decoration.replace({
+              widget: new ParagraphPreviewWidget(kind.text),
+              inclusive: false,
+              block: false,
+            }).range(line.from, line.to)
+          );
           break;
         case 'bulletItem':
-          decorations.push(previewLine.range(line.from));
-          decorations.push(Decoration.widget({ widget: new ListItemPreviewWidget(kind.text, false, 0), side: -1 }).range(line.from));
+          decorations.push(
+            Decoration.replace({
+              widget: new ListItemPreviewWidget(kind.text, false, 0),
+              inclusive: false,
+              block: false,
+            }).range(line.from, line.to)
+          );
           break;
         case 'orderedItem':
-          decorations.push(previewLine.range(line.from));
-          decorations.push(Decoration.widget({ widget: new ListItemPreviewWidget(kind.text, true, kind.index), side: -1 }).range(line.from));
+          decorations.push(
+            Decoration.replace({
+              widget: new ListItemPreviewWidget(kind.text, true, kind.index),
+              inclusive: false,
+              block: false,
+            }).range(line.from, line.to)
+          );
           break;
       }
     }
@@ -305,24 +340,10 @@ const livePreviewPlugin = ViewPlugin.fromClass(
   { decorations: (v) => v.decorations }
 );
 
-// ─── CSS: hide raw text in preview lines, show only widgets ────────
+// ─── Theme: ensure preview widgets inherit editor styling ────────
 
 const livePreviewTheme = EditorView.baseTheme({
-  // In preview lines, hide raw text by collapsing font and making transparent.
-  // Using font-size: 0 + color: transparent is more robust than display: none
-  // because CodeMirror's internal DOM structure varies and display:none can
-  // break layout calculations. The widget restores its own font/color.
-  '.cm-preview-line': {
-    fontSize: '0',
-    color: 'transparent',
-  },
-  '.cm-preview-line .cm-preview-widget': {
-    fontSize: 'inherit',
-    color: 'inherit',
-  },
-  // Ensure the widget picks up the editor's base font size and color
-  // (set on .cm-content by the theme), not the zeroed-out line values
-  '.cm-content .cm-preview-line .cm-preview-widget': {
+  '.cm-preview-widget': {
     fontSize: 'var(--cm-font-size, 15px)',
     color: 'var(--cm-text-color, inherit)',
   },
