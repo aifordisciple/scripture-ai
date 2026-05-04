@@ -195,7 +195,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
     <div
       ref={menuRef}
       className={cn(
-        "fixed z-50 flex flex-col gap-2 p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl transition-all duration-200 ease-out origin-bottom border border-slate-100 dark:border-slate-800 w-[240px]",
+        "fixed z-50 flex flex-col gap-2 p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl shadow-black/15 transition-all duration-200 ease-out origin-bottom border border-slate-100 dark:border-slate-800 w-[240px]",
         visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"
       )}
       style={{
@@ -282,7 +282,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
                     onMouseDown={handleMenuClick}
                     onPointerDown={handleMenuClick}
                     className={cn(
-                      "flex items-center justify-center gap-1 py-2 px-2 rounded-lg",
+                      "flex items-center justify-center gap-1 py-2 px-2 rounded-xl",
                       "text-xs font-medium",
                       "bg-white dark:bg-slate-700",
                       "hover:bg-blue-50 dark:hover:bg-blue-900/30",
@@ -300,7 +300,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
                   onMouseDown={handleMenuClick}
                   onPointerDown={handleMenuClick}
                   className={cn(
-                    "col-span-2 flex items-center justify-center gap-1 py-2 px-2 rounded-lg",
+                    "col-span-2 flex items-center justify-center gap-1 py-2 px-2 rounded-xl",
                     "text-xs font-medium",
                     "bg-gradient-to-r from-blue-500 to-indigo-500",
                     "text-white",

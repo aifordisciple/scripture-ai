@@ -52,11 +52,11 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2">
-          <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-lg gap-1">
+          <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl gap-1">
             <button
               onClick={() => setMode('exact')}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-md transition-all",
+                "flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-lg transition-all",
                 mode === 'exact'
                   ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
@@ -68,7 +68,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             <button
               onClick={() => setMode('ai')}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-md transition-all",
+                "flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-lg transition-all",
                 mode === 'ai'
                   ? "bg-blue-600 text-white shadow-sm"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
@@ -90,7 +90,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={3}
-              className="flex-1 w-full rounded-md border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-400"
+              className="flex-1 w-full rounded-lg border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-400"
               autoFocus
             />
             <Button onClick={handleSearch} className={cn("w-full", mode === 'ai' && "bg-blue-600 hover:bg-blue-700")}>

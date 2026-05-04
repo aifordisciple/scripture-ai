@@ -164,7 +164,7 @@ export default function FeedbackAdminPanel() {
       case "resolved":
         return <CheckCircle2 className="w-4 h-4 text-green-500" />;
       default:
-        return <CheckCircle2 className="w-4 h-4 text-gray-400" />;
+        return <CheckCircle2 className="w-4 h-4 text-slate-400" />;
     }
   };
 
@@ -188,9 +188,9 @@ export default function FeedbackAdminPanel() {
       case "resolved":
         return `${base} bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400`;
       case "closed":
-        return `${base} bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400`;
+        return `${base} bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400`;
       default:
-        return `${base} bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400`;
+        return `${base} bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400`;
     }
   };
 
@@ -213,7 +213,7 @@ export default function FeedbackAdminPanel() {
       case "low":
         return "text-green-500";
       default:
-        return "text-gray-400";
+        return "text-slate-400";
     }
   };
 
@@ -236,23 +236,23 @@ export default function FeedbackAdminPanel() {
           { label: t('adminFeedback.statsPending'), value: stats.pending, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20" },
           { label: t('adminFeedback.statsProcessing'), value: stats.processing, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
           { label: t('adminFeedback.statsResolved'), value: stats.resolved, color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20" },
-          { label: t('adminFeedback.statsClosed'), value: stats.closed, color: "text-gray-600 dark:text-gray-400", bg: "bg-gray-50 dark:bg-gray-700/30" },
+          { label: t('adminFeedback.statsClosed'), value: stats.closed, color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-700/30" },
         ].map((stat) => (
           <div
             key={stat.label}
-            className={`${stat.bg} rounded-xl p-4 border border-gray-200 dark:border-gray-700`}
+            className={`${stat.bg} rounded-xl p-4 border border-slate-200 dark:border-slate-700`}
           >
-            <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</p>
             <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder={t('adminFeedback.searchPlaceholder')}
@@ -261,19 +261,19 @@ export default function FeedbackAdminPanel() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             />
           </div>
           <div className="flex gap-2">
             <div className="relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <select
                 value={filterStatus}
                 onChange={(e) => {
                   setFilterStatus(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm appearance-none cursor-pointer"
+                className="pl-10 pr-8 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm appearance-none cursor-pointer"
               >
                 <option value="all">{t('adminFeedback.filterAllStatus')}</option>
                 <option value="pending">{t('adminFeedback.statusPending')}</option>
@@ -288,7 +288,7 @@ export default function FeedbackAdminPanel() {
                 setFilterType(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm appearance-none cursor-pointer"
+              className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm appearance-none cursor-pointer"
             >
               <option value="all">{t('adminFeedback.filterAllType')}</option>
               <option value="bug">{t('adminFeedback.typeBug')}</option>
@@ -299,7 +299,7 @@ export default function FeedbackAdminPanel() {
           </div>
           <button
             onClick={fetchFeedbacks}
-            className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             title={t('adminFeedback.refreshTitle')}
           >
             <RefreshCw className="w-5 h-5" />
@@ -308,22 +308,22 @@ export default function FeedbackAdminPanel() {
       </div>
 
       {/* Feedback List */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
           </div>
         ) : feedbacks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-500">
+          <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
             <Inbox className="w-12 h-12 mb-3" />
             <p className="text-lg">{t('adminFeedback.noFeedback')}</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          <div className="divide-y divide-slate-200 dark:divide-slate-700">
             {feedbacks.map((fb) => (
               <div
                 key={fb.id}
-                className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
+                className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
                 onClick={() => {
                   setSelectedFeedback(fb);
                   setShowDetailModal(true);
@@ -334,24 +334,24 @@ export default function FeedbackAdminPanel() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       {getStatusIcon(fb.status)}
-                      <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                         {fb.title}
                       </h3>
                       <span className={getPriorityColor(fb.priority)}>
                         {getPriorityLabel(fb.priority)}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                       {fb.content}
                     </p>
                     <div className="flex items-center gap-3 mt-2">
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
                         {fb.userName || fb.userEmail}
                       </span>
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
                         {getTypeLabel(fb.type)}
                       </span>
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
                         {new Date(fb.createdAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -369,22 +369,22 @@ export default function FeedbackAdminPanel() {
 
         {/* Pagination */}
         {feedbacks.length > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800/50">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               {t('adminFeedback.pageIndicator', { page: currentPage })}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setCurrentPage(currentPage + 1)}
                 disabled={feedbacks.length < pageSize}
-                className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -399,7 +399,7 @@ export default function FeedbackAdminPanel() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   {t('adminFeedback.detailTitle')}
                 </h2>
                 <button
@@ -407,7 +407,7 @@ export default function FeedbackAdminPanel() {
                     setShowDetailModal(false);
                     setSelectedFeedback(null);
                   }}
-                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg"
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -421,21 +421,21 @@ export default function FeedbackAdminPanel() {
                   <span className={`text-sm ${getPriorityColor(selectedFeedback.priority)}`}>
                     {t('adminFeedback.priorityLabel')}: {getPriorityLabel(selectedFeedback.priority)}
                   </span>
-                  <span className="text-sm text-gray-400 dark:text-gray-500">
+                  <span className="text-sm text-slate-400 dark:text-slate-500">
                     {getTypeLabel(selectedFeedback.type)}
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  <h3 className="font-medium text-slate-900 dark:text-slate-100 mb-2">
                     {selectedFeedback.title}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
+                  <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap">
                     {selectedFeedback.content}
                   </p>
                 </div>
 
-                <div className="text-xs text-gray-400 dark:text-gray-500 space-y-1">
+                <div className="text-xs text-slate-400 dark:text-slate-500 space-y-1">
                   <p>{t('adminFeedback.submitter')}: {selectedFeedback.userName || selectedFeedback.userEmail}</p>
                   <p>{t('adminFeedback.submitTime')}: {new Date(selectedFeedback.createdAt).toLocaleString()}</p>
                   {selectedFeedback.category && (
@@ -460,8 +460,8 @@ export default function FeedbackAdminPanel() {
                 )}
 
                 {/* Reply Section */}
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     {t('adminFeedback.replyLabel')}
                   </label>
                   <textarea
@@ -469,7 +469,7 @@ export default function FeedbackAdminPanel() {
                     onChange={(e) => setReplyContent(e.target.value)}
                     rows={4}
                     placeholder={t('adminFeedback.replyPlaceholder')}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
                   />
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex gap-2">
@@ -488,7 +488,7 @@ export default function FeedbackAdminPanel() {
                           onClick={() =>
                             handleUpdateStatus(selectedFeedback.id, "closed")
                           }
-                          className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                          className="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                         >
                           {t('adminFeedback.closeFeedback')}
                         </button>
@@ -500,7 +500,7 @@ export default function FeedbackAdminPanel() {
                           setShowDetailModal(false);
                           setSelectedFeedback(null);
                         }}
-                        className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                       >
                         {t('adminFeedback.cancel')}
                       </button>

@@ -234,7 +234,7 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
       case "USER_UNMUTED":
         return "text-green-500 bg-green-100 dark:bg-green-900/30";
       default:
-        return "text-gray-500 bg-gray-100 dark:bg-gray-800";
+        return "text-slate-500 bg-slate-100 dark:bg-slate-800";
     }
   };
 

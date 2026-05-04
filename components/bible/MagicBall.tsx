@@ -395,7 +395,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             exit={{ scale: 0.9, opacity: 0, y: 10 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className={cn(
-              "fixed z-[99] w-72 rounded-2xl shadow-2xl overflow-hidden",
+              "fixed z-[99] w-72 rounded-2xl shadow-2xl shadow-black/15 overflow-hidden",
               "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
             )}
             style={{
@@ -432,7 +432,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                     setIsAiFinishedButUnseen(false);
                     setIsQueuePanelOpen(false);
                   }}
-                  className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white text-sm font-medium shadow-sm transition-all hover:shadow-md"
+                  className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white text-sm font-medium shadow-sm transition-all hover:shadow-md"
                 >
                   {t('ai.clickToView')}
                 </button>
@@ -543,7 +543,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             ? "translate-x-0 opacity-100 scale-100"
             : "translate-x-10 opacity-0 scale-50 pointer-events-none"
         )}>
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm animate-pulse-subtle">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full shadow-lg shadow-black/10 flex items-center gap-2 font-bold text-sm animate-pulse-subtle">
             <MousePointerClick className="w-4 h-4" /> {t('ai.clickToView')}
           </div>
           <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-purple-600"></div>
@@ -558,7 +558,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1"
+              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg shadow-black/10 flex items-center gap-1"
             >
               {isProcessing ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -575,18 +575,18 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
           <>
             <div className={cn("absolute transition-all duration-300 ease-out", showHint === "ai-toggle" ? "-translate-x-28 opacity-100 scale-100" : "translate-x-0 opacity-0 scale-50")}>
               {isAiOpen ? (
-                <div className="bg-slate-500 text-white px-3 py-2 rounded-full shadow-xl flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20"><X className="w-4 h-4" /> {t('ai.closeAssistant')}</div>
+                <div className="bg-slate-500 text-white px-3 py-2 rounded-full shadow-xl shadow-black/10 flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20"><X className="w-4 h-4" /> {t('ai.closeAssistant')}</div>
               ) : (
-                <div className="bg-blue-600 text-white px-3 py-2 rounded-full shadow-xl flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20"><Bot className="w-4 h-4" /> {t('ai.openInterpretation')}</div>
+                <div className="bg-blue-600 text-white px-3 py-2 rounded-full shadow-xl shadow-black/10 flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20"><Bot className="w-4 h-4" /> {t('ai.openInterpretation')}</div>
               )}
             </div>
             <div className={cn("absolute transition-all duration-300 ease-out", showHint === "menu-toggle" ? "-translate-y-24 opacity-100 scale-100" : "translate-y-0 opacity-0 scale-50")}>
-              <div className="bg-primary/90 text-white p-2.5 rounded-full shadow-xl backdrop-blur-md border border-white/20">
+              <div className="bg-primary/90 text-white p-2.5 rounded-full shadow-xl shadow-black/10 backdrop-blur-md border border-white/20">
                 {onOpenBookPicker ? <BookOpenCheck className="w-5 h-5" /> : (isSidebarOpen ? <X className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />)}
               </div>
             </div>
             <div className={cn("absolute transition-all duration-300 ease-out", (showHint === "fullscreen" || showHint === "exit-fullscreen") ? "translate-y-24 opacity-100 scale-100" : "translate-y-0 opacity-0 scale-50")}>
-              <div className="bg-slate-700/80 text-white p-2.5 rounded-full shadow-xl backdrop-blur-md border border-white/20">{showHint === "exit-fullscreen" ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}</div>
+              <div className="bg-slate-700/80 text-white p-2.5 rounded-full shadow-xl shadow-black/10 backdrop-blur-md border border-white/20">{showHint === "exit-fullscreen" ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}</div>
             </div>
           </>
         )}
@@ -710,7 +710,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute -top-1 -right-1 z-20 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg"
+              className="absolute -top-1 -right-1 z-20 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg shadow-black/10"
             >
               {queueCount + (currentAiRequest ? 1 : 0)}
             </motion.div>

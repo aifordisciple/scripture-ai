@@ -105,7 +105,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
       case 1:
         return "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-200 dark:border-yellow-800";
       case 2:
-        return "bg-gradient-to-r from-slate-50 to-slate-50 dark:from-slate-900/20 dark:to-gray-900/20 border-slate-200 dark:border-slate-700";
+        return "bg-gradient-to-r from-slate-50 to-slate-50 dark:from-slate-900/20 dark:to-slate-900/20 border-slate-200 dark:border-slate-700";
       case 3:
         return "bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800";
       default:
