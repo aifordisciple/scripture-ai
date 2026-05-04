@@ -92,6 +92,29 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
     if (e.target === e.currentTarget) onClose()
   }, [onClose])
 
+  // Get the selected book's data
+  const selectedBookData = useMemo(() => {
+    return BIBLE_BOOKS.find(b => b.id === selectedBook)
+  }, [selectedBook])
+
+  // Filter books by search
+  const filteredBooks = useMemo(() => {
+    if (!verseSearch) return BIBLE_BOOKS
+    const q = verseSearch.toLowerCase()
+    return BIBLE_BOOKS.filter(b =>
+      b.name.includes(q) ||
+      (b.nameEn && b.nameEn.toLowerCase().includes(q)) ||
+      b.id.toLowerCase().includes(q) ||
+      (getBookDisplayName(b.id, locale)).toLowerCase().includes(q)
+    )
+  }, [verseSearch, locale])
+
+  const oldTestament = filteredBooks.slice(0, 39)
+  const newTestament = filteredBooks.slice(39)
+
+  // Get max verse count for a chapter (approximate - we'll show 1-50 as range)
+  const MAX_VERSE = 50
+
   if (!open) return null
 
   const handleRecommendVerses = async () => {
@@ -186,29 +209,6 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
       .join('; ')
     setVerseRefs(refsText)
   }
-
-  // Get the selected book's data
-  const selectedBookData = useMemo(() => {
-    return BIBLE_BOOKS.find(b => b.id === selectedBook)
-  }, [selectedBook])
-
-  // Filter books by search
-  const filteredBooks = useMemo(() => {
-    if (!verseSearch) return BIBLE_BOOKS
-    const q = verseSearch.toLowerCase()
-    return BIBLE_BOOKS.filter(b =>
-      b.name.includes(q) ||
-      (b.nameEn && b.nameEn.toLowerCase().includes(q)) ||
-      b.id.toLowerCase().includes(q) ||
-      (getBookDisplayName(b.id, locale)).toLowerCase().includes(q)
-    )
-  }, [verseSearch, locale])
-
-  const oldTestament = filteredBooks.slice(0, 39)
-  const newTestament = filteredBooks.slice(39)
-
-  // Get max verse count for a chapter (approximate - we'll show 1-50 as range)
-  const MAX_VERSE = 50
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={handleOverlayClick}>
