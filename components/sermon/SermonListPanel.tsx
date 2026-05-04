@@ -11,9 +11,7 @@ import {
   Folder,
   ChevronRight,
   ChevronDown,
-  MoreHorizontal,
   Trash2,
-  Edit3,
   Tag,
 } from 'lucide-react'
 import { NewSermonDialog } from './NewSermonDialog'
@@ -91,27 +89,35 @@ export function SermonListPanel() {
 
   const handleDeleteSermon = async (id: string) => {
     if (!confirm(t('sermon.deleteConfirm'))) return
+    const prevSermons = sermons
+    const prevCurrent = currentSermon
     try {
-      await fetch(`/api/sermon?id=${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/sermon?id=${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Delete failed')
       setSermons(sermons.filter(s => s.id !== id))
       if (currentSermon?.id === id) setCurrentSermon(null)
     } catch {
-      // 静默处理
+      // Revert on failure
+      setSermons(prevSermons)
+      if (prevCurrent?.id === id) setCurrentSermon(prevCurrent)
     }
     setContextMenu(null)
   }
 
   const handleDeleteFolder = async (id: string) => {
     if (!confirm(t('sermon.deleteFolderConfirm'))) return
+    const prevFolders = sermonFolders
     try {
-      await fetch(`/api/sermon/folder?id=${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/sermon/folder?id=${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Delete folder failed')
       setSermonFolders(sermonFolders.filter(f => f.id !== id))
-      // 刷新讲章列表（讲章移至根目录）
-      const res = await fetch('/api/sermon')
-      const data = await res.json()
+      // Refresh sermons (moved to root)
+      const sermonsRes = await fetch('/api/sermon')
+      const data = await sermonsRes.json()
       setSermons(data.data || [])
     } catch {
-      // 静默处理
+      // Revert on failure
+      setSermonFolders(prevFolders)
     }
     setContextMenu(null)
   }
@@ -125,10 +131,11 @@ export function SermonListPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
       })
+      if (!res.ok) throw new Error('Create folder failed')
       const data = await res.json()
       setSermonFolders([...sermonFolders, data.data])
     } catch {
-      // 静默处理
+      // User can retry - no state to revert since folder wasn't created
     }
   }
 

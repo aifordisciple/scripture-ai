@@ -18,7 +18,7 @@ import {
   ViewUpdate,
   WidgetType,
 } from '@codemirror/view';
-import { EditorState, Extension, Range } from '@codemirror/state';
+import { Extension, Range } from '@codemirror/state';
 
 // ─── Preview Widgets (all inline <span>, inherit editor lineHeight) ────────
 
@@ -96,10 +96,63 @@ class ListItemPreviewWidget extends WidgetType {
 }
 
 class FencedBlockPreviewWidget extends WidgetType {
-  constructor(readonly label: string, readonly content: string, readonly color: string, readonly icon: string) { super(); }
+  constructor(readonly label: string, readonly content: string, readonly color: string, readonly icon: string, readonly isVerse: boolean = false) { super(); }
   toDOM(): HTMLElement {
-    const wrap = document.createElement('span');
-    wrap.className = 'cm-preview-widget';
+    if (this.isVerse) {
+      return this.createVerseCard();
+    }
+    return this.createSectionCard();
+  }
+
+  private createVerseCard(): HTMLElement {
+    const wrap = document.createElement('div');
+    wrap.className = 'cm-preview-widget cm-verse-card';
+    wrap.setAttribute('contenteditable', 'false');
+
+    // Verse reference header
+    const header = document.createElement('div');
+    header.className = 'cm-verse-card-header';
+    const refIcon = document.createElement('span');
+    refIcon.style.cssText = 'font-size:0.9em;margin-right:4px;';
+    refIcon.textContent = '📖';
+    const refText = document.createElement('span');
+    refText.style.cssText = 'font-weight:600;font-size:0.85em;';
+    refText.textContent = this.label;
+    header.appendChild(refIcon);
+    header.appendChild(refText);
+
+    // Verse body
+    const body = document.createElement('div');
+    body.className = 'cm-verse-card-body';
+    body.style.cssText = 'white-space:pre-wrap;line-height:1.8;';
+    // Parse verse content: split into verse number + text
+    const lines = this.content.split('\n');
+    for (const line of lines) {
+      const verseLine = document.createElement('div');
+      verseLine.style.cssText = 'margin-bottom:2px;';
+      // Match verse number pattern: starts with digits
+      const verseNumMatch = line.match(/^(\d+)\s?(.*)/);
+      if (verseNumMatch) {
+        const numSpan = document.createElement('sup');
+        numSpan.style.cssText = 'color:#3b82f6;font-weight:600;font-size:0.75em;margin-right:2px;vertical-align:super;';
+        numSpan.textContent = verseNumMatch[1];
+        verseLine.appendChild(numSpan);
+        const textNode = document.createTextNode(verseNumMatch[2]);
+        verseLine.appendChild(textNode);
+      } else {
+        verseLine.textContent = line;
+      }
+      body.appendChild(verseLine);
+    }
+
+    wrap.appendChild(header);
+    wrap.appendChild(body);
+    return wrap;
+  }
+
+  private createSectionCard(): HTMLElement {
+    const wrap = document.createElement('div');
+    wrap.className = 'cm-preview-widget cm-section-card';
     wrap.setAttribute('contenteditable', 'false');
     wrap.style.cssText = `border-left:3px solid ${this.color};border-radius:4px;padding:2px 10px;cursor:text;background:${this.color}11;`;
     const header = document.createElement('span');
@@ -112,8 +165,9 @@ class FencedBlockPreviewWidget extends WidgetType {
     wrap.appendChild(body);
     return wrap;
   }
+
   eq(other: FencedBlockPreviewWidget) {
-    return this.label === other.label && this.content === other.content && this.color === other.color && this.icon === other.icon;
+    return this.label === other.label && this.content === other.content && this.color === other.color && this.icon === other.icon && this.isVerse === other.isVerse;
   }
   ignoreEvent() { return false; }
 }
@@ -137,9 +191,10 @@ function renderInlineMarkdown(text: string): string {
   html = html.replace(/~~(.+?)~~/g, '<del>$1</del>');
   html = html.replace(/`(.+?)`/g, '<code style="background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px;font-size:0.9em">$1</code>');
   // Only render links with safe URL schemes to prevent XSS via javascript: protocol
+  // Escape URL in href to prevent attribute injection via unescaped quotes
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, linkText: string, url: string) => {
     if (isSafeUrl(url)) {
-      return `<a style="color:#3b82f6;text-decoration:underline" href="${url}">${linkText}</a>`;
+      return `<a style="color:#3b82f6;text-decoration:underline" href="${escapeHtml(url)}" rel="noopener noreferrer">${linkText}</a>`;
     }
     // For unsafe URLs, just show the text without a link
     return linkText;
@@ -156,7 +211,7 @@ type LineKind =
   | { type: 'paragraph'; text: string }
   | { type: 'bulletItem'; text: string }
   | { type: 'orderedItem'; text: string; index: number }
-  | { type: 'fencedStart'; label: string; color: string; icon: string }
+  | { type: 'fencedStart'; label: string; color: string; icon: string; isVerse: boolean }
   | { type: 'fencedEnd' }
   | { type: 'empty' }
   | { type: 'other' };
@@ -188,13 +243,13 @@ function classifyLine(text: string): LineKind {
   if (orderedMatch) return { type: 'orderedItem', text: orderedMatch[2], index: parseInt(orderedMatch[1]) };
 
   const verseMatch = trimmed.match(/^```verse:(.+)$/);
-  if (verseMatch) return { type: 'fencedStart', label: verseMatch[1].trim(), color: '#3b82f6', icon: '📖' };
+  if (verseMatch) return { type: 'fencedStart', label: verseMatch[1].trim(), color: '#3b82f6', icon: '📖', isVerse: true };
 
   const sectionMatch = trimmed.match(/^```section:(.+)$/);
   if (sectionMatch) {
     const sType = sectionMatch[1].trim();
     const info = SECTION_COLORS[sType] || { color: '#8b5cf6', label: sType };
-    return { type: 'fencedStart', label: info.label, color: info.color, icon: '📑' };
+    return { type: 'fencedStart', label: info.label, color: info.color, icon: '📑', isVerse: false };
   }
 
   if (trimmed === '```') return { type: 'fencedEnd' };
@@ -218,6 +273,7 @@ interface FencedState {
   label: string;
   color: string;
   icon: string;
+  isVerse: boolean;
   contentLines: string[];
   startLineNum: number;
 }
@@ -240,7 +296,7 @@ function buildDecorations(view: EditorView): DecorationSet {
           const endLineNum = i;
           if (!isActive && !activeLines.has(fenced.startLineNum)) {
             const content = fenced.contentLines.slice(0, -1).join('\n');
-            const widget = new FencedBlockPreviewWidget(fenced.label, content, fenced.color, fenced.icon);
+            const widget = new FencedBlockPreviewWidget(fenced.label, content, fenced.color, fenced.icon, fenced.isVerse);
             // Replace the entire fenced block (from start of opening line to end of closing line)
             const startLine = doc.line(fenced.startLineNum);
             const endLine = doc.line(endLineNum);
@@ -248,7 +304,6 @@ function buildDecorations(view: EditorView): DecorationSet {
               Decoration.replace({
                 widget,
                 inclusive: false,
-                block: true,
               }).range(startLine.from, endLine.to)
             );
           }
@@ -264,6 +319,7 @@ function buildDecorations(view: EditorView): DecorationSet {
           label: kind.label,
           color: kind.color,
           icon: kind.icon,
+          isVerse: kind.isVerse,
           contentLines: [line.text],
           startLineNum: i,
         };
@@ -343,11 +399,28 @@ function buildDecorations(view: EditorView): DecorationSet {
 const livePreviewPlugin = ViewPlugin.fromClass(
   class {
     decorations: DecorationSet;
+    private rafId: number | null = null;
+
     constructor(view: EditorView) { this.decorations = buildDecorations(view); }
     update(update: ViewUpdate) {
-      if (update.docChanged || update.viewportChanged || update.selectionSet) {
+      if (update.docChanged || update.viewportChanged) {
+        // Immediate rebuild for content/viewport changes
+        if (this.rafId !== null) {
+          cancelAnimationFrame(this.rafId);
+          this.rafId = null;
+        }
         this.decorations = buildDecorations(update.view);
+      } else if (update.selectionSet) {
+        // Debounce selection-only changes to avoid lag on large documents
+        if (this.rafId !== null) cancelAnimationFrame(this.rafId);
+        this.rafId = requestAnimationFrame(() => {
+          this.decorations = buildDecorations(update.view);
+          this.rafId = null;
+        });
       }
+    }
+    destroy() {
+      if (this.rafId !== null) cancelAnimationFrame(this.rafId);
     }
   },
   { decorations: (v) => v.decorations }
@@ -359,6 +432,25 @@ const livePreviewTheme = EditorView.baseTheme({
   '.cm-preview-widget': {
     fontSize: 'var(--cm-font-size, 15px)',
     color: 'var(--cm-text-color, inherit)',
+  },
+  // Verse card styles
+  '.cm-verse-card': {
+    margin: '8px 0',
+    borderRadius: '8px',
+    border: '1px solid #e2e8f0',
+    padding: '0',
+    overflow: 'hidden',
+    cursor: 'text',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+  },
+  '.cm-verse-card-header': {
+    padding: '6px 14px',
+    borderBottom: '1px solid #e2e8f0',
+    background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+    color: '#1e40af',
+  },
+  '.cm-verse-card-body': {
+    padding: '10px 14px',
   },
 });
 

@@ -92,5 +92,22 @@ export const sermonEditorTheme = (isDark: boolean, fontSize: number = DEFAULT_FO
     '.cm-line.cm-fencedcode, .cm-block-comment': {
       backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
     },
+    // Verse card dark mode overrides
+    '.cm-verse-card': {
+      border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+      background: isDark
+        ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+        : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+    },
+    '.cm-verse-card-header': {
+      borderBottom: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+      background: isDark
+        ? 'linear-gradient(135deg, #1e3a5f 0%, #172554 100%)'
+        : 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+      color: isDark ? '#93c5fd' : '#1e40af',
+    },
+    '.cm-verse-card-body': {
+      color: isDark ? '#e2e8f0' : '#1e293b',
+    },
   });
 };

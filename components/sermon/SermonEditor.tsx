@@ -29,6 +29,7 @@ export function SermonEditor() {
   } = useBibleStore()
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savingRef = useRef(false)
   const sermonsRef = useRef(sermons)
   sermonsRef.current = sermons
   const currentSermonRef = useRef(currentSermon)
@@ -59,10 +60,12 @@ export function SermonEditor() {
     }
   }, [currentSermon?.id, currentSermon?.content])
 
-  // Auto-save - uses refs to avoid stale closure
+  // Auto-save - uses refs to avoid stale closure; guarded against concurrent saves
   const autoSave = useCallback(async (content: string) => {
+    if (savingRef.current) return
     const sermon = currentSermonRef.current
     if (!sermon) return
+    savingRef.current = true
     const wordCount = content.length
 
     setIsSermonSaving(true)
@@ -86,6 +89,7 @@ export function SermonEditor() {
     } catch (error) {
       console.error('[SermonEditor] Auto-save failed:', error)
     } finally {
+      savingRef.current = false
       setIsSermonSaving(false)
     }
   }, [setIsSermonSaving, setSermons])

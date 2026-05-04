@@ -1,4 +1,4 @@
-import { streamText } from 'ai';
+import { streamText, type CoreMessage } from 'ai';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
@@ -81,7 +81,7 @@ export async function POST(
     const result = await streamText({
       model,
       system: fullSystemPrompt,
-      messages: messages as any,
+      messages: messages as CoreMessage[],
       maxTokens: 4096,
     });
 

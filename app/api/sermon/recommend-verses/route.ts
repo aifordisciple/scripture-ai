@@ -16,14 +16,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
   }
 
-  const body = await request.json()
-  const { topic, apiConfig: rawConfig, locale } = body
+  const { apiConfig, body, error: parseError } = await extractApiConfig(request)
+  if (parseError) {
+    return NextResponse.json({ error: parseError }, { status: 400 })
+  }
+
+  const { topic, locale } = body as { topic?: string; locale?: string }
 
   if (!topic?.trim()) {
     return NextResponse.json({ error: 'Topic is required' }, { status: 400 })
   }
 
-  const apiConfig = extractApiConfig(rawConfig)
   const model = await getAIModel(apiConfig, session.user.id)
 
   const lang = locale === 'en' ? 'en' : 'zh'

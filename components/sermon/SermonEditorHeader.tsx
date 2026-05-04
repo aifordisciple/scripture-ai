@@ -39,6 +39,7 @@ export function SermonEditorHeader() {
   const handleTitleSave = async () => {
     setEditingTitle(false)
     if (titleDraft.trim() && titleDraft !== currentSermon.title) {
+      const prevTitle = currentSermon.title
       const updated = { ...currentSermon, title: titleDraft.trim() }
       setCurrentSermon(updated)
       try {
@@ -49,13 +50,15 @@ export function SermonEditorHeader() {
         })
         setSermons(sermonsRef.current.map(s => s.id === currentSermon.id ? updated : s))
       } catch {
-        // 静默处理
+        // Revert on failure
+        setCurrentSermon({ ...currentSermon, title: prevTitle })
       }
     }
   }
 
   const handleStatusChange = async (status: 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED') => {
     setShowStatusMenu(false)
+    const prevStatus = currentSermon.status
     const updated = { ...currentSermon, status }
     setCurrentSermon(updated)
     try {
@@ -66,7 +69,8 @@ export function SermonEditorHeader() {
       })
       setSermons(sermonsRef.current.map(s => s.id === currentSermon.id ? updated : s))
     } catch {
-      // 静默处理
+      // Revert on failure
+      setCurrentSermon({ ...currentSermon, status: prevStatus })
     }
   }
 

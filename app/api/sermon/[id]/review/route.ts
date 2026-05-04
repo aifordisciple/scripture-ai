@@ -21,8 +21,12 @@ export async function POST(
   }
 
   const { id } = await params
-  const body = await request.json()
-  const { apiConfig: rawConfig, locale } = body
+  const { apiConfig, body, error: parseError } = await extractApiConfig(request)
+  if (parseError) {
+    return NextResponse.json({ error: parseError }, { status: 400 })
+  }
+
+  const { locale } = body as { locale?: string }
 
   const sermon = await prisma.sermon.findFirst({
     where: { id, userId: session.user.id },
@@ -38,7 +42,6 @@ export async function POST(
     return NextResponse.json({ error: 'Sermon content is empty' }, { status: 400 })
   }
 
-  const apiConfig = extractApiConfig(rawConfig)
   const model = await getAIModel(apiConfig, session.user.id)
 
   const lang = locale === 'en' ? 'en' : 'zh'

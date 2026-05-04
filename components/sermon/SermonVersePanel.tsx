@@ -129,27 +129,31 @@ export function SermonVersePanel() {
       return
     }
     setLoading(true)
-    // Fetch verse text for each reference
+    // Race condition guard: ignore stale results if verseRefs changes mid-fetch
+    let cancelled = false
     Promise.all(
       refs.map(async (ref) => {
         try {
           const res = await fetch(`/api/bible?book=${ref.bookId}&chapter=${ref.chapter}`)
           const data = await res.json()
           const verses = data.verses || data.data || []
-          const relevantVerses = verses.filter((v: any) => {
+          const relevantVerses = verses.filter((v: { verse?: number; verseNumber?: number }) => {
             const verse = v.verse || v.verseNumber
             return verse >= ref.verseStart && verse <= ref.verseEnd
           })
-          const text = relevantVerses.map((v: any) => `${v.verse || v.verseNumber}. ${v.content || v.text}`).join('\n')
+          const text = relevantVerses.map((v: { verse?: number; verseNumber?: number; content?: string; text?: string }) => `${v.verse || v.verseNumber}. ${v.content || v.text}`).join('\n')
           return { ...ref, text, loading: false }
         } catch {
           return { ...ref, text: '', loading: false }
         }
       })
     ).then((data) => {
-      setVerseData(data)
-      setLoading(false)
+      if (!cancelled) {
+        setVerseData(data)
+        setLoading(false)
+      }
     })
+    return () => { cancelled = true }
   }, [currentSermon?.verseRefs])
 
   const handleInsert = useCallback((text: string) => {
