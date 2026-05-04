@@ -16,6 +16,7 @@ export const sermon = {
     emptyTitle: 'Start Writing',
     emptyDesc: 'Select a sermon from the list, or create a new one to begin',
     deleteConfirm: 'Are you sure you want to delete this sermon?',
+    viewDetail: 'View Details',
     deleteFolderConfirm: 'Delete this folder? Sermons will move to root.',
     editorPlaceholder: 'Start writing your sermon...',
     autoSaved: 'Auto-saved',

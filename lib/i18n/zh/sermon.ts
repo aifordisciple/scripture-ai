@@ -16,6 +16,7 @@ export const sermon = {
     emptyTitle: '开始撰写讲章',
     emptyDesc: '从左侧选择一篇讲章，或创建新的讲章开始写作',
     deleteConfirm: '确定删除这篇讲章？',
+    viewDetail: '查看详情',
     deleteFolderConfirm: '确定删除此文件夹？讲章将移至根目录。',
     editorPlaceholder: '开始书写你的讲章...',
     autoSaved: '已自动保存',

@@ -268,12 +268,12 @@ export function SermonListPanel() {
       )}
 
       {/* 讲章列表 */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {filteredSermons.length === 0 ? (
           <div className="text-center py-8 text-xs text-muted-foreground">{t('sermon.noSermons')}</div>
         ) : (
           filteredSermons.map(sermon => (
-            <button
+            <div
               key={sermon.id}
               onClick={() => setCurrentSermon(sermon)}
               onContextMenu={(e) => {
@@ -281,26 +281,56 @@ export function SermonListPanel() {
                 setContextMenu({ type: 'sermon', id: sermon.id, x: e.clientX, y: e.clientY })
               }}
               className={cn(
-                'w-full text-left px-3 py-2.5 border-b border-border/50 transition-colors',
+                'group cursor-pointer rounded-2xl p-5 transition-all',
+                'bg-white dark:bg-slate-900 shadow-sm hover:shadow-md',
+                'border border-slate-100 dark:border-slate-800',
                 currentSermon?.id === sermon.id
-                  ? 'bg-primary/10 shadow-[inset_4px_0_0_0_hsl(var(--primary))]'
-                  : 'hover:bg-secondary/80 shadow-[inset_4px_0_0_0_transparent]'
+                  ? 'ring-2 ring-indigo-500/40 border-indigo-200 dark:border-indigo-800'
+                  : ''
               )}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-medium text-foreground truncate flex-1">
-                  {sermon.title || t('sermon.untitled')}
-                </span>
-                <span className={cn('text-[9px] px-1.5 py-0.5 rounded', statusColor(sermon.status))}>
-                  {sermon.status === 'DRAFT' ? t('sermon.draft') : sermon.status === 'IN_PROGRESS' ? t('sermon.inProgress') : t('sermon.completed')}
+              {/* 顶部：元数据层 */}
+              <div className="flex justify-between items-center mb-3">
+                {sermon.verseRefs ? (
+                  <span className="text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-1 rounded-md text-xs font-semibold">
+                    {sermon.verseRefs}
+                  </span>
+                ) : (
+                  <span className={cn('text-[10px] px-2 py-0.5 rounded-md font-semibold', statusColor(sermon.status))}>
+                    {sermon.status === 'DRAFT' ? t('sermon.draft') : sermon.status === 'IN_PROGRESS' ? t('sermon.inProgress') : t('sermon.completed')}
+                  </span>
+                )}
+                <span className="text-slate-400 dark:text-slate-500 text-xs">
+                  {sermon.sermonDate ? new Date(sermon.sermonDate).toLocaleDateString() : new Date(sermon.createdAt).toLocaleDateString()}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                <span>{styleLabel(sermon.style)}</span>
-                {sermon.sermonDate && <span>{new Date(sermon.sermonDate).toLocaleDateString()}</span>}
-                <span>{sermon.wordCount}{t('sermon.editorWords')}</span>
+
+              {/* 中部：核心内容层 */}
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight mb-1">
+                {sermon.title || t('sermon.untitled')}
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-1">
+                {styleLabel(sermon.style)}{sermon.wordCount > 0 ? ` · ${sermon.wordCount}${t('sermon.editorWords')}` : ''}
+              </p>
+
+              {/* 底部：操作层 */}
+              <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-50 dark:border-slate-800/50">
+                <span className="text-indigo-600 dark:text-indigo-400 text-sm font-medium flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {t('sermon.viewDetail')}
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteSermon(sermon.id)
+                  }}
+                  className="text-slate-300 hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400 transition-colors p-2 -mr-2"
+                  title={t('sermon.delete')}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
-            </button>
+            </div>
           ))
         )}
       </div>
