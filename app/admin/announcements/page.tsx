@@ -243,7 +243,7 @@ export default function AdminAnnouncementsPage() {
     <>
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('admin.announcementManagement')}</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900">{t('admin.announcementManagement')}</h1>
         <button
           onClick={() => openEditor()}
           className="flex items-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm md:text-base"
@@ -255,29 +255,29 @@ export default function AdminAnnouncementsPage() {
       </div>
 
       {/* 公告列表 - 桌面端表格 */}
-      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+      <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.announcement')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.type')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.status')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.time')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.actions')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.announcement')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.type')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.time')}</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.actions')}</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-slate-200">
               {data?.announcements.map((announcement) => (
-                <tr key={announcement.id} className="hover:bg-gray-50">
+                <tr key={announcement.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{announcement.title}</div>
-                    <div className="text-sm text-gray-500 line-clamp-1">{announcement.content}</div>
+                    <div className="text-sm font-medium text-slate-900">{announcement.title}</div>
+                    <div className="text-sm text-slate-500 line-clamp-1">{announcement.content}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       {getTypeIcon(announcement.type)}
-                      <span className="text-sm text-gray-600">{getTypeLabel(announcement.type)}</span>
+                      <span className="text-sm text-slate-600">{getTypeLabel(announcement.type)}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -287,13 +287,13 @@ export default function AdminAnnouncementsPage() {
                         "px-2 py-1 text-xs font-medium rounded-full",
                         announcement.isActive
                           ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-500"
+                          : "bg-slate-100 text-slate-500"
                       )}
                     >
                       {announcement.isActive ? t('admin.enabled') : t('admin.disabled')}
                     </button>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                     {formatDateClient(new Date(announcement.createdAt))}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -317,7 +317,7 @@ export default function AdminAnnouncementsPage() {
         </div>
 
         {data && data.announcements.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-slate-500">
             {t('admin.noAnnouncements')}
           </div>
         )}
@@ -326,7 +326,7 @@ export default function AdminAnnouncementsPage() {
       {/* 公告列表 - 移动端卡片 */}
       <div className="md:hidden space-y-3">
         {data?.announcements.map((announcement) => (
-          <div key={announcement.id} className="bg-white rounded-lg shadow p-4">
+          <div key={announcement.id} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
@@ -340,23 +340,23 @@ export default function AdminAnnouncementsPage() {
                     "px-2 py-0.5 text-xs font-medium rounded-full",
                     announcement.isActive
                       ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-500"
+                      : "bg-slate-100 text-slate-500"
                   )}>
                     {announcement.isActive ? t('admin.enabled') : t('admin.disabled')}
                   </span>
                 </div>
-                <h3 className="font-medium text-gray-900 truncate">{announcement.title}</h3>
-                <p className="text-sm text-gray-500 line-clamp-2 mt-1">{announcement.content}</p>
+                <h3 className="font-medium text-slate-900 truncate">{announcement.title}</h3>
+                <p className="text-sm text-slate-500 line-clamp-2 mt-1">{announcement.content}</p>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
-              <span className="text-xs text-gray-400">
+            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-xs text-slate-400">
                 {formatDateClient(new Date(announcement.createdAt))}
               </span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => toggleActive(announcement)}
-                  className="text-xs px-2 py-1 rounded text-gray-600 hover:bg-gray-100"
+                  className="text-xs px-2 py-1 rounded text-slate-600 hover:bg-slate-100"
                 >
                   {announcement.isActive ? t('admin.disable') : t('admin.enable')}
                 </button>
@@ -378,7 +378,7 @@ export default function AdminAnnouncementsPage() {
         ))}
 
         {data && data.announcements.length === 0 && (
-          <div className="text-center py-12 text-gray-500 bg-white rounded-lg">
+          <div className="text-center py-12 text-slate-500 bg-white dark:bg-slate-900 rounded-xl">
             {t('admin.noAnnouncements')}
           </div>
         )}
@@ -386,47 +386,47 @@ export default function AdminAnnouncementsPage() {
 
       {/* 编辑弹窗 */}
       {showEditor && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="bg-black/50 fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
               <h3 className="text-lg font-semibold">
                 {editingId ? t('admin.editAnnouncement') : t('admin.newAnnouncement')}
               </h3>
-              <button onClick={closeEditor} className="text-gray-400 hover:text-gray-600">
+              <button onClick={closeEditor} className="text-slate-400 hover:text-slate-600">
                 <X size={20} />
               </button>
             </div>
 
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.title')}</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.title')}</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder={t('admin.announcementTitlePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.content')}</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.content')}</label>
                 <textarea
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder={t('admin.announcementContentPlaceholder')}
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.type')}</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.type')}</label>
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   >
                     <option value="INFO">{t('admin.info')}</option>
                     <option value="WARNING">{t('admin.warning')}</option>
@@ -435,11 +435,11 @@ export default function AdminAnnouncementsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.status')}</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.status')}</label>
                   <select
                     value={formData.isActive ? 'true' : 'false'}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   >
                     <option value="true">{t('admin.enable')}</option>
                     <option value="false">{t('admin.disable')}</option>
@@ -449,22 +449,22 @@ export default function AdminAnnouncementsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.startTimeOptional')}</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.startTimeOptional')}</label>
                   <input
                     type="datetime-local"
                     value={formData.startsAt}
                     onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.endTimeOptional')}</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.endTimeOptional')}</label>
                   <input
                     type="datetime-local"
                     value={formData.endsAt}
                     onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -477,9 +477,9 @@ export default function AdminAnnouncementsPage() {
                     id="sendNotification"
                     checked={formData.sendNotification}
                     onChange={(e) => setFormData({ ...formData, sendNotification: e.target.checked })}
-                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
                   />
-                  <label htmlFor="sendNotification" className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <label htmlFor="sendNotification" className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
                     <BellRing size={16} className="text-indigo-600" />
                     {t('admin.pushNotificationOnPublish')}
                   </label>
@@ -490,7 +490,7 @@ export default function AdminAnnouncementsPage() {
             <div className="flex justify-end gap-3 p-4 border-t sticky bottom-0 bg-white">
               <button
                 onClick={closeEditor}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200"
               >
                 {t('admin.cancel')}
               </button>

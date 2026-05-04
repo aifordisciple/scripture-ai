@@ -72,7 +72,7 @@ export function Skeleton({
     text: 'rounded',
     circular: 'rounded-full',
     rectangular: 'rounded-none',
-    rounded: 'rounded-lg',
+    rounded: 'rounded-xl',
   };
 
   // 动画样式

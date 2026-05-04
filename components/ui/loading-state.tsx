@@ -52,7 +52,7 @@ export function LoadingState({
 
 export function CardSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("space-y-3 p-4 rounded-lg border", className)}>
+    <div className={cn("space-y-3 p-4 rounded-xl border", className)}>
       <Skeleton className="h-4 w-3/4" />
       <Skeleton className="h-4 w-1/2" />
       <Skeleton className="h-4 w-5/6" />

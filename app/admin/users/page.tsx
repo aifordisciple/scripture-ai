@@ -185,26 +185,26 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('admin.userManagement')}</h1>
+      <h1 className="text-xl md:text-2xl font-bold text-slate-900">{t('admin.userManagement')}</h1>
 
       {/* 搜索和筛选 */}
-      <div className="bg-white rounded-lg shadow p-3 md:p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-3 md:p-4">
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3 md:gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
             <input
               type="text"
               placeholder={t('admin.searchNameOrEmail')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
           <div className="flex gap-3">
             <select
               value={roleFilter}
               onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-              className="flex-1 md:flex-none px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="flex-1 md:flex-none px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="">{t('admin.allRoles')}</option>
               <option value="user">{t('admin.userRole')}</option>
@@ -222,34 +222,34 @@ export default function AdminUsersPage() {
       </div>
 
       {/* 用户列表 - 桌面端表格 */}
-      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+      <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.user')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.role')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.status')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.stats')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.registered')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.actions')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.user')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.role')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.stats')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.registered')}</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.actions')}</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-slate-200">
               {data?.users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
+                <tr key={user.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
                         {user.image ? (
                           <img src={user.image} alt="" className="h-10 w-10 object-cover" />
                         ) : (
-                          <User size={20} className="text-gray-500" />
+                          <User size={20} className="text-slate-500" />
                         )}
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{user.name || t('admin.notSet')}</div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="text-sm font-medium text-slate-900">{user.name || t('admin.notSet')}</div>
+                        <div className="text-sm text-slate-500">{user.email}</div>
                       </div>
                     </div>
                   </td>
@@ -258,7 +258,7 @@ export default function AdminUsersPage() {
                       "px-2 py-1 text-xs font-medium rounded-full",
                       user.role === 'admin'
                         ? "bg-purple-100 text-purple-700"
-                        : "bg-gray-100 text-gray-700"
+                        : "bg-slate-100 text-slate-700"
                     )}>
                       {user.role === 'admin' ? t('admin.adminRole') : t('admin.userRole')}
                     </span>
@@ -273,14 +273,14 @@ export default function AdminUsersPage() {
                       <span className="text-xs text-green-600">{t('admin.normal')}</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                     <div className="flex gap-3">
                       <span title={t('admin.highlights')}>{user._count.highlights} {t('admin.highlights')}</span>
                       <span title={t('admin.notes')}>{user._count.notes} {t('admin.notes')}</span>
                       <span title={t('admin.groups')}>{user._count.churchMemberships} {t('admin.groups')}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                     {formatDateClient(new Date(user.createdAt))}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -289,7 +289,7 @@ export default function AdminUsersPage() {
                         <button
                           onClick={() => handleUnmuteUser(user)}
                           disabled={updating === user.id}
-                          className="px-3 py-1 rounded text-sm text-green-600 hover:bg-green-50 disabled:opacity-50"
+                          className="px-3 py-1 rounded text-sm text-green-600 hover:bg-green-50 disabled:opacity-50 transition-colors"
                         >
                           <CheckCircle className="w-4 h-4 inline mr-1" />
                           {t('admin.unmute')}
@@ -298,7 +298,7 @@ export default function AdminUsersPage() {
                         <button
                           onClick={() => openMuteDialog(user)}
                           disabled={updating === user.id}
-                          className="px-3 py-1 rounded text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                          className="px-3 py-1 rounded text-sm text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
                         >
                           <Ban className="w-4 h-4 inline mr-1" />
                           {t('admin.mute')}
@@ -308,7 +308,7 @@ export default function AdminUsersPage() {
                         onClick={() => toggleRole(user)}
                         disabled={updating === user.id}
                         className={cn(
-                          "px-3 py-1 rounded text-sm",
+                          "px-3 py-1 rounded text-sm transition-colors",
                           user.role === 'admin'
                             ? "text-red-600 hover:bg-red-50"
                             : "text-indigo-600 hover:bg-indigo-50",
@@ -329,19 +329,19 @@ export default function AdminUsersPage() {
       {/* 用户列表 - 移动端卡片 */}
       <div className="md:hidden space-y-3">
         {data?.users.map((user) => (
-          <div key={user.id} className="bg-white rounded-lg shadow p-4">
+          <div key={user.id} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="h-12 w-12 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden shrink-0">
                   {user.image ? (
                     <img src={user.image} alt="" className="h-12 w-12 object-cover" />
                   ) : (
-                    <User size={24} className="text-gray-500" />
+                    <User size={24} className="text-slate-500" />
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-medium text-gray-900 truncate">{user.name || t('admin.notSet')}</div>
-                  <div className="text-sm text-gray-500 truncate">{user.email}</div>
+                  <div className="font-medium text-slate-900 truncate">{user.name || t('admin.notSet')}</div>
+                  <div className="text-sm text-slate-500 truncate">{user.email}</div>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1">
@@ -349,7 +349,7 @@ export default function AdminUsersPage() {
                   "px-2 py-1 text-xs font-medium rounded-full shrink-0",
                   user.role === 'admin'
                     ? "bg-purple-100 text-purple-700"
-                    : "bg-gray-100 text-gray-700"
+                    : "bg-slate-100 text-slate-700"
                 )}>
                   {user.role === 'admin' ? t('admin.adminRole') : t('admin.userRole')}
                 </span>
@@ -361,14 +361,14 @@ export default function AdminUsersPage() {
               </div>
             </div>
 
-            <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
+            <div className="mt-3 flex items-center gap-4 text-sm text-slate-500">
               <span>{user._count.highlights} {t('admin.highlights')}</span>
               <span>{user._count.notes} {t('admin.notes')}</span>
               <span>{user._count.churchMemberships} {t('admin.groups')}</span>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2">
-              <div className="text-xs text-gray-400">
+            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
+              <div className="text-xs text-slate-400">
                 {t('admin.registeredColon')} {formatDateClient(new Date(user.createdAt))}
               </div>
               <div className="flex gap-2">
@@ -376,7 +376,7 @@ export default function AdminUsersPage() {
                   <button
                     onClick={() => handleUnmuteUser(user)}
                     disabled={updating === user.id}
-                    className="px-3 py-1.5 rounded text-sm font-medium text-green-600 bg-green-50 hover:bg-green-100 disabled:opacity-50"
+                    className="px-3 py-1.5 rounded text-sm font-medium text-green-600 bg-green-50 hover:bg-green-100 disabled:opacity-50 transition-colors"
                   >
                     {t('admin.unmute')}
                   </button>
@@ -384,7 +384,7 @@ export default function AdminUsersPage() {
                   <button
                     onClick={() => openMuteDialog(user)}
                     disabled={updating === user.id}
-                    className="px-3 py-1.5 rounded text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 disabled:opacity-50"
+                    className="px-3 py-1.5 rounded text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 disabled:opacity-50 transition-colors"
                   >
                     {t('admin.mute')}
                   </button>
@@ -393,7 +393,7 @@ export default function AdminUsersPage() {
                   onClick={() => toggleRole(user)}
                   disabled={updating === user.id}
                   className={cn(
-                    "px-3 py-1.5 rounded text-sm font-medium",
+                    "px-3 py-1.5 rounded text-sm font-medium transition-colors",
                     user.role === 'admin'
                       ? "text-red-600 bg-red-50 hover:bg-red-100"
                       : "text-indigo-600 bg-indigo-50 hover:bg-indigo-100",
@@ -410,15 +410,15 @@ export default function AdminUsersPage() {
 
       {/* 分页 */}
       {data && data.pagination.totalPages > 1 && (
-        <div className="bg-white rounded-lg shadow px-4 py-3 flex items-center justify-between border-t border-gray-200">
-          <div className="text-sm text-gray-700">
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm px-4 py-3 flex items-center justify-between border-t border-slate-200">
+          <div className="text-sm text-slate-700">
             {t('admin.totalCount', { count: data.pagination.total })}
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="p-2 rounded border border-gray-300 disabled:opacity-50"
+              className="p-2 rounded border border-slate-300 disabled:opacity-50"
             >
               <ChevronLeft size={20} />
             </button>
@@ -428,7 +428,7 @@ export default function AdminUsersPage() {
             <button
               onClick={() => setPage(p => Math.min(data.pagination.totalPages, p + 1))}
               disabled={page === data.pagination.totalPages}
-              className="p-2 rounded border border-gray-300 disabled:opacity-50"
+              className="p-2 rounded border border-slate-300 disabled:opacity-50"
             >
               <ChevronRight size={20} />
             </button>
@@ -443,7 +443,7 @@ export default function AdminUsersPage() {
             <DialogTitle>{t('admin.muteUser')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-500">
               {t('admin.confirmMuteUser')} <strong>{muteUser?.name || muteUser?.email}</strong> {t('admin.muteUserConsequence')}
             </p>
             <div>

@@ -131,7 +131,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
             <button
               key={journey.id}
               onClick={() => handleSelectJourney(journey)}
-              className="w-full p-4 bg-slate-50 dark:bg-slate-800 rounded-lg text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              className="w-full p-4 bg-slate-50 dark:bg-slate-800 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             >
               <div className="font-medium text-slate-900 dark:text-white">
                 {journey.titleZh}
@@ -179,7 +179,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
       {/* 当前站点信息 */}
       <div className="flex-1 p-4">
         {selectedJourney.stops[journeyStep] && (
-          <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4">
+          <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">
                 {journeyStep + 1}
@@ -211,7 +211,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
                 setMapCenter([stop.location.latitude, stop.location.longitude]);
                 onSelectJourney?.(stop.location.id);
               }}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
                 index === journeyStep
                   ? 'bg-indigo-100 dark:bg-indigo-900/50'
                   : 'hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -242,7 +242,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
         <button
           onClick={() => handleStepChange('prev')}
           disabled={journeyStep === 0}
-          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-50"
+          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-50"
         >
           <SkipBack className="w-5 h-5" />
         </button>
@@ -255,7 +255,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
         <button
           onClick={() => handleStepChange('next')}
           disabled={journeyStep === selectedJourney.stops.length - 1}
-          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-50"
+          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-50"
         >
           <SkipForward className="w-5 h-5" />
         </button>

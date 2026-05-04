@@ -237,31 +237,31 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
       <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
         <button
           onClick={() => mapInstanceRef.current?.zoomIn()}
-          className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg hover:bg-slate-50 dark:hover:bg-slate-700"
+          className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg shadow-black/10 hover:bg-slate-50 dark:hover:bg-slate-700"
         >
           <Plus className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
         <button
           onClick={() => mapInstanceRef.current?.zoomOut()}
-          className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg hover:bg-slate-50 dark:hover:bg-slate-700"
+          className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg shadow-black/10 hover:bg-slate-50 dark:hover:bg-slate-700"
         >
           <Minus className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
         <button
           onClick={toggleFullscreen}
-          className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg hover:bg-slate-50 dark:hover:bg-slate-700"
+          className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg shadow-black/10 hover:bg-slate-50 dark:hover:bg-slate-700"
         >
           {isFullscreen ? <Minimize className="w-5 h-5 text-slate-600 dark:text-slate-300" /> : <Maximize className="w-5 h-5 text-slate-600 dark:text-slate-300" />}
         </button>
         <div className="relative">
           <button
             onClick={() => setShowLayers(!showLayers)}
-            className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg hover:bg-slate-50 dark:hover:bg-slate-700"
+            className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg shadow-black/10 hover:bg-slate-50 dark:hover:bg-slate-700"
           >
             <Layers className="w-5 h-5 text-slate-600 dark:text-slate-300" />
           </button>
           {showLayers && (
-            <div className="absolute right-0 top-10 bg-white dark:bg-slate-800 rounded-lg shadow-xl p-2 min-w-[120px] border border-slate-200 dark:border-slate-700">
+            <div className="absolute right-0 top-10 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-black/10 p-2 min-w-[120px] border border-slate-200 dark:border-slate-700">
               {['standard', 'satellite', 'terrain'].map((layer) => (
                 <button
                   key={layer}

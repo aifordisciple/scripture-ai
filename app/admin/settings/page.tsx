@@ -64,7 +64,7 @@ export default function AdminSettingsPage() {
 
   const getActionBadge = (action: string) => {
     const styles: Record<string, string> = {
-      VIEW: 'bg-gray-100 text-gray-700',
+      VIEW: 'bg-slate-100 text-slate-700',
       CREATE: 'bg-green-100 text-green-700',
       UPDATE: 'bg-blue-100 text-blue-700',
       DELETE: 'bg-red-100 text-red-700'
@@ -76,7 +76,7 @@ export default function AdminSettingsPage() {
       DELETE: '删除'
     };
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded ${styles[action] || 'bg-gray-100 text-gray-700'}`}>
+      <span className={`px-2 py-1 text-xs font-medium rounded ${styles[action] || 'bg-slate-100 text-slate-700'}`}>
         {labels[action] || action}
       </span>
     );
@@ -129,18 +129,18 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">系统设置</h1>
+      <h1 className="text-2xl font-bold text-slate-900">系统设置</h1>
 
       {/* 操作日志 */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b border-gray-200">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm">
+        <div className="p-4 border-b border-slate-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">操作日志</h2>
+            <h2 className="text-lg font-semibold text-slate-900">操作日志</h2>
             <div className="flex gap-4">
               <select
                 value={actionFilter}
                 onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">全部操作</option>
                 <option value="VIEW">查看</option>
@@ -151,7 +151,7 @@ export default function AdminSettingsPage() {
               <select
                 value={targetTypeFilter}
                 onChange={(e) => { setTargetTypeFilter(e.target.value); setPage(1); }}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="">全部对象</option>
                 <option value="USER">用户</option>
@@ -165,27 +165,27 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作人</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">对象</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">详情</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">时间</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">操作人</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">操作</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">对象</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">详情</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">IP</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-slate-200">
               {logs?.logs.map((log) => {
                 const details = parseDetails(log.details);
                 return (
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <tr key={log.id} className="hover:bg-slate-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                       {new Date(log.createdAt).toLocaleString('zh-CN')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-slate-900">
                         {log.admin.name || log.admin.email}
                       </div>
                     </td>
@@ -196,22 +196,22 @@ export default function AdminSettingsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">{getTargetTypeLabel(log.targetType)}</span>
+                      <span className="text-sm text-slate-600">{getTargetTypeLabel(log.targetType)}</span>
                       {log.targetId && (
-                        <span className="text-xs text-gray-400 ml-2">({log.targetId.slice(0, 8)}...)</span>
+                        <span className="text-xs text-slate-400 ml-2">({log.targetId.slice(0, 8)}...)</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
                       {details && (
-                        <details className="text-sm text-gray-500">
-                          <summary className="cursor-pointer hover:text-gray-700">查看详情</summary>
-                          <pre className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-x-auto max-w-xs">
+                        <details className="text-sm text-slate-500">
+                          <summary className="cursor-pointer hover:text-slate-700 transition-colors">查看详情</summary>
+                          <pre className="mt-2 text-xs bg-slate-50 p-2 rounded overflow-x-auto max-w-xs">
                             {JSON.stringify(details, null, 2)}
                           </pre>
                         </details>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                       {log.ip || '-'}
                     </td>
                   </tr>
@@ -223,15 +223,15 @@ export default function AdminSettingsPage() {
 
         {/* 分页 */}
         {logs && logs.pagination.totalPages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-            <div className="text-sm text-gray-700">
+          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+            <div className="text-sm text-slate-700">
               共 {logs.pagination.total} 条记录
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-2 rounded border border-gray-300 disabled:opacity-50"
+                className="p-2 rounded border border-slate-300 disabled:opacity-50 transition-colors"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -241,7 +241,7 @@ export default function AdminSettingsPage() {
               <button
                 onClick={() => setPage(p => Math.min(logs.pagination.totalPages, p + 1))}
                 disabled={page === logs.pagination.totalPages}
-                className="p-2 rounded border border-gray-300 disabled:opacity-50"
+                className="p-2 rounded border border-slate-300 disabled:opacity-50 transition-colors"
               >
                 <ChevronRight size={20} />
               </button>

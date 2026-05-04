@@ -196,11 +196,11 @@ export default function AdminMessagesPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">{t('admin.messageManagement')}</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900">{t('admin.messageManagement')}</h1>
       </div>
 
       {/* Tab 切换 */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-slate-200">
         <nav className="-mb-px flex space-x-4 md:space-x-8">
           <button
             onClick={() => setTab('send')}
@@ -208,7 +208,7 @@ export default function AdminMessagesPage() {
               "py-3 md:py-4 px-1 border-b-2 font-medium text-sm",
               tab === 'send'
                 ? "border-indigo-500 text-indigo-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
             )}
           >
             <Send size={16} className="inline mr-1 md:mr-2" />
@@ -220,7 +220,7 @@ export default function AdminMessagesPage() {
               "py-3 md:py-4 px-1 border-b-2 font-medium text-sm",
               tab === 'history'
                 ? "border-indigo-500 text-indigo-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
             )}
           >
             <Mail size={16} className="inline mr-1 md:mr-2" />
@@ -233,30 +233,30 @@ export default function AdminMessagesPage() {
         <>
           {/* [P2-18修复] 错误状态 */}
           {error && !users && (
-            <div className="flex flex-col items-center justify-center py-12 gap-4 bg-white rounded-lg shadow">
+            <div className="flex flex-col items-center justify-center py-12 gap-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm">
               <div className="text-red-500">{error}</div>
-              <button onClick={fetchUsers} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{t('admin.retry')}</button>
+              <button onClick={fetchUsers} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">{t('admin.retry')}</button>
             </div>
           )}
 
           {/* 搜索和批量操作 */}
-          <div className="bg-white rounded-lg shadow p-3 md:p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-3 md:p-4">
             <div className="flex flex-col md:flex-row md:flex-wrap items-stretch md:items-center gap-3 md:gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder={t('admin.searchUsers')}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={handleSearch}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
                 >
                   {t('admin.search')}
                 </button>
@@ -265,7 +265,7 @@ export default function AdminMessagesPage() {
                 <button
                   onClick={() => openCompose('selected')}
                   disabled={selectedUsers.length === 0}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm md:text-base"
                 >
                   <User size={16} />
                   <span className="hidden sm:inline">{t('admin.sendToSelected')}</span>
@@ -273,7 +273,7 @@ export default function AdminMessagesPage() {
                 </button>
                 <button
                   onClick={() => openCompose('all')}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm md:text-base"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm md:text-base"
                 >
                   <Users size={16} />
                   <span className="hidden sm:inline">{t('admin.sendToAllUsers')}</span>
@@ -284,17 +284,17 @@ export default function AdminMessagesPage() {
           </div>
 
           {/* 用户列表 - 桌面端表格 */}
-          <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+          <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-slate-200">
+                  <thead className="bg-slate-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-8">
                         <input
                           type="checkbox"
                           checked={users?.users.length === selectedUsers.length && users?.users.length > 0}
@@ -307,18 +307,18 @@ export default function AdminMessagesPage() {
                           }}
                         />
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.user')}</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.email')}</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.registered')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.user')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.email')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.registered')}</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-slate-200">
                     {users?.users.map((user) => (
                       <tr
                         key={user.id}
                         onClick={() => toggleUserSelection(user)}
                         className={cn(
-                          "hover:bg-gray-50 cursor-pointer",
+                          "hover:bg-slate-50 cursor-pointer",
                           selectedUsers.find(u => u.id === user.id) && "bg-indigo-50"
                         )}
                       >
@@ -338,15 +338,15 @@ export default function AdminMessagesPage() {
                                 <User size={16} className="text-indigo-600" />
                               )}
                             </div>
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-slate-900">
                               {user.name || t('admin.notSet')}
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                           {user.email}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                           {new Date(user.createdAt).toLocaleDateString('zh-CN')}
                         </td>
                       </tr>
@@ -357,7 +357,7 @@ export default function AdminMessagesPage() {
             )}
 
             {users && users.users.length === 0 && (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-slate-500">
                 {t('admin.noUsers')}
               </div>
             )}
@@ -366,7 +366,7 @@ export default function AdminMessagesPage() {
           {/* 用户列表 - 移动端卡片 */}
           <div className="md:hidden space-y-3">
             {loading ? (
-              <div className="flex items-center justify-center py-12 bg-white rounded-lg">
+              <div className="flex items-center justify-center py-12 bg-white dark:bg-slate-900 rounded-xl">
                 <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
               </div>
             ) : (
@@ -375,7 +375,7 @@ export default function AdminMessagesPage() {
                   key={user.id}
                   onClick={() => toggleUserSelection(user)}
                   className={cn(
-                    "bg-white rounded-lg shadow p-4 cursor-pointer transition-colors",
+                    "bg-white dark:bg-slate-900 rounded-xl shadow-sm p-4 cursor-pointer transition-colors",
                     selectedUsers.find(u => u.id === user.id) && "ring-2 ring-indigo-500 bg-indigo-50"
                   )}
                 >
@@ -388,14 +388,14 @@ export default function AdminMessagesPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 truncate">{user.name || t('admin.notSet')}</div>
-                      <div className="text-sm text-gray-500 truncate">{user.email}</div>
+                      <div className="font-medium text-slate-900 truncate">{user.name || t('admin.notSet')}</div>
+                      <div className="text-sm text-slate-500 truncate">{user.email}</div>
                     </div>
                     <div className={cn(
                       "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0",
                       selectedUsers.find(u => u.id === user.id)
                         ? "bg-indigo-600 border-indigo-600"
-                        : "border-gray-300"
+                        : "border-slate-300"
                     )}>
                       {selectedUsers.find(u => u.id === user.id) && (
                         <Check size={14} className="text-white" />
@@ -407,7 +407,7 @@ export default function AdminMessagesPage() {
             )}
 
             {users && users.users.length === 0 && (
-              <div className="text-center py-12 text-gray-500 bg-white rounded-lg">
+              <div className="text-center py-12 text-slate-500 bg-white dark:bg-slate-900 rounded-xl">
                 {t('admin.noUsers')}
               </div>
             )}
@@ -416,12 +416,12 @@ export default function AdminMessagesPage() {
       )}
 
       {tab === 'history' && (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
           {/* [P2-18修复] 错误状态 */}
           {error && !messages ? (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
               <div className="text-red-500">{error}</div>
-              <button onClick={fetchMessages} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{t('admin.retry')}</button>
+              <button onClick={fetchMessages} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">{t('admin.retry')}</button>
             </div>
           ) : loading ? (
             <div className="flex items-center justify-center py-12">
@@ -431,26 +431,26 @@ export default function AdminMessagesPage() {
             <>
               {/* 桌面端表格 */}
               <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-slate-200">
+                  <thead className="bg-slate-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.messageContent')}</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.recipient')}</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.sentAt')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.messageContent')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.recipient')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.sentAt')}</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-slate-200">
                     {messages?.messages.map((msg) => (
-                      <tr key={msg.id} className="hover:bg-gray-50">
+                      <tr key={msg.id} className="hover:bg-slate-50">
                         <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-gray-900">{msg.title}</div>
-                          <div className="text-sm text-gray-500 line-clamp-2 mt-1">{msg.content}</div>
+                          <div className="text-sm font-medium text-slate-900">{msg.title}</div>
+                          <div className="text-sm text-slate-500 line-clamp-2 mt-1">{msg.content}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{msg.user.name || t('admin.notSet')}</div>
-                          <div className="text-xs text-gray-500">{msg.user.email}</div>
+                          <div className="text-sm text-slate-900">{msg.user.name || t('admin.notSet')}</div>
+                          <div className="text-xs text-slate-500">{msg.user.email}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                           {formatDate(msg.createdAt)}
                         </td>
                       </tr>
@@ -462,10 +462,10 @@ export default function AdminMessagesPage() {
               {/* 移动端卡片 */}
               <div className="md:hidden space-y-3 p-3">
                 {messages?.messages.map((msg) => (
-                  <div key={msg.id} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
-                    <div className="font-medium text-gray-900">{msg.title}</div>
-                    <div className="text-sm text-gray-500 line-clamp-2 mt-1">{msg.content}</div>
-                    <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
+                  <div key={msg.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                    <div className="font-medium text-slate-900">{msg.title}</div>
+                    <div className="text-sm text-slate-500 line-clamp-2 mt-1">{msg.content}</div>
+                    <div className="flex items-center justify-between mt-2 text-xs text-slate-400">
                       <span>{t('admin.toColon')} {msg.user.name || msg.user.email}</span>
                       <span>{formatDate(msg.createdAt)}</span>
                     </div>
@@ -476,14 +476,14 @@ export default function AdminMessagesPage() {
               {/* 分页 */}
               {messages && messages.pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between px-4 md:px-6 py-4 border-t">
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-slate-500">
                     {t('admin.totalCount', { count: messages.pagination.total })}
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setMessagePage(p => Math.max(1, p - 1))}
                       disabled={messagePage === 1}
-                      className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                      className="p-2 border rounded-lg hover:bg-slate-50 disabled:opacity-50 transition-colors"
                     >
                       <ChevronLeft size={18} />
                     </button>
@@ -493,7 +493,7 @@ export default function AdminMessagesPage() {
                     <button
                       onClick={() => setMessagePage(p => Math.min(messages.pagination.totalPages, p + 1))}
                       disabled={messagePage === messages.pagination.totalPages}
-                      className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                      className="p-2 border rounded-lg hover:bg-slate-50 disabled:opacity-50 transition-colors"
                     >
                       <ChevronRight size={18} />
                     </button>
@@ -504,7 +504,7 @@ export default function AdminMessagesPage() {
           )}
 
           {messages && messages.messages.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-slate-500">
               {t('admin.noSentMessages')}
             </div>
           )}
@@ -513,13 +513,13 @@ export default function AdminMessagesPage() {
 
       {/* 发送私信弹窗 */}
       {showCompose && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
               <h3 className="text-lg font-semibold">
                 {sendToAll ? t('admin.sendToAllUsers') : t('admin.sendToCountUsers', { count: selectedUsers.length })}
               </h3>
-              <button onClick={closeCompose} className="text-gray-400 hover:text-gray-600">
+              <button onClick={closeCompose} className="text-slate-400 hover:text-slate-600 transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -533,7 +533,7 @@ export default function AdminMessagesPage() {
                     </span>
                   ))}
                   {selectedUsers.length > 5 && (
-                    <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                    <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs">
                       +{selectedUsers.length - 5} {t('admin.more')}
                     </span>
                   )}
@@ -541,23 +541,23 @@ export default function AdminMessagesPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.title')}</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.title')}</label>
                 <input
                   type="text"
                   value={composeData.title}
                   onChange={(e) => setComposeData({ ...composeData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder={t('admin.messageTitlePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.content')}</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.content')}</label>
                 <textarea
                   value={composeData.content}
                   onChange={(e) => setComposeData({ ...composeData, content: e.target.value })}
                   rows={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder={t('admin.messageContentPlaceholder')}
                 />
               </div>
@@ -566,14 +566,14 @@ export default function AdminMessagesPage() {
             <div className="flex justify-end gap-3 p-4 border-t sticky bottom-0 bg-white">
               <button
                 onClick={closeCompose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
               >
                 {t('admin.cancel')}
               </button>
               <button
                 onClick={handleSend}
                 disabled={sending}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
               >
                 {sending ? t('admin.sending') : t('admin.send')}
               </button>
