@@ -308,15 +308,23 @@ const livePreviewPlugin = ViewPlugin.fromClass(
 // ─── CSS: hide raw text in preview lines, show only widgets ────────
 
 const livePreviewTheme = EditorView.baseTheme({
-  // In preview lines, hide everything except our preview widgets
+  // In preview lines, hide raw text by collapsing font and making transparent.
+  // Using font-size: 0 + color: transparent is more robust than display: none
+  // because CodeMirror's internal DOM structure varies and display:none can
+  // break layout calculations. The widget restores its own font/color.
   '.cm-preview-line': {
-    position: 'relative',
+    fontSize: '0',
+    color: 'transparent',
   },
-  '.cm-preview-line > *': {
-    display: 'none',
+  '.cm-preview-line .cm-preview-widget': {
+    fontSize: 'inherit',
+    color: 'inherit',
   },
-  '.cm-preview-line > .cm-preview-widget': {
-    display: 'inline',
+  // Ensure the widget picks up the editor's base font size and color
+  // (set on .cm-content by the theme), not the zeroed-out line values
+  '.cm-content .cm-preview-line .cm-preview-widget': {
+    fontSize: 'var(--cm-font-size, 15px)',
+    color: 'var(--cm-text-color, inherit)',
   },
 });
 

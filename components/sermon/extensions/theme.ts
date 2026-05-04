@@ -45,6 +45,8 @@ export const sermonEditorTheme = (isDark: boolean, fontSize: number = DEFAULT_FO
       caretColor: cursorColor,
       maxWidth: '800px',
       margin: '0 auto',
+      '--cm-font-size': `${fontSize}px`,
+      '--cm-text-color': fg,
     },
     '.cm-cursor': {
       borderLeftColor: cursorColor,
