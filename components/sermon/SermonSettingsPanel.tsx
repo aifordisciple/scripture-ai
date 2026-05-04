@@ -8,29 +8,21 @@ import { cn } from '@/lib/utils'
 
 export function SermonSettingsPanel() {
   const { t } = useTranslation()
-  const { currentSermon, sermons, setSermons } = useBibleStore()
-  const [autoSave, setAutoSave] = useState(true)
+  const { currentSermon, sermons, setSermons, setCurrentSermon, sermonAutoSave, setSermonAutoSave } = useBibleStore()
   const [aiPreference, setAiPreference] = useState<'formal' | 'casual' | 'scholarly'>('casual')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleExport = () => {
     if (!currentSermon) return
-    let contentText = ''
-    try {
-      const parsed = typeof currentSermon.content === 'string' ? JSON.parse(currentSermon.content) : currentSermon.content
-      contentText = parsed?.content
-        ?.map((node: any) => node.content?.map((c: any) => c.text || '').join('') || '')
-        .join('\n') || ''
-    } catch {
-      contentText = String(currentSermon.content || '')
-    }
-
-    const exportText = `# ${currentSermon.title}\n\n## ${t('sermon.verseRefsLabel')}: ${currentSermon.verseRefs || 'N/A'}\n\n${contentText}`
-    const blob = new Blob([exportText], { type: 'text/markdown' })
+    // Content is now Markdown — export directly
+    const content = currentSermon.content || ''
+    const title = currentSermon.title || 'sermon'
+    const markdown = `# ${title}\n\n${content}`
+    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${currentSermon.title || 'sermon'}.md`
+    a.download = `${title}.md`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -38,9 +30,10 @@ export function SermonSettingsPanel() {
   const handleDelete = async () => {
     if (!currentSermon) return
     try {
-      const res = await fetch(`/api/sermon/${currentSermon.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/sermon?id=${currentSermon.id}`, { method: 'DELETE' })
       if (res.ok) {
         setSermons(sermons.filter(s => s.id !== currentSermon.id))
+        setCurrentSermon(null)
         setShowDeleteConfirm(false)
       }
     } catch (error) {
@@ -83,14 +76,14 @@ export function SermonSettingsPanel() {
         {/* Auto Save */}
         <div className="rounded-lg border border-border bg-card p-3">
           <button
-            onClick={() => setAutoSave(!autoSave)}
+            onClick={() => setSermonAutoSave(!sermonAutoSave)}
             className="flex items-center justify-between w-full"
           >
             <div className="text-left">
               <p className="text-xs font-medium text-foreground/90">{t('sermon.settingsAutoSave')}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">{t('sermon.settingsAutoSaveDesc')}</p>
             </div>
-            {autoSave ? (
+            {sermonAutoSave ? (
               <ToggleRight className="w-5 h-5 text-primary" />
             ) : (
               <ToggleLeft className="w-5 h-5 text-muted-foreground" />

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { BookMarked, ClipboardPaste, Loader2 } from 'lucide-react'
+import { useSermonEditor } from './SermonEditorContext'
 
 interface VerseRefData {
   bookId: string
@@ -112,7 +113,8 @@ function parseVerseRefs(refs: string): VerseRefData[] {
 
 export function SermonVersePanel() {
   const { t } = useTranslation()
-  const { currentSermon, setCurrentSermon } = useBibleStore()
+  const { currentSermon } = useBibleStore()
+  const { insertContent } = useSermonEditor()
   const [verseData, setVerseData] = useState<VerseRefData[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -152,9 +154,9 @@ export function SermonVersePanel() {
 
   const handleInsert = useCallback((text: string) => {
     if (!currentSermon || !text) return
-    const newContent = currentSermon.content ? `${currentSermon.content}\n\n${text}` : text
-    setCurrentSermon({ ...currentSermon, content: newContent })
-  }, [currentSermon, setCurrentSermon])
+    // Insert directly into the CodeMirror editor via context
+    insertContent(text)
+  }, [currentSermon, insertContent])
 
   return (
     <div className="h-full flex flex-col bg-secondary">

@@ -23,6 +23,7 @@ export function SermonListPanel() {
   const {
     sermons,
     sermonFolders,
+    setSermonFolders,
     currentSermon,
     setCurrentSermon,
     sermonSearchQuery,
@@ -104,7 +105,6 @@ export function SermonListPanel() {
     if (!confirm(t('sermon.deleteFolderConfirm'))) return
     try {
       await fetch(`/api/sermon/folder?id=${id}`, { method: 'DELETE' })
-      const { setSermonFolders } = useBibleStore.getState()
       setSermonFolders(sermonFolders.filter(f => f.id !== id))
       // 刷新讲章列表（讲章移至根目录）
       const res = await fetch('/api/sermon')
@@ -126,7 +126,6 @@ export function SermonListPanel() {
         body: JSON.stringify({ name }),
       })
       const data = await res.json()
-      const { setSermonFolders } = useBibleStore.getState()
       setSermonFolders([...sermonFolders, data.data])
     } catch {
       // 静默处理

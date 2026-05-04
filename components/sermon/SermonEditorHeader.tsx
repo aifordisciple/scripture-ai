@@ -50,7 +50,7 @@ export function SermonEditorHeader() {
     }
   }
 
-  const handleStatusChange = async (status: string) => {
+  const handleStatusChange = async (status: 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED') => {
     setShowStatusMenu(false)
     const updated = { ...currentSermon, status }
     setCurrentSermon(updated)

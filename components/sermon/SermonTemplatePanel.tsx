@@ -78,6 +78,7 @@ export function SermonTemplatePanel() {
     const markdown = template.sections
       .map(s => `## ${s.title}\n\n${s.placeholder}`)
       .join('\n\n')
+    // Replace editor content by updating currentSermon (triggers re-sync)
     setCurrentSermon({ ...currentSermon, content: markdown })
     setAppliedId(template.id)
     setTimeout(() => setAppliedId(null), 2000)

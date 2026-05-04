@@ -7,10 +7,12 @@ import { useTranslation } from '@/lib/i18n'
 import { Bot, Send, StopCircle, ClipboardPaste, Sparkles, PenLine, BookOpen, Lightbulb, Link2, Target } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { useSermonEditor } from './SermonEditorContext'
 
 export function SermonAIPanel() {
   const { t } = useTranslation()
-  const { currentSermon, setCurrentSermon, apiConfig, locale } = useBibleStore()
+  const { currentSermon, apiConfig, locale } = useBibleStore()
+  const { insertContent } = useSermonEditor()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [chatKey, setChatKey] = useState(0)
   const prevSermonIdRef = useRef(currentSermon?.id)
@@ -38,8 +40,8 @@ export function SermonAIPanel() {
 
   const handleInsertToEditor = (content: string) => {
     if (!currentSermon) return
-    const newContent = currentSermon.content ? `${currentSermon.content}\n\n${content}` : content
-    setCurrentSermon({ ...currentSermon, content: newContent })
+    // Insert directly into the CodeMirror editor via context
+    insertContent(content)
   }
 
   const quickPrompts = [

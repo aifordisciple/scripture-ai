@@ -550,6 +550,9 @@ export interface SermonSlice {
   // 从阅读页创建讲章时传入的经文
   sermonInitialVerseRefs: string;
   setSermonInitialVerseRefs: (refs: string) => void;
+  // Auto-save toggle
+  sermonAutoSave: boolean;
+  setSermonAutoSave: (enabled: boolean) => void;
 }
 
 // --------------------------------------------------

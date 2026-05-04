@@ -26,6 +26,7 @@ export function SermonTab() {
     setSermons,
     setSermonFolders,
     sermons,
+    isDarkMode,
   } = useBibleStore()
 
   // Load sermons and folders on mount
@@ -51,7 +52,7 @@ export function SermonTab() {
   }, [setSermons, setSermonFolders, setSermonsLoading])
 
   return (
-    <SermonEditorProvider>
+    <SermonEditorProvider isDark={isDarkMode}>
       <div className="flex h-full bg-background">
         {/* Icon Sidebar */}
         <SermonSidebar />

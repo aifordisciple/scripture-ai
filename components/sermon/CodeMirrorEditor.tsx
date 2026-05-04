@@ -12,6 +12,7 @@ import { searchKeymap } from '@codemirror/search';
 import { livePreviewExtension } from './extensions/livePreview';
 import { sermonEditorTheme } from './extensions/theme';
 import EditorToolbar from './EditorToolbar';
+import { useSermonEditor } from './SermonEditorContext';
 
 interface CodeMirrorEditorProps {
   content: string;
@@ -31,6 +32,7 @@ export default function CodeMirrorEditor({
   lineHeight,
 }: CodeMirrorEditorProps) {
   const [editorView, setEditorView] = useState<CMEditorView | null>(null);
+  const { registerEditorView } = useSermonEditor();
 
   // Handle content change from CodeMirror
   const handleChange = useCallback(
@@ -73,7 +75,8 @@ export default function CodeMirrorEditor({
   // Capture editorView after mount
   const onCreateEditor = useCallback((view: CMEditorView) => {
     setEditorView(view);
-  }, []);
+    registerEditorView(view);
+  }, [registerEditorView]);
 
   return (
     <div className="flex flex-col h-full" style={{ minHeight: 0 }}>

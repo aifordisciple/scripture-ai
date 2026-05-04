@@ -32,4 +32,6 @@ export const createSermonSlice: StateCreator<StoreState, [], [], SermonSlice> = 
   setSermonReviewLoading: (loading) => set({ sermonReviewLoading: loading }),
   sermonInitialVerseRefs: '',
   setSermonInitialVerseRefs: (refs) => set({ sermonInitialVerseRefs: refs }),
+  sermonAutoSave: true,
+  setSermonAutoSave: (enabled) => set({ sermonAutoSave: enabled }),
 });

@@ -25,6 +25,7 @@ export function SermonEditor() {
     setSermons,
     sermons,
     isDarkMode,
+    sermonAutoSave,
   } = useBibleStore()
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -36,16 +37,27 @@ export function SermonEditor() {
   const [markdownContent, setMarkdownContent] = useState('')
   const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE)
   const [lineHeight, setLineHeight] = useState(DEFAULT_LINE_HEIGHT)
+  // Track whether the last content change was from the editor itself
+  // to avoid syncing external changes back into the editor (loop prevention)
+  const isEditorSourceRef = useRef(false)
 
-  // Sync content when switching sermons
+  // Sync content when switching sermons or when content changes externally
   useEffect(() => {
     if (currentSermon) {
+      // If the change came from the editor itself, skip syncing
+      if (isEditorSourceRef.current) {
+        isEditorSourceRef.current = false
+        return
+      }
       const md = ensureMarkdown(currentSermon.content)
-      setMarkdownContent(md)
+      // Only update if content actually differs (avoid unnecessary re-renders)
+      if (md !== markdownContent) {
+        setMarkdownContent(md)
+      }
     } else {
       setMarkdownContent('')
     }
-  }, [currentSermon?.id])
+  }, [currentSermon?.id, currentSermon?.content])
 
   // Auto-save - uses refs to avoid stale closure
   const autoSave = useCallback(async (content: string) => {
@@ -81,6 +93,7 @@ export function SermonEditor() {
   // Handle content change from CodeMirror
   const handleContentChange = useCallback((content: string) => {
     setMarkdownContent(content)
+    isEditorSourceRef.current = true
     const sermon = currentSermonRef.current
     if (sermon && sermon.content !== content) {
       const updated = { ...sermon, content }
@@ -89,8 +102,10 @@ export function SermonEditor() {
       setSermons(sermonsRef.current.map(s => s.id === sermon.id ? updated : s))
     }
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    saveTimerRef.current = setTimeout(() => autoSave(content), 1500)
-  }, [setCurrentSermon, setSermons, autoSave])
+    if (sermonAutoSave) {
+      saveTimerRef.current = setTimeout(() => autoSave(content), 1500)
+    }
+  }, [setCurrentSermon, setSermons, autoSave, sermonAutoSave])
 
   // Manual save handler for Cmd+S
   const handleSave = useCallback(() => {
