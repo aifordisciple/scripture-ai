@@ -139,7 +139,7 @@ export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: Rad
                   className={cn(
                     "absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto",
                     "w-14 h-14 rounded-full",
-                    "bg-gradient-to-br shadow-lg",
+                    "bg-gradient-to-br shadow-lg shadow-black/10",
                     colorClass,
                     "flex flex-col items-center justify-center",
                     "text-white text-xs font-medium",

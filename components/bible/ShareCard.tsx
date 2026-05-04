@@ -409,7 +409,7 @@ export function ShareCard() {
                                         <button
                                             key={i}
                                             onClick={() => handleBgSelect(url)}
-                                            className={cn("w-full aspect-square rounded-lg bg-cover bg-center border-2 hover:border-blue-500 hover:scale-105 transition-all shadow-sm relative", selectedBgUrl === url ? "border-blue-500 ring-2 ring-blue-200" : "border-transparent")}
+                                            className={cn("w-full aspect-square rounded-xl bg-cover bg-center border-2 hover:border-blue-500 hover:scale-105 transition-all shadow-sm relative", selectedBgUrl === url ? "border-blue-500 ring-2 ring-blue-200" : "border-transparent")}
                                             style={{ backgroundImage: `url(${url})` }}
                                         >
                                             {selectedBgUrl === url && loading && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><Loader2 className="w-4 h-4 animate-spin text-white"/></div>}
