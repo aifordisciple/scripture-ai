@@ -43,7 +43,7 @@ export class SermonErrorBoundary extends React.Component<ErrorBoundaryProps, Err
           <div className="text-muted-foreground text-xs mb-4 max-w-md break-all">
             {this.state.error?.message || '未知错误'}
           </div>
-          {this.state.error?.stack && (
+          {process.env.NODE_ENV === 'development' && this.state.error?.stack && (
             <pre className="text-[10px] text-muted-foreground/70 mb-4 max-w-lg max-h-32 overflow-auto bg-muted/30 p-2 rounded text-left">
               {this.state.error.stack.split('\n').slice(0, 8).join('\n')}
             </pre>

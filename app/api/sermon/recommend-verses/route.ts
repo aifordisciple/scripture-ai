@@ -46,7 +46,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ data: verses })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Recommendation failed' }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Recommendation failed'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

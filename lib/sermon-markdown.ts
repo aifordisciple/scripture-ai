@@ -74,7 +74,10 @@ export function generateExcerpt(markdown: string, maxLength: number = 200): stri
   return plainText.slice(0, maxLength).replace(/\s+\S*$/, '') + '...';
 }
 
-/** Check if content is Tiptap JSON (starts with '{') */
+/** Check if content is Tiptap JSON (legacy format from before CodeMirror migration) */
 export function isTiptapJson(content: string): boolean {
-  return content.trimStart().startsWith('{');
+  const trimmed = content.trimStart();
+  // Check for the standard Tiptap document root signature
+  // A simple '{' check is too broad and would match any JSON-like content
+  return trimmed.startsWith('{"type":"doc"') || trimmed.startsWith('{ "type": "doc"');
 }

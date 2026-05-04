@@ -66,7 +66,8 @@ export async function POST(
     }
 
     return NextResponse.json({ data: reviewData })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Review failed' }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Review failed'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

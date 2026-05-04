@@ -2,9 +2,9 @@
  * CodeMirror extension for Obsidian-like seamless live preview
  *
  * Strategy: Use Decoration.replace to replace raw markdown text with
- * preview widgets. This is more robust than the previous approach of
- * Decoration.widget + CSS hiding, which could fail when CodeMirror's
- * internal DOM structure prevented the CSS cascade from hiding the
+ * preview widgets. This is more robust than CSS-hiding approaches
+ * (font-size:0 + color:transparent), which can fail when CodeMirror's
+ * internal DOM structure prevents the CSS cascade from hiding the
  * original text (causing "ABCABC" duplication).
  *
  * With Decoration.replace, CodeMirror itself removes the original text
@@ -113,12 +113,22 @@ class FencedBlockPreviewWidget extends WidgetType {
     return wrap;
   }
   eq(other: FencedBlockPreviewWidget) {
-    return this.label === other.label && this.content === other.content && this.color === other.color;
+    return this.label === other.label && this.content === other.content && this.color === other.color && this.icon === other.icon;
   }
   ignoreEvent() { return false; }
 }
 
 // ─── Inline Markdown Renderer ────────
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/** Check if a URL is safe for use in an href attribute (prevents javascript: protocol XSS) */
+function isSafeUrl(url: string): boolean {
+  const trimmed = url.trim().toLowerCase();
+  return trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/') || trimmed.startsWith('#');
+}
 
 function renderInlineMarkdown(text: string): string {
   let html = escapeHtml(text);
@@ -126,12 +136,15 @@ function renderInlineMarkdown(text: string): string {
   html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
   html = html.replace(/~~(.+?)~~/g, '<del>$1</del>');
   html = html.replace(/`(.+?)`/g, '<code style="background:rgba(0,0,0,0.06);padding:1px 4px;border-radius:3px;font-size:0.9em">$1</code>');
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a style="color:#3b82f6;text-decoration:underline" href="$2">$1</a>');
+  // Only render links with safe URL schemes to prevent XSS via javascript: protocol
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, linkText: string, url: string) => {
+    if (isSafeUrl(url)) {
+      return `<a style="color:#3b82f6;text-decoration:underline" href="${url}">${linkText}</a>`;
+    }
+    // For unsafe URLs, just show the text without a link
+    return linkText;
+  });
   return html;
-}
-
-function escapeHtml(text: string): string {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // ─── Line Classification ─────────────────────────────────────────
@@ -332,7 +345,7 @@ const livePreviewPlugin = ViewPlugin.fromClass(
     decorations: DecorationSet;
     constructor(view: EditorView) { this.decorations = buildDecorations(view); }
     update(update: ViewUpdate) {
-      if (update.docChanged || update.selectionSet) {
+      if (update.docChanged || update.viewportChanged || update.selectionSet) {
         this.decorations = buildDecorations(update.view);
       }
     }
