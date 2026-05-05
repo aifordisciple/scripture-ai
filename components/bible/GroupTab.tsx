@@ -393,7 +393,7 @@ export function GroupTab() {
                   <div
                     key={plan.id}
                     onClick={() => setSelectedPlanId(plan.id)}
-                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                    className="cursor-pointer hover:bg-[#f5f5f7] dark:hover:bg-[#2a2a2c] transition-colors"
                   >
                     <div className={cn(
                       "p-4 rounded-xl border",

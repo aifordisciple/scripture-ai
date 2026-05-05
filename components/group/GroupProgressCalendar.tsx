@@ -178,13 +178,13 @@ export function GroupProgressCalendar({
             {t('group.progressCalendar')}
           </CardTitle>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={goToToday} className="text-xs">
+            <Button variant="ghost" size="sm" onClick={goToToday} className="text-xs active:scale-95">
               {t('group.today')}
             </Button>
-            <Button variant="ghost" size="icon" onClick={goToPrevMonth} className="h-8 w-8">
+            <Button variant="ghost" size="icon" onClick={goToPrevMonth} className="h-8 w-8 active:scale-95">
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={goToNextMonth} className="h-8 w-8">
+            <Button variant="ghost" size="icon" onClick={goToNextMonth} className="h-8 w-8 active:scale-95">
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>

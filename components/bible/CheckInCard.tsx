@@ -70,7 +70,7 @@ export const CheckInCard = memo(function CheckInCard({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute -top-2 -right-2 z-10 w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full shadow-lg shadow-black/10"
+          className="absolute -top-2 -right-2 z-10 w-8 h-8 flex items-center justify-center bg-white dark:bg-[#272729] rounded-full"
         >
           <X className="w-4 h-4 text-slate-500" />
         </button>
@@ -78,7 +78,7 @@ export const CheckInCard = memo(function CheckInCard({
         {/* Card content - for image generation */}
         <div
           ref={cardRef}
-          className="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-2xl shadow-black/15"
+          className="bg-[#0066cc] rounded-lg p-6 text-white"
         >
           {/* Header */}
           <div className="text-center mb-6">
@@ -90,7 +90,7 @@ export const CheckInCard = memo(function CheckInCard({
                 day: 'numeric',
               })}
             </div>
-            <h2 className="text-2xl font-bold">{t('bible.checkInSuccess')}</h2>
+            <h2 className="text-2xl font-semibold">{t('bible.checkInSuccess')}</h2>
           </div>
 
           {/* Streak display */}
@@ -99,14 +99,14 @@ export const CheckInCard = memo(function CheckInCard({
               <div className={cn('relative', flameColor)}>
                 <Flame className="w-16 h-16 fill-current animate-pulse" />
                 {streakDays >= 1 && (
-                  <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
+                  <span className="absolute inset-0 flex items-center justify-center text-white font-semibold text-lg">
                     {streakDays}
                   </span>
                 )}
               </div>
               <span className="text-sm mt-1 opacity-80">{t('bible.consecutiveCheckIn')}</span>
             </div>
-            <div className="text-4xl font-bold">{t('bible.daysUnit', { count: streakDays })}</div>
+            <div className="text-4xl font-semibold">{t('bible.daysUnit', { count: streakDays })}</div>
           </div>
 
           {/* Today's reading */}
@@ -115,7 +115,7 @@ export const CheckInCard = memo(function CheckInCard({
               <BookOpen className="w-4 h-4" />
               <span className="text-sm opacity-80">{t('bible.checkInTodayReading')}</span>
             </div>
-            <p className="font-bold text-lg">{todayChapter}</p>
+            <p className="font-semibold text-lg">{todayChapter}</p>
             {todayVerse && (
               <p className="text-sm opacity-80 mt-1">{todayVerse}</p>
             )}

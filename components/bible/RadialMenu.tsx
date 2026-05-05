@@ -48,20 +48,20 @@ const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
 
 // 颜色映射
 const ACTION_COLORS: Record<string, string> = {
-  detail: "from-purple-500 to-violet-600",
-  context: "from-amber-500 to-orange-600",
-  original: "from-indigo-500 to-blue-600",
-  application: "from-emerald-500 to-green-600",
-  prayer: "from-rose-500 to-pink-600",
-  explain_to_kid: "from-cyan-500 to-teal-600",
-  tutor: "from-violet-500 to-purple-600",
-  sermon: "from-orange-500 to-red-600",
-  "study-guide": "from-teal-500 to-emerald-600",
+  detail: "bg-[#0066cc]",
+  context: "bg-[#0066cc]/90",
+  original: "bg-[#0066cc]",
+  application: "bg-[#0066cc]/90",
+  prayer: "bg-[#0066cc]",
+  explain_to_kid: "bg-[#0066cc]/90",
+  tutor: "bg-[#0066cc]",
+  sermon: "bg-[#0066cc]/90",
+  "study-guide": "bg-[#0066cc]",
   // [P0优化] AI模式选项颜色
-  "ai-mode-general": "from-blue-500 to-indigo-600",
-  "ai-mode-tutor": "from-violet-500 to-purple-600",
-  "ai-mode-sermon": "from-orange-500 to-amber-600",
-  "ai-mode-study-guide": "from-teal-500 to-cyan-600",
+  "ai-mode-general": "bg-[#0066cc]",
+  "ai-mode-tutor": "bg-[#0066cc]/90",
+  "ai-mode-sermon": "bg-[#0066cc]",
+  "ai-mode-study-guide": "bg-[#0066cc]/90",
 };
 
 export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: RadialMenuProps) {
@@ -103,7 +103,7 @@ export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: Rad
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl shadow-black/10 flex items-center justify-center"
+              className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0066cc] flex items-center justify-center"
             >
               <Sparkles className="w-7 h-7 text-white" />
             </motion.div>

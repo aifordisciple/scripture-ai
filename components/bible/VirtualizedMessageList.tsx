@@ -126,7 +126,7 @@ const MessageBubble = memo(function MessageBubble({
       <div className={cn(
         'relative transition-all',
         role === 'user'
-          ? 'max-w-[88%] rounded-2xl rounded-tr-md px-4 py-3 shadow-sm bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-indigo-600 text-white text-[14.5px]'
+          ? 'max-w-[88%] rounded-2xl rounded-tr-md px-4 py-3 shadow-sm bg-[#0066cc] dark:bg-[#2997ff] text-white text-[14.5px]'
           : 'w-full'
       )}>
         {role === 'user' && (
@@ -144,10 +144,10 @@ const MessageBubble = memo(function MessageBubble({
           <>
             {/* AI 标识 */}
             <div className="flex items-center gap-2 mb-4 select-none">
-              <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-sm">
+              <div className="w-5 h-5 rounded-lg bg-[#0066cc] flex items-center justify-center shadow-sm">
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
-              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('bible.aiInterpretation')}</span>
+              <span className="text-[11px] font-medium text-[#7a7a7a] dark:text-[#7a7a7a]">{t('bible.aiInterpretation')}</span>
             </div>
 
             {isThinking && (
@@ -157,7 +157,7 @@ const MessageBubble = memo(function MessageBubble({
                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
                 </div>
-                <span className="text-slate-500 dark:text-slate-400">{t('bible.deepInterpreting')}</span>
+                <span className="text-[#7a7a7a] dark:text-[#7a7a7a]">{t('bible.deepInterpreting')}</span>
               </div>
             )}
 
@@ -174,13 +174,13 @@ const MessageBubble = memo(function MessageBubble({
 
             {/* 底部工具栏 */}
             {(mainText || !isThinking) && (
-              <div className="mt-5 pt-4 border-t border-slate-100/80 dark:border-slate-800/60 flex justify-between items-center opacity-100 select-none">
+              <div className="mt-5 pt-4 border-t border-slate-100/80 dark:border-[#3a3a3c]/60 flex justify-between items-center opacity-100 select-none">
                 <div className="flex items-center gap-0.5 flex-wrap">
                   <button
                     onClick={handleCopy}
                     className={cn(
                       'flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg',
-                      copied ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      copied ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-[#7a7a7a] hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                     )}
                   >
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -192,7 +192,7 @@ const MessageBubble = memo(function MessageBubble({
                       onClick={() => { onSaveInsight(); setBookmarked(true); }}
                       className={cn(
                         'flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg',
-                        bookmarked ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                        bookmarked ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-[#7a7a7a] hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                       )}
                     >
                       <Bookmark className={cn('w-3.5 h-3.5', bookmarked && 'fill-current')} />
@@ -203,7 +203,7 @@ const MessageBubble = memo(function MessageBubble({
                   {onShare && (
                     <button
                       onClick={onShare}
-                      className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                      className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-[#7a7a7a] hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                     >
                       <Share2 className="w-3.5 h-3.5" />
                       {t('bible.share')}
@@ -213,7 +213,7 @@ const MessageBubble = memo(function MessageBubble({
                   {onRetry && (
                     <button
                       onClick={onRetry}
-                      className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                      className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-[#7a7a7a] hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                       {t('bible.retry')}
@@ -222,7 +222,7 @@ const MessageBubble = memo(function MessageBubble({
                 </div>
 
                 <div onClick={(e) => e.stopPropagation()}>
-                  <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 h-8 px-2.5 text-[11px] rounded-lg" label={t('bible.readAloud')} />
+                  <AudioButton text={mainText} size="sm" variant="ghost" className="text-[#7a7a7a] hover:text-blue-600 dark:hover:text-blue-400 h-8 px-2.5 text-[11px] rounded-lg" label={t('bible.readAloud')} />
                 </div>
               </div>
             )}
@@ -230,7 +230,7 @@ const MessageBubble = memo(function MessageBubble({
         )}
 
         {role === 'assistant' && isLatest && !isThinking && (
-          <span className="inline-block w-2.5 h-2.5 ml-1 bg-gradient-to-tr from-blue-400 to-purple-400 rounded-full animate-pulse align-baseline shadow-[0_0_10px_rgba(96,165,250,0.8)]" />
+          <span className="inline-block w-2.5 h-2.5 ml-1 bg-gradient-to-tr from-blue-400 to-purple-400 rounded-full animate-pulse align-baseline shadow-sm" />
         )}
       </div>
     </div>
@@ -241,15 +241,15 @@ const MessageBubble = memo(function MessageBubble({
 function EmptyState() {
   const { t } = useTranslation()
   return (
-    <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-500 select-none opacity-60">
-      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center mb-5">
-        <svg className="w-10 h-10 stroke-1 text-slate-400 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <div className="h-full flex flex-col items-center justify-center text-center text-[#7a7a7a] dark:text-[#7a7a7a] select-none opacity-60">
+      <div className="w-20 h-20 rounded-2xl bg-[#0066cc]/5 dark:bg-[#2a2a2c] flex items-center justify-center mb-5">
+        <svg className="w-10 h-10 stroke-1 text-[#7a7a7a] dark:text-[#7a7a7a]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <rect x="3" y="11" width="18" height="10" rx="2" />
           <circle cx="12" cy="16" r="1" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
       </div>
-      <p className="text-[13px] text-slate-500 dark:text-slate-400">{t('bible.emptyStateHint')}</p>
+      <p className="text-[13px] text-[#7a7a7a] dark:text-[#7a7a7a]">{t('bible.emptyStateHint')}</p>
     </div>
   )
 }
@@ -290,7 +290,7 @@ function LoadingIndicator() {
         <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
         <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
       </div>
-      <span className="text-slate-500 dark:text-slate-400">{t('bible.deepInterpreting')}</span>
+      <span className="text-[#7a7a7a] dark:text-[#7a7a7a]">{t('bible.deepInterpreting')}</span>
     </div>
   )
 }
