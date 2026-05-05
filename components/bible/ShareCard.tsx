@@ -227,7 +227,7 @@ export function ShareCard() {
 
   return (
     <Dialog open={isShareOpen} onOpenChange={(open) => !open && closeShareModal()}>
-      <DialogContent className="sm:max-w-5xl bg-white dark:bg-[#272729] border-none p-0 overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[700px]">
+      <DialogContent className="sm:max-w-5xl bg-card dark:bg-card border-none p-0 overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[700px]">
 
         {/* --- 结果页 (Result) --- */}
         {step === 'result' && resultImg && (

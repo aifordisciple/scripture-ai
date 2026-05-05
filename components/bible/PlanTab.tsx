@@ -180,7 +180,7 @@ export function PlanTab() {
 
     return (
       <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
-        <button onClick={() => setViewingPlanId(null)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm font-medium">
+        <button onClick={() => setViewingPlanId(null)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm font-semibold">
           <ChevronLeft className="w-4 h-4" /> {t('plan.backToHall')}
         </button>
 
@@ -203,7 +203,7 @@ export function PlanTab() {
         </div>
 
         <div className="bg-card dark:bg-card rounded-lg p-5 border dark:border-border mb-8">
-           <div className="flex justify-between text-sm font-medium mb-2">
+           <div className="flex justify-between text-sm font-semibold mb-2">
               <span className="text-foreground dark:text-muted-foreground">{t('plan.overallProgress')}</span>
               <span className="text-primary dark:text-primary/80 font-semibold">{progressPercent}% ({completedDaysCount}/{totalDays})</span>
            </div>
@@ -313,7 +313,7 @@ export function PlanTab() {
                            <div
                              key={idx}
                              className={cn(
-                               "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border group",
+                               "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors border group",
                                isTaskCompleted
                                  ? "bg-transparent border-border dark:border-background text-muted-foreground"
                                  : "bg-primary/5 border-primary/10 text-apple-focus dark:bg-primary/10 dark:border-primary/20 dark:text-primary/80"
@@ -522,7 +522,7 @@ export function PlanTab() {
             </div>
             {t('plan.aiCustomTitle')}
           </h2>
-          <p className="text-white/90 text-sm md:text-base mb-8 max-w-2xl leading-relaxed font-medium">
+          <p className="text-white/90 text-sm md:text-base mb-8 max-w-2xl leading-relaxed font-semibold">
             {t('plan.aiCustomDesc')}
           </p>
           
@@ -535,18 +535,18 @@ export function PlanTab() {
               disabled={isGenerating} 
               onKeyDown={(e) => e.key === 'Enter' && handleGeneratePlan()} 
               // 保持纯白输入框的超高辨识度
-              className="flex-1 bg-white dark:bg-[#272729] rounded-xl px-5 py-4 text-[#1d1d1f] dark:text-[#f5f5f7] placeholder:text-[#7a7a7a] dark:placeholder:text-[#7a7a7a] focus-visible:ring-2 focus-visible:ring-[#0066cc]/40 focus:ring-2 focus:ring-[#0066cc]/30 text-base transition-all" 
+              className="flex-1 bg-card dark:bg-card rounded-lg px-5 py-4 text-foreground dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus:ring-2 focus:ring-primary/30 text-base transition-all" 
             />
             <Button 
               onClick={handleGeneratePlan} 
               disabled={isGenerating || !aiPrompt.trim()} 
               // 按钮改为白底蓝字，与蓝宝石背景形成清爽的强对比
-              className="bg-white hover:bg-[#f5f5f7] text-[#0066cc] font-semibold rounded-xl px-8 py-4 h-auto active:scale-95 transition-all sm:w-auto w-full group border border-white"
+              className="bg-card hover:bg-secondary text-primary font-semibold rounded-lg px-8 py-4 h-auto active:scale-95 transition-all sm:w-auto w-full group border border-white"
             >
               {isGenerating ? (
-                <><Loader2 className="w-5 h-5 animate-spin mr-2 text-[#0066cc]" /> {t('plan.aiCustomGenerating')}</>
+                <><Loader2 className="w-5 h-5 animate-spin mr-2 text-primary" /> {t('plan.aiCustomGenerating')}</>
               ) : (
-                <>{t('plan.aiCustomGenerate')} <Sparkles className="w-4 h-4 ml-2 opacity-50 group-hover:opacity-100 transition-opacity text-[#0066cc]" /></>
+                <>{t('plan.aiCustomGenerate')} <Sparkles className="w-4 h-4 ml-2 opacity-50 group-hover:opacity-100 transition-opacity text-primary" /></>
               )}
             </Button>
           </div>
@@ -557,22 +557,22 @@ export function PlanTab() {
       <h2 className="text-lg font-semibold text-foreground mb-4">{t('plan.exploreMore')}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {discoverPlans.map((plan) => (
-          <div key={plan.id} className="flex flex-col bg-white dark:bg-[#272729] rounded-lg p-6 border dark:border-[#1d1d1f] hover:bg-black/[0.02] transition-colors relative group">
+          <div key={plan.id} className="flex flex-col bg-card dark:bg-card rounded-lg p-6 border dark:border-background hover:bg-black/[0.02] transition-colors relative group">
              {plan.id.startsWith('custom-') && (
-               <button onClick={(e) => { e.stopPropagation(); deleteCustomPlan(plan.id); }} className="absolute top-4 right-4 p-2 text-[#e0e0e0] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button>
+               <button onClick={(e) => { e.stopPropagation(); deleteCustomPlan(plan.id); }} className="absolute top-4 right-4 p-2 text-border hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button>
              )}
              <div className="flex items-start justify-between mb-4 pr-6">
                 <div>
                   <h3 className="text-lg font-semibold text-foreground font-serif">{tDual(plan.title, plan.titleEn)}</h3>
                   <div className="flex items-center gap-2 mt-2">
-                     {tArr(plan.tags, plan.tagsEn)?.map((tag: string) => <span key={tag} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-md font-medium">{tag}</span>)}
+                     {tArr(plan.tags, plan.tagsEn)?.map((tag: string) => <span key={tag} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-md font-semibold">{tag}</span>)}
                      <span className="text-xs text-muted-foreground ml-1">{t('plan.durationDays', { count: plan.durationDays })}</span>
                   </div>
                 </div>
-                <Target className="w-8 h-8 text-[#0066cc]/10 dark:text-[#0066cc]/20" />
+                <Target className="w-8 h-8 text-primary/10 dark:text-primary/20" />
              </div>
-             <p className="text-sm text-[#1d1d1f] dark:text-[#7a7a7a] mb-6 flex-1 line-clamp-3">{tDual(plan.description, plan.descriptionEn)}</p>
-             <Button onClick={() => { startPlan(plan.id); setViewingPlanId(plan.id); }} className="w-full gap-2 rounded-xl bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-white font-semibold">
+             <p className="text-sm text-foreground dark:text-muted-foreground mb-6 flex-1 line-clamp-3">{tDual(plan.description, plan.descriptionEn)}</p>
+             <Button onClick={() => { startPlan(plan.id); setViewingPlanId(plan.id); }} className="w-full gap-2 rounded-lg bg-primary hover:bg-apple-focus active:scale-95 text-white font-semibold">
                <PlayCircle className="w-4 h-4" /> {t('plan.startPlan')}
              </Button>
           </div>
