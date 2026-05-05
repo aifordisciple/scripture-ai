@@ -15,7 +15,6 @@ export function SermonEditorHeader() {
   const titleRef = useRef<HTMLInputElement>(null)
   const statusMenuRef = useRef<HTMLDivElement>(null)
 
-  // Use ref to avoid stale closure on sermons
   const sermonsRef = useRef(sermons)
   sermonsRef.current = sermons
 
@@ -50,7 +49,6 @@ export function SermonEditorHeader() {
         })
         setSermons(sermonsRef.current.map(s => s.id === currentSermon.id ? updated : s))
       } catch {
-        // Revert on failure
         setCurrentSermon({ ...currentSermon, title: prevTitle })
       }
     }
@@ -69,22 +67,39 @@ export function SermonEditorHeader() {
       })
       setSermons(sermonsRef.current.map(s => s.id === currentSermon.id ? updated : s))
     } catch {
-      // Revert on failure
       setCurrentSermon({ ...currentSermon, status: prevStatus })
     }
   }
 
-  const statusConfig: Record<string, { label: string; color: string }> = {
-    DRAFT: { label: t('sermon.draft'), color: 'bg-black/5 dark:bg-white/10 text-slate-600 dark:text-slate-300' },
-    IN_PROGRESS: { label: t('sermon.inProgress'), color: 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' },
-    COMPLETED: { label: t('sermon.completed'), color: 'bg-green-500/10 text-green-600 dark:text-green-400' },
+  // Apple status tokens — pearl-capsule style
+  const statusConfig: Record<string, { label: string; bg: string; text: string; dot: string }> = {
+    DRAFT: {
+      label: t('sermon.draft'),
+      bg: 'bg-[#fafafc] dark:bg-white/[0.06]',
+      text: 'text-[#333] dark:text-[#ccc]',
+      dot: 'bg-[#7a7a7a]',
+    },
+    IN_PROGRESS: {
+      label: t('sermon.inProgress'),
+      bg: 'bg-[#0066cc]/10 dark:bg-[#0066cc]/20',
+      text: 'text-[#0066cc] dark:text-[#2997ff]',
+      dot: 'bg-[#0066cc]',
+    },
+    COMPLETED: {
+      label: t('sermon.completed'),
+      bg: 'bg-green-500/10 dark:bg-green-500/20',
+      text: 'text-green-600 dark:text-green-400',
+      dot: 'bg-green-500',
+    },
   }
 
   const currentStatus = statusConfig[currentSermon.status] || statusConfig.DRAFT
 
   return (
-    <div className="border-b border-black/5 dark:border-white/10 px-4 py-1.5 flex items-center gap-3 bg-transparent">
-      {/* Title */}
+    <div className="h-[52px] px-5 flex items-center gap-3 bg-[#f5f5f7]/80 dark:bg-[#272729]/80 backdrop-blur-xl backdrop-saturate-[180%] border-b border-black/[0.04] dark:border-white/[0.06]"
+      style={{ fontFamily: "'SF Pro Display', 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif" }}
+    >
+      {/* Title — Apple tagline (21px/600) scaled for toolbar density */}
       {editingTitle ? (
         <input
           ref={titleRef}
@@ -95,7 +110,8 @@ export function SermonEditorHeader() {
             if (e.key === 'Enter') handleTitleSave()
             if (e.key === 'Escape') { setEditingTitle(false) }
           }}
-          className="flex-1 text-sm font-medium bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-md px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 focus:border-indigo-500/30"
+          className="flex-1 text-sm font-semibold bg-white dark:bg-white/[0.06] border border-[#e0e0e0] dark:border-white/[0.08] rounded-lg px-3 py-1 focus:outline-none focus:border-[#0066cc]/40 focus:ring-2 focus:ring-[#0066cc]/20 transition-shadow"
+          style={{ letterSpacing: '-0.224px' }}
         />
       ) : (
         <button
@@ -103,7 +119,8 @@ export function SermonEditorHeader() {
             setTitleDraft(currentSermon.title)
             setEditingTitle(true)
           }}
-          className="flex-1 text-left text-sm font-medium text-slate-900 dark:text-slate-100 truncate hover:bg-black/5 dark:hover:bg-white/5 rounded-md px-2 py-0.5 -ml-2 transition-colors"
+          className="flex-1 text-left text-[15px] font-semibold text-[#1d1d1f] dark:text-white truncate hover:bg-black/[0.04] dark:hover:bg-white/[0.06] rounded-lg px-2 py-1 -ml-2 transition-colors active:scale-[0.98]"
+          style={{ letterSpacing: '-0.224px' }}
         >
           {currentSermon.title || t('sermon.untitled')}
         </button>
@@ -111,34 +128,43 @@ export function SermonEditorHeader() {
 
       {/* Saving indicator */}
       {isSermonSaving && (
-        <span className="text-[10px] text-slate-400 dark:text-slate-500 animate-pulse">{t('sermon.saving')}</span>
+        <span className="text-[10px] text-[#7a7a7a] dark:text-[#999] animate-pulse">{t('sermon.saving')}</span>
       )}
 
-      {/* Style badge */}
-      <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-slate-500 dark:text-slate-400">
+      {/* Style badge — Apple pearl-capsule */}
+      <span className="text-[11px] px-2.5 py-1 rounded-[11px] bg-[#fafafc] dark:bg-white/[0.06] text-[#7a7a7a] dark:text-[#999] border border-[#e0e0e0] dark:border-white/[0.08]"
+        style={{ letterSpacing: '-0.12px' }}
+      >
         {t(`sermon.${currentSermon.style.toLowerCase()}`)}
       </span>
 
-      {/* Status dropdown */}
+      {/* Status dropdown — Apple pearl-capsule */}
       <div className="relative" ref={statusMenuRef}>
         <button
           onClick={() => setShowStatusMenu(!showStatusMenu)}
-          className={cn('flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors', currentStatus.color)}
+          className={cn(
+            'flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-[11px] border transition-all duration-150 active:scale-95',
+            currentStatus.bg, currentStatus.text,
+            'border-[#e0e0e0] dark:border-white/[0.08] hover:border-[#0066cc]/30'
+          )}
+          style={{ letterSpacing: '-0.12px' }}
         >
+          <span className={cn('w-1.5 h-1.5 rounded-full', currentStatus.dot)} />
           {currentStatus.label}
           <ChevronDown className="w-2.5 h-2.5" />
         </button>
         {showStatusMenu && (
-          <div className="absolute right-0 top-full mt-1 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-lg shadow-lg border border-black/5 dark:border-white/10 py-1 min-w-[120px]">
-            {Object.entries(statusConfig).map(([key, { label, color }]) => (
+          <div className="absolute right-0 top-full mt-1.5 z-50 bg-[#f5f5f7]/90 dark:bg-[#272729]/90 backdrop-blur-xl backdrop-saturate-[180%] rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.12)] border border-black/[0.04] dark:border-white/[0.06] py-1.5 min-w-[140px]">
+            {Object.entries(statusConfig).map(([key, { label, bg, text, dot }]) => (
               <button
                 key={key}
                 onClick={() => handleStatusChange(key)}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-[10px] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
+                style={{ letterSpacing: '-0.12px' }}
               >
-                <span className={cn('w-2 h-2 rounded-full', color.split(' ')[0])} />
-                <span className="text-slate-700 dark:text-slate-300">{label}</span>
-                {currentSermon.status === key && <Check className="w-3 h-3 text-indigo-600 dark:text-indigo-400 ml-auto" />}
+                <span className={cn('w-2 h-2 rounded-full', dot)} />
+                <span className="text-[#1d1d1f] dark:text-[#ccc]">{label}</span>
+                {currentSermon.status === key && <Check className="w-3 h-3 text-[#0066cc] dark:text-[#2997ff] ml-auto" />}
               </button>
             ))}
           </div>

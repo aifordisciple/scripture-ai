@@ -148,32 +148,34 @@ export function SermonEditor() {
         />
       </div>
 
-      {/* Status Bar */}
-      <div className="border-t border-black/5 dark:border-white/10 px-4 py-1 flex items-center gap-4 text-[10px] text-slate-400 dark:text-slate-500">
+      {/* Status Bar — Apple fine-print */}
+      <div className="border-t border-[#e0e0e0] dark:border-white/[0.06] px-5 py-1.5 flex items-center gap-4 text-[12px] text-[#7a7a7a] dark:text-[#999]"
+        style={{ fontFamily: "'SF Pro Text', system-ui, -apple-system, sans-serif", letterSpacing: '-0.12px' }}
+      >
         <span>{charCount}{t('sermon.editorWords')}</span>
         <span>~{Math.max(1, Math.round(charCount / 300))}{t('sermon.editorMinutes')}</span>
         <div className="flex-1" />
         <button
           onClick={() => setFontSize(s => Math.max(12, s - 1))}
-          className="px-1 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+          className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
           title="减小字号"
         >A-</button>
-        <span className="text-[10px]">{fontSize}px</span>
+        <span>{fontSize}px</span>
         <button
           onClick={() => setFontSize(s => Math.min(24, s + 1))}
-          className="px-1 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+          className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
           title="增大字号"
         >A+</button>
-        <span className="mx-1 text-black/10 dark:text-white/10">|</span>
+        <span className="mx-1 text-[#e0e0e0] dark:text-white/[0.08]">|</span>
         <button
           onClick={() => setLineHeight(h => Math.round(Math.max(1.2, h - 0.2) * 10) / 10)}
-          className="px-1 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+          className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
           title="减小行距"
         >≡-</button>
-        <span className="text-[10px]">{lineHeight.toFixed(1)}</span>
+        <span>{lineHeight.toFixed(1)}</span>
         <button
           onClick={() => setLineHeight(h => Math.round(Math.min(3.5, h + 0.2) * 10) / 10)}
-          className="px-1 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+          className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
           title="增大行距"
         >≡+</button>
       </div>

@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
+import { cn } from '@/lib/utils'
 import { SermonSidebar } from './SermonSidebar'
 import { SermonListPanel } from './SermonListPanel'
 import { SermonEditor } from './SermonEditor'
@@ -13,7 +14,6 @@ import { SermonTemplatePanel } from './SermonTemplatePanel'
 import { SermonReviewPanel } from './SermonReviewPanel'
 import { SermonSettingsPanel } from './SermonSettingsPanel'
 import { SermonEditorProvider } from './SermonEditorContext'
-import { cn } from '@/lib/utils'
 import { SermonErrorBoundary } from './SermonErrorBoundary'
 
 export function SermonTab() {
@@ -53,13 +53,16 @@ export function SermonTab() {
 
   return (
     <SermonEditorProvider isDark={isDarkMode}>
-      <div className="flex h-full bg-slate-50 dark:bg-slate-900 antialiased text-slate-900 dark:text-slate-100">
+      <div
+        className="flex h-full antialiased bg-[#f5f5f7] dark:bg-[#272729] text-[#1d1d1f] dark:text-white"
+        style={{ fontFamily: "'SF Pro Display', 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif" }}
+      >
         {/* Icon Sidebar */}
         <SermonSidebar />
 
         {/* Panel Area */}
         <div className={cn(
-          'border-r border-black/5 dark:border-white/10 transition-all duration-200 overflow-hidden',
+          'border-r border-black/[0.04] dark:border-white/[0.06] transition-all duration-200 overflow-hidden',
           activeSermonPanel === 'list' ? 'w-[280px]' : 'w-[300px]'
         )}>
           {activeSermonPanel === 'list' && <SermonListPanel />}
