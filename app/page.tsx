@@ -691,7 +691,7 @@ export default function Home() {
         </div>
 
         {/* Mobile Tab Bar - 向下滚动自动隐藏，向上滚动自动显示（与菜单栏一致） */}
-        {activeTab?.type !== 'sermon' && (
+        {activeTab?.type !== 'sermon' && !isAiOpen && (
         <div
           className={cn(
             "md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--glass-bg-light)] dark:bg-[var(--glass-bg-dark)] backdrop-blur-[20px] backdrop-saturate-[180%] border-t border-border flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
