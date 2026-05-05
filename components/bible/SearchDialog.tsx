@@ -43,7 +43,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-white dark:bg-card dark:border-border">
+      <DialogContent className="sm:max-w-lg bg-card dark:border-border">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground dark:text-foreground">
             <Search className="w-5 h-5" />
@@ -90,7 +90,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={3}
-              className="flex-1 w-full rounded-full border border-border dark:bg-card dark:border-border dark:text-foreground/80 px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-muted-foreground"
+              className="flex-1 w-full rounded-xl border border-border dark:bg-card dark:border-border dark:text-foreground/80 px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-muted-foreground"
               autoFocus
             />
             <Button onClick={handleSearch} className={cn("w-full rounded-full active:scale-95", mode === 'ai' && "bg-primary hover:bg-apple-focus")}>

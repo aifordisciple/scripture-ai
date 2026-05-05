@@ -190,13 +190,6 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     }
   }, [selectedVerses, enqueueAI, setAiOpen, setActiveQuickAction]);
 
-  // --- Apple HIG: No decorative idle animations ---
-  // Always stop and reset position - no breathing/bobbing
-  useEffect(() => {
-    controls.stop();
-    controls.set({ y: 0 });
-  }, [isAiGenerating, isRepositioning, isAiFinishedButUnseen, isAiOpen, isQueuePanelOpen, isRadialMenuOpen, controls]);
-
   // --- 监听 AI 状态变化 ---
   useEffect(() => {
     // 1. AI 生成完成的瞬间
@@ -367,6 +360,19 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
 
   // 关闭队列面板
   const closeQueuePanel = () => setIsQueuePanelOpen(false);
+
+  // 计算球体状态类名
+  const orbStateClass = cn(
+    isRepositioning ? "magic-orb--repositioning" :
+    isAiFinishedButUnseen ? "magic-orb--finished" :
+    isAiGenerating ? "magic-orb--generating" :
+    hasQueueContent ? "magic-orb--queued" :
+    isAiOpen ? "magic-orb--active" :
+    "magic-orb--idle"
+  );
+
+  // 图标阴影 — 确保在彩色球体上清晰可读
+  const iconDropShadow = "drop-shadow(0 1px 2px rgba(0,0,0,0.4))";
 
   return (
     <>
@@ -606,35 +612,35 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
       >
         <div
           data-magic-ball="true"
-          className={cn(
-            "relative w-full h-full rounded-full transition-all duration-300",
-            // Apple icon-circular: translucent chip background
-            "bg-[var(--apple-chip-translucent)]/64 dark:bg-white/10",
-            // State rings (Apple-style subtle indicators)
-            isRepositioning ? "ring-4 ring-primary/30 scale-110" :
-            (isAiFinishedButUnseen ? "ring-2 ring-primary/40" :
-            (isQueuePanelOpen ? "ring-2 ring-primary/40" :
-            (isAiGenerating ? "ring-2 ring-primary/20 animate-pulse" :
-            (hasQueueContent ? "ring-2 ring-primary/20" :
-            (isAiOpen ? "ring-2 ring-primary/15" : "")))))
-          )}
+          className={cn("magic-orb-container", orbStateClass)}
         >
-          {/* Core icon - Apple ink color */}
+          {/* Layer 2: Rotating conic-gradient */}
+          <div className="magic-orb-gradient" />
+
+          {/* Layer 3: 3D depth overlay (highlight + shadow) */}
+          <div className="magic-orb-depth" />
+
+          {/* Layer 4: Shimmer sweep */}
+          <div className="magic-orb-shimmer" />
+
+          {/* Layer 5: Icon with readability plate */}
           <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+            {/* Readability plate — subtle dark backdrop for icon contrast */}
+            <div className="absolute w-6 h-6 rounded-full bg-black/[0.08]" />
             {isRepositioning ? (
-              <Move className="w-5 h-5 text-foreground" />
+              <Move className="w-5 h-5 text-white" style={{ filter: iconDropShadow }} />
             ) : isAiFinishedButUnseen ? (
-              <MousePointerClick className="w-6 h-6 text-foreground" />
+              <MousePointerClick className="w-6 h-6 text-white" style={{ filter: iconDropShadow }} />
             ) : isQueuePanelOpen ? (
-              <ListOrdered className="w-5 h-5 text-foreground" />
+              <ListOrdered className="w-5 h-5 text-white" style={{ filter: iconDropShadow }} />
             ) : hasQueueContent && !isAiOpen ? (
-              <ListOrdered className="w-5 h-5 text-foreground" />
+              <ListOrdered className="w-5 h-5 text-white" style={{ filter: iconDropShadow }} />
             ) : isAiOpen ? (
-              <Sparkles className="w-5 h-5 text-foreground" />
+              <Sparkles className="w-5 h-5 text-white" style={{ filter: iconDropShadow }} />
             ) : isAiGenerating ? (
-              <Sparkles className="w-5 h-5 text-foreground animate-pulse" />
+              <Sparkles className="w-5 h-5 text-white animate-pulse" style={{ filter: iconDropShadow }} />
             ) : (
-              <Sparkles className="w-5 h-5 text-foreground" />
+              <Sparkles className="w-5 h-5 text-white" style={{ filter: iconDropShadow }} />
             )}
           </div>
 

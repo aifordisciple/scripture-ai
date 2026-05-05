@@ -5,7 +5,7 @@ export default function DashboardLoading() {
   return (
     <div className="min-h-screen bg-accent/50 dark:bg-card flex flex-col">
       {/* Header skeleton */}
-      <div className="bg-white dark:bg-card border-b dark:border-border px-6 py-4 flex items-center justify-between">
+      <div className="bg-card border-b dark:border-border px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-6 w-48" />
@@ -24,7 +24,7 @@ export default function DashboardLoading() {
           <Skeleton className="h-3 w-96 mt-2" />
         </div>
 
-        <div className="bg-white dark:bg-card rounded-2xl border dark:border-border p-6">
+        <div className="bg-card rounded-2xl border dark:border-border p-6">
           <div className="grid grid-cols-7 gap-2">
             {Array.from({ length: 35 }).map((_, i) => (
               <Skeleton key={i} className="h-8 w-full rounded" />

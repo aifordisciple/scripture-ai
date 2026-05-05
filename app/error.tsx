@@ -24,7 +24,7 @@ export default function GlobalError({
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <h2 className="text-xl font-bold text-foreground">
+          <h2 className="text-xl font-semibold text-foreground">
             {t('common.errorBoundaryTitle') || 'Something went wrong'}
           </h2>
           <p className="text-sm text-muted-foreground">

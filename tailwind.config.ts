@@ -203,6 +203,24 @@ const config = {
           from: { transform: "scale(1)", opacity: "1" },
           to: { transform: "scale(0.95)", opacity: "0" },
         },
+        "magic-orb-rotate": {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" },
+        },
+        "magic-orb-glow": {
+          "0%, 100%": {
+            boxShadow:
+              "0 0 12px 2px var(--magic-orb-glow-1), 0 0 24px 4px var(--magic-orb-glow-2), 0 2px 8px rgba(0, 0, 0, 0.08)",
+          },
+          "50%": {
+            boxShadow:
+              "0 0 16px 4px var(--magic-orb-glow-1), 0 0 32px 8px var(--magic-orb-glow-2), 0 2px 8px rgba(0, 0, 0, 0.08)",
+          },
+        },
+        "magic-orb-shimmer": {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -215,6 +233,9 @@ const config = {
         "slide-in-right": "slide-in-from-right var(--duration-normal) var(--ease-out)",
         "scale-in": "scale-in 150ms var(--ease-spring)",
         "scale-out": "scale-out 150ms var(--ease-default)",
+        "magic-orb-rotate": "magic-orb-rotate 10s linear infinite",
+        "magic-orb-glow": "magic-orb-glow 4s ease-in-out infinite",
+        "magic-orb-shimmer": "magic-orb-shimmer 5s ease-in-out infinite",
       },
     },
   },

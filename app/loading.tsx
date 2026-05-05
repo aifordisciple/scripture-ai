@@ -18,7 +18,7 @@ export default function Loading() {
 
         {/* 文字提示 */}
         <div className="flex flex-col items-center gap-2">
-          <h2 className="text-xl font-serif tracking-widest text-foreground font-bold">
+          <h2 className="text-xl font-serif tracking-widest text-foreground font-semibold">
             {t('common.appName')}
           </h2>
           <p className="text-sm text-muted-foreground tracking-widest">

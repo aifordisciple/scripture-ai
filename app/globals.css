@@ -144,6 +144,16 @@
   --glass-blur: blur(20px);
   --glass-saturate: saturate(180%);
 
+  /* === Magic Orb Tokens — Light === */
+  --magic-orb-color-1: #1e3a5f;
+  --magic-orb-color-2: #4a1942;
+  --magic-orb-color-3: #1a4a3a;
+  --magic-orb-color-4: #5c1a1a;
+  --magic-orb-highlight: rgba(255, 255, 255, 0.65);
+  --magic-orb-shadow: rgba(0, 0, 0, 0.2);
+  --magic-orb-glow-1: rgba(0, 102, 204, 0.25);
+  --magic-orb-glow-2: rgba(102, 51, 153, 0.15);
+
   /* === Typography Tokens === */
   --text-body: 17px;
   --lh-body: 1.47;
@@ -264,6 +274,16 @@
   /* === Dark Glass Tokens === */
   --glass-bg-light: rgba(39, 39, 41, 0.8);
   --glass-bg-dark: rgba(39, 39, 41, 0.8);
+
+  /* === Magic Orb Tokens — Dark === */
+  --magic-orb-color-1: #2563eb;
+  --magic-orb-color-2: #7c3aed;
+  --magic-orb-color-3: #059669;
+  --magic-orb-color-4: #dc2626;
+  --magic-orb-highlight: rgba(255, 255, 255, 0.5);
+  --magic-orb-shadow: rgba(0, 0, 0, 0.35);
+  --magic-orb-glow-1: rgba(41, 151, 255, 0.3);
+  --magic-orb-glow-2: rgba(139, 92, 246, 0.2);
 }
 
 @layer base {
@@ -627,6 +647,170 @@ body::-webkit-scrollbar-thumb:hover,
 }
 
 /* =========================================
+   Magic Orb 3D 球体动画系统
+   ========================================= */
+
+/* 渐变旋转 — 缓慢冥想般的旋转 */
+@keyframes magic-orb-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 发光脉冲 — 微妙的呼吸效果 */
+@keyframes magic-orb-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 12px 2px var(--magic-orb-glow-1),
+      0 0 24px 4px var(--magic-orb-glow-2),
+      0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    box-shadow:
+      0 0 16px 4px var(--magic-orb-glow-1),
+      0 0 32px 8px var(--magic-orb-glow-2),
+      0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* 微光扫过 — 光线反射 */
+@keyframes magic-orb-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 球体容器 */
+.magic-orb-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  animation: magic-orb-glow 4s ease-in-out infinite;
+}
+
+/* 旋转渐变层 */
+.magic-orb-gradient {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    var(--magic-orb-color-1),
+    var(--magic-orb-color-2),
+    var(--magic-orb-color-3),
+    var(--magic-orb-color-4),
+    var(--magic-orb-color-1)
+  );
+  animation: magic-orb-rotate 10s linear infinite;
+  will-change: transform;
+}
+
+/* 3D 深度叠加层 — 高光和阴影 */
+.magic-orb-depth {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      ellipse 60% 50% at 35% 30%,
+      var(--magic-orb-highlight) 0%,
+      rgba(255, 255, 255, 0.15) 40%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 80% 60% at 65% 75%,
+      var(--magic-orb-shadow) 0%,
+      transparent 60%
+    );
+  pointer-events: none;
+}
+
+/* 微光扫过层 */
+.magic-orb-shimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.25) 45%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.25) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: magic-orb-shimmer 5s ease-in-out infinite;
+  will-change: background-position;
+  pointer-events: none;
+}
+
+/* === 状态覆盖 === */
+
+/* AI 生成中 — 快速旋转，强烈发光 */
+.magic-orb--generating .magic-orb-gradient {
+  animation-duration: 2s;
+}
+.magic-orb--generating {
+  animation: magic-orb-glow 2s ease-in-out infinite;
+  box-shadow:
+    0 0 16px 4px var(--magic-orb-glow-1),
+    0 0 32px 8px var(--magic-orb-glow-2),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* AI 完成待查看 — 金色发光通知 */
+.magic-orb--finished {
+  animation: magic-orb-glow 1.5s ease-in-out infinite;
+  box-shadow:
+    0 0 16px 4px rgba(217, 119, 6, 0.4),
+    0 0 32px 8px rgba(217, 119, 6, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.magic-orb--finished .magic-orb-gradient {
+  animation-duration: 6s;
+}
+.magic-orb--finished .magic-orb-shimmer {
+  animation-duration: 2s;
+}
+
+/* 位置调整中 — 暂停动画，扩大发光 */
+.magic-orb--repositioning .magic-orb-gradient {
+  animation-play-state: paused;
+}
+.magic-orb--repositioning .magic-orb-shimmer {
+  animation-play-state: paused;
+}
+.magic-orb--repositioning {
+  animation: none;
+  box-shadow:
+    0 0 20px 6px var(--magic-orb-glow-1),
+    0 0 40px 12px var(--magic-orb-glow-2),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* AI 侧边栏打开 — 平静状态 */
+.magic-orb--active {
+  animation: magic-orb-glow 5s ease-in-out infinite;
+}
+
+/* 队列内容 — 略强发光 */
+.magic-orb--queued {
+  animation: magic-orb-glow 3s ease-in-out infinite;
+}
+
+/* === 减少运动偏好 === */
+@media (prefers-reduced-motion: reduce) {
+  .magic-orb-gradient,
+  .magic-orb-shimmer,
+  .magic-orb-container {
+    animation: none !important;
+  }
+  .magic-orb--generating .magic-orb-gradient {
+    animation: none !important;
+  }
+}
+
+/* =========================================
    iOS Safari 特定修复
    ========================================= */
 
@@ -644,9 +828,19 @@ body::-webkit-scrollbar-thumb:hover,
     border-radius: 50% !important;
   }
 
-  /* 波纹动画层特殊处理 */
+  /* 所有内部层强制圆形裁剪 */
   [data-magic-ball="true"] > div,
   [data-magic-ball="true"] > div > div {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    border-radius: 50% !important;
+    overflow: hidden;
+  }
+
+  /* 3D 球体各层特殊处理 */
+  [data-magic-ball="true"] .magic-orb-gradient,
+  [data-magic-ball="true"] .magic-orb-depth,
+  [data-magic-ball="true"] .magic-orb-shimmer {
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
     border-radius: 50% !important;

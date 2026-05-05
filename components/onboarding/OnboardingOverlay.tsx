@@ -105,7 +105,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="relative w-full max-w-md bg-white dark:bg-card rounded-3xl shadow-2xl overflow-hidden"
+          className="relative w-full max-w-md bg-card rounded-3xl overflow-hidden"
         >
           {/* 跳过按钮 */}
           <button
@@ -125,9 +125,9 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
                   className={cn(
                     "w-2 h-2 rounded-full transition-all duration-300",
                     index === currentStep
-                      ? "w-6 bg-gradient-to-r from-blue-500 to-purple-500"
+                      ? "w-6 bg-primary"
                       : index < currentStep
-                      ? "bg-blue-500"
+                      ? "bg-primary"
                       : "bg-accent dark:bg-accent"
                   )}
                 />
@@ -143,8 +143,8 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
                 transition={{ delay: 0.1 }}
                 className={cn(
                   "w-24 h-24 rounded-full flex items-center justify-center",
-                  "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900",
-                  "border-2 border-border dark:border-border"
+                  "bg-secondary",
+                  "border-2 border-border"
                 )}
               >
                 {step.icon}
@@ -197,9 +197,8 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
             <button
               onClick={handleNext}
               className={cn(
-                "flex items-center gap-1 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all",
-                "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600",
-                "text-white shadow-lg shadow-blue-500/25",
+                "flex items-center gap-1 px-6 py-2.5 rounded-full text-sm font-semibold transition-all",
+                "bg-primary text-primary-foreground",
                 "active:scale-95"
               )}
             >
@@ -223,9 +222,8 @@ function GestureHint({ type }: { type: string }) {
       <motion.div
         className={cn(
           "absolute w-10 h-10 rounded-full",
-          "bg-gradient-to-br from-blue-400 to-purple-500",
-          "flex items-center justify-center",
-          "shadow-lg"
+          "bg-primary",
+          "flex items-center justify-center"
         )}
         animate={getAnimation(type)}
         transition={{

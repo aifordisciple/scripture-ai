@@ -91,7 +91,7 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full text-sm md:text-xs font-semibold cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group/tab shrink-0 active:scale-95",
               activeTabId === tab.id
-                ? "bg-white dark:bg-card border-border dark:border-border text-primary"
+                ? "bg-card border-border dark:border-border text-primary"
                 : "bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-lg border-border/60 dark:border-white/10 text-muted-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.1]"
             )}
           >
@@ -371,7 +371,7 @@ export default function Home() {
 
       {/* Desktop Sidebar */}
       {isDesktopSidebarOpen && (
-        <aside className="hidden md:block w-72 h-full border-r bg-white dark:bg-background shrink-0 transition-all duration-300 z-20">
+        <aside className="hidden md:block w-72 h-full border-r bg-card shrink-0 transition-all duration-300 z-20">
           <Sidebar />
         </aside>
       )}
@@ -386,7 +386,7 @@ export default function Home() {
 
       {/* Mobile Settings Sheet */}
       <Sheet open={isMobileSettingsOpen} onOpenChange={setMobileSettingsOpen}>
-        <SheetContent side="bottom" className="bg-white dark:bg-background border-t-0 pb-6 rounded-t-2xl max-h-[85vh] overflow-y-auto">
+        <SheetContent side="bottom" className="bg-card border-t-0 pb-6 rounded-t-2xl max-h-[85vh] overflow-y-auto">
           <SheetHeader className="mb-4 pt-2">
             <SheetTitle className="text-foreground flex items-center gap-2">
               <Settings className="w-5 h-5 text-primary" /> {t('settings.title')}
@@ -511,7 +511,7 @@ export default function Home() {
             isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
-          <div className="pointer-events-auto rounded-2xl bg-white/40 dark:bg-black/40 backdrop-blur-xl backdrop-saturate-[180%] shadow-sm h-12 flex items-center justify-between px-2 md:px-3 gap-1">
+          <div className="pointer-events-auto rounded-2xl bg-card/40 dark:bg-card/40 backdrop-blur-xl backdrop-saturate-[180%] shadow-sm h-12 flex items-center justify-between px-2 md:px-3 gap-1">
             {/* Left side: mobile hamburger / desktop sidebar toggle + search */}
             <div className="flex items-center gap-1 shrink-0">
               <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
@@ -594,7 +594,7 @@ export default function Home() {
                   {showSettingsDropdown && (
                     <>
                       <div className="fixed inset-0 z-[100]" onClick={() => setShowSettingsDropdown(false)} />
-                      <div className="absolute right-0 top-full mt-2 w-64 bg-white/80 dark:bg-card/80 backdrop-blur-[20px] backdrop-saturate-[180%] border border-border/50 dark:border-border rounded-2xl z-[100] p-3 space-y-3 shadow-lg">
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-card/80 backdrop-blur-[20px] backdrop-saturate-[180%] border border-border/50 dark:border-border rounded-lg z-[100] p-3 space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground flex items-center gap-2">
                             {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}

@@ -52,7 +52,7 @@ export function OnboardingStep({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="relative w-full max-w-md bg-white dark:bg-card rounded-3xl shadow-2xl overflow-hidden"
+          className="relative w-full max-w-md bg-card rounded-3xl overflow-hidden"
         >
           {/* 跳过按钮 */}
           <button
@@ -72,9 +72,9 @@ export function OnboardingStep({
                   className={cn(
                     "w-2 h-2 rounded-full transition-all duration-300",
                     index === currentStep
-                      ? "w-6 bg-gradient-to-r from-blue-500 to-purple-500"
+                      ? "w-6 bg-primary"
                       : index < currentStep
-                      ? "bg-blue-500"
+                      ? "bg-primary"
                       : "bg-accent dark:bg-accent"
                   )}
                 />
@@ -98,8 +98,8 @@ export function OnboardingStep({
                   transition={{ delay: 0.1 }}
                   className={cn(
                     "w-24 h-24 rounded-full flex items-center justify-center",
-                    "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900",
-                    "border-2 border-border dark:border-border"
+                    "bg-secondary",
+                    "border-2 border-border"
                   )}
                 >
                   {step.icon}
@@ -117,7 +117,7 @@ export function OnboardingStep({
                 transition={{ duration: 0.2 }}
                 className="text-center"
               >
-                <h2 className="text-xl font-bold text-foreground dark:text-foreground mb-3">
+                <h2 className="text-xl font-semibold text-foreground mb-3">
                   {step.title}
                 </h2>
                 <p className="text-muted-foreground dark:text-foreground text-sm leading-relaxed">

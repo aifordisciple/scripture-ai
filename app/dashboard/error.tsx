@@ -23,7 +23,7 @@ export default function DashboardError({
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 px-4">
       <div className="flex flex-col items-center gap-4 max-w-md text-center">
         <AlertTriangle className="w-12 h-12 text-destructive" />
-        <h2 className="text-lg font-bold text-foreground">
+        <h2 className="text-lg font-semibold text-foreground">
           {t('common.errorBoundaryTitle') || 'Something went wrong'}
         </h2>
         <p className="text-sm text-muted-foreground">

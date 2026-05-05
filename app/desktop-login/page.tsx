@@ -203,7 +203,7 @@ export default function DesktopLoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground dark:text-foreground mb-2">
+          <h1 className="text-3xl font-semibold text-foreground dark:text-foreground mb-2">
             AI读
           </h1>
           <p className="text-muted-foreground dark:text-muted-foreground">
@@ -212,7 +212,7 @@ export default function DesktopLoginPage() {
         </div>
 
         {/* Login Form Card */}
-        <div className="bg-white dark:bg-card rounded-2xl shadow-xl p-8 border border-border dark:border-border">
+        <div className="bg-card rounded-2xl shadow-xl p-8 border border-border dark:border-border">
           <h2 className="text-xl font-semibold text-center mb-6 text-foreground dark:text-foreground">
             {isLogin ? "登录账户" : "创建账户"}
           </h2>

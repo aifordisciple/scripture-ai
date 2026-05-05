@@ -16,7 +16,7 @@ export default function NotFound() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background">
         <div className="text-6xl mb-4">📖</div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">404</h1>
+        <h1 className="text-2xl font-semibold text-foreground mb-2">404</h1>
       </div>
     )
   }
@@ -24,7 +24,7 @@ export default function NotFound() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4">
       <div className="text-6xl mb-4">📖</div>
-      <h1 className="text-2xl font-bold text-foreground mb-2">
+      <h1 className="text-2xl font-semibold text-foreground mb-2">
         {t('common.notFoundTitle')}
       </h1>
       <p className="text-muted-foreground mb-6 text-center">
