@@ -312,7 +312,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       {/* 左侧导航 */}
       <div className="hidden md:flex flex-1 self-stretch group items-start justify-center">
         <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }} title={t('reader.prevChapter')}>
-           <div className="bg-apple-chip/30 dark:bg-white/10 p-3 rounded-full text-muted-foreground hover:text-foreground dark:hover:text-white active:scale-95 transition-all duration-300">
+           <div className="bg-[var(--apple-chip-translucent)]/64 dark:bg-white/10 p-[10px] rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground dark:hover:text-white active:scale-95 transition-all duration-300">
               <ChevronLeft className="w-8 h-8 opacity-50 group-hover:opacity-100" />
            </div>
         </div>
@@ -353,7 +353,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             ) : (
                 <>  
                     <div className="flex items-center justify-center mb-10 md:mb-16 relative mt-4">
-                        <h1 className="text-3xl md:text-4xl font-serif font-semibold text-foreground dark:text-foreground select-none text-center tracking-wider">
+                        <h1 className="text-[34px] font-semibold tracking-[-0.374px] leading-[1.47] text-foreground select-none text-center">
                             {getBookDisplayName(book, locale)} <span className="opacity-80 mx-1">·</span> {chapter}
                         </h1>
                     </div>
@@ -385,7 +385,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                             )}
                         >
                             <span
-                              className={cn("font-sans font-semibold mr-4 select-none shrink-0 mt-[0.3em] transition-opacity duration-300", isSelected ? "text-primary opacity-100" : "text-foreground/50 group-hover/verse:text-foreground/70")}
+                              className={cn("text-[14px] font-regular tracking-[-0.224px] leading-[1.43] mr-4 select-none shrink-0 mt-[0.3em] transition-opacity duration-300", isSelected ? "text-primary opacity-100" : "text-foreground/50 group-hover/verse:text-foreground/70")}
                               style={{ fontSize: Math.max(fontSize * 0.55, 10) }}
                             >
                                 {verseNum}
@@ -393,7 +393,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
                             <div className="flex-1 min-w-0">
                                 <div
-                                  className={cn("font-serif tracking-wide transition-colors text-start", isSelected ? "text-foreground font-semibold" : "text-foreground/90")}
+                                  className={cn("text-[17px] font-regular tracking-[-0.374px] leading-[1.47] transition-colors text-start", isSelected ? "text-foreground font-semibold" : "text-foreground/90")}
                                   style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
                                 >
                                     {mainVerse.content}
@@ -455,7 +455,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       {/* 右侧导航 */}
       <div className="hidden md:flex flex-1 self-stretch group items-start justify-center">
         <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleNextChapter(); }} title={t('reader.nextChapter')}>
-           <div className="bg-apple-chip/30 dark:bg-white/10 p-3 rounded-full text-muted-foreground hover:text-foreground dark:hover:text-white active:scale-95 transition-all duration-300">
+           <div className="bg-[var(--apple-chip-translucent)]/64 dark:bg-white/10 p-[10px] rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground dark:hover:text-white active:scale-95 transition-all duration-300">
               <ChevronRight className="w-8 h-8 opacity-50 group-hover:opacity-100" />
            </div>
         </div>

@@ -608,33 +608,33 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
           data-magic-ball="true"
           className={cn(
             "relative w-full h-full rounded-full transition-all duration-300",
-            // Solid Action Blue background
-            "bg-primary dark:bg-primary",
-            // State rings (simplified)
+            // Apple icon-circular: translucent chip background
+            "bg-[var(--apple-chip-translucent)]/64 dark:bg-white/10",
+            // State rings (Apple-style subtle indicators)
             isRepositioning ? "ring-4 ring-primary/30 scale-110" :
             (isAiFinishedButUnseen ? "ring-2 ring-primary/40" :
             (isQueuePanelOpen ? "ring-2 ring-primary/40" :
-            (isAiGenerating ? "ring-2 ring-primary/20" :
+            (isAiGenerating ? "ring-2 ring-primary/20 animate-pulse" :
             (hasQueueContent ? "ring-2 ring-primary/20" :
             (isAiOpen ? "ring-2 ring-primary/15" : "")))))
           )}
         >
-          {/* Core icon - simple white icon on solid blue */}
+          {/* Core icon - Apple ink color */}
           <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
             {isRepositioning ? (
-              <Move className="w-5 h-5 text-white/90" />
+              <Move className="w-5 h-5 text-foreground" />
             ) : isAiFinishedButUnseen ? (
-              <MousePointerClick className="w-6 h-6 text-white" />
+              <MousePointerClick className="w-6 h-6 text-foreground" />
             ) : isQueuePanelOpen ? (
-              <ListOrdered className="w-5 h-5 text-white" />
+              <ListOrdered className="w-5 h-5 text-foreground" />
             ) : hasQueueContent && !isAiOpen ? (
-              <ListOrdered className="w-5 h-5 text-white" />
+              <ListOrdered className="w-5 h-5 text-foreground" />
             ) : isAiOpen ? (
-              <Sparkles className="w-5 h-5 text-white" />
+              <Sparkles className="w-5 h-5 text-foreground" />
             ) : isAiGenerating ? (
-              <Sparkles className="w-5 h-5 text-white animate-pulse" />
+              <Sparkles className="w-5 h-5 text-foreground animate-pulse" />
             ) : (
-              <Sparkles className="w-5 h-5 text-white" />
+              <Sparkles className="w-5 h-5 text-foreground" />
             )}
           </div>
 

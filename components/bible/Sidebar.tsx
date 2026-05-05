@@ -158,13 +158,13 @@ export function Sidebar() {
   return (
     <div className="flex flex-col h-full bg-transparent">
       
-      {/* 顶部标题与搜索栏 (毛玻璃悬浮效果) */}
-      <div className="pt-6 pb-4 px-4 shrink-0 glass-nav rounded-none border-x-0 border-t-0 border-b border-border dark:border-border z-10 sticky top-0">
+      {/* 顶部标题与搜索栏 (Apple frosted sub-nav style) */}
+      <div className="pt-6 pb-4 px-4 shrink-0 bg-[var(--glass-bg-light)] dark:bg-[var(--glass-bg-dark)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border z-10 sticky top-0">
         <div className="flex items-center gap-2.5 mb-5 px-2">
            <div className="p-1.5 bg-primary/10 rounded-lg">
              <Library className="w-5 h-5 text-primary" />
            </div>
-           <h2 className="text-xl font-serif font-semibold text-foreground tracking-widest select-none">{t('sidebar.title')}</h2>
+           <h2 className="text-[21px] font-semibold tracking-[0.231px] text-foreground select-none">{t('sidebar.title')}</h2>
         </div>
         
         <div className="relative group">
