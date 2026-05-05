@@ -512,7 +512,7 @@ export default function Home() {
           )}
         >
           <div className="pointer-events-auto rounded-2xl bg-white/70 dark:bg-black/60 backdrop-blur-[20px] backdrop-saturate-[180%] shadow-sm h-12 flex items-center justify-between px-2 md:px-3 gap-1">
-            {/* Left side: mobile hamburger / desktop sidebar toggle / desktop logo */}
+            {/* Left side: mobile hamburger / desktop sidebar toggle + search */}
             <div className="flex items-center gap-1 shrink-0">
               <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
                 <Menu className="h-5 w-5" />
@@ -520,7 +520,14 @@ export default function Home() {
               <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-muted-foreground" : "text-foreground")} onClick={toggleDesktopSidebar}>
                 <PanelLeft className="h-5 w-5" />
               </Button>
-              <span className="hidden md:block text-xs font-regular tracking-tight select-none text-foreground/70">AI读</span>
+              {/* Desktop: search button */}
+              <button
+                className="hidden md:flex items-center gap-1.5 rounded-full bg-black/[0.04] dark:bg-white/10 hover:bg-black/[0.07] dark:hover:bg-white/15 px-3 py-1 text-xs text-foreground/60 active:scale-95 transition-colors pointer-events-auto"
+                onClick={() => setIsSearchOpen(true)}
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>{t('reader.searchPlaceholder')}</span>
+              </button>
             </div>
 
             {/* Mobile: Book/chapter name */}
@@ -561,15 +568,6 @@ export default function Home() {
               <Button variant="ghost" size="icon" className="md:hidden flex text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
                 <Search className="h-5 w-5" />
               </Button>
-
-              {/* Desktop: search button */}
-              <button
-                className="hidden md:flex items-center gap-1.5 rounded-full bg-black/[0.04] dark:bg-white/10 hover:bg-black/[0.07] dark:hover:bg-white/15 px-3 py-1 text-xs text-foreground/60 active:scale-95 transition-colors pointer-events-auto"
-                onClick={() => setIsSearchOpen(true)}
-              >
-                <Search className="w-3.5 h-3.5" />
-                <span>{t('reader.searchPlaceholder')}</span>
-              </button>
 
               {/* Desktop: right-side tools */}
               <div className="hidden sm:flex items-center gap-1">
