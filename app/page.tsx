@@ -5,6 +5,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { Sidebar } from "@/components/bible/Sidebar";
 import { Slider } from "@/components/ui/slider";
 import { useBibleStore } from "@/store/useBibleStore";
@@ -221,10 +222,11 @@ export default function Home() {
     prevTextRef.current = chapterSpeechText;
   }, [chapterSpeechText, player]);
 
+  const { setTheme } = useTheme();
+
   useEffect(() => {
-    if (isDarkMode) { document.documentElement.classList.add('dark'); } 
-    else { document.documentElement.classList.remove('dark'); }
-  }, [isDarkMode]);
+    setTheme(isDarkMode ? "dark" : "light");
+  }, [isDarkMode, setTheme]);
 
   useEffect(() => {
     const handleFullscreenChange = () => { setIsFullscreen(!!document.fullscreenElement); };
