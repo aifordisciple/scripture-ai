@@ -56,16 +56,16 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
   };
 
   return (
-    <div className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl shadow-black/15 border border-slate-200 dark:border-slate-700 overflow-hidden z-[9999]">
+    <div className="relative bg-white dark:bg-[#272729] rounded-lg border border-[#e0e0e0] dark:border-[#3a3a3c] overflow-hidden z-[9999]">
       {/* 头部 */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700">
+      <div className="flex items-center justify-between p-4 border-b border-[#e0e0e0] dark:border-[#3a3a3c]">
         <div className="flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-          <h3 className="font-semibold text-slate-900 dark:text-white">{location.nameZh}</h3>
+          <MapPin className="w-5 h-5 text-[#0066cc] dark:text-[#4d9fe0]" />
+          <h3 className="font-semibold text-[#1d1d1f] dark:text-white">{location.nameZh}</h3>
         </div>
         <button
           onClick={onClose}
-          className="p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400"
+          className="p-1 rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] text-[#7a7a7a] active:scale-95"
         >
           <X className="w-4 h-4" />
         </button>
@@ -74,18 +74,18 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
       {/* 内容 */}
       <div className="p-4 space-y-3">
         {/* 英文名 */}
-        <div className="text-sm text-slate-500 dark:text-slate-400">
+        <div className="text-sm text-[#7a7a7a] dark:text-[#7a7a7a]">
           {location.nameEn}
         </div>
 
         {/* 区域 */}
         {location.region && (
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs rounded-full">
+            <span className="px-2 py-0.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#4d9fe0] text-xs rounded-full">
               {location.region}
             </span>
             {location.modernCountry && (
-              <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-full">
+              <span className="px-2 py-0.5 bg-[#f5f5f7] dark:bg-[#3a3a3c] text-[#1d1d1f] dark:text-[#7a7a7a] text-xs rounded-full">
                 {location.modernCountry}
               </span>
             )}
@@ -94,16 +94,16 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
 
         {/* 描述 */}
         {location.description && (
-          <p className="text-sm text-slate-600 dark:text-slate-300">
+          <p className="text-sm text-[#1d1d1f] dark:text-[#e0e0e0]">
             {location.description}
           </p>
         )}
 
         {/* 圣经意义 */}
         {location.significance && (
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
-            <div className="text-xs text-slate-400 mb-1">{t('atlas.biblicalSignificance')}</div>
-            <p className="text-sm text-slate-700 dark:text-slate-200">
+          <div className="pt-2 border-t border-[#e0e0e0] dark:border-[#3a3a3c]">
+            <div className="text-xs text-[#7a7a7a] mb-1">{t('atlas.biblicalSignificance')}</div>
+            <p className="text-sm text-[#1d1d1f] dark:text-[#e0e0e0]">
               {location.significance}
             </p>
           </div>
@@ -111,10 +111,10 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
 
         {/* 相关经文 */}
         {loading ? (
-          <div className="text-xs text-slate-400">{t('atlas.loadingRelatedVerses')}</div>
+          <div className="text-xs text-[#7a7a7a]">{t('atlas.loadingRelatedVerses')}</div>
         ) : verseLocations.length > 0 && (
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
-            <div className="text-xs text-slate-400 mb-2">{t('atlas.relatedVerses')}</div>
+          <div className="pt-2 border-t border-[#e0e0e0] dark:border-[#3a3a3c]">
+            <div className="text-xs text-[#7a7a7a] mb-2">{t('atlas.relatedVerses')}</div>
             <div className="flex flex-wrap gap-1">
               {verseLocations.map((vl, index) => (
                 <button
@@ -127,7 +127,7 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
                     setAtlasPanelOpen(false);
                     onClose();
                   }}
-                  className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  className="px-2 py-0.5 bg-[#f5f5f7] dark:bg-[#3a3a3c] text-[#1d1d1f] dark:text-[#7a7a7a] text-xs rounded cursor-pointer hover:bg-[#0066cc]/10 dark:hover:bg-[#0066cc]/20 hover:text-[#0066cc] dark:hover:text-[#4d9fe0] transition-colors active:scale-95"
                 >
                   {vl.bookId} {vl.chapter}:{vl.verse}
                 </button>
@@ -141,7 +141,7 @@ export default function LocationCard({ location, onClose }: LocationCardProps) {
       <div className="flex gap-2 p-4 pt-0">
         <button
           onClick={handleViewVerses}
-          className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium text-[#0066cc] dark:text-[#4d9fe0] bg-[#0066cc]/10 dark:bg-[#0066cc]/20 rounded-lg hover:bg-[#0066cc]/20 dark:hover:bg-[#0066cc]/30 transition-colors active:scale-95"
         >
           <BookOpen className="w-4 h-4" />
           {t('atlas.viewAllRelatedVerses')}

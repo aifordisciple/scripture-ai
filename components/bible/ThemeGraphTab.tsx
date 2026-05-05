@@ -42,18 +42,18 @@ interface ThemeConnection {
 }
 
 const CATEGORY_CONFIG: Record<string, { labelKey: string; color: string; bgColor: string }> = {
-  THEOLOGICAL: { labelKey: "bible.categoryTheological", color: "text-blue-600", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
-  ETHICAL: { labelKey: "bible.categoryEthical", color: "text-green-600", bgColor: "bg-green-100 dark:bg-green-900/30" },
-  HISTORICAL: { labelKey: "bible.categoryHistorical", color: "text-amber-600", bgColor: "bg-amber-100 dark:bg-amber-900/30" },
-  PROPHETIC: { labelKey: "bible.categoryProphetic", color: "text-purple-600", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
+  THEOLOGICAL: { labelKey: "bible.categoryTheological", color: "text-[#0066cc]", bgColor: "bg-[#0066cc]/5 dark:bg-[#0066cc]/10" },
+  ETHICAL: { labelKey: "bible.categoryEthical", color: "text-[#0066cc]", bgColor: "bg-[#0066cc]/10 dark:bg-[#0066cc]/20" },
+  HISTORICAL: { labelKey: "bible.categoryHistorical", color: "text-[#0066cc]", bgColor: "bg-[#0066cc]/5 dark:bg-[#0066cc]/10" },
+  PROPHETIC: { labelKey: "bible.categoryProphetic", color: "text-[#0066cc]", bgColor: "bg-[#0066cc]/10 dark:bg-[#0066cc]/20" },
 };
 
 const CONNECTION_TYPE_CONFIG: Record<string, { labelKey: string; color: string }> = {
-  PARENT: { labelKey: "bible.connParent", color: "text-blue-500" },
-  CHILD: { labelKey: "bible.connChild", color: "text-green-500" },
-  RELATED: { labelKey: "bible.connRelated", color: "text-amber-500" },
+  PARENT: { labelKey: "bible.connParent", color: "text-[#0066cc]" },
+  CHILD: { labelKey: "bible.connChild", color: "text-[#0066cc]" },
+  RELATED: { labelKey: "bible.connRelated", color: "text-[#0066cc]" },
   CONTRAST: { labelKey: "bible.connContrast", color: "text-red-500" },
-  FULFILLS: { labelKey: "bible.connFulfills", color: "text-purple-500" },
+  FULFILLS: { labelKey: "bible.connFulfills", color: "text-[#0066cc]" },
 };
 
 export function ThemeGraphTab() {
@@ -171,8 +171,8 @@ export function ThemeGraphTab() {
         key={theme.id}
         onClick={() => setSelectedTheme(selectedTheme?.id === theme.id ? null : theme)}
         className={cn(
-          "group relative p-4 rounded-xl cursor-pointer border shadow-sm hover:shadow-md transition-all duration-300",
-          "bg-white dark:bg-slate-900 dark:border-slate-800",
+          "group relative p-4 rounded-xl cursor-pointer border transition-all duration-300",
+          "bg-white dark:bg-[#272729] dark:border-[#3a3a3c]",
           selectedTheme?.id === theme.id && "ring-2 ring-primary/50"
         )}
       >
@@ -202,7 +202,7 @@ export function ThemeGraphTab() {
           />
         </div>
 
-        <h3 className="font-bold text-foreground mb-1">{theme.nameZh}</h3>
+        <h3 className="font-semibold text-foreground mb-1">{theme.nameZh}</h3>
         {theme.nameEn && (
           <p className="text-xs text-muted-foreground mb-2">{theme.nameEn}</p>
         )}
@@ -216,7 +216,7 @@ export function ThemeGraphTab() {
 
         {/* 展开的详情 */}
         {selectedTheme?.id === theme.id && (
-          <div className="mt-4 pt-4 border-t dark:border-slate-800 space-y-3">
+          <div className="mt-4 pt-4 border-t dark:border-[#3a3a3c] space-y-3">
             {theme.summary && (
               <p className="text-sm text-foreground/80">{theme.summary}</p>
             )}
@@ -235,7 +235,7 @@ export function ThemeGraphTab() {
                         key={conn.id}
                         className={cn(
                           "px-2 py-1 text-xs rounded-full border",
-                          "bg-slate-50 dark:bg-slate-800",
+                          "bg-[#f5f5f7] dark:bg-[#1d1d1f]",
                           connConfig.color
                         )}
                       >
@@ -260,7 +260,7 @@ export function ThemeGraphTab() {
                         e.stopPropagation();
                         handleVerseClick(verse);
                       }}
-                      className="px-2 py-1 text-xs rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      className="px-2 py-1 text-xs rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors active:scale-95"
                     >
                       {verse}
                     </button>
@@ -277,12 +277,12 @@ export function ThemeGraphTab() {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
       {/* 头部 */}
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-slate-800">
-        <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-[#3a3a3c]">
+        <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#0066cc] rounded-xl">
           <Network className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('bible.themeGraph')}</h1>
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">{t('bible.themeGraph')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {t('bible.exploreThemeHint')}
           </p>
@@ -297,12 +297,12 @@ export function ThemeGraphTab() {
             placeholder={t('bible.searchTheme')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10"
+            className="pl-10 pr-10 bg-[#f5f5f7] dark:bg-[#1d1d1f] border border-[#e0e0e0] dark:border-[#3a3a3c] rounded-full"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground active:scale-95"
             >
               <X className="w-4 h-4" />
             </button>
@@ -316,6 +316,7 @@ export function ThemeGraphTab() {
               variant={selectedCategory === null ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(null)}
+              className="active:scale-95"
             >
               {t('bible.allCategories')}
             </Button>
@@ -325,6 +326,7 @@ export function ThemeGraphTab() {
                 variant={selectedCategory === key ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(key)}
+                className="active:scale-95"
               >
                 {t(config.labelKey)}
               </Button>
@@ -355,7 +357,7 @@ export function ThemeGraphTab() {
               <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <h2
                   className={cn(
-                    "text-lg font-bold mb-4 flex items-center gap-2",
+                    "text-lg font-semibold mb-4 flex items-center gap-2",
                     config.color
                   )}
                 >

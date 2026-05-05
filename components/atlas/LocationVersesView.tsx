@@ -52,14 +52,14 @@ export default function LocationVersesView({ locationId, locationName, onBack }:
   return (
     <div className="flex flex-col h-full">
       {/* 头部 */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-[#e0e0e0] dark:border-[#3a3a3c]">
         <button
           onClick={onBack}
-          className="p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500"
+          className="p-1 rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] text-[#7a7a7a] active:scale-95"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h3 className="font-semibold text-slate-900 dark:text-white">
+        <h3 className="font-semibold text-[#1d1d1f] dark:text-white">
           {t('atlas.relatedVersesOf', { locationName })}
         </h3>
       </div>
@@ -68,22 +68,22 @@ export default function LocationVersesView({ locationId, locationName, onBack }:
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-indigo-500 mr-2" />
-            <span className="text-slate-500">{t('atlas.loadingVerses')}</span>
+            <Loader2 className="w-6 h-6 animate-spin text-[#0066cc] mr-2" />
+            <span className="text-[#7a7a7a]">{t('atlas.loadingVerses')}</span>
           </div>
         ) : verses.length === 0 ? (
-          <div className="text-center py-8 text-slate-400">
+          <div className="text-center py-8 text-[#7a7a7a]">
             {t('atlas.noRelatedVerses')}
           </div>
         ) : (
           <>
-            <div className="text-sm text-slate-500 mb-4">
+            <div className="text-sm text-[#7a7a7a] mb-4">
               {t('atlas.foundVersesCount', { count: verses.length })}
             </div>
             {verses.map((verse, index) => (
               <div
                 key={`${verse.bookId}-${verse.chapter}-${verse.verse}`}
-                className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700"
+                className="p-3 bg-[#f5f5f7] dark:bg-[#1d1d1f] rounded-lg border border-[#e0e0e0] dark:border-[#3a3a3c]"
               >
                 {/* 经文出处 */}
                 <button
@@ -95,14 +95,14 @@ export default function LocationVersesView({ locationId, locationName, onBack }:
                     setAtlasPanelOpen(false);
                     onBack();
                   }}
-                  className="flex items-center gap-2 mb-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                  className="flex items-center gap-2 mb-2 text-sm font-medium text-[#0066cc] dark:text-[#4d9fe0] hover:underline active:scale-95"
                 >
                   <BookOpen className="w-4 h-4" />
                   {verse.bookId} {verse.chapter}:{verse.verse}
                   {verse.verseEnd && verse.verseEnd !== verse.verse ? `-${verse.verseEnd}` : ''}
                 </button>
                 {/* 经文内容 */}
-                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                <p className="text-sm text-[#1d1d1f] dark:text-[#e0e0e0] leading-relaxed">
                   {verse.content}
                 </p>
               </div>
@@ -112,7 +112,7 @@ export default function LocationVersesView({ locationId, locationName, onBack }:
             {hasMore && (
               <button
                 onClick={() => setPage(p => p + 1)}
-                className="w-full py-2 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl"
+                className="w-full py-2 text-sm text-[#0066cc] dark:text-[#4d9fe0] hover:bg-[#0066cc]/10 dark:hover:bg-[#0066cc]/20 rounded-lg active:scale-95"
               >
                 {t('atlas.foundVersesCount', { count: verses.length })}
               </button>

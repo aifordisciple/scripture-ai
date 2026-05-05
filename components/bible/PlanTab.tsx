@@ -186,11 +186,11 @@ export function PlanTab() {
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-             <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold mb-2">
+             <div className="flex items-center gap-2 text-[#0066cc] dark:text-[#0066cc]/80 font-semibold mb-2">
                 <Calendar className="w-5 h-5" />
                 <span className="text-sm uppercase tracking-widest">{t('plan.inProgress')}</span>
              </div>
-             <h1 className="text-2xl md:text-3xl font-bold text-foreground font-serif flex items-center gap-3">
+             <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif flex items-center gap-3">
                 {tDual(planDetails.title, planDetails.titleEn)}
                 {isTotallyCompleted && <Medal className="w-8 h-8 text-yellow-500 drop-shadow-md animate-bounce" />}
              </h1>
@@ -202,20 +202,20 @@ export function PlanTab() {
           </Button>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border dark:border-slate-800 shadow-sm mb-8">
+        <div className="bg-white dark:bg-[#272729] rounded-lg p-5 border dark:border-[#1d1d1f] mb-8">
            <div className="flex justify-between text-sm font-medium mb-2">
-              <span className="text-slate-600 dark:text-slate-300">{t('plan.overallProgress')}</span>
-              <span className="text-indigo-600 dark:text-indigo-400 font-bold">{progressPercent}% ({completedDaysCount}/{totalDays})</span>
+              <span className="text-[#1d1d1f] dark:text-[#7a7a7a]">{t('plan.overallProgress')}</span>
+              <span className="text-[#0066cc] dark:text-[#0066cc]/80 font-semibold">{progressPercent}% ({completedDaysCount}/{totalDays})</span>
            </div>
-           <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }} />
+           <div className="h-2.5 w-full bg-[#e0e0e0] dark:bg-[#1d1d1f] rounded-full overflow-hidden">
+              <div className="h-full bg-[#0066cc] transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }} />
            </div>
         </div>
 
         {/* 今日快速操作 */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <Button 
-            className="flex-1 h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg gap-2 shadow-lg shadow-indigo-200"
+            className="flex-1 h-14 rounded-full bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-white font-semibold text-lg gap-2"
             onClick={() => {
                 // 逻辑：构建智能流式阅读步骤
                 const day = calculateLogicDay(activeData.startDate);
@@ -255,7 +255,7 @@ export function PlanTab() {
           
           <Button 
             variant="outline" 
-            className="h-14 rounded-2xl border-2 border-indigo-100 text-indigo-600 font-bold px-6"
+            className="h-14 rounded-full border-2 border-[#0066cc]/10 text-[#0066cc] font-semibold px-6 active:scale-95"
             onClick={() => {
               catchUpPlan(viewingPlanId);
             }}
@@ -282,23 +282,23 @@ export function PlanTab() {
 
              return (
                <div key={task.day} className={cn(
-                  "flex flex-col gap-3 p-4 rounded-2xl border transition-all duration-300",
-                  isCompleted ? "bg-slate-50 border-slate-100 dark:bg-slate-900/50 dark:border-slate-800/50 opacity-60"
-                  : isToday ? "bg-indigo-50/50 border-indigo-300 dark:bg-indigo-900/30 dark:border-indigo-500/50 shadow-md ring-1 ring-indigo-500/20"
-                  : "bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 shadow-sm hover:border-indigo-200"
+                  "flex flex-col gap-3 p-4 rounded-lg border transition-all duration-300",
+                  isCompleted ? "bg-[#f5f5f7] border-[#e0e0e0] dark:bg-[#272729]/50 dark:border-[#1d1d1f]/50 opacity-60"
+                  : isToday ? "bg-[#0066cc]/5 border-[#0066cc]/30 dark:bg-[#0066cc]/10 dark:border-[#0066cc]/50 ring-1 ring-[#0066cc]/20"
+                  : "bg-white border-[#e0e0e0] dark:bg-[#272729] dark:border-[#1d1d1f] hover:border-[#0066cc]/20"
                )}>
                    <div className="flex flex-col md:flex-row md:items-center gap-4">
                      <div className="flex items-center gap-4 md:w-36 shrink-0">
                         <button
                           onClick={() => toggleTaskCompleted(viewingPlanId, task.day, 'devotional')}
-                          className="shrink-0 hover:scale-110 transition-transform focus-visible:ring-2 focus-visible:ring-indigo-400"
+                          className="shrink-0 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-[#0066cc]/40"
                         >
-                          {completedTasks.includes('devotional') ? <CheckCircle2 className="w-7 h-7 text-indigo-500" /> : <Circle className="w-7 h-7 text-slate-300 dark:text-slate-600 hover:text-indigo-400" />}
+                          {completedTasks.includes('devotional') ? <CheckCircle2 className="w-7 h-7 text-[#0066cc]" /> : <Circle className="w-7 h-7 text-[#e0e0e0] dark:text-[#7a7a7a] hover:text-[#0066cc]/60" />}
                         </button>
                         <div className="flex flex-col">
-                           <span className="font-bold text-lg text-slate-700 dark:text-slate-200">{t('plan.day', { day: task.day })}</span>
+                           <span className="font-semibold text-lg text-[#1d1d1f] dark:text-[#e0e0e0]">{t('plan.day', { day: task.day })}</span>
                            <div className="flex items-center gap-1.5 mt-0.5">
-                             <span className={cn("text-xs font-medium", isToday ? "text-indigo-600 dark:text-indigo-400" : "text-slate-500 dark:text-slate-400")}>
+                             <span className={cn("text-xs font-medium", isToday ? "text-[#0066cc] dark:text-[#0066cc]/80" : "text-[#7a7a7a] dark:text-[#7a7a7a]")}>
                                {isToday ? t('plan.today') : dateStr}
                              </span>
                              {isBehind && <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-bold whitespace-nowrap">{t('plan.behind')}</span>}
@@ -315,8 +315,8 @@ export function PlanTab() {
                              className={cn(
                                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border group",
                                isTaskCompleted
-                                 ? "bg-transparent border-slate-200 dark:border-slate-700 text-slate-500"
-                                 : "bg-indigo-50 border-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800/50 dark:text-indigo-300"
+                                 ? "bg-transparent border-[#e0e0e0] dark:border-[#1d1d1f] text-[#7a7a7a]"
+                                 : "bg-[#0066cc]/5 border-[#0066cc]/10 text-[#0071e3] dark:bg-[#0066cc]/10 dark:border-[#0066cc]/20 dark:text-[#0066cc]/80"
                              )}
                            >
                               {/* 1. 独立的圆圈状态切换区 */}
@@ -325,7 +325,7 @@ export function PlanTab() {
                                   e.stopPropagation();
                                   toggleTaskCompleted(viewingPlanId, task.day, taskKey);
                                 }}
-                                className="shrink-0 hover:scale-110 transition-transform focus-visible:ring-2 focus-visible:ring-indigo-400 flex items-center justify-center"
+                                className="shrink-0 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-[#0066cc]/40 flex items-center justify-center"
                               >
                                 {isTaskCompleted ? (
                                   <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -354,12 +354,12 @@ export function PlanTab() {
                     </div>
                      {/* 下半部分：动态 AI 导读渲染 */}
                      {(task.devotional || activeData.savedDevotionals?.[task.day]) && (
-                        <div className="mt-1 md:ml-[9.5rem] bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded-xl border border-indigo-100/60 dark:border-indigo-800/30 relative">
-                          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-serif whitespace-pre-wrap">
+                        <div className="mt-1 md:ml-[9.5rem] bg-[#0066cc]/5 dark:bg-[#0066cc]/5 p-3 rounded-xl border border-[#0066cc]/10 dark:border-[#0066cc]/15 relative">
+                          <p className="text-sm text-[#1d1d1f] dark:text-[#7a7a7a] leading-relaxed font-serif whitespace-pre-wrap">
                             {task.devotional || activeData.savedDevotionals?.[task.day]}
                           </p>
                            {/* AI 生成标记 */}
-                           {!task.devotional && <Sparkles className="w-4 h-4 text-indigo-400 absolute top-2 right-2 opacity-30" />}
+                           {!task.devotional && <Sparkles className="w-4 h-4 text-[#0066cc]/60 absolute top-2 right-2 opacity-30" />}
                          </div>
                       )}
                </div>
@@ -389,12 +389,12 @@ export function PlanTab() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
-      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
-        <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-[#1d1d1f]">
+        <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/15 text-[#0066cc] dark:text-[#0066cc]/80 rounded-xl">
            <Calendar className="w-6 h-6" />
         </div>
         <div>
-           <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('plan.title')}</h1>
+           <h1 className="text-2xl font-semibold text-foreground tracking-tight">{t('plan.title')}</h1>
            <p className="text-sm text-muted-foreground mt-1">{t('plan.subtitle')}</p>
         </div>
         {bgGenerating && (
@@ -408,7 +408,7 @@ export function PlanTab() {
       {/* 我的计划 (正在进行) */}
       {inProgressPlans.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-lg font-bold text-foreground mb-4">{t('plan.myPlansCount', { count: inProgressPlans.length })}</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">{t('plan.myPlansCount', { count: inProgressPlans.length })}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {inProgressPlans.map((plan) => {
               const activeData = activePlans.find(p => p.planId === plan.id)!;
@@ -423,7 +423,7 @@ export function PlanTab() {
               const isTotallyCompleted = completedDaysCount >= plan.durationDays;
 
               return (
-                <div key={plan.id} role="button" tabIndex={0} className="relative flex flex-col bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-indigo-100 dark:border-indigo-900 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group" onClick={() => setViewingPlanId(plan.id)}>
+                <div key={plan.id} role="button" tabIndex={0} className="relative flex flex-col bg-white dark:bg-[#272729] rounded-lg p-6 border-2 border-[#0066cc]/10 dark:border-[#0066cc]/20 hover:bg-black/[0.02] transition-all cursor-pointer overflow-hidden group" onClick={() => setViewingPlanId(plan.id)}>
                    {/* 自定义计划删除按钮 */}
                    {plan.id.startsWith('custom-') && (
                      <button
@@ -433,21 +433,21 @@ export function PlanTab() {
                          setPendingDeleteAction(() => deleteCustomPlan);
                          setShowDeleteConfirm(true);
                        }}
-                       className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                       className="absolute top-4 right-4 p-2 text-[#e0e0e0] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                      >
                        <Trash2 className="w-4 h-4" />
                      </button>
                    )}
                    {isTotallyCompleted && (
-                     <div className="absolute -top-3 -right-3 bg-gradient-to-br from-yellow-300 to-yellow-500 p-4 rounded-full shadow-lg border-4 border-white dark:border-slate-900 transform rotate-12">
+                     <div className="absolute -top-3 -right-3 bg-yellow-400 p-4 rounded-full border-4 border-white dark:border-[#272729] transform rotate-12">
                         <Medal className="w-7 h-7 text-white" />
                      </div>
                    )}
-                   <h3 className="text-xl font-bold text-indigo-900 dark:text-indigo-300 font-serif mb-1 pr-10">{tDual(plan.title, plan.titleEn)}</h3>
+                   <h3 className="text-xl font-semibold text-[#1d1d1f] dark:text-[#0066cc]/80 font-serif mb-1 pr-10">{tDual(plan.title, plan.titleEn)}</h3>
                    <div className="flex justify-between items-center mt-auto pt-6">
                       <div className="flex-1 mr-4">
-                        <div className="flex justify-between text-xs mb-1 font-medium text-slate-500"><span className="text-indigo-600">{progressPercent}%</span><span>{t('plan.durationDays', { count: plan.durationDays })}</span></div>
-                        <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-indigo-500" style={{ width: `${progressPercent}%` }}/></div>
+                        <div className="flex justify-between text-xs mb-1 font-medium text-[#7a7a7a]"><span className="text-[#0066cc]">{progressPercent}%</span><span>{t('plan.durationDays', { count: plan.durationDays })}</span></div>
+                        <div className="h-1.5 w-full bg-[#e0e0e0] dark:bg-[#1d1d1f] rounded-full overflow-hidden"><div className="h-full bg-[#0066cc]" style={{ width: `${progressPercent}%` }}/></div>
                        </div>
                        <Button
                           variant={isTotallyCompleted ? "secondary" : "default"}
@@ -473,7 +473,7 @@ export function PlanTab() {
       {/* 荣誉墙 (已完成的计划) */}
       {archivedPlans.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
             <Medal className="w-5 h-5 text-yellow-500" /> {t('plan.honorWallCount', { count: archivedPlans.length })}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

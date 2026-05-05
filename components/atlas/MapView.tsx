@@ -222,9 +222,9 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
 
   if (loading) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800">
-        <Loader2 className="w-6 h-6 animate-spin text-indigo-500 mr-2" />
-        <span className="text-slate-500">{t('atlas.loadingLocationData')}</span>
+      <div className="w-full h-full flex items-center justify-center bg-[#f5f5f7] dark:bg-[#1d1d1f]">
+        <Loader2 className="w-6 h-6 animate-spin text-[#0066cc] mr-2" />
+        <span className="text-[#7a7a7a]">{t('atlas.loadingLocationData')}</span>
       </div>
     );
   }
@@ -237,31 +237,31 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
       <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
         <button
           onClick={() => mapInstanceRef.current?.zoomIn()}
-          className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg shadow-black/10 hover:bg-slate-50 dark:hover:bg-slate-700"
+          className="p-2 bg-white dark:bg-[#272729] rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] active:scale-95"
         >
-          <Plus className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+          <Plus className="w-5 h-5 text-[#1d1d1f] dark:text-[#e0e0e0]" />
         </button>
         <button
           onClick={() => mapInstanceRef.current?.zoomOut()}
-          className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg shadow-black/10 hover:bg-slate-50 dark:hover:bg-slate-700"
+          className="p-2 bg-white dark:bg-[#272729] rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] active:scale-95"
         >
-          <Minus className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+          <Minus className="w-5 h-5 text-[#1d1d1f] dark:text-[#e0e0e0]" />
         </button>
         <button
           onClick={toggleFullscreen}
-          className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg shadow-black/10 hover:bg-slate-50 dark:hover:bg-slate-700"
+          className="p-2 bg-white dark:bg-[#272729] rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] active:scale-95"
         >
-          {isFullscreen ? <Minimize className="w-5 h-5 text-slate-600 dark:text-slate-300" /> : <Maximize className="w-5 h-5 text-slate-600 dark:text-slate-300" />}
+          {isFullscreen ? <Minimize className="w-5 h-5 text-[#1d1d1f] dark:text-[#e0e0e0]" /> : <Maximize className="w-5 h-5 text-[#1d1d1f] dark:text-[#e0e0e0]" />}
         </button>
         <div className="relative">
           <button
             onClick={() => setShowLayers(!showLayers)}
-            className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg shadow-black/10 hover:bg-slate-50 dark:hover:bg-slate-700"
+            className="p-2 bg-white dark:bg-[#272729] rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] active:scale-95"
           >
-            <Layers className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+            <Layers className="w-5 h-5 text-[#1d1d1f] dark:text-[#e0e0e0]" />
           </button>
           {showLayers && (
-            <div className="absolute right-0 top-10 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-black/10 p-2 min-w-[120px] border border-slate-200 dark:border-slate-700">
+            <div className="absolute right-0 top-10 bg-white dark:bg-[#272729] rounded-lg p-2 min-w-[120px] border border-[#e0e0e0] dark:border-[#3a3a3c]">
               {['standard', 'satellite', 'terrain'].map((layer) => (
                 <button
                   key={layer}
@@ -271,8 +271,8 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
                   }}
                   className={`w-full text-left px-3 py-2 text-sm rounded ${
                     selectedLayer === layer
-                      ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                      ? 'bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#4d9fe0]'
+                      : 'text-[#1d1d1f] dark:text-[#e0e0e0] hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c]'
                   }`}
                 >
                   {layer === 'standard' ? t('atlas.tabMap') : layer === 'satellite' ? 'Satellite' : 'Terrain'}
