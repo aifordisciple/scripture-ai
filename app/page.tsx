@@ -421,7 +421,7 @@ export default function Home() {
                   <button
                     key={lh}
                     onClick={() => setLineHeight(lh)}
-                    className={cn("px-3 py-1 text-xs rounded-md transition-all", lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                    className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                   >
                     {lh === 1.4 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
                   </button>
@@ -430,7 +430,7 @@ export default function Home() {
             </div>
                         <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground font-medium">{t('settings.bilingual')}</span>
-              <Button variant={showDualVersion ? "default" : "secondary"} size="sm" onClick={toggleDualVersion} className="rounded-full px-4">
+              <Button variant={showDualVersion ? "default" : "secondary"} size="sm" onClick={toggleDualVersion} className="rounded-full px-4 active:scale-95">
                 {showDualVersion ? t('settings.enabled') : t('settings.disabled')}
               </Button>
             </div>
@@ -442,7 +442,7 @@ export default function Home() {
               <div className="flex bg-secondary/50 p-1 rounded-lg">
                 <button
                   onClick={() => setLocale('zh')}
-                  className={cn("px-3 py-1 text-xs rounded-md transition-all", locale === 'zh' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", locale === 'zh' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                 >
                   中文
                 </button>
@@ -451,7 +451,7 @@ export default function Home() {
                     setLocale('en');
                     if (!showDualVersion) toggleDualVersion();
                   }}
-                  className={cn("px-3 py-1 text-xs rounded-md transition-all", locale === 'en' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", locale === 'en' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                 >
                   English
                 </button>
@@ -463,13 +463,13 @@ export default function Home() {
               <div className="flex bg-secondary/50 p-1 rounded-lg">
                 <button
                   onClick={() => setBibleVersion('CUV')}
-                  className={cn("px-3 py-1 text-xs rounded-md transition-all", bibleVersion === 'CUV' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", bibleVersion === 'CUV' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                 >
                   {t('common.bibleVersionCUV')}
                 </button>
                 <button
                   onClick={() => setBibleVersion('KJV')}
-                  className={cn("px-3 py-1 text-xs rounded-md transition-all", bibleVersion === 'KJV' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", bibleVersion === 'KJV' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
                 >
                   KJV
                 </button>
@@ -483,7 +483,7 @@ export default function Home() {
 
           <div className="mt-8 mb-4">
             <Button
-              className="w-full rounded-full font-bold h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="w-full rounded-full font-bold h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground active:scale-[0.98]"
               onClick={() => setMobileSettingsOpen(false)}
             >
               {t('settings.closeAndFinish')}
@@ -677,7 +677,7 @@ export default function Home() {
               <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-bold rounded-full text-white/80 hover:text-white active:scale-95">
                 <BookOpenCheck className="h-4 w-4" />{bibleVersion}
               </Button>
-              <div className="mx-1 border-l h-5 border-border/50"></div>
+              <div className="mx-1 border-l h-5 border-white/20"></div>
 
               {/* 火苗动效 - 桌面端 */}
               {streakCount > 0 && (
