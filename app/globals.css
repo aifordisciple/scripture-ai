@@ -82,41 +82,42 @@
 :root {
   --radius: 18px;
   /* Apple Design Language — Light Mode */
-  --background: #f5f5f7;              /* Parchment */
-  --foreground: #1d1d1f;              /* Ink */
-  --card: #ffffff;                     /* Canvas */
-  --card-foreground: #1d1d1f;
-  --popover: #ffffff;
-  --popover-foreground: #1d1d1f;
-  --primary: #0066cc;                  /* Action Blue */
-  --primary-foreground: #ffffff;
-  --secondary: #fafafc;                /* Pearl */
-  --secondary-foreground: #333333;     /* Ink Muted 80 */
-  --muted: #f5f5f7;
-  --muted-foreground: #7a7a7a;         /* Ink Muted 48 */
-  --accent: #f5f5f7;
-  --accent-foreground: #1d1d1f;
+  --background: var(--apple-parchment);
+  --foreground: var(--apple-ink);
+  --card: var(--apple-canvas);
+  --card-foreground: var(--apple-ink);
+  --popover: var(--apple-canvas);
+  --popover-foreground: var(--apple-ink);
+  --primary: var(--apple-primary);
+  --primary-foreground: var(--apple-on-dark);
+  --secondary: var(--apple-pearl);
+  --secondary-foreground: var(--apple-ink-muted-80);
+  --muted: var(--apple-parchment);
+  --muted-foreground: var(--apple-ink-muted-48);
+  --accent: var(--apple-parchment);
+  --accent-foreground: var(--apple-ink);
   --destructive: #cc0000;
-  --border: #e0e0e0;                   /* Hairline */
-  --input: #e0e0e0;
-  --ring: #0066cc;
+  --border: var(--apple-hairline);
+  --input: var(--apple-hairline);
+  --ring: var(--apple-primary-focus);
 
-  --chart-1: #0066cc;
-  --chart-2: #2997ff;
-  --chart-3: #7a7a7a;
-  --chart-4: #333333;
-  --chart-5: #1d1d1f;
+  --chart-1: var(--apple-primary);
+  --chart-2: var(--apple-primary-on-dark);
+  --chart-3: var(--apple-ink-muted-48);
+  --chart-4: var(--apple-ink-muted-80);
+  --chart-5: var(--apple-ink);
 
-  --sidebar: #f5f5f7;
-  --sidebar-foreground: #1d1d1f;
-  --sidebar-primary: #0066cc;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #fafafc;
-  --sidebar-accent-foreground: #1d1d1f;
-  --sidebar-border: #e0e0e0;
-  --sidebar-ring: #0066cc;
+  --sidebar: var(--apple-parchment);
+  --sidebar-foreground: var(--apple-ink);
+  --sidebar-primary: var(--apple-primary);
+  --sidebar-primary-foreground: var(--apple-on-dark);
+  --sidebar-accent: var(--apple-pearl);
+  --sidebar-accent-foreground: var(--apple-ink);
+  --sidebar-border: var(--apple-hairline);
+  --sidebar-ring: var(--apple-primary);
 
   /* === Apple Design Tokens === */
+  --apple-primary: #0066cc;
   --apple-primary-focus: #0071e3;
   --apple-primary-on-dark: #2997ff;
   --apple-ink: #1d1d1f;
@@ -205,39 +206,39 @@
 
 .dark {
   /* Apple Design Language — Dark Mode */
-  --background: #272729;              /* Tile-1 */
-  --foreground: #ffffff;
-  --card: #2a2a2c;                    /* Tile-2 */
-  --card-foreground: #ffffff;
-  --popover: #2a2a2c;
-  --popover-foreground: #ffffff;
-  --primary: #2997ff;                  /* Sky Link Blue */
-  --primary-foreground: #ffffff;
-  --secondary: #2a2a2c;
-  --secondary-foreground: #cccccc;     /* Body Muted */
-  --muted: #2a2a2c;
+  --background: var(--apple-parchment);
+  --foreground: var(--apple-on-dark);
+  --card: var(--apple-canvas);
+  --card-foreground: var(--apple-on-dark);
+  --popover: var(--apple-canvas);
+  --popover-foreground: var(--apple-on-dark);
+  --primary: var(--apple-primary-on-dark);
+  --primary-foreground: var(--apple-on-dark);
+  --secondary: var(--apple-canvas);
+  --secondary-foreground: var(--apple-body-muted);
+  --muted: var(--apple-canvas);
   --muted-foreground: #999999;
-  --accent: #2a2a2c;
-  --accent-foreground: #cccccc;
+  --accent: var(--apple-canvas);
+  --accent-foreground: var(--apple-body-muted);
   --destructive: #ff4444;
   --border: #3a3a3c;
   --input: #3a3a3c;
-  --ring: #2997ff;
+  --ring: var(--apple-primary-on-dark);
 
-  --chart-1: #2997ff;
-  --chart-2: #0066cc;
+  --chart-1: var(--apple-primary-on-dark);
+  --chart-2: var(--apple-primary);
   --chart-3: #999999;
-  --chart-4: #cccccc;
-  --chart-5: #ffffff;
+  --chart-4: var(--apple-body-muted);
+  --chart-5: var(--apple-on-dark);
 
-  --sidebar: #272729;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #2997ff;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #2a2a2c;
-  --sidebar-accent-foreground: #cccccc;
+  --sidebar: var(--apple-parchment);
+  --sidebar-foreground: var(--apple-on-dark);
+  --sidebar-primary: var(--apple-primary-on-dark);
+  --sidebar-primary-foreground: var(--apple-on-dark);
+  --sidebar-accent: var(--apple-canvas);
+  --sidebar-accent-foreground: var(--apple-body-muted);
   --sidebar-border: #3a3a3c;
-  --sidebar-ring: #2997ff;
+  --sidebar-ring: var(--apple-primary-on-dark);
 
   /* 深色模式阴影 — Apple: UI 无阴影 */
   --shadow-xs: none;
