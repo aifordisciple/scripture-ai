@@ -130,8 +130,8 @@ export function SharedNotes({ churchId }: SharedNotesProps) {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <BookOpen className="w-4 h-4 text-[#0066cc] shrink-0" />
-                      <span className="font-medium text-[#0066cc] dark:text-[#2997ff]">
+                      <BookOpen className="w-4 h-4 text-primary shrink-0" />
+                      <span className="font-medium text-primary dark:text-primary">
                         {getBookName(note.bookId)} {note.chapter}:{note.verse}
                       </span>
                     </div>

@@ -305,7 +305,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                   className={cn(
                     "p-4 rounded-lg border",
                     announcement.pinned
-                      ? "bg-[#0066cc]/5 dark:bg-[#2997ff]/10 border-[#e0e0e0] dark:border-[#3a3a3c]"
+                      ? "bg-primary/5 dark:bg-primary/10 border-[#e0e0e0] dark:border-[#3a3a3c]"
                       : "bg-muted/30"
                   )}
                 >
@@ -313,7 +313,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         {announcement.pinned && (
-                          <Pin className="w-4 h-4 text-[#0066cc]" />
+                          <Pin className="w-4 h-4 text-primary" />
                         )}
                         <h3 className="font-semibold truncate">{announcement.title}</h3>
                       </div>
@@ -328,7 +328,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                         {announcement.content.length > 100 && (
                           <button
                             onClick={() => toggleExpand(announcement.id)}
-                            className="text-[#0066cc] dark:text-[#2997ff] hover:underline"
+                            className="text-primary dark:text-primary hover:underline"
                           >
                             {isExpanded ? (
                               <>{t('group.collapse')} <ChevronUp className="w-3 h-3 inline" /></>

@@ -333,9 +333,9 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                   key={entry.userId}
                   className={cn(
                     "flex items-center justify-between p-3 rounded-lg",
-                    index === 0 && "bg-[#0066cc]/5 dark:bg-[#0066cc]/10",
+                    index === 0 && "bg-primary/5 dark:bg-primary/10",
                     index === 1 && "bg-[#f5f5f7] dark:bg-[#2a2a2c]",
-                    index === 2 && "bg-[#0066cc]/5 dark:bg-[#0066cc]/10"
+                    index === 2 && "bg-primary/5 dark:bg-primary/10"
                   )}
                 >
                   <div className="flex items-center gap-3">

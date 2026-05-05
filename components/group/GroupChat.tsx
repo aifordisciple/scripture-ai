@@ -203,7 +203,7 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
                     className={cn(
                       "max-w-[80%] rounded-lg px-4 py-2",
                       msg.userId === currentUserId
-                        ? "bg-[#0066cc] text-white rounded-br-sm dark:bg-[#2997ff]"
+                        ? "bg-primary text-white rounded-br-sm dark:bg-primary"
                         : "bg-muted rounded-bl-sm"
                     )}
                   >

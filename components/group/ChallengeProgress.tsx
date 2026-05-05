@@ -60,7 +60,7 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
           {isChallenge ? (
             <Trophy className="w-5 h-5 text-orange-500" />
           ) : (
-            <Target className="w-5 h-5 text-[#0066cc]" />
+            <Target className="w-5 h-5 text-primary" />
           )}
           {plan.name}
           {isChallenge && (
@@ -87,7 +87,7 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
         {/* Stats grid */}
         <div className="grid grid-cols-3 gap-3 pt-2">
           <div className="text-center p-3 rounded-lg bg-[#f5f5f7] dark:bg-[#2a2a2c]">
-            <div className="text-2xl font-semibold text-[#0066cc] dark:text-[#2997ff]">
+            <div className="text-2xl font-semibold text-primary dark:text-primary">
               {progress.chaptersRead}
             </div>
             <div className="text-xs text-muted-foreground">{t('group.chaptersRead')}</div>

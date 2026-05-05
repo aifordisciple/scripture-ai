@@ -389,13 +389,13 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                   className={cn(
                     "p-4 rounded-lg border cursor-pointer transition-colors",
                     selectedTemplate === template.id
-                      ? "border-[#0066cc] bg-[#0066cc]/5 dark:bg-[#2997ff]/10"
+                      ? "border-[#0066cc] bg-primary/5 dark:bg-primary/10"
                       : "border-border hover:border-[#0066cc]/50"
                   )}
                 >
                   <div className="font-semibold">{template.name}</div>
                   <div className="text-sm text-muted-foreground">{template.description}</div>
-                  <div className="text-xs text-[#0066cc] dark:text-[#2997ff] mt-1">
+                  <div className="text-xs text-primary dark:text-primary mt-1">
                     {t('group.templateDaysChapters', { days: template.durationDays, chapters: template.readings.reduce((sum, r) => sum + r.chapters.length, 0) })}
                   </div>
                 </div>

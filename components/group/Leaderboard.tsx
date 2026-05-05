@@ -107,7 +107,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
       case 2:
         return "bg-[#f5f5f7] dark:bg-[#2a2a2c] border-[#e0e0e0] dark:border-[#3a3a3c]";
       case 3:
-        return "bg-[#0066cc]/5 dark:bg-[#0066cc]/10 border-[#0066cc]/20 dark:border-[#0066cc]/30";
+        return "bg-primary/5 dark:bg-primary/10 border-[#0066cc]/20 dark:border-[#0066cc]/30";
       default:
         return "bg-card border-border";
     }
@@ -179,7 +179,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
                 onClick={() => setSortMode(option.mode)}
                 className={cn(
                   "h-7 px-2 text-xs gap-1 shrink-0 active:scale-95",
-                  sortMode === option.mode && "bg-[#0066cc] hover:bg-[#0071e3]"
+                  sortMode === option.mode && "bg-primary hover:bg-apple-focus"
                 )}
               >
                 {option.icon}

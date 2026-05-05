@@ -271,7 +271,7 @@ export function GroupBadgeGallery({
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#0066cc] dark:bg-[#2997ff] transition-all"
+                  className="h-full bg-primary dark:bg-primary transition-all"
                   style={{ width: `${(totalEarned / totalBadges) * 100}%` }}
                 />
               </div>

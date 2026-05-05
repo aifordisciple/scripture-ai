@@ -128,7 +128,7 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
   const getActivityIcon = (taskType: string) => {
     switch (taskType) {
       case "devotional":
-        return <Sparkles className="w-4 h-4 text-[#0066cc]" />;
+        return <Sparkles className="w-4 h-4 text-primary" />;
       case "reading":
         return <BookOpen className="w-4 h-4 text-green-500" />;
       case "completion":
@@ -233,8 +233,8 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
                     className="w-10 h-10 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-[#0066cc]/10 dark:bg-[#2997ff]/20 flex items-center justify-center">
-                    <User className="w-5 h-5 text-[#0066cc] dark:text-[#2997ff]" />
+                  <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary dark:text-primary" />
                   </div>
                 )}
               </div>

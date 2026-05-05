@@ -227,7 +227,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
       <Card className="overflow-hidden border-dashed">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
+            <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-xl">
               <Users className="w-5 h-5" />
             </div>
             <div className="flex-1">
@@ -254,7 +254,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
       <Card className="overflow-hidden">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
+            <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-xl">
               <Users className="w-5 h-5" />
             </div>
             <div className="flex-1">
@@ -293,7 +293,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
             "p-2.5 rounded-xl",
             isTodayCompleted
               ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-              : "bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff]"
+              : "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"
           )}>
             {isTodayCompleted ? (
               <CheckCircle2 className="w-5 h-5" />
@@ -352,7 +352,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
                 size="sm"
                 onClick={handleStartReading}
                 disabled={startingReading}
-                className="w-full bg-[#0066cc] hover:bg-[#0071e3] gap-1 active:scale-95"
+                className="w-full bg-primary hover:bg-apple-focus gap-1 active:scale-95"
               >
                 {startingReading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

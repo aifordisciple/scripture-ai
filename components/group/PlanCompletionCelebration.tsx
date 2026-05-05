@@ -277,7 +277,7 @@ export function PlanCompletionCelebration({
                     </Button>
                     <Button
                       onClick={onClose}
-                      className="flex-1 gap-1 bg-[#0066cc] hover:bg-[#0055b3] dark:bg-[#2997ff] dark:hover:bg-[#0a84ff] active:scale-95"
+                      className="flex-1 gap-1 bg-primary hover:bg-[#0055b3] dark:bg-primary dark:hover:bg-[#0a84ff] active:scale-95"
                     >
                       <PartyPopper className="w-4 h-4" />
                       {t('group.awesome')}

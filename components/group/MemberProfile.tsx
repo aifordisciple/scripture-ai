@@ -146,7 +146,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
           <div className="space-y-6 pt-4">
             {/* Profile Header */}
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-[#0066cc]/10 dark:bg-[#0066cc]/20 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
                 {data.user.image ? (
                   <img
                     src={data.user.image}
@@ -154,7 +154,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                     className="w-16 h-16 rounded-full object-cover"
                   />
                 ) : (
-                  <User className="w-8 h-8 text-[#0066cc] dark:text-[#2997ff]" />
+                  <User className="w-8 h-8 text-primary dark:text-primary" />
                 )}
               </div>
               <div>
@@ -174,7 +174,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <Card>
                 <CardContent className="pt-4 text-center">
-                  <BookOpen className="w-5 h-5 mx-auto mb-1 text-[#0066cc]" />
+                  <BookOpen className="w-5 h-5 mx-auto mb-1 text-primary" />
                   <div className="text-xl font-bold">{data.stats.totalChaptersRead}</div>
                   <div className="text-xs text-muted-foreground">{t('group.chaptersRead')}</div>
                 </CardContent>
@@ -216,7 +216,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                     {data.badges.map((badge) => (
                       <div
                         key={badge.id}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0066cc]/10 dark:bg-[#0066cc]/20"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 dark:bg-primary/20"
                         title={`${badge.type} - ${formatDate(badge.earnedAt)}`}
                       >
                         <span className="text-lg">{getBadgeIcon(badge.type)}</span>
@@ -279,7 +279,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                         className="p-3 rounded-lg bg-muted/30"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-[#0066cc] dark:text-[#2997ff]">
+                          <span className="text-sm font-medium text-primary dark:text-primary">
                             {getBookName(note.bookId)} {note.chapter}:{note.verse}
                           </span>
                           <span className="text-xs text-muted-foreground">

@@ -157,13 +157,13 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
     switch (role) {
       case "OWNER":
         return (
-          <span className="inline-flex items-center gap-1 text-xs bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] px-2 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-xs bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-2 py-0.5 rounded-full">
             <Crown className="w-3 h-3" /> {t('group.roleOwner')}
           </span>
         );
       case "ADMIN":
         return (
-          <span className="inline-flex items-center gap-1 text-xs bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] px-2 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-xs bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-2 py-0.5 rounded-full">
             <Shield className="w-3 h-3" /> {t('group.roleAdmin')}
           </span>
         );
@@ -206,12 +206,12 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
               className={cn(
                 "flex items-center justify-between p-3 rounded-lg border",
                 member.role === "OWNER"
-                  ? "bg-[#0066cc]/5 dark:bg-[#0066cc]/10 border-[#0066cc]/20 dark:border-[#0066cc]/30"
+                  ? "bg-primary/5 dark:bg-primary/10 border-[#0066cc]/20 dark:border-[#0066cc]/30"
                   : "bg-muted/30"
               )}
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#0066cc]/10 dark:bg-[#0066cc]/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
                   {member.user.image ? (
                     <img
                       src={member.user.image}
@@ -219,7 +219,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (
-                    <Users className="w-5 h-5 text-[#0066cc] dark:text-[#2997ff]" />
+                    <Users className="w-5 h-5 text-primary dark:text-primary" />
                   )}
                 </div>
                 <div>
@@ -254,7 +254,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                     {isOwner && member.role === "MEMBER" && (
                       <DropdownMenuItem
                         onClick={() => setRole(member.userId, "ADMIN")}
-                        className="text-[#0066cc]"
+                        className="text-primary"
                       >
                         <Shield className="w-4 h-4 mr-2" />
                         {t('group.setAsAdmin')}
