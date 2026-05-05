@@ -31,7 +31,7 @@ export function GroupCard({ church, isMember, memberRole, onClick }: GroupCardPr
   return (
     <Card
       className={cn(
-        "cursor-pointer transition-all hover:shadow-md",
+        "cursor-pointer transition-colors active:scale-95",
         isMember && "border-primary/50"
       )}
       onClick={onClick}
@@ -43,7 +43,7 @@ export function GroupCard({ church, isMember, memberRole, onClick }: GroupCardPr
               <Users className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-bold text-foreground">{church.name}</h3>
+              <h3 className="font-semibold text-foreground">{church.name}</h3>
               <div className="flex items-center gap-2 mt-1">
                 {church.isPublic ? (
                   <Badge variant="outline" className="text-xs gap-1">

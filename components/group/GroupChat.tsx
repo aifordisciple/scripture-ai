@@ -201,9 +201,9 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
                 ) : (
                   <div
                     className={cn(
-                      "max-w-[80%] rounded-2xl px-4 py-2",
+                      "max-w-[80%] rounded-lg px-4 py-2",
                       msg.userId === currentUserId
-                        ? "bg-indigo-500 text-white rounded-br-sm"
+                        ? "bg-[#0066cc] text-white rounded-br-sm dark:bg-[#2997ff]"
                         : "bg-muted rounded-bl-sm"
                     )}
                   >
@@ -214,7 +214,7 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
                     )}
                     {msg.type === "SHARE_VERSE" && msg.metadata && (
                       <div className="mb-2 p-2 bg-white/10 rounded-lg text-sm">
-                        <p className="font-medium text-indigo-200 text-xs mb-1">
+                        <p className="font-medium text-[#2997ff] text-xs mb-1">
                           <BookOpen className="w-3 h-3 inline mr-1" />
                           {getBookName(msg.metadata.bookId || "")} {msg.metadata.chapter}
                         </p>
@@ -255,7 +255,7 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
             rows={1}
             className="flex-1 resize-none max-h-32 rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
-          <Button onClick={sendMessage} disabled={sending || !input.trim()} size="icon" className="shrink-0">
+          <Button onClick={sendMessage} disabled={sending || !input.trim()} size="icon" className="shrink-0 active:scale-95">
             {sending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (

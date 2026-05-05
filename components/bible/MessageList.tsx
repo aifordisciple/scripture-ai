@@ -151,7 +151,7 @@ const MessageBubble = memo(function MessageBubble({
             </div>
 
             {isThinking && (
-              <div className="flex items-center gap-2.5 text-blue-500 mb-4 text-[13px] font-medium select-none">
+              <div className="flex items-center gap-2.5 text-[#0066cc] mb-4 text-[13px] font-medium select-none">
                 <div className="flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-[#0066cc] rounded-full animate-pulse"></span>
                   <span className="w-1.5 h-1.5 bg-[#0066cc] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
@@ -241,9 +241,9 @@ const MessageBubble = memo(function MessageBubble({
 function EmptyState() {
   const { t } = useTranslation()
   return (
-    <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-500 select-none opacity-60">
+    <div className="h-full flex flex-col items-center justify-center text-center text-[#7a7a7a] select-none opacity-60">
       <div className="w-20 h-20 rounded-2xl bg-[#0066cc]/5 flex items-center justify-center mb-5">
-        <svg className="w-10 h-10 stroke-1 text-slate-400 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <svg className="w-10 h-10 stroke-1 text-[#7a7a7a]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <rect x="3" y="11" width="18" height="10" rx="2" />
           <circle cx="12" cy="16" r="1" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />

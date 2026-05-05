@@ -100,9 +100,9 @@ export const QuickPrompts = memo(function QuickPrompts({
         {aiMode === 'custom' ? (
           <>
             {customPrompts.length === 0 ? (
-              <div className="flex items-center gap-2 px-3 py-2 text-sm text-slate-400">
+              <div className="flex items-center gap-2 px-3 py-2 text-sm text-[#7a7a7a]">
                 <span>{t('bible.noCustomPrompts')}</span>
-                <a href="/settings/prompts" className="text-blue-500 hover:text-blue-600 underline">
+                <a href="/settings/prompts" className="text-[#0066cc] hover:text-[#0071e3] underline">
                   {t('bible.goAdd')}
                 </a>
               </div>
@@ -121,7 +121,7 @@ export const QuickPrompts = memo(function QuickPrompts({
             {/* 管理按钮 */}
             <a
               href="/settings/prompts"
-              className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-slate-700 transition-all active:scale-95 shadow-sm dark:bg-slate-800 dark:text-slate-200 hover:brightness-95 whitespace-nowrap shrink-0 bg-[#0066cc]/5 text-[#0066cc] border-[#0066cc]/10 hover:bg-[#0066cc]/10"
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-[#3a3a3c] transition-all active:scale-95 dark:bg-[#2a2a2c] dark:text-white/80 whitespace-nowrap shrink-0 bg-[#0066cc]/5 text-[#0066cc] border-[#0066cc]/10 hover:bg-[#0066cc]/10"
             >
               <Settings className="w-3 h-3" />
               {t('bible.manage')}

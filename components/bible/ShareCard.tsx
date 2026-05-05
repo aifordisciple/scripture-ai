@@ -227,11 +227,11 @@ export function ShareCard() {
 
   return (
     <Dialog open={isShareOpen} onOpenChange={(open) => !open && closeShareModal()}>
-      <DialogContent className="sm:max-w-5xl bg-white dark:bg-slate-900 border-none p-0 overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[700px]">
+      <DialogContent className="sm:max-w-5xl bg-white dark:bg-[#272729] border-none p-0 overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[700px]">
 
         {/* --- 结果页 (Result) --- */}
         {step === 'result' && resultImg && (
-            <div className="absolute inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6 animate-in fade-in slide-in-from-bottom-10">
+            <div className="absolute inset-0 z-50 bg-[#272729] flex flex-col items-center justify-center p-6 animate-in fade-in slide-in-from-bottom-10">
                 <div className="w-full max-w-sm flex flex-col h-full relative">
                     <div className="flex justify-between items-center mb-4 shrink-0">
                         <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" onClick={() => setStep('edit')}>
@@ -251,7 +251,7 @@ export function ShareCard() {
                     </div>
 
                     <div className="mt-4 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/5 shrink-0 text-center space-y-3">
-                        <p className="text-white font-bold text-lg flex items-center justify-center gap-2 animate-pulse">
+                        <p className="text-white font-semibold text-lg flex items-center justify-center gap-2 animate-pulse">
                             <Share2 className="w-5 h-5" />
                             {t('shareCard.longPressSave')}
                         </p>
@@ -260,7 +260,7 @@ export function ShareCard() {
                         {/* PC端提供下载按钮 */}
                         <div className="hidden md:block pt-2">
                              <Button
-                                className="w-full bg-blue-600 hover:bg-blue-700"
+                                className="w-full bg-[#0066cc] hover:bg-[#0071e3] active:scale-95"
                                 onClick={() => {
                                     const link = document.createElement("a");
                                     link.download = `scripture-${Date.now()}.png`;
@@ -280,7 +280,7 @@ export function ShareCard() {
         <div className={cn("flex-1 flex flex-col md:flex-row overflow-hidden relative", step === 'result' ? 'invisible' : 'visible')}>
 
             {/* 左侧：预览 */}
-            <div className="bg-slate-100 dark:bg-black/50 items-center justify-center p-6 overflow-auto flex-1 flex">
+            <div className="bg-[#f5f5f7] dark:bg-black/50 items-center justify-center p-6 overflow-auto flex-1 flex">
               <div className="transform md:scale-100 scale-[0.7] origin-center transition-transform duration-300">
                 <div
                     ref={cardRef}
@@ -371,9 +371,9 @@ export function ShareCard() {
             </div>
 
             {/* 右侧：设置 */}
-            <div className="bg-white dark:bg-slate-900 flex-col transition-all duration-300 w-full md:w-96 md:border-l dark:border-slate-800 flex h-[50vh] md:h-full">
-                <DialogHeader className="p-3 border-b dark:border-slate-800 shrink-0">
-                    <DialogTitle className="flex items-center gap-2 text-slate-700 dark:text-slate-200 text-sm md:text-base">
+            <div className="bg-white dark:bg-[#272729] flex-col transition-all duration-300 w-full md:w-96 md:border-l dark:border-[#3a3a3c] flex h-[50vh] md:h-full">
+                <DialogHeader className="p-3 border-b dark:border-[#3a3a3c] shrink-0">
+                    <DialogTitle className="flex items-center gap-2 text-[#1d1d1f] dark:text-white text-sm md:text-base">
                         <ImageIcon className="w-5 h-5" /> {t('shareCard.customize')}
                     </DialogTitle>
                 </DialogHeader>
@@ -403,13 +403,13 @@ export function ShareCard() {
 
                         <TabsContent value="bg" className="space-y-6">
                             <div>
-                                <label className="text-xs font-bold text-slate-500 mb-2 block">{t('shareCard.featuredPhotos')}</label>
+                                <label className="text-xs font-semibold text-[#7a7a7a] mb-2 block">{t('shareCard.featuredPhotos')}</label>
                                 <div className="grid grid-cols-3 gap-2">
                                     {UNSPLASH_PRESETS.map((url, i) => (
                                         <button
                                             key={i}
                                             onClick={() => handleBgSelect(url)}
-                                            className={cn("w-full aspect-square rounded-xl bg-cover bg-center border-2 hover:border-blue-500 hover:scale-105 transition-all shadow-sm relative", selectedBgUrl === url ? "border-blue-500 ring-2 ring-blue-200" : "border-transparent")}
+                                            className={cn("w-full aspect-square rounded-xl bg-cover bg-center border-2 hover:border-[#0066cc] transition-all relative active:scale-95", selectedBgUrl === url ? "border-[#0066cc] ring-2 ring-[#0066cc]/20" : "border-transparent")}
                                             style={{ backgroundImage: `url(${url})` }}
                                         >
                                             {selectedBgUrl === url && loading && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><Loader2 className="w-4 h-4 animate-spin text-white"/></div>}
@@ -418,67 +418,67 @@ export function ShareCard() {
                                 </div>
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-slate-500 mb-2 block">{t('shareCard.gradients')}</label>
+                                <label className="text-xs font-semibold text-[#7a7a7a] mb-2 block">{t('shareCard.gradients')}</label>
                                 <div className="grid grid-cols-4 gap-2">
                                     {GRADIENT_PRESETS.map((g, i) => (
-                                        <button key={i} onClick={() => { setSafeBgImage(null); setSelectedBgUrl(null); setBgGradient(g.bg); setRecMainColor(g.text); setRecInfoColor(g.info); if (!['card', 'split', 'poster', 'film'].includes(layoutMode)) { setTextColor(g.text); setInfoColor(g.info); } }} className={cn("w-full aspect-square rounded-full border shadow-sm hover:scale-110 transition-transform", bgGradient === g.bg && !safeBgImage && "ring-2 ring-blue-500 ring-offset-2")} style={{ background: g.bg }} title={t(g.nameKey)} />
+                                        <button key={i} onClick={() => { setSafeBgImage(null); setSelectedBgUrl(null); setBgGradient(g.bg); setRecMainColor(g.text); setRecInfoColor(g.info); if (!['card', 'split', 'poster', 'film'].includes(layoutMode)) { setTextColor(g.text); setInfoColor(g.info); } }} className={cn("w-full aspect-square rounded-full border transition-transform active:scale-95", bgGradient === g.bg && !safeBgImage && "ring-2 ring-[#0066cc] ring-offset-2")} style={{ background: g.bg }} title={t(g.nameKey)} />
                                     ))}
                                 </div>
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-slate-500 mb-2 block">{t('shareCard.custom')}</label>
+                                <label className="text-xs font-semibold text-[#7a7a7a] mb-2 block">{t('shareCard.custom')}</label>
                                 <div className="relative">
                                     <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleImageUpload} />
-                                    <Button variant="outline" size="sm" className="w-full border-dashed" onClick={() => fileInputRef.current?.click()}><Upload className="w-4 h-4 mr-2" /> {t('shareCard.uploadImage')}</Button>
+                                    <Button variant="outline" size="sm" className="w-full border-dashed active:scale-95" onClick={() => fileInputRef.current?.click()}><Upload className="w-4 h-4 mr-2" /> {t('shareCard.uploadImage')}</Button>
                                 </div>
                             </div>
                         </TabsContent>
 
                         <TabsContent value="text" className="space-y-6">
                             <div className="space-y-3">
-                                <label className="text-xs font-bold text-slate-500 flex items-center gap-1"><Type className="w-3 h-3"/> {t('shareCard.fontLabel')}</label>
+                                <label className="text-xs font-semibold text-[#7a7a7a] flex items-center gap-1"><Type className="w-3 h-3"/> {t('shareCard.fontLabel')}</label>
                                 <div className="grid grid-cols-2 gap-2">
                                     {FONT_OPTIONS.map((f, i) => (
-                                        <button key={i} onClick={() => setFontFamily(f.value)} className={cn("px-2 py-1.5 text-xs border rounded hover:bg-slate-50 text-left truncate", fontFamily === f.value && "border-blue-500 text-blue-600 bg-blue-50/50")} style={{ fontFamily: f.value }}>{t(f.nameKey)}</button>
+                                        <button key={i} onClick={() => setFontFamily(f.value)} className={cn("px-2 py-1.5 text-xs border rounded hover:bg-[#f5f5f7] text-left truncate active:scale-95", fontFamily === f.value && "border-[#0066cc] text-[#0066cc] bg-[#0066cc]/5")} style={{ fontFamily: f.value }}>{t(f.nameKey)}</button>
                                     ))}
                                 </div>
                             </div>
                             <div className="space-y-3">
-                                <label className="text-xs font-bold text-slate-500 flex items-center justify-between"><span>{t('shareCard.fontSize')}</span><span>{fontSize}px</span></label>
+                                <label className="text-xs font-semibold text-[#7a7a7a] flex items-center justify-between"><span>{t('shareCard.fontSize')}</span><span>{fontSize}px</span></label>
                                 <Slider value={[fontSize]} min={14} max={48} step={1} onValueChange={(val) => setFontSize(val[0])} />
                             </div>
                             <div className="space-y-3">
-                                <label className="text-xs font-bold text-slate-500 flex items-center justify-between"><span className="flex items-center gap-1"><MoveVertical className="w-3 h-3"/> {t('shareCard.lineSpacing')}</span><span>{lineHeight}</span></label>
+                                <label className="text-xs font-semibold text-[#7a7a7a] flex items-center justify-between"><span className="flex items-center gap-1"><MoveVertical className="w-3 h-3"/> {t('shareCard.lineSpacing')}</span><span>{lineHeight}</span></label>
                                 <Slider value={[lineHeight]} min={1.0} max={3.0} step={0.1} onValueChange={(val) => setLineHeight(val[0])} />
                             </div>
                             <div className="space-y-3">
-                                <label className="text-xs font-bold text-slate-500">{t('shareCard.alignment')}</label>
+                                <label className="text-xs font-semibold text-[#7a7a7a]">{t('shareCard.alignment')}</label>
                                 <div className="flex gap-2">
-                                    <Button variant={textAlign === 'left' ? 'secondary' : 'outline'} size="sm" onClick={() => setTextAlign('left')} className="flex-1"><AlignLeft className="w-4 h-4" /></Button>
-                                    <Button variant={textAlign === 'center' ? 'secondary' : 'outline'} size="sm" onClick={() => setTextAlign('center')} className="flex-1"><AlignCenter className="w-4 h-4" /></Button>
-                                    <Button variant={textAlign === 'right' ? 'secondary' : 'outline'} size="sm" onClick={() => setTextAlign('right')} className="flex-1"><AlignRight className="w-4 h-4" /></Button>
+                                    <Button variant={textAlign === 'left' ? 'secondary' : 'outline'} size="sm" onClick={() => setTextAlign('left')} className="flex-1 active:scale-95"><AlignLeft className="w-4 h-4" /></Button>
+                                    <Button variant={textAlign === 'center' ? 'secondary' : 'outline'} size="sm" onClick={() => setTextAlign('center')} className="flex-1 active:scale-95"><AlignCenter className="w-4 h-4" /></Button>
+                                    <Button variant={textAlign === 'right' ? 'secondary' : 'outline'} size="sm" onClick={() => setTextAlign('right')} className="flex-1 active:scale-95"><AlignRight className="w-4 h-4" /></Button>
                                 </div>
                             </div>
                             <div className="space-y-3">
-                                <label className="text-xs font-bold text-slate-500">{t('shareCard.mainColor')}</label>
+                                <label className="text-xs font-semibold text-[#7a7a7a]">{t('shareCard.mainColor')}</label>
                                 <div className="flex gap-3 flex-wrap items-center">
                                     {['#ffffff', '#f8f9fa', '#e2e8f0', '#333333', '#1a202c', '#000000', '#2b6cb0', '#2f855a', '#c53030'].map(c => (
-                                        <button key={c} onClick={() => setTextColor(c)} className={cn("w-8 h-8 rounded-full border shadow-sm transition-transform hover:scale-110", textColor === c && "ring-2 ring-blue-500 ring-offset-2")} style={{ backgroundColor: c }} />
+                                        <button key={c} onClick={() => setTextColor(c)} className={cn("w-8 h-8 rounded-full border transition-transform active:scale-95", textColor === c && "ring-2 ring-[#0066cc] ring-offset-2")} style={{ backgroundColor: c }} />
                                     ))}
                                     <div className="relative">
-                                        <button onClick={() => mainColorRef.current?.click()} className="w-8 h-8 rounded-full border border-dashed border-slate-400 flex items-center justify-center hover:bg-slate-100" title={t('shareCard.customColor')}><Palette className="w-4 h-4 text-slate-500" /></button>
+                                        <button onClick={() => mainColorRef.current?.click()} className="w-8 h-8 rounded-full border border-dashed border-[#7a7a7a] flex items-center justify-center hover:bg-[#f5f5f7] active:scale-95" title={t('shareCard.customColor')}><Palette className="w-4 h-4 text-[#7a7a7a]" /></button>
                                         <input ref={mainColorRef} type="color" className="absolute opacity-0 w-0 h-0" onChange={(e) => setTextColor(e.target.value)} />
                                     </div>
                                 </div>
                             </div>
                             <div className="space-y-3 border-t pt-3">
-                                <label className="text-xs font-bold text-slate-500 flex items-center gap-1"><Info className="w-3 h-3"/> {t('shareCard.infoColor')}</label>
+                                <label className="text-xs font-semibold text-[#7a7a7a] flex items-center gap-1"><Info className="w-3 h-3"/> {t('shareCard.infoColor')}</label>
                                 <div className="flex gap-3 flex-wrap items-center">
                                     {['#ffffff', '#cccccc', '#999999', '#666666', '#333333', '#000000'].map(c => (
-                                        <button key={c} onClick={() => setInfoColor(c)} className={cn("w-6 h-6 rounded-full border shadow-sm transition-transform hover:scale-110", infoColor === c && "ring-2 ring-blue-500 ring-offset-2")} style={{ backgroundColor: c }} />
+                                        <button key={c} onClick={() => setInfoColor(c)} className={cn("w-6 h-6 rounded-full border transition-transform active:scale-95", infoColor === c && "ring-2 ring-[#0066cc] ring-offset-2")} style={{ backgroundColor: c }} />
                                     ))}
                                     <div className="relative">
-                                        <button onClick={() => infoColorRef.current?.click()} className="w-6 h-6 rounded-full border border-dashed border-slate-400 flex items-center justify-center hover:bg-slate-100" title={t('shareCard.customColor')}><Palette className="w-3 h-3 text-slate-500" /></button>
+                                        <button onClick={() => infoColorRef.current?.click()} className="w-6 h-6 rounded-full border border-dashed border-[#7a7a7a] flex items-center justify-center hover:bg-[#f5f5f7] active:scale-95" title={t('shareCard.customColor')}><Palette className="w-3 h-3 text-[#7a7a7a]" /></button>
                                         <input ref={infoColorRef} type="color" className="absolute opacity-0 w-0 h-0" onChange={(e) => setInfoColor(e.target.value)} />
                                     </div>
                                 </div>
@@ -487,8 +487,8 @@ export function ShareCard() {
                     </Tabs>
                 </div>
 
-                <div className="p-4 border-t dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0">
-                    <Button onClick={generateImage} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-black/10 transition-all hover:scale-[1.02]">
+                <div className="p-4 border-t dark:border-[#3a3a3c] bg-[#f5f5f7] dark:bg-[#272729] shrink-0">
+                    <Button onClick={generateImage} disabled={loading} className="w-full bg-[#0066cc] hover:bg-[#0071e3] text-white active:scale-95 rounded-full">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ImageIcon className="w-4 h-4 mr-2" />}
                         {loading ? loadingText : t('shareCard.generateBtn')}
                     </Button>
@@ -502,8 +502,8 @@ export function ShareCard() {
 
 function LayoutButton({ mode, current, set, label, icon }: any) {
     return (
-        <button onClick={() => set(mode)} className={cn("p-3 border rounded-xl hover:bg-slate-50 flex flex-col items-center gap-2 transition-all", current === mode && "border-blue-500 bg-blue-50/50 ring-1 ring-blue-500 text-blue-600")}>
-            <div className={cn("text-slate-500", current === mode && "text-blue-500")}>{icon}</div>
+        <button onClick={() => set(mode)} className={cn("p-3 border rounded-xl hover:bg-[#f5f5f7] flex flex-col items-center gap-2 transition-all active:scale-95", current === mode && "border-[#0066cc] bg-[#0066cc]/5 ring-1 ring-[#0066cc] text-[#0066cc]")}>
+            <div className={cn("text-[#7a7a7a]", current === mode && "text-[#0066cc]")}>{icon}</div>
             <span className="text-xs font-medium">{label}</span>
         </button>
     )

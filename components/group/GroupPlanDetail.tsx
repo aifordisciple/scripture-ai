@@ -328,7 +328,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold mb-2">
+          <div className="flex items-center gap-2 text-[#0066cc] dark:text-[#2997ff] font-semibold mb-2">
             {isChallenge ? (
               <Trophy className="w-5 h-5" />
             ) : (
@@ -338,7 +338,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
               {isChallenge ? t('group.challengeMode') : t('group.tabPlans')}
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground font-serif">
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif">
             {plan.name}
           </h1>
           {plan.description && (
@@ -347,7 +347,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
         </div>
         <div className="flex items-center gap-2">
           {plan.source === "AI_GENERATED" && (
-            <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded-full">
+            <span className="text-xs bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] px-2 py-1 rounded-full">
               {t('group.aiGenerated')}
             </span>
           )}
@@ -392,7 +392,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
           {/* Stats grid */}
           <div className="grid grid-cols-3 gap-3 pt-2">
             <div className="text-center p-3 rounded-lg bg-white/50 dark:bg-black/20">
-              <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+              <div className="text-2xl font-bold text-[#0066cc] dark:text-[#2997ff]">
                 {progress.chaptersRead}
               </div>
               <div className="text-xs text-muted-foreground">{t('group.chaptersRead')}</div>
@@ -417,7 +417,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
             <Button
               onClick={handleStartReading}
               disabled={generatingDevotional || loading}
-              className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-xl shadow-indigo-600/20 gap-2"
+              className="w-full h-14 rounded-lg bg-[#0066cc] hover:bg-[#0071e3] text-white font-semibold text-lg gap-2 active:scale-95"
             >
               {generatingDevotional ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -525,7 +525,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-500" />
+              <Sparkles className="w-5 h-5 text-[#0066cc]" />
               {selectedDay ? t('group.dayDevotional', { day: selectedDay }) : t('group.todayDevotional')}
             </CardTitle>
           </CardHeader>
@@ -566,7 +566,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                 >
                   <div className="flex-shrink-0">
                     {isToggling ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
+                      <Loader2 className="w-5 h-5 animate-spin text-[#0066cc]" />
                     ) : isCompleted ? (
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
                     ) : (
@@ -574,7 +574,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-bold truncate">{t('group.bookChapter', { book: bookName, chapter: reading.chapter })}</div>
+                    <div className="font-semibold truncate">{t('group.bookChapter', { book: bookName, chapter: reading.chapter })}</div>
                     {isCompleted && (
                       <div className="text-xs text-green-600 dark:text-green-400">{t('group.completed')}</div>
                     )}
@@ -626,24 +626,24 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                       allCompleted
                         ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
                         : isCurrentDay
-                          ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800"
+                          ? "bg-[#0066cc]/5 dark:bg-[#0066cc]/10 border-[#0066cc]/20 dark:border-[#0066cc]/30"
                           : "bg-muted/30 border-border"
                     )}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold">{t('group.dayLabel', { day: task.day })}</span>
+                        <span className="font-semibold">{t('group.dayLabel', { day: task.day })}</span>
                         <span className={cn(
                           "text-xs",
-                          isCurrentDay ? "text-indigo-600 dark:text-indigo-400 font-medium" : "text-muted-foreground"
+                          isCurrentDay ? "text-[#0066cc] dark:text-[#2997ff] font-medium" : "text-muted-foreground"
                         )}>
                           {isCurrentDay ? t('group.today') : taskDate}
                         </span>
                         {isCurrentDay && (
-                          <span className="text-xs bg-indigo-500 text-white px-1.5 py-0.5 rounded">{t('group.todayShort')}</span>
+                          <span className="text-xs bg-[#0066cc] text-white px-1.5 py-0.5 rounded">{t('group.todayShort')}</span>
                         )}
                         {isBehind && !isCurrentDay && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-bold">{t('group.behind')}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-semibold">{t('group.behind')}</span>
                         )}
                       </div>
                       {allCompleted && (
@@ -657,14 +657,14 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                     {devotionalContent && (
                       <div className="mb-2 p-2 rounded bg-muted/50">
                         <div className="flex items-center gap-2 mb-1">
-                          <Sparkles className="w-3 h-3 text-indigo-500" />
+                          <Sparkles className="w-3 h-3 text-[#0066cc]" />
                           <span className="text-xs font-medium text-muted-foreground">{t('group.devotional')}</span>
                           {isCurrentDay && (
                             <span className={cn(
                               "text-xs px-1 py-0.5 rounded",
                               devotionalCompleted
                                 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                                : "bg-[#f5f5f7] dark:bg-[#2a2a2c] text-[#7a7a7a]"
                             )}>
                               {devotionalCompleted ? t('group.read') : t('group.unread')}
                             </span>
@@ -689,7 +689,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                               "text-xs px-2 py-1 rounded transition-colors hover:opacity-80 flex items-center gap-1",
                               completed
                                 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
+                                : "bg-[#f5f5f7] dark:bg-[#2a2a2c] text-[#7a7a7a] hover:bg-[#0066cc]/5 dark:hover:bg-[#0066cc]/10"
                             )}
                           >
                             {t('group.bookChapterShort', { book: bookName, chapter: r.chapter })}

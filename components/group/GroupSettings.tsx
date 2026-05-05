@@ -32,8 +32,8 @@ interface GroupSettingsProps {
 }
 
 const PRESET_COLORS = [
-  { nameKey: "colorIndigo", value: "#6366f1" },
-  { nameKey: "colorPurple", value: "#8b5cf6" },
+  { nameKey: "colorBlue", value: "#0066cc" },
+  { nameKey: "colorPurple", value: "#7c3aed" },
   { nameKey: "colorPink", value: "#ec4899" },
   { nameKey: "colorRed", value: "#ef4444" },
   { nameKey: "colorOrange", value: "#f97316" },
@@ -61,13 +61,13 @@ export function GroupSettings({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const [themeColor, setThemeColor] = useState(currentSettings?.themeColor || "#6366f1");
+  const [themeColor, setThemeColor] = useState(currentSettings?.themeColor || "#0066cc");
   const [logoUrl, setLogoUrl] = useState(currentSettings?.logoUrl || "");
   const [fontFamily, setFontFamily] = useState(currentSettings?.fontFamily || "serif");
 
   useEffect(() => {
     if (currentSettings) {
-      setThemeColor(currentSettings.themeColor || "#6366f1");
+      setThemeColor(currentSettings.themeColor || "#0066cc");
       setLogoUrl(currentSettings.logoUrl || "");
       setFontFamily(currentSettings.fontFamily || "serif");
     }
@@ -154,10 +154,10 @@ export function GroupSettings({
                         key={color.value}
                         onClick={() => setThemeColor(color.value)}
                         className={cn(
-                          "w-10 h-10 rounded-lg border-2 transition-all",
+                          "w-10 h-10 rounded-lg border-2 transition-colors active:scale-95",
                           themeColor === color.value
-                            ? "border-foreground scale-110"
-                            : "border-transparent hover:scale-105"
+                            ? "border-foreground"
+                            : "border-transparent"
                         )}
                         style={{ backgroundColor: color.value }}
                         title={t(`group.${color.nameKey}`)}
@@ -176,7 +176,7 @@ export function GroupSettings({
                       value={themeColor}
                       onChange={(e) => setThemeColor(e.target.value)}
                       className="w-28"
-                      placeholder="#6366f1"
+                      placeholder="#0066cc"
                     />
                   </div>
                 </div>
