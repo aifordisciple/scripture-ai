@@ -209,9 +209,9 @@ export default function FeedbackAdminPanel() {
       case "high":
         return "text-destructive";
       case "medium":
-        return "text-amber-600 dark:text-amber-400";
+        return "text-amber-500";
       case "low":
-        return "text-green-600 dark:text-green-400";
+        return "text-green-500";
       default:
         return "text-muted-foreground";
     }
@@ -242,14 +242,14 @@ export default function FeedbackAdminPanel() {
             key={stat.label}
             className={`${stat.bg} rounded-lg p-4 border border-border`}
           >
-            <p className="text-sm text-muted-foreground apple-body">{stat.label}</p>
-            <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+            <p className="text-sm text-muted-foreground">{stat.label}</p>
+            <p className={`text-2xl font-semibold ${stat.color}`}>{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div className="bg-accent rounded-lg p-4">
+      <div className="bg-card rounded-lg border border-border p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -261,7 +261,7 @@ export default function FeedbackAdminPanel() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-card text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent text-sm apple-body"
+              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-card text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
             />
           </div>
           <div className="flex gap-2">
@@ -273,7 +273,7 @@ export default function FeedbackAdminPanel() {
                   setFilterStatus(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-10 pr-8 py-2 border border-border rounded-lg bg-card text-foreground text-sm appearance-none cursor-pointer apple-body min-h-[44px]"
+                className="pl-10 pr-8 py-2 border border-border rounded-lg bg-card text-foreground text-sm appearance-none cursor-pointer"
               >
                 <option value="all">{t('adminFeedback.filterAllStatus')}</option>
                 <option value="pending">{t('adminFeedback.statusPending')}</option>
@@ -288,7 +288,7 @@ export default function FeedbackAdminPanel() {
                 setFilterType(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-4 py-2 border border-border rounded-lg bg-card text-foreground text-sm appearance-none cursor-pointer apple-body min-h-[44px]"
+              className="px-4 py-2 border border-border rounded-lg bg-card text-foreground text-sm appearance-none cursor-pointer"
             >
               <option value="all">{t('adminFeedback.filterAllType')}</option>
               <option value="bug">{t('adminFeedback.typeBug')}</option>
@@ -299,7 +299,7 @@ export default function FeedbackAdminPanel() {
           </div>
           <button
             onClick={fetchFeedbacks}
-            className="p-2 text-muted-foreground hover:text-primary hover:bg-accent rounded-lg transition-all duration-fast active:scale-95 min-h-[44px]"
+            className="p-2 text-muted-foreground hover:text-primary hover:bg-accent/50 rounded-lg transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title={t('adminFeedback.refreshTitle')}
           >
             <RefreshCw className="w-5 h-5" />
@@ -314,16 +314,16 @@ export default function FeedbackAdminPanel() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
         ) : feedbacks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground apple-body">
             <Inbox className="w-12 h-12 mb-3" />
-            <p className="text-lg apple-body">{t('adminFeedback.noFeedback')}</p>
+            <p className="text-lg">{t('adminFeedback.noFeedback')}</p>
           </div>
         ) : (
           <div className="divide-y divide-border">
             {feedbacks.map((fb) => (
               <div
                 key={fb.id}
-                className="p-4 hover:bg-accent transition-all duration-fast cursor-pointer min-h-[44px]"
+                className="p-4 hover:bg-accent/50 transition-colors cursor-pointer min-h-[44px]"
                 onClick={() => {
                   setSelectedFeedback(fb);
                   setShowDetailModal(true);
@@ -334,14 +334,14 @@ export default function FeedbackAdminPanel() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       {getStatusIcon(fb.status)}
-                      <h3 className="text-sm font-semibold text-foreground truncate apple-headline">
+                      <h3 className="text-sm font-semibold text-foreground truncate">
                         {fb.title}
                       </h3>
                       <span className={getPriorityColor(fb.priority)}>
                         {getPriorityLabel(fb.priority)}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate apple-body">
+                    <p className="text-sm text-muted-foreground truncate">
                       {fb.content}
                     </p>
                     <div className="flex items-center gap-3 mt-2">
@@ -369,22 +369,22 @@ export default function FeedbackAdminPanel() {
 
         {/* Pagination */}
         {feedbacks.length > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-accent">
-            <p className="text-sm text-muted-foreground apple-body">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-accent/30">
+            <p className="text-sm text-muted-foreground">
               {t('adminFeedback.pageIndicator', { page: currentPage })}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-fast active:scale-95 min-h-[44px]"
+                className="p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-accent/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setCurrentPage(currentPage + 1)}
                 disabled={feedbacks.length < pageSize}
-                className="p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-fast active:scale-95 min-h-[44px]"
+                className="p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-accent/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -396,10 +396,10 @@ export default function FeedbackAdminPanel() {
       {/* Detail Modal */}
       {showDetailModal && selectedFeedback && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-border">
+          <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-foreground apple-headline">
+                <h2 className="text-lg font-semibold text-foreground">
                   {t('adminFeedback.detailTitle')}
                 </h2>
                 <button
@@ -407,7 +407,7 @@ export default function FeedbackAdminPanel() {
                     setShowDetailModal(false);
                     setSelectedFeedback(null);
                   }}
-                  className="p-1 text-muted-foreground hover:text-foreground rounded-lg transition-all duration-fast active:scale-95 min-h-[44px]"
+                  className="p-1 text-muted-foreground hover:text-foreground rounded-lg transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -421,21 +421,21 @@ export default function FeedbackAdminPanel() {
                   <span className={`text-sm ${getPriorityColor(selectedFeedback.priority)}`}>
                     {t('adminFeedback.priorityLabel')}: {getPriorityLabel(selectedFeedback.priority)}
                   </span>
-                  <span className="text-sm text-muted-foreground apple-body">
+                  <span className="text-sm text-muted-foreground">
                     {getTypeLabel(selectedFeedback.type)}
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-foreground mb-2 apple-headline">
+                  <h3 className="font-semibold text-foreground mb-2">
                     {selectedFeedback.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap apple-body">
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {selectedFeedback.content}
                   </p>
                 </div>
 
-                <div className="text-xs text-muted-foreground space-y-1 apple-body">
+                <div className="text-xs text-muted-foreground space-y-1">
                   <p>{t('adminFeedback.submitter')}: {selectedFeedback.userName || selectedFeedback.userEmail}</p>
                   <p>{t('adminFeedback.submitTime')}: {new Date(selectedFeedback.createdAt).toLocaleString()}</p>
                   {selectedFeedback.category && (
@@ -448,7 +448,7 @@ export default function FeedbackAdminPanel() {
                     <p className="text-xs font-semibold text-primary mb-1">
                       {t('adminFeedback.adminReply')}
                     </p>
-                    <p className="text-sm text-foreground whitespace-pre-wrap apple-body">
+                    <p className="text-sm text-foreground whitespace-pre-wrap">
                       {selectedFeedback.adminReply}
                     </p>
                     {selectedFeedback.repliedAt && (
@@ -461,7 +461,7 @@ export default function FeedbackAdminPanel() {
 
                 {/* Reply Section */}
                 <div className="border-t border-border pt-4">
-                  <label className="block text-sm font-semibold text-foreground mb-2 apple-headline">
+                  <label className="block text-sm font-semibold text-foreground mb-2">
                     {t('adminFeedback.replyLabel')}
                   </label>
                   <textarea
@@ -469,7 +469,7 @@ export default function FeedbackAdminPanel() {
                     onChange={(e) => setReplyContent(e.target.value)}
                     rows={4}
                     placeholder={t('adminFeedback.replyPlaceholder')}
-                    className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none apple-body"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent text-sm resize-none"
                   />
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex gap-2">
@@ -488,7 +488,7 @@ export default function FeedbackAdminPanel() {
                           onClick={() =>
                             handleUpdateStatus(selectedFeedback.id, "closed")
                           }
-                          className="px-3 py-1.5 text-sm border border-border text-muted-foreground rounded-lg hover:bg-accent transition-all duration-fast active:scale-95 min-h-[44px]"
+                          className="px-3 py-1.5 text-sm border border-border text-muted-foreground rounded-lg hover:bg-accent/50 transition-all duration-fast active:scale-95 min-h-[44px]"
                         >
                           {t('adminFeedback.closeFeedback')}
                         </button>
@@ -500,14 +500,14 @@ export default function FeedbackAdminPanel() {
                           setShowDetailModal(false);
                           setSelectedFeedback(null);
                         }}
-                        className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-all duration-fast active:scale-95 min-h-[44px]"
+                        className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent/50 rounded-lg transition-all duration-fast active:scale-95 min-h-[44px]"
                       >
                         {t('adminFeedback.cancel')}
                       </button>
                       <button
                         onClick={handleReply}
                         disabled={!replyContent.trim() || submitting}
-                        className="px-4 py-2 text-sm bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-fast disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 min-h-[44px]"
+                        className="px-4 py-2 text-sm bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-fast disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 min-h-[44px]"
                       >
                         {submitting ? t('adminFeedback.submitting') : t('adminFeedback.replyAndResolve')}
                       </button>

@@ -298,7 +298,7 @@ export function PlanTab() {
                         <div className="flex flex-col">
                            <span className="font-semibold text-lg text-foreground dark:text-foreground">{t('plan.day', { day: task.day })}</span>
                            <div className="flex items-center gap-1.5 mt-0.5">
-                             <span className={cn("text-xs font-medium", isToday ? "text-[#0066cc] dark:text-[#0066cc]/80" : "text-[#7a7a7a] dark:text-[#7a7a7a]")}>
+                             <span className={cn("text-xs font-semibold", isToday ? "text-primary dark:text-primary/80" : "text-muted-foreground dark:text-muted-foreground")}>
                                {isToday ? t('plan.today') : dateStr}
                              </span>
                              {isBehind && <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-semibold whitespace-nowrap">{t('plan.behind')}</span>}
@@ -315,8 +315,8 @@ export function PlanTab() {
                              className={cn(
                                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border group",
                                isTaskCompleted
-                                 ? "bg-transparent border-[#e0e0e0] dark:border-[#1d1d1f] text-[#7a7a7a]"
-                                 : "bg-[#0066cc]/5 border-[#0066cc]/10 text-[#0071e3] dark:bg-[#0066cc]/10 dark:border-[#0066cc]/20 dark:text-[#0066cc]/80"
+                                 ? "bg-transparent border-border dark:border-background text-muted-foreground"
+                                 : "bg-primary/5 border-primary/10 text-apple-focus dark:bg-primary/10 dark:border-primary/20 dark:text-primary/80"
                              )}
                            >
                               {/* 1. 独立的圆圈状态切换区 */}
@@ -325,7 +325,7 @@ export function PlanTab() {
                                   e.stopPropagation();
                                   toggleTaskCompleted(viewingPlanId, task.day, taskKey);
                                 }}
-                                className="shrink-0 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-[#0066cc]/40 flex items-center justify-center"
+                                className="shrink-0 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-primary/40 flex items-center justify-center"
                               >
                                 {isTaskCompleted ? (
                                   <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -354,12 +354,12 @@ export function PlanTab() {
                     </div>
                      {/* 下半部分：动态 AI 导读渲染 */}
                      {(task.devotional || activeData.savedDevotionals?.[task.day]) && (
-                        <div className="mt-1 md:ml-[9.5rem] bg-[#0066cc]/5 dark:bg-[#0066cc]/5 p-3 rounded-xl border border-[#0066cc]/10 dark:border-[#0066cc]/15 relative">
-                          <p className="text-sm text-[#1d1d1f] dark:text-[#7a7a7a] leading-relaxed font-serif whitespace-pre-wrap">
+                        <div className="mt-1 md:ml-[9.5rem] bg-primary/5 dark:bg-primary/5 p-3 rounded-lg border border-primary/10 dark:border-primary/15 relative">
+                          <p className="text-sm text-foreground dark:text-muted-foreground leading-relaxed font-serif whitespace-pre-wrap">
                             {task.devotional || activeData.savedDevotionals?.[task.day]}
                           </p>
                            {/* AI 生成标记 */}
-                           {!task.devotional && <Sparkles className="w-4 h-4 text-[#0066cc]/60 absolute top-2 right-2 opacity-30" />}
+                           {!task.devotional && <Sparkles className="w-4 h-4 text-primary/60 absolute top-2 right-2 opacity-30" />}
                          </div>
                       )}
                </div>
@@ -389,8 +389,8 @@ export function PlanTab() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
-      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-[#1d1d1f]">
-        <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/15 text-[#0066cc] dark:text-[#0066cc]/80 rounded-xl">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-background">
+        <div className="p-2.5 bg-primary/10 dark:bg-primary/15 text-primary dark:text-primary/80 rounded-lg">
            <Calendar className="w-6 h-6" />
         </div>
         <div>
@@ -423,7 +423,7 @@ export function PlanTab() {
               const isTotallyCompleted = completedDaysCount >= plan.durationDays;
 
               return (
-                <div key={plan.id} role="button" tabIndex={0} className="relative flex flex-col bg-white dark:bg-[#272729] rounded-lg p-6 border-2 border-[#0066cc]/10 dark:border-[#0066cc]/20 hover:bg-black/[0.02] transition-all cursor-pointer overflow-hidden group" onClick={() => setViewingPlanId(plan.id)}>
+                <div key={plan.id} role="button" tabIndex={0} className="relative flex flex-col bg-card dark:bg-card rounded-lg p-6 border-2 border-primary/10 dark:border-primary/20 hover:bg-black/[0.02] transition-all cursor-pointer overflow-hidden group" onClick={() => setViewingPlanId(plan.id)}>
                    {/* 自定义计划删除按钮 */}
                    {plan.id.startsWith('custom-') && (
                      <button
@@ -433,21 +433,21 @@ export function PlanTab() {
                          setPendingDeleteAction(() => deleteCustomPlan);
                          setShowDeleteConfirm(true);
                        }}
-                       className="absolute top-4 right-4 p-2 text-[#e0e0e0] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                       className="absolute top-4 right-4 p-2 text-border hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                      >
                        <Trash2 className="w-4 h-4" />
                      </button>
                    )}
                    {isTotallyCompleted && (
-                     <div className="absolute -top-3 -right-3 bg-yellow-400 p-4 rounded-full border-4 border-white dark:border-[#272729] transform rotate-12">
+                     <div className="absolute -top-3 -right-3 bg-yellow-400 p-4 rounded-full border-4 border-background dark:border-card transform rotate-12">
                         <Medal className="w-7 h-7 text-white" />
                      </div>
                    )}
-                   <h3 className="text-xl font-semibold text-[#1d1d1f] dark:text-[#0066cc]/80 font-serif mb-1 pr-10">{tDual(plan.title, plan.titleEn)}</h3>
+                   <h3 className="text-xl font-semibold text-foreground dark:text-primary/80 font-serif mb-1 pr-10">{tDual(plan.title, plan.titleEn)}</h3>
                    <div className="flex justify-between items-center mt-auto pt-6">
                       <div className="flex-1 mr-4">
-                        <div className="flex justify-between text-xs mb-1 font-medium text-[#7a7a7a]"><span className="text-[#0066cc]">{progressPercent}%</span><span>{t('plan.durationDays', { count: plan.durationDays })}</span></div>
-                        <div className="h-1.5 w-full bg-[#e0e0e0] dark:bg-[#1d1d1f] rounded-full overflow-hidden"><div className="h-full bg-[#0066cc]" style={{ width: `${progressPercent}%` }}/></div>
+                        <div className="flex justify-between text-xs mb-1 font-semibold text-muted-foreground"><span className="text-primary">{progressPercent}%</span><span>{t('plan.durationDays', { count: plan.durationDays })}</span></div>
+                        <div className="h-1.5 w-full bg-border dark:bg-background rounded-full overflow-hidden"><div className="h-full bg-primary" style={{ width: `${progressPercent}%` }}/></div>
                        </div>
                        <Button
                           variant={isTotallyCompleted ? "secondary" : "default"}
@@ -480,7 +480,7 @@ export function PlanTab() {
             {archivedPlans.map((plan) => (
               <div
                 key={plan!.id}
-                className="relative flex flex-col items-center justify-center bg-[#f5f5f7] dark:bg-[#272729]/50 rounded-lg p-4 border border-[#e0e0e0] dark:border-[#1d1d1f] opacity-80 hover:opacity-100 transition-opacity cursor-pointer group"
+                className="relative flex flex-col items-center justify-center bg-secondary dark:bg-card/50 rounded-lg p-4 border border-border dark:border-background opacity-80 hover:opacity-100 transition-opacity cursor-pointer group"
                 onClick={() => setViewingPlanId(plan!.id)}
               >
                  {/* 自定义计划删除按钮 */}
@@ -492,16 +492,16 @@ export function PlanTab() {
                        setPendingDeleteAction(() => deleteCustomPlan);
                        setShowDeleteConfirm(true);
                      }}
-                     className="absolute top-2 right-2 p-1.5 text-[#e0e0e0] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                     className="absolute top-2 right-2 p-1.5 text-border hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                    >
                      <Trash2 className="w-3.5 h-3.5" />
                    </button>
                  )}
                  <Medal className="w-10 h-10 text-yellow-400 mb-2" />
-                 <h3 className="text-sm font-semibold text-center font-serif text-[#1d1d1f] dark:text-[#e0e0e0] line-clamp-2 leading-snug">
+                 <h3 className="text-sm font-semibold text-center font-serif text-foreground dark:text-foreground/60 line-clamp-2 leading-snug">
                    {tDual(plan!.title, plan!.titleEn)}
                  </h3>
-                 <span className="text-[10px] text-muted-foreground mt-2 bg-[#e0e0e0] dark:bg-[#1d1d1f] px-2 py-0.5 rounded-full">{t('plan.completed')}</span>
+                 <span className="text-[10px] text-muted-foreground mt-2 bg-border dark:bg-background px-2 py-0.5 rounded-full">{t('plan.completed')}</span>
               </div>
             ))}
           </div>
@@ -509,11 +509,11 @@ export function PlanTab() {
       )}
 
 {/* AI 定制区 */}
-      <div className="mb-10 relative overflow-hidden bg-[#0066cc] rounded-[2rem] p-6 md:p-8 border border-[#0066cc]/30">
+      <div className="mb-10 relative overflow-hidden bg-primary rounded-full p-6 md:p-8 border border-primary/30">
         
         {/* 装饰性背景光晕 (增加蓝宝石的通透折射感) */}
-        <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-[#0066cc]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-[20rem] h-[20rem] bg-[#0066cc]/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[20rem] h-[20rem] bg-primary/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
 
         <div className="relative z-10">
           <h2 className="text-2xl font-semibold flex items-center gap-3 mb-3 text-white tracking-tight">

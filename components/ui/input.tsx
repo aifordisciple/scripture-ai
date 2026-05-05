@@ -9,7 +9,7 @@ const inputVariants = cva(
       variant: {
         default: "h-11 rounded-lg px-3 py-2",
         search:
-          "h-11 rounded-pill px-5 py-3 bg-secondary border-transparent",
+          "h-11 rounded-full px-5 py-3 bg-secondary border-transparent",
       },
     },
     defaultVariants: {

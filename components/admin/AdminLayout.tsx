@@ -85,14 +85,14 @@ export default function AdminLayout({
         {/* Logo area */}
         <div className="h-16 flex items-center px-6 border-b border-border">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-apple-lg bg-primary flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-semibold text-sm">AI</span>
             </div>
             <span className="apple-headline text-lg">AI读 · 管理</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="ml-auto lg:hidden p-2 rounded-apple-sm hover:bg-accent active:scale-95 transition-all"
+            className="ml-auto lg:hidden p-2 rounded-md hover:bg-accent active:scale-95 transition-all"
           >
             <X className="w-5 h-5" />
           </button>
@@ -109,7 +109,7 @@ export default function AdminLayout({
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={`
-                    flex items-center gap-3 px-3 min-h-[44px] rounded-apple-md
+                    flex items-center gap-3 px-3 min-h-[44px] rounded-md
                     transition-all duration-150 active:scale-95
                     ${
                       active
@@ -133,7 +133,7 @@ export default function AdminLayout({
         <div className="p-4 border-t border-border">
           <Link
             href="/"
-            className="flex items-center gap-2 px-3 py-2 rounded-apple-md text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-150 active:scale-95 text-[15px]"
+            className="flex items-center gap-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-150 active:scale-95 text-[15px]"
           >
             <span>← 返回主站</span>
           </Link>
@@ -147,7 +147,7 @@ export default function AdminLayout({
           {/* Mobile menu button */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 -ml-2 rounded-apple-sm hover:bg-accent active:scale-95 transition-all"
+            className="lg:hidden p-2 -ml-2 rounded-md hover:bg-accent active:scale-95 transition-all"
           >
             <Menu className="w-5 h-5" />
           </button>

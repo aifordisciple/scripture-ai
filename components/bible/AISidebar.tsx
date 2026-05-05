@@ -717,7 +717,7 @@ export function AISidebar() {
               <button
                 onClick={() => { setShowModeSelector(!showModeSelector); setShowFontSizeSelector(false); setShowSessionList(false); }}
                 className={cn(
-                  "flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-medium transition-colors",
+                  "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-colors",
                   aiMode === 'general' ? "text-muted-foreground hover:bg-black/[0.04]" : "",
                   aiMode === 'tutor' ? "text-primary bg-primary/10" : "",
                   aiMode === 'sermon' ? "text-primary bg-primary/10" : "",
@@ -778,7 +778,7 @@ export function AISidebar() {
               <button
                 onClick={() => { setShowFontSizeSelector(!showFontSizeSelector); setShowModeSelector(false); setShowSessionList(false); }}
                 className={cn(
-                  "flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-medium transition-colors",
+                  "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-colors",
                   aiFontSize === 'medium' ? "text-muted-foreground hover:bg-black/[0.04]" : "text-primary bg-primary/10"
                 )}
                 title={t('ai.fontSize')}
@@ -824,14 +824,14 @@ export function AISidebar() {
             {/* [P3-1修复] 自定义确认对话框替代原生 confirm() */}
             {showClearConfirm && (
               <div className="absolute top-12 right-2 z-50 glass-panel rounded-lg border border-border dark:border-border p-3 text-sm">
-                <p className="mb-2 text-[#1d1d1f] dark:text-white/80">{t('ai.clearAllConfirm')}</p>
+                <p className="mb-2 text-foreground dark:text-foreground/80">{t('ai.clearAllConfirm')}</p>
                 <div className="flex gap-2 justify-end">
-                  <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-xl bg-[#f5f5f7] dark:bg-[#2a2a2c] text-[#1d1d1f] dark:text-white/80 hover:bg-[#e0e0e0]">{t('common.cancel')}</button>
-                  <button onClick={confirmClearChat} className="px-3 py-1 text-xs rounded-xl bg-red-500 text-white hover:bg-red-600">{t('common.confirm')}</button>
+                  <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-lg bg-secondary dark:bg-card text-foreground dark:text-foreground/80 hover:bg-accent">{t('common.cancel')}</button>
+                  <button onClick={confirmClearChat} className="px-3 py-1 text-xs rounded-lg bg-red-500 text-white hover:bg-red-600">{t('common.confirm')}</button>
                 </div>
               </div>
             )}
-            <Button variant="ghost" size="icon" onClick={() => { setAiOpen(false); clearSelection(); }} className="dark:text-white/50 dark:hover:bg-white/[0.06]">
+            <Button variant="ghost" size="icon" onClick={() => { setAiOpen(false); clearSelection(); }} className="dark:text-foreground/50 dark:hover:bg-white/[0.06]">
               <X className="w-5 h-5" />
             </Button>
           </div>
@@ -839,7 +839,7 @@ export function AISidebar() {
 
         {/* 消息列表 */}
         <div
-          className="flex-1 overflow-y-auto p-4 bg-[#f5f5f7]/50 dark:bg-[#1d1d1f]/50 min-h-0 space-y-6 relative scroll-smooth"
+          className="flex-1 overflow-y-auto p-4 bg-background/50 dark:bg-background/50 min-h-0 space-y-6 relative scroll-smooth"
           ref={scrollRef}
           onScroll={handleScroll}
           onClick={() => {
@@ -862,7 +862,7 @@ export function AISidebar() {
 
           {isImmersive && (
             <div className="fixed top-6 left-1/2 -translate-x-1/2 md:left-auto md:right-[calc(var(--sidebar-width)/2)] md:translate-x-1/2 z-50 pointer-events-none animate-in fade-in duration-500">
-              <div className="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full shadow-lg shadow-black/10 backdrop-blur-sm flex items-center gap-1">
+              <div className="bg-black/60 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
                 {t('ai.immersiveHint')}
               </div>
             </div>
@@ -885,7 +885,7 @@ export function AISidebar() {
 
         {/* 输入表单 */}
         <div className={cn(
-          "bg-white dark:bg-[#272729] flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
+          "bg-card dark:bg-card flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
           isImmersive ? "h-0 opacity-0" : "opacity-100"
         )}>
           <AIInputForm
@@ -963,11 +963,11 @@ function RenameModal({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8] rounded-lg p-5 w-full max-w-sm"
+          className="glass-panel rounded-lg p-5 w-full max-w-sm"
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 className="text-lg font-bold mb-4 text-[#1d1d1f] dark:text-white flex items-center gap-2">
-            <Edit className="w-5 h-5 text-[#0066cc]" />
+          <h3 className="text-lg font-bold mb-4 text-foreground dark:text-foreground flex items-center gap-2">
+            <Edit className="w-5 h-5 text-primary" />
             {t('ai.renameChat')}
           </h3>
           <div className="flex gap-2 mb-4">
@@ -976,7 +976,7 @@ function RenameModal({
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
               placeholder={t('ai.renamePlaceholder')}
-              className="flex-1 px-4 py-3 border border-[#e0e0e0] dark:border-[#3a3a3c] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] bg-white dark:bg-[#272729] dark:text-white"
+              className="flex-1 px-4 py-3 border border-border dark:border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-card dark:bg-card dark:text-foreground"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') onSubmit()
@@ -985,7 +985,7 @@ function RenameModal({
             />
             <button
               disabled={isGenerating}
-              className="px-3 py-3 text-xs text-[#0066cc] hover:bg-[#0066cc]/5 rounded-xl transition-colors disabled:opacity-50"
+              className="px-3 py-3 text-xs text-primary hover:bg-primary/5 rounded-lg transition-colors disabled:opacity-50"
             >
               {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
             </button>
@@ -993,14 +993,14 @@ function RenameModal({
           <div className="flex justify-end gap-2">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-[#1d1d1f] dark:text-white/60 hover:bg-black/[0.04] rounded-xl transition-colors"
+              className="px-5 py-2.5 text-sm font-semibold text-foreground dark:text-foreground/60 hover:bg-black/[0.04] rounded-lg transition-colors"
             >
               {t('ai.cancel')}
             </button>
             <button
               onClick={onSubmit}
               disabled={!title.trim()}
-              className="px-5 py-2.5 text-sm font-medium text-white bg-[#0066cc] hover:bg-[#0071e3] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-apple-focus rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t('ai.save')}
             </button>
@@ -1039,7 +1039,7 @@ function DeleteConfirmModal({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8] rounded-lg p-5 w-full max-w-sm"
+          className="glass-panel rounded-lg p-5 w-full max-w-sm"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-3 mb-4">
@@ -1047,7 +1047,7 @@ function DeleteConfirmModal({
               <Trash2 className="w-5 h-5 text-red-500" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[#1d1d1f] dark:text-white">{t('ai.deleteChat')}</h3>
+              <h3 className="text-lg font-bold text-foreground dark:text-foreground">{t('ai.deleteChat')}</h3>
               <p className="text-sm text-muted-foreground">{t('ai.deleteChatHint')}</p>
             </div>
           </div>
@@ -1057,13 +1057,13 @@ function DeleteConfirmModal({
           <div className="flex justify-end gap-2">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-[#1d1d1f] dark:text-white/60 hover:bg-black/[0.04] rounded-xl transition-colors"
+              className="px-5 py-2.5 text-sm font-semibold text-foreground dark:text-foreground/60 hover:bg-black/[0.04] rounded-lg transition-colors"
             >
               {t('ai.cancel')}
             </button>
             <button
               onClick={onConfirm}
-              className="px-5 py-2.5 text-sm font-medium text-white bg-[#cc0000] hover:bg-[#dd0000] rounded-lg transition-colors"
+              className="px-5 py-2.5 text-sm font-semibold text-white bg-destructive hover:bg-destructive/90 rounded-lg transition-colors"
             >
               {t('ai.confirmDelete')}
             </button>

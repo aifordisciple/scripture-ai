@@ -58,7 +58,6 @@ export default function AdminUsersPage() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // 禁言相关状态
   const [muteDialogOpen, setMuteDialogOpen] = useState(false);
   const [muteUser, setMuteUser] = useState<User | null>(null);
   const [muteReason, setMuteReason] = useState('');
@@ -114,14 +113,12 @@ export default function AdminUsersPage() {
     }
   };
 
-  // 打开禁言对话框
   const openMuteDialog = (user: User) => {
     setMuteUser(user);
     setMuteReason('');
     setMuteDialogOpen(true);
   };
 
-  // 禁言用户
   const handleMuteUser = async () => {
     if (!muteUser) return;
     setUpdating(muteUser.id);
@@ -146,7 +143,6 @@ export default function AdminUsersPage() {
     }
   };
 
-  // 解除禁言
   const handleUnmuteUser = async (user: User) => {
     setUpdating(user.id);
     try {
@@ -173,12 +169,11 @@ export default function AdminUsersPage() {
     );
   }
 
-  // [P2-18修复] 显示错误状态UI
   if (error && !data) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-lg">{error}</div>
-        <button onClick={fetchUsers} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95">{t('admin.retry')}</button>
+        <div className="text-destructive text-lg">{error}</div>
+        <button onClick={fetchUsers} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 transition-all duration-fast">{t('admin.retry')}</button>
       </div>
     );
   }
@@ -187,7 +182,6 @@ export default function AdminUsersPage() {
     <div className="space-y-4 md:space-y-6">
       <h1 className="text-xl md:text-2xl font-semibold text-foreground apple-headline">{t('admin.userManagement')}</h1>
 
-      {/* 搜索和筛选 */}
       <div className="bg-card rounded-lg border border-border p-3 md:p-4">
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3 md:gap-4">
           <div className="relative flex-1">
@@ -212,16 +206,14 @@ export default function AdminUsersPage() {
             </select>
             <button
               type="submit"
-              className="px-6 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 whitespace-nowrap"
+              className="px-6 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 transition-all duration-fast whitespace-nowrap"
             >
               {t('admin.search')}
-
             </button>
           </div>
         </form>
       </div>
 
-      {/* 用户列表 - 桌面端表格 */}
       <div className="hidden md:block bg-card rounded-lg border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-border">
@@ -237,7 +229,7 @@ export default function AdminUsersPage() {
             </thead>
             <tbody className="bg-card divide-y divide-border">
               {data?.users.map((user) => (
-                <tr key={user.id} className="hover:bg-accent/50 transition-colors min-h-[44px]">
+                <tr key={user.id} className="hover:bg-accent/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center overflow-hidden">
@@ -266,8 +258,8 @@ export default function AdminUsersPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     {user.isMuted ? (
                       <div className="flex items-center gap-1">
-                        <Ban className="w-4 h-4 text-red-500" />
-                        <span className="text-xs text-red-600 dark:text-red-400">{t('admin.muted')}</span>
+                        <Ban className="w-4 h-4 text-destructive" />
+                        <span className="text-xs text-destructive">{t('admin.muted')}</span>
                       </div>
                     ) : (
                       <span className="text-xs text-green-600 dark:text-green-400">{t('admin.normal')}</span>
@@ -289,7 +281,7 @@ export default function AdminUsersPage() {
                         <button
                           onClick={() => handleUnmuteUser(user)}
                           disabled={updating === user.id}
-                          className="px-3 py-1 rounded text-sm text-green-600 hover:bg-green-50 disabled:opacity-50 transition-colors"
+                          className="px-3 py-1 rounded text-sm text-green-600 dark:text-green-400 hover:bg-green-500/10 disabled:opacity-50 transition-all duration-fast active:scale-95 min-h-[44px]"
                         >
                           <CheckCircle className="w-4 h-4 inline mr-1" />
                           {t('admin.unmute')}
@@ -298,7 +290,7 @@ export default function AdminUsersPage() {
                         <button
                           onClick={() => openMuteDialog(user)}
                           disabled={updating === user.id}
-                          className="px-3 py-1 rounded text-sm text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                          className="px-3 py-1 rounded text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50 transition-all duration-fast active:scale-95 min-h-[44px]"
                         >
                           <Ban className="w-4 h-4 inline mr-1" />
                           {t('admin.mute')}
@@ -308,9 +300,9 @@ export default function AdminUsersPage() {
                         onClick={() => toggleRole(user)}
                         disabled={updating === user.id}
                         className={cn(
-                          "px-3 py-1 rounded text-sm transition-colors",
+                          "px-3 py-1 rounded text-sm transition-all duration-fast active:scale-95 min-h-[44px]",
                           user.role === 'admin'
-                            ? "text-red-600 hover:bg-red-50"
+                            ? "text-destructive hover:bg-destructive/10"
                             : "text-[#0066cc] hover:bg-[#0066cc]/10",
                           updating === user.id && "opacity-50 cursor-not-allowed"
                         )}
@@ -326,49 +318,48 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* 用户列表 - 移动端卡片 */}
       <div className="md:hidden space-y-3">
         {data?.users.map((user) => (
-          <div key={user.id} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-4">
+          <div key={user.id} className="bg-card rounded-lg border border-border p-4 min-h-[44px]">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="h-12 w-12 rounded-full bg-accent flex items-center justify-center overflow-hidden shrink-0">
                   {user.image ? (
                     <img src={user.image} alt="" className="h-12 w-12 object-cover" />
                   ) : (
-                    <User size={24} className="text-slate-500" />
+                    <User size={24} className="text-muted-foreground" />
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-medium text-slate-900 truncate">{user.name || t('admin.notSet')}</div>
-                  <div className="text-sm text-slate-500 truncate">{user.email}</div>
+                  <div className="font-semibold text-foreground truncate">{user.name || t('admin.notSet')}</div>
+                  <div className="text-sm text-muted-foreground truncate">{user.email}</div>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1">
                 <span className={cn(
-                  "px-2 py-1 text-xs font-medium rounded-full shrink-0",
+                  "px-2 py-1 text-xs font-semibold rounded-full shrink-0",
                   user.role === 'admin'
-                    ? "bg-purple-100 text-purple-700"
-                    : "bg-slate-100 text-slate-700"
+                    ? "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                    :"bg-accent text-muted-foreground"
                 )}>
                   {user.role === 'admin' ? t('admin.adminRole') : t('admin.userRole')}
                 </span>
                 {user.isMuted && (
-                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
+                  <span className="px-2 py-1 text-xs font-semibold rounded-full bg-destructive/10 text-destructive">
                     {t('admin.muted')}
                   </span>
                 )}
               </div>
             </div>
 
-            <div className="mt-3 flex items-center gap-4 text-sm text-slate-500">
+            <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
               <span>{user._count.highlights} {t('admin.highlights')}</span>
               <span>{user._count.notes} {t('admin.notes')}</span>
               <span>{user._count.churchMemberships} {t('admin.groups')}</span>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
-              <div className="text-xs text-slate-400">
+            <div className="mt-3 pt-3 border-t border-border flex items-center justify-between flex-wrap gap-2">
+              <div className="text-xs text-muted-foreground">
                 {t('admin.registeredColon')} {formatDateClient(new Date(user.createdAt))}
               </div>
               <div className="flex gap-2">
@@ -376,7 +367,7 @@ export default function AdminUsersPage() {
                   <button
                     onClick={() => handleUnmuteUser(user)}
                     disabled={updating === user.id}
-                    className="px-3 py-1.5 rounded text-sm font-medium text-green-600 bg-green-50 hover:bg-green-100 disabled:opacity-50 transition-colors"
+                    className="px-3 py-1.5 rounded text-sm font-semibold text-green-600 dark:text-green-400 bg-green-500/10 hover:bg-green-500/20 disabled:opacity-50 transition-all duration-fast active:scale-95"
                   >
                     {t('admin.unmute')}
                   </button>
@@ -384,7 +375,7 @@ export default function AdminUsersPage() {
                   <button
                     onClick={() => openMuteDialog(user)}
                     disabled={updating === user.id}
-                    className="px-3 py-1.5 rounded text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 disabled:opacity-50 transition-colors"
+                    className="px-3 py-1.5 rounded text-sm font-semibold text-destructive bg-destructive/10 hover:bg-destructive/20 disabled:opacity-50 transition-all duration-fast active:scale-95"
                   >
                     {t('admin.mute')}
                   </button>
@@ -393,9 +384,9 @@ export default function AdminUsersPage() {
                   onClick={() => toggleRole(user)}
                   disabled={updating === user.id}
                   className={cn(
-                    "px-3 py-1.5 rounded text-sm font-medium transition-colors",
+                    "px-3 py-1.5 rounded text-sm font-semibold transition-all duration-fast active:scale-95",
                     user.role === 'admin'
-                      ? "text-red-600 bg-red-50 hover:bg-red-100"
+                      ? "text-destructive bg-destructive/10 hover:bg-destructive/20"
                       : "text-[#0066cc] bg-[#0066cc]/10 hover:bg-[#0066cc]/20",
                     updating === user.id && "opacity-50 cursor-not-allowed"
                   )}
@@ -408,17 +399,16 @@ export default function AdminUsersPage() {
         ))}
       </div>
 
-      {/* 分页 */}
       {data && data.pagination.totalPages > 1 && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm px-4 py-3 flex items-center justify-between border-t border-slate-200">
-          <div className="text-sm text-slate-700">
+        <div className="bg-card rounded-lg border border-border px-4 py-3 flex items-center justify-between">
+          <div className="text-sm text-foreground">
             {t('admin.totalCount', { count: data.pagination.total })}
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="p-2 rounded border border-slate-300 disabled:opacity-50"
+              className="p-2 rounded border border-border disabled:opacity-50 transition-all duration-fast active:scale-95"
             >
               <ChevronLeft size={20} />
             </button>
@@ -428,7 +418,7 @@ export default function AdminUsersPage() {
             <button
               onClick={() => setPage(p => Math.min(data.pagination.totalPages, p + 1))}
               disabled={page === data.pagination.totalPages}
-              className="p-2 rounded border border-slate-300 disabled:opacity-50"
+              className="p-2 rounded border border-border disabled:opacity-50 transition-all duration-fast active:scale-95"
             >
               <ChevronRight size={20} />
             </button>
@@ -436,18 +426,17 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* 禁言对话框 */}
       <Dialog open={muteDialogOpen} onOpenChange={setMuteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('admin.muteUser')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               {t('admin.confirmMuteUser')} <strong>{muteUser?.name || muteUser?.email}</strong> {t('admin.muteUserConsequence')}
             </p>
             <div>
-              <label className="text-sm font-medium">{t('admin.muteReason')}</label>
+              <label className="text-sm font-semibold">{t('admin.muteReason')}</label>
               <Textarea
                 value={muteReason}
                 onChange={(e) => setMuteReason(e.target.value)}

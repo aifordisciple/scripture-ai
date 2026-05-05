@@ -1,61 +1,41 @@
 // app/admin/announcements/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Check, AlertTriangle, Info, Bell, BellRing } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Megaphone, Plus, Trash2, Edit2, Eye, EyeOff, Calendar, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatDateClient } from '@/lib/locale';
-import { useTranslation } from '@/lib/i18n';
 import { useToast } from '@/components/ui/toast';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useTranslation } from '@/lib/i18n';
 
 interface Announcement {
   id: string;
   title: string;
   content: string;
-  type: string;
+  type: 'info' | 'warning' | 'maintenance';
   isActive: boolean;
-  startsAt: string | null;
-  endsAt: string | null;
-  createdBy: string;
+  startDate: string | null;
+  endDate: string | null;
   createdAt: string;
-  creator?: {
-    id: string;
-    name: string | null;
-    email: string;
-  } | null;
-}
-
-interface AnnouncementsResponse {
-  announcements: Announcement[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  updatedAt: string;
 }
 
 export default function AdminAnnouncementsPage() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  const [data, setData] = useState<AnnouncementsResponse | null>(null);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showEditor, setShowEditor] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    type: 'INFO',
-    isActive: true,
-    startsAt: '',
-    endsAt: '',
-    sendNotification: false
+    type: 'info' as 'info' | 'warning' | 'maintenance',
+    startDate: '',
+    endDate: '',
+    isActive: true
   });
-  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -67,8 +47,8 @@ export default function AdminAnnouncementsPage() {
     try {
       const res = await fetch('/api/admin/announcements');
       if (!res.ok) throw new Error('Failed to fetch announcements');
-      const json = await res.json();
-      setData(json);
+      const data = await res.json();
+      setAnnouncements(data);
     } catch (err) {
       console.error(err);
       setError(t('admin.loadAnnouncementsFailed'));
@@ -77,70 +57,46 @@ export default function AdminAnnouncementsPage() {
     }
   };
 
-  const openEditor = (announcement?: Announcement) => {
-    if (announcement) {
-      setEditingId(announcement.id);
-      setFormData({
-        title: announcement.title,
-        content: announcement.content,
-        type: announcement.type,
-        isActive: announcement.isActive,
-        startsAt: announcement.startsAt ? announcement.startsAt.slice(0, 16) : '',
-        endsAt: announcement.endsAt ? announcement.endsAt.slice(0, 16) : '',
-        sendNotification: false
-      });
-    } else {
-      setEditingId(null);
-      setFormData({
-        title: '',
-        content: '',
-        type: 'INFO',
-        isActive: true,
-        startsAt: '',
-        endsAt: '',
-        sendNotification: false
-      });
-    }
-    setShowEditor(true);
-  };
-
-  const closeEditor = () => {
-    setShowEditor(false);
-    setEditingId(null);
+  const resetForm = () => {
     setFormData({
       title: '',
       content: '',
-      type: 'INFO',
-      isActive: true,
-      startsAt: '',
-      endsAt: '',
-      sendNotification: false
+      type: 'info',
+      startDate: '',
+      endDate: '',
+      isActive: true
     });
+    setEditingId(null);
+    setShowForm(false);
   };
 
-  const handleSave = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!formData.title || !formData.content) {
-      addToast({ type: 'error', message: t('admin.fillTitleAndContent') });
+      addToast({ type: 'error', message: t('admin.fillRequiredFields') });
       return;
     }
 
     setSaving(true);
     try {
-      const url = '/api/admin/announcements';
+      const url = editingId
+        ? `/api/admin/announcements/${editingId}`
+        : '/api/admin/announcements';
       const method = editingId ? 'PUT' : 'POST';
-      const body = editingId
-        ? { id: editingId, ...formData }
-        : formData;
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(formData)
       });
 
       if (!res.ok) throw new Error('Failed to save announcement');
 
-      closeEditor();
+      addToast({
+        type: 'success',
+        message: editingId ? t('admin.announcementUpdated') : t('admin.announcementCreated')
+      });
+      resetForm();
       fetchAnnouncements();
     } catch (err) {
       console.error(err);
@@ -150,20 +106,27 @@ export default function AdminAnnouncementsPage() {
     }
   };
 
-  const handleDelete = (id: string) => {
-    setPendingDeleteId(id);
-    setShowDeleteConfirm(true);
+  const handleEdit = (announcement: Announcement) => {
+    setFormData({
+      title: announcement.title,
+      content: announcement.content,
+      type: announcement.type,
+      startDate: announcement.startDate ? announcement.startDate.split('T')[0] : '',
+      endDate: announcement.endDate ? announcement.endDate.split('T')[0] : '',
+      isActive: announcement.isActive
+    });
+    setEditingId(announcement.id);
+    setShowForm(true);
   };
 
-  const confirmDeleteAnnouncement = async () => {
-    if (!pendingDeleteId) return;
-    setShowDeleteConfirm(false);
+  const handleDelete = async (id: string) => {
+    if (!confirm(t('admin.confirmDeleteAnnouncement'))) return;
 
     try {
-      const res = await fetch(`/api/admin/announcements?id=${id}`, {
-        method: 'DELETE'
-      });
+      const res = await fetch(`/api/admin/announcements/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete announcement');
+
+      addToast({ type: 'success', message: t('admin.announcementDeleted') });
       fetchAnnouncements();
     } catch (err) {
       console.error(err);
@@ -173,55 +136,41 @@ export default function AdminAnnouncementsPage() {
 
   const toggleActive = async (announcement: Announcement) => {
     try {
-      const res = await fetch('/api/admin/announcements', {
+      const res = await fetch(`/api/admin/announcements/${announcement.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: announcement.id,
-          isActive: !announcement.isActive
-        })
+        body: JSON.stringify({ ...announcement, isActive: !announcement.isActive })
       });
-      if (!res.ok) throw new Error('Failed to update');
+
+      if (!res.ok) throw new Error('Failed to toggle announcement');
+
       fetchAnnouncements();
     } catch (err) {
       console.error(err);
+      addToast({ type: 'error', message: t('admin.updateFailed') });
     }
   };
 
-  const getTypeIcon = (type: string) => {
+  const getTypeStyle = (type: string) => {
     switch (type) {
-      case 'WARNING':
-        return <AlertTriangle size={16} className="text-yellow-600" />;
-      case 'MAINTENANCE':
-        return <Bell size={16} className="text-red-600" />;
+      case 'warning':
+        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+      case 'maintenance':
+        return 'bg-destructive/10 text-destructive';
       default:
-        return <Info size={16} className="text-blue-600" />;
+        return 'bg-primary/10 text-primary';
     }
   };
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'WARNING':
-        return t('admin.warning');
-      case 'MAINTENANCE':
-        return t('admin.maintenance');
-      default:
-        return t('admin.info');
+      case 'warning': return t('admin.warning');
+      case 'maintenance': return t('admin.maintenance');
+      default: return t('admin.info');
     }
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'WARNING':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'MAINTENANCE':
-        return 'bg-red-100 text-red-700';
-      default:
-        return 'bg-blue-100 text-blue-700';
-    }
-  };
-
-  if (loading && !data) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066cc]"></div>
@@ -229,290 +178,207 @@ export default function AdminAnnouncementsPage() {
     );
   }
 
-  // [P2-18修复] 显示错误状态UI
-  if (error && !data) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-red-500 text-lg">{error}</div>
-        <button onClick={fetchAnnouncements} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 transition-colors">{t('admin.retry')}</button>
-      </div>
-    );
-  }
-
   return (
-    <>
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl md:text-2xl font-semibold text-slate-900">{t('admin.announcementManagement')}</h1>
+        <h1 className="text-2xl font-semibold text-foreground apple-headline">{t('admin.announcementManagement')}</h1>
         <button
-          onClick={() => openEditor()}
-          className="flex items-center gap-2 px-3 md:px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 transition-colors text-sm md:text-base"
+          onClick={() => { resetForm(); setShowForm(true); }}
+          className="flex items-center gap-2 px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] transition-all duration-fast active:scale-95 min-h-[44px]"
         >
           <Plus size={18} />
-          <span className="hidden sm:inline">{t('admin.newAnnouncement')}</span>
-          <span className="sm:hidden">{t('admin.newBtn')}</span>
+          {t('admin.createAnnouncement')}
         </button>
       </div>
 
-      {/* 公告列表 - 桌面端表格 */}
-      <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.announcement')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.type')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.status')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.time')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-slate-200">
-              {data?.announcements.map((announcement) => (
-                <tr key={announcement.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-slate-900">{announcement.title}</div>
-                    <div className="text-sm text-slate-500 line-clamp-1">{announcement.content}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      {getTypeIcon(announcement.type)}
-                      <span className="text-sm text-slate-600">{getTypeLabel(announcement.type)}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => toggleActive(announcement)}
-                      className={cn(
-                        "px-2 py-1 text-xs font-medium rounded-full",
-                        announcement.isActive
-                          ? "bg-green-100 text-green-700"
-                          : "bg-slate-100 text-slate-500"
-                      )}
-                    >
-                      {announcement.isActive ? t('admin.enabled') : t('admin.disabled')}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                    {formatDateClient(new Date(announcement.createdAt))}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => openEditor(announcement)}
-                      className="text-[#0066cc] hover:text-[#0071e3] mr-3 transition-colors"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(announcement.id)}
-                      className="text-red-600 hover:text-red-900 transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* [P2-18修复] 错误状态 */}
+      {error && (
+        <div className="bg-destructive/10 text-destructive p-4 rounded-lg flex items-center gap-2">
+          <Megaphone size={20} />
+          <span>{error}</span>
         </div>
+      )}
 
-        {data && data.announcements.length === 0 && (
-          <div className="text-center py-12 text-slate-500">
-            {t('admin.noAnnouncements')}
-          </div>
-        )}
-      </div>
-
-      {/* 公告列表 - 移动端卡片 */}
-      <div className="md:hidden space-y-3">
-        {data?.announcements.map((announcement) => (
-          <div key={announcement.id} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-4">
-            <div className="flex items-start justify-between gap-3">
+      {/* 公告列表 */}
+      <div className="space-y-4">
+        {announcements.map((announcement) => (
+          <div
+            key={announcement.id}
+            className={cn(
+              "bg-card rounded-lg border border-border p-4 transition-colors",
+              !announcement.isActive && "opacity-60"
+            )}
+          >
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-semibold text-foreground">{announcement.title}</h3>
                   <span className={cn(
-                    "px-2 py-0.5 text-xs font-medium rounded-full",
-                    getTypeColor(announcement.type)
+                    "px-2 py-0.5 text-xs font-semibold rounded-full",
+                    getTypeStyle(announcement.type)
                   )}>
                     {getTypeLabel(announcement.type)}
                   </span>
-                  <span className={cn(
-                    "px-2 py-0.5 text-xs font-medium rounded-full",
-                    announcement.isActive
-                      ? "bg-green-100 text-green-700"
-                      : "bg-slate-100 text-slate-500"
-                  )}>
-                    {announcement.isActive ? t('admin.enabled') : t('admin.disabled')}
-                  </span>
+                  {!announcement.isActive && (
+                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-accent text-muted-foreground">
+                      {t('admin.inactive')}
+                    </span>
+                  )}
                 </div>
-                <h3 className="font-medium text-slate-900 truncate">{announcement.title}</h3>
-                <p className="text-sm text-slate-500 line-clamp-2 mt-1">{announcement.content}</p>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{announcement.content}</p>
+                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Calendar size={12} />
+                    {t('admin.created')}: {new Date(announcement.createdAt).toLocaleDateString('zh-CN')}
+                  </span>
+                  {announcement.startDate && (
+                    <span>{t('admin.start')}: {new Date(announcement.startDate).toLocaleDateString('zh-CN')}</span>
+                  )}
+                  {announcement.endDate && (
+                    <span>{t('admin.end')}: {new Date(announcement.endDate).toLocaleDateString('zh-CN')}</span>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs text-slate-400">
-                {formatDateClient(new Date(announcement.createdAt))}
-              </span>
-              <div className="flex items-center gap-2">
+
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => toggleActive(announcement)}
-                  className="text-xs px-2 py-1 rounded text-slate-600 hover:bg-slate-100 transition-colors"
+                  className={cn(
+                    "p-2 rounded-lg transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center",
+                    announcement.isActive
+                      ? "text-green-600 dark:text-green-400 hover:bg-green-500/10"
+                      : "text-muted-foreground hover:bg-accent/50"
+                  )}
+                  title={announcement.isActive ? t('admin.deactivate') : t('admin.activate')}
                 >
-                  {announcement.isActive ? t('admin.disable') : t('admin.enable')}
+                  {announcement.isActive ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
                 <button
-                  onClick={() => openEditor(announcement)}
-                  className="p-1.5 text-[#0066cc] hover:bg-[#0066cc]/10 rounded transition-colors"
+                  onClick={() => handleEdit(announcement)}
+                  className="p-2 text-[#0066cc] hover:bg-[#0066cc]/10 rounded-lg transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
-                  <Edit2 size={16} />
+                  <Edit2 size={18} />
                 </button>
                 <button
                   onClick={() => handleDelete(announcement.id)}
-                  className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                  className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={18} />
                 </button>
               </div>
             </div>
           </div>
         ))}
 
-        {data && data.announcements.length === 0 && (
-          <div className="text-center py-12 text-slate-500 bg-white dark:bg-slate-900 rounded-xl">
+        {announcements.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground apple-body">
             {t('admin.noAnnouncements')}
           </div>
         )}
       </div>
 
-      {/* 编辑弹窗 */}
-      {showEditor && (
-        <div className="bg-black/50 fixed inset-0 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
+      {/* 创建/编辑公告弹窗 */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card z-10">
               <h3 className="text-lg font-semibold">
-                {editingId ? t('admin.editAnnouncement') : t('admin.newAnnouncement')}
+                {editingId ? t('admin.editAnnouncement') : t('admin.createAnnouncement')}
               </h3>
-              <button onClick={closeEditor} className="text-slate-400 hover:text-slate-600 transition-colors">
+              <button onClick={resetForm} className="text-muted-foreground hover:text-foreground transition-all duration-fast active:scale-95">
                 <X size={20} />
               </button>
             </div>
 
-            <div className="p-4 space-y-4">
+            <form onSubmit={handleSubmit} className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.title')}</label>
+                <label className="block text-sm font-semibold text-foreground mb-1">{t('admin.title')} *</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
                   placeholder={t('admin.announcementTitlePlaceholder')}
+                  required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.content')}</label>
+                <label className="block text-sm font-semibold text-foreground mb-1">{t('admin.content')} *</label>
                 <textarea
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
                   placeholder={t('admin.announcementContentPlaceholder')}
+                  required
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.type')}</label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
-                  >
-                    <option value="INFO">{t('admin.info')}</option>
-                    <option value="WARNING">{t('admin.warning')}</option>
-                    <option value="MAINTENANCE">{t('admin.maintenance')}</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.status')}</label>
-                  <select
-                    value={formData.isActive ? 'true' : 'false'}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
-                  >
-                    <option value="true">{t('admin.enable')}</option>
-                    <option value="false">{t('admin.disable')}</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1">{t('admin.type')}</label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as 'info' | 'warning' | 'maintenance' })}
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
+                >
+                  <option value="info">{t('admin.info')}</option>
+                  <option value="warning">{t('admin.warning')}</option>
+                  <option value="maintenance">{t('admin.maintenance')}</option>
+                </select>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.startTimeOptional')}</label>
+                  <label className="block text-sm font-semibold text-foreground mb-1">{t('admin.startDate')}</label>
                   <input
-                    type="datetime-local"
-                    value={formData.startsAt}
-                    onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('admin.endTimeOptional')}</label>
+                  <label className="block text-sm font-semibold text-foreground mb-1">{t('admin.endDate')}</label>
                   <input
-                    type="datetime-local"
-                    value={formData.endsAt}
-                    onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
                   />
                 </div>
               </div>
 
-              {/* 推送通知选项 - 仅新建时显示 */}
-              {!editingId && (
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                  <input
-                    type="checkbox"
-                    id="sendNotification"
-                    checked={formData.sendNotification}
-                    onChange={(e) => setFormData({ ...formData, sendNotification: e.target.checked })}
-                    className="w-4 h-4 text-[#0066cc] border-slate-300 rounded focus:ring-[#0066cc]/20"
-                  />
-                  <label htmlFor="sendNotification" className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-                    <BellRing size={16} className="text-[#0066cc]" />
-                    {t('admin.pushNotificationOnPublish')}
-                  </label>
-                </div>
-              )}
-            </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  className="w-4 h-4 rounded border-border text-[#0066cc] focus:ring-primary"
+                />
+                <label className="text-sm font-semibold text-foreground">{t('admin.publishImmediately')}</label>
+              </div>
 
-            <div className="flex justify-end gap-3 p-4 border-t sticky bottom-0 bg-white">
-              <button
-                onClick={closeEditor}
-                className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
-              >
-                {t('admin.cancel')}
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 disabled:opacity-50 transition-colors"
-              >
-                {saving ? t('admin.saving') : t('admin.save')}
-              </button>
-            </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-border">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-4 py-2 text-foreground bg-accent rounded-lg hover:bg-accent/80 transition-all duration-fast active:scale-95 min-h-[44px]"
+                >
+                  {t('admin.cancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] disabled:opacity-50 transition-all duration-fast active:scale-95 min-h-[44px]"
+                >
+                  {saving ? t('admin.saving') : (editingId ? t('admin.update') : t('admin.create'))}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
     </div>
-    <ConfirmDialog
-      open={showDeleteConfirm}
-      onOpenChange={setShowDeleteConfirm}
-      title={t('admin.confirmDeleteAnnouncement')}
-      description={t('admin.deleteAnnouncementWarning')}
-      onConfirm={confirmDeleteAnnouncement}
-    />
-    </>
   );
 }

@@ -723,7 +723,7 @@ export default function Home() {
 
               <UserMenu />
 
-              <Button variant="ghost" size="icon" className="rounded-full text-[#7a7a7a] dark:text-white/60 hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
+              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground dark:text-foreground/60 hover:text-foreground dark:hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>
             </div>
@@ -744,7 +744,7 @@ export default function Home() {
         {activeTab?.type !== 'sermon' && (
         <div
           className={cn(
-            "md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#f5f5f7]/80 dark:bg-[#272729]/80 backdrop-blur-xl saturate-[1.8] border-t border-[#e0e0e0] dark:border-[#3a3a3c] border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
+            "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-nav border-t border-border border-b-0 rounded-t-lg flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
             isNavVisible ? "translate-y-0" : "translate-y-full"
           )}
         >
