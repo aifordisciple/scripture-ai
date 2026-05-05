@@ -27,7 +27,7 @@ export function SermonSidebar() {
   const { activeSermonPanel, setActiveSermonPanel } = useBibleStore()
 
   return (
-    <div className="w-10 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl flex flex-col items-center py-3 gap-1 border-r border-slate-200/60 dark:border-slate-800/60">
+    <div className="w-10 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl flex flex-col items-center py-3 gap-0.5 border-r border-black/5 dark:border-white/10">
       {PANEL_ICONS.map(({ type, icon: Icon, key }) => {
         const isActive = activeSermonPanel === type
         return (
@@ -35,10 +35,10 @@ export function SermonSidebar() {
             key={type}
             onClick={() => setActiveSermonPanel(isActive ? 'list' : type)}
             className={cn(
-              'w-8 h-8 rounded-lg flex items-center justify-center transition-colors',
+              'w-8 h-8 rounded-md flex items-center justify-center transition-colors',
               isActive
-                ? 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700/40'
+                ? 'bg-black/5 dark:bg-white/10 text-slate-900 dark:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5'
             )}
             title={t(`sermon.${key}`)}
           >
