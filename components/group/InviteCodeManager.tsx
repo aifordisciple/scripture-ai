@@ -212,7 +212,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                     <Button
                       onClick={createCode}
                       disabled={creating}
-                      className="w-full"
+                      className="w-full active:scale-95"
                     >
                       {creating && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                       {t('group.createInviteCode')}
@@ -243,7 +243,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <code className="font-mono text-lg font-bold bg-muted px-3 py-1 rounded">
+                      <code className="font-mono text-lg font-semibold bg-muted px-3 py-1 rounded">
                         {code.code}
                       </code>
                       <div className="flex items-center gap-2">
@@ -322,7 +322,7 @@ export function InviteCodeManager({ churchId, isAdmin }: InviteCodeManagerProps)
                   className="w-64 h-64 rounded-lg border"
                 />
                 <p className="text-sm text-muted-foreground mt-3 mb-4">
-                  {t('group.inviteCode')}: <span className="font-mono font-bold">{selectedCodeForQr}</span>
+                  {t('group.inviteCode')}: <span className="font-mono font-semibold">{selectedCodeForQr}</span>
                 </p>
                 <div className="flex gap-2">
                   <Button

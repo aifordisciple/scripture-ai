@@ -133,7 +133,7 @@ export function GroupSettings({
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="active:scale-95">
                 {t('common.edit')}
               </Button>
             </DialogTrigger>
@@ -220,6 +220,7 @@ export function GroupSettings({
                         size="sm"
                         onClick={() => setFontFamily(font.value)}
                         style={{ fontFamily: font.value }}
+                        className="active:scale-95"
                       >
                         {t(`group.${font.nameKey}`)}
                       </Button>
@@ -228,10 +229,10 @@ export function GroupSettings({
                 </div>
               </div>
               <DialogFooter className="mt-6">
-                <Button variant="outline" onClick={() => setOpen(false)}>
+                <Button variant="outline" onClick={() => setOpen(false)} className="active:scale-95">
                   {t('common.cancel')}
                 </Button>
-                <Button onClick={saveSettings} disabled={saving}>
+                <Button onClick={saveSettings} disabled={saving} className="active:scale-95">
                   {saving ? (
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   ) : saved ? (

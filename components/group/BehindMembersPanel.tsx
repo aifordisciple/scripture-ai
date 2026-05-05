@@ -274,7 +274,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                         variant="outline"
                         onClick={() => sendReminder(member.user.id, 'reminder')}
                         disabled={sendingReminder === member.user.id}
-                        className="gap-1"
+                        className="gap-1 active:scale-95"
                       >
                         {sendingReminder === member.user.id ? (
                           <Loader2 className="w-3 h-3 animate-spin" />
@@ -288,7 +288,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                         variant="outline"
                         onClick={() => sendReminder(member.user.id, 'encouragement')}
                         disabled={sendingReminder === member.user.id}
-                        className="gap-1"
+                        className="gap-1 active:scale-95"
                       >
                         <Heart className="w-3 h-3" />
                         {t('group.sendEncouragement')}
@@ -300,7 +300,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                           setSelectedMember(member);
                           setRemindDialogOpen(true);
                         }}
-                        className="gap-1"
+                        className="gap-1 active:scale-95"
                       >
                         <MessageSquare className="w-3 h-3" />
                         {t('group.customMessage')}
@@ -329,7 +329,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                   });
                   setShowBatchConfirm(true);
                 }}
-                className="gap-1"
+                className="gap-1 active:scale-95"
               >
                 <Send className="w-3 h-3" />
                 {t('group.remindAll')}
@@ -371,6 +371,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
               <Button
                 onClick={handleCustomSend}
                 disabled={!customMessage.trim()}
+                className="active:scale-95"
               >
                 {t('common.send')}
               </Button>

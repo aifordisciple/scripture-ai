@@ -127,7 +127,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="active:scale-95">
             <User className="w-4 h-4 mr-2" />
             {t('group.viewProfile')}
           </Button>
@@ -146,7 +146,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
           <div className="space-y-6 pt-4">
             {/* Profile Header */}
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-[#0066cc]/10 dark:bg-[#0066cc]/20 flex items-center justify-center">
                 {data.user.image ? (
                   <img
                     src={data.user.image}
@@ -154,11 +154,11 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                     className="w-16 h-16 rounded-full object-cover"
                   />
                 ) : (
-                  <User className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                  <User className="w-8 h-8 text-[#0066cc] dark:text-[#2997ff]" />
                 )}
               </div>
               <div>
-                <h2 className="text-xl font-bold">{data.user.name || t('group.anonymousUser')}</h2>
+                <h2 className="text-xl font-semibold">{data.user.name || t('group.anonymousUser')}</h2>
                 <p className="text-sm text-muted-foreground">
                   {t('group.joinedAt', { date: formatDate(data.user.createdAt) })}
                 </p>
@@ -174,7 +174,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <Card>
                 <CardContent className="pt-4 text-center">
-                  <BookOpen className="w-5 h-5 mx-auto mb-1 text-indigo-500" />
+                  <BookOpen className="w-5 h-5 mx-auto mb-1 text-[#0066cc]" />
                   <div className="text-xl font-bold">{data.stats.totalChaptersRead}</div>
                   <div className="text-xs text-muted-foreground">{t('group.chaptersRead')}</div>
                 </CardContent>
@@ -216,7 +216,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                     {data.badges.map((badge) => (
                       <div
                         key={badge.id}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0066cc]/10 dark:bg-[#0066cc]/20"
                         title={`${badge.type} - ${formatDate(badge.earnedAt)}`}
                       >
                         <span className="text-lg">{getBadgeIcon(badge.type)}</span>
@@ -279,7 +279,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                         className="p-3 rounded-lg bg-muted/30"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                          <span className="text-sm font-medium text-[#0066cc] dark:text-[#2997ff]">
                             {getBookName(note.bookId)} {note.chapter}:{note.verse}
                           </span>
                           <span className="text-xs text-muted-foreground">

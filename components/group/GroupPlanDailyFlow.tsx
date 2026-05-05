@@ -54,9 +54,9 @@ export function GroupPlanDailyFlow() {
       <div className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-md flex flex-col pt-[10vh] animate-in fade-in duration-300">
         <div className="max-w-2xl mx-auto w-full px-6 flex-1 flex flex-col">
           <div className="flex items-center gap-2 mb-8 opacity-60">
-            <Users className="w-5 h-5 text-indigo-500" />
-            <Sparkles className="w-5 h-5 text-indigo-500" />
-            <span className="text-sm font-bold uppercase tracking-widest text-indigo-500">
+            <Users className="w-5 h-5 text-[#0066cc]" />
+            <Sparkles className="w-5 h-5 text-[#0066cc]" />
+            <span className="text-sm font-semibold uppercase tracking-widest text-[#0066cc]">
               {t('plan.dailyDevotionalWithPlan', { planName: ctx.planName, day: ctx.day })}
             </span>
           </div>
@@ -68,7 +68,7 @@ export function GroupPlanDailyFlow() {
           <div className="pb-12 pt-6 bg-gradient-to-t from-background via-background to-transparent sticky bottom-0">
             <Button
               onClick={handleNext}
-              className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-xl shadow-indigo-600/20"
+              className="w-full h-14 rounded-lg bg-[#0066cc] hover:bg-[#0071e3] text-white font-semibold text-lg active:scale-95"
             >
               {t('plan.readTodayScripture')} <ChevronRight className="w-5 h-5 ml-1" />
             </Button>
@@ -89,20 +89,20 @@ export function GroupPlanDailyFlow() {
 
     return (
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-md animate-in slide-in-from-bottom-8 duration-500">
-        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-4 rounded-3xl shadow-2xl border border-indigo-500/20 flex items-center justify-between">
+        <div className="bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl p-4 rounded-3xl border border-[#e0e0e0] dark:border-[#3a3a3c] flex items-center justify-between">
           <div className="flex flex-col pl-2">
-            <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold tracking-widest uppercase mb-0.5 flex items-center gap-1">
+            <span className="text-[10px] text-[#0066cc] dark:text-[#2997ff] font-semibold tracking-widest uppercase mb-0.5 flex items-center gap-1">
               <Users className="w-3 h-3" />
               {t('plan.groupReading')}
             </span>
-            <span className="text-sm font-bold text-foreground">
+            <span className="text-sm font-semibold text-foreground">
               {bookName} {t('plan.chapterNum', { chapter: step.chapter ?? '' })}
             </span>
             <span className="text-xs text-muted-foreground mt-1">{t('plan.readingProgress', { current: currentReadingIndex, total: totalReadings || 1 })}</span>
           </div>
           <Button
             onClick={handleNext}
-            className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 shadow-md"
+            className="rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white font-semibold px-5 active:scale-95"
           >
             {t('plan.completeAndContinue')} <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
@@ -114,25 +114,25 @@ export function GroupPlanDailyFlow() {
   // 视图 C：全屏撒花完成界面
   if (step.type === 'completion') {
     return (
-      <div className="fixed inset-0 z-[60] bg-indigo-600/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500">
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-2xl max-w-sm w-full text-center relative overflow-hidden">
+      <div className="fixed inset-0 z-[60] bg-[#0066cc]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500">
+        <div className="bg-white dark:bg-[#272729] p-8 rounded-[2rem] max-w-sm w-full text-center relative overflow-hidden border border-[#e0e0e0] dark:border-[#3a3a3c]">
           <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500">
             <CheckCircle2 className="w-10 h-10" />
           </div>
           <PartyPopper className="absolute -top-4 -right-4 w-16 h-16 text-yellow-400 opacity-20" />
           <PartyPopper className="absolute -bottom-4 -left-4 w-16 h-16 text-yellow-400 opacity-20 transform scale-x-[-1]" />
 
-          <h2 className="text-2xl font-bold mb-2 text-foreground">{t('plan.todayTaskComplete')}</h2>
+          <h2 className="text-2xl font-semibold mb-2 text-foreground">{t('plan.todayTaskComplete')}</h2>
           <p className="text-muted-foreground mb-4">
             {t('plan.completionMessage', { planTitle: ctx.planName, day: ctx.day })}
           </p>
-          <p className="text-sm text-indigo-600 dark:text-indigo-400 mb-8 flex items-center justify-center gap-1">
+          <p className="text-sm text-[#0066cc] dark:text-[#2997ff] mb-8 flex items-center justify-center gap-1">
             <Users className="w-4 h-4" />
             {t('plan.syncedToGroupLeaderboard')}
           </p>
           <Button
             onClick={handleNext}
-            className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg"
+            className="w-full h-14 rounded-lg bg-[#0066cc] hover:bg-[#0071e3] text-white font-semibold text-lg active:scale-95"
           >
             {t('plan.endCheckin')}
           </Button>

@@ -60,7 +60,7 @@ interface Stats {
   }[];
 }
 
-const COLORS = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'];
+const COLORS = ['#0066cc', '#2997ff', '#0071e3', '#409cff', '#66b3ff'];
 
 export function GroupStats({ churchId, plans }: GroupStatsProps) {
   const { t } = useTranslation();
@@ -248,7 +248,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                   />
                   <Bar
                     dataKey="count"
-                    fill="#6366f1"
+                    fill="#0066cc"
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>

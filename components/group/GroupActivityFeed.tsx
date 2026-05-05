@@ -128,13 +128,13 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
   const getActivityIcon = (taskType: string) => {
     switch (taskType) {
       case "devotional":
-        return <Sparkles className="w-4 h-4 text-indigo-500" />;
+        return <Sparkles className="w-4 h-4 text-[#0066cc]" />;
       case "reading":
         return <BookOpen className="w-4 h-4 text-green-500" />;
       case "completion":
         return <CheckCircle2 className="w-4 h-4 text-orange-500" />;
       default:
-        return <CheckCircle2 className="w-4 h-4 text-slate-500" />;
+        return <CheckCircle2 className="w-4 h-4 text-[#7a7a7a]" />;
     }
   };
 
@@ -233,8 +233,8 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
                     className="w-10 h-10 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                    <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <div className="w-10 h-10 rounded-full bg-[#0066cc]/10 dark:bg-[#2997ff]/20 flex items-center justify-center">
+                    <User className="w-5 h-5 text-[#0066cc] dark:text-[#2997ff]" />
                   </div>
                 )}
               </div>
@@ -302,7 +302,7 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
             variant="outline"
             onClick={loadMore}
             disabled={loadingMore}
-            className="gap-2"
+            className="gap-2 active:scale-95"
           >
             {loadingMore ? (
               <Loader2 className="w-4 h-4 animate-spin" />

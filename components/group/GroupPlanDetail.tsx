@@ -321,7 +321,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={onBack}>
+        <Button variant="ghost" size="sm" onClick={onBack} className="active:scale-95">
           <ChevronLeft className="w-4 h-4 mr-1" /> {t('group.backToList')}
         </Button>
       </div>
@@ -587,7 +587,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                       e.stopPropagation();
                       goToChapter(reading.book, reading.chapter);
                     }}
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 active:scale-95"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
@@ -745,7 +745,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                 size="sm"
                 onClick={() => generateDevotional(currentDay)}
                 disabled={generatingDevotional}
-                className="gap-1"
+                className="gap-1 active:scale-95"
               >
                 {generatingDevotional ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

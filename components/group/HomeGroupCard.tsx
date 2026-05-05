@@ -227,7 +227,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
       <Card className="overflow-hidden border-dashed">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+            <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
               <Users className="w-5 h-5" />
             </div>
             <div className="flex-1">
@@ -238,7 +238,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
               variant="ghost"
               size="sm"
               onClick={onJoinGroup || goToGroupTab}
-              className="gap-1"
+              className="gap-1 active:scale-95"
             >
               {t('group.join')} <ChevronRight className="w-4 h-4" />
             </Button>
@@ -254,7 +254,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
       <Card className="overflow-hidden">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+            <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
               <Users className="w-5 h-5" />
             </div>
             <div className="flex-1">
@@ -265,7 +265,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
               variant="ghost"
               size="sm"
               onClick={goToGroupTab}
-              className="gap-1"
+              className="gap-1 active:scale-95"
             >
               {t('group.view')} <ChevronRight className="w-4 h-4" />
             </Button>
@@ -283,7 +283,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
 
   return (
     <Card className={cn(
-      "overflow-hidden transition-shadow hover:shadow-md",
+      "overflow-hidden",
       isTodayCompleted && "border-green-200 dark:border-green-800"
     )}>
       <CardContent className="p-4">
@@ -293,7 +293,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
             "p-2.5 rounded-xl",
             isTodayCompleted
               ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-              : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
+              : "bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff]"
           )}>
             {isTodayCompleted ? (
               <CheckCircle2 className="w-5 h-5" />
@@ -342,7 +342,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
                 variant="outline"
                 size="sm"
                 onClick={goToGroupTab}
-                className="w-full gap-1"
+                className="w-full gap-1 active:scale-95"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 {t('group.todayCompleted')}
@@ -352,7 +352,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
                 size="sm"
                 onClick={handleStartReading}
                 disabled={startingReading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 gap-1"
+                className="w-full bg-[#0066cc] hover:bg-[#0071e3] gap-1 active:scale-95"
               >
                 {startingReading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

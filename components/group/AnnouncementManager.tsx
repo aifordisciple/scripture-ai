@@ -228,7 +228,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
           {isAdmin && (
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1" onClick={resetForm}>
+                <Button variant="outline" size="sm" className="gap-1 active:scale-95" onClick={resetForm}>
                   <Plus className="w-4 h-4" /> {t('group.publishAnnouncement')}
                 </Button>
               </DialogTrigger>
@@ -263,7 +263,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                       id="pinned"
                       checked={pinned}
                       onChange={(e) => setPinned(e.target.checked)}
-                      className="rounded border-slate-300"
+                      className="rounded border-[#e0e0e0] dark:border-[#3a3a3c]"
                     />
                     <Label htmlFor="pinned" className="text-sm font-normal">
                       {t('group.pinThisAnnouncement')}
@@ -277,6 +277,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                   <Button
                     onClick={createAnnouncement}
                     disabled={saving || !title.trim() || !content.trim()}
+                    className="active:scale-95"
                   >
                     {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                     {t('group.publish')}
@@ -304,7 +305,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                   className={cn(
                     "p-4 rounded-lg border",
                     announcement.pinned
-                      ? "bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800"
+                      ? "bg-[#0066cc]/5 dark:bg-[#2997ff]/10 border-[#e0e0e0] dark:border-[#3a3a3c]"
                       : "bg-muted/30"
                   )}
                 >
@@ -312,9 +313,9 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         {announcement.pinned && (
-                          <Pin className="w-4 h-4 text-amber-500" />
+                          <Pin className="w-4 h-4 text-[#0066cc]" />
                         )}
-                        <h3 className="font-bold truncate">{announcement.title}</h3>
+                        <h3 className="font-semibold truncate">{announcement.title}</h3>
                       </div>
                       <p className={cn(
                         "text-sm text-muted-foreground",
@@ -327,7 +328,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                         {announcement.content.length > 100 && (
                           <button
                             onClick={() => toggleExpand(announcement.id)}
-                            className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                            className="text-[#0066cc] dark:text-[#2997ff] hover:underline"
                           >
                             {isExpanded ? (
                               <>{t('group.collapse')} <ChevronUp className="w-3 h-3 inline" /></>
@@ -406,7 +407,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                   id="edit-pinned"
                   checked={pinned}
                   onChange={(e) => setPinned(e.target.checked)}
-                  className="rounded border-slate-300"
+                  className="rounded border-[#e0e0e0] dark:border-[#3a3a3c]"
                 />
                 <Label htmlFor="edit-pinned" className="text-sm font-normal">
                   {t('group.pinThisAnnouncement')}
@@ -420,6 +421,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
               <Button
                 onClick={updateAnnouncement}
                 disabled={saving || !title.trim() || !content.trim()}
+                className="active:scale-95"
               >
                 {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                 {t('common.save')}
@@ -441,7 +443,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
               <Button variant="outline" onClick={() => setDeleteId(null)}>
                 {t('common.cancel')}
               </Button>
-              <Button variant="destructive" onClick={deleteAnnouncement} disabled={saving}>
+              <Button variant="destructive" onClick={deleteAnnouncement} disabled={saving} className="active:scale-95">
                 {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                 {t('common.delete')}
               </Button>

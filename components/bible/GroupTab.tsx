@@ -246,7 +246,7 @@ export function GroupTab() {
   if (status === 'loading' || loading) {
     return (
       <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8 flex flex-col items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-4" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#0066cc] mb-4" />
         <p className="text-muted-foreground">{t('group.loading')}</p>
       </div>
     );
@@ -256,12 +256,12 @@ export function GroupTab() {
   if (status === 'unauthenticated') {
     return (
       <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
-        <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
-          <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+        <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-[#3a3a3c]">
+          <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
             <Users className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('group.title')}</h1>
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">{t('group.title')}</h1>
             <p className="text-sm text-muted-foreground mt-1">
               {t('group.subtitle')}
             </p>
@@ -270,7 +270,7 @@ export function GroupTab() {
 
         <div className="flex flex-col items-center justify-center py-20">
           <LogIn className="w-16 h-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-bold text-foreground mb-2">{t('group.loginRequired')}</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2">{t('group.loginRequired')}</h2>
           <p className="text-muted-foreground text-center max-w-md mb-6">
             {t('group.loginRequiredDesc')}
           </p>
@@ -321,13 +321,13 @@ export function GroupTab() {
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold mb-2">
+            <div className="flex items-center gap-2 text-[#0066cc] dark:text-[#2997ff] font-semibold mb-2">
               <Users className="w-5 h-5" />
               <span className="text-sm uppercase tracking-widest">
                 {isAdmin ? t('group.manageGroup') : t('group.myGroup')}
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground font-serif">
+            <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif">
               {selectedGroup.church.name}
             </h1>
             {selectedGroup.church.description && (
@@ -406,12 +406,12 @@ export function GroupTab() {
                           {plan.mode === "CHALLENGE" ? (
                             <Trophy className="w-5 h-5 text-orange-500" />
                           ) : (
-                            <Calendar className="w-5 h-5 text-indigo-500" />
+                            <Calendar className="w-5 h-5 text-[#0066cc]" />
                           )}
-                          <span className="font-bold">{plan.name}</span>
+                          <span className="font-semibold">{plan.name}</span>
                         </div>
                         {plan.source === "AI_GENERATED" && (
-                          <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] px-2 py-0.5 rounded-full">
                             {t('group.aiGenerated')}
                           </span>
                         )}
@@ -512,12 +512,12 @@ export function GroupTab() {
   // Main list view
   return (
     <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
-      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
-        <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-[#3a3a3c]">
+        <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
           <Users className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('group.title')}</h1>
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">{t('group.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {t('group.subtitle')}
           </p>
@@ -578,7 +578,7 @@ export function GroupTab() {
           {/* My Groups */}
           {myGroups.length > 0 && (
             <div className="mb-12">
-              <h2 className="text-lg font-bold text-foreground mb-4">
+              <h2 className="text-lg font-semibold text-foreground mb-4">
                 {t('group.myGroups', { count: myGroups.length })}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -601,7 +601,7 @@ export function GroupTab() {
           {/* Public Groups */}
           {publicGroups.length > 0 && (
             <div>
-              <h2 className="text-lg font-bold text-foreground mb-4">
+              <h2 className="text-lg font-semibold text-foreground mb-4">
                 {t('group.discoverPublic')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

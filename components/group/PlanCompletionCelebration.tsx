@@ -172,7 +172,7 @@ export function PlanCompletionCelebration({
               transition={{ type: "spring", damping: 20 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Card className="w-full max-w-md bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300 dark:from-amber-950 dark:via-yellow-950 dark:to-orange-950 dark:border-amber-700 shadow-2xl">
+              <Card className="w-full max-w-md bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300 dark:from-[#272729] dark:via-[#2a2a2c] dark:to-[#272729] dark:border-amber-700">
                 <CardContent className="p-6 text-center">
                   {/* Close button */}
                   <button
@@ -189,7 +189,7 @@ export function PlanCompletionCelebration({
                     transition={{ delay: 0.2, type: "spring", damping: 10 }}
                     className="mb-4"
                   >
-                    <div className="w-24 h-24 mx-auto bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center shadow-lg">
+                    <div className="w-24 h-24 mx-auto bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
                       <Trophy className="w-12 h-12 text-white" />
                     </div>
                   </motion.div>
@@ -200,7 +200,7 @@ export function PlanCompletionCelebration({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <h2 className="text-2xl font-bold text-amber-800 dark:text-amber-200 mb-2">
+                    <h2 className="text-2xl font-semibold text-amber-800 dark:text-amber-200 mb-2">
                       🎉 {t('group.congratulations')}
                     </h2>
                     <p className="text-lg text-amber-700 dark:text-amber-300 font-medium mb-4">
@@ -216,19 +216,19 @@ export function PlanCompletionCelebration({
                     className="grid grid-cols-3 gap-3 mb-6"
                   >
                     <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
-                      <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                      <div className="text-2xl font-semibold text-amber-600 dark:text-amber-400">
                         {stats.completedDays}
                       </div>
                       <div className="text-xs text-muted-foreground">{t('group.statDays')}</div>
                     </div>
                     <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
-                      <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                      <div className="text-2xl font-semibold text-amber-600 dark:text-amber-400">
                         {stats.chaptersRead}
                       </div>
                       <div className="text-xs text-muted-foreground">{t('group.statChapters')}</div>
                     </div>
                     <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
-                      <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1">
+                      <div className="text-2xl font-semibold text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1">
                         <Star className="w-4 h-4" />
                         {stats.streakDays}
                       </div>
@@ -270,14 +270,14 @@ export function PlanCompletionCelebration({
                     <Button
                       variant="outline"
                       onClick={generateCertificate}
-                      className="flex-1 gap-1"
+                      className="flex-1 gap-1 active:scale-95"
                     >
                       <Download className="w-4 h-4" />
                       {t('group.downloadCertificate')}
                     </Button>
                     <Button
                       onClick={onClose}
-                      className="flex-1 gap-1 bg-amber-500 hover:bg-amber-600"
+                      className="flex-1 gap-1 bg-[#0066cc] hover:bg-[#0055b3] dark:bg-[#2997ff] dark:hover:bg-[#0a84ff] active:scale-95"
                     >
                       <PartyPopper className="w-4 h-4" />
                       {t('group.awesome')}

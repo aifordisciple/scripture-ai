@@ -94,7 +94,7 @@ export function JoinByInviteDialog({ onSuccess }: JoinByInviteDialogProps) {
           <Button
             onClick={handleJoin}
             disabled={loading || code.length !== 6}
-            className="w-full"
+            className="w-full active:scale-95"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />

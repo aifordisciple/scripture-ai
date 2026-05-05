@@ -208,7 +208,7 @@ export function GroupPlanEditDialog({
             <Button variant="outline" onClick={() => setEditOpen(false)}>
               {t('common.cancel')}
             </Button>
-            <Button onClick={handleSave} disabled={saving || !name.trim()}>
+            <Button onClick={handleSave} disabled={saving || !name.trim()} className="active:scale-95">
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               ) : null}
@@ -238,6 +238,7 @@ export function GroupPlanEditDialog({
               variant="destructive"
               onClick={handleDelete}
               disabled={deleting}
+              className="active:scale-95"
             >
               {deleting ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />

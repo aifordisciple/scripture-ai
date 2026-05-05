@@ -103,11 +103,11 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
   const getRankBg = (rank: number) => {
     switch (rank) {
       case 1:
-        return "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-200 dark:border-yellow-800";
+        return "bg-[#f5f5f7] dark:bg-[#2a2a2c] border-[#e0e0e0] dark:border-[#3a3a3c]";
       case 2:
-        return "bg-gradient-to-r from-slate-50 to-slate-50 dark:from-slate-900/20 dark:to-slate-900/20 border-slate-200 dark:border-slate-700";
+        return "bg-[#f5f5f7] dark:bg-[#2a2a2c] border-[#e0e0e0] dark:border-[#3a3a3c]";
       case 3:
-        return "bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800";
+        return "bg-[#0066cc]/5 dark:bg-[#0066cc]/10 border-[#0066cc]/20 dark:border-[#0066cc]/30";
       default:
         return "bg-card border-border";
     }
@@ -178,8 +178,8 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
                 size="sm"
                 onClick={() => setSortMode(option.mode)}
                 className={cn(
-                  "h-7 px-2 text-xs gap-1 shrink-0",
-                  sortMode === option.mode && "bg-indigo-500 hover:bg-indigo-600"
+                  "h-7 px-2 text-xs gap-1 shrink-0 active:scale-95",
+                  sortMode === option.mode && "bg-[#0066cc] hover:bg-[#0071e3]"
                 )}
               >
                 {option.icon}
@@ -241,7 +241,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-primary">
+                    <p className="font-semibold text-primary">
                       {displayValue.value}
                     </p>
                     <p className="text-xs text-muted-foreground">{displayValue.unit}</p>

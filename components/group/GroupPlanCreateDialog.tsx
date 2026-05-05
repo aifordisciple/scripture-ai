@@ -368,7 +368,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
             <Button
               onClick={createWithAI}
               disabled={creating || !aiPrompt.trim()}
-              className="w-full"
+              className="w-full active:scale-95"
             >
               {creating ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -404,7 +404,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
             <Button
               onClick={createFromTemplate}
               disabled={creating || !selectedTemplate}
-              className="w-full"
+              className="w-full active:scale-95"
             >
               {creating ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -524,7 +524,7 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
             <Button
               onClick={createManual}
               disabled={creating || !manualName.trim()}
-              className="w-full"
+              className="w-full active:scale-95"
             >
               {creating ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />

@@ -223,12 +223,12 @@ export function GroupProgressCalendar({
                 disabled={isFuture}
                 className={cn(
                   "aspect-square rounded-lg flex flex-col items-center justify-center text-xs transition-all",
-                  "hover:ring-2 hover:ring-indigo-300",
+                  "hover:ring-2 hover:ring-[#0066cc]/30",
                   dayProgress.completed && "bg-green-100 dark:bg-green-900/30",
                   dayProgress.partial && !dayProgress.completed && "bg-yellow-100 dark:bg-yellow-900/30",
                   !dayProgress.completed && !dayProgress.partial && !isFuture && "bg-red-50 dark:bg-red-900/20",
                   isFuture && "opacity-40",
-                  isToday && "ring-2 ring-indigo-500"
+                  isToday && "ring-2 ring-[#0066cc]"
                 )}
               >
                 <span className={cn(

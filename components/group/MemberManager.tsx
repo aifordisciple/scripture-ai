@@ -157,13 +157,13 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
     switch (role) {
       case "OWNER":
         return (
-          <span className="inline-flex items-center gap-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-xs bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] px-2 py-0.5 rounded-full">
             <Crown className="w-3 h-3" /> {t('group.roleOwner')}
           </span>
         );
       case "ADMIN":
         return (
-          <span className="inline-flex items-center gap-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-xs bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] px-2 py-0.5 rounded-full">
             <Shield className="w-3 h-3" /> {t('group.roleAdmin')}
           </span>
         );
@@ -206,12 +206,12 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
               className={cn(
                 "flex items-center justify-between p-3 rounded-lg border",
                 member.role === "OWNER"
-                  ? "bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800"
+                  ? "bg-[#0066cc]/5 dark:bg-[#0066cc]/10 border-[#0066cc]/20 dark:border-[#0066cc]/30"
                   : "bg-muted/30"
               )}
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-[#0066cc]/10 dark:bg-[#0066cc]/20 flex items-center justify-center">
                   {member.user.image ? (
                     <img
                       src={member.user.image}
@@ -219,7 +219,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (
-                    <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <Users className="w-5 h-5 text-[#0066cc] dark:text-[#2997ff]" />
                   )}
                 </div>
                 <div>
@@ -241,6 +241,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                       variant="ghost"
                       size="sm"
                       disabled={isProcessing}
+                      className="active:scale-95"
                     >
                       {isProcessing ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -253,7 +254,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                     {isOwner && member.role === "MEMBER" && (
                       <DropdownMenuItem
                         onClick={() => setRole(member.userId, "ADMIN")}
-                        className="text-indigo-600"
+                        className="text-[#0066cc]"
                       >
                         <Shield className="w-4 h-4 mr-2" />
                         {t('group.setAsAdmin')}
@@ -286,7 +287,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
           <div className="pt-4 border-t mt-4">
             <Dialog open={disbandOpen} onOpenChange={setDisbandOpen}>
               <DialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="gap-2">
+                <Button variant="destructive" size="sm" className="gap-2 active:scale-95">
                   <Trash2 className="w-4 h-4" />
                   {t('group.disbandGroup')}
                 </Button>
@@ -305,6 +306,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                   <Button
                     variant="outline"
                     onClick={() => setDisbandOpen(false)}
+                    className="active:scale-95"
                   >
                     {t('common.cancel')}
                   </Button>
@@ -312,6 +314,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                     variant="destructive"
                     onClick={disbandGroup}
                     disabled={disbanding}
+                    className="active:scale-95"
                   >
                     {disbanding ? (
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
