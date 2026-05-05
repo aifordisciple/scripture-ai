@@ -67,12 +67,12 @@ export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderP
             size="icon" 
             onClick={() => play(text)} 
             disabled={isLoading || !text}
-            className={cn("h-9 w-9 rounded-full dark:text-slate-200", className)}
+            className={cn("h-9 w-9 rounded-full dark:text-white/80", className)}
         >
             {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
+                <Loader2 className="h-5 w-5 animate-spin text-[#7a7a7a]" />
             ) : isPlaying ? (
-                <Pause className="h-5 w-5 text-blue-600 fill-current" />
+                <Pause className="h-5 w-5 text-[#0066cc] fill-current" />
             ) : (
                 <Play className="h-5 w-5 fill-current" />
             )}
@@ -82,7 +82,7 @@ export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderP
 
   // --- 模式 2: 完整模式 (带进度条和倍速) ---
   return (
-    <div className={cn("flex items-center gap-2 bg-slate-100 dark:bg-slate-900 rounded-full px-3 py-1 border border-slate-200 dark:border-slate-800 transition-all shadow-sm", className)}>
+    <div className={cn("flex items-center gap-2 bg-[#f5f5f7] dark:bg-[#2a2a2c] rounded-full px-3 py-1 border border-[#e0e0e0] dark:border-[#3a3a3c] transition-all", className)}>
       
       {/* 播放/暂停 */}
       <Button 
@@ -90,14 +90,14 @@ export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderP
         size="icon" 
         onClick={() => play(text)} 
         disabled={isLoading || !text}
-        className="h-8 w-8 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0"
+        className="h-8 w-8 rounded-full hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 shrink-0"
       >
         {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+          <Loader2 className="h-4 w-4 animate-spin text-[#7a7a7a]" />
         ) : isPlaying ? (
-          <Pause className="h-4 w-4 text-blue-600 fill-current" />
+          <Pause className="h-4 w-4 text-[#0066cc] fill-current" />
         ) : (
-          <Play className="h-4 w-4 text-slate-700 dark:text-slate-300 fill-current ml-0.5" />
+          <Play className="h-4 w-4 text-[#1d1d1f] dark:text-white/80 fill-current ml-0.5" />
         )}
       </Button>
 
@@ -105,7 +105,7 @@ export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderP
       <div className={cn("flex items-center gap-2 transition-all duration-500 overflow-hidden", 
           duration > 0 ? "w-full md:w-64 opacity-100" : "w-0 opacity-0"
       )}>
-        <span className="text-[10px] text-slate-500 font-mono w-9 text-right shrink-0 select-none">
+        <span className="text-[10px] text-[#7a7a7a] font-mono w-9 text-right shrink-0 select-none">
           {formatTime(isDragging ? localProgress : currentTime)}
         </span>
         
@@ -125,7 +125,7 @@ export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderP
           }}
         />
 
-        <span className="text-[10px] text-slate-400 font-mono w-9 shrink-0 select-none">
+        <span className="text-[10px] text-[#7a7a7a]/60 font-mono w-9 shrink-0 select-none">
           {formatTime(duration)}
         </span>
       </div>
@@ -135,8 +135,8 @@ export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderP
         variant="ghost"
         size="sm"
         onClick={toggleSpeed}
-        className={cn("h-7 px-2 text-[10px] font-bold text-slate-500 hover:text-blue-600 transition-all overflow-hidden",
-            duration > 0 ? "w-auto opacity-100 ml-1 border-l dark:border-slate-700 rounded-none" : "w-0 opacity-0 px-0"
+        className={cn("h-7 px-2 text-[10px] font-bold text-[#7a7a7a] hover:text-[#0066cc] transition-all overflow-hidden",
+            duration > 0 ? "w-auto opacity-100 ml-1 border-l border-[#e0e0e0] dark:border-[#3a3a3c] rounded-none" : "w-0 opacity-0 px-0"
         )}
         title={t('bible.togglePlaybackSpeed')}
       >

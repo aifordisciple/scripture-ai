@@ -82,7 +82,7 @@ export function AudioButton({
     <Button
       variant={variant}
       size={size}
-      className={cn("transition-colors", className, isThisPlaying && "text-blue-600 bg-blue-50 dark:bg-blue-900/20")}
+      className={cn("transition-colors", className, isThisPlaying && "text-[#0066cc] bg-[#0066cc]/10 active:scale-95")}
       onClick={handleToggle}
       title={isThisPlaying ? t('bible.stopReading') : t('bible.readContent')}
       disabled={isLoading && !isThisPlaying}

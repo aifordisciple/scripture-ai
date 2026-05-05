@@ -312,7 +312,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       {/* 左侧导航 */}
       <div className="hidden md:flex flex-1 self-stretch group items-start justify-center">
         <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handlePrevChapter(); }} title={t('reader.prevChapter')}>
-           <div className="glass-panel p-3 rounded-full text-muted-foreground hover:text-foreground hover:scale-110 transition-all duration-300">
+           <div className="bg-[#d2d2d7]/30 dark:bg-white/10 p-3 rounded-full text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white active:scale-95 transition-all duration-300">
               <ChevronLeft className="w-8 h-8 opacity-50 group-hover:opacity-100" />
            </div>
         </div>
@@ -353,7 +353,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             ) : (
                 <>  
                     <div className="flex items-center justify-center mb-10 md:mb-16 relative mt-4">
-                        <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground/90 select-none text-center tracking-wider">
+                        <h1 className="text-3xl md:text-4xl font-serif font-semibold text-[#1d1d1f] dark:text-white select-none text-center tracking-wider">
                             {getBookDisplayName(book, locale)} <span className="opacity-80 mx-1">·</span> {chapter}
                         </h1>
                     </div>
@@ -380,12 +380,12 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                             onClick={(e) => handleVerseClick(mainVerse, e)}
                             className={cn(
                                 "relative flex items-start px-3 md:px-5 py-2.5 rounded-2xl cursor-pointer transition-all duration-300 group/verse",
-                                isSelected ? "bg-primary/10 dark:bg-primary/20 shadow-[inset_4px_0_0_0_hsl(var(--primary))]" :
+                                isSelected ? "bg-[#0066cc]/10 border-l-[3px] border-l-[#0066cc]" :
                                 highlightClass ? `${highlightClass}` : "hover:bg-black/5 dark:hover:bg-white/5"
                             )}
                         >
                             <span
-                              className={cn("font-sans font-semibold mr-4 select-none shrink-0 mt-[0.3em] transition-opacity duration-300", isSelected ? "text-primary opacity-100" : "text-foreground/50 group-hover/verse:text-foreground/70")}
+                              className={cn("font-sans font-semibold mr-4 select-none shrink-0 mt-[0.3em] transition-opacity duration-300", isSelected ? "text-[#0066cc] opacity-100" : "text-foreground/50 group-hover/verse:text-foreground/70")}
                               style={{ fontSize: Math.max(fontSize * 0.55, 10) }}
                             >
                                 {verseNum}
@@ -415,7 +415,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                                     enqueueAI(t('reader.aiInterpretPrompt'), content, context, ref);
                                     useBibleStore.getState().setAiOpen(true);
                                 }}
-                                className="hidden md:block absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/verse:opacity-100 transition-all duration-200 p-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-500 dark:text-blue-400 hover:scale-110 active:scale-95"
+                                className="hidden md:block absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/verse:opacity-100 transition-all duration-200 p-1.5 rounded-full bg-[#0066cc]/5 hover:bg-[#0066cc]/10 text-[#0066cc] active:scale-95"
                                 title={t('reader.aiInterpret')}
                             >
                                 <Sparkles className="w-3.5 h-3.5" />
@@ -437,13 +437,12 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                             }
                         }} 
                         className={cn(
-                          "group inline-flex items-center gap-2.5 px-8 py-3.5 glass-panel rounded-full",
-                          "bg-card/60 hover:bg-card text-foreground font-medium text-sm",
-                          // 核心动画类名：悬浮上浮投影放大，点击时回缩(scale-95)
-                          "transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1.5 active:scale-95 active:translate-y-0 active:shadow-sm"
+                          "group inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full",
+                          "bg-[#0066cc] hover:bg-[#0071e3] text-white font-medium text-sm",
+                          "transition-all duration-300 active:scale-95"
                         )}
                     >
-                        <BookOpenCheck className="w-5 h-5 text-primary group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300" />
+                        <BookOpenCheck className="w-5 h-5 text-white transition-transform duration-300" />
                         {t('reader.chapterSummary', { chapter })}
                     </button>
                     </div>
@@ -456,7 +455,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
       {/* 右侧导航 */}
       <div className="hidden md:flex flex-1 self-stretch group items-start justify-center">
         <div className="sticky top-[50vh] -translate-y-1/2 p-4 cursor-pointer" onClick={(e) => { e.stopPropagation(); handleNextChapter(); }} title={t('reader.nextChapter')}>
-           <div className="glass-panel p-3 rounded-full text-muted-foreground hover:text-foreground hover:scale-110 transition-all duration-300">
+           <div className="bg-[#d2d2d7]/30 dark:bg-white/10 p-3 rounded-full text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white active:scale-95 transition-all duration-300">
               <ChevronRight className="w-8 h-8 opacity-50 group-hover:opacity-100" />
            </div>
         </div>

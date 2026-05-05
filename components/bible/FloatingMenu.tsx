@@ -29,7 +29,7 @@ const COLORS = [
   { id: 'green', bg: 'bg-green-300', border: 'border-green-500' },
   { id: 'blue', bg: 'bg-blue-300', border: 'border-blue-500' },
   { id: 'red', bg: 'bg-red-300', border: 'border-red-500' },
-  { id: 'none', bg: 'bg-slate-100', border: 'border-slate-300', icon: true }
+  { id: 'none', bg: 'bg-[#e0e0e0]', border: 'border-[#7a7a7a]', icon: true }
 ];
 
 // AI 快捷选项
@@ -188,14 +188,14 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
 
   // 箭头位置
   const arrowClass = effectiveShowAbove
-    ? "absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white dark:border-t-slate-900 drop-shadow-sm"
-    : "absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-white dark:border-b-slate-900 drop-shadow-sm";
+    ? "absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white dark:border-t-[#272729]"
+    : "absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-white dark:border-b-[#272729]";
 
   return (
     <div
       ref={menuRef}
       className={cn(
-        "fixed z-50 flex flex-col gap-2 p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl shadow-black/15 transition-all duration-200 ease-out origin-bottom border border-slate-100 dark:border-slate-800 w-[240px]",
+        "fixed z-50 flex flex-col gap-2 p-3 bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8] rounded-lg transition-all duration-200 ease-out origin-bottom border border-[#e0e0e0] dark:border-[#3a3a3c] w-[240px]",
         visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"
       )}
       style={{
@@ -221,7 +221,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
               )}
               aria-label={c.id === 'none' ? t('floatingMenu.clearHighlight') : t('floatingMenu.highlightColor', { color: c.id })}
           >
-              {c.icon && <X className="w-3 h-3 text-slate-500" />}
+              {c.icon && <X className="w-3 h-3 text-[#7a7a7a]" />}
           </button>
           ))}
       </div>
@@ -234,11 +234,11 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onClick={handleMainExplain}
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all active:scale-95 group"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#0066cc] hover:bg-[#0071e3] text-white rounded-lg transition-all active:scale-95 group"
             aria-label={t('floatingMenu.aiDeep')}
           >
-            <Sparkles className="w-4 h-4 fill-current animate-pulse" />
-            <span className="font-bold text-sm">{t('floatingMenu.aiDeep')}</span>
+            <Sparkles className="w-4 h-4 fill-current" />
+            <span className="font-semibold text-sm">{t('floatingMenu.aiDeep')}</span>
           </button>
           {/* 下拉箭头按钮 */}
           <button
@@ -246,8 +246,8 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
             onMouseDown={handleMenuClick}
             onPointerDown={handleMenuClick}
             className={cn(
-              "px-2 py-2.5 rounded-xl shadow-md transition-all active:scale-95",
-              "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700",
+              "px-2 py-2.5 rounded-lg transition-all active:scale-95",
+              "bg-[#0066cc] hover:bg-[#0071e3]",
               "text-white",
               "border-l border-white/20"
             )}
@@ -274,7 +274,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
               onClick={handleMenuClick}
               onMouseDown={handleMenuClick}
             >
-              <div className="grid grid-cols-2 gap-1 p-1 bg-slate-50 dark:bg-slate-800 rounded-xl">
+              <div className="grid grid-cols-2 gap-1 p-1 bg-[#f5f5f7] dark:bg-[#2a2a2c] rounded-lg">
                 {AI_OPTIONS.map((option) => (
                   <button
                     key={option.id}
@@ -282,14 +282,14 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
                     onMouseDown={handleMenuClick}
                     onPointerDown={handleMenuClick}
                     className={cn(
-                      "flex items-center justify-center gap-1 py-2 px-2 rounded-xl",
+                      "flex items-center justify-center gap-1 py-2 px-2 rounded-lg",
                       "text-xs font-medium",
-                      "bg-white dark:bg-slate-700",
-                      "hover:bg-blue-50 dark:hover:bg-blue-900/30",
-                      "text-slate-700 dark:text-slate-200",
-                      "hover:text-blue-600 dark:hover:text-blue-400",
+                      "bg-white dark:bg-[#2a2a2c]",
+                      "hover:bg-[#0066cc]/5",
+                      "text-[#1d1d1f] dark:text-white/80",
+                      "hover:text-[#0066cc]",
                       "transition-colors duration-150",
-                      "border border-slate-200 dark:border-slate-600"
+                      "border border-[#e0e0e0] dark:border-[#3a3a3c]"
                     )}
                   >
                     {t(option.labelKey)}
