@@ -58,7 +58,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               className={cn(
                 "flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold rounded-lg transition-all",
                 mode === 'exact'
-                  ? "bg-white dark:bg-card text-foreground dark:text-foreground"
+                  ? "bg-primary dark:bg-primary text-white"
                   : "text-muted-foreground hover:text-foreground dark:hover:text-white"
               )}
             >
