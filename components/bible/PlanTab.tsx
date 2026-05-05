@@ -517,7 +517,7 @@ export function PlanTab() {
 
         <div className="relative z-10">
           <h2 className="text-2xl font-semibold flex items-center gap-3 mb-3 text-white tracking-tight">
-            <div className="p-2 bg-white/20 rounded-xl border border-white/30 backdrop-blur-sm">
+            <div className="p-2 bg-white/20 rounded-lg border border-white/30 backdrop-blur-sm">
                <Sparkles className="w-5 h-5 text-white/80" /> 
             </div>
             {t('plan.aiCustomTitle')}
