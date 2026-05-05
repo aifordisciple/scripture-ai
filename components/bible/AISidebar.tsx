@@ -839,7 +839,7 @@ export function AISidebar() {
 
         {/* 消息列表 */}
         <div
-          className="flex-1 overflow-y-auto p-4 bg-background/50 dark:bg-background/50 min-h-0 space-y-6 relative scroll-smooth"
+          className="flex-1 overflow-y-auto p-4 bg-background dark:bg-background min-h-0 space-y-6 relative scroll-smooth"
           ref={scrollRef}
           onScroll={handleScroll}
           onClick={() => {
