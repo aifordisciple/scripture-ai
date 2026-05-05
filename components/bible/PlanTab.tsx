@@ -554,25 +554,25 @@ export function PlanTab() {
       </div>
 
       {/* 探索计划 */}
-      <h2 className="text-lg font-bold text-foreground mb-4">{t('plan.exploreMore')}</h2>
+      <h2 className="text-lg font-semibold text-foreground mb-4">{t('plan.exploreMore')}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {discoverPlans.map((plan) => (
-          <div key={plan.id} className="flex flex-col bg-white dark:bg-slate-900 rounded-2xl p-6 border dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow relative group">
+          <div key={plan.id} className="flex flex-col bg-white dark:bg-[#272729] rounded-lg p-6 border dark:border-[#1d1d1f] hover:bg-black/[0.02] transition-colors relative group">
              {plan.id.startsWith('custom-') && (
-               <button onClick={(e) => { e.stopPropagation(); deleteCustomPlan(plan.id); }} className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button>
+               <button onClick={(e) => { e.stopPropagation(); deleteCustomPlan(plan.id); }} className="absolute top-4 right-4 p-2 text-[#e0e0e0] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button>
              )}
              <div className="flex items-start justify-between mb-4 pr-6">
                 <div>
-                  <h3 className="text-lg font-bold text-foreground font-serif">{tDual(plan.title, plan.titleEn)}</h3>
+                  <h3 className="text-lg font-semibold text-foreground font-serif">{tDual(plan.title, plan.titleEn)}</h3>
                   <div className="flex items-center gap-2 mt-2">
                      {tArr(plan.tags, plan.tagsEn)?.map((tag: string) => <span key={tag} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-md font-medium">{tag}</span>)}
                      <span className="text-xs text-muted-foreground ml-1">{t('plan.durationDays', { count: plan.durationDays })}</span>
                   </div>
                 </div>
-                <Target className="w-8 h-8 text-indigo-100 dark:text-indigo-900/50" />
+                <Target className="w-8 h-8 text-[#0066cc]/10 dark:text-[#0066cc]/20" />
              </div>
-             <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1 line-clamp-3">{tDual(plan.description, plan.descriptionEn)}</p>
-             <Button onClick={() => { startPlan(plan.id); setViewingPlanId(plan.id); }} className="w-full gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white">
+             <p className="text-sm text-[#1d1d1f] dark:text-[#7a7a7a] mb-6 flex-1 line-clamp-3">{tDual(plan.description, plan.descriptionEn)}</p>
+             <Button onClick={() => { startPlan(plan.id); setViewingPlanId(plan.id); }} className="w-full gap-2 rounded-xl bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-white font-semibold">
                <PlayCircle className="w-4 h-4" /> {t('plan.startPlan')}
              </Button>
           </div>
