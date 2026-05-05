@@ -56,9 +56,16 @@ const config = {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        sm: "8px",
+        md: "11px",
+        lg: "18px",
+        xl: "22px",
+        "2xl": "26px",
+        pill: "9999px",
+      },
+      fontFamily: {
+        'apple-display': ['SF Pro Display', 'system-ui', '-apple-system', 'sans-serif'],
+        'apple-text': ['SF Pro Text', 'system-ui', '-apple-system', 'sans-serif'],
       },
       /* 扩展间距系统 */
       spacing: {
