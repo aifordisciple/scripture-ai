@@ -175,28 +175,28 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
               <Card>
                 <CardContent className="pt-4 text-center">
                   <BookOpen className="w-5 h-5 mx-auto mb-1 text-primary" />
-                  <div className="text-xl font-bold">{data.stats.totalChaptersRead}</div>
+                  <div className="text-xl font-semibold">{data.stats.totalChaptersRead}</div>
                   <div className="text-xs text-muted-foreground">{t('group.chaptersRead')}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-4 text-center">
                   <BookOpen className="w-5 h-5 mx-auto mb-1 text-green-500" />
-                  <div className="text-xl font-bold">{data.stats.uniqueBooksRead}</div>
+                  <div className="text-xl font-semibold">{data.stats.uniqueBooksRead}</div>
                   <div className="text-xs text-muted-foreground">{t('group.booksRead')}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-4 text-center">
                   <Flame className="w-5 h-5 mx-auto mb-1 text-orange-500" />
-                  <div className="text-xl font-bold">{data.stats.streakDays}</div>
+                  <div className="text-xl font-semibold">{data.stats.streakDays}</div>
                   <div className="text-xs text-muted-foreground">{t('group.streakDays')}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-4 text-center">
                   <Trophy className="w-5 h-5 mx-auto mb-1 text-amber-500" />
-                  <div className="text-xl font-bold">{data.stats.totalScore}</div>
+                  <div className="text-xl font-semibold">{data.stats.totalScore}</div>
                   <div className="text-xs text-muted-foreground">{t('group.totalScore')}</div>
                 </CardContent>
               </Card>
@@ -251,7 +251,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm font-bold text-green-600 dark:text-green-400">
+                          <div className="text-sm font-semibold text-green-600 dark:text-green-400">
                             {t('group.daysCompleted', { count: progress.completedDays })}
                           </div>
                         </div>

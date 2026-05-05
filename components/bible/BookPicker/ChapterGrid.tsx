@@ -20,7 +20,7 @@ export function ChapterGrid({ chapters, selectedChapter, onSelect }: ChapterGrid
   }, [chapters]);
 
   return (
-    <div className="grid grid-cols-8 gap-1.5">
+    <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-1.5">
       {chapterList.map((chapter, index) => {
         const isSelected = selectedChapter === chapter;
 

@@ -70,7 +70,7 @@ export const CheckInCard = memo(function CheckInCard({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute -top-2 -right-2 z-10 w-8 h-8 flex items-center justify-center bg-white dark:bg-card rounded-full"
+          className="absolute -top-2 -right-2 z-10 w-8 h-8 flex items-center justify-center bg-card rounded-full"
         >
           <X className="w-4 h-4 text-muted-foreground" />
         </button>
@@ -90,7 +90,7 @@ export const CheckInCard = memo(function CheckInCard({
                 day: 'numeric',
               })}
             </div>
-            <h2 className="text-2xl font-semibold">{t('bible.checkInSuccess')}</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">{t('bible.checkInSuccess')}</h2>
           </div>
 
           {/* Streak display */}
@@ -106,7 +106,7 @@ export const CheckInCard = memo(function CheckInCard({
               </div>
               <span className="text-sm mt-1 opacity-80">{t('bible.consecutiveCheckIn')}</span>
             </div>
-            <div className="text-4xl font-semibold">{t('bible.daysUnit', { count: streakDays })}</div>
+            <div className="text-4xl font-semibold tracking-tight">{t('bible.daysUnit', { count: streakDays })}</div>
           </div>
 
           {/* Today's reading */}

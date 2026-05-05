@@ -33,7 +33,7 @@ export function IosInstallGuide({ open, onOpenChange }: IosInstallGuideProps) {
         <div className="space-y-6 px-4">
           {/* 步骤 1 */}
           <div className="flex items-start gap-4">
-            <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+            <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
               1
             </div>
             <div className="flex-1">
@@ -50,7 +50,7 @@ export function IosInstallGuide({ open, onOpenChange }: IosInstallGuideProps) {
 
           {/* 步骤 2 */}
           <div className="flex items-start gap-4">
-            <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+            <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
               2
             </div>
             <div className="flex-1">
@@ -67,7 +67,7 @@ export function IosInstallGuide({ open, onOpenChange }: IosInstallGuideProps) {
 
           {/* 步骤 3 */}
           <div className="flex items-start gap-4">
-            <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+            <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
               3
             </div>
             <div className="flex-1">

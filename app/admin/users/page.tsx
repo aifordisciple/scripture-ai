@@ -180,7 +180,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <h1 className="text-xl md:text-2xl font-semibold text-foreground apple-headline">{t('admin.userManagement')}</h1>
+      <h1 className="text-xl md:text-2xl font-semibold text-foreground apple-headline tracking-tight">{t('admin.userManagement')}</h1>
 
       <div className="bg-card rounded-lg border border-border p-3 md:p-4">
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3 md:gap-4">

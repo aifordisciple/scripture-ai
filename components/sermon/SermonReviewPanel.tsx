@@ -121,7 +121,7 @@ export function SermonReviewPanel() {
             {/* Overall Score */}
             <div className="rounded-lg border border-border bg-card p-3 text-center">
               <p className="text-[10px] text-muted-foreground mb-1">{t('sermon.reviewOverallScore')}</p>
-              <p className="text-2xl font-bold text-primary">{sermonReviewData.overallScore.toFixed(1)}</p>
+              <p className="text-2xl font-semibold text-primary">{sermonReviewData.overallScore.toFixed(1)}</p>
               <p className="text-[10px] text-muted-foreground mt-1">/ 10</p>
             </div>
 
@@ -165,7 +165,7 @@ export function SermonReviewPanel() {
             {sermonReviewData.estimatedMinutes > 0 && (
               <div className="rounded-lg border border-border bg-card p-2.5 text-center">
                 <p className="text-[10px] text-muted-foreground">{t('sermon.reviewTiming')}</p>
-                <p className="text-lg font-bold text-foreground/90">~{sermonReviewData.estimatedMinutes}<span className="text-[10px] font-normal text-muted-foreground ml-1">min</span></p>
+                <p className="text-lg font-semibold text-foreground/90">~{sermonReviewData.estimatedMinutes}<span className="text-[10px] font-normal text-muted-foreground ml-1">min</span></p>
               </div>
             )}
           </>

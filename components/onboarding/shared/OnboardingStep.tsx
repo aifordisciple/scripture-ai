@@ -146,7 +146,7 @@ export function OnboardingStep({
             <button
               onClick={isLastStep ? onComplete : onNext}
               className={cn(
-                "flex items-center gap-1 px-6 py-2.5 rounded-xl text-sm font-bold transition-all",
+                "flex items-center gap-1 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all",
                 "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600",
                 "text-white shadow-lg shadow-blue-500/25",
                 "active:scale-95"

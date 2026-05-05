@@ -227,7 +227,7 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
                 <div className="mb-3">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="h-px flex-1" style={{ backgroundColor: borderColor }} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: mutedColor }}>
+                    <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: mutedColor }}>
                       {locale === 'en' ? 'Old Testament' : '旧约'}
                     </span>
                     <span className="text-[10px]" style={{ color: mutedColor }}>{oldTestament.length}</span>
@@ -240,7 +240,7 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
                         onClick={() => { setSelectedBook(book.id); setStep('chapter') }}
                         className={cn(
                           'px-2 py-1.5 rounded-lg text-[11px] transition-colors text-center',
-                          selectedBook === book.id ? 'font-bold' : ''
+                          selectedBook === book.id ? 'font-semibold' : ''
                         )}
                         style={selectedBook === book.id
                           ? { backgroundColor: primaryColor, color: '#fff' }
@@ -257,7 +257,7 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <div className="h-px flex-1" style={{ backgroundColor: borderColor }} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: mutedColor }}>
+                    <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: mutedColor }}>
                       {locale === 'en' ? 'New Testament' : '新约'}
                     </span>
                     <span className="text-[10px]" style={{ color: mutedColor }}>{newTestament.length}</span>
@@ -270,7 +270,7 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
                         onClick={() => { setSelectedBook(book.id); setStep('chapter') }}
                         className={cn(
                           'px-2 py-1.5 rounded-lg text-[11px] transition-colors text-center',
-                          selectedBook === book.id ? 'font-bold' : ''
+                          selectedBook === book.id ? 'font-semibold' : ''
                         )}
                         style={selectedBook === book.id
                           ? { backgroundColor: primaryColor, color: '#fff' }
@@ -296,7 +296,7 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
                     onClick={() => { setSelectedChapter(ch); setStep('verse') }}
                     className={cn(
                       'aspect-square flex items-center justify-center rounded-lg text-xs transition-all',
-                      selectedChapter === ch ? 'font-bold scale-105 shadow-sm' : ''
+                      selectedChapter === ch ? 'font-semibold scale-105 shadow-sm' : ''
                     )}
                     style={selectedChapter === ch
                       ? { backgroundColor: primaryColor, color: '#fff' }
@@ -339,8 +339,8 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
                       }}
                       className={cn(
                         'aspect-square flex items-center justify-center rounded text-[10px] transition-all',
-                        isStart && 'rounded-l-lg font-bold',
-                        isEnd && !isStart && 'rounded-r-lg font-bold',
+                        isStart && 'rounded-l-lg font-semibold',
+                        isEnd && !isStart && 'rounded-r-lg font-semibold',
                       )}
                       style={
                         (isStart || isEnd)

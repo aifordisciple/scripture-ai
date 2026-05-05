@@ -62,7 +62,7 @@ export function BookmarksTab() {
           <Bookmark className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('bible.myBookmarks')}</h1>
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">{t('bible.myBookmarks')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {t('bible.bookmarkCount', { count: bookmarks.length })}
           </p>
@@ -81,7 +81,7 @@ export function BookmarksTab() {
             const bookName = BIBLE_BOOKS.find(b => b.id === bookId)?.name || bookId;
             return (
               <div key={bookId} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-lg font-bold font-serif text-foreground mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold font-serif text-foreground mb-4 flex items-center gap-2">
                   <span className="w-1 h-5 bg-purple-500 rounded-full inline-block"></span>
                   {bookName}
                 </h2>
@@ -92,13 +92,13 @@ export function BookmarksTab() {
                       onClick={() => handleJump(item.bookId, item.chapter)}
                       className={cn(
                         "group relative flex flex-col p-4 rounded-xl cursor-pointer",
-                        "bg-white dark:bg-card border dark:border-border",
+                        "bg-card border dark:border-border",
                         "shadow-sm hover:shadow-md hover:border-purple-200 dark:hover:border-purple-800",
                         "transition-all duration-300"
                       )}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                        <span className="text-lg font-semibold text-purple-600 dark:text-purple-400">
                           {t('bible.chapterLabel', { chapter: item.chapter })}
                         </span>
                         <Button

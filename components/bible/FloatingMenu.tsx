@@ -385,7 +385,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           aria-label={copied ? t('floatingMenu.copiedToClipboard') : t('floatingMenu.copyVerse')}
         >
           <Copy className={cn("w-4 h-4 mb-1", copied ? "text-green-600" : "text-muted-foreground dark:text-foreground/50")} />
-          <span className={cn("text-[10px]", copied ? "text-green-600 font-bold" : "text-muted-foreground")}>
+          <span className={cn("text-[10px]", copied ? "text-green-600 font-semibold" : "text-muted-foreground")}>
             {copied ? t('floatingMenu.copied') : t('floatingMenu.copy')}
           </span>
         </button>

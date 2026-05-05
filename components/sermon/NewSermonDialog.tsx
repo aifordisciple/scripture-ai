@@ -470,7 +470,7 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
                     <div className="mb-4">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="h-px flex-1 bg-border" />
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
                           {locale === 'en' ? 'Old Testament' : '旧约'}
                         </span>
                         <span className="text-[10px] text-muted-foreground">{oldTestament.length}</span>
@@ -501,7 +501,7 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
                     <div className="mb-2">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="h-px flex-1 bg-border" />
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
                           {locale === 'en' ? 'New Testament' : '新约'}
                         </span>
                         <span className="text-[10px] text-muted-foreground">{newTestament.length}</span>
@@ -544,7 +544,7 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
                       className={cn(
                         'aspect-square flex items-center justify-center rounded-xl text-sm transition-all',
                         selectedChapter === ch
-                          ? 'bg-primary text-primary-foreground font-bold scale-105 shadow-sm'
+                          ? 'bg-primary text-primary-foreground font-semibold scale-105 shadow-sm'
                           : 'bg-secondary text-foreground/80 hover:bg-primary/10 hover:text-primary hover:scale-110 border border-border/60'
                       )}
                     >
@@ -586,8 +586,8 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
                           }}
                           className={cn(
                             'aspect-square flex items-center justify-center rounded-lg text-xs transition-all',
-                            isStart && 'bg-primary text-primary-foreground font-bold rounded-l-lg',
-                            isEnd && !isStart && 'bg-primary text-primary-foreground font-bold rounded-r-lg',
+                            isStart && 'bg-primary text-primary-foreground font-semibold rounded-l-lg',
+                            isEnd && !isStart && 'bg-primary text-primary-foreground font-semibold rounded-r-lg',
                             isSelected && !isStart && !isEnd && 'bg-primary/20 text-primary',
                             !isSelected && 'bg-secondary text-foreground/70 hover:bg-primary/10 hover:text-primary border border-border/40'
                           )}

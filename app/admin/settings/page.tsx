@@ -129,7 +129,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-foreground apple-headline">系统设置</h1>
+      <h1 className="text-2xl font-semibold text-foreground apple-headline tracking-tight">系统设置</h1>
 
       {/* 操作日志 */}
       <div className="bg-card rounded-lg border border-border">

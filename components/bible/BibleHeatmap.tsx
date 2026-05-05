@@ -182,7 +182,7 @@ export function BibleHeatmap({
       {tooltip.visible && (
         <div
           className={cn(
-             "absolute z-50 px-2.5 py-1.5 text-xs font-bold text-white bg-card dark:bg-white dark:text-foreground rounded shadow-xl pointer-events-none transform -translate-x-1/2 whitespace-nowrap animate-in fade-in zoom-in-95 duration-100",
+             "absolute z-50 px-2.5 py-1.5 text-xs font-semibold text-white bg-card dark:bg-white dark:text-foreground rounded shadow-xl pointer-events-none transform -translate-x-1/2 whitespace-nowrap animate-in fade-in zoom-in-95 duration-100",
              tooltip.isBelow ? "translate-y-0" : "-translate-y-full"
           )}
           style={{ left: tooltip.x, top: tooltip.y }}

@@ -135,7 +135,7 @@ export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderP
         variant="ghost"
         size="sm"
         onClick={toggleSpeed}
-        className={cn("h-7 px-2 text-[10px] font-bold text-muted-foreground hover:text-primary transition-all overflow-hidden",
+        className={cn("h-7 px-2 text-[10px] font-semibold text-muted-foreground hover:text-primary transition-all overflow-hidden",
             duration > 0 ? "w-auto opacity-100 ml-1 border-l border-border dark:border-border rounded-none" : "w-0 opacity-0 px-0"
         )}
         title={t('bible.togglePlaybackSpeed')}

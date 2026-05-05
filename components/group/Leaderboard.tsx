@@ -96,7 +96,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
       case 3:
         return <Medal className="w-5 h-5 text-amber-600" />;
       default:
-        return <span className="w-5 h-5 flex items-center justify-center text-sm font-bold text-muted-foreground">{rank}</span>;
+        return <span className="w-5 h-5 flex items-center justify-center text-sm font-semibold text-muted-foreground">{rank}</span>;
     }
   };
 
@@ -192,7 +192,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
           {myEntry && myEntry.rank > 3 && (
             <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
               <div className="flex items-center gap-3">
-                <span className="w-6 h-6 flex items-center justify-center text-sm font-bold text-primary">
+                <span className="w-6 h-6 flex items-center justify-center text-sm font-semibold text-primary">
                   {myEntry.rank}
                 </span>
                 <div className="flex-1">

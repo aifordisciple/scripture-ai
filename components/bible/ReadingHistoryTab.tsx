@@ -135,7 +135,7 @@ export function ReadingHistoryTab() {
           <History className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('bible.readingHistory')}</h1>
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">{t('bible.readingHistory')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {t('bible.historyCount', { count: readingHistory.length })}
           </p>
@@ -161,7 +161,7 @@ export function ReadingHistoryTab() {
               <Clock className="w-4 h-4" />
               <span className="text-xs font-semibold">{t('bible.todayReading')}</span>
             </div>
-            <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+            <p className="text-2xl font-semibold text-emerald-700 dark:text-emerald-300">
               {formatDuration(todayStats.totalDuration)}
             </p>
           </div>
@@ -170,7 +170,7 @@ export function ReadingHistoryTab() {
               <BookOpen className="w-4 h-4" />
               <span className="text-xs font-semibold">{t('bible.readChapters')}</span>
             </div>
-            <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+            <p className="text-2xl font-semibold text-blue-700 dark:text-blue-300">
               {t('bible.chaptersUnit', { count: todayStats.chaptersRead })}
             </p>
           </div>
@@ -179,7 +179,7 @@ export function ReadingHistoryTab() {
               <TrendingUp className="w-4 h-4" />
               <span className="text-xs font-semibold">{t('bible.readCount')}</span>
             </div>
-            <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+            <p className="text-2xl font-semibold text-purple-700 dark:text-purple-300">
               {t('bible.countUnit', { count: todayStats.recordCount })}
             </p>
           </div>
@@ -196,7 +196,7 @@ export function ReadingHistoryTab() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t('bible.continueReading')}</p>
-                <p className="font-bold text-foreground">
+                <p className="font-semibold text-foreground">
                   {t('bible.continueReadingChapter', { book: BIBLE_BOOKS.find(b => b.id === continueReading.bookId)?.name, chapter: continueReading.chapter })}
                 </p>
               </div>
@@ -253,14 +253,14 @@ export function ReadingHistoryTab() {
                       onClick={() => handleJump(item.bookId, item.chapter)}
                       className={cn(
                         "group flex items-center justify-between p-4 rounded-xl cursor-pointer",
-                        "bg-white dark:bg-card border dark:border-border",
+                        "bg-card border dark:border-border",
                         "hover:border-emerald-200 dark:hover:border-emerald-800",
                         "shadow-sm hover:shadow-md transition-all duration-300"
                       )}
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                          <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                             {item.chapter}
                           </span>
                         </div>

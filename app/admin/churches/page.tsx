@@ -93,7 +93,7 @@ export default function AdminChurchesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-foreground apple-headline">小组管理</h1>
+      <h1 className="text-2xl font-semibold text-foreground apple-headline tracking-tight">小组管理</h1>
 
       <div className="bg-card rounded-lg border border-border p-4">
         <form onSubmit={handleSearch} className="flex gap-4">

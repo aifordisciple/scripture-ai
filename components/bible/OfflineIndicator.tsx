@@ -59,7 +59,7 @@ export function OfflineIndicator({
 
       {/* 展开详情 */}
       {isExpanded && (
-        <div className="absolute top-full left-0 mt-2 p-4 rounded-xl bg-white dark:bg-card border dark:border-border shadow-lg min-w-[200px] z-50">
+        <div className="absolute top-full left-0 mt-2 p-4 rounded-xl bg-card border dark:border-border shadow-lg min-w-[200px] z-50">
           <div className="space-y-3">
             {/* 状态 */}
             <div className="flex items-center justify-between">

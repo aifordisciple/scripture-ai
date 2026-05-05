@@ -200,7 +200,7 @@ export function PlanCompletionCelebration({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <h2 className="text-2xl font-semibold text-amber-800 dark:text-amber-200 mb-2">
+                    <h2 className="text-2xl font-semibold text-amber-800 dark:text-amber-200 mb-2 tracking-tight">
                       🎉 {t('group.congratulations')}
                     </h2>
                     <p className="text-lg text-amber-700 dark:text-amber-300 font-semibold mb-4">

@@ -117,7 +117,7 @@ export function NoteEditor() {
 
   return (
     <Sheet open={isNoteOpen} onOpenChange={(open) => !open && closeNoteEditor()}>
-      <SheetContent className="w-full sm:max-w-md bg-white dark:bg-card flex flex-col h-full z-[100]">
+      <SheetContent className="w-full sm:max-w-md bg-card flex flex-col h-full z-[100]">
         <SheetHeader className="mb-4 shrink-0">
           <SheetTitle className="flex items-center gap-2 text-xl">
             <BookOpen className="w-5 h-5 text-primary" />

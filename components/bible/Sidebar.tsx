@@ -229,7 +229,7 @@ export function Sidebar() {
                   <Users className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="font-bold text-sm text-foreground">{t('sidebar.familyGroup')}</p>
+                  <p className="font-semibold text-sm text-foreground">{t('sidebar.familyGroup')}</p>
                   <p className="text-xs text-muted-foreground">{t('sidebar.familyGroupDesc')}</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />

@@ -181,7 +181,7 @@ export default function AdminAnnouncementsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-foreground apple-headline">{t('admin.announcementManagement')}</h1>
+        <h1 className="text-2xl font-semibold text-foreground apple-headline tracking-tight">{t('admin.announcementManagement')}</h1>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-apple-focus transition-all duration-150 active:scale-95 min-h-[44px]"

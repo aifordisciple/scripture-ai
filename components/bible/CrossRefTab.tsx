@@ -187,7 +187,7 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
           <GitBranch className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-foreground">{t('bible.crossRefTitle')}</h1>
+          <h1 className="text-xl font-semibold text-foreground">{t('bible.crossRefTitle')}</h1>
           <p className="text-sm text-muted-foreground">{t('bible.crossRefSubtitle')}</p>
         </div>
       </div>

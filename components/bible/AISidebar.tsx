@@ -966,7 +966,7 @@ function RenameModal({
           className="glass-panel rounded-lg p-5 w-full max-w-sm"
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 className="text-lg font-bold mb-4 text-foreground dark:text-foreground flex items-center gap-2">
+          <h3 className="text-lg font-semibold mb-4 text-foreground dark:text-foreground flex items-center gap-2">
             <Edit className="w-5 h-5 text-primary" />
             {t('ai.renameChat')}
           </h3>
@@ -1047,7 +1047,7 @@ function DeleteConfirmModal({
               <Trash2 className="w-5 h-5 text-red-500" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-foreground dark:text-foreground">{t('ai.deleteChat')}</h3>
+              <h3 className="text-lg font-semibold text-foreground dark:text-foreground">{t('ai.deleteChat')}</h3>
               <p className="text-sm text-muted-foreground">{t('ai.deleteChatHint')}</p>
             </div>
           </div>

@@ -42,7 +42,7 @@ const SuggestionItem = memo(function SuggestionItem({
     return (
       <>
         {text.slice(0, index)}
-        <span className="font-bold text-primary">{text.slice(index, index + highlight.length)}</span>
+        <span className="font-semibold text-primary">{text.slice(index, index + highlight.length)}</span>
         {text.slice(index + highlight.length)}
       </>
     )

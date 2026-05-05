@@ -99,7 +99,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
     <div className="h-full flex flex-col p-4">
       {/* 当前年份显示 */}
       <div className="text-center mb-6">
-        <div className="text-3xl font-semibold text-foreground dark:text-foreground">
+        <div className="text-3xl font-semibold text-foreground dark:text-foreground tracking-tight">
           {formatYear(year)}
         </div>
       </div>

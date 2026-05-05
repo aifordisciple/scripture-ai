@@ -139,7 +139,7 @@ export function UserMenu() {
         className="rounded-full bg-primary/10 text-primary dark:text-primary border-2 border-transparent hover:border-primary/20"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className="font-bold">{userInitial}</span>
+        <span className="font-semibold">{userInitial}</span>
       </Button>
 
       {isOpen && createPortal(
@@ -172,11 +172,11 @@ export function UserMenu() {
               <img src={session.user.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
             ) : (
               <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <span className="font-bold text-primary dark:text-primary">{userInitial}</span>
+                <span className="font-semibold text-primary dark:text-primary">{userInitial}</span>
               </div>
             )}
             <div className="min-w-0">
-              <p className="font-bold text-sm text-foreground dark:text-foreground truncate">{session.user?.name}</p>
+              <p className="font-semibold text-sm text-foreground dark:text-foreground truncate">{session.user?.name}</p>
               <p className="text-xs text-muted-foreground truncate mt-0.5">{session.user?.email}</p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export function UserMenu() {
               {streakCount > 0 && (
                 <div className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded-full">
                   <Flame className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-xs font-bold text-primary">{streakCount}</span>
+                  <span className="text-xs font-semibold text-primary">{streakCount}</span>
                 </div>
               )}
             </button>
@@ -229,7 +229,7 @@ export function UserMenu() {
             label={t('auth.groupReading')}
             onClick={() => openTab('group')}
             rightElement={groupUnread > 0 ? (
-              <span className="min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1">
+              <span className="min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[10px] font-semibold rounded-full px-1">
                 {groupUnread > 99 ? '99+' : groupUnread}
               </span>
             ) : undefined}

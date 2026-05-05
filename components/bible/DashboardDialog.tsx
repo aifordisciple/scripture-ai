@@ -121,8 +121,8 @@ export function DashboardDialog() {
         {/* --- [新增] 清空数据内部确认遮罩 --- */}
         {showClearMenu && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
-            <div className="bg-white dark:bg-card p-6 rounded-2xl shadow-2xl w-full max-w-sm border dark:border-border">
-              <h3 className="text-xl font-bold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2">
+            <div className="bg-card p-6 rounded-2xl shadow-2xl w-full max-w-sm border dark:border-border">
+              <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2">
                 <Trash2 className="w-5 h-5"/> {t('bible.selectDataToClear')}
               </h3>
               
@@ -153,7 +153,7 @@ export function DashboardDialog() {
                   variant="destructive" 
                   disabled={!clearOpts.highlights && !clearOpts.notes && !clearOpts.interactions} 
                   onClick={executeClear}
-                  className="rounded-full font-bold"
+                  className="rounded-full font-semibold"
                 >
                   {t('bible.confirmClear')}
                 </Button>
@@ -165,7 +165,7 @@ export function DashboardDialog() {
         <DialogHeader className="p-5 md:p-6 pb-4 border-b dark:border-border bg-accent/50 dark:bg-card/50 shrink-0">
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <DialogTitle className="text-xl font-semibold flex items-center gap-2">
                 <Activity className="w-5 h-5 text-blue-500" />
                 {t('bible.personalMap')}
               </DialogTitle>
@@ -195,7 +195,7 @@ export function DashboardDialog() {
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-2 md:px-6 pb-10 bg-white dark:bg-card">
+        <div className="flex-1 overflow-y-auto px-2 md:px-6 pb-10 bg-card">
            <BibleHeatmap 
              data={heatmapData} 
              onCellClick={handleCellClick}

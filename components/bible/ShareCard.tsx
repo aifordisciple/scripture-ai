@@ -354,7 +354,7 @@ export function ShareCard() {
                         }}
                         >
                             <div className={cn(layoutMode === 'modern' ? "mt-2" : "")}>
-                                <div className={cn("font-bold", layoutMode === 'magazine' ? "text-xl italic" : "text-sm")}>
+                                <div className={cn("font-semibold", layoutMode === 'magazine' ? "text-xl italic" : "text-sm")}>
                                     {bookName} {shareData.chapter}:{formatVerseRange(shareData.verses)}
                                 </div>
                                 {layoutMode === 'modern' && (

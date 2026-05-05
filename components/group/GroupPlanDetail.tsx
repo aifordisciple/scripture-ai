@@ -338,7 +338,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
               {isChallenge ? t('group.challengeMode') : t('group.tabPlans')}
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif">
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif tracking-tight">
             {plan.name}
           </h1>
           {plan.description && (
@@ -380,7 +380,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">{t('group.completionProgress')}</span>
-              <span className="font-bold">{completionPercent}%</span>
+              <span className="font-semibold">{completionPercent}%</span>
             </div>
             <Progress value={completionPercent} className="h-3" />
             <div className="flex justify-between text-xs text-muted-foreground">
@@ -392,20 +392,20 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
           {/* Stats grid */}
           <div className="grid grid-cols-3 gap-3 pt-2">
             <div className="text-center p-3 rounded-lg bg-white/50 dark:bg-black/20">
-              <div className="text-2xl font-bold text-primary dark:text-primary">
+              <div className="text-2xl font-semibold text-primary dark:text-primary">
                 {progress.chaptersRead}
               </div>
               <div className="text-xs text-muted-foreground">{t('group.chaptersRead')}</div>
             </div>
             <div className="text-center p-3 rounded-lg bg-white/50 dark:bg-black/20">
-              <div className="text-2xl font-bold text-orange-500 flex items-center justify-center gap-1">
+              <div className="text-2xl font-semibold text-orange-500 flex items-center justify-center gap-1">
                 <Flame className="w-5 h-5" />
                 {progress.streakDays}
               </div>
               <div className="text-xs text-muted-foreground">{t('group.streakDays')}</div>
             </div>
             <div className="text-center p-3 rounded-lg bg-white/50 dark:bg-black/20">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              <div className="text-2xl font-semibold text-green-600 dark:text-green-400">
                 {progress.completedDays}
               </div>
               <div className="text-xs text-muted-foreground">{t('group.completedDaysLabel2')}</div>

@@ -233,7 +233,7 @@ export function InsightsTab() {
                     key={item.id}
                     className={cn(
                       "group relative flex flex-col p-4 rounded-2xl cursor-pointer border transition-all duration-300",
-                      "bg-white dark:bg-card border-border dark:border-border",
+                      "bg-card border-border dark:border-border",
                       expandedId === item.id && "ring-2 ring-primary/30"
                     )}
                     onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}

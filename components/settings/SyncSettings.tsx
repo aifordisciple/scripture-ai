@@ -47,7 +47,7 @@ export function SyncSettings() {
   if (!session?.user) {
     return (
       <div className="bg-secondary/50 p-4 rounded-xl border border-border/50">
-        <div className="flex items-center gap-2 mb-2 text-sm font-bold text-muted-foreground">
+        <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-muted-foreground">
           <CloudOff className="w-4 h-4" /> {t('settings.dataSync')}
         </div>
         <p className="text-xs text-muted-foreground">
@@ -60,7 +60,7 @@ export function SyncSettings() {
   return (
     <div className="bg-secondary/50 p-4 rounded-xl border border-border/50 space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Cloud className="w-4 h-4 text-primary" /> {t('settings.dataSync')}
         </div>
         {isSyncing ? (

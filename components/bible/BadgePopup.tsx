@@ -29,12 +29,12 @@ export function BadgePopup() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-card p-8 rounded-3xl border-2 border-primary text-center max-w-sm mx-4 animate-in zoom-in-95 duration-500">
+      <div className="bg-card p-8 rounded-3xl border-2 border-primary text-center max-w-sm mx-4 animate-in zoom-in-95 duration-500">
         <div className="relative inline-block mb-4">
           <Medal className="w-20 h-20 text-primary" />
           <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-primary" />
         </div>
-        <h2 className="text-2xl font-semibold mb-2">{t('bible.badgeEarned')}</h2>
+        <h2 className="text-2xl font-semibold mb-2 tracking-tight">{t('bible.badgeEarned')}</h2>
         <p className="text-muted-foreground mb-6">
           {t('bible.badgeUnlocked', { badge: badgeName })}
         </p>

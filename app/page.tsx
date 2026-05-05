@@ -12,6 +12,7 @@ import { useBibleStore } from "@/store/useBibleStore";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen, BookOpenCheck, Moon, Sun, ChevronDown, Type, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
 import { BIBLE_BOOKS, getBookDisplayName } from "@/lib/constants";
@@ -406,7 +407,7 @@ export default function Home() {
 
             {activeTab.type === 'read' && (
               <div className="bg-secondary/50 p-4 rounded-xl border border-border/50">
-                 <div className="flex items-center gap-2 mb-2 text-sm font-bold text-foreground">
+                 <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-foreground">
                     <Headphones className="w-4 h-4 text-primary" /> {t('settings.tts')}
                  </div>
                  <HeaderPlayer player={player} text={chapterSpeechText || ""} mode="full" className="bg-background border border-border shadow-sm w-full rounded-lg" />
@@ -485,7 +486,7 @@ export default function Home() {
 
           <div className="mt-8 mb-4">
             <Button
-              className="w-full rounded-full font-bold h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground active:scale-[0.98]"
+              className="w-full rounded-full font-semibold h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground active:scale-[0.98]"
               onClick={() => setMobileSettingsOpen(false)}
             >
               {t('settings.closeAndFinish')}
@@ -654,7 +655,7 @@ export default function Home() {
                 {streakCount > 0 && (
                   <div className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded-full">
                     <Flame className="h-[18px] w-[18px] text-primary" />
-                    <span className="text-xs font-bold text-primary">{streakCount}</span>
+                    <span className="text-xs font-semibold text-primary">{streakCount}</span>
                   </div>
                 )}
 
@@ -704,7 +705,7 @@ export default function Home() {
         {activeTab?.type !== 'sermon' && (
         <div
           className={cn(
-            "md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--glass-bg-light)] dark:bg-[var(--glass-bg-dark)] backdrop-blur-[20px] backdrop-saturate-[180%] border-t border-border border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
+            "md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--glass-bg-light)] dark:bg-[var(--glass-bg-dark)] backdrop-blur-[20px] backdrop-saturate-[180%] border-t border-border flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
             isNavVisible ? "translate-y-0" : "translate-y-full"
           )}
         >
