@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
 import { BadgePopup } from "@/components/bible/BadgePopup";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
@@ -143,15 +144,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <AuthProvider>
-          <ToastProvider>
-           {children}
-           {/* 后台数据同步组件，它自带 "use client"，会自动在浏览器空闲时挂载 */}
-           <SyncProvider />
-           {/* 勋章获得弹窗 */}
-           <BadgePopup />
-           {/* 访问统计追踪 */}
-           <AnalyticsTracker />
-          </ToastProvider>
+          <ThemeProvider>
+            <ToastProvider>
+             {children}
+             {/* 后台数据同步组件，它自带 "use client"，会自动在浏览器空闲时挂载 */}
+             <SyncProvider />
+             {/* 勋章获得弹窗 */}
+             <BadgePopup />
+             {/* 访问统计追踪 */}
+             <AnalyticsTracker />
+            </ToastProvider>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </LocaleHtmlWrapper>
