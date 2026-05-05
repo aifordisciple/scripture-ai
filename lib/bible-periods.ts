@@ -29,7 +29,7 @@ export const BIBLE_PERIODS: BiblePeriod[] = [
     yearStart: -2166,
     yearEnd: -1805,
     description: '亚伯拉罕、以撒、雅各、约瑟',
-    color: '#6366f1', // indigo
+    color: '#0066cc', // action blue
   },
   {
     id: 'exodus',

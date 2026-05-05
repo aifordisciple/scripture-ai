@@ -196,7 +196,7 @@ export default function AdminMessagesPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl md:text-2xl font-bold text-slate-900">{t('admin.messageManagement')}</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-slate-900">{t('admin.messageManagement')}</h1>
       </div>
 
       {/* Tab 切换 */}
@@ -207,8 +207,8 @@ export default function AdminMessagesPage() {
             className={cn(
               "py-3 md:py-4 px-1 border-b-2 font-medium text-sm",
               tab === 'send'
-                ? "border-indigo-500 text-indigo-600"
-                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                ? "border-[#0066cc] text-[#0066cc]"
+                : "border-transparent text-[#7a7a7a] hover:text-[#1d1d1f] hover:border-[#e0e0e0]"
             )}
           >
             <Send size={16} className="inline mr-1 md:mr-2" />
@@ -219,8 +219,8 @@ export default function AdminMessagesPage() {
             className={cn(
               "py-3 md:py-4 px-1 border-b-2 font-medium text-sm",
               tab === 'history'
-                ? "border-indigo-500 text-indigo-600"
-                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                ? "border-[#0066cc] text-[#0066cc]"
+                : "border-transparent text-[#7a7a7a] hover:text-[#1d1d1f] hover:border-[#e0e0e0]"
             )}
           >
             <Mail size={16} className="inline mr-1 md:mr-2" />
@@ -235,7 +235,7 @@ export default function AdminMessagesPage() {
           {error && !users && (
             <div className="flex flex-col items-center justify-center py-12 gap-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm">
               <div className="text-red-500">{error}</div>
-              <button onClick={fetchUsers} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">{t('admin.retry')}</button>
+              <button onClick={fetchUsers} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] transition-colors">{t('admin.retry')}</button>
             </div>
           )}
 
@@ -250,7 +250,7 @@ export default function AdminMessagesPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder={t('admin.searchUsers')}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-[#0066cc]"
                 />
               </div>
               <div className="flex gap-2">
@@ -265,7 +265,7 @@ export default function AdminMessagesPage() {
                 <button
                   onClick={() => openCompose('selected')}
                   disabled={selectedUsers.length === 0}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm md:text-base"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm md:text-base"
                 >
                   <User size={16} />
                   <span className="hidden sm:inline">{t('admin.sendToSelected')}</span>
@@ -287,7 +287,7 @@ export default function AdminMessagesPage() {
           <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-[#0066cc]" />
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -319,7 +319,7 @@ export default function AdminMessagesPage() {
                         onClick={() => toggleUserSelection(user)}
                         className={cn(
                           "hover:bg-slate-50 cursor-pointer",
-                          selectedUsers.find(u => u.id === user.id) && "bg-indigo-50"
+                          selectedUsers.find(u => u.id === user.id) && "bg-[#0066cc]/10"
                         )}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -331,11 +331,11 @@ export default function AdminMessagesPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden">
+                            <div className="w-8 h-8 rounded-full bg-[#0066cc]/10 flex items-center justify-center overflow-hidden">
                               {user.image ? (
                                 <img src={user.image} alt="" className="w-8 h-8 rounded-full" />
                               ) : (
-                                <User size={16} className="text-indigo-600" />
+                                <User size={16} className="text-[#0066cc]" />
                               )}
                             </div>
                             <div className="text-sm font-medium text-slate-900">
@@ -367,7 +367,7 @@ export default function AdminMessagesPage() {
           <div className="md:hidden space-y-3">
             {loading ? (
               <div className="flex items-center justify-center py-12 bg-white dark:bg-slate-900 rounded-xl">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-[#0066cc]" />
               </div>
             ) : (
               users?.users.map((user) => (
@@ -376,15 +376,15 @@ export default function AdminMessagesPage() {
                   onClick={() => toggleUserSelection(user)}
                   className={cn(
                     "bg-white dark:bg-slate-900 rounded-xl shadow-sm p-4 cursor-pointer transition-colors",
-                    selectedUsers.find(u => u.id === user.id) && "ring-2 ring-indigo-500 bg-indigo-50"
+                    selectedUsers.find(u => u.id === user.id) && "ring-2 ring-[#0066cc] bg-[#0066cc]/10"
                   )}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-[#0066cc]/10 flex items-center justify-center overflow-hidden shrink-0">
                       {user.image ? (
                         <img src={user.image} alt="" className="w-10 h-10 rounded-full" />
                       ) : (
-                        <User size={20} className="text-indigo-600" />
+                        <User size={20} className="text-[#0066cc]" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -394,7 +394,7 @@ export default function AdminMessagesPage() {
                     <div className={cn(
                       "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0",
                       selectedUsers.find(u => u.id === user.id)
-                        ? "bg-indigo-600 border-indigo-600"
+                        ? "bg-[#0066cc] border-[#0066cc]"
                         : "border-slate-300"
                     )}>
                       {selectedUsers.find(u => u.id === user.id) && (
@@ -421,11 +421,11 @@ export default function AdminMessagesPage() {
           {error && !messages ? (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
               <div className="text-red-500">{error}</div>
-              <button onClick={fetchMessages} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">{t('admin.retry')}</button>
+              <button onClick={fetchMessages} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] transition-colors">{t('admin.retry')}</button>
             </div>
           ) : loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#0066cc]" />
             </div>
           ) : (
             <>
@@ -528,7 +528,7 @@ export default function AdminMessagesPage() {
               {!sendToAll && selectedUsers.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {selectedUsers.slice(0, 5).map(user => (
-                    <span key={user.id} className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs">
+                    <span key={user.id} className="px-2 py-1 bg-[#0066cc]/10 text-[#0066cc] rounded text-xs">
                       {user.name || user.email}
                     </span>
                   ))}
@@ -546,7 +546,7 @@ export default function AdminMessagesPage() {
                   type="text"
                   value={composeData.title}
                   onChange={(e) => setComposeData({ ...composeData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-[#0066cc]"
                   placeholder={t('admin.messageTitlePlaceholder')}
                 />
               </div>
@@ -557,7 +557,7 @@ export default function AdminMessagesPage() {
                   value={composeData.content}
                   onChange={(e) => setComposeData({ ...composeData, content: e.target.value })}
                   rows={6}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-[#0066cc]"
                   placeholder={t('admin.messageContentPlaceholder')}
                 />
               </div>
@@ -573,7 +573,7 @@ export default function AdminMessagesPage() {
               <button
                 onClick={handleSend}
                 disabled={sending}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] disabled:opacity-50 transition-colors"
               >
                 {sending ? t('admin.sending') : t('admin.send')}
               </button>

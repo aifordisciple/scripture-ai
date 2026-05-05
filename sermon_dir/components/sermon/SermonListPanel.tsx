@@ -284,16 +284,16 @@ export function SermonListPanel() {
                 'group cursor-pointer rounded-2xl p-6 transition-all duration-300',
                 'bg-white dark:bg-slate-900 shadow-sm',
                 'border border-slate-200/60 dark:border-slate-800',
-                'hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800/50 hover:-translate-y-0.5',
+                'hover:border-[#0066cc]/20 dark:hover:border-[#0066cc]/30',
                 currentSermon?.id === sermon.id
-                  ? 'ring-2 ring-indigo-500/40 border-indigo-200 dark:border-indigo-800'
+                  ? 'ring-2 ring-[#0066cc]/40 border-[#0066cc]/20 dark:border-[#0066cc]/30'
                   : ''
               )}
             >
               {/* 顶部：元数据层 */}
               <div className="flex justify-between items-center">
                 {sermon.verseRefs ? (
-                  <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10 dark:bg-indigo-400/10 dark:text-indigo-400 dark:ring-indigo-400/20">
+                  <span className="inline-flex items-center rounded-full bg-[#0066cc]/10 px-2.5 py-0.5 text-xs font-medium text-[#0066cc] ring-1 ring-inset ring-[#0066cc]/10 dark:bg-[#0066cc]/20 dark:text-[#2997ff] dark:ring-[#2997ff]/20">
                     {sermon.verseRefs}
                   </span>
                 ) : (
@@ -307,7 +307,7 @@ export function SermonListPanel() {
               </div>
 
               {/* 中部：核心内容层 */}
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight mt-3 mb-2 leading-tight group-hover:text-indigo-600 transition-colors">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight mt-3 mb-2 leading-tight group-hover:text-[#0066cc] transition-colors">
                 {sermon.title || t('sermon.untitled')}
               </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
@@ -316,7 +316,7 @@ export function SermonListPanel() {
 
               {/* 底部：操作层 */}
               <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                <span className="text-sm font-semibold text-indigo-600 flex items-center gap-1.5 group/btn">
+                <span className="text-sm font-semibold text-[#0066cc] flex items-center gap-1.5 group/btn">
                   {t('sermon.viewDetail')}
                   <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
                 </span>

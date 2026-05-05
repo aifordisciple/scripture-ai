@@ -122,14 +122,14 @@ export default function AdminSettingsPage() {
   if (loading && !logs) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066cc]"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">系统设置</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">系统设置</h1>
 
       {/* 操作日志 */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm">
@@ -140,7 +140,7 @@ export default function AdminSettingsPage() {
               <select
                 value={actionFilter}
                 onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
-                className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
               >
                 <option value="">全部操作</option>
                 <option value="VIEW">查看</option>
@@ -151,7 +151,7 @@ export default function AdminSettingsPage() {
               <select
                 value={targetTypeFilter}
                 onChange={(e) => { setTargetTypeFilter(e.target.value); setPage(1); }}
-                className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
               >
                 <option value="">全部对象</option>
                 <option value="USER">用户</option>

@@ -83,7 +83,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066cc]"></div>
       </div>
     );
   }
@@ -101,7 +101,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">{t('admin.dashboard')}</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">{t('admin.dashboard')}</h1>
 
       {/* 关键指标卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
       {/* 用户统计 */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6">
         <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-          <Users className="text-indigo-600" size={20} />
+          <Users className="text-[#0066cc]" size={20} />
           {t('admin.userStatistics')}
         </h2>
 
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
                 <div key={i} className="flex-1 flex flex-col items-center gap-2">
                   <div className="w-full flex-1 flex items-end">
                     <div
-                      className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t transition-all"
+                      className="w-full bg-[#0066cc] rounded-t transition-all"
                       style={{ height: `${Math.max(height, 2)}%` }}
                     >
                       {day.count > 0 && (
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
           </h2>
 
           <div className="grid grid-cols-2 gap-6">
-            <StatItem label={t('admin.activePlans')} value={stats.plans.active} color="indigo" />
+            <StatItem label={t('admin.activePlans')} value={stats.plans.active} color="blue" />
             <StatItem label={t('admin.completedPlans')} value={stats.plans.completed} color="slate" />
           </div>
         </div>
@@ -261,19 +261,19 @@ export default function AdminDashboard() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-slate-50 rounded-lg">
-              <div className="text-2xl font-bold">{stats.feedback.total}</div>
+              <div className="text-2xl font-semibold">{stats.feedback.total}</div>
               <div className="text-sm text-slate-600">{t('admin.total')}</div>
             </div>
             <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">{stats.feedback.open}</div>
+              <div className="text-2xl font-semibold text-orange-600">{stats.feedback.open}</div>
               <div className="text-sm text-slate-600">{t('admin.pending')}</div>
             </div>
             <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{stats.feedback.inProgress}</div>
+              <div className="text-2xl font-semibold text-blue-600">{stats.feedback.inProgress}</div>
               <div className="text-sm text-slate-600">{t('admin.inProgress')}</div>
             </div>
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{stats.feedback.resolved}</div>
+              <div className="text-2xl font-semibold text-green-600">{stats.feedback.resolved}</div>
               <div className="text-sm text-slate-600">{t('admin.resolved')}</div>
             </div>
           </div>
@@ -334,7 +334,7 @@ function StatCard({
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-slate-600">{title}</p>
-          <p className="text-3xl font-bold mt-1">{value}</p>
+          <p className="text-3xl font-semibold mt-1">{value}</p>
         </div>
         <div className={cn("p-3 rounded-lg text-white", color)}>
           <Icon size={24} />
@@ -352,20 +352,19 @@ function StatItem({
 }: {
   label: string;
   value: number;
-  color?: 'default' | 'green' | 'blue' | 'orange' | 'indigo' | 'slate';
+  color?: 'default' | 'green' | 'blue' | 'orange' | 'slate';
 }) {
   const colorClasses = {
     default: 'text-slate-900',
     green: 'text-green-600',
-    blue: 'text-blue-600',
+    blue: 'text-[#0066cc]',
     orange: 'text-orange-600',
-    indigo: 'text-indigo-600',
     slate: 'text-slate-600'
   };
 
   return (
     <div className="text-center p-4 bg-slate-50 rounded-lg">
-      <div className={cn("text-3xl font-bold", colorClasses[color])}>{value}</div>
+      <div className={cn("text-3xl font-semibold", colorClasses[color])}>{value}</div>
       <div className="text-sm text-slate-600 mt-1">{label}</div>
     </div>
   );

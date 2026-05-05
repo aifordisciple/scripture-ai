@@ -77,7 +77,7 @@ export default function AdminChurchesPage() {
   if (loading && !data) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066cc]"></div>
       </div>
     );
   }
@@ -87,14 +87,14 @@ export default function AdminChurchesPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <div className="text-red-500 text-lg">{error}</div>
-        <button onClick={fetchChurches} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">重试</button>
+        <button onClick={fetchChurches} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95">重试</button>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">小组管理</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">小组管理</h1>
 
       {/* 搜索和筛选 */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-4">
@@ -106,13 +106,13 @@ export default function AdminChurchesPage() {
               placeholder="搜索小组名称..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
             />
           </div>
           <select
             value={isPublicFilter}
             onChange={(e) => { setIsPublicFilter(e.target.value); setPage(1); }}
-            className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
           >
             <option value="">全部类型</option>
             <option value="true">公开小组</option>
@@ -120,7 +120,7 @@ export default function AdminChurchesPage() {
           </select>
           <button
             type="submit"
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="px-6 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 transition-colors"
           >
             搜索
           </button>
@@ -136,7 +136,7 @@ export default function AdminChurchesPage() {
           >
             <div
               className="h-2"
-              style={{ backgroundColor: church.themeColor || '#6366f1' }}
+              style={{ backgroundColor: church.themeColor || '#0066cc' }}
             ></div>
             <div className="p-4">
               <div className="flex items-start justify-between mb-2">

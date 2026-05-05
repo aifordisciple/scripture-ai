@@ -224,7 +224,7 @@ export default function AdminAnnouncementsPage() {
   if (loading && !data) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066cc]"></div>
       </div>
     );
   }
@@ -234,7 +234,7 @@ export default function AdminAnnouncementsPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <div className="text-red-500 text-lg">{error}</div>
-        <button onClick={fetchAnnouncements} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">{t('admin.retry')}</button>
+        <button onClick={fetchAnnouncements} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 transition-colors">{t('admin.retry')}</button>
       </div>
     );
   }
@@ -243,10 +243,10 @@ export default function AdminAnnouncementsPage() {
     <>
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl md:text-2xl font-bold text-slate-900">{t('admin.announcementManagement')}</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-slate-900">{t('admin.announcementManagement')}</h1>
         <button
           onClick={() => openEditor()}
-          className="flex items-center gap-2 px-3 md:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm md:text-base"
+          className="flex items-center gap-2 px-3 md:px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 transition-colors text-sm md:text-base"
         >
           <Plus size={18} />
           <span className="hidden sm:inline">{t('admin.newAnnouncement')}</span>
@@ -299,7 +299,7 @@ export default function AdminAnnouncementsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => openEditor(announcement)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-3 transition-colors"
+                      className="text-[#0066cc] hover:text-[#0071e3] mr-3 transition-colors"
                     >
                       <Edit2 size={16} />
                     </button>
@@ -362,7 +362,7 @@ export default function AdminAnnouncementsPage() {
                 </button>
                 <button
                   onClick={() => openEditor(announcement)}
-                  className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                  className="p-1.5 text-[#0066cc] hover:bg-[#0066cc]/10 rounded transition-colors"
                 >
                   <Edit2 size={16} />
                 </button>
@@ -404,7 +404,7 @@ export default function AdminAnnouncementsPage() {
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
                   placeholder={t('admin.announcementTitlePlaceholder')}
                 />
               </div>
@@ -415,7 +415,7 @@ export default function AdminAnnouncementsPage() {
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
                   placeholder={t('admin.announcementContentPlaceholder')}
                 />
               </div>
@@ -426,7 +426,7 @@ export default function AdminAnnouncementsPage() {
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
                   >
                     <option value="INFO">{t('admin.info')}</option>
                     <option value="WARNING">{t('admin.warning')}</option>
@@ -439,7 +439,7 @@ export default function AdminAnnouncementsPage() {
                   <select
                     value={formData.isActive ? 'true' : 'false'}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
                   >
                     <option value="true">{t('admin.enable')}</option>
                     <option value="false">{t('admin.disable')}</option>
@@ -454,7 +454,7 @@ export default function AdminAnnouncementsPage() {
                     type="datetime-local"
                     value={formData.startsAt}
                     onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
                   />
                 </div>
 
@@ -464,7 +464,7 @@ export default function AdminAnnouncementsPage() {
                     type="datetime-local"
                     value={formData.endsAt}
                     onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
                   />
                 </div>
               </div>
@@ -477,10 +477,10 @@ export default function AdminAnnouncementsPage() {
                     id="sendNotification"
                     checked={formData.sendNotification}
                     onChange={(e) => setFormData({ ...formData, sendNotification: e.target.checked })}
-                    className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                    className="w-4 h-4 text-[#0066cc] border-slate-300 rounded focus:ring-[#0066cc]/20"
                   />
                   <label htmlFor="sendNotification" className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-                    <BellRing size={16} className="text-indigo-600" />
+                    <BellRing size={16} className="text-[#0066cc]" />
                     {t('admin.pushNotificationOnPublish')}
                   </label>
                 </div>
@@ -497,7 +497,7 @@ export default function AdminAnnouncementsPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 disabled:opacity-50 transition-colors"
               >
                 {saving ? t('admin.saving') : t('admin.save')}
               </button>

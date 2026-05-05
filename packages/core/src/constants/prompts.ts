@@ -75,7 +75,7 @@ export const THEOLOGICAL_PROMPTS = [
     id: 'original',
     label: "🔍 原文词义",
     prompt: "请从这段经文中挑选 1-2 个最具神学意义的希伯来文或希腊文单词。解释它们的 Strong's 编号、原意、词根，以及这个词如何丰富了经文的含义。",
-    color: "bg-indigo-50 text-indigo-700 border-indigo-200"
+    color: "bg-[#0066cc]/10 text-[#0066cc] border-[#0066cc]/20"
   },
   {
     id: 'application',

@@ -168,7 +168,7 @@ export default function AdminUsersPage() {
   if (loading && !data) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066cc]"></div>
       </div>
     );
   }
@@ -178,14 +178,14 @@ export default function AdminUsersPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <div className="text-red-500 text-lg">{error}</div>
-        <button onClick={fetchUsers} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{t('admin.retry')}</button>
+        <button onClick={fetchUsers} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95">{t('admin.retry')}</button>
       </div>
     );
   }
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <h1 className="text-xl md:text-2xl font-bold text-slate-900">{t('admin.userManagement')}</h1>
+      <h1 className="text-xl md:text-2xl font-semibold text-slate-900">{t('admin.userManagement')}</h1>
 
       {/* 搜索和筛选 */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-3 md:p-4">
@@ -197,14 +197,14 @@ export default function AdminUsersPage() {
               placeholder={t('admin.searchNameOrEmail')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
             />
           </div>
           <div className="flex gap-3">
             <select
               value={roleFilter}
               onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-              className="flex-1 md:flex-none px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="flex-1 md:flex-none px-4 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
             >
               <option value="">{t('admin.allRoles')}</option>
               <option value="user">{t('admin.userRole')}</option>
@@ -212,7 +212,7 @@ export default function AdminUsersPage() {
             </select>
             <button
               type="submit"
-              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 whitespace-nowrap"
+              className="px-6 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 whitespace-nowrap"
             >
               {t('admin.search')}
 
@@ -311,7 +311,7 @@ export default function AdminUsersPage() {
                           "px-3 py-1 rounded text-sm transition-colors",
                           user.role === 'admin'
                             ? "text-red-600 hover:bg-red-50"
-                            : "text-indigo-600 hover:bg-indigo-50",
+                            : "text-[#0066cc] hover:bg-[#0066cc]/10",
                           updating === user.id && "opacity-50 cursor-not-allowed"
                         )}
                       >
@@ -396,7 +396,7 @@ export default function AdminUsersPage() {
                     "px-3 py-1.5 rounded text-sm font-medium transition-colors",
                     user.role === 'admin'
                       ? "text-red-600 bg-red-50 hover:bg-red-100"
-                      : "text-indigo-600 bg-indigo-50 hover:bg-indigo-100",
+                      : "text-[#0066cc] bg-[#0066cc]/10 hover:bg-[#0066cc]/20",
                     updating === user.id && "opacity-50 cursor-not-allowed"
                   )}
                 >

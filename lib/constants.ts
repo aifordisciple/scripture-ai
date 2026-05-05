@@ -273,7 +273,7 @@ export const THEOLOGICAL_PROMPTS: DualLangPromptEntry[] = [
       zh: "请从这段经文中挑选 1-2 个最具神学意义的希伯来文或希腊文单词。解释它们的 Strong's 编号、原意、词根，以及这个词如何丰富了经文的含义。",
       en: "Please select 1-2 Hebrew or Greek words with the greatest theological significance from this passage. Explain their Strong's numbers, original meanings, roots, and how each word enriches the meaning of the passage."
     },
-    color: "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100"
+    color: "bg-[#0066cc]/10 text-[#0066cc] border-[#0066cc]/20 hover:bg-[#0066cc]/20"
   },
   {
     id: 'application',
