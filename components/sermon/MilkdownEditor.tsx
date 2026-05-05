@@ -1,13 +1,12 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useMemo } from 'react'
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react'
 import { Editor, EditorStatus } from '@milkdown/kit/core'
 import { Milkdown, MilkdownProvider, useEditor, useInstance } from '@milkdown/react'
 import { commonmark } from '@milkdown/preset-commonmark'
 import { gfm } from '@milkdown/preset-gfm'
 import { history } from '@milkdown/kit/plugin/history'
 import { clipboard } from '@milkdown/kit/plugin/clipboard'
-import { cursor } from '@milkdown/kit/plugin/cursor'
 import { trailing } from '@milkdown/kit/plugin/trailing'
 import { indent } from '@milkdown/kit/plugin/indent'
 import { listener, listenerCtx } from '@milkdown/plugin-listener'
@@ -45,6 +44,9 @@ function MilkdownInner({
   const contentRef = useRef(content)
   contentRef.current = content
 
+  // Track whether a content sync is in progress to prevent onChange loop
+  const syncingRef = useRef(false)
+
   // Generate theme CSS
   const themeCSS = useMemo(() => sermonEditorCSS(isDark, fontSize, lineHeight), [isDark, fontSize, lineHeight])
 
@@ -52,11 +54,11 @@ function MilkdownInner({
     const editor = Editor.make()
       .config((ctx) => {
         // Set default value
-        ctx.set(defaultValueCtx as any, contentRef.current)
+        ctx.set(defaultValueCtx as any, contentRef.current || '')
 
         // Configure listener for onChange
         ctx.get(listenerCtx).markdownUpdated((ctx, markdown, prevMarkdown) => {
-          if (markdown !== prevMarkdown) {
+          if (markdown !== prevMarkdown && !syncingRef.current) {
             onChangeRef.current(markdown)
           }
         })
@@ -76,7 +78,6 @@ function MilkdownInner({
       .use(gfm)
       .use(history)
       .use(clipboard)
-      .use(cursor)
       .use(trailing)
       .use(indent)
       .use(listener)
@@ -112,17 +113,23 @@ function MilkdownInner({
 
     editor.action((ctx) => {
       const view = ctx.get('editorView' as any) as any
+      if (!view) return
       const serializer = ctx.get('serializer' as any) as any
       const currentMarkdown: string = serializer(view.state.doc)
       if (currentMarkdown !== contentRef.current) {
         const parser = ctx.get('parser' as any) as any
-        const doc = parser(contentRef.current)
+        const doc = parser(contentRef.current || '')
         if (doc) {
-          // Use dispatch with ReplaceDoc transaction instead of updateState
-          // This preserves NodeView lifecycle and avoids "node not found" errors
-          const tr = view.state.tr.replaceWith(0, view.state.doc.content.size, doc.content)
-          tr.setMeta('addToHistory', false)
-          view.dispatch(tr)
+          syncingRef.current = true
+          try {
+            const state = view.state.create({ doc })
+            view.updateState(state)
+          } finally {
+            // Reset syncing flag after a tick to let listener callbacks drain
+            setTimeout(() => {
+              syncingRef.current = false
+            }, 50)
+          }
         }
       }
     })
@@ -146,6 +153,45 @@ function MilkdownInner({
 }
 
 export default function MilkdownEditor(props: MilkdownEditorProps) {
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const handler = (e: ErrorEvent) => {
+      // Capture unhandled errors from Milkdown/ProseMirror
+      const msg = e.message || ''
+      if (msg.includes('milkdown') || msg.includes('prosemirror') || msg.includes('Milkdown') || msg.includes('ProseMirror')) {
+        console.error('[MilkdownEditor] Unhandled error:', e.error)
+        setError(msg)
+      }
+    }
+    const rejectionHandler = (e: PromiseRejectionEvent) => {
+      const msg = e.reason?.message || String(e.reason)
+      console.error('[MilkdownEditor] Unhandled rejection:', e.reason)
+      setError(msg)
+    }
+    window.addEventListener('error', handler)
+    window.addEventListener('unhandledrejection', rejectionHandler)
+    return () => {
+      window.removeEventListener('error', handler)
+      window.removeEventListener('unhandledrejection', rejectionHandler)
+    }
+  }, [])
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-4 gap-2">
+        <p className="text-red-500 text-sm">编辑器加载失败</p>
+        <p className="text-xs text-muted-foreground max-w-md break-all">{error}</p>
+        <button
+          className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={() => { setError(null); window.location.reload() }}
+        >
+          刷新重试
+        </button>
+      </div>
+    )
+  }
+
   return (
     <MilkdownProvider>
       <MilkdownInner {...props} />
