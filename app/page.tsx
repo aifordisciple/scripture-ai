@@ -566,7 +566,7 @@ export default function Home() {
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               {/* Mobile: TTS play button */}
               {activeTab.type === 'read' && (
                 <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none md:hidden" mode="minimal" />
@@ -596,7 +596,7 @@ export default function Home() {
                   {/* Settings dropdown panel */}
                   {showSettingsDropdown && (
                     <>
-                      <div className="fixed inset-0 z-[100]" onClick={() => setShowSettingsDropdown(false)} />
+                      <div className="fixed inset-0 z-[100] pointer-events-auto" onClick={() => setShowSettingsDropdown(false)} />
                       <div className="absolute right-0 top-full mt-2 w-64 bg-card/80 backdrop-blur-[20px] backdrop-saturate-[180%] border border-border/50 dark:border-border rounded-lg z-[100] p-3 space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground flex items-center gap-2">
