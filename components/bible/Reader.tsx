@@ -437,9 +437,9 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                             }
                         }} 
                         className={cn(
-                          "group inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full",
-                          "bg-primary hover:bg-apple-focus text-white font-semibold text-sm",
-                          "transition-all duration-300 active:scale-95"
+                          "group inline-flex items-center gap-2.5 px-[22px] py-[11px] rounded-full",
+                          "bg-primary hover:bg-apple-focus text-white text-[17px] font-regular tracking-[-0.374px]",
+                          "active:scale-95 transition-all duration-300"
                         )}
                     >
                         <BookOpenCheck className="w-5 h-5 text-white transition-transform duration-300" />

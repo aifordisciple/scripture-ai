@@ -82,8 +82,8 @@ export function Sidebar() {
        <div className="mb-8">
          <div className="flex items-center gap-2 px-6 mb-3 opacity-60">
            <div className="h-[1px] flex-1 bg-border"></div>
-           <h3 className="text-[11px] font-semibold text-foreground uppercase tracking-widest">{title}</h3>
-           <span className="text-[10px] text-muted-foreground">{filtered.length}</span>
+           <h3 className="text-[14px] font-semibold tracking-[-0.224px] text-muted-foreground uppercase">{title}</h3>
+           <span className="text-[12px] font-regular tracking-[-0.12px] text-muted-foreground">{filtered.length}</span>
            <div className="h-[1px] flex-1 bg-border"></div>
          </div>
          
@@ -174,7 +174,7 @@ export function Sidebar() {
             placeholder={t('sidebar.searchPlaceholder')} 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-secondary dark:bg-apple-tile-3 text-foreground text-sm rounded-full pl-10 pr-10 py-2.5 border-none focus:outline-none focus:ring-2 focus:ring-primary/30 h-11 px-10 transition-all placeholder:text-muted-foreground"
+            className="w-full bg-secondary dark:bg-card text-foreground text-[17px] font-regular tracking-[-0.374px] rounded-full pl-10 pr-10 border-none focus:outline-none focus:ring-2 focus:ring-primary/30 min-h-[44px] px-10 transition-all placeholder:text-muted-foreground"
           />
           {searchQuery && (
             <button 

@@ -504,70 +504,48 @@ export default function Home() {
         )}
       >
         
-        {/* Header - Apple Dual-Layer Navigation: Global Nav + Sub Nav */}
+        {/* Header - Single-line Frosted Glass Bar */}
         <div
           className={cn(
-            "absolute top-0 left-0 right-0 z-30 pointer-events-none transition-transform duration-300 ease-in-out",
+            "absolute top-2 left-2 right-2 z-30 pointer-events-none transition-transform duration-300 ease-in-out",
             isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
-          {/* Layer 1 — Global Nav (44px, black bar) */}
-          <div className="h-11 bg-apple-surface-black text-white flex items-center justify-between px-2 md:px-4 pointer-events-auto">
-            {/* Left side: mobile hamburger / desktop logo */}
-            <div className="flex items-center gap-2 shrink-0">
-              <Button variant="ghost" size="icon" className="md:hidden text-white/80 hover:text-white hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
+          <div className="pointer-events-auto rounded-2xl bg-white/70 dark:bg-black/60 backdrop-blur-[20px] backdrop-saturate-[180%] shadow-sm h-12 flex items-center justify-between px-2 md:px-3 gap-1">
+            {/* Left side: mobile hamburger / desktop sidebar toggle / desktop logo */}
+            <div className="flex items-center gap-1 shrink-0">
+              <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
                 <Menu className="h-5 w-5" />
               </Button>
-              <span className="hidden md:block text-xs font-regular tracking-tight select-none">AI读</span>
-            </div>
-
-            {/* Center: desktop search button */}
-            <button
-              className="hidden md:flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/15 px-4 py-1.5 text-xs text-white/70 active:scale-95 transition-colors pointer-events-auto"
-              onClick={() => setIsSearchOpen(true)}
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span>{t('reader.searchPlaceholder')}</span>
-            </button>
-
-            {/* Right side: User menu */}
-            <div className="flex items-center shrink-0">
-              <UserMenu />
-            </div>
-          </div>
-
-          {/* Layer 2 — Sub Nav Frosted (52px) */}
-          <div className="h-[52px] bg-[var(--glass-bg-light)] dark:bg-[var(--glass-bg-dark)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border flex items-center justify-between px-2 md:px-4 pointer-events-auto">
-            {/* Left side: desktop sidebar toggle / mobile book-chapter name */}
-            <div className="flex items-center shrink-0">
-              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-muted-foreground dark:text-muted-foreground dark:text-foreground/60" : "text-foreground dark:text-foreground")} onClick={toggleDesktopSidebar}>
+              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-muted-foreground" : "text-foreground")} onClick={toggleDesktopSidebar}>
                 <PanelLeft className="h-5 w-5" />
               </Button>
+              <span className="hidden md:block text-xs font-regular tracking-tight select-none text-foreground/70">AI读</span>
+            </div>
 
-              {/* Mobile: Book/chapter name in Apple tagline style */}
-              <div className="md:hidden flex-1 text-center min-w-0 px-1">
-                <button
-                  onClick={() => {
-                    if (activeTab.type === 'read') {
-                      setIsBookPickerOpen(true);
-                    }
-                  }}
-                  className={cn(
-                    "inline-flex items-center text-[21px] font-semibold tracking-[0.231px] text-foreground max-w-full active:scale-95",
-                    activeTab.type === 'read' && "hover:text-foreground/80 dark:hover:text-foreground/80 transition-colors"
-                  )}
-                >
-                  <span className="truncate">
-                    {activeTab.type === 'read' ? (
-                      <>{activeTab.book} {activeTab.chapter}</>
-                    ) : activeTab.type === 'search' ? t('tabs.search') : activeTab.type === 'dashboard' ? t('tabs.dashboard') : activeTab.type === 'highlights' ? t('tabs.highlights') : activeTab.type === 'notes' ? t('tabs.notes') : activeTab.type === 'cross-ref' ? t('tabs.crossref') : activeTab.type === 'group' ? t('tabs.group') : activeTab.type === 'atlas' ? t('tabs.atlas') : activeTab.type === 'insights' ? t('tabs.insights') : t('tabs.plan')}
-                  </span>
-                </button>
-              </div>
+            {/* Mobile: Book/chapter name */}
+            <div className="md:hidden flex-1 text-center min-w-0 px-1">
+              <button
+                onClick={() => {
+                  if (activeTab.type === 'read') {
+                    setIsBookPickerOpen(true);
+                  }
+                }}
+                className={cn(
+                  "inline-flex items-center text-[17px] font-semibold tracking-[0.231px] text-foreground max-w-full active:scale-95",
+                  activeTab.type === 'read' && "hover:text-foreground/80 transition-colors"
+                )}
+              >
+                <span className="truncate">
+                  {activeTab.type === 'read' ? (
+                    <>{activeTab.book} {activeTab.chapter}</>
+                  ) : activeTab.type === 'search' ? t('tabs.search') : activeTab.type === 'dashboard' ? t('tabs.dashboard') : activeTab.type === 'highlights' ? t('tabs.highlights') : activeTab.type === 'notes' ? t('tabs.notes') : activeTab.type === 'cross-ref' ? t('tabs.crossref') : activeTab.type === 'group' ? t('tabs.group') : activeTab.type === 'atlas' ? t('tabs.atlas') : activeTab.type === 'insights' ? t('tabs.insights') : t('tabs.plan')}
+                </span>
+              </button>
             </div>
 
             {/* Center: desktop tab pills */}
-            <div className="hidden md:flex flex-1 items-center overflow-hidden mx-4 mask-linear-fade pl-2 min-w-0">
+            <div className="hidden md:flex flex-1 items-center overflow-hidden mx-2 mask-linear-fade pl-2 min-w-0">
                <TabList
                  tabs={tabs}
                  activeTabId={activeTabId}
@@ -577,14 +555,23 @@ export default function Home() {
                />
             </div>
 
-            {/* Right side: AI action button + mobile tools */}
+            {/* Right side */}
             <div className="flex items-center gap-1 shrink-0">
-              {/* Mobile: search + settings */}
-              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
+              {/* Mobile: search */}
+              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
                 <Search className="h-5 w-5" />
               </Button>
 
-              {/* Desktop: right-side tools (settings dropdown, version, streak, plan, etc.) */}
+              {/* Desktop: search button */}
+              <button
+                className="hidden md:flex items-center gap-1.5 rounded-full bg-black/[0.04] dark:bg-white/10 hover:bg-black/[0.07] dark:hover:bg-white/15 px-3 py-1 text-xs text-foreground/60 active:scale-95 transition-colors pointer-events-auto"
+                onClick={() => setIsSearchOpen(true)}
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>{t('reader.searchPlaceholder')}</span>
+              </button>
+
+              {/* Desktop: right-side tools */}
               <div className="hidden sm:flex items-center gap-1">
                 {activeTab.type === 'read' && (
                    <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="full" />
@@ -597,7 +584,7 @@ export default function Home() {
                     size="icon"
                     onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
                     className={cn(
-                      "text-muted-foreground dark:text-foreground/60 hover:text-foreground dark:hover:text-white rounded-full hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95",
+                      "text-muted-foreground hover:text-foreground rounded-full hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95",
                       showSettingsDropdown && "bg-black/[0.04] dark:bg-white/10"
                     )}
                     title={t('settings.readingSettings')}
@@ -609,7 +596,7 @@ export default function Home() {
                   {showSettingsDropdown && (
                     <>
                       <div className="fixed inset-0 z-[100]" onClick={() => setShowSettingsDropdown(false)} />
-                      <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-card border border-border dark:border-border rounded-lg z-[100] p-3 space-y-3">
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-white/80 dark:bg-card/80 backdrop-blur-[20px] backdrop-saturate-[180%] border border-border/50 dark:border-border rounded-2xl z-[100] p-3 space-y-3 shadow-lg">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground flex items-center gap-2">
                             {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
@@ -657,10 +644,10 @@ export default function Home() {
                   )}
                 </div>
 
-                <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white active:scale-95">
+                <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-foreground/80 hover:text-foreground active:scale-95">
                   <BookOpenCheck className="h-4 w-4" />{bibleVersion}
                 </Button>
-                <div className="mx-1 border-l h-5 border-border dark:border-white/20"></div>
+                <div className="mx-1 border-l h-5 border-border/40 dark:border-white/20"></div>
 
                 {streakCount > 0 && (
                   <div className="flex items-center gap-1 px-2 py-1 bg-primary/10 rounded-full">
@@ -679,14 +666,17 @@ export default function Home() {
 
               {/* AI action button (all screens) */}
               <button
-                className="bg-primary text-white rounded-full px-4 py-1.5 text-[17px] font-regular tracking-[-0.374px] active:scale-95 transition-transform"
+                className="bg-primary text-white rounded-full px-4 py-1.5 text-[15px] font-regular tracking-[-0.374px] active:scale-95 transition-transform"
                 onClick={() => setAiOpen(!isAiOpen)}
               >
                 ✨ AI
               </button>
 
+              {/* User menu */}
+              <UserMenu />
+
               {/* Mobile: settings */}
-              <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground dark:text-foreground/60 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
+              <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>
 
@@ -699,7 +689,7 @@ export default function Home() {
         </div>
 
         {/* Main Content Area */}
-        <div id="reader-scroll-container" onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-smooth pt-24 md:pt-[104px] pb-4 relative z-0">
+        <div id="reader-scroll-container" onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-smooth pt-16 md:pt-16 pb-4 relative z-0">
           <TabContentRenderer
             tabs={tabs}
             activeTabId={activeTabId}
