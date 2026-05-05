@@ -171,13 +171,13 @@ export function GroupBadgeGallery({
                       return (
                         <Dialog key={badge.id}>
                           <DialogTrigger asChild>
-                            <button
+	                            <button
                               onClick={() => setSelectedBadge(badge)}
                               className={cn(
-                                "relative w-full aspect-square rounded-xl flex flex-col items-center justify-center transition-all",
+                                "relative w-full aspect-square rounded-lg flex flex-col items-center justify-center transition-colors active:scale-95",
                                 "border-2",
                                 isEarned
-                                  ? "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-300 dark:border-amber-700 cursor-pointer hover:scale-105"
+                                  ? "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-300 dark:border-amber-700 cursor-pointer"
                                   : "bg-muted/30 border-border cursor-pointer hover:bg-muted/50"
                               )}
                             >
@@ -271,7 +271,7 @@ export function GroupBadgeGallery({
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all"
+                  className="h-full bg-[#0066cc] dark:bg-[#2997ff] transition-all"
                   style={{ width: `${(totalEarned / totalBadges) * 100}%` }}
                 />
               </div>

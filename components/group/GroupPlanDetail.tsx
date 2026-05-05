@@ -450,7 +450,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                       variant="outline"
                       size="sm"
                       onClick={() => setSelectedDay(day)}
-                      className="text-xs"
+                      className="text-xs active:scale-95"
                     >
                       {t('group.dayLabel', { day })}
                     </Button>
@@ -471,7 +471,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                       setSelectedDay(catchUpDay);
                     }
                   }}
-                  className="mt-3 text-orange-600 border-orange-200 hover:bg-orange-50 dark:text-orange-400 dark:border-orange-800 dark:hover:bg-orange-900/20"
+                  className="mt-3 text-orange-600 border-orange-200 hover:bg-orange-50 dark:text-orange-400 dark:border-orange-800 dark:hover:bg-orange-900/20 active:scale-95"
                 >
                   <FastForward className="w-4 h-4 mr-1" />
                   {t('group.catchUpProgress')}
@@ -492,6 +492,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedDay(null)}
+                  className="active:scale-95"
                 >
                   <ChevronLeft className="w-4 h-4 mr-1" /> {t('group.backToToday')}
                 </Button>
