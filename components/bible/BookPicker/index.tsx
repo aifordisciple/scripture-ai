@@ -88,7 +88,7 @@ export function BookPicker({
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogContent className="w-screen h-screen max-w-none max-h-none p-0 bg-background/95 backdrop-blur-sm rounded-none border-none" showCloseButton={false}>
         {/* 顶部标题栏 */}
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/50">
