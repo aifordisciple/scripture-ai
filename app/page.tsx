@@ -563,14 +563,14 @@ export default function Home() {
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
               {/* Mobile: search */}
-              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
-                <Search className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-8 w-8 active:scale-95" onClick={() => setIsSearchOpen(true)}>
+                <Search className="h-[18px] w-[18px]" />
               </Button>
 
               {/* Desktop: right-side tools */}
-              <div className="hidden sm:flex items-center gap-1">
+              <div className="hidden sm:flex items-center gap-0.5">
                 {activeTab.type === 'read' && (
                    <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="full" />
                 )}
@@ -582,12 +582,12 @@ export default function Home() {
                     size="icon"
                     onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
                     className={cn(
-                      "text-muted-foreground hover:text-foreground rounded-full hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95",
-                      showSettingsDropdown && "bg-black/[0.04] dark:bg-white/10"
+                      "text-muted-foreground hover:text-foreground rounded-full hover:bg-black/[0.06] dark:hover:bg-white/10 active:scale-95 h-8 w-8",
+                      showSettingsDropdown && "bg-black/[0.06] dark:bg-white/10"
                     )}
                     title={t('settings.readingSettings')}
                   >
-                    <Settings className="h-4 w-4" />
+                    <Settings className="h-[18px] w-[18px]" />
                   </Button>
 
                   {/* Settings dropdown panel */}
@@ -642,14 +642,18 @@ export default function Home() {
                   )}
                 </div>
 
-                <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-foreground/80 hover:text-foreground active:scale-95">
-                  <BookOpenCheck className="h-4 w-4" />{bibleVersion}
+                <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-foreground/60 hover:text-foreground active:scale-95 h-8 px-2.5">
+                  <BookOpenCheck className="h-[18px] w-[18px]" />{bibleVersion}
                 </Button>
-                <div className="mx-1 border-l h-5 border-border/40 dark:border-white/20"></div>
+              </div>
 
+              {/* Divider between tool groups */}
+              <div className="hidden sm:block h-5 w-px bg-foreground/10 dark:bg-white/15" />
+
+              <div className="hidden sm:flex items-center gap-0.5">
                 {streakCount > 0 && (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-primary/10 rounded-full">
-                    <Flame className="w-4 h-4 text-primary" />
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded-full">
+                    <Flame className="h-[18px] w-[18px] text-primary" />
                     <span className="text-xs font-bold text-primary">{streakCount}</span>
                   </div>
                 )}
@@ -657,14 +661,14 @@ export default function Home() {
                 <Button variant="ghost" size="icon" onClick={() => {
                   const planTab = tabs.find(t => t.type === 'plan');
                   if (planTab) { setActiveTab(planTab.id); } else { addTab({ type: 'plan' }); }
-                }} className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors relative active:scale-95" title={t('tabs.plan')}>
-                  <Calendar className="h-5 w-5" />
+                }} className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors active:scale-95 h-8 w-8" title={t('tabs.plan')}>
+                  <Calendar className="h-[18px] w-[18px]" />
                 </Button>
               </div>
 
-              {/* AI action button (all screens) */}
+              {/* AI action button */}
               <button
-                className="bg-primary text-white rounded-full px-4 py-1.5 text-[15px] font-regular tracking-[-0.374px] active:scale-95 transition-transform"
+                className="bg-primary text-white rounded-full px-3.5 py-1 text-sm font-medium active:scale-95 transition-transform"
                 onClick={() => setAiOpen(!isAiOpen)}
               >
                 ✨ AI
@@ -674,8 +678,8 @@ export default function Home() {
               <UserMenu />
 
               {/* Mobile: settings */}
-              <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
-                <Settings className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 h-8 w-8 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
+                <Settings className="h-[18px] w-[18px]" />
               </Button>
 
               {/* Mobile: TTS */}
