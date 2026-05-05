@@ -511,7 +511,7 @@ export default function Home() {
             isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
-          <div className="pointer-events-auto rounded-2xl bg-white/70 dark:bg-black/60 backdrop-blur-[20px] backdrop-saturate-[180%] shadow-sm h-12 flex items-center justify-between px-2 md:px-3 gap-1">
+          <div className="pointer-events-auto rounded-2xl bg-white/40 dark:bg-black/40 backdrop-blur-xl backdrop-saturate-[180%] shadow-sm h-12 flex items-center justify-between px-2 md:px-3 gap-1">
             {/* Left side: mobile hamburger / desktop sidebar toggle + search */}
             <div className="flex items-center gap-1 shrink-0">
               <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
