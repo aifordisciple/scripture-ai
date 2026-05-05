@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useCallback, useRef } from 'react'
-import { EditorView } from '@codemirror/view'
+import React, { useState, useMemo, useCallback } from 'react'
 import { BIBLE_BOOKS, getBookDisplayName } from '@/lib/constants'
 import { generateVerseBlock } from '@/lib/sermon-markdown'
 import { useBibleStore } from '@/store/useBibleStore'
@@ -10,6 +9,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { BookOpen, X, Plus, ChevronLeft, Search, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useBreakpoint } from '@/hooks/use-media-query'
+import { useSermonEditor } from './SermonEditorContext'
 
 type VerseSelectorStep = 'book' | 'chapter' | 'verse'
 
@@ -21,17 +21,17 @@ interface SelectedRef {
 }
 
 interface VersePickerPopoverProps {
-  editorView: EditorView | null
   isDark: boolean
   children: React.ReactNode
 }
 
 const MAX_VERSE = 50
 
-export default function VersePickerPopover({ editorView, isDark, children }: VersePickerPopoverProps) {
+export default function VersePickerPopover({ isDark, children }: VersePickerPopoverProps) {
   const { locale } = useBibleStore()
   const { t } = useTranslation()
   const { isMd } = useBreakpoint()
+  const { insertContent } = useSermonEditor()
 
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<VerseSelectorStep>('book')
@@ -83,7 +83,6 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
     const end = verseEnd || verseStart
     const newRef: SelectedRef = { bookId: selectedBook, chapter: selectedChapter, verseStart, verseEnd: end }
     setSelectedRefs(prev => [...prev, newRef])
-    // Reset verse selection but stay on verse step for quick multi-add
     setVerseStart(null)
     setVerseEnd(null)
   }, [selectedBook, selectedChapter, verseStart, verseEnd])
@@ -97,18 +96,16 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
     return `${name} ${ref.chapter}:${ref.verseStart}${ref.verseEnd > ref.verseStart ? `-${ref.verseEnd}` : ''}`
   }, [locale])
 
-  /** Insert all selected verse refs into the editor */
+  /** Insert all selected verse refs into the editor via context */
   const handleInsert = useCallback(async () => {
-    if (!editorView || selectedRefs.length === 0) return
+    if (selectedRefs.length === 0) return
     setInserting(true)
     try {
       const blocks: string[] = []
       for (const ref of selectedRefs) {
-        // Fetch verse text from API
         const res = await fetch(`/api/bible?book=${ref.bookId}&chapter=${ref.chapter}`)
         const data = await res.json()
         const verses: Array<{ verse: number; content: string; version?: string }> = data.data || []
-        // Filter to selected range, deduplicate by verse number (take first version only)
         const seen = new Set<number>()
         const filtered = verses.filter(v => {
           if (v.verse < ref.verseStart || v.verse > ref.verseEnd) return false
@@ -121,23 +118,14 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
         blocks.push(generateVerseBlock(displayRef, verseText || '...'))
       }
       const combined = blocks.join('\n\n')
-      // Insert at cursor using EditorView.dispatch
-      const { from } = editorView.state.selection.main
-      const line = editorView.state.doc.lineAt(from)
-      const insertPos = line.to
-      const prefix = line.text.trim() === '' ? '' : '\n'
-      editorView.dispatch({
-        changes: { from: insertPos, insert: `${prefix}${combined}\n` },
-        selection: { anchor: insertPos + prefix.length + combined.length + 1 },
-      })
-      editorView.focus()
+      insertContent(combined)
       setOpen(false)
     } catch (err) {
       console.error('[VersePickerPopover] Insert failed:', err)
     } finally {
       setInserting(false)
     }
-  }, [editorView, selectedRefs, formatRef])
+  }, [selectedRefs, formatRef, insertContent])
 
   const bgColor = isDark ? '#1e293b' : '#ffffff'
   const borderColor = isDark ? '#334155' : '#e2e8f0'

@@ -516,6 +516,10 @@ export default function Home() {
               <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
                 <Menu className="h-5 w-5" />
               </Button>
+              {/* Mobile: search button */}
+              <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-8 w-8 active:scale-95" onClick={() => setIsSearchOpen(true)}>
+                <Search className="h-[18px] w-[18px]" />
+              </Button>
               <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-muted-foreground" : "text-foreground")} onClick={toggleDesktopSidebar}>
                 <PanelLeft className="h-5 w-5" />
               </Button>
@@ -563,10 +567,10 @@ export default function Home() {
 
             {/* Right side */}
             <div className="flex items-center gap-1.5 shrink-0">
-              {/* Mobile: search */}
-              <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-8 w-8 active:scale-95" onClick={() => setIsSearchOpen(true)}>
-                <Search className="h-[18px] w-[18px]" />
-              </Button>
+              {/* Mobile: TTS play button */}
+              {activeTab.type === 'read' && (
+                <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none md:hidden" mode="minimal" />
+              )}
 
               {/* Desktop: right-side tools */}
               <div className="hidden sm:flex items-center gap-0.5">
@@ -665,18 +669,13 @@ export default function Home() {
                 </Button>
               </div>
 
-              {/* User menu */}
-              <UserMenu />
-
               {/* Mobile: settings */}
-              <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 h-8 w-8 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
+              <Button variant="ghost" size="icon" className="md:hidden rounded-full text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 h-8 w-8 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-[18px] w-[18px]" />
               </Button>
 
-              {/* Mobile: TTS */}
-              {activeTab.type === 'read' && (
-                <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none sm:hidden" mode="minimal" />
-              )}
+              {/* User menu */}
+              <UserMenu />
             </div>
           </div>
         </div>

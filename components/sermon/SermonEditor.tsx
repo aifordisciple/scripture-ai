@@ -5,10 +5,10 @@ import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { useBreakpoint } from '@/hooks/use-media-query'
 import { SermonEditorHeader } from './SermonEditorHeader'
-import CodeMirrorEditor from './CodeMirrorEditor'
+import MilkdownEditor from './MilkdownEditor'
 import { isTiptapJson } from '@/lib/sermon-markdown'
 import { tiptapToMarkdown } from '@/lib/tiptap-to-markdown'
-import { DEFAULT_FONT_SIZE, DEFAULT_LINE_HEIGHT } from './extensions/theme'
+import { DEFAULT_FONT_SIZE, DEFAULT_LINE_HEIGHT } from './extensions/milkdownTheme'
 
 /** Convert content to Markdown: if it's Tiptap JSON, convert; otherwise return as-is */
 function ensureMarkdown(raw: string): string {
@@ -96,7 +96,7 @@ export function SermonEditor() {
     }
   }, [setIsSermonSaving, setSermons])
 
-  // Handle content change from CodeMirror
+  // Handle content change from Milkdown
   const handleContentChange = useCallback((content: string) => {
     setMarkdownContent(content)
     isEditorSourceRef.current = true
@@ -138,9 +138,9 @@ export function SermonEditor() {
       {/* Header */}
       <SermonEditorHeader />
 
-      {/* CodeMirror Editor */}
+      {/* Milkdown Editor */}
       <div className="flex-1 min-h-0">
-        <CodeMirrorEditor
+        <MilkdownEditor
           content={markdownContent}
           onChange={handleContentChange}
           isDark={isDarkMode}
