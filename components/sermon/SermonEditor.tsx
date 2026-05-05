@@ -149,31 +149,31 @@ export function SermonEditor() {
       </div>
 
       {/* Status Bar */}
-      <div className="border-t border-border px-4 py-1 flex items-center gap-4 text-[10px] text-muted-foreground">
+      <div className="border-t border-black/5 dark:border-white/10 px-4 py-1 flex items-center gap-4 text-[10px] text-slate-400 dark:text-slate-500">
         <span>{charCount}{t('sermon.editorWords')}</span>
         <span>~{Math.max(1, Math.round(charCount / 300))}{t('sermon.editorMinutes')}</span>
         <div className="flex-1" />
         <button
           onClick={() => setFontSize(s => Math.max(12, s - 1))}
-          className="px-1 hover:text-foreground transition-colors"
+          className="px-1 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
           title="减小字号"
         >A-</button>
         <span className="text-[10px]">{fontSize}px</span>
         <button
           onClick={() => setFontSize(s => Math.min(24, s + 1))}
-          className="px-1 hover:text-foreground transition-colors"
+          className="px-1 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
           title="增大字号"
         >A+</button>
-        <span className="mx-1 text-border">|</span>
+        <span className="mx-1 text-black/10 dark:text-white/10">|</span>
         <button
           onClick={() => setLineHeight(h => Math.round(Math.max(1.2, h - 0.2) * 10) / 10)}
-          className="px-1 hover:text-foreground transition-colors"
+          className="px-1 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
           title="减小行距"
         >≡-</button>
         <span className="text-[10px]">{lineHeight.toFixed(1)}</span>
         <button
           onClick={() => setLineHeight(h => Math.round(Math.min(3.5, h + 0.2) * 10) / 10)}
-          className="px-1 hover:text-foreground transition-colors"
+          className="px-1 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
           title="增大行距"
         >≡+</button>
       </div>

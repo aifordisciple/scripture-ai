@@ -75,15 +75,15 @@ export function SermonEditorHeader() {
   }
 
   const statusConfig: Record<string, { label: string; color: string }> = {
-    DRAFT: { label: t('sermon.draft'), color: 'bg-muted text-muted-foreground' },
-    IN_PROGRESS: { label: t('sermon.inProgress'), color: 'bg-primary/10 text-primary' },
+    DRAFT: { label: t('sermon.draft'), color: 'bg-black/5 dark:bg-white/10 text-slate-600 dark:text-slate-300' },
+    IN_PROGRESS: { label: t('sermon.inProgress'), color: 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' },
     COMPLETED: { label: t('sermon.completed'), color: 'bg-green-500/10 text-green-600 dark:text-green-400' },
   }
 
   const currentStatus = statusConfig[currentSermon.status] || statusConfig.DRAFT
 
   return (
-    <div className="border-b border-border px-4 py-2 flex items-center gap-3 bg-secondary">
+    <div className="border-b border-black/5 dark:border-white/10 px-4 py-1.5 flex items-center gap-3 bg-transparent">
       {/* Title */}
       {editingTitle ? (
         <input
@@ -95,7 +95,7 @@ export function SermonEditorHeader() {
             if (e.key === 'Enter') handleTitleSave()
             if (e.key === 'Escape') { setEditingTitle(false) }
           }}
-          className="flex-1 text-sm font-medium bg-card border border-border rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary/40"
+          className="flex-1 text-sm font-medium bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-md px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 focus:border-indigo-500/30"
         />
       ) : (
         <button
@@ -103,7 +103,7 @@ export function SermonEditorHeader() {
             setTitleDraft(currentSermon.title)
             setEditingTitle(true)
           }}
-          className="flex-1 text-left text-sm font-medium text-foreground/90 truncate hover:text-foreground transition-colors"
+          className="flex-1 text-left text-sm font-medium text-slate-900 dark:text-slate-100 truncate hover:bg-black/5 dark:hover:bg-white/5 rounded-md px-2 py-0.5 -ml-2 transition-colors"
         >
           {currentSermon.title || t('sermon.untitled')}
         </button>
@@ -111,11 +111,11 @@ export function SermonEditorHeader() {
 
       {/* Saving indicator */}
       {isSermonSaving && (
-        <span className="text-[10px] text-muted-foreground animate-pulse">{t('sermon.saving')}</span>
+        <span className="text-[10px] text-slate-400 dark:text-slate-500 animate-pulse">{t('sermon.saving')}</span>
       )}
 
       {/* Style badge */}
-      <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+      <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-slate-500 dark:text-slate-400">
         {t(`sermon.${currentSermon.style.toLowerCase()}`)}
       </span>
 
@@ -123,22 +123,22 @@ export function SermonEditorHeader() {
       <div className="relative" ref={statusMenuRef}>
         <button
           onClick={() => setShowStatusMenu(!showStatusMenu)}
-          className={cn('flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full', currentStatus.color)}
+          className={cn('flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors', currentStatus.color)}
         >
           {currentStatus.label}
           <ChevronDown className="w-2.5 h-2.5" />
         </button>
         {showStatusMenu && (
-          <div className="absolute right-0 top-full mt-1 z-50 bg-card rounded-lg shadow-lg border border-border py-1 min-w-[120px]">
+          <div className="absolute right-0 top-full mt-1 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-lg shadow-lg border border-black/5 dark:border-white/10 py-1 min-w-[120px]">
             {Object.entries(statusConfig).map(([key, { label, color }]) => (
               <button
                 key={key}
                 onClick={() => handleStatusChange(key)}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-[10px] hover:bg-secondary transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-[10px] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
               >
                 <span className={cn('w-2 h-2 rounded-full', color.split(' ')[0])} />
-                <span className="text-foreground/90">{label}</span>
-                {currentSermon.status === key && <Check className="w-3 h-3 text-primary ml-auto" />}
+                <span className="text-slate-700 dark:text-slate-300">{label}</span>
+                {currentSermon.status === key && <Check className="w-3 h-3 text-indigo-600 dark:text-indigo-400 ml-auto" />}
               </button>
             ))}
           </div>

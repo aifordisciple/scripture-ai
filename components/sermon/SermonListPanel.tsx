@@ -149,38 +149,31 @@ export function SermonListPanel() {
     return map[style] || style
   }
 
-  const statusColor = (status: string) => {
-    const map: Record<string, string> = {
-      DRAFT: 'bg-muted text-muted-foreground',
-      IN_PROGRESS: 'bg-primary/10 text-primary',
-      COMPLETED: 'bg-green-500/10 text-green-600 dark:text-green-400',
-    }
-    return map[status] || map.DRAFT
-  }
+  const isSelected = (id: string) => currentSermon?.id === id
 
   return (
     <div className="h-full flex flex-col bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl">
       {/* 搜索栏 */}
-      <div className="p-3 border-b border-slate-200/60 dark:border-slate-800/60">
+      <div className="px-3 py-2 border-b border-black/5 dark:border-white/10">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             value={sermonSearchQuery}
             onChange={(e) => setSermonSearchQuery(e.target.value)}
             placeholder={t('sermon.searchPlaceholder')}
-            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 focus:border-indigo-500/40"
+            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-black/5 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 focus:border-indigo-500/30"
           />
         </div>
       </div>
 
       {/* 文件夹区域 */}
-      <div className="px-2 py-2 border-b border-slate-200/60 dark:border-slate-800/60">
-        <div className="flex items-center justify-between px-2 mb-1">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t('sermon.panelList')}</span>
+      <div className="px-3 py-2 border-b border-black/5 dark:border-white/10">
+        <div className="flex items-center justify-between px-2.5 mb-1">
+          <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">{t('sermon.panelList')}</span>
           <button
             onClick={handleCreateFolder}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
             title={t('sermon.newFolder')}
           >
             <FolderPlus className="w-3.5 h-3.5" />
@@ -191,13 +184,15 @@ export function SermonListPanel() {
         <button
           onClick={() => setSermonSelectedFolderId(null)}
           className={cn(
-            'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs transition-colors',
-            !sermonSelectedFolderId ? 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' : 'text-muted-foreground hover:bg-slate-200/60 dark:hover:bg-slate-700/40'
+            'w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+            !sermonSelectedFolderId
+              ? 'bg-black/5 dark:bg-white/10 text-slate-900 dark:text-white font-semibold'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5'
           )}
         >
-          <FolderOpen className="w-3.5 h-3.5" />
+          <FolderOpen className="w-4 h-4" />
           {t('sermon.allSermons')}
-          <span className="ml-auto text-[10px] text-muted-foreground">{sermons.length}</span>
+          <span className="ml-auto text-[10px] text-slate-400 dark:text-slate-500">{sermons.length}</span>
         </button>
 
         {/* 文件夹树 */}
@@ -209,8 +204,10 @@ export function SermonListPanel() {
                 setSermonSelectedFolderId(folder.id)
               }}
               className={cn(
-                'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs transition-colors',
-                sermonSelectedFolderId === folder.id ? 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' : 'text-muted-foreground hover:bg-slate-200/60 dark:hover:bg-slate-700/40'
+                'w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+                sermonSelectedFolderId === folder.id
+                  ? 'bg-black/5 dark:bg-white/10 text-slate-900 dark:text-white font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5'
               )}
               onContextMenu={(e) => {
                 e.preventDefault()
@@ -218,7 +215,7 @@ export function SermonListPanel() {
               }}
             >
               {expandedFolders.has(folder.id) ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-              <Folder className="w-3.5 h-3.5" />
+              <Folder className="w-4 h-4" />
               {folder.name}
             </button>
             {expandedFolders.has(folder.id) && folder.children.map(child => (
@@ -226,15 +223,17 @@ export function SermonListPanel() {
                 key={child.id}
                 onClick={() => setSermonSelectedFolderId(child.id)}
                 className={cn(
-                  'w-full flex items-center gap-2 pl-7 pr-2 py-1.5 rounded-md text-xs transition-colors',
-                  sermonSelectedFolderId === child.id ? 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' : 'text-muted-foreground hover:bg-slate-200/60 dark:hover:bg-slate-700/40'
+                  'w-full flex items-center gap-2 pl-8 pr-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+                  sermonSelectedFolderId === child.id
+                    ? 'bg-black/5 dark:bg-white/10 text-slate-900 dark:text-white font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5'
                 )}
                 onContextMenu={(e) => {
                   e.preventDefault()
                   setContextMenu({ type: 'folder', id: child.id, x: e.clientX, y: e.clientY })
                 }}
               >
-                <Folder className="w-3 h-3.5" />
+                <Folder className="w-4 h-4" />
                 {child.name}
               </button>
             ))}
@@ -244,12 +243,12 @@ export function SermonListPanel() {
 
       {/* 标签区域 */}
       {allTags.length > 0 && (
-        <div className="px-3 py-2 border-b border-slate-200/60 dark:border-slate-800/60">
-          <div className="flex items-center gap-1 mb-1.5">
-            <Tag className="w-3 h-3 text-muted-foreground" />
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Tags</span>
+        <div className="px-3 py-2 border-b border-black/5 dark:border-white/10">
+          <div className="flex items-center gap-1 mb-1.5 px-2.5">
+            <Tag className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Tags</span>
           </div>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 px-2.5">
             {allTags.map(tag => (
               <button
                 key={tag}
@@ -263,8 +262,8 @@ export function SermonListPanel() {
                 className={cn(
                   'text-[10px] px-2 py-0.5 rounded-full transition-colors',
                   sermonSelectedTags.includes(tag)
-                    ? 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400'
-                    : 'bg-slate-100/80 dark:bg-slate-800/60 text-muted-foreground hover:bg-slate-200/80 dark:hover:bg-slate-700/60'
+                    ? 'bg-black/5 dark:bg-white/10 text-slate-900 dark:text-white font-medium'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5'
                 )}
               >
                 {tag}
@@ -274,80 +273,97 @@ export function SermonListPanel() {
         </div>
       )}
 
-      {/* 讲章列表 */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+      {/* 讲章列表 — macOS flat list style */}
+      <div className="flex-1 overflow-y-auto px-2 py-1">
         {filteredSermons.length === 0 ? (
-          <div className="text-center py-8 text-xs text-muted-foreground">{t('sermon.noSermons')}</div>
+          <div className="text-center py-8 text-xs text-slate-400 dark:text-slate-500">{t('sermon.noSermons')}</div>
         ) : (
-          filteredSermons.map(sermon => (
-            <div
-              key={sermon.id}
-              onClick={() => setCurrentSermon(sermon)}
-              onContextMenu={(e) => {
-                e.preventDefault()
-                setContextMenu({ type: 'sermon', id: sermon.id, x: e.clientX, y: e.clientY })
-              }}
-              className={cn(
-                'group cursor-pointer rounded-2xl p-6 transition-all duration-300',
-                'bg-white dark:bg-slate-900 shadow-sm',
-                'border border-slate-200/60 dark:border-slate-800',
-                'hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800/50 hover:-translate-y-0.5',
-                currentSermon?.id === sermon.id
-                  ? 'ring-2 ring-indigo-500/40 border-indigo-200 dark:border-indigo-800'
-                  : ''
-              )}
-            >
-              {/* 顶部：元数据层 */}
-              <div className="flex justify-between items-center">
-                {sermon.verseRefs ? (
-                  <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10 dark:bg-indigo-400/10 dark:text-indigo-400 dark:ring-indigo-400/20">
-                    {sermon.verseRefs}
-                  </span>
-                ) : (
-                  <span className={cn('text-[10px] px-2 py-0.5 rounded-md font-semibold', statusColor(sermon.status))}>
-                    {sermon.status === 'DRAFT' ? t('sermon.draft') : sermon.status === 'IN_PROGRESS' ? t('sermon.inProgress') : t('sermon.completed')}
-                  </span>
-                )}
-                <span className="text-xs text-slate-400 font-medium">
-                  {sermon.sermonDate ? new Date(sermon.sermonDate).toLocaleDateString() : new Date(sermon.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-
-              {/* 中部：核心内容层 */}
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight mt-3 mb-2 leading-tight group-hover:text-indigo-600 transition-colors">
-                {sermon.title || t('sermon.untitled')}
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                {styleLabel(sermon.style)}{sermon.wordCount > 0 ? ` · ${sermon.wordCount}${t('sermon.editorWords')}` : ''}
-              </p>
-
-              {/* 底部：操作层 */}
-              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                <span className="text-sm font-semibold text-indigo-600 flex items-center gap-1.5 group/btn">
-                  {t('sermon.viewDetail')}
-                  <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDeleteSermon(sermon.id)
+          <div className="divide-y divide-black/5 dark:divide-white/5">
+            {filteredSermons.map(sermon => {
+              const selected = isSelected(sermon.id)
+              return (
+                <div
+                  key={sermon.id}
+                  onClick={() => setCurrentSermon(sermon)}
+                  onContextMenu={(e) => {
+                    e.preventDefault()
+                    setContextMenu({ type: 'sermon', id: sermon.id, x: e.clientX, y: e.clientY })
                   }}
-                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors -mr-2"
-                  title={t('sermon.delete')}
+                  className={cn(
+                    'group cursor-pointer px-3 py-2.5 transition-colors rounded-lg mx-0.5',
+                    selected
+                      ? 'bg-indigo-600 text-white'
+                      : 'hover:bg-black/5 dark:hover:bg-white/5'
+                  )}
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          ))
+                  {/* 标题行 */}
+                  <div className="flex items-center gap-2">
+                    <h3 className={cn(
+                      'text-sm font-medium truncate flex-1',
+                      selected ? 'text-white' : 'text-slate-900 dark:text-slate-100'
+                    )}>
+                      {sermon.title || t('sermon.untitled')}
+                    </h3>
+                    <span className={cn(
+                      'text-[10px] shrink-0',
+                      selected ? 'text-white/70' : 'text-slate-400 dark:text-slate-500'
+                    )}>
+                      {sermon.sermonDate ? new Date(sermon.sermonDate).toLocaleDateString() : new Date(sermon.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  {/* 副标题行 */}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {sermon.verseRefs ? (
+                      <span className={cn(
+                        'text-[10px] font-medium',
+                        selected ? 'text-white/80' : 'text-indigo-600 dark:text-indigo-400'
+                      )}>
+                        {sermon.verseRefs}
+                      </span>
+                    ) : (
+                      <span className={cn(
+                        'text-[10px] font-medium',
+                        selected ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'
+                      )}>
+                        {sermon.status === 'DRAFT' ? t('sermon.draft') : sermon.status === 'IN_PROGRESS' ? t('sermon.inProgress') : t('sermon.completed')}
+                      </span>
+                    )}
+                    <span className={cn(
+                      'text-[10px]',
+                      selected ? 'text-white/60' : 'text-slate-400 dark:text-slate-500'
+                    )}>
+                      {styleLabel(sermon.style)}{sermon.wordCount > 0 ? ` · ${sermon.wordCount}${t('sermon.editorWords')}` : ''}
+                    </span>
+                    <div className="flex-1" />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteSermon(sermon.id)
+                      }}
+                      className={cn(
+                        'p-1 rounded-md transition-colors opacity-0 group-hover:opacity-100',
+                        selected
+                          ? 'text-white/60 hover:text-white hover:bg-white/10'
+                          : 'text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30'
+                      )}
+                      title={t('sermon.delete')}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         )}
       </div>
 
       {/* 新建按钮 */}
-      <div className="p-3 border-t border-slate-200/60 dark:border-slate-800/60">
+      <div className="px-3 py-2 border-t border-black/5 dark:border-white/10">
         <button
           onClick={() => setShowNewDialog(true)}
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-1.5 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           {t('sermon.newSermon')}
@@ -357,7 +373,7 @@ export function SermonListPanel() {
       {/* 右键菜单 */}
       {contextMenu && (
         <div
-          className="fixed z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-lg shadow-lg border border-slate-200/60 dark:border-slate-800/60 py-1 min-w-[120px]"
+          className="fixed z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-lg shadow-lg border border-black/5 dark:border-white/10 py-1 min-w-[120px]"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={() => setContextMenu(null)}
         >
@@ -366,7 +382,7 @@ export function SermonListPanel() {
               if (contextMenu.type === 'sermon') handleDeleteSermon(contextMenu.id)
               else handleDeleteFolder(contextMenu.id)
             }}
-            className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/10"
+            className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-red-600 dark:text-red-400 hover:bg-black/5 dark:hover:bg-white/5"
           >
             <Trash2 className="w-3 h-3" />
             {t('sermon.delete')}
