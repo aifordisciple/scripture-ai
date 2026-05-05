@@ -195,7 +195,7 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
     <div
       ref={menuRef}
       className={cn(
-        "fixed z-50 flex flex-col gap-2 p-3 glass-panel rounded-lg transition-all duration-200 ease-out origin-bottom border border-border dark:border-border w-[240px]",
+        "fixed z-50 flex flex-col gap-2 p-3 bg-white dark:bg-[#272729] rounded-lg transition-all duration-200 ease-out origin-bottom border border-border dark:border-border shadow-lg w-[240px]",
         visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"
       )}
       style={{
