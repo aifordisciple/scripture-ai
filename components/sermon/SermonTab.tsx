@@ -53,13 +53,13 @@ export function SermonTab() {
 
   return (
     <SermonEditorProvider isDark={isDarkMode}>
-      <div className="flex h-full bg-background">
+      <div className="flex h-full bg-slate-50 dark:bg-slate-900">
         {/* Icon Sidebar */}
         <SermonSidebar />
 
         {/* Panel Area */}
         <div className={cn(
-          'border-r border-border transition-all duration-200 overflow-hidden',
+          'border-r border-slate-200/60 dark:border-slate-800/60 transition-all duration-200 overflow-hidden',
           activeSermonPanel === 'list' ? 'w-[280px]' : 'w-[300px]'
         )}>
           {activeSermonPanel === 'list' && <SermonListPanel />}
