@@ -192,7 +192,7 @@ export function PlanTab() {
              </div>
              <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif flex items-center gap-3">
                 {tDual(planDetails.title, planDetails.titleEn)}
-                {isTotallyCompleted && <Medal className="w-8 h-8 text-yellow-500 drop-shadow-md animate-bounce" />}
+                {isTotallyCompleted && <Medal className="w-8 h-8 text-yellow-500 animate-bounce" />}
              </h1>
           </div>
           <Button variant="ghost" size="sm" onClick={() => {
@@ -301,7 +301,7 @@ export function PlanTab() {
                              <span className={cn("text-xs font-medium", isToday ? "text-[#0066cc] dark:text-[#0066cc]/80" : "text-[#7a7a7a] dark:text-[#7a7a7a]")}>
                                {isToday ? t('plan.today') : dateStr}
                              </span>
-                             {isBehind && <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-bold whitespace-nowrap">{t('plan.behind')}</span>}
+                             {isBehind && <span className="text-[10px] px-1.5 py-0.5 rounded text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 font-semibold whitespace-nowrap">{t('plan.behind')}</span>}
                            </div>
                         </div>
                      </div>
@@ -512,8 +512,8 @@ export function PlanTab() {
       <div className="mb-10 relative overflow-hidden bg-[#0066cc] rounded-[2rem] p-6 md:p-8 border border-[#0066cc]/30">
         
         {/* 装饰性背景光晕 (增加蓝宝石的通透折射感) */}
-        <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-cyan-300/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-[20rem] h-[20rem] bg-indigo-300/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-[#0066cc]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[20rem] h-[20rem] bg-[#0066cc]/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
 
         <div className="relative z-10">
           <h2 className="text-2xl font-semibold flex items-center gap-3 mb-3 text-white tracking-tight">
