@@ -72,7 +72,7 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
     <div className="relative flex items-center w-full group overflow-hidden">
       {canScrollLeft && (
         <div className="absolute left-0 z-10 h-full flex items-center pr-4 bg-gradient-to-r from-background via-background to-transparent">
-          <button onClick={(e) => { e.stopPropagation(); scroll('left'); }} className="w-6 h-6 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border shadow-sm text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={(e) => { e.stopPropagation(); scroll('left'); }} className="w-6 h-6 flex items-center justify-center rounded-full bg-[#f5f5f7] dark:bg-[#2a2a2c] border border-[#e0e0e0] dark:border-[#3a3a3c] text-muted-foreground hover:text-foreground transition-colors active:scale-95">
             <ChevronLeft className="w-4 h-4" />
           </button>
         </div>
@@ -88,10 +88,10 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             key={tab.id}
             onClick={() => onSwitchTab(tab.id)}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full text-sm md:text-xs font-medium cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group/tab shrink-0",
+              "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full text-sm md:text-xs font-medium cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group/tab shrink-0 active:scale-95",
               activeTabId === tab.id
-                ? "bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border-primary/20 text-primary shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.5)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.05)]"
-                : "bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-lg border-white/20 dark:border-white/10 text-muted-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.1] hover:shadow-[0_1px_4px_rgba(0,0,0,0.04)]"
+                ? "bg-white dark:bg-[#2a2a2c] border-[#e0e0e0] dark:border-[#3a3a3c] text-primary"
+                : "bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-lg border-white/20 dark:border-white/10 text-muted-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.1]"
             )}
           >
             <span className="max-w-[120px] truncate select-none">
@@ -509,24 +509,24 @@ export default function Home() {
             isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
-          <header className="h-14 flex items-center justify-between px-2 md:px-4 glass-panel rounded-2xl pointer-events-auto shadow-sm">
+          <header className="h-11 flex items-center justify-between px-2 md:px-4 bg-[#000000] dark:bg-[#1d1d1f] rounded-none pointer-events-auto">
 
             {/* 左侧：菜单 + 搜索 */}
             <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
-              <Button variant="ghost" size="icon" className="md:hidden text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full h-9 w-9" onClick={() => toggleSidebar()}>
+              <Button variant="ghost" size="icon" className="md:hidden text-white/80 hover:text-white hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
                 <Menu className="h-5 w-5" />
               </Button>
 
-              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full hover:bg-black/5 dark:hover:bg-white/5", !isDesktopSidebarOpen ? "text-muted-foreground" : "text-primary")} onClick={toggleDesktopSidebar}>
+              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-white/60" : "text-white")} onClick={toggleDesktopSidebar}>
                 <PanelLeft className="h-5 w-5" />
               </Button>
 
-              <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-secondary/60 hover:bg-secondary border-none ml-1" onClick={() => setIsSearchOpen(true)}>
-                  <Search className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground pr-2">{t('reader.searchPlaceholder')}</span>
+              <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-white/10 hover:bg-white/15 border-none ml-1 active:scale-95" onClick={() => setIsSearchOpen(true)}>
+                  <Search className="w-4 h-4 text-white/60" />
+                  <span className="text-xs text-white/60 pr-2">{t('reader.searchPlaceholder')}</span>
               </Button>
 
-              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full h-9 w-9" onClick={() => setIsSearchOpen(true)}>
+              <Button variant="ghost" size="icon" className="md:hidden flex text-white/80 hover:text-white hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
                 <Search className="h-5 w-5" />
               </Button>
             </div>
@@ -551,8 +551,8 @@ export default function Home() {
                   }
                 }}
                 className={cn(
-                  "inline-flex items-center font-serif font-bold text-base text-foreground tracking-wide max-w-full",
-                  activeTab.type === 'read' && "hover:text-primary transition-colors"
+                  "inline-flex items-center font-serif font-bold text-base text-white tracking-wide max-w-full",
+                  activeTab.type === 'read' && "hover:text-white/80 transition-colors"
                 )}
               >
                 <span className="truncate">
@@ -577,8 +577,8 @@ export default function Home() {
                   size="icon"
                   onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
                   className={cn(
-                    "text-muted-foreground rounded-full hover:bg-black/5 dark:hover:bg-white/5",
-                    showSettingsDropdown && "bg-black/5 dark:bg-white/10"
+                    "text-white/60 hover:text-white rounded-full hover:bg-white/10 active:scale-95",
+                    showSettingsDropdown && "bg-white/10"
                   )}
                   title={t('settings.readingSettings')}
                 >
@@ -593,7 +593,7 @@ export default function Home() {
                       className="fixed inset-0 z-[100]"
                       onClick={() => setShowSettingsDropdown(false)}
                     />
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border/50 rounded-xl shadow-xl z-[100] p-3 space-y-3">
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-[#2a2a2c] border border-[#e0e0e0] dark:border-[#3a3a3c] rounded-lg z-[100] p-3 space-y-3">
                       {/* 深色模式 */}
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground flex items-center gap-2">
@@ -674,16 +674,16 @@ export default function Home() {
                 )}
               </div>
 
-              <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-bold rounded-full">
+              <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-bold rounded-full text-white/80 hover:text-white active:scale-95">
                 <BookOpenCheck className="h-4 w-4" />{bibleVersion}
               </Button>
               <div className="mx-1 border-l h-5 border-border/50"></div>
 
               {/* 火苗动效 - 桌面端 */}
               {streakCount > 0 && (
-                <div className="flex items-center gap-1 px-2 py-1 bg-orange-50 dark:bg-orange-950/30 rounded-full border border-orange-100 dark:border-orange-900/50">
-                  <Flame className="w-4 h-4 text-orange-500 fill-orange-500 animate-pulse" />
-                  <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{streakCount}</span>
+                <div className="flex items-center gap-1 px-2 py-1 bg-[#0066cc]/10 rounded-full">
+                  <Flame className="w-4 h-4 text-[#0066cc]" />
+                  <span className="text-xs font-bold text-[#0066cc]">{streakCount}</span>
                 </div>
               )}
 
@@ -699,7 +699,7 @@ export default function Home() {
                     addTab({ type: 'plan' });
                   }
                 }}
-                className="rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 transition-colors relative"
+                className="rounded-full text-muted-foreground hover:bg-[#0066cc]/10 hover:text-[#0066cc] transition-colors relative active:scale-95"
                 title={t('tabs.plan')}
               >
                 <Calendar className="h-5 w-5" />
@@ -744,7 +744,7 @@ export default function Home() {
         {activeTab?.type !== 'sermon' && (
         <div
           className={cn(
-            "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"
+            "md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#f5f5f7]/80 dark:bg-[#272729]/80 backdrop-blur-xl saturate-[1.8] border-t border-[#e0e0e0] dark:border-[#3a3a3c] border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe"
           )}
         >
             <TabList 
