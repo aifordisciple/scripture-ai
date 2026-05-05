@@ -282,7 +282,7 @@ export default function AdminAnnouncementsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card z-10">
-              <h3 className="text-lg font-semibold">
+              <h3 className="text-lg font-semibold tracking-[-0.022em]">
                 {editingId ? t('admin.editAnnouncement') : t('admin.createAnnouncement')}
               </h3>
               <button onClick={resetForm} className="text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-95">

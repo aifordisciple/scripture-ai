@@ -665,14 +665,6 @@ export default function Home() {
                 </Button>
               </div>
 
-              {/* AI action button */}
-              <button
-                className="bg-primary text-white rounded-full px-3.5 py-1 text-sm font-medium active:scale-95 transition-transform"
-                onClick={() => setAiOpen(!isAiOpen)}
-              >
-                ✨ AI
-              </button>
-
               {/* User menu */}
               <UserMenu />
 

@@ -181,7 +181,7 @@ export default function AdminDashboard() {
 
       {/* 用户统计 */}
       <div className="bg-card rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2 tracking-[-0.022em]">
           <Users className="text-primary" size={20} />
           {t('admin.userStatistics')}
         </h2>
@@ -226,7 +226,7 @@ export default function AdminDashboard() {
 
       {/* 小组统计 */}
       <div className="bg-card rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2 tracking-[-0.022em]">
           <BookOpen className="text-purple-600" size={20} />
           {t('admin.groupStatistics')}
         </h2>
@@ -282,7 +282,7 @@ export default function AdminDashboard() {
 
       {/* 活跃度趋势 */}
       <div className="bg-card rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2 tracking-[-0.022em]">
           <Calendar className="text-teal-600" size={20} />
           {t('admin.sevenDayActiveUsers')}
         </h2>

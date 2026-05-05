@@ -265,7 +265,7 @@ export function HighlightsTab() {
         <div className="space-y-10">
           {Object.entries(groupedHighlights).map(([bookName, items]) => (
             <div key={bookName} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <h2 className="text-lg font-semibold font-serif text-foreground mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold font-serif text-foreground mb-4 flex items-center gap-2 tracking-[-0.022em]">
                 <span className="w-1 h-5 bg-primary rounded-full inline-block"></span>
                 {bookName}
               </h2>

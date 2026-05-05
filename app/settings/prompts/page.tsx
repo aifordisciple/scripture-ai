@@ -59,7 +59,7 @@ function PromptFormModal({
         className="bg-white dark:bg-accent rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
       >
         <div className="p-4 border-b dark:border-border flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground dark:text-foreground">
+          <h2 className="text-lg font-semibold text-foreground dark:text-foreground tracking-[-0.022em]">
             {isEditing ? '编辑自定义问题' : '添加自定义问题'}
           </h2>
           <button
@@ -267,7 +267,7 @@ export default function PromptsSettingsPage() {
             >
               <ArrowLeft className="w-5 h-5 text-muted-foreground dark:text-foreground" />
             </button>
-            <h1 className="text-lg font-semibold text-foreground dark:text-foreground">
+            <h1 className="text-lg font-semibold text-foreground dark:text-foreground tracking-[-0.022em]">
               自定义问题
             </h1>
           </div>
@@ -295,7 +295,7 @@ export default function PromptsSettingsPage() {
             <div className="w-16 h-16 bg-accent dark:bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">📝</span>
             </div>
-            <h2 className="text-lg font-semibold text-muted-foreground dark:text-foreground mb-2">
+            <h2 className="text-lg font-semibold text-muted-foreground dark:text-foreground mb-2 tracking-[-0.022em]">
               还没有自定义问题
             </h2>
             <p className="text-sm text-muted-foreground mb-6">

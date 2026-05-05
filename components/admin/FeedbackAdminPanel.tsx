@@ -399,7 +399,7 @@ export default function FeedbackAdminPanel() {
           <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-foreground">
+                <h2 className="text-lg font-semibold text-foreground tracking-[-0.022em]">
                   {t('adminFeedback.detailTitle')}
                 </h2>
                 <button

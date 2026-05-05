@@ -408,7 +408,7 @@ export function PlanTab() {
       {/* 我的计划 (正在进行) */}
       {inProgressPlans.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-lg font-semibold text-foreground mb-4">{t('plan.myPlansCount', { count: inProgressPlans.length })}</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4 tracking-[-0.022em]">{t('plan.myPlansCount', { count: inProgressPlans.length })}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {inProgressPlans.map((plan) => {
               const activeData = activePlans.find(p => p.planId === plan.id)!;
@@ -473,7 +473,7 @@ export function PlanTab() {
       {/* 荣誉墙 (已完成的计划) */}
       {archivedPlans.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2 tracking-[-0.022em]">
             <Medal className="w-5 h-5 text-yellow-500" /> {t('plan.honorWallCount', { count: archivedPlans.length })}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -554,7 +554,7 @@ export function PlanTab() {
       </div>
 
       {/* 探索计划 */}
-      <h2 className="text-lg font-semibold text-foreground mb-4">{t('plan.exploreMore')}</h2>
+      <h2 className="text-lg font-semibold text-foreground mb-4 tracking-[-0.022em]">{t('plan.exploreMore')}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {discoverPlans.map((plan) => (
           <div key={plan.id} className="flex flex-col bg-card dark:bg-card rounded-lg p-6 border dark:border-background hover:bg-black/[0.02] transition-colors relative group">
@@ -563,7 +563,7 @@ export function PlanTab() {
              )}
              <div className="flex items-start justify-between mb-4 pr-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground font-serif">{tDual(plan.title, plan.titleEn)}</h3>
+                  <h3 className="text-lg font-semibold text-foreground font-serif tracking-[-0.022em]">{tDual(plan.title, plan.titleEn)}</h3>
                   <div className="flex items-center gap-2 mt-2">
                      {tArr(plan.tags, plan.tagsEn)?.map((tag: string) => <span key={tag} className="px-2 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-md font-semibold">{tag}</span>)}
                      <span className="text-xs text-muted-foreground ml-1">{t('plan.durationDays', { count: plan.durationDays })}</span>

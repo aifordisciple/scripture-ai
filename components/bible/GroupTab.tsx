@@ -578,7 +578,7 @@ export function GroupTab() {
           {/* My Groups */}
           {myGroups.length > 0 && (
             <div className="mb-12">
-              <h2 className="text-lg font-semibold text-foreground mb-4">
+              <h2 className="text-lg font-semibold text-foreground mb-4 tracking-[-0.022em]">
                 {t('group.myGroups', { count: myGroups.length })}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -601,7 +601,7 @@ export function GroupTab() {
           {/* Public Groups */}
           {publicGroups.length > 0 && (
             <div>
-              <h2 className="text-lg font-semibold text-foreground mb-4">
+              <h2 className="text-lg font-semibold text-foreground mb-4 tracking-[-0.022em]">
                 {t('group.discoverPublic')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

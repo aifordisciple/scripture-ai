@@ -357,7 +357,7 @@ export function ThemeGraphTab() {
               <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <h2
                   className={cn(
-                    "text-lg font-semibold mb-4 flex items-center gap-2",
+                    "text-lg font-semibold mb-4 flex items-center gap-2 tracking-[-0.022em]",
                     config.color
                   )}
                 >

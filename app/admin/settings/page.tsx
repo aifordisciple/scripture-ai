@@ -135,7 +135,7 @@ export default function AdminSettingsPage() {
       <div className="bg-card rounded-lg border border-border">
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-foreground">操作日志</h2>
+            <h2 className="text-lg font-semibold text-foreground tracking-[-0.022em]">操作日志</h2>
             <div className="flex gap-4">
               <select
                 value={actionFilter}
