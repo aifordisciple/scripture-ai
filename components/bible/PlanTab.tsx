@@ -190,7 +190,7 @@ export function PlanTab() {
                 <Calendar className="w-5 h-5" />
                 <span className="text-sm uppercase tracking-widest">{t('plan.inProgress')}</span>
              </div>
-             <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif flex items-center gap-3">
+             <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif flex items-center gap-3 tracking-tight">
                 {tDual(planDetails.title, planDetails.titleEn)}
                 {isTotallyCompleted && <Medal className="w-8 h-8 text-yellow-500 animate-bounce" />}
              </h1>

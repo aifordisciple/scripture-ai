@@ -161,7 +161,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
                 transition={{ duration: 0.2 }}
                 className="text-center"
               >
-                <h2 className="text-xl font-semibold text-foreground dark:text-foreground mb-3">
+                <h2 className="text-xl font-semibold text-foreground dark:text-foreground mb-3 tracking-[-0.022em]">
                   {step.title}
                 </h2>
                 <p className="text-muted-foreground dark:text-foreground text-sm leading-relaxed">

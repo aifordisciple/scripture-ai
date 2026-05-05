@@ -209,7 +209,7 @@ export function CrossRefPanel({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ duration: 0.2 }}
-        className="fixed z-50 max-w-[calc(100vw-20px)] bg-white dark:bg-card rounded-2xl shadow-2xl shadow-black/15 border border-border dark:border-border overflow-hidden flex flex-col"
+        className="fixed z-50 max-w-[calc(100vw-20px)] bg-card rounded-2xl shadow-2xl shadow-black/15 border border-border dark:border-border overflow-hidden flex flex-col"
         style={{
           top: adjustedTop,
           left: adjustedLeft,

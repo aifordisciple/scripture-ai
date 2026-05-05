@@ -154,7 +154,7 @@ export function UserMenu() {
           <div
             ref={menuRef}
             className={cn(
-              "fixed bg-white/80 dark:bg-card/80 backdrop-blur-xl saturate-[1.8] rounded-lg border border-border dark:border-border py-2 z-[9999] animate-in duration-200",
+              "fixed bg-card/80 backdrop-blur-xl saturate-[1.8] rounded-lg border border-border dark:border-border py-2 z-[9999] animate-in duration-200",
               isMobile
                 ? "bottom-0 left-0 right-0 rounded-b-none max-h-[80vh] overflow-y-auto slide-in-from-bottom duration-300 w-full"
                 : "fade-in zoom-in-95 w-56"
@@ -285,7 +285,7 @@ export function UserMenu() {
             {subMenuOpen && !isMobile && (
               <div
                 ref={subMenuRef}
-                className="absolute right-full top-0 mr-1 bg-white/80 dark:bg-card/80 backdrop-blur-xl saturate-[1.8] rounded-lg border border-border dark:border-border py-2 z-[10000] w-44 animate-in fade-in zoom-in-95 duration-150"
+                className="absolute right-full top-0 mr-1 bg-card/80 backdrop-blur-xl saturate-[1.8] rounded-lg border border-border dark:border-border py-2 z-[10000] w-44 animate-in fade-in zoom-in-95 duration-150"
                 onMouseEnter={() => {
                   if (subMenuTimerRef.current) clearTimeout(subMenuTimerRef.current);
                 }}

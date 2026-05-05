@@ -86,7 +86,7 @@ export function PlanDailyFlow() {
 
      return (
        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-md animate-in slide-in-from-bottom-8 duration-500">
-         <div className="bg-white/90 dark:bg-card/90 backdrop-blur-xl p-4 rounded-lg border border-primary/20 flex items-center justify-between">
+         <div className="bg-card/90 backdrop-blur-xl p-4 rounded-lg border border-primary/20 flex items-center justify-between">
            <div className="flex flex-col pl-2">
              <span className="text-[10px] text-primary dark:text-primary font-semibold tracking-widest uppercase mb-0.5">{t('plan.currentlyReading')}</span>
              <span className="text-sm font-semibold text-foreground">
@@ -109,14 +109,14 @@ export function PlanDailyFlow() {
   if (step.type === 'completion') {
      return (
        <div className="fixed inset-0 z-[60] bg-primary/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 animate-in zoom-in-95 duration-500">
-          <div className="bg-white dark:bg-card p-8 rounded-[2rem]-2xl max-w-sm w-full text-center relative overflow-hidden">
+          <div className="bg-card p-8 rounded-[2rem]-2xl max-w-sm w-full text-center relative overflow-hidden">
              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500">
                 <CheckCircle2 className="w-10 h-10" />
              </div>
              <PartyPopper className="absolute -top-4 -right-4 w-16 h-16 text-yellow-400 opacity-20" />
              <PartyPopper className="absolute -bottom-4 -left-4 w-16 h-16 text-yellow-400 opacity-20 transform scale-x-[-1]" />
 
-             <h2 className="text-2xl font-semibold mb-2 text-foreground">{t('plan.todayTaskComplete')}</h2>
+             <h2 className="text-2xl font-semibold mb-2 text-foreground tracking-tight">{t('plan.todayTaskComplete')}</h2>
              <p className="text-muted-foreground mb-8">
                {t('plan.completionMessage', { planTitle: ctx.planTitle, day: ctx.day })}
              </p>

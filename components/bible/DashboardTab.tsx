@@ -176,7 +176,7 @@ export function DashboardTab() {
       {/* 头部区域：标题与操作盘 */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 mb-8 mt-4 md:mt-8 w-full">
           <div className="w-full lg:w-auto">
-            <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2 mb-2">
+            <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2 mb-2 tracking-tight">
               <Activity className="w-6 h-6 text-primary" /> {t('bible.dashboardTitle')}
             </h1>
             <p className="text-sm text-muted-foreground">{t('bible.dashboardSubtitle')}</p>

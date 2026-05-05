@@ -327,7 +327,7 @@ export function GroupTab() {
                 {isAdmin ? t('group.manageGroup') : t('group.myGroup')}
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif">
+            <h1 className="text-2xl md:text-3xl font-semibold text-foreground font-serif tracking-tight">
               {selectedGroup.church.name}
             </h1>
             {selectedGroup.church.description && (

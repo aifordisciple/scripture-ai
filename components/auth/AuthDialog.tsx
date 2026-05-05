@@ -78,7 +78,7 @@ export function AuthDialog() {
     <Dialog open={isAuthOpen} onOpenChange={setAuthOpen}>
       <DialogContent className="sm:max-w-md bg-card dark:bg-card border-border dark:border-border">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl font-semibold">
+          <DialogTitle className="text-center text-xl font-semibold tracking-[-0.022em]">
             {isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}
           </DialogTitle>
         </DialogHeader>

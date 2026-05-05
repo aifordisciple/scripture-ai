@@ -117,7 +117,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 pb-32">
       <div className="mb-8 border-b pb-4 dark:border-border">
-        <h1 className="text-2xl font-semibold text-foreground dark:text-foreground flex items-center gap-2">
+        <h1 className="text-2xl font-semibold text-foreground dark:text-foreground flex items-center gap-2 tracking-tight">
           🔍 {t('search.resultsFor', { query })}
         </h1>
         <p className="text-muted-foreground text-sm mt-1">

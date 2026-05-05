@@ -22,7 +22,7 @@ export const AIInputForm = memo(function AIInputForm({
 }: AIInputFormProps) {
   const { t } = useTranslation()
   return (
-    <div className="bg-white dark:bg-card flex-shrink-0">
+    <div className="bg-card flex-shrink-0">
       <div className="p-4 safe-area-bottom">
         <form onSubmit={onSubmit} className="flex gap-2 items-end relative" role="form">
           <textarea

@@ -419,17 +419,15 @@ export default function Home() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground font-semibold">{t('settings.lineHeight')}</span>
-              <div className="flex bg-secondary/50 p-1 rounded-lg">
-                {[1.4, 1.8, 2.2].map(lh => (
-                  <button
-                    key={lh}
-                    onClick={() => setLineHeight(lh)}
-                    className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
-                  >
-                    {lh === 1.4 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
-                  </button>
-                ))}
-              </div>
+              <SegmentedControl
+                options={[
+                  { label: t('common.compact'), value: '1.4' },
+                  { label: t('common.standard'), value: '1.8' },
+                  { label: t('common.loose'), value: '2.2' },
+                ]}
+                value={String(lineHeight)}
+                onChange={(v) => setLineHeight(Number(v))}
+              />
             </div>
                         <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground font-semibold">{t('settings.bilingual')}</span>
