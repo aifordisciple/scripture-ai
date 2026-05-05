@@ -160,7 +160,7 @@ export function NotesTab() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
-      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-[#3a3a3c]">
         <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
           <BookOpen className="w-6 h-6" />
         </div>
