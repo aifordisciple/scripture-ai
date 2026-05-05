@@ -311,7 +311,7 @@ export function UserMenu() {
 
           {/* 反馈 */}
           <MenuItem
-            icon={<MessageSquare className="w-4 h-4 text-green-600 dark:text-green-400" />}
+            icon={<MessageSquare className="w-4 h-4 text-[#0066cc]" />}
             label={t('auth.feedback')}
             onClick={() => { setIsOpen(false); setFeedbackDialogOpen(true); }}
           />
@@ -321,10 +321,10 @@ export function UserMenu() {
             <>
               <div className="my-1 border-t border-[#e0e0e0] dark:border-[#3a3a3c]" />
               <Link href="/admin/feedback" onClick={() => setIsOpen(false)}>
-                <div className="w-full flex items-center gap-3 px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left">
-                  <Shield className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <div className="w-full flex items-center gap-3 px-5 py-2.5 text-sm text-[#1d1d1f] dark:text-white/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-left">
+                  <Shield className="w-4 h-4 text-[#0066cc]" />
                   {t('auth.feedbackManagement')}
-                  <span className="ml-auto text-[10px] bg-purple-200 dark:bg-purple-800 px-1.5 py-0.5 rounded text-purple-600 dark:text-purple-300">Admin</span>
+                  <span className="ml-auto text-[10px] bg-[#0066cc]/10 px-1.5 py-0.5 rounded text-[#0066cc]">Admin</span>
                 </div>
               </Link>
             </>
@@ -358,7 +358,7 @@ function MenuItem({ icon, label, onClick, className, rightElement }: any) {
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 px-5 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left",
+        "w-full flex items-center gap-3 px-5 py-2.5 text-sm text-[#1d1d1f] dark:text-white/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 transition-colors text-left",
  className
       )}
     >

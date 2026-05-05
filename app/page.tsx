@@ -106,14 +106,14 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             />
           </div>
         ))}
-        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 ml-1" onClick={onAddTab}>
+        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 ml-1 active:scale-95" onClick={onAddTab}>
           <Plus className="w-4 h-4" />
         </Button>
       </div>
 
       {canScrollRight && (
         <div className="absolute right-0 z-10 h-full flex items-center pl-4 bg-gradient-to-l from-background via-background to-transparent">
-          <button onClick={(e) => { e.stopPropagation(); scroll('right'); }} className="w-6 h-6 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border shadow-sm text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={(e) => { e.stopPropagation(); scroll('right'); }} className="w-6 h-6 flex items-center justify-center rounded-full bg-[#f5f5f7] dark:bg-[#2a2a2c] border border-[#e0e0e0] dark:border-[#3a3a3c] text-muted-foreground hover:text-foreground transition-colors active:scale-95">
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -369,7 +369,7 @@ export default function Home() {
 
       {/* Desktop Sidebar */}
       {isDesktopSidebarOpen && (
-        <aside className="hidden md:block w-72 h-full border-r bg-card/50 backdrop-blur-md shrink-0 transition-all duration-300 z-20">
+        <aside className="hidden md:block w-72 h-full border-r bg-white dark:bg-[#272729] shrink-0 transition-all duration-300 z-20">
           <Sidebar />
         </aside>
       )}
@@ -384,7 +384,7 @@ export default function Home() {
 
       {/* Mobile Settings Sheet */}
       <Sheet open={isMobileSettingsOpen} onOpenChange={setMobileSettingsOpen}>
-        <SheetContent side="bottom" className="bg-card border-t-0 pb-6 rounded-t-2xl max-h-[85vh] overflow-y-auto">
+        <SheetContent side="bottom" className="bg-white dark:bg-[#272729] border-t-0 pb-6 rounded-t-2xl max-h-[85vh] overflow-y-auto">
           <SheetHeader className="mb-4 pt-2">
             <SheetTitle className="text-foreground flex items-center gap-2">
               <Settings className="w-5 h-5 text-primary" /> {t('settings.title')}
@@ -397,7 +397,7 @@ export default function Home() {
                 {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
                 {isDarkMode ? t('settings.darkMode') : t('settings.lightMode')}
               </span>
-              <Button variant={isDarkMode ? "default" : "secondary"} size="sm" onClick={toggleDarkMode} className="rounded-full px-4">
+              <Button variant={isDarkMode ? "default" : "secondary"} size="sm" onClick={toggleDarkMode} className="rounded-full px-4 active:scale-95">
                 {isDarkMode ? t('settings.toggleLight') : t('settings.toggleDark')}
               </Button>
             </div>
@@ -551,7 +551,7 @@ export default function Home() {
                   }
                 }}
                 className={cn(
-                  "inline-flex items-center font-serif font-bold text-base text-white tracking-wide max-w-full",
+                  "inline-flex items-center font-serif font-bold text-base text-white tracking-wide max-w-full active:scale-95",
                   activeTab.type === 'read' && "hover:text-white/80 transition-colors"
                 )}
               >
@@ -604,7 +604,7 @@ export default function Home() {
                           variant={isDarkMode ? "default" : "secondary"}
                           size="sm"
                           onClick={toggleDarkMode}
-                          className="rounded-full px-3 h-7 text-xs"
+                          className="rounded-full px-3 h-7 text-xs active:scale-95"
                         >
                           {isDarkMode ? t('settings.toggleLight') : t('settings.toggleDark')}
                         </Button>
@@ -620,7 +620,7 @@ export default function Home() {
                           variant={isFullscreen ? "default" : "secondary"}
                           size="sm"
                           onClick={toggleFullscreen}
-                          className="rounded-full px-3 h-7 text-xs"
+                          className="rounded-full px-3 h-7 text-xs active:scale-95"
                         >
                           {isFullscreen ? t('settings.exitFullscreen') : t('settings.enterFullscreen')}
                         </Button>
@@ -641,7 +641,7 @@ export default function Home() {
                               key={lh}
                               onClick={() => setLineHeight(lh)}
                               className={cn(
-                                "flex-1 px-2 py-1 text-xs rounded-md transition-all",
+                                "flex-1 px-2 py-1 text-xs rounded-md transition-all active:scale-95",
                                 lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                               )}
                             >
@@ -723,7 +723,7 @@ export default function Home() {
 
               <UserMenu />
 
-              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 h-9 w-9" onClick={() => setMobileSettingsOpen(true)}>
+              <Button variant="ghost" size="icon" className="rounded-full text-white/60 hover:text-white hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>
             </div>
