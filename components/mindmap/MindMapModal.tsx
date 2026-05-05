@@ -265,7 +265,7 @@ export function MindMapModal({ isOpen, onClose, data, title }: MindMapModalProps
         <Dialog.Content className="fixed inset-0 sm:inset-4 md:inset-8 bg-card sm:rounded-xl shadow-2xl shadow-black/15 z-50 flex flex-col overflow-hidden">
           {/* 标题栏 - 移动端固定高度 */}
           <div className="shrink-0 px-3 sm:px-4 py-2.5 sm:py-3 border-b border-border dark:border-border bg-card">
-            <Dialog.Title className="text-base sm:text-lg font-semibold text-foreground dark:text-foreground truncate">
+            <Dialog.Title className="text-base sm:text-lg font-semibold text-foreground dark:text-foreground truncate tracking-[-0.022em]">
               {title || t('mindmap.defaultTitle')}
             </Dialog.Title>
           </div>

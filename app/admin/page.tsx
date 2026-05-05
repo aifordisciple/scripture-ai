@@ -134,7 +134,7 @@ export default function AdminDashboard() {
       {/* 访问统计趋势图 */}
       {analytics && analytics.trend.length > 0 && (
         <div className="bg-card rounded-lg border border-border p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2 tracking-[-0.022em]">
             <Eye className="text-cyan-600" size={20} />
             {t('admin.sevenDayVisitTrend')}
           </h2>
@@ -241,7 +241,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 读经计划统计 */}
         <div className="bg-card rounded-lg border border-border p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2 tracking-[-0.022em]">
             <Target className="text-amber-600 dark:text-amber-400" size={20} />
             {t('admin.readingPlanStatistics')}
           </h2>
@@ -254,7 +254,7 @@ export default function AdminDashboard() {
 
         {/* 反馈统计 */}
         <div className="bg-card rounded-lg border border-border p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2 tracking-[-0.022em]">
             <TrendingUp className="text-green-600" size={20} />
             {t('admin.feedbackStatistics')}
           </h2>

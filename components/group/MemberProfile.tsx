@@ -158,7 +158,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                 )}
               </div>
               <div>
-                <h2 className="text-xl font-semibold">{data.user.name || t('group.anonymousUser')}</h2>
+                <h2 className="text-xl font-semibold tracking-[-0.022em]">{data.user.name || t('group.anonymousUser')}</h2>
                 <p className="text-sm text-muted-foreground">
                   {t('group.joinedAt', { date: formatDate(data.user.createdAt) })}
                 </p>

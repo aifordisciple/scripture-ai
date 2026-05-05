@@ -213,7 +213,7 @@ export default function DesktopLoginPage() {
 
         {/* Login Form Card */}
         <div className="bg-card rounded-2xl shadow-xl p-8 border border-border dark:border-border">
-          <h2 className="text-xl font-semibold text-center mb-6 text-foreground dark:text-foreground">
+          <h2 className="text-xl font-semibold text-center mb-6 text-foreground dark:text-foreground tracking-[-0.022em]">
             {isLogin ? "登录账户" : "创建账户"}
           </h2>
 

@@ -270,7 +270,7 @@ export function GroupTab() {
 
         <div className="flex flex-col items-center justify-center py-20">
           <LogIn className="w-16 h-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold text-foreground mb-2">{t('group.loginRequired')}</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2 tracking-[-0.022em]">{t('group.loginRequired')}</h2>
           <p className="text-muted-foreground text-center max-w-md mb-6">
             {t('group.loginRequiredDesc')}
           </p>

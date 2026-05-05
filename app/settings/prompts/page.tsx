@@ -241,7 +241,7 @@ export default function PromptsSettingsPage() {
       {status === 'unauthenticated' && (
         <div className="flex flex-col items-center justify-center min-h-screen px-4">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-foreground dark:text-foreground mb-2">
+            <h2 className="text-xl font-semibold text-foreground dark:text-foreground mb-2 tracking-[-0.022em]">
               请先登录
             </h2>
             <p className="text-muted-foreground dark:text-muted-foreground mb-4">

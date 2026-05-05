@@ -123,7 +123,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
   if (!selectedJourney) {
     return (
       <div className="h-full overflow-y-auto p-4">
-        <h3 className="text-lg font-semibold text-foreground dark:text-foreground mb-4">
+        <h3 className="text-lg font-semibold text-foreground dark:text-foreground mb-4 tracking-[-0.022em]">
           {t('atlas.selectJourney')}
         </h3>
         <div className="space-y-3">
@@ -168,7 +168,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
         >
           {t('atlas.returnToList')}
         </button>
-        <h3 className="text-lg font-semibold text-foreground dark:text-foreground">
+        <h3 className="text-lg font-semibold text-foreground dark:text-foreground tracking-[-0.022em]">
           {selectedJourney.titleZh}
         </h3>
         <div className="text-sm text-muted-foreground dark:text-muted-foreground">

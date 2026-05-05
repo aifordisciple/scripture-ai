@@ -120,7 +120,7 @@ export default function DashboardPage() {
       {showClearMenu && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-card p-6 rounded-2xl shadow-2xl w-full max-w-sm border dark:border-border">
-            <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2">
+            <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2 tracking-[-0.022em]">
               <Trash2 className="w-5 h-5"/> {t('dashboard.selectDataToClear') || '选择要清空的数据'}
             </h3>
 
@@ -165,7 +165,7 @@ export default function DashboardPage() {
           </Link>
           <div className="h-6 w-px bg-accent dark:bg-accent hidden sm:block"></div>
           <div>
-            <h1 className="text-xl font-semibold flex items-center gap-2">
+            <h1 className="text-xl font-semibold flex items-center gap-2 tracking-[-0.022em]">
               <Activity className="w-5 h-5 text-blue-500" />
               {t('dashboard.title')}
             </h1>

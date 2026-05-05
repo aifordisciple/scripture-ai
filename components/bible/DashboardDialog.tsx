@@ -165,7 +165,7 @@ export function DashboardDialog() {
         <DialogHeader className="p-5 md:p-6 pb-4 border-b dark:border-border bg-accent/50 dark:bg-card/50 shrink-0">
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+              <DialogTitle className="text-xl font-semibold flex items-center gap-2 tracking-[-0.022em]">
                 <Activity className="w-5 h-5 text-blue-500" />
                 {t('bible.personalMap')}
               </DialogTitle>

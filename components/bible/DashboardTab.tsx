@@ -143,7 +143,7 @@ export function DashboardTab() {
       {showClearMenu && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-card dark:bg-card p-6 rounded-lg w-full max-w-sm border dark:border-border">
-            <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2">
+            <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2 tracking-[-0.022em]">
               <Trash2 className="w-5 h-5"/> {t('bible.selectDataToClear')}
             </h3>
             <div className="space-y-3 mb-8">

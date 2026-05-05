@@ -443,7 +443,7 @@ export function PlanTab() {
                         <Medal className="w-7 h-7 text-white" />
                      </div>
                    )}
-                   <h3 className="text-xl font-semibold text-foreground dark:text-primary/80 font-serif mb-1 pr-10">{tDual(plan.title, plan.titleEn)}</h3>
+                   <h3 className="text-xl font-semibold text-foreground dark:text-primary/80 font-serif mb-1 pr-10 tracking-[-0.022em]">{tDual(plan.title, plan.titleEn)}</h3>
                    <div className="flex justify-between items-center mt-auto pt-6">
                       <div className="flex-1 mr-4">
                         <div className="flex justify-between text-xs mb-1 font-semibold text-muted-foreground"><span className="text-primary">{progressPercent}%</span><span>{t('plan.durationDays', { count: plan.durationDays })}</span></div>

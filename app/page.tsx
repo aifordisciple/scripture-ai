@@ -443,7 +443,7 @@ export default function Home() {
               <div className="flex bg-secondary/50 p-1 rounded-lg">
                 <button
                   onClick={() => setLocale('zh')}
-                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", locale === 'zh' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", locale === 'zh' ? "bg-card text-foreground" : "text-muted-foreground")}
                 >
                   中文
                 </button>
@@ -452,7 +452,7 @@ export default function Home() {
                     setLocale('en');
                     if (!showDualVersion) toggleDualVersion();
                   }}
-                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", locale === 'en' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", locale === 'en' ? "bg-card text-foreground" : "text-muted-foreground")}
                 >
                   English
                 </button>
@@ -464,13 +464,13 @@ export default function Home() {
               <div className="flex bg-secondary/50 p-1 rounded-lg">
                 <button
                   onClick={() => setBibleVersion('CUV')}
-                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", bibleVersion === 'CUV' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", bibleVersion === 'CUV' ? "bg-card text-foreground" : "text-muted-foreground")}
                 >
                   {t('common.bibleVersionCUV')}
                 </button>
                 <button
                   onClick={() => setBibleVersion('KJV')}
-                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", bibleVersion === 'KJV' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                  className={cn("px-3 py-1 text-xs rounded-md transition-all active:scale-95", bibleVersion === 'KJV' ? "bg-card text-foreground" : "text-muted-foreground")}
                 >
                   KJV
                 </button>
@@ -620,7 +620,7 @@ export default function Home() {
                           </span>
                           <div className="flex bg-secondary/50 p-1 rounded-lg">
                             {[1.4, 1.8, 2.2].map(lh => (
-                              <button key={lh} onClick={() => setLineHeight(lh)} className={cn("flex-1 px-2 py-1 text-xs rounded-md transition-all active:scale-95", lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                              <button key={lh} onClick={() => setLineHeight(lh)} className={cn("flex-1 px-2 py-1 text-xs rounded-md transition-all active:scale-95", lineHeight === lh ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground")}>
                                 {lh === 1.4 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
                               </button>
                             ))}

@@ -127,7 +127,7 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-1">{t('feedback.submitSuccess')}</h3>
+            <h3 className="text-lg font-semibold mb-1 tracking-[-0.022em]">{t('feedback.submitSuccess')}</h3>
             <p className="text-sm text-muted-foreground">{t('feedback.submitSuccessMessage')}</p>
           </div>
         ) : (

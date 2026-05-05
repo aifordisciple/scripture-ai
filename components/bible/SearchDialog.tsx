@@ -52,14 +52,14 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2">
-          <div className="flex p-1 bg-secondary dark:bg-card rounded-lg gap-1">
+          <div className="flex p-1 bg-secondary/50 rounded-lg gap-1">
             <button
               onClick={() => setMode('exact')}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold rounded-lg transition-all",
                 mode === 'exact'
-                  ? "bg-primary dark:bg-primary text-white"
-                  : "text-muted-foreground hover:text-foreground dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <TextSearch className="w-4 h-4" />
@@ -70,8 +70,8 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               className={cn(
                 "flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold rounded-lg transition-all",
                 mode === 'ai'
-                  ? "bg-primary dark:bg-primary text-white"
-                  : "text-muted-foreground hover:text-foreground dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Sparkles className="w-4 h-4" />

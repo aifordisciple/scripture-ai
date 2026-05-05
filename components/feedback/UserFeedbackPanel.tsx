@@ -247,7 +247,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             </Button>
 
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold">{selectedFeedback.title}</h3>
+              <h3 className="text-lg font-semibold tracking-[-0.022em]">{selectedFeedback.title}</h3>
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="outline" className="flex items-center gap-1">
                   {getTypeIcon(selectedFeedback.type)}
