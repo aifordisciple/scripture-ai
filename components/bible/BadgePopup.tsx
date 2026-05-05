@@ -29,18 +29,18 @@ export function BadgePopup() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl shadow-black/15 border-4 border-yellow-400 text-center max-w-sm mx-4 animate-in zoom-in-95 duration-500">
+      <div className="bg-white dark:bg-[#272729] p-8 rounded-3xl border-2 border-[#0066cc] text-center max-w-sm mx-4 animate-in zoom-in-95 duration-500">
         <div className="relative inline-block mb-4">
-          <Medal className="w-20 h-20 text-yellow-500" />
-          <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-yellow-400 animate-bounce" />
+          <Medal className="w-20 h-20 text-[#0066cc]" />
+          <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-[#0066cc]" />
         </div>
-        <h2 className="text-2xl font-bold mb-2">{t('bible.badgeEarned')}</h2>
+        <h2 className="text-2xl font-semibold mb-2">{t('bible.badgeEarned')}</h2>
         <p className="text-muted-foreground mb-6">
           {t('bible.badgeUnlocked', { badge: badgeName })}
         </p>
-        <Button 
-          onClick={() => setEarnedType(null)} 
-          className="w-full rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-bold"
+        <Button
+          onClick={() => setEarnedType(null)}
+          className="w-full rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white font-semibold active:scale-95"
         >
           {t('bible.claimReward')}
         </Button>

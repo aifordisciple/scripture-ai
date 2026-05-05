@@ -117,25 +117,25 @@ export function NoteEditor() {
 
   return (
     <Sheet open={isNoteOpen} onOpenChange={(open) => !open && closeNoteEditor()}>
-      <SheetContent className="w-full sm:max-w-md bg-white dark:bg-slate-950 flex flex-col h-full z-[100]">
+      <SheetContent className="w-full sm:max-w-md bg-white dark:bg-[#272729] flex flex-col h-full z-[100]">
         <SheetHeader className="mb-4 shrink-0">
           <SheetTitle className="flex items-center gap-2 text-xl">
-            <BookOpen className="w-5 h-5 text-blue-600" />
+            <BookOpen className="w-5 h-5 text-[#0066cc]" />
             {t('bible.devotionalNote')}
           </SheetTitle>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">
+          <p className="text-sm font-semibold text-[#7a7a7a] uppercase tracking-widest mt-1">
             {noteTargetVerse.bookId} {noteTargetVerse.chapter}:{noteTargetVerse.verse}
           </p>
         </SheetHeader>
 
         <div className="flex-1 flex flex-col gap-4 min-h-0 relative">
           {/* 加入一个提示角标 */}
-          <div className="absolute top-2 right-4 text-[10px] text-slate-400 pointer-events-none select-none">
+          <div className="absolute top-2 right-4 text-[10px] text-[#7a7a7a] pointer-events-none select-none">
             {t('bible.markdownHint')}
           </div>
           
           <textarea
-            className="flex-1 w-full p-4 pt-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 font-sans leading-relaxed text-[15px] text-slate-700 dark:text-slate-300 shadow-inner"
+            className="flex-1 w-full p-4 pt-8 rounded-xl border border-[#e0e0e0] dark:border-[#3a3a3c] bg-[#f5f5f7] dark:bg-[#1d1d1f] resize-none focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] font-sans leading-relaxed text-[15px] text-[#1d1d1f] dark:text-white/80"
             placeholder={t('bible.notePlaceholder')}
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -149,12 +149,12 @@ export function NoteEditor() {
               variant="outline" 
               onClick={handleGeneratePrayer}
               disabled={isGenerating || !content.trim()}
-              className="gap-2 border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-900 dark:text-purple-300 dark:hover:bg-purple-900/20 rounded-full"
+              className="gap-2 border-[#e0e0e0] text-[#0066cc] hover:bg-[#0066cc]/5 dark:border-[#3a3a3c] dark:text-[#2997ff] dark:hover:bg-[#0066cc]/10 rounded-full active:scale-95"
             >
               {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               {t('bible.generatePrayer')}
             </Button>
-            <Button onClick={handleSave} disabled={isSaving || !content.trim()} className="gap-2 bg-blue-600 hover:bg-blue-700 rounded-full font-bold px-6">
+            <Button onClick={handleSave} disabled={isSaving || !content.trim()} className="gap-2 bg-[#0066cc] hover:bg-[#0071e3] rounded-full font-semibold px-6 active:scale-95">
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {t('bible.saveNote')}
             </Button>

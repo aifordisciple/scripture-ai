@@ -43,10 +43,10 @@ const TOAST_ICONS: Record<ToastType, React.ReactNode> = {
 }
 
 const TOAST_STYLES: Record<ToastType, string> = {
-  success: "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800",
-  error: "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800",
-  info: "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800",
-  warning: "bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800",
+  success: "bg-white dark:bg-[#272729] border-[#e0e0e0] dark:border-[#3a3a3c]",
+  error: "bg-white dark:bg-[#272729] border-[#e0e0e0] dark:border-[#3a3a3c]",
+  info: "bg-white dark:bg-[#272729] border-[#e0e0e0] dark:border-[#3a3a3c]",
+  warning: "bg-white dark:bg-[#272729] border-[#e0e0e0] dark:border-[#3a3a3c]",
 }
 
 interface ToastItemProps {
@@ -70,18 +70,18 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        "flex items-center gap-3 p-4 rounded-xl border shadow-lg",
+        "flex items-center gap-3 p-4 rounded-xl border",
         "min-w-[280px] max-w-[400px]",
         TOAST_STYLES[toast.type]
       )}
     >
       {TOAST_ICONS[toast.type]}
-      <p className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-200">
+      <p className="flex-1 text-sm font-medium text-[#1d1d1f] dark:text-white">
         {toast.message}
       </p>
       <button
         onClick={() => onRemove(toast.id)}
-        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+        className="text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white transition-colors"
         aria-label="Close notification"
       >
         <X className="w-4 h-4" />

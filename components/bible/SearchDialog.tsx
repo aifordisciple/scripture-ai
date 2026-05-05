@@ -43,23 +43,23 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-white dark:bg-slate-900 dark:border-slate-800">
+      <DialogContent className="sm:max-w-lg bg-white dark:bg-[#272729] dark:border-[#3a3a3c]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
+          <DialogTitle className="flex items-center gap-2 text-[#1d1d1f] dark:text-white">
             <Search className="w-5 h-5" />
             {t('search.dialogTitle')}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2">
-          <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl gap-1">
+          <div className="flex p-1 bg-[#f5f5f7] dark:bg-[#1d1d1f] rounded-xl gap-1">
             <button
               onClick={() => setMode('exact')}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-xl transition-all",
                 mode === 'exact'
-                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
+                  ? "bg-white dark:bg-[#2a2a2c] text-[#1d1d1f] dark:text-white"
+                  : "text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white"
               )}
             >
               <TextSearch className="w-4 h-4" />
@@ -70,8 +70,8 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               className={cn(
                 "flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-xl transition-all",
                 mode === 'ai'
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
+                  ? "bg-[#0066cc] dark:bg-[#2997ff] text-white"
+                  : "text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white"
               )}
             >
               <Sparkles className="w-4 h-4" />
@@ -90,15 +90,15 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={3}
-              className="flex-1 w-full rounded-xl border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-400"
+              className="flex-1 w-full rounded-full border border-[#e0e0e0] dark:bg-[#1d1d1f] dark:border-[#3a3a3c] dark:text-white/80 px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] placeholder:text-[#7a7a7a]"
               autoFocus
             />
-            <Button onClick={handleSearch} className={cn("w-full", mode === 'ai' && "bg-blue-600 hover:bg-blue-700")}>
+            <Button onClick={handleSearch} className={cn("w-full rounded-full active:scale-95", mode === 'ai' && "bg-[#0066cc] hover:bg-[#0071e3]")}>
               {t('search.searchButton')}
             </Button>
           </div>
 
-          <div className="text-xs text-slate-400 min-h-[16px]">
+          <div className="text-xs text-[#7a7a7a] min-h-[16px]">
             {mode === 'exact' && t('search.exactHint')}
             {mode === 'ai' && t('search.aiHint')}
           </div>

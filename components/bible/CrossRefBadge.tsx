@@ -15,23 +15,23 @@ interface CrossRefBadgeProps {
 const TYPE_CONFIG: Record<ConnectionType, { labelKey: string; colorClass: string }> = {
   QUOTATION: {
     labelKey: 'bible.typeQuotation',
-    colorClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+    colorClass: 'bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#0066cc]/20 dark:text-[#2997ff]',
   },
   PARALLEL: {
     labelKey: 'bible.typeParallel',
-    colorClass: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+    colorClass: 'bg-[#0066cc]/5 text-[#0066cc] dark:bg-[#0066cc]/10 dark:text-[#2997ff]',
   },
   THEMATIC: {
     labelKey: 'bible.typeThematic',
-    colorClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    colorClass: 'bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#0066cc]/20 dark:text-[#2997ff]',
   },
   PROPHECY: {
     labelKey: 'bible.typeProphecy',
-    colorClass: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+    colorClass: 'bg-[#0066cc]/5 text-[#0066cc] dark:bg-[#0066cc]/10 dark:text-[#2997ff]',
   },
   ILLUSTRATION: {
     labelKey: 'bible.typeIllustration',
-    colorClass: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
+    colorClass: 'bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#0066cc]/20 dark:text-[#2997ff]',
   },
 };
 
@@ -42,7 +42,7 @@ export function CrossRefBadge({ type, className }: CrossRefBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+        'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold',
         config.colorClass,
         className
       )}
@@ -87,7 +87,7 @@ export function CrossRefFilterTabs({
   ];
 
   return (
-    <div className="flex flex-wrap gap-1.5 p-2 border-b border-slate-200 dark:border-slate-700">
+    <div className="flex flex-wrap gap-1.5 p-2 border-b border-[#e0e0e0] dark:border-[#3a3a3c]">
       {filters.map(({ type, labelKey }) => (
         <button
           key={type}
@@ -95,8 +95,8 @@ export function CrossRefFilterTabs({
           className={cn(
             'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
             activeFilter === type
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
+              ? 'bg-[#0066cc] text-white'
+              : 'bg-[#f5f5f7] text-[#7a7a7a] hover:bg-[#e0e0e0] dark:bg-[#2a2a2c] dark:text-[#7a7a7a] dark:hover:bg-[#3a3a3c] active:scale-95'
           )}
         >
           {t(labelKey)}
