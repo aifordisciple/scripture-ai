@@ -27,19 +27,19 @@ export const easings = {
 // Tailwind CSS class presets for transitions
 export const transitions = {
   /** Fast transition for colors (150ms) */
-  colorsFast: 'transition-colors duration-fast ease-default',
+  colorsFast: 'transition-colors duration-150 ease-default',
   /** Normal transition for colors (300ms) */
   colors: 'transition-colors duration-normal ease-default',
   /** Fast transition for all properties */
-  allFast: 'transition-all duration-fast ease-default',
+  allFast: 'transition-all duration-150 ease-default',
   /** Normal transition for all properties */
   all: 'transition-all duration-normal ease-default',
   /** Transform transition with spring easing */
   transform: 'transition-transform duration-normal ease-spring',
   /** Transform transition with spring easing (fast) */
-  transformFast: 'transition-transform duration-fast ease-spring',
+  transformFast: 'transition-transform duration-150 ease-spring',
   /** Opacity transition */
-  opacity: 'transition-opacity duration-fast ease-default',
+  opacity: 'transition-opacity duration-150 ease-default',
   /** Shadow transition */
   shadow: 'transition-shadow duration-normal ease-default',
 } as const;

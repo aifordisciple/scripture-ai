@@ -43,10 +43,10 @@ const TOAST_ICONS: Record<ToastType, React.ReactNode> = {
 }
 
 const TOAST_STYLES: Record<ToastType, string> = {
-  success: "bg-white dark:bg-[#272729] border-[#e0e0e0] dark:border-[#3a3a3c]",
-  error: "bg-white dark:bg-[#272729] border-[#e0e0e0] dark:border-[#3a3a3c]",
-  info: "bg-white dark:bg-[#272729] border-[#e0e0e0] dark:border-[#3a3a3c]",
-  warning: "bg-white dark:bg-[#272729] border-[#e0e0e0] dark:border-[#3a3a3c]",
+  success: "bg-card dark:bg-card border-border dark:border-border",
+  error: "bg-card dark:bg-card border-border dark:border-border",
+  info: "bg-card dark:bg-card border-border dark:border-border",
+  warning: "bg-card dark:bg-card border-border dark:border-border",
 }
 
 interface ToastItemProps {
@@ -76,12 +76,12 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       )}
     >
       {TOAST_ICONS[toast.type]}
-      <p className="flex-1 text-sm font-medium text-[#1d1d1f] dark:text-white">
+      <p className="flex-1 text-sm font-semibold text-foreground dark:text-foreground">
         {toast.message}
       </p>
       <button
         onClick={() => onRemove(toast.id)}
-        className="text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white transition-colors"
+        className="text-muted-foreground hover:text-foreground dark:hover:text-foreground transition-colors"
         aria-label="Close notification"
       >
         <X className="w-4 h-4" />

@@ -139,7 +139,7 @@ const config = {
       },
       /* 动画时长 */
       transitionDuration: {
-        'fast': 'var(--duration-fast)',
+        'fast': '150ms',
         'normal': 'var(--duration-normal)',
         'slow': 'var(--duration-slow)',
       },
@@ -213,8 +213,8 @@ const config = {
         "slide-in-bottom": "slide-in-from-bottom var(--duration-normal) var(--ease-out)",
         "slide-in-left": "slide-in-from-left var(--duration-normal) var(--ease-out)",
         "slide-in-right": "slide-in-from-right var(--duration-normal) var(--ease-out)",
-        "scale-in": "scale-in var(--duration-fast) var(--ease-spring)",
-        "scale-out": "scale-out var(--duration-fast) var(--ease-default)",
+        "scale-in": "scale-in 150ms var(--ease-spring)",
+        "scale-out": "scale-out 150ms var(--ease-default)",
       },
     },
   },

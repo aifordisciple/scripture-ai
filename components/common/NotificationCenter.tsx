@@ -220,7 +220,7 @@ export function NotificationCenter({ onNotificationClick }: NotificationCenterPr
       case "BADGE_EARNED":
         return "text-amber-500 bg-amber-100 dark:bg-amber-900/30";
       case "NEW_MESSAGE":
-        return "text-[#0066cc] bg-[#0066cc]/10 dark:bg-[#0066cc]/20";
+        return "text-primary bg-primary/10 dark:bg-primary/20";
       case "TASK_REMINDER":
         return "text-orange-500 bg-orange-100 dark:bg-orange-900/30";
       case "ANNOUNCEMENT":

@@ -246,7 +246,7 @@ export function GroupTab() {
   if (status === 'loading' || loading) {
     return (
       <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8 flex flex-col items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#0066cc] mb-4" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
         <p className="text-muted-foreground">{t('group.loading')}</p>
       </div>
     );
@@ -256,8 +256,8 @@ export function GroupTab() {
   if (status === 'unauthenticated') {
     return (
       <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
-        <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-[#3a3a3c]">
-          <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
+        <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-border">
+          <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-lg">
             <Users className="w-6 h-6" />
           </div>
           <div className="flex-1">
@@ -314,14 +314,14 @@ export function GroupTab() {
             setSelectedPlanId(null);
             setGroupPlans([]);
           }}
-          className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm font-medium"
+          className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm font-semibold"
         >
           <ChevronLeft className="w-4 h-4" /> {t('group.backToList')}
         </button>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <div className="flex items-center gap-2 text-[#0066cc] dark:text-[#2997ff] font-semibold mb-2">
+            <div className="flex items-center gap-2 text-primary dark:text-primary font-semibold mb-2">
               <Users className="w-5 h-5" />
               <span className="text-sm uppercase tracking-widest">
                 {isAdmin ? t('group.manageGroup') : t('group.myGroup')}
@@ -393,10 +393,10 @@ export function GroupTab() {
                   <div
                     key={plan.id}
                     onClick={() => setSelectedPlanId(plan.id)}
-                    className="cursor-pointer hover:bg-[#f5f5f7] dark:hover:bg-[#2a2a2c] transition-colors"
+                    className="cursor-pointer hover:bg-secondary dark:hover:bg-card transition-colors"
                   >
                     <div className={cn(
-                      "p-4 rounded-xl border",
+                      "p-4 rounded-lg border",
                       plan.mode === "CHALLENGE"
                         ? "border-orange-200 dark:border-orange-800 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20"
                         : "border-border bg-card"
@@ -406,12 +406,12 @@ export function GroupTab() {
                           {plan.mode === "CHALLENGE" ? (
                             <Trophy className="w-5 h-5 text-orange-500" />
                           ) : (
-                            <Calendar className="w-5 h-5 text-[#0066cc]" />
+                            <Calendar className="w-5 h-5 text-primary" />
                           )}
                           <span className="font-semibold">{plan.name}</span>
                         </div>
                         {plan.source === "AI_GENERATED" && (
-                          <span className="text-xs bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-2 py-0.5 rounded-full">
                             {t('group.aiGenerated')}
                           </span>
                         )}
@@ -426,7 +426,7 @@ export function GroupTab() {
                         {plan.mode === "CHALLENGE" && (
                           <>
                             <span>•</span>
-                            <span className="text-orange-600 dark:text-orange-400 font-medium">{t('group.challengeMode')}</span>
+                            <span className="text-orange-600 dark:text-orange-400 font-semibold">{t('group.challengeMode')}</span>
                           </>
                         )}
                       </div>
@@ -512,8 +512,8 @@ export function GroupTab() {
   // Main list view
   return (
     <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 pb-8">
-      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-[#3a3a3c]">
-        <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-border">
+        <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-lg">
           <Users className="w-6 h-6" />
         </div>
         <div className="flex-1">
@@ -623,7 +623,7 @@ export function GroupTab() {
           {myGroups.length === 0 && publicGroups.length === 0 && (
             <div className="text-center text-muted-foreground py-16">
               <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium mb-2">{t('group.emptyNoGroup')}</p>
+              <p className="text-lg font-semibold mb-2">{t('group.emptyNoGroup')}</p>
               <p className="text-sm">{t('group.emptyHint')}</p>
             </div>
           )}

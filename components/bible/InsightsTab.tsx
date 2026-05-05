@@ -175,8 +175,8 @@ export function InsightsTab() {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
       {/* 头部 */}
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-[#3a3a3c]">
-        <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-border">
+        <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-lg">
           <Bookmark className="w-6 h-6" />
         </div>
         <div className="flex-1">
@@ -194,7 +194,7 @@ export function InsightsTab() {
           placeholder={t('bible.searchCollection')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-10 rounded-full h-11 bg-[#f5f5f7] dark:bg-[#1d1d1f] border-[#e0e0e0] dark:border-[#3a3a3c] focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
+          className="pl-10 pr-10 rounded-full h-11 bg-secondary dark:bg-card border-border dark:border-border focus:ring-primary/20 focus:border-primary"
         />
         {searchQuery && (
           <button
@@ -223,7 +223,7 @@ export function InsightsTab() {
           {Object.entries(groupedInsights).map(([bookName, items]) => (
             <div key={bookName} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <h2 className="text-lg font-semibold font-serif text-foreground mb-4 flex items-center gap-2">
-                <span className="w-1 h-5 bg-[#0066cc] rounded-full inline-block"></span>
+                <span className="w-1 h-5 bg-primary rounded-full inline-block"></span>
                 {bookName}
                 <span className="text-sm font-normal text-muted-foreground">({items.length})</span>
               </h2>
@@ -233,8 +233,8 @@ export function InsightsTab() {
                     key={item.id}
                     className={cn(
                       "group relative flex flex-col p-4 rounded-2xl cursor-pointer border transition-all duration-300",
-                      "bg-white dark:bg-[#272729] border-[#e0e0e0] dark:border-[#3a3a3c]",
-                      expandedId === item.id && "ring-2 ring-[#0066cc]/30"
+                      "bg-white dark:bg-card border-border dark:border-border",
+                      expandedId === item.id && "ring-2 ring-primary/30"
                     )}
                     onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
                   >
@@ -247,7 +247,7 @@ export function InsightsTab() {
                         {editingId === item.id ? null : (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleJump(item.bookId, item.chapter); }}
-                            className="text-muted-foreground hover:text-[#0066cc] transition-colors"
+                            className="text-muted-foreground hover:text-primary transition-colors"
                             title={t('bible.jumpToVerse')}
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -260,7 +260,7 @@ export function InsightsTab() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 text-[#0066cc] hover:text-[#0071e3] hover:bg-[#0066cc]/10 dark:hover:bg-[#0066cc]/10 rounded-full active:scale-95"
+                              className="h-7 w-7 text-primary hover:text-apple-focus hover:bg-primary/10 dark:hover:bg-primary/10 rounded-full active:scale-95"
                               onClick={(e) => { e.stopPropagation(); handleEditSave(item.id); }}
                               title={t('bible.saveBtn')}
                             >
@@ -281,7 +281,7 @@ export function InsightsTab() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 text-muted-foreground hover:text-[#0066cc] rounded-full active:scale-95"
+                              className="h-7 w-7 text-muted-foreground hover:text-primary rounded-full active:scale-95"
                               onClick={(e) => handleEdit(e, item)}
                               title={t('bible.editBtn')}
                             >
@@ -318,7 +318,7 @@ export function InsightsTab() {
                           placeholder={t('bible.contentLabel')}
                           value={editContent}
                           onChange={(e) => setEditContent(e.target.value)}
-                          className="w-full min-h-[120px] p-3 text-sm border-[#e0e0e0] dark:border-[#3a3a3c] rounded-lg bg-background resize-none focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
+                          className="w-full min-h-[120px] p-3 text-sm border-border dark:border-border rounded-lg bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         />
                         <Input
                           placeholder={t('bible.tagsPlaceholder')}
@@ -330,7 +330,7 @@ export function InsightsTab() {
                     ) : (
                       <>
                         {item.title && (
-                          <p className="text-sm font-medium text-foreground mb-1">{item.title}</p>
+                          <p className="text-sm font-semibold text-foreground mb-1">{item.title}</p>
                         )}
                         {expandedId === item.id ? (
                           <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed">
@@ -347,7 +347,7 @@ export function InsightsTab() {
                             {item.tags.map((tag, idx) => (
                               <span
                                 key={idx}
-                                className="px-2 py-0.5 text-[10px] rounded-full bg-[#f5f5f7] dark:bg-[#2a2a2c] text-muted-foreground"
+                                className="px-2 py-0.5 text-[10px] rounded-full bg-secondary dark:bg-card text-muted-foreground"
                               >
                                 {tag}
                               </span>

@@ -96,7 +96,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-[#7a7a7a] gap-3">
+      <div className="flex flex-col items-center justify-center h-[60vh] text-muted-foreground gap-3">
         <Loader2 className="w-8 h-8 animate-spin" />
         <p>
             {mode === 'ai' ? t('search.aiThinking') : t('search.searching')}
@@ -107,7 +107,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-[#7a7a7a] gap-3">
+      <div className="flex flex-col items-center justify-center h-[60vh] text-muted-foreground gap-3">
         <AlertCircle className="w-8 h-8 text-red-400" />
         <p className="text-red-500">{error}</p>
       </div>
@@ -116,30 +116,30 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 pb-32">
-      <div className="mb-8 border-b pb-4 dark:border-[#3a3a3c]">
-        <h1 className="text-2xl font-semibold text-[#1d1d1f] dark:text-white flex items-center gap-2">
+      <div className="mb-8 border-b pb-4 dark:border-border">
+        <h1 className="text-2xl font-semibold text-foreground dark:text-foreground flex items-center gap-2">
           🔍 {t('search.resultsFor', { query })}
         </h1>
-        <p className="text-[#7a7a7a] text-sm mt-1">
+        <p className="text-muted-foreground text-sm mt-1">
           {mode === 'exact' ? t('search.modeExact') : t('search.modeAi')} • {t('search.foundCount', { count: results.length })}
         </p>
       </div>
 
       {/* AI 总结卡片 - 仅在AI模式下显示 */}
       {mode === 'ai' && aiSummary && (
-        <div className="mb-6 bg-[#0066cc]/5 dark:bg-[#0066cc]/10 rounded-xl border border-[#0066cc]/20 dark:border-[#0066cc]/30 overflow-hidden">
+        <div className="mb-6 bg-primary/5 dark:bg-primary/10 rounded-lg border border-primary/20 dark:border-primary/30 overflow-hidden">
           <button
             onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
             className="w-full flex items-center justify-between p-4 text-left"
           >
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#0066cc]" />
-              <span className="font-semibold text-[#0066cc] dark:text-[#2997ff]">{t('search.aiInsight')}</span>
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="font-semibold text-primary dark:text-primary">{t('search.aiInsight')}</span>
             </div>
             {isSummaryExpanded ? (
-              <ChevronUp className="w-5 h-5 text-[#0066cc]/60" />
+              <ChevronUp className="w-5 h-5 text-primary/60" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-[#0066cc]/60" />
+              <ChevronDown className="w-5 h-5 text-primary/60" />
             )}
           </button>
 
@@ -147,7 +147,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
             "overflow-hidden transition-all duration-300",
             isSummaryExpanded ? "max-h-[500px] opacity-100" : "max-h-20 opacity-80"
           )}>
-            <div className="px-4 pb-4 text-[#1d1d1f]/80 dark:text-white/70 leading-relaxed">
+            <div className="px-4 pb-4 text-foreground/80 dark:text-foreground/70 leading-relaxed">
               {!isSummaryExpanded && (
                 <p className="line-clamp-2">{aiSummary}</p>
               )}
@@ -160,7 +160,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
       )}
 
       {results.length === 0 ? (
-        <div className="text-center text-[#7a7a7a] py-10">
+        <div className="text-center text-muted-foreground py-10">
           {t('search.noResultsHint')}
         </div>
       ) : (
@@ -168,17 +168,17 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
           {results.map((verse) => (
             <div
               key={verse.id}
-              className="bg-[#f5f5f7] dark:bg-[#2a2a2c] rounded-lg p-4 transition-all cursor-pointer group border border-transparent hover:border-[#0066cc]/30 dark:hover:border-[#0066cc]/30 active:scale-[0.98]"
+              className="bg-secondary dark:bg-card rounded-lg p-4 transition-all cursor-pointer group border border-transparent hover:border-primary/30 dark:hover:border-primary/30 active:scale-[0.98]"
               onClick={() => handleResultClick(verse.bookId, verse.chapter, verse.verse)}
             >
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-[#0066cc] dark:text-[#2997ff] bg-[#0066cc]/10 dark:bg-[#0066cc]/20 px-2 py-1 rounded">
+                <span className="text-xs font-semibold text-primary dark:text-primary bg-primary/10 dark:bg-primary/20 px-2 py-1 rounded">
                   {getBookDisplayName(verse.bookId, locale)} {verse.chapter}:{verse.verse}
                 </span>
-                <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-[#0066cc] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
               <div
-                className="text-[#1d1d1f] dark:text-white/70 font-serif"
+                className="text-foreground dark:text-foreground/70 font-serif"
                 style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
               >
                 {verse.content}

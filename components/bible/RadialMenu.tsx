@@ -48,20 +48,20 @@ const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
 
 // 颜色映射
 const ACTION_COLORS: Record<string, string> = {
-  detail: "bg-[#0066cc]",
-  context: "bg-[#0066cc]/90",
-  original: "bg-[#0066cc]",
-  application: "bg-[#0066cc]/90",
-  prayer: "bg-[#0066cc]",
-  explain_to_kid: "bg-[#0066cc]/90",
-  tutor: "bg-[#0066cc]",
-  sermon: "bg-[#0066cc]/90",
-  "study-guide": "bg-[#0066cc]",
+  detail: "bg-primary",
+  context: "bg-primary/90",
+  original: "bg-primary",
+  application: "bg-primary/90",
+  prayer: "bg-primary",
+  explain_to_kid: "bg-primary/90",
+  tutor: "bg-primary",
+  sermon: "bg-primary/90",
+  "study-guide": "bg-primary",
   // [P0优化] AI模式选项颜色
-  "ai-mode-general": "bg-[#0066cc]",
-  "ai-mode-tutor": "bg-[#0066cc]/90",
-  "ai-mode-sermon": "bg-[#0066cc]",
-  "ai-mode-study-guide": "bg-[#0066cc]/90",
+  "ai-mode-general": "bg-primary",
+  "ai-mode-tutor": "bg-primary/90",
+  "ai-mode-sermon": "bg-primary",
+  "ai-mode-study-guide": "bg-primary/90",
 };
 
 export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: RadialMenuProps) {
@@ -103,7 +103,7 @@ export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: Rad
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0066cc] flex items-center justify-center"
+              className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary flex items-center justify-center"
             >
               <Sparkles className="w-7 h-7 text-white" />
             </motion.div>
@@ -142,7 +142,7 @@ export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: Rad
                     "bg-gradient-to-br shadow-lg shadow-black/10",
                     colorClass,
                     "flex flex-col items-center justify-center",
-                    "text-white text-xs font-medium",
+                    "text-white text-xs font-semibold",
                     "hover:scale-110 active:scale-95",
                     "transition-transform duration-150",
                     "border-2 border-white/30"

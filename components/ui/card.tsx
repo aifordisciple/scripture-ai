@@ -9,7 +9,7 @@ const cardVariants = cva(
       variant: {
         default: "rounded-lg",
         interactive:
-          "rounded-lg cursor-pointer hover:bg-accent/50 transition-colors duration-fast active:scale-[0.98]",
+          "rounded-lg cursor-pointer hover:bg-accent/50 transition-colors duration-150 active:scale-[0.98]",
         "product-tile": "border-0 rounded-none",
       },
     },

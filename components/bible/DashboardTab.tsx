@@ -142,24 +142,24 @@ export function DashboardTab() {
       
       {showClearMenu && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-[#272729] p-6 rounded-lg w-full max-w-sm border dark:border-[#3a3a3c]">
+          <div className="bg-card dark:bg-card p-6 rounded-lg w-full max-w-sm border dark:border-border">
             <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2">
               <Trash2 className="w-5 h-5"/> {t('bible.selectDataToClear')}
             </h3>
             <div className="space-y-3 mb-8">
               <button onClick={() => toggleOpt('highlights')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
-                 {clearOpts.highlights ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-[#7a7a7a]" />}
-                 <span className="flex-1 text-sm font-medium">{t('bible.clearAllHighlights', { count: highlights.length })}</span>
+                 {clearOpts.highlights ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-muted-foreground" />}
+                 <span className="flex-1 text-sm font-semibold">{t('bible.clearAllHighlights', { count: highlights.length })}</span>
               </button>
               <button onClick={() => toggleOpt('notes')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
-                 {clearOpts.notes ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-[#7a7a7a]" />}
-                 <span className="flex-1 text-sm font-medium">{t('bible.clearAllNotes', { count: notes.length })}</span>
+                 {clearOpts.notes ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-muted-foreground" />}
+                 <span className="flex-1 text-sm font-semibold">{t('bible.clearAllNotes', { count: notes.length })}</span>
               </button>
               <button onClick={() => toggleOpt('interactions')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
-                 {clearOpts.interactions ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-[#7a7a7a]" />}
-                 <span className="flex-1 text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">
+                 {clearOpts.interactions ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-muted-foreground" />}
+                 <span className="flex-1 text-sm font-semibold text-foreground dark:text-foreground">
                     {t('bible.clearReadingFootprint')} <br/>
-                    <span className="text-[10px] text-[#7a7a7a] font-normal">{t('bible.heatmapResetNote')}</span>
+                    <span className="text-[10px] text-muted-foreground font-normal">{t('bible.heatmapResetNote')}</span>
                  </span>
               </button>
             </div>
@@ -177,15 +177,15 @@ export function DashboardTab() {
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 mb-8 mt-4 md:mt-8 w-full">
           <div className="w-full lg:w-auto">
             <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2 mb-2">
-              <Activity className="w-6 h-6 text-[#0066cc]" /> {t('bible.dashboardTitle')}
+              <Activity className="w-6 h-6 text-primary" /> {t('bible.dashboardTitle')}
             </h1>
-            <p className="text-sm text-[#7a7a7a]">{t('bible.dashboardSubtitle')}</p>
+            <p className="text-sm text-muted-foreground">{t('bible.dashboardSubtitle')}</p>
           </div>
           
           {/* 操作盘：手机端分两行，桌面端在一行 */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
             {/* 时间跨度控制器 */}
-            <div className="flex bg-[#f5f5f7] dark:bg-[#1d1d1f] p-1 rounded-lg w-full sm:w-auto justify-between">
+            <div className="flex bg-secondary dark:bg-apple-tile3 p-1 rounded-lg w-full sm:w-auto justify-between">
               {[
                 { id: '7d', label: t('bible.last7days') },
                 { id: '30d', label: t('bible.last30days') },
@@ -194,7 +194,7 @@ export function DashboardTab() {
                 <button 
                   key={tab.id}
                   onClick={() => setTimeRange(tab.id as any)}
-                  className={`flex-1 sm:flex-none px-4 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all ${timeRange === tab.id ? 'bg-white dark:bg-[#3a3a3c] text-[#0066cc] dark:text-[#4da3ff]' : 'text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-[#f5f5f7]'}`}
+                  className={`flex-1 sm:flex-none px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all ${timeRange === tab.id ? 'bg-card dark:bg-apple-chip text-primary dark:text-primary' : 'text-muted-foreground hover:text-foreground dark:hover:text-foreground'}`}
                 >
                   {tab.label}
                 </button>
@@ -203,7 +203,7 @@ export function DashboardTab() {
             
             {/* 功能按钮：强制并列 */}
             <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
-              <Button variant="outline" size="sm" className="flex-1 sm:flex-none gap-2 rounded-full border-[#0066cc]/20 text-[#0066cc] hover:bg-[#0066cc]/5" onClick={handleExportTSV}>
+              <Button variant="outline" size="sm" className="flex-1 sm:flex-none gap-2 rounded-full border-primary/20 text-primary hover:bg-primary/5" onClick={handleExportTSV}>
                 <Download className="w-4 h-4 shrink-0" /> {t('bible.exportTSV')}
               </Button>
               <Button variant="ghost" size="sm" className="flex-1 sm:flex-none gap-2 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => setShowClearMenu(true)}>
@@ -214,22 +214,22 @@ export function DashboardTab() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-         <div className="bg-white dark:bg-[#272729] border dark:border-[#3a3a3c] p-6 rounded-lg flex items-center gap-5">
-             <div className="p-4 bg-[#0066cc]/10 text-[#0066cc] dark:text-[#4da3ff] rounded-lg"><BrainCircuit className="w-8 h-8"/></div>
-             <div><div className="text-3xl font-black">{totalAiChats}</div><div className="text-sm text-[#7a7a7a] font-medium">{t('bible.aiExplorationCount')}</div></div>
+         <div className="bg-card dark:bg-card border dark:border-border p-6 rounded-lg flex items-center gap-5">
+             <div className="p-4 bg-primary/10 text-primary dark:text-primary rounded-lg"><BrainCircuit className="w-8 h-8"/></div>
+             <div><div className="text-3xl font-black">{totalAiChats}</div><div className="text-sm text-muted-foreground font-semibold">{t('bible.aiExplorationCount')}</div></div>
          </div>
-         <div className="bg-white dark:bg-[#272729] border dark:border-[#3a3a3c] p-6 rounded-lg flex items-center gap-5">
-             <div className="p-4 bg-[#0066cc]/10 text-[#0066cc] dark:text-[#4da3ff] rounded-lg"><Activity className="w-8 h-8"/></div>
-             <div><div className="text-3xl font-black">{totalHighlights}</div><div className="text-sm text-[#7a7a7a] font-medium">{t('bible.studyInteractionCount')}</div></div>
+         <div className="bg-card dark:bg-card border dark:border-border p-6 rounded-lg flex items-center gap-5">
+             <div className="p-4 bg-primary/10 text-primary dark:text-primary rounded-lg"><Activity className="w-8 h-8"/></div>
+             <div><div className="text-3xl font-black">{totalHighlights}</div><div className="text-sm text-muted-foreground font-semibold">{t('bible.studyInteractionCount')}</div></div>
          </div>
       </div>
 
       {/* 动态趋势图表 */}
-      <div className="bg-white dark:bg-[#272729] rounded-lg border dark:border-[#3a3a3c] p-6 mb-8">
+      <div className="bg-card dark:bg-card rounded-lg border dark:border-border p-6 mb-8">
         <h3 className="text-base font-semibold mb-6 flex items-center gap-2">{t('bible.coreTrend')}</h3>
         <div className="h-72 w-full">
             {loading ? (
-                <div className="h-full w-full flex items-center justify-center text-[#7a7a7a]">{t('bible.loadingStats')}</div>
+                <div className="h-full w-full flex items-center justify-center text-muted-foreground">{t('bible.loadingStats')}</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -256,7 +256,7 @@ export function DashboardTab() {
       </div>
 
       {/* 原本静态热力图保留在下方即可，作为"全景概览"使用 */}
-      <div className="bg-white dark:bg-[#272729] rounded-lg border dark:border-[#3a3a3c] p-4 md:p-6 overflow-x-auto">
+      <div className="bg-card dark:bg-card rounded-lg border dark:border-border p-4 md:p-6 overflow-x-auto">
          <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
            <Clock className="w-4 h-4" /> {t('bible.yearlyOverview')}
          </h3>

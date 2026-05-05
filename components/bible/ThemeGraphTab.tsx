@@ -42,18 +42,18 @@ interface ThemeConnection {
 }
 
 const CATEGORY_CONFIG: Record<string, { labelKey: string; color: string; bgColor: string }> = {
-  THEOLOGICAL: { labelKey: "bible.categoryTheological", color: "text-[#0066cc]", bgColor: "bg-[#0066cc]/5 dark:bg-[#0066cc]/10" },
-  ETHICAL: { labelKey: "bible.categoryEthical", color: "text-[#0066cc]", bgColor: "bg-[#0066cc]/10 dark:bg-[#0066cc]/20" },
-  HISTORICAL: { labelKey: "bible.categoryHistorical", color: "text-[#0066cc]", bgColor: "bg-[#0066cc]/5 dark:bg-[#0066cc]/10" },
-  PROPHETIC: { labelKey: "bible.categoryProphetic", color: "text-[#0066cc]", bgColor: "bg-[#0066cc]/10 dark:bg-[#0066cc]/20" },
+  THEOLOGICAL: { labelKey: "bible.categoryTheological", color: "text-primary", bgColor: "bg-primary/5 dark:bg-primary/10" },
+  ETHICAL: { labelKey: "bible.categoryEthical", color: "text-primary", bgColor: "bg-primary/10 dark:bg-primary/20" },
+  HISTORICAL: { labelKey: "bible.categoryHistorical", color: "text-primary", bgColor: "bg-primary/5 dark:bg-primary/10" },
+  PROPHETIC: { labelKey: "bible.categoryProphetic", color: "text-primary", bgColor: "bg-primary/10 dark:bg-primary/20" },
 };
 
 const CONNECTION_TYPE_CONFIG: Record<string, { labelKey: string; color: string }> = {
-  PARENT: { labelKey: "bible.connParent", color: "text-[#0066cc]" },
-  CHILD: { labelKey: "bible.connChild", color: "text-[#0066cc]" },
-  RELATED: { labelKey: "bible.connRelated", color: "text-[#0066cc]" },
+  PARENT: { labelKey: "bible.connParent", color: "text-primary" },
+  CHILD: { labelKey: "bible.connChild", color: "text-primary" },
+  RELATED: { labelKey: "bible.connRelated", color: "text-primary" },
   CONTRAST: { labelKey: "bible.connContrast", color: "text-red-500" },
-  FULFILLS: { labelKey: "bible.connFulfills", color: "text-[#0066cc]" },
+  FULFILLS: { labelKey: "bible.connFulfills", color: "text-primary" },
 };
 
 export function ThemeGraphTab() {
@@ -171,8 +171,8 @@ export function ThemeGraphTab() {
         key={theme.id}
         onClick={() => setSelectedTheme(selectedTheme?.id === theme.id ? null : theme)}
         className={cn(
-          "group relative p-4 rounded-xl cursor-pointer border transition-all duration-300",
-          "bg-white dark:bg-[#272729] dark:border-[#3a3a3c]",
+          "group relative p-4 rounded-lg cursor-pointer border transition-all duration-300",
+          "bg-card dark:bg-card dark:border-border",
           selectedTheme?.id === theme.id && "ring-2 ring-primary/50"
         )}
       >
@@ -180,7 +180,7 @@ export function ThemeGraphTab() {
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "px-2 py-0.5 text-xs rounded-full font-medium",
+                "px-2 py-0.5 text-xs rounded-full font-semibold",
                 config.bgColor,
                 config.color
               )}
@@ -216,7 +216,7 @@ export function ThemeGraphTab() {
 
         {/* 展开的详情 */}
         {selectedTheme?.id === theme.id && (
-          <div className="mt-4 pt-4 border-t dark:border-[#3a3a3c] space-y-3">
+          <div className="mt-4 pt-4 border-t dark:border-border space-y-3">
             {theme.summary && (
               <p className="text-sm text-foreground/80">{theme.summary}</p>
             )}
@@ -224,7 +224,7 @@ export function ThemeGraphTab() {
             {/* 关联主题 */}
             {themeConnections.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">{t('bible.relatedThemes')}</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">{t('bible.relatedThemes')}</p>
                 <div className="flex flex-wrap gap-2">
                   {themeConnections.slice(0, 5).map((conn) => {
                     const connectedTheme = getConnectedTheme(conn, theme.id);
@@ -235,7 +235,7 @@ export function ThemeGraphTab() {
                         key={conn.id}
                         className={cn(
                           "px-2 py-1 text-xs rounded-full border",
-                          "bg-[#f5f5f7] dark:bg-[#1d1d1f]",
+                          "bg-secondary dark:bg-apple-tile3",
                           connConfig.color
                         )}
                       >
@@ -251,7 +251,7 @@ export function ThemeGraphTab() {
             {/* 关键经文 */}
             {theme.keyVerses && theme.keyVerses.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">{t('bible.keyVerses')}</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">{t('bible.keyVerses')}</p>
                 <div className="flex flex-wrap gap-1">
                   {theme.keyVerses.slice(0, 5).map((verse, idx) => (
                     <button
@@ -277,8 +277,8 @@ export function ThemeGraphTab() {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
       {/* 头部 */}
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-[#3a3a3c]">
-        <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#0066cc] rounded-xl">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-border">
+        <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-lg">
           <Network className="w-6 h-6" />
         </div>
         <div className="flex-1">
@@ -297,7 +297,7 @@ export function ThemeGraphTab() {
             placeholder={t('bible.searchTheme')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10 bg-[#f5f5f7] dark:bg-[#1d1d1f] border border-[#e0e0e0] dark:border-[#3a3a3c] rounded-full"
+            className="pl-10 pr-10 bg-secondary dark:bg-apple-tile3 border border-border dark:border-border rounded-full"
           />
           {searchQuery && (
             <button

@@ -175,8 +175,8 @@ export function HighlightsTab() {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-[#3a3a3c]">
-        <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-border">
+        <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-lg">
           <BookMarked className="w-6 h-6" />
         </div>
         <div className="flex-1">
@@ -194,10 +194,10 @@ export function HighlightsTab() {
             key={color}
             onClick={() => setSelectedColor(selectedColor === color ? null : color)}
             className={cn(
-              "flex items-center gap-2 p-3 rounded-xl border transition-all active:scale-95",
+              "flex items-center gap-2 p-3 rounded-lg border transition-all active:scale-95",
               selectedColor === color
-                ? "border-[#0066cc] bg-[#0066cc]/5"
-                : "border-[#e0e0e0] dark:border-[#3a3a3c] hover:border-[#0066cc]/50 hover:bg-[#f5f5f7] dark:hover:bg-[#2a2a2c]"
+                ? "border-primary bg-primary/5"
+                : "border-border dark:border-border hover:border-primary/50 hover:bg-secondary dark:hover:bg-card"
             )}
           >
             <div className={cn("w-4 h-4 rounded-full", COLOR_BUTTON_STYLES[color])} />
@@ -218,7 +218,7 @@ export function HighlightsTab() {
             placeholder={t('highlights.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 rounded-full h-11 bg-[#f5f5f7] dark:bg-[#1d1d1f] border-[#e0e0e0] dark:border-[#3a3a3c] focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] transition-all text-sm"
+            className="w-full pl-10 pr-10 rounded-full h-11 bg-secondary dark:bg-card border-border dark:border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
           />
           {searchQuery && (
             <button
@@ -236,7 +236,7 @@ export function HighlightsTab() {
             </p>
             <button
               onClick={() => { setSearchQuery(''); setSelectedColor(null); }}
-              className="text-xs text-[#0066cc] hover:underline"
+              className="text-xs text-primary hover:underline"
             >
               {t('highlights.clearFilter')}
             </button>
@@ -266,7 +266,7 @@ export function HighlightsTab() {
           {Object.entries(groupedHighlights).map(([bookName, items]) => (
             <div key={bookName} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <h2 className="text-lg font-semibold font-serif text-foreground mb-4 flex items-center gap-2">
-                <span className="w-1 h-5 bg-[#0066cc] rounded-full inline-block"></span>
+                <span className="w-1 h-5 bg-primary rounded-full inline-block"></span>
                 {bookName}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

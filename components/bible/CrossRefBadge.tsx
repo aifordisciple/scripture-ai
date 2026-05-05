@@ -15,23 +15,23 @@ interface CrossRefBadgeProps {
 const TYPE_CONFIG: Record<ConnectionType, { labelKey: string; colorClass: string }> = {
   QUOTATION: {
     labelKey: 'bible.typeQuotation',
-    colorClass: 'bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#0066cc]/20 dark:text-[#2997ff]',
+    colorClass: 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
   },
   PARALLEL: {
     labelKey: 'bible.typeParallel',
-    colorClass: 'bg-[#0066cc]/5 text-[#0066cc] dark:bg-[#0066cc]/10 dark:text-[#2997ff]',
+    colorClass: 'bg-primary/5 text-primary dark:bg-primary/10 dark:text-primary',
   },
   THEMATIC: {
     labelKey: 'bible.typeThematic',
-    colorClass: 'bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#0066cc]/20 dark:text-[#2997ff]',
+    colorClass: 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
   },
   PROPHECY: {
     labelKey: 'bible.typeProphecy',
-    colorClass: 'bg-[#0066cc]/5 text-[#0066cc] dark:bg-[#0066cc]/10 dark:text-[#2997ff]',
+    colorClass: 'bg-primary/5 text-primary dark:bg-primary/10 dark:text-primary',
   },
   ILLUSTRATION: {
     labelKey: 'bible.typeIllustration',
-    colorClass: 'bg-[#0066cc]/10 text-[#0066cc] dark:bg-[#0066cc]/20 dark:text-[#2997ff]',
+    colorClass: 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
   },
 };
 
@@ -87,16 +87,16 @@ export function CrossRefFilterTabs({
   ];
 
   return (
-    <div className="flex flex-wrap gap-1.5 p-2 border-b border-[#e0e0e0] dark:border-[#3a3a3c]">
+    <div className="flex flex-wrap gap-1.5 p-2 border-b border-border dark:border-border">
       {filters.map(({ type, labelKey }) => (
         <button
           key={type}
           onClick={() => onFilterChange(type)}
           className={cn(
-            'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+            'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all',
             activeFilter === type
-              ? 'bg-[#0066cc] text-white'
-              : 'bg-[#f5f5f7] text-[#7a7a7a] hover:bg-[#e0e0e0] dark:bg-[#2a2a2c] dark:text-[#7a7a7a] dark:hover:bg-[#3a3a3c] active:scale-95'
+              ? 'bg-primary text-white'
+              : 'bg-secondary text-muted-foreground hover:bg-accent dark:bg-card dark:text-muted-foreground dark:hover:bg-border active:scale-95'
           )}
         >
           {t(labelKey)}

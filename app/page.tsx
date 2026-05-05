@@ -723,7 +723,7 @@ export default function Home() {
 
               <UserMenu />
 
-              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground dark:text-foreground/60 hover:text-foreground dark:hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
+              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>
             </div>

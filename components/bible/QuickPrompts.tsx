@@ -80,8 +80,8 @@ export const QuickPrompts = memo(function QuickPrompts({
       })
 
   return (
-    <div className="px-4 pb-2 pt-3 border-t border-[#e0e0e0] dark:border-[#3a3a3c]">
-      <div className="text-[10px] text-[#7a7a7a] font-semibold uppercase tracking-widest pl-1 mb-2">
+    <div className="px-4 pb-2 pt-3 border-t border-border dark:border-border">
+      <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest pl-1 mb-2">
         {t(MODE_LABELS[aiMode] || MODE_LABELS.general)}
       </div>
 
@@ -100,9 +100,9 @@ export const QuickPrompts = memo(function QuickPrompts({
         {aiMode === 'custom' ? (
           <>
             {customPrompts.length === 0 ? (
-              <div className="flex items-center gap-2 px-3 py-2 text-sm text-[#7a7a7a]">
+              <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
                 <span>{t('bible.noCustomPrompts')}</span>
-                <a href="/settings/prompts" className="text-[#0066cc] hover:text-[#0071e3] underline">
+                <a href="/settings/prompts" className="text-primary hover:text-apple-focus underline">
                   {t('bible.goAdd')}
                 </a>
               </div>
@@ -111,7 +111,7 @@ export const QuickPrompts = memo(function QuickPrompts({
                 <button
                   key={p.id}
                   onClick={() => onChipClick(p.prompt)}
-                  className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-[#3a3a3c] transition-all active:scale-95 dark:bg-[#2a2a2c] dark:text-white/80 whitespace-nowrap shrink-0 bg-[#f5f5f7] text-[#1d1d1f] border-[#e0e0e0] hover:bg-[#e0e0e0]"
+                  className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold border dark:border-border transition-all active:scale-95 dark:bg-card dark:text-foreground/80 whitespace-nowrap shrink-0 bg-secondary text-foreground border-border hover:bg-accent"
                 >
                   <Sparkles className="w-3 h-3" />
                   {p.label}
@@ -121,7 +121,7 @@ export const QuickPrompts = memo(function QuickPrompts({
             {/* 管理按钮 */}
             <a
               href="/settings/prompts"
-              className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-[#3a3a3c] transition-all active:scale-95 dark:bg-[#2a2a2c] dark:text-white/80 whitespace-nowrap shrink-0 bg-[#0066cc]/5 text-[#0066cc] border-[#0066cc]/10 hover:bg-[#0066cc]/10"
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold border dark:border-border transition-all active:scale-95 dark:bg-card dark:text-foreground/80 whitespace-nowrap shrink-0 bg-primary/5 text-primary border-primary/10 hover:bg-primary/10"
             >
               <Settings className="w-3 h-3" />
               {t('bible.manage')}
@@ -134,7 +134,7 @@ export const QuickPrompts = memo(function QuickPrompts({
               key={t.id}
               onClick={() => onChipClick(resolveDualLang(t.prompt, locale))}
               className={cn(
-                'flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium border dark:border-[#3a3a3c] transition-all active:scale-95 dark:bg-[#2a2a2c] dark:text-white/80 whitespace-nowrap shrink-0',
+                'flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold border dark:border-border transition-all active:scale-95 dark:bg-card dark:text-foreground/80 whitespace-nowrap shrink-0',
                 t.color
               )}
             >

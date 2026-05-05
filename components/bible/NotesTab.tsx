@@ -160,8 +160,8 @@ export function NotesTab() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
-      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-[#3a3a3c]">
-        <div className="p-2.5 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#2997ff] rounded-xl">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-border">
+        <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-lg">
           <BookOpen className="w-6 h-6" />
         </div>
         <div className="flex-1">
@@ -174,7 +174,7 @@ export function NotesTab() {
           variant="outline"
           size="sm"
           onClick={handleExportMarkdown}
-          className="gap-2 rounded-full border-[#e0e0e0] text-[#0066cc] hover:bg-[#0066cc]/5 dark:border-[#3a3a3c] dark:text-[#2997ff] dark:hover:bg-[#0066cc]/10 active:scale-95"
+          className="gap-2 rounded-full border-border text-primary hover:bg-primary/5 dark:border-border dark:text-primary dark:hover:bg-primary/10 active:scale-95"
         >
           <Download className="w-4 h-4" /> {t('bible.exportBtn')}
         </Button>
@@ -189,7 +189,7 @@ export function NotesTab() {
             placeholder={t('bible.searchNotesPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 rounded-full h-11 bg-[#f5f5f7] dark:bg-[#1d1d1f] border-[#e0e0e0] dark:border-[#3a3a3c] focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] transition-all text-sm"
+            className="w-full pl-10 pr-10 rounded-full h-11 bg-secondary dark:bg-apple-tile3 border-border dark:border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
           />
           {searchQuery && (
             <button
@@ -223,7 +223,7 @@ export function NotesTab() {
           {Object.entries(groupedNotes).map(([bookName, items]) => (
             <div key={bookName} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <h2 className="text-lg font-semibold font-serif text-foreground mb-4 flex items-center gap-2">
-                <span className="w-1 h-5 bg-[#0066cc] rounded-full inline-block"></span>
+                <span className="w-1 h-5 bg-primary rounded-full inline-block"></span>
                 {bookName}
               </h2>
               <div className="grid grid-cols-1 gap-4">
@@ -236,17 +236,17 @@ export function NotesTab() {
                       <div
                         key={item.id}
                         className={cn(
-                          "group relative flex flex-col rounded-2xl border dark:border-[#3a3a3c] transition-all duration-300",
-                          isExpanded ? "bg-white dark:bg-[#272729]" : "p-5 bg-white dark:bg-[#272729]"
+                          "group relative flex flex-col rounded-2xl border dark:border-border transition-all duration-300",
+                          isExpanded ? "bg-card dark:bg-card" : "p-5 bg-card dark:bg-card"
                         )}
                       >
                         {/* 标题栏 - 展开时 sticky 固定在顶部 */}
                         <div
                           className={cn(
-                            "flex items-center justify-between border-b dark:border-[#3a3a3c] pb-2 px-5 pt-5",
-                            needsExpand && "cursor-pointer hover:bg-[#f5f5f7] dark:hover:bg-[#2a2a2c]",
+                            "flex items-center justify-between border-b dark:border-border pb-2 px-5 pt-5",
+                            needsExpand && "cursor-pointer hover:bg-secondary dark:hover:bg-card",
                             // 展开时 sticky 效果
-                            isExpanded && needsExpand && "sticky top-0 z-10 bg-white dark:bg-[#272729] rounded-t-2xl"
+                            isExpanded && needsExpand && "sticky top-0 z-10 bg-card dark:bg-card rounded-t-2xl"
                           )}
                           onClick={(e) => {
                             if (needsExpand) {
@@ -258,7 +258,7 @@ export function NotesTab() {
                           }}
                         >
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-[#0066cc] dark:text-[#2997ff]">
+                            <span className="text-sm font-semibold text-primary dark:text-primary">
                               {item.bookId} {item.chapter}:{item.verse}
                             </span>
                             {needsExpand && (
@@ -275,7 +275,7 @@ export function NotesTab() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-slate-400 hover:text-[#0066cc] bg-[#f5f5f7] hover:bg-[#0066cc]/5 dark:bg-[#2a2a2c] dark:hover:bg-[#0066cc]/10 rounded-full active:scale-95"
+                              className="h-8 w-8 text-slate-400 hover:text-primary bg-secondary hover:bg-primary/5 dark:bg-card dark:hover:bg-primary/10 rounded-full active:scale-95"
                               onClick={(e) => handleEdit(e, item.bookId, item.chapter, item.verse)}
                               title={t('bible.editBtn')}
                             >
@@ -284,7 +284,7 @@ export function NotesTab() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-slate-400 hover:text-red-600 bg-[#f5f5f7] hover:bg-red-50 dark:bg-[#2a2a2c] dark:hover:bg-red-900/20 rounded-full active:scale-95"
+                              className="h-8 w-8 text-slate-400 hover:text-red-600 bg-secondary hover:bg-red-50 dark:bg-card dark:hover:bg-red-900/20 rounded-full active:scale-95"
                               onClick={(e) => handleDelete(e, item.id)}
                               title={t('bible.deleteBtn')}
                             >
@@ -297,7 +297,7 @@ export function NotesTab() {
                         {/* 内容区域 */}
                         <div
                           className={cn(
-                            "prose prose-sm dark:prose-invert max-w-none break-words text-[#1d1d1f]/80 dark:text-white/70 px-5 pb-5",
+                            "prose prose-sm dark:prose-invert max-w-none break-words text-foreground/80 dark:text-foreground/70 px-5 pb-5",
                             !isExpanded && needsExpand && "line-clamp-3"
                           )}
                         >

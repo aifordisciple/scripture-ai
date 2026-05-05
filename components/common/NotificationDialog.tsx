@@ -205,7 +205,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
       case "BADGE_EARNED":
         return "text-amber-500 bg-amber-100 dark:bg-amber-900/30";
       case "NEW_MESSAGE":
-        return "text-[#0066cc] bg-[#0066cc]/10 dark:bg-[#0066cc]/20";
+        return "text-primary bg-primary/10 dark:bg-primary/20";
       case "TASK_REMINDER":
         return "text-orange-500 bg-orange-100 dark:bg-orange-900/30";
       case "ANNOUNCEMENT":
@@ -284,7 +284,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
                       "group flex gap-3 p-3 rounded-lg cursor-pointer transition-colors",
                       notification.read
                         ? "bg-muted/30 hover:bg-muted/50"
-                        : "bg-[#0066cc]/5 dark:bg-[#0066cc]/10 hover:bg-[#0066cc]/10 dark:hover:bg-[#0066cc]/20"
+                        : "bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/20"
                     )}
                   >
                     <div className={cn("w-9 h-9 rounded-full flex items-center justify-center shrink-0", getIconColor(notification.type))}>
@@ -320,7 +320,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
                       </p>
                     </div>
                     {!notification.read && (
-                      <div className="w-2 h-2 rounded-full bg-[#0066cc] shrink-0 mt-2" />
+                      <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2" />
                     )}
                   </div>
                 );

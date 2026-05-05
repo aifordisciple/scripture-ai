@@ -70,7 +70,7 @@ export const CheckInCard = memo(function CheckInCard({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute -top-2 -right-2 z-10 w-8 h-8 flex items-center justify-center bg-white dark:bg-[#272729] rounded-full"
+          className="absolute -top-2 -right-2 z-10 w-8 h-8 flex items-center justify-center bg-white dark:bg-card rounded-full"
         >
           <X className="w-4 h-4 text-slate-500" />
         </button>
@@ -78,7 +78,7 @@ export const CheckInCard = memo(function CheckInCard({
         {/* Card content - for image generation */}
         <div
           ref={cardRef}
-          className="bg-[#0066cc] rounded-lg p-6 text-white"
+          className="bg-primary rounded-lg p-6 text-white"
         >
           {/* Header */}
           <div className="text-center mb-6">
@@ -110,7 +110,7 @@ export const CheckInCard = memo(function CheckInCard({
           </div>
 
           {/* Today's reading */}
-          <div className="bg-white/10 rounded-xl p-4 mb-4">
+          <div className="bg-white/10 rounded-lg p-4 mb-4">
             <div className="flex items-center gap-2 mb-2">
               <BookOpen className="w-4 h-4" />
               <span className="text-sm opacity-80">{t('bible.checkInTodayReading')}</span>
@@ -123,7 +123,7 @@ export const CheckInCard = memo(function CheckInCard({
 
           {/* Encouragement */}
           <div className="text-center mb-4">
-            <p className="text-lg font-medium">{encouragement}</p>
+            <p className="text-lg font-semibold">{encouragement}</p>
           </div>
 
           {/* User signature */}

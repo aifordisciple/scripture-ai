@@ -487,8 +487,8 @@ export function ShareCard() {
                     </Tabs>
                 </div>
 
-                <div className="p-4 border-t dark:border-[#3a3a3c] bg-[#f5f5f7] dark:bg-[#272729] shrink-0">
-                    <Button onClick={generateImage} disabled={loading} className="w-full bg-[#0066cc] hover:bg-[#0071e3] text-white active:scale-95 rounded-full">
+                <div className="p-4 border-t dark:border-border bg-secondary dark:bg-card shrink-0">
+                    <Button onClick={generateImage} disabled={loading} className="w-full bg-primary hover:bg-apple-focus text-white active:scale-95 rounded-full">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ImageIcon className="w-4 h-4 mr-2" />}
                         {loading ? loadingText : t('shareCard.generateBtn')}
                     </Button>
@@ -502,9 +502,9 @@ export function ShareCard() {
 
 function LayoutButton({ mode, current, set, label, icon }: any) {
     return (
-        <button onClick={() => set(mode)} className={cn("p-3 border rounded-xl hover:bg-[#f5f5f7] flex flex-col items-center gap-2 transition-all active:scale-95", current === mode && "border-[#0066cc] bg-[#0066cc]/5 ring-1 ring-[#0066cc] text-[#0066cc]")}>
-            <div className={cn("text-muted-foreground", current === mode && "text-[#0066cc]")}>{icon}</div>
-            <span className="text-xs font-medium">{label}</span>
+        <button onClick={() => set(mode)} className={cn("p-3 border rounded-lg hover:bg-secondary flex flex-col items-center gap-2 transition-all active:scale-95", current === mode && "border-primary bg-primary/5 ring-1 ring-primary text-primary")}>
+            <div className={cn("text-muted-foreground", current === mode && "text-primary")}>{icon}</div>
+            <span className="text-xs font-semibold">{label}</span>
         </button>
     )
 }

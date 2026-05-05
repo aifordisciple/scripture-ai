@@ -22,11 +22,11 @@ export const AIInputForm = memo(function AIInputForm({
 }: AIInputFormProps) {
   const { t } = useTranslation()
   return (
-    <div className="bg-white dark:bg-[#272729] flex-shrink-0">
+    <div className="bg-white dark:bg-card flex-shrink-0">
       <div className="p-4 safe-area-bottom">
         <form onSubmit={onSubmit} className="flex gap-2 items-end relative" role="form">
           <textarea
-            className="flex-1 px-4 py-3 pr-12 border border-[#e0e0e0] dark:border-[#3a3a3c] rounded-full text-base focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] transition-colors bg-[#f5f5f7] dark:bg-[#1d1d1f] dark:text-white focus:bg-white dark:focus:bg-[#272729] resize-none max-h-32"
+            className="flex-1 px-4 py-3 pr-12 border border-border dark:border-border rounded-full text-base focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors bg-secondary dark:bg-card dark:text-foreground focus:bg-card dark:focus:bg-card resize-none max-h-32"
             value={input}
             onChange={(e) => {
               onInputChange(e.target.value)
@@ -62,7 +62,7 @@ export const AIInputForm = memo(function AIInputForm({
                 type="submit"
                 size="icon"
                 disabled={!input.trim() || isLoading}
-                className="h-8 w-8 rounded-full bg-[#0066cc] hover:bg-[#0071e3]"
+                className="h-8 w-8 rounded-full bg-primary hover:bg-apple-focus"
                 aria-label={t('bible.send')}
               >
                 <Send className="w-4 h-4" />
@@ -71,7 +71,7 @@ export const AIInputForm = memo(function AIInputForm({
           </div>
         </form>
 
-        <div className="mt-2 text-[10px] text-center text-[#7a7a7a]/60 select-none">
+        <div className="mt-2 text-[10px] text-center text-muted-foreground/60 select-none">
           {t('bible.aiDisclaimer')}
         </div>
       </div>
