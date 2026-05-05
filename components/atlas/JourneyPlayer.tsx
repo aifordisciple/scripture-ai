@@ -171,7 +171,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
         <h3 className="text-lg font-semibold text-[#1d1d1f] dark:text-white">
           {selectedJourney.titleZh}
         </h3>
-        <div className="text-sm text-slate-500 dark:text-slate-400">
+        <div className="text-sm text-[#7a7a7a] dark:text-[#7a7a7a]">
           {t('atlas.journeyStep', { current: journeyStep + 1, total: selectedJourney.stops.length })}
         </div>
       </div>
@@ -188,7 +188,7 @@ export default function JourneyPlayer({ journeyId, onSelectJourney }: JourneyPla
                 <div className="font-semibold text-[#1d1d1f] dark:text-white">
                   {selectedJourney.stops[journeyStep].location.nameZh}
                 </div>
-                <div className="text-sm text-slate-500 dark:text-slate-400">
+                <div className="text-sm text-[#7a7a7a] dark:text-[#7a7a7a]">
                   {selectedJourney.stops[journeyStep].location.nameEn}
                 </div>
               </div>

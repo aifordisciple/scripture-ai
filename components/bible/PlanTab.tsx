@@ -480,7 +480,7 @@ export function PlanTab() {
             {archivedPlans.map((plan) => (
               <div
                 key={plan!.id}
-                className="relative flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 opacity-80 hover:opacity-100 transition-opacity cursor-pointer group"
+                className="relative flex flex-col items-center justify-center bg-[#f5f5f7] dark:bg-[#272729]/50 rounded-lg p-4 border border-[#e0e0e0] dark:border-[#1d1d1f] opacity-80 hover:opacity-100 transition-opacity cursor-pointer group"
                 onClick={() => setViewingPlanId(plan!.id)}
               >
                  {/* 自定义计划删除按钮 */}
@@ -492,16 +492,16 @@ export function PlanTab() {
                        setPendingDeleteAction(() => deleteCustomPlan);
                        setShowDeleteConfirm(true);
                      }}
-                     className="absolute top-2 right-2 p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                     className="absolute top-2 right-2 p-1.5 text-[#e0e0e0] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                    >
                      <Trash2 className="w-3.5 h-3.5" />
                    </button>
                  )}
-                 <Medal className="w-10 h-10 text-yellow-400 mb-2 drop-shadow-sm" />
-                 <h3 className="text-sm font-bold text-center font-serif text-slate-700 dark:text-slate-300 line-clamp-2 leading-snug">
+                 <Medal className="w-10 h-10 text-yellow-400 mb-2" />
+                 <h3 className="text-sm font-semibold text-center font-serif text-[#1d1d1f] dark:text-[#e0e0e0] line-clamp-2 leading-snug">
                    {tDual(plan!.title, plan!.titleEn)}
                  </h3>
-                 <span className="text-[10px] text-muted-foreground mt-2 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">{t('plan.completed')}</span>
+                 <span className="text-[10px] text-muted-foreground mt-2 bg-[#e0e0e0] dark:bg-[#1d1d1f] px-2 py-0.5 rounded-full">{t('plan.completed')}</span>
               </div>
             ))}
           </div>
@@ -509,25 +509,25 @@ export function PlanTab() {
       )}
 
 {/* AI 定制区 */}
-      <div className="mb-10 relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-[2rem] p-6 md:p-8 shadow-2xl border border-blue-400/30">
+      <div className="mb-10 relative overflow-hidden bg-[#0066cc] rounded-[2rem] p-6 md:p-8 border border-[#0066cc]/30">
         
         {/* 装饰性背景光晕 (增加蓝宝石的通透折射感) */}
         <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-cyan-300/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-[20rem] h-[20rem] bg-indigo-300/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
 
         <div className="relative z-10">
-          <h2 className="text-2xl font-black flex items-center gap-3 mb-3 text-white tracking-tight">
-            <div className="p-2 bg-white/20 rounded-xl border border-white/30 backdrop-blur-sm shadow-inner">
-               <Sparkles className="w-5 h-5 text-cyan-100" /> 
+          <h2 className="text-2xl font-semibold flex items-center gap-3 mb-3 text-white tracking-tight">
+            <div className="p-2 bg-white/20 rounded-xl border border-white/30 backdrop-blur-sm">
+               <Sparkles className="w-5 h-5 text-white/80" /> 
             </div>
             {t('plan.aiCustomTitle')}
           </h2>
-          <p className="text-blue-50/90 text-sm md:text-base mb-8 max-w-2xl leading-relaxed font-medium">
+          <p className="text-white/90 text-sm md:text-base mb-8 max-w-2xl leading-relaxed font-medium">
             {t('plan.aiCustomDesc')}
           </p>
           
           {/* 输入框与按钮的包裹层 (高透玻璃态) */}
-          <div className="bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20 flex flex-col sm:flex-row gap-3 shadow-inner">
+          <div className="bg-white/10 backdrop-blur-md p-2 rounded-lg border border-white/20 flex flex-col sm:flex-row gap-3">
             <input 
               value={aiPrompt} 
               onChange={e => setAiPrompt(e.target.value)} 
@@ -535,18 +535,18 @@ export function PlanTab() {
               disabled={isGenerating} 
               onKeyDown={(e) => e.key === 'Enter' && handleGeneratePlan()} 
               // 保持纯白输入框的超高辨识度
-              className="flex-1 bg-white dark:bg-slate-800 rounded-xl px-5 py-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-indigo-400 focus:ring-2 focus:ring-cyan-300/50 text-base shadow-sm transition-all" 
+              className="flex-1 bg-white dark:bg-[#272729] rounded-xl px-5 py-4 text-[#1d1d1f] dark:text-[#f5f5f7] placeholder:text-[#7a7a7a] dark:placeholder:text-[#7a7a7a] focus-visible:ring-2 focus-visible:ring-[#0066cc]/40 focus:ring-2 focus:ring-[#0066cc]/30 text-base transition-all" 
             />
             <Button 
               onClick={handleGeneratePlan} 
               disabled={isGenerating || !aiPrompt.trim()} 
               // 按钮改为白底蓝字，与蓝宝石背景形成清爽的强对比
-              className="bg-white hover:bg-blue-50 text-blue-700 font-bold rounded-xl px-8 py-4 h-auto shadow-lg shadow-blue-900/20 transition-all sm:w-auto w-full group border border-white"
+              className="bg-white hover:bg-[#f5f5f7] text-[#0066cc] font-semibold rounded-xl px-8 py-4 h-auto active:scale-95 transition-all sm:w-auto w-full group border border-white"
             >
               {isGenerating ? (
-                <><Loader2 className="w-5 h-5 animate-spin mr-2 text-blue-500" /> {t('plan.aiCustomGenerating')}</>
+                <><Loader2 className="w-5 h-5 animate-spin mr-2 text-[#0066cc]" /> {t('plan.aiCustomGenerating')}</>
               ) : (
-                <>{t('plan.aiCustomGenerate')} <Sparkles className="w-4 h-4 ml-2 opacity-50 group-hover:opacity-100 transition-opacity text-blue-500" /></>
+                <>{t('plan.aiCustomGenerate')} <Sparkles className="w-4 h-4 ml-2 opacity-50 group-hover:opacity-100 transition-opacity text-[#0066cc]" /></>
               )}
             </Button>
           </div>

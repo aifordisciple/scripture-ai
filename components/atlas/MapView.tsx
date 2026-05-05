@@ -141,8 +141,8 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
         const popupContent = `
           <div class="p-2">
             <h3 class="font-semibold text-sm">${location.nameZh}</h3>
-            <p class="text-xs text-slate-500">${location.nameEn || ''}</p>
-            ${location.yearStart ? `<p class="text-xs text-slate-400">${location.yearStart < 0 ? t('atlas.eventYearBc', { year: Math.abs(location.yearStart) }) : t('atlas.eventYearAd', { year: location.yearStart })}</p>` : ''}
+            <p class="text-xs" style="color: #7a7a7a">${location.nameEn || ''}</p>
+            ${location.yearStart ? `<p class="text-xs" style="color: #7a7a7a">${location.yearStart < 0 ? t('atlas.eventYearBc', { year: Math.abs(location.yearStart) }) : t('atlas.eventYearAd', { year: location.yearStart })}</p>` : ''}
           </div>
         `;
         marker.bindPopup(popupContent);
