@@ -40,6 +40,7 @@ export function sermonEditorCSS(isDark: boolean, fontSize: number = DEFAULT_FONT
       caret-color: ${cursorColor};
       max-width: 800px;
       margin: 0 auto;
+      touch-action: manipulation;
     }
     .milkdown .editor ::selection {
       background-color: ${selectionBg};

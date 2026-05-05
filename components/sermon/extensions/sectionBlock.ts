@@ -137,6 +137,7 @@ class SectionBlockView {
 
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false
+    if (this.getPos() == null) return false
     this.node = node
     const sectionType = node.attrs.sectionType || 'introduction'
     const info = SECTION_COLORS[sectionType] || { color: '#8b5cf6', label: sectionType }

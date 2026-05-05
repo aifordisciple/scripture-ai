@@ -115,6 +115,7 @@ class VerseBlockView {
 
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false
+    if (this.getPos() == null) return false
     this.node = node
     this.dom.dataset.verse = node.attrs.reference
     const refEl = this.dom.querySelector('.sermon-verse-ref')

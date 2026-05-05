@@ -118,8 +118,11 @@ function MilkdownInner({
         const parser = ctx.get('parser' as any) as any
         const doc = parser(contentRef.current)
         if (doc) {
-          const state = view.state.create({ doc })
-          view.updateState(state)
+          // Use dispatch with ReplaceDoc transaction instead of updateState
+          // This preserves NodeView lifecycle and avoids "node not found" errors
+          const tr = view.state.tr.replaceWith(0, view.state.doc.content.size, doc.content)
+          tr.setMeta('addToHistory', false)
+          view.dispatch(tr)
         }
       }
     })
