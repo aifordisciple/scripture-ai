@@ -125,7 +125,7 @@ export function GroupSettings({
               style={{ backgroundColor: themeColor }}
             />
             <div>
-              <div className="font-medium">{t('group.themeColor')}</div>
+              <div className="font-semibold">{t('group.themeColor')}</div>
               <div className="text-sm text-muted-foreground">
                 {PRESET_COLORS.find(c => c.value === themeColor) ? t(`group.${PRESET_COLORS.find(c => c.value === themeColor)!.nameKey}`) : t('group.custom')}
               </div>

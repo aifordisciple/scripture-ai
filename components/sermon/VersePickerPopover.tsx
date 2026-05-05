@@ -359,12 +359,12 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
               {/* Selection preview + add button */}
               {verseStart !== null && (
                 <div className="mt-2 flex items-center gap-2">
-                  <div className="flex-1 px-2 py-1 rounded-lg text-xs font-medium" style={{ backgroundColor: `${primaryColor}1a`, color: primaryColor, border: `1px solid ${primaryColor}33` }}>
+                  <div className="flex-1 px-2 py-1 rounded-lg text-xs font-semibold" style={{ backgroundColor: `${primaryColor}1a`, color: primaryColor, border: `1px solid ${primaryColor}33` }}>
                     {getBookDisplayName(selectedBook, locale)} {selectedChapter}:{verseStart}{verseEnd && verseEnd > verseStart ? `-${verseEnd}` : ''}
                   </div>
                   <button
                     onClick={addRef}
-                    className="px-2.5 py-1 text-[11px] font-medium rounded-lg flex items-center gap-1 transition-colors"
+                    className="px-2.5 py-1 text-[11px] font-semibold rounded-lg flex items-center gap-1 transition-colors"
                     style={{ backgroundColor: primaryColor, color: '#fff' }}
                   >
                     <Plus className="w-3 h-3" />
@@ -396,7 +396,7 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
             <button
               onClick={handleInsert}
               disabled={inserting}
-              className="w-full py-1.5 text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+              className="w-full py-1.5 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
               style={{ backgroundColor: primaryColor, color: '#fff' }}
             >
               {inserting ? (

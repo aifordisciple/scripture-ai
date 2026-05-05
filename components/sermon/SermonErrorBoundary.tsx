@@ -37,7 +37,7 @@ export class SermonErrorBoundary extends React.Component<ErrorBoundaryProps, Err
       }
       return (
         <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-          <div className="text-destructive text-sm font-medium mb-2">
+          <div className="text-destructive text-sm font-semibold mb-2">
             讲章编辑器加载失败
           </div>
           <div className="text-muted-foreground text-xs mb-4 max-w-md break-all">
@@ -50,7 +50,7 @@ export class SermonErrorBoundary extends React.Component<ErrorBoundaryProps, Err
           )}
           <button
             onClick={this.handleReset}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
+            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
           >
             重试
           </button>

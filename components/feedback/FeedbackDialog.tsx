@@ -127,14 +127,14 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium mb-1">{t('feedback.submitSuccess')}</h3>
+            <h3 className="text-lg font-semibold mb-1">{t('feedback.submitSuccess')}</h3>
             <p className="text-sm text-muted-foreground">{t('feedback.submitSuccessMessage')}</p>
           </div>
         ) : (
           <div className="space-y-4">
             {/* Feedback Type */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('feedback.feedbackType')}</label>
+              <label className="text-sm font-semibold">{t('feedback.feedbackType')}</label>
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger>
                   <SelectValue />
@@ -157,7 +157,7 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 
             {/* Title */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('feedback.titleLabel')}</label>
+              <label className="text-sm font-semibold">{t('feedback.titleLabel')}</label>
               <Input
                 placeholder={t('feedback.titlePlaceholder')}
                 value={title}
@@ -168,7 +168,7 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 
             {/* Content */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t('feedback.contentLabel')}</label>
+              <label className="text-sm font-semibold">{t('feedback.contentLabel')}</label>
               <Textarea
                 placeholder={t('feedback.contentPlaceholder')}
                 value={content}

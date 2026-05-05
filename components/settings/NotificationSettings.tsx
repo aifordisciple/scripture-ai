@@ -129,7 +129,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
           <div className="space-y-6">
             {/* 邮件通知 */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-foreground">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground dark:text-foreground">
                 <Mail className="w-4 h-4" />
                 {t('settings.emailNotification')}
               </div>
@@ -161,7 +161,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
 
             {/* 浏览器通知 */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-foreground">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground dark:text-foreground">
                 <Globe className="w-4 h-4" />
                 {t('settings.browserNotification')}
               </div>
@@ -181,7 +181,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
 
             {/* 声音提醒 */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-foreground">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground dark:text-foreground">
                 <Volume2 className="w-4 h-4" />
                 {t('settings.soundNotification')}
               </div>

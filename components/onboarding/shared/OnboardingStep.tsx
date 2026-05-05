@@ -133,7 +133,7 @@ export function OnboardingStep({
               onClick={onPrev}
               disabled={isFirstStep}
               className={cn(
-                "flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors",
                 isFirstStep
                   ? "text-foreground dark:text-muted-foreground cursor-not-allowed"
                   : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-white hover:bg-accent dark:hover:bg-accent"

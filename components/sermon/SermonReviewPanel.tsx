@@ -23,7 +23,7 @@ function ScoreBar({ score }: { score: number }) {
       <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
         <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-[10px] font-mono font-medium text-muted-foreground w-5 text-right">{score}</span>
+      <span className="text-[10px] font-mono font-semibold text-muted-foreground w-5 text-right">{score}</span>
     </div>
   )
 }
@@ -82,7 +82,7 @@ export function SermonReviewPanel() {
       <div className="px-3 py-2 border-b border-border">
         <div className="flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-          <span className="text-xs font-medium text-foreground/90">{t('sermon.reviewPanelTitle')}</span>
+          <span className="text-xs font-semibold text-foreground/90">{t('sermon.reviewPanelTitle')}</span>
         </div>
       </div>
 
@@ -91,7 +91,7 @@ export function SermonReviewPanel() {
         <button
           onClick={handleGenerateReview}
           disabled={sermonReviewLoading}
-          className={`w-full ${isMd ? 'py-2' : 'py-3 min-h-[44px]'} rounded-lg text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 transition-colors flex items-center justify-center gap-1.5 active:scale-95`}
+          className={`w-full ${isMd ? 'py-2' : 'py-3 min-h-[44px]'} rounded-lg text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 transition-colors flex items-center justify-center gap-1.5 active:scale-95`}
         >
           {sermonReviewLoading ? (
             <>
@@ -132,7 +132,7 @@ export function SermonReviewPanel() {
                   <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center text-primary">
                     {dimensionIcons[item.key] || <Star className="w-3 h-3" />}
                   </div>
-                  <span className="text-[11px] font-medium text-foreground/90 flex-1">{item.label}</span>
+                  <span className="text-[11px] font-semibold text-foreground/90 flex-1">{item.label}</span>
                 </div>
                 <ScoreBar score={item.score} />
                 <p className="text-[10px] text-muted-foreground mt-1.5 leading-relaxed">{item.suggestion}</p>
@@ -148,7 +148,7 @@ export function SermonReviewPanel() {
               <div key={key} className="rounded-lg border border-border bg-card">
                 <button
                   onClick={() => toggleSub(key)}
-                  className="w-full px-2.5 py-2 flex items-center gap-1.5 text-[11px] font-medium text-foreground/90"
+                  className="w-full px-2.5 py-2 flex items-center gap-1.5 text-[11px] font-semibold text-foreground/90"
                 >
                   {expandedSub === key ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                   {label}

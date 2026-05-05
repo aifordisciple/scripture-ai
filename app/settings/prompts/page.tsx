@@ -72,7 +72,7 @@ function PromptFormModal({
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground dark:text-foreground mb-1">
+            <label className="block text-sm font-semibold text-foreground dark:text-foreground mb-1">
               标签名称（支持emoji）
             </label>
             <input
@@ -86,7 +86,7 @@ function PromptFormModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground dark:text-foreground mb-1">
+            <label className="block text-sm font-semibold text-foreground dark:text-foreground mb-1">
               问题内容
             </label>
             <textarea
@@ -295,7 +295,7 @@ export default function PromptsSettingsPage() {
             <div className="w-16 h-16 bg-accent dark:bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">📝</span>
             </div>
-            <h2 className="text-lg font-medium text-muted-foreground dark:text-foreground mb-2">
+            <h2 className="text-lg font-semibold text-muted-foreground dark:text-foreground mb-2">
               还没有自定义问题
             </h2>
             <p className="text-sm text-muted-foreground mb-6">
@@ -324,7 +324,7 @@ export default function PromptsSettingsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium text-foreground dark:text-foreground truncate">
+                        <h3 className="font-semibold text-foreground dark:text-foreground truncate">
                           {prompt.label}
                         </h3>
                         {prompt.isDefault && (
@@ -381,7 +381,7 @@ export default function PromptsSettingsPage() {
 
         {/* Tips */}
         <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-          <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
+          <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
             使用提示
           </h3>
           <ul className="text-xs text-blue-600 dark:text-blue-400 space-y-1">

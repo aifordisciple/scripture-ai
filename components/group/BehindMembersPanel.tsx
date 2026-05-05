@@ -151,7 +151,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
               <Heart className="w-5 h-5 text-green-500" />
             </div>
             <div>
-              <p className="font-medium text-green-700 dark:text-green-300">
+              <p className="font-semibold text-green-700 dark:text-green-300">
                 {t('group.allMembersOnTrack')}
               </p>
               <p className="text-sm text-green-600 dark:text-green-400">
@@ -223,7 +223,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium truncate">{userName}</span>
+                      <span className="font-semibold truncate">{userName}</span>
                       <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full">
                         {t('group.daysBehind', { count: member.behindDays.length })}
                       </span>
@@ -249,7 +249,7 @@ export function BehindMembersPanel({ churchId, planId }: BehindMembersPanelProps
                   <div className="p-3 border-t bg-card space-y-3">
                     {/* Behind days detail */}
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground mb-2">{t('group.behindDaysLabel')}</p>
+                      <p className="text-xs font-semibold text-muted-foreground mb-2">{t('group.behindDaysLabel')}</p>
                       <div className="flex flex-wrap gap-1">
                         {member.behindDays.slice(0, 10).map(day => (
                           <span

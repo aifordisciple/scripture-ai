@@ -69,7 +69,7 @@ export function SermonAIPanel() {
       <div className="px-3 py-2 border-b border-border">
         <div className="flex items-center gap-1.5">
           <Bot className="w-3.5 h-3.5 text-primary" />
-          <span className="text-xs font-medium text-foreground/90">{t('sermon.aiPanelTitle')}</span>
+          <span className="text-xs font-semibold text-foreground/90">{t('sermon.aiPanelTitle')}</span>
         </div>
       </div>
 

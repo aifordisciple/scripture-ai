@@ -279,7 +279,7 @@ export default function DesktopLoginPage() {
             {isLogin ? "还没有账号？" : "已有账号？"}
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-blue-600 hover:underline ml-1 font-medium"
+              className="text-blue-600 hover:underline ml-1 font-semibold"
             >
               {isLogin ? "去注册" : "去登录"}
             </button>

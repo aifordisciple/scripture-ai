@@ -79,7 +79,7 @@ export function SyncSettings() {
           <button
             onClick={() => setSyncMode('merge')}
             className={cn(
-              "flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all",
+              "flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all",
               syncMode === 'merge'
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "bg-background text-muted-foreground hover:bg-secondary"
@@ -90,7 +90,7 @@ export function SyncSettings() {
           <button
             onClick={() => setSyncMode('overwrite')}
             className={cn(
-              "flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all",
+              "flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all",
               syncMode === 'overwrite'
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "bg-background text-muted-foreground hover:bg-secondary"
@@ -109,7 +109,7 @@ export function SyncSettings() {
       {/* 同步状态 */}
       <div className="flex items-center justify-between text-xs">
         <span className="text-muted-foreground">{t('settings.lastSync')}</span>
-        <span className="text-foreground font-medium">
+        <span className="text-foreground font-semibold">
           {formatLastSyncTime(lastSyncTime)}
         </span>
       </div>

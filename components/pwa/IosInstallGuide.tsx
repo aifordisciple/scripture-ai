@@ -37,7 +37,7 @@ export function IosInstallGuide({ open, onOpenChange }: IosInstallGuideProps) {
               1
             </div>
             <div className="flex-1">
-              <p className="font-medium text-foreground mb-1">{t('pwa.step1Title')}</p>
+              <p className="font-semibold text-foreground mb-1">{t('pwa.step1Title')}</p>
               <p className="text-sm text-muted-foreground">
                 {t('pwa.step1Desc')}
               </p>
@@ -54,7 +54,7 @@ export function IosInstallGuide({ open, onOpenChange }: IosInstallGuideProps) {
               2
             </div>
             <div className="flex-1">
-              <p className="font-medium text-foreground mb-1">{t('pwa.step2Title')}</p>
+              <p className="font-semibold text-foreground mb-1">{t('pwa.step2Title')}</p>
               <p className="text-sm text-muted-foreground">
                 {t('pwa.step2Desc')}
               </p>
@@ -71,7 +71,7 @@ export function IosInstallGuide({ open, onOpenChange }: IosInstallGuideProps) {
               3
             </div>
             <div className="flex-1">
-              <p className="font-medium text-foreground mb-1">{t('pwa.step3Title')}</p>
+              <p className="font-semibold text-foreground mb-1">{t('pwa.step3Title')}</p>
               <p className="text-sm text-muted-foreground">
                 {t('pwa.step3Desc')}
               </p>

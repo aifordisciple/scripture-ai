@@ -282,7 +282,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             {/* 回复历史 */}
             {parseReplies(selectedFeedback.replies).length > 0 && (
               <div>
-                <div className="text-sm font-medium text-foreground dark:text-foreground mb-2">
+                <div className="text-sm font-semibold text-foreground dark:text-foreground mb-2">
                   {t('feedback.conversationHistory')}
                 </div>
                 <ScrollArea className="max-h-[200px] border rounded-lg p-3">
@@ -321,7 +321,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             {selectedFeedback.status === "RESOLVED" ? (
               <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-center">
                 <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                <p className="text-sm text-green-700 dark:text-green-400 font-medium">
+                <p className="text-sm text-green-700 dark:text-green-400 font-semibold">
                   {t('feedback.feedbackResolved')}
                 </p>
                 <p className="text-xs text-green-600 dark:text-green-500 mt-1">
@@ -424,7 +424,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium truncate">{feedback.title}</div>
+                            <div className="font-semibold truncate">{feedback.title}</div>
                             <div className="flex items-center gap-2 mt-1.5">
                               {hasNewReply ? (
                                 <Badge className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">

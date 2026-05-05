@@ -94,7 +94,7 @@ export function SermonTemplatePanel() {
       <div className="px-3 py-2 border-b border-border">
         <div className="flex items-center gap-1.5">
           <LayoutTemplate className="w-3.5 h-3.5 text-primary" />
-          <span className="text-xs font-medium text-foreground/90">{t('sermon.templatePanelTitle')}</span>
+          <span className="text-xs font-semibold text-foreground/90">{t('sermon.templatePanelTitle')}</span>
         </div>
       </div>
 
@@ -111,7 +111,7 @@ export function SermonTemplatePanel() {
             )}
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-foreground/90">{t(`sermon.${template.nameKey}`)}</span>
+              <span className="text-xs font-semibold text-foreground/90">{t(`sermon.${template.nameKey}`)}</span>
               {appliedId === template.id && <Check className="w-3.5 h-3.5 text-primary" />}
             </div>
             <p className="text-[10px] text-muted-foreground leading-relaxed">{t(`sermon.${template.descKey}`)}</p>

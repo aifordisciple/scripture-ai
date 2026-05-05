@@ -69,7 +69,7 @@ export function MindMapToolbar({
           <ZoomOut className="w-5 h-5 sm:w-5 sm:h-5 text-muted-foreground dark:text-foreground" />
         </button>
 
-        <span className="text-xs sm:text-sm text-muted-foreground dark:text-foreground min-w-[40px] sm:min-w-[60px] text-center font-medium">
+        <span className="text-xs sm:text-sm text-muted-foreground dark:text-foreground min-w-[40px] sm:min-w-[60px] text-center font-semibold">
           {zoomPercent}%
         </span>
 

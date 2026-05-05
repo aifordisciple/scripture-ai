@@ -377,7 +377,7 @@ export function DirectMessagePanel({ open, onOpenChange, initialUserId }: Direct
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="font-medium truncate">
+                          <p className="font-semibold truncate">
                             {conv.user.name || t('dm.user')}
                           </p>
                           <span className="text-xs text-muted-foreground">
