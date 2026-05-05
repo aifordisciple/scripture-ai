@@ -253,6 +253,8 @@ export interface SermonFolderData {
 
 export type SermonPanelType = 'list' | 'ai' | 'verse' | 'template' | 'review' | 'settings';
 
+export type SermonMobileView = 'list' | 'editor';
+
 export interface SermonReviewItem {
   key: string;
   label: string;
@@ -556,6 +558,9 @@ export interface SermonSlice {
   // AI preference
   sermonAiPreference: 'formal' | 'casual' | 'scholarly';
   setSermonAiPreference: (pref: 'formal' | 'casual' | 'scholarly') => void;
+  // Mobile view navigation (only used below md:768px)
+  sermonMobileView: SermonMobileView;
+  setSermonMobileView: (view: SermonMobileView) => void;
 }
 
 // --------------------------------------------------

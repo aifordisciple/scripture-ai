@@ -9,6 +9,7 @@ import { useTranslation } from '@/lib/i18n'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { BookOpen, X, Plus, ChevronLeft, Search, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useBreakpoint } from '@/hooks/use-media-query'
 
 type VerseSelectorStep = 'book' | 'chapter' | 'verse'
 
@@ -30,6 +31,7 @@ const MAX_VERSE = 50
 export default function VersePickerPopover({ editorView, isDark, children }: VersePickerPopoverProps) {
   const { locale } = useBibleStore()
   const { t } = useTranslation()
+  const { isMd } = useBreakpoint()
 
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<VerseSelectorStep>('book')
@@ -150,7 +152,7 @@ export default function VersePickerPopover({ editorView, isDark, children }: Ver
       <PopoverContent
         align="start"
         sideOffset={6}
-        className="w-[420px] p-0 overflow-hidden rounded-xl border shadow-xl"
+        className={`${isMd ? 'w-[420px]' : 'w-[calc(100vw-1rem)]'} p-0 overflow-hidden rounded-xl border shadow-xl`}
         style={{ backgroundColor: bgColor, borderColor, color: fgColor }}
       >
         {/* Header */}

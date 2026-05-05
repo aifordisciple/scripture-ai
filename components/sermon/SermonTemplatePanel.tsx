@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
+import { useBreakpoint } from '@/hooks/use-media-query'
 import { LayoutTemplate, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -70,6 +71,7 @@ const TEMPLATES: Template[] = [
 
 export function SermonTemplatePanel() {
   const { t } = useTranslation()
+  const { isMd } = useBreakpoint()
   const { currentSermon, setCurrentSermon, sermons, setSermons } = useBibleStore()
   const [appliedId, setAppliedId] = useState<string | null>(null)
 
@@ -102,7 +104,7 @@ export function SermonTemplatePanel() {
             key={template.id}
             onClick={() => handleApply(template)}
             className={cn(
-              'w-full text-left rounded-lg border p-2.5 transition-colors',
+              `w-full text-left rounded-lg border ${isMd ? 'p-2.5' : 'p-3 min-h-[44px]'} transition-colors active:scale-[0.98]`,
               appliedId === template.id
                 ? 'border-primary bg-primary/10'
                 : 'border-border bg-card hover:border-primary/40 hover:bg-primary/5'

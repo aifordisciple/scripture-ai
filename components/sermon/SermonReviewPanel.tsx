@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
+import { useBreakpoint } from '@/hooks/use-media-query'
 import { CheckCircle2, Loader2, Star, FileText, MessageCircle, HandHeart, ChevronDown, ChevronRight } from 'lucide-react'
 import type { SermonReviewData } from '@/store/types'
 
@@ -29,6 +30,7 @@ function ScoreBar({ score }: { score: number }) {
 
 export function SermonReviewPanel() {
   const { t } = useTranslation()
+  const { isMd } = useBreakpoint()
   const { currentSermon, apiConfig, locale, sermonReviewData, setSermonReviewData, sermonReviewLoading, setSermonReviewLoading } = useBibleStore()
   const [expandedSub, setExpandedSub] = useState<string | null>(null)
   const prevSermonIdRef = useRef(currentSermon?.id)
@@ -89,7 +91,7 @@ export function SermonReviewPanel() {
         <button
           onClick={handleGenerateReview}
           disabled={sermonReviewLoading}
-          className="w-full py-2 rounded-lg text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 transition-colors flex items-center justify-center gap-1.5"
+          className={`w-full ${isMd ? 'py-2' : 'py-3 min-h-[44px]'} rounded-lg text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 transition-colors flex items-center justify-center gap-1.5 active:scale-95`}
         >
           {sermonReviewLoading ? (
             <>

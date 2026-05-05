@@ -3,6 +3,7 @@
 import { useEffect, useCallback, useRef, useState } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
+import { useBreakpoint } from '@/hooks/use-media-query'
 import { SermonEditorHeader } from './SermonEditorHeader'
 import CodeMirrorEditor from './CodeMirrorEditor'
 import { isTiptapJson } from '@/lib/sermon-markdown'
@@ -18,6 +19,7 @@ function ensureMarkdown(raw: string): string {
 
 export function SermonEditor() {
   const { t } = useTranslation()
+  const { isMd } = useBreakpoint()
   const {
     currentSermon,
     setCurrentSermon,
@@ -149,7 +151,7 @@ export function SermonEditor() {
       </div>
 
       {/* Status Bar — Apple fine-print */}
-      <div className="border-t border-[#e0e0e0] dark:border-white/[0.06] px-5 py-1.5 flex items-center gap-4 text-[12px] text-[#7a7a7a] dark:text-[#999]"
+      <div className={`border-t border-[#e0e0e0] dark:border-white/[0.06] flex items-center gap-4 text-[12px] text-[#7a7a7a] dark:text-[#999] ${isMd ? 'px-5 py-1.5' : 'px-3 py-2 pb-safe'}`}
         style={{ fontFamily: "'SF Pro Text', system-ui, -apple-system, sans-serif", letterSpacing: '-0.12px' }}
       >
         <span>{charCount}{t('sermon.editorWords')}</span>
@@ -157,27 +159,31 @@ export function SermonEditor() {
         <div className="flex-1" />
         <button
           onClick={() => setFontSize(s => Math.max(12, s - 1))}
-          className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
+          className={`${isMd ? 'px-1.5 py-0.5' : 'px-3 py-2 min-h-[44px] min-w-[44px]'} rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95`}
           title="减小字号"
         >A-</button>
         <span>{fontSize}px</span>
         <button
           onClick={() => setFontSize(s => Math.min(24, s + 1))}
-          className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
+          className={`${isMd ? 'px-1.5 py-0.5' : 'px-3 py-2 min-h-[44px] min-w-[44px]'} rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95`}
           title="增大字号"
         >A+</button>
-        <span className="mx-1 text-[#e0e0e0] dark:text-white/[0.08]">|</span>
-        <button
-          onClick={() => setLineHeight(h => Math.round(Math.max(1.2, h - 0.2) * 10) / 10)}
-          className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
-          title="减小行距"
-        >≡-</button>
-        <span>{lineHeight.toFixed(1)}</span>
-        <button
-          onClick={() => setLineHeight(h => Math.round(Math.min(3.5, h + 0.2) * 10) / 10)}
-          className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
-          title="增大行距"
-        >≡+</button>
+        {isMd && (
+          <>
+            <span className="mx-1 text-[#e0e0e0] dark:text-white/[0.08]">|</span>
+            <button
+              onClick={() => setLineHeight(h => Math.round(Math.max(1.2, h - 0.2) * 10) / 10)}
+              className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
+              title="减小行距"
+            >≡-</button>
+            <span>{lineHeight.toFixed(1)}</span>
+            <button
+              onClick={() => setLineHeight(h => Math.round(Math.min(3.5, h + 0.2) * 10) / 10)}
+              className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
+              title="增大行距"
+            >≡+</button>
+          </>
+        )}
       </div>
     </div>
   )

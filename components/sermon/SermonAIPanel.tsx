@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from 'react'
 import { useChat } from 'ai/react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
+import { useBreakpoint } from '@/hooks/use-media-query'
 import { Bot, Send, StopCircle, ClipboardPaste, Sparkles, PenLine, BookOpen, Lightbulb, Link2, Target } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -11,6 +12,7 @@ import { useSermonEditor } from './SermonEditorContext'
 
 export function SermonAIPanel() {
   const { t } = useTranslation()
+  const { isMd } = useBreakpoint()
   const { currentSermon, apiConfig, locale } = useBibleStore()
   const { insertContent } = useSermonEditor()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -84,7 +86,7 @@ export function SermonAIPanel() {
               }
             }}
             disabled={isLoading}
-            className="inline-flex items-center gap-1 px-2 py-1 text-[10px] rounded-full bg-card border border-border text-muted-foreground hover:bg-primary/10 hover:text-primary disabled:opacity-50 transition-colors"
+            className={`inline-flex items-center gap-1 ${isMd ? 'px-2 py-1' : 'px-3 py-2 min-h-[36px]'} text-[10px] rounded-full bg-card border border-border text-muted-foreground hover:bg-primary/10 hover:text-primary disabled:opacity-50 transition-colors active:scale-95`}
           >
             <Icon className="w-2.5 h-2.5" />
             {t(`sermon.${key}`)}
@@ -149,14 +151,14 @@ export function SermonAIPanel() {
             onChange={handleInputChange}
             placeholder={t('sermon.aiPlaceholder')}
             disabled={isLoading}
-            className="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-border bg-card focus:outline-none focus:ring-1 focus:ring-primary/40 disabled:opacity-50"
+            className={`flex-1 px-2.5 ${isMd ? 'py-1.5' : 'py-2.5'} text-xs rounded-lg border border-border bg-card focus:outline-none focus:ring-1 focus:ring-primary/40 disabled:opacity-50`}
           />
           {isLoading ? (
-            <button type="button" onClick={() => stop()} className="p-1.5 rounded-lg text-destructive hover:bg-destructive/10">
+            <button type="button" onClick={() => stop()} className={`${isMd ? 'p-1.5' : 'p-2.5 min-h-[44px] min-w-[44px]'} rounded-lg text-destructive hover:bg-destructive/10 active:scale-95`}>
               <StopCircle className="w-4 h-4" />
             </button>
           ) : (
-            <button type="submit" disabled={!input.trim()} className="p-1.5 rounded-lg text-primary hover:bg-primary/10 disabled:opacity-30">
+            <button type="submit" disabled={!input.trim()} className={`${isMd ? 'p-1.5' : 'p-2.5 min-h-[44px] min-w-[44px]'} rounded-lg text-primary hover:bg-primary/10 disabled:opacity-30 active:scale-95`}>
               <Send className="w-4 h-4" />
             </button>
           )}

@@ -212,7 +212,7 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={handleOverlayClick}>
-      <div ref={dialogRef} className="bg-card rounded-xl shadow-2xl w-[480px] max-h-[85vh] overflow-hidden flex flex-col">
+      <div ref={dialogRef} className="bg-card rounded-xl shadow-2xl w-[480px] max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <h3 className="text-sm font-semibold text-foreground">{t('sermon.newSermon')}</h3>
@@ -411,7 +411,7 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
       {showVerseSelector && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowVerseSelector(false)}>
           <div
-            className="bg-card rounded-xl shadow-2xl w-[520px] max-h-[80vh] overflow-hidden flex flex-col"
+            className="bg-card rounded-xl shadow-2xl w-[520px] max-w-[calc(100vw-1rem)] max-h-[80vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Selector Header */}

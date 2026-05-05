@@ -2,12 +2,14 @@
 
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
+import { useBreakpoint } from '@/hooks/use-media-query'
 import { Settings, ToggleLeft, ToggleRight, PenLine, Download, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
 export function SermonSettingsPanel() {
   const { t } = useTranslation()
+  const { isMd } = useBreakpoint()
   const { currentSermon, sermons, setSermons, setCurrentSermon, sermonAutoSave, setSermonAutoSave, sermonAiPreference, setSermonAiPreference } = useBibleStore()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
@@ -73,7 +75,7 @@ export function SermonSettingsPanel() {
                   } catch {}
                 }}
                 className={cn(
-                  'px-2 py-1.5 rounded-md text-[10px] font-medium text-center transition-colors',
+                  `${isMd ? 'px-2 py-1.5' : 'px-3 py-2.5 min-h-[44px]'} rounded-md text-[10px] font-medium text-center transition-colors active:scale-95`,
                   currentSermon?.style === style
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary'
@@ -120,7 +122,7 @@ export function SermonSettingsPanel() {
                 key={key}
                 onClick={() => setSermonAiPreference(key)}
                 className={cn(
-                  'px-2 py-1 rounded-md text-[10px] font-medium transition-colors',
+                  `${isMd ? 'px-2 py-1' : 'px-3 py-2 min-h-[44px]'} rounded-md text-[10px] font-medium transition-colors active:scale-95`,
                   sermonAiPreference === key
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground'
@@ -162,7 +164,7 @@ export function SermonSettingsPanel() {
           <div className="space-y-2">
             <button
               onClick={handleExport}
-              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium bg-muted text-muted-foreground hover:bg-secondary transition-colors"
+              className={`w-full flex items-center justify-center gap-1.5 ${isMd ? 'py-2' : 'py-3 min-h-[44px]'} rounded-lg text-xs font-medium bg-muted text-muted-foreground hover:bg-secondary transition-colors active:scale-95`}
             >
               <Download className="w-3.5 h-3.5" />
               {t('sermon.exportSermon')}
@@ -171,7 +173,7 @@ export function SermonSettingsPanel() {
             {!showDeleteConfirm ? (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                className={`w-full flex items-center justify-center gap-1.5 ${isMd ? 'py-2' : 'py-3 min-h-[44px]'} rounded-lg text-xs font-medium bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors active:scale-95`}
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 {t('sermon.deleteSermon')}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
+import { useBreakpoint } from '@/hooks/use-media-query'
 import { BookMarked, ClipboardPaste, Loader2 } from 'lucide-react'
 import { useSermonEditor } from './SermonEditorContext'
 
@@ -113,6 +114,7 @@ function parseVerseRefs(refs: string): VerseRefData[] {
 
 export function SermonVersePanel() {
   const { t } = useTranslation()
+  const { isMd } = useBreakpoint()
   const { currentSermon } = useBibleStore()
   const { insertContent } = useSermonEditor()
   const [verseData, setVerseData] = useState<VerseRefData[]>([])
@@ -191,7 +193,7 @@ export function SermonVersePanel() {
               </span>
               <button
                 onClick={() => handleInsert(ref.text || '')}
-                className="inline-flex items-center gap-0.5 text-[10px] text-primary hover:text-primary/80"
+                className={`inline-flex items-center gap-0.5 text-[10px] text-primary hover:text-primary/80 ${isMd ? '' : 'min-h-[44px] px-3'} active:scale-95`}
               >
                 <ClipboardPaste className="w-2.5 h-2.5" />
                 {t('sermon.verseInsert')}

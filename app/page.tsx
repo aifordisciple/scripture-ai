@@ -740,7 +740,8 @@ export default function Home() {
           />
         </div>
 
-        {/* Mobile Tab Bar - 始终可见，防止导航丢失 */}
+        {/* Mobile Tab Bar - 始终可见，防止导航丢失（讲章模块有自己的底部栏，隐藏应用栏避免重叠） */}
+        {activeTab?.type !== 'sermon' && (
         <div
           className={cn(
             "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel border-t border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]"
@@ -754,6 +755,7 @@ export default function Home() {
               onAddTab={handleAddTab} 
             />
         </div>
+        )}
 
         {/* 沉浸式读经计划控制器 */}
         <PlanDailyFlow />
