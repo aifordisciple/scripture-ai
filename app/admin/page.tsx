@@ -83,7 +83,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066cc]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -109,13 +109,13 @@ export default function AdminDashboard() {
           title={t('admin.activeToday')}
           value={stats.users.activeToday}
           icon={Activity}
-          color="bg-green-500"
+          color="bg-green-500/100"
         />
         <StatCard
           title={t('admin.newUsersToday')}
           value={stats.users.newToday}
           icon={TrendingUp}
-          color="bg-blue-500"
+          color="bg-primary/100"
         />
         <StatCard
           title={t('admin.pageViewsToday')}
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
       {/* 用户统计 */}
       <div className="bg-card rounded-lg border border-border p-6">
         <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
-          <Users className="text-[#0066cc]" size={20} />
+          <Users className="text-primary" size={20} />
           {t('admin.userStatistics')}
         </h2>
 
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
                 <div key={i} className="flex-1 flex flex-col items-center gap-2">
                   <div className="w-full flex-1 flex items-end">
                     <div
-                      className="w-full bg-[#0066cc] rounded-t transition-all"
+                      className="w-full bg-primary rounded-t transition-all"
                       style={{ height: `${Math.max(height, 2)}%` }}
                     >
                       {day.count > 0 && (
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
         {/* 读经计划统计 */}
         <div className="bg-card rounded-lg border border-border p-6">
           <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
-            <Target className="text-orange-600" size={20} />
+            <Target className="text-amber-600 dark:text-amber-400" size={20} />
             {t('admin.readingPlanStatistics')}
           </h2>
 
@@ -357,8 +357,8 @@ function StatItem({
   const colorClasses = {
     default: 'text-foreground',
     green: 'text-green-600 dark:text-green-400',
-    blue: 'text-[#0066cc]',
-    orange: 'text-orange-600',
+    blue: 'text-primary',
+    orange: 'text-amber-600 dark:text-amber-400',
     muted: 'text-muted-foreground'
   };
 

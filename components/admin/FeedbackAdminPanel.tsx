@@ -234,7 +234,7 @@ export default function FeedbackAdminPanel() {
         {[
           { label: t('adminFeedback.statsAll'), value: stats.total, color: "text-primary", bg: "bg-primary/10" },
           { label: t('adminFeedback.statsPending'), value: stats.pending, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10" },
-          { label: t('adminFeedback.statsProcessing'), value: stats.processing, color: "text-[#0066cc] dark:text-[#2997ff]", bg: "bg-[#0066cc]/5 dark:bg-[#0066cc]/10" },
+          { label: t('adminFeedback.statsProcessing'), value: stats.processing, color: "text-primary dark:text-primary", bg: "bg-primary/5 dark:bg-primary/10" },
           { label: t('adminFeedback.statsResolved'), value: stats.resolved, color: "text-green-600 dark:text-green-400", bg: "bg-green-500/10" },
           { label: t('adminFeedback.statsClosed'), value: stats.closed, color: "text-muted-foreground", bg: "bg-accent" },
         ].map((stat) => (
@@ -299,7 +299,7 @@ export default function FeedbackAdminPanel() {
           </div>
           <button
             onClick={fetchFeedbacks}
-            className="p-2 text-muted-foreground hover:text-primary hover:bg-accent/50 rounded-lg transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2 text-muted-foreground hover:text-primary hover:bg-accent/50 rounded-lg transition-all duration-150 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title={t('adminFeedback.refreshTitle')}
           >
             <RefreshCw className="w-5 h-5" />
@@ -377,14 +377,14 @@ export default function FeedbackAdminPanel() {
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-accent/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-accent/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setCurrentPage(currentPage + 1)}
                 disabled={feedbacks.length < pageSize}
-                className="p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-accent/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-accent/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -407,7 +407,7 @@ export default function FeedbackAdminPanel() {
                     setShowDetailModal(false);
                     setSelectedFeedback(null);
                   }}
-                  className="p-1 text-muted-foreground hover:text-foreground rounded-lg transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="p-1 text-muted-foreground hover:text-foreground rounded-lg transition-all duration-150 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -478,7 +478,7 @@ export default function FeedbackAdminPanel() {
                           onClick={() =>
                             handleUpdateStatus(selectedFeedback.id, "processing")
                           }
-                          className="px-3 py-1.5 text-sm border border-primary/30 text-primary rounded-lg hover:bg-primary/10 transition-all duration-fast active:scale-95 min-h-[44px]"
+                          className="px-3 py-1.5 text-sm border border-primary/30 text-primary rounded-lg hover:bg-primary/10 transition-all duration-150 active:scale-95 min-h-[44px]"
                         >
                           {t('adminFeedback.markProcessing')}
                         </button>
@@ -488,7 +488,7 @@ export default function FeedbackAdminPanel() {
                           onClick={() =>
                             handleUpdateStatus(selectedFeedback.id, "closed")
                           }
-                          className="px-3 py-1.5 text-sm border border-border text-muted-foreground rounded-lg hover:bg-accent/50 transition-all duration-fast active:scale-95 min-h-[44px]"
+                          className="px-3 py-1.5 text-sm border border-border text-muted-foreground rounded-lg hover:bg-accent/50 transition-all duration-150 active:scale-95 min-h-[44px]"
                         >
                           {t('adminFeedback.closeFeedback')}
                         </button>
@@ -500,14 +500,14 @@ export default function FeedbackAdminPanel() {
                           setShowDetailModal(false);
                           setSelectedFeedback(null);
                         }}
-                        className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent/50 rounded-lg transition-all duration-fast active:scale-95 min-h-[44px]"
+                        className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent/50 rounded-lg transition-all duration-150 active:scale-95 min-h-[44px]"
                       >
                         {t('adminFeedback.cancel')}
                       </button>
                       <button
                         onClick={handleReply}
                         disabled={!replyContent.trim() || submitting}
-                        className="px-4 py-2 text-sm bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-fast disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 min-h-[44px]"
+                        className="px-4 py-2 text-sm bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 min-h-[44px]"
                       >
                         {submitting ? t('adminFeedback.submitting') : t('adminFeedback.replyAndResolve')}
                       </button>

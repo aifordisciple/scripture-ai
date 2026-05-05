@@ -205,9 +205,9 @@ export default function AdminMessagesPage() {
           <button
             onClick={() => setTab('send')}
             className={cn(
-              "py-3 md:py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-fast active:scale-95",
+              "py-3 md:py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-150 active:scale-95",
               tab === 'send'
-                ? "border-[#0066cc] text-[#0066cc]"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
             )}
           >
@@ -217,9 +217,9 @@ export default function AdminMessagesPage() {
           <button
             onClick={() => setTab('history')}
             className={cn(
-              "py-3 md:py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-fast active:scale-95",
+              "py-3 md:py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-150 active:scale-95",
               tab === 'history'
-                ? "border-[#0066cc] text-[#0066cc]"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
             )}
           >
@@ -235,7 +235,7 @@ export default function AdminMessagesPage() {
           {error && !users && (
             <div className="flex flex-col items-center justify-center py-12 gap-4 bg-card rounded-lg border border-border">
               <div className="text-destructive">{error}</div>
-              <button onClick={fetchUsers} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 transition-all duration-fast">{t('admin.retry')}</button>
+              <button onClick={fetchUsers} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-apple-focus active:scale-95 transition-all duration-150">{t('admin.retry')}</button>
             </div>
           )}
 
@@ -250,13 +250,13 @@ export default function AdminMessagesPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder={t('admin.searchUsers')}
-                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={handleSearch}
-                  className="px-4 py-2 bg-accent text-foreground rounded-lg hover:bg-accent/80 transition-all duration-fast active:scale-95"
+                  className="px-4 py-2 bg-accent text-foreground rounded-lg hover:bg-accent/80 transition-all duration-150 active:scale-95"
                 >
                   {t('admin.search')}
                 </button>
@@ -265,7 +265,7 @@ export default function AdminMessagesPage() {
                 <button
                   onClick={() => openCompose('selected')}
                   disabled={selectedUsers.length === 0}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-fast active:scale-95 text-sm md:text-base min-h-[44px]"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-primary text-white rounded-lg hover:bg-apple-focus disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 text-sm md:text-base min-h-[44px]"
                 >
                   <User size={16} />
                   <span className="hidden sm:inline">{t('admin.sendToSelected')}</span>
@@ -273,7 +273,7 @@ export default function AdminMessagesPage() {
                 </button>
                 <button
                   onClick={() => openCompose('all')}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-fast active:scale-95 text-sm md:text-base min-h-[44px]"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-150 active:scale-95 text-sm md:text-base min-h-[44px]"
                 >
                   <Users size={16} />
                   <span className="hidden sm:inline">{t('admin.sendToAllUsers')}</span>
@@ -287,7 +287,7 @@ export default function AdminMessagesPage() {
           <div className="hidden md:block bg-card rounded-lg border border-border overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-[#0066cc]" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -367,7 +367,7 @@ export default function AdminMessagesPage() {
           <div className="md:hidden space-y-3">
             {loading ? (
               <div className="flex items-center justify-center py-12 bg-card rounded-lg border border-border">
-                <Loader2 className="w-8 h-8 animate-spin text-[#0066cc]" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : (
               users?.users.map((user) => (
@@ -375,7 +375,7 @@ export default function AdminMessagesPage() {
                   key={user.id}
                   onClick={() => toggleUserSelection(user)}
                   className={cn(
-                    "bg-card rounded-lg border border-border p-4 cursor-pointer transition-all duration-fast min-h-[44px]",
+                    "bg-card rounded-lg border border-border p-4 cursor-pointer transition-all duration-150 min-h-[44px]",
                     selectedUsers.find(u => u.id === user.id) && "ring-2 ring-primary bg-primary/10"
                   )}
                 >
@@ -421,11 +421,11 @@ export default function AdminMessagesPage() {
           {error && !messages ? (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
               <div className="text-destructive">{error}</div>
-              <button onClick={fetchMessages} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] transition-all duration-fast active:scale-95">{t('admin.retry')}</button>
+              <button onClick={fetchMessages} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-apple-focus transition-all duration-150 active:scale-95">{t('admin.retry')}</button>
             </div>
           ) : loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-[#0066cc]" />
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : (
             <>
@@ -483,7 +483,7 @@ export default function AdminMessagesPage() {
                     <button
                       onClick={() => setMessagePage(p => Math.max(1, p - 1))}
                       disabled={messagePage === 1}
-                      className="p-2 border border-border rounded-lg hover:bg-accent/50 disabled:opacity-50 transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      className="p-2 border border-border rounded-lg hover:bg-accent/50 disabled:opacity-50 transition-all duration-150 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
                     >
                       <ChevronLeft size={18} />
                     </button>
@@ -493,7 +493,7 @@ export default function AdminMessagesPage() {
                     <button
                       onClick={() => setMessagePage(p => Math.min(messages.pagination.totalPages, p + 1))}
                       disabled={messagePage === messages.pagination.totalPages}
-                      className="p-2 border border-border rounded-lg hover:bg-accent/50 disabled:opacity-50 transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      className="p-2 border border-border rounded-lg hover:bg-accent/50 disabled:opacity-50 transition-all duration-150 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
                     >
                       <ChevronRight size={18} />
                     </button>
@@ -519,7 +519,7 @@ export default function AdminMessagesPage() {
               <h3 className="text-lg font-semibold">
                 {sendToAll ? t('admin.sendToAllUsers') : t('admin.sendToCountUsers', { count: selectedUsers.length })}
               </h3>
-              <button onClick={closeCompose} className="text-muted-foreground hover:text-foreground transition-all duration-fast active:scale-95">
+              <button onClick={closeCompose} className="text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-95">
                 <X size={20} />
               </button>
             </div>
@@ -546,7 +546,7 @@ export default function AdminMessagesPage() {
                   type="text"
                   value={composeData.title}
                   onChange={(e) => setComposeData({ ...composeData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                   placeholder={t('admin.messageTitlePlaceholder')}
                 />
               </div>
@@ -557,7 +557,7 @@ export default function AdminMessagesPage() {
                   value={composeData.content}
                   onChange={(e) => setComposeData({ ...composeData, content: e.target.value })}
                   rows={6}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                   placeholder={t('admin.messageContentPlaceholder')}
                 />
               </div>
@@ -566,14 +566,14 @@ export default function AdminMessagesPage() {
             <div className="flex justify-end gap-3 p-4 border-t border-border sticky bottom-0 bg-card z-10">
               <button
                 onClick={closeCompose}
-                className="px-4 py-2 text-foreground bg-accent rounded-lg hover:bg-accent/80 transition-all duration-fast active:scale-95 min-h-[44px]"
+                className="px-4 py-2 text-foreground bg-accent rounded-lg hover:bg-accent/80 transition-all duration-150 active:scale-95 min-h-[44px]"
               >
                 {t('admin.cancel')}
               </button>
               <button
                 onClick={handleSend}
                 disabled={sending}
-                className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] disabled:opacity-50 transition-all duration-fast active:scale-95 min-h-[44px]"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-apple-focus disabled:opacity-50 transition-all duration-150 active:scale-95 min-h-[44px]"
               >
                 {sending ? t('admin.sending') : t('admin.send')}
               </button>

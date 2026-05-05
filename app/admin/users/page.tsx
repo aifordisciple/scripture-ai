@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
   if (loading && !data) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066cc]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -173,7 +173,7 @@ export default function AdminUsersPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <div className="text-destructive text-lg">{error}</div>
-        <button onClick={fetchUsers} className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 transition-all duration-fast">{t('admin.retry')}</button>
+        <button onClick={fetchUsers} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-apple-focus active:scale-95 transition-all duration-150">{t('admin.retry')}</button>
       </div>
     );
   }
@@ -191,14 +191,14 @@ export default function AdminUsersPage() {
               placeholder={t('admin.searchNameOrEmail')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-primary/20 focus:border-[#0066cc]"
+              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-primary/20 focus:border-primary"
             />
           </div>
           <div className="flex gap-3">
             <select
               value={roleFilter}
               onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-              className="flex-1 md:flex-none px-4 py-2 border border-border rounded-lg focus:ring-primary/20 focus:border-[#0066cc]"
+              className="flex-1 md:flex-none px-4 py-2 border border-border rounded-lg focus:ring-primary/20 focus:border-primary"
             >
               <option value="">{t('admin.allRoles')}</option>
               <option value="user">{t('admin.userRole')}</option>
@@ -206,7 +206,7 @@ export default function AdminUsersPage() {
             </select>
             <button
               type="submit"
-              className="px-6 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] active:scale-95 transition-all duration-fast whitespace-nowrap"
+              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-apple-focus active:scale-95 transition-all duration-150 whitespace-nowrap"
             >
               {t('admin.search')}
             </button>
@@ -281,7 +281,7 @@ export default function AdminUsersPage() {
                         <button
                           onClick={() => handleUnmuteUser(user)}
                           disabled={updating === user.id}
-                          className="px-3 py-1 rounded text-sm text-green-600 dark:text-green-400 hover:bg-green-500/10 disabled:opacity-50 transition-all duration-fast active:scale-95 min-h-[44px]"
+                          className="px-3 py-1 rounded text-sm text-green-600 dark:text-green-400 hover:bg-green-500/10 disabled:opacity-50 transition-all duration-150 active:scale-95 min-h-[44px]"
                         >
                           <CheckCircle className="w-4 h-4 inline mr-1" />
                           {t('admin.unmute')}
@@ -290,7 +290,7 @@ export default function AdminUsersPage() {
                         <button
                           onClick={() => openMuteDialog(user)}
                           disabled={updating === user.id}
-                          className="px-3 py-1 rounded text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50 transition-all duration-fast active:scale-95 min-h-[44px]"
+                          className="px-3 py-1 rounded text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50 transition-all duration-150 active:scale-95 min-h-[44px]"
                         >
                           <Ban className="w-4 h-4 inline mr-1" />
                           {t('admin.mute')}
@@ -300,10 +300,10 @@ export default function AdminUsersPage() {
                         onClick={() => toggleRole(user)}
                         disabled={updating === user.id}
                         className={cn(
-                          "px-3 py-1 rounded text-sm transition-all duration-fast active:scale-95 min-h-[44px]",
+                          "px-3 py-1 rounded text-sm transition-all duration-150 active:scale-95 min-h-[44px]",
                           user.role === 'admin'
                             ? "text-destructive hover:bg-destructive/10"
-                            : "text-[#0066cc] hover:bg-[#0066cc]/10",
+                            : "text-primary hover:bg-primary/10",
                           updating === user.id && "opacity-50 cursor-not-allowed"
                         )}
                       >
@@ -367,7 +367,7 @@ export default function AdminUsersPage() {
                   <button
                     onClick={() => handleUnmuteUser(user)}
                     disabled={updating === user.id}
-                    className="px-3 py-1.5 rounded text-sm font-semibold text-green-600 dark:text-green-400 bg-green-500/10 hover:bg-green-500/20 disabled:opacity-50 transition-all duration-fast active:scale-95"
+                    className="px-3 py-1.5 rounded text-sm font-semibold text-green-600 dark:text-green-400 bg-green-500/10 hover:bg-green-500/20 disabled:opacity-50 transition-all duration-150 active:scale-95"
                   >
                     {t('admin.unmute')}
                   </button>
@@ -375,7 +375,7 @@ export default function AdminUsersPage() {
                   <button
                     onClick={() => openMuteDialog(user)}
                     disabled={updating === user.id}
-                    className="px-3 py-1.5 rounded text-sm font-semibold text-destructive bg-destructive/10 hover:bg-destructive/20 disabled:opacity-50 transition-all duration-fast active:scale-95"
+                    className="px-3 py-1.5 rounded text-sm font-semibold text-destructive bg-destructive/10 hover:bg-destructive/20 disabled:opacity-50 transition-all duration-150 active:scale-95"
                   >
                     {t('admin.mute')}
                   </button>
@@ -384,10 +384,10 @@ export default function AdminUsersPage() {
                   onClick={() => toggleRole(user)}
                   disabled={updating === user.id}
                   className={cn(
-                    "px-3 py-1.5 rounded text-sm font-semibold transition-all duration-fast active:scale-95",
+                    "px-3 py-1.5 rounded text-sm font-semibold transition-all duration-150 active:scale-95",
                     user.role === 'admin'
                       ? "text-destructive bg-destructive/10 hover:bg-destructive/20"
-                      : "text-[#0066cc] bg-[#0066cc]/10 hover:bg-[#0066cc]/20",
+                      : "text-primary bg-primary/10 hover:bg-primary/20",
                     updating === user.id && "opacity-50 cursor-not-allowed"
                   )}
                 >
@@ -408,7 +408,7 @@ export default function AdminUsersPage() {
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="p-2 rounded border border-border disabled:opacity-50 transition-all duration-fast active:scale-95"
+              className="p-2 rounded border border-border disabled:opacity-50 transition-all duration-150 active:scale-95"
             >
               <ChevronLeft size={20} />
             </button>
@@ -418,7 +418,7 @@ export default function AdminUsersPage() {
             <button
               onClick={() => setPage(p => Math.min(data.pagination.totalPages, p + 1))}
               disabled={page === data.pagination.totalPages}
-              className="p-2 rounded border border-border disabled:opacity-50 transition-all duration-fast active:scale-95"
+              className="p-2 rounded border border-border disabled:opacity-50 transition-all duration-150 active:scale-95"
             >
               <ChevronRight size={20} />
             </button>

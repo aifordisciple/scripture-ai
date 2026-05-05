@@ -122,7 +122,7 @@ export default function AdminSettingsPage() {
   if (loading && !logs) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066cc]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -140,7 +140,7 @@ export default function AdminSettingsPage() {
               <select
                 value={actionFilter}
                 onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
-                className="px-3 py-1.5 text-sm border border-border rounded-lg focus:ring-primary/20 focus:border-[#0066cc]"
+                className="px-3 py-1.5 text-sm border border-border rounded-lg focus:ring-primary/20 focus:border-primary"
               >
                 <option value="">全部操作</option>
                 <option value="VIEW">查看</option>
@@ -151,7 +151,7 @@ export default function AdminSettingsPage() {
               <select
                 value={targetTypeFilter}
                 onChange={(e) => { setTargetTypeFilter(e.target.value); setPage(1); }}
-                className="px-3 py-1.5 text-sm border border-border rounded-lg focus:ring-primary/20 focus:border-[#0066cc]"
+                className="px-3 py-1.5 text-sm border border-border rounded-lg focus:ring-primary/20 focus:border-primary"
               >
                 <option value="">全部对象</option>
                 <option value="USER">用户</option>
@@ -231,7 +231,7 @@ export default function AdminSettingsPage() {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-2 rounded border border-border disabled:opacity-50 transition-all duration-fast active:scale-95"
+                className="p-2 rounded border border-border disabled:opacity-50 transition-all duration-150 active:scale-95"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -241,7 +241,7 @@ export default function AdminSettingsPage() {
               <button
                 onClick={() => setPage(p => Math.min(logs.pagination.totalPages, p + 1))}
                 disabled={page === logs.pagination.totalPages}
-                className="p-2 rounded border border-border disabled:opacity-50 transition-all duration-fast active:scale-95"
+                className="p-2 rounded border border-border disabled:opacity-50 transition-all duration-150 active:scale-95"
               >
                 <ChevronRight size={20} />
               </button>

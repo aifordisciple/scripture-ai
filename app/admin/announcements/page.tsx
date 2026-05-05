@@ -173,7 +173,7 @@ export default function AdminAnnouncementsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066cc]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -184,7 +184,7 @@ export default function AdminAnnouncementsPage() {
         <h1 className="text-2xl font-semibold text-foreground apple-headline">{t('admin.announcementManagement')}</h1>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] transition-all duration-fast active:scale-95 min-h-[44px]"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-apple-focus transition-all duration-150 active:scale-95 min-h-[44px]"
         >
           <Plus size={18} />
           {t('admin.createAnnouncement')}
@@ -244,7 +244,7 @@ export default function AdminAnnouncementsPage() {
                 <button
                   onClick={() => toggleActive(announcement)}
                   className={cn(
-                    "p-2 rounded-lg transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center",
+                    "p-2 rounded-lg transition-all duration-150 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center",
                     announcement.isActive
                       ? "text-green-600 dark:text-green-400 hover:bg-green-500/10"
                       : "text-muted-foreground hover:bg-accent/50"
@@ -255,13 +255,13 @@ export default function AdminAnnouncementsPage() {
                 </button>
                 <button
                   onClick={() => handleEdit(announcement)}
-                  className="p-2 text-[#0066cc] hover:bg-[#0066cc]/10 rounded-lg transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-all duration-150 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   <Edit2 size={18} />
                 </button>
                 <button
                   onClick={() => handleDelete(announcement.id)}
-                  className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-all duration-fast active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-all duration-150 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   <Trash2 size={18} />
                 </button>
@@ -285,7 +285,7 @@ export default function AdminAnnouncementsPage() {
               <h3 className="text-lg font-semibold">
                 {editingId ? t('admin.editAnnouncement') : t('admin.createAnnouncement')}
               </h3>
-              <button onClick={resetForm} className="text-muted-foreground hover:text-foreground transition-all duration-fast active:scale-95">
+              <button onClick={resetForm} className="text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-95">
                 <X size={20} />
               </button>
             </div>
@@ -297,7 +297,7 @@ export default function AdminAnnouncementsPage() {
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                   placeholder={t('admin.announcementTitlePlaceholder')}
                   required
                 />
@@ -309,7 +309,7 @@ export default function AdminAnnouncementsPage() {
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                   placeholder={t('admin.announcementContentPlaceholder')}
                   required
                 />
@@ -320,7 +320,7 @@ export default function AdminAnnouncementsPage() {
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value as 'info' | 'warning' | 'maintenance' })}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                 >
                   <option value="info">{t('admin.info')}</option>
                   <option value="warning">{t('admin.warning')}</option>
@@ -335,7 +335,7 @@ export default function AdminAnnouncementsPage() {
                     type="date"
                     value={formData.startDate}
                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
+                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                   />
                 </div>
                 <div>
@@ -344,7 +344,7 @@ export default function AdminAnnouncementsPage() {
                     type="date"
                     value={formData.endDate}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-[#0066cc]"
+                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                   />
                 </div>
               </div>
@@ -354,7 +354,7 @@ export default function AdminAnnouncementsPage() {
                   type="checkbox"
                   checked={formData.isActive}
                   onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="w-4 h-4 rounded border-border text-[#0066cc] focus:ring-primary"
+                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                 />
                 <label className="text-sm font-semibold text-foreground">{t('admin.publishImmediately')}</label>
               </div>
@@ -363,14 +363,14 @@ export default function AdminAnnouncementsPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 text-foreground bg-accent rounded-lg hover:bg-accent/80 transition-all duration-fast active:scale-95 min-h-[44px]"
+                  className="px-4 py-2 text-foreground bg-accent rounded-lg hover:bg-accent/80 transition-all duration-150 active:scale-95 min-h-[44px]"
                 >
                   {t('admin.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0071e3] disabled:opacity-50 transition-all duration-fast active:scale-95 min-h-[44px]"
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-apple-focus disabled:opacity-50 transition-all duration-150 active:scale-95 min-h-[44px]"
                 >
                   {saving ? t('admin.saving') : (editingId ? t('admin.update') : t('admin.create'))}
                 </button>
