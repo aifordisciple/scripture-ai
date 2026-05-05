@@ -699,7 +699,7 @@ export default function Home() {
                     addTab({ type: 'plan' });
                   }
                 }}
-                className="rounded-full text-muted-foreground hover:bg-[#0066cc]/10 hover:text-[#0066cc] transition-colors relative active:scale-95"
+                className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors relative active:scale-95"
                 title={t('tabs.plan')}
               >
                 <Calendar className="h-5 w-5" />

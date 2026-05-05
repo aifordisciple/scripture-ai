@@ -389,8 +389,8 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className={cn(
               "fixed z-[99] w-72 rounded-lg overflow-hidden",
-              "bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8]",
-              "border border-[#e0e0e0] dark:border-[#3a3a3c]"
+              "glass-panel",
+              "border border-border dark:border-border"
             )}
             style={{
               bottom: position.bottom + 65,
@@ -398,14 +398,14 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             }}
           >
             {/* 头部 */}
-            <div className="flex items-center justify-between px-4 py-3 bg-[#f5f5f7] dark:bg-[#2a2a2c] border-b border-[#e0e0e0] dark:border-[#3a3a3c]">
-              <div className="flex items-center gap-2 text-sm font-semibold text-[#1d1d1f] dark:text-white/80">
-                <ListOrdered className="w-4 h-4 text-[#0066cc]" />
+            <div className="flex items-center justify-between px-4 py-3 bg-secondary dark:bg-card border-b border-border dark:border-border">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground dark:text-foreground/80">
+                <ListOrdered className="w-4 h-4 text-primary" />
                 {t('ai.queueTitle')}
               </div>
               <button
                 onClick={closeQueuePanel}
-                className="text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white transition-colors"
+                className="text-muted-foreground hover:text-foreground dark:hover:text-foreground transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -413,9 +413,9 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
 
             {/* 已完成的解读（待查看） */}
             {isAiFinishedButUnseen && !currentAiRequest && (
-              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-[#0066cc]/5">
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-primary/5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-[#0066cc] flex items-center gap-1">
+                  <span className="text-xs font-bold text-primary flex items-center gap-1">
                     <BookOpenCheck className="w-3.5 h-3.5" />
                     {t('ai.interpretationDone')}
                   </span>
@@ -426,7 +426,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                     setIsAiFinishedButUnseen(false);
                     setIsQueuePanelOpen(false);
                   }}
-                  className="w-full py-2 px-3 rounded-xl bg-[#0066cc] hover:bg-[#0071e3] text-white text-sm font-medium transition-all"
+                  className="w-full py-2 px-3 rounded-xl bg-primary hover:bg-apple-focus text-white text-sm font-medium transition-all"
                 >
                   {t('ai.clickToView')}
                 </button>
@@ -437,7 +437,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             {currentAiRequest && currentAiRequest.status === 'processing' && (
               <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-bold text-[#0066cc] flex items-center gap-1">
+                  <span className="text-xs font-bold text-primary flex items-center gap-1">
                     <Loader2 className="w-3 h-3 animate-spin" />
                     {t('ai.processing')}
                   </span>
@@ -452,12 +452,12 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                   </button>
                 </div>
                 <div className="flex items-start gap-2">
-                  <BookOpen className="w-4 h-4 text-[#7a7a7a] shrink-0 mt-0.5" />
+                  <BookOpen className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-[#1d1d1f] dark:text-white/80 truncate">
+                    <div className="text-sm font-medium text-foreground dark:text-foreground/80 truncate">
                       {getShortRef(currentAiRequest.ref)}
                     </div>
-                    <div className="text-xs text-[#7a7a7a] truncate">
+                    <div className="text-xs text-muted-foreground truncate">
                       {truncatePrompt(currentAiRequest.prompt, 30)}
                     </div>
                   </div>
@@ -468,7 +468,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             {/* 等待队列 */}
             {aiQueue.length > 0 && (
               <div className="max-h-48 overflow-y-auto">
-                <div className="px-4 py-2 text-xs text-[#7a7a7a] font-medium bg-[#f5f5f7]/50 dark:bg-[#2a2a2c]/50">
+                <div className="px-4 py-2 text-xs text-muted-foreground font-medium bg-secondary/50 dark:bg-card/50">
                   {t('ai.waiting')} ({aiQueue.length})
                 </div>
                 {aiQueue.map((item, index) => (
@@ -477,21 +477,21 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                     className="px-4 py-2.5 flex items-center justify-between hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
                   >
                     <div className="flex items-start gap-2 flex-1 min-w-0">
-                      <span className="text-xs text-[#7a7a7a] font-mono w-4 shrink-0">
+                      <span className="text-xs text-muted-foreground font-mono w-4 shrink-0">
                         {index + 1}.
                       </span>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm text-[#1d1d1f] dark:text-white/80 truncate">
+                        <div className="text-sm text-foreground dark:text-foreground/80 truncate">
                           {getShortRef(item.ref)}
                         </div>
-                        <div className="text-xs text-[#7a7a7a] truncate">
+                        <div className="text-xs text-muted-foreground truncate">
                           {truncatePrompt(item.prompt, 25)}
                         </div>
                       </div>
                     </div>
                     <button
                       onClick={() => cancelAIRequest(item.id)}
-                      className="ml-2 text-[#7a7a7a] hover:text-[#cc0000] dark:hover:text-[#cc0000] transition-colors shrink-0"
+                      className="ml-2 text-muted-foreground hover:text-destructive dark:hover:text-destructive transition-colors shrink-0"
                       title={t('ai.removeFromQueue')}
                     >
                       <X className="w-3.5 h-3.5" />
@@ -517,7 +517,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                 setAiOpen(true);
                 setIsQueuePanelOpen(false);
               }}
-              className="w-full px-4 py-2.5 text-center text-xs font-medium text-[#0066cc] bg-[#f5f5f7] dark:bg-[#2a2a2c] hover:bg-[#0066cc]/5 transition-colors border-t border-[#e0e0e0] dark:border-[#3a3a3c]"
+              className="w-full px-4 py-2.5 text-center text-xs font-medium text-primary bg-secondary dark:bg-card hover:bg-primary/5 transition-colors border-t border-border dark:border-border"
             >
               {t('ai.openAISidebar')}
             </button>
@@ -537,10 +537,10 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             ? "translate-x-0 opacity-100 scale-100"
             : "translate-x-10 opacity-0 scale-50 pointer-events-none"
         )}>
-          <div className="bg-[#0066cc] text-white px-4 py-2 rounded-full flex items-center gap-2 font-semibold text-sm">
+          <div className="bg-primary text-white px-4 py-2 rounded-full flex items-center gap-2 font-semibold text-sm">
             <MousePointerClick className="w-4 h-4" /> {t('ai.clickToView')}
           </div>
-          <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-[#0066cc]"></div>
+          <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-primary"></div>
         </div>
 
         {/* 2. 队列徽章提示 */}
@@ -552,7 +552,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="bg-[#cc0000] text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1"
+              className="bg-destructive text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1"
             >
               {isProcessing ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -569,18 +569,18 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
           <>
             <div className={cn("absolute transition-all duration-300 ease-out", showHint === "ai-toggle" ? "-translate-x-28 opacity-100 scale-100" : "translate-x-0 opacity-0 scale-50")}>
               {isAiOpen ? (
-                <div className="bg-[#1d1d1f]/80 text-white px-3 py-2 rounded-full flex items-center gap-2 font-bold text-xs"><X className="w-4 h-4" /> {t('ai.closeAssistant')}</div>
+                <div className="bg-foreground/80 text-white px-3 py-2 rounded-full flex items-center gap-2 font-bold text-xs"><X className="w-4 h-4" /> {t('ai.closeAssistant')}</div>
               ) : (
-                <div className="bg-[#0066cc] text-white px-3 py-2 rounded-full flex items-center gap-2 font-bold text-xs"><Bot className="w-4 h-4" /> {t('ai.openInterpretation')}</div>
+                <div className="bg-primary text-white px-3 py-2 rounded-full flex items-center gap-2 font-bold text-xs"><Bot className="w-4 h-4" /> {t('ai.openInterpretation')}</div>
               )}
             </div>
             <div className={cn("absolute transition-all duration-300 ease-out", showHint === "menu-toggle" ? "-translate-y-24 opacity-100 scale-100" : "translate-y-0 opacity-0 scale-50")}>
-              <div className="bg-[#0066cc]/90 text-white p-2.5 rounded-full">
+              <div className="bg-primary/90 text-white p-2.5 rounded-full">
                 {onOpenBookPicker ? <BookOpenCheck className="w-5 h-5" /> : (isSidebarOpen ? <X className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />)}
               </div>
             </div>
             <div className={cn("absolute transition-all duration-300 ease-out", (showHint === "fullscreen" || showHint === "exit-fullscreen") ? "translate-y-24 opacity-100 scale-100" : "translate-y-0 opacity-0 scale-50")}>
-              <div className="bg-[#1d1d1f]/80 text-white p-2.5 rounded-full">{showHint === "exit-fullscreen" ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}</div>
+              <div className="bg-foreground/80 text-white p-2.5 rounded-full">{showHint === "exit-fullscreen" ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}</div>
             </div>
           </>
         )}
@@ -609,14 +609,14 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
           className={cn(
             "relative w-full h-full rounded-full transition-all duration-300",
             // Solid Action Blue background
-            "bg-[#0066cc] dark:bg-[#2997ff]",
+            "bg-primary dark:bg-primary",
             // State rings (simplified)
-            isRepositioning ? "ring-4 ring-[#0066cc]/30 scale-110" :
-            (isAiFinishedButUnseen ? "ring-2 ring-[#0066cc]/40" :
-            (isQueuePanelOpen ? "ring-2 ring-[#0066cc]/40" :
-            (isAiGenerating ? "ring-2 ring-[#0066cc]/20" :
-            (hasQueueContent ? "ring-2 ring-[#0066cc]/20" :
-            (isAiOpen ? "ring-2 ring-[#0066cc]/15" : "")))))
+            isRepositioning ? "ring-4 ring-primary/30 scale-110" :
+            (isAiFinishedButUnseen ? "ring-2 ring-primary/40" :
+            (isQueuePanelOpen ? "ring-2 ring-primary/40" :
+            (isAiGenerating ? "ring-2 ring-primary/20" :
+            (hasQueueContent ? "ring-2 ring-primary/20" :
+            (isAiOpen ? "ring-2 ring-primary/15" : "")))))
           )}
         >
           {/* Core icon - simple white icon on solid blue */}
@@ -643,7 +643,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute -top-1 -right-1 z-20 bg-[#cc0000] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center"
+              className="absolute -top-1 -right-1 z-20 bg-destructive text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center"
             >
               {queueCount + (currentAiRequest ? 1 : 0)}
             </motion.div>

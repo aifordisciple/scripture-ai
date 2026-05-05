@@ -1,172 +1,188 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
 import {
   LayoutDashboard,
   Users,
   Building2,
   MessageSquare,
-  Settings,
   Bell,
-  ChevronLeft,
+  Settings,
+  MessageCircle,
+  Menu,
+  X,
+  Sun,
+  Moon,
   ChevronRight,
   Home,
   Mail,
-  Menu,
-  X
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
+} from "lucide-react";
 
 const navItems = [
-  { href: '/admin', label: '仪表盘', icon: LayoutDashboard },
-  { href: '/admin/users', label: '用户管理', icon: Users },
-  { href: '/admin/churches', label: '小组管理', icon: Building2 },
-  { href: '/admin/messages', label: '私信管理', icon: Mail },
-  { href: '/admin/feedback', label: '反馈管理', icon: MessageSquare },
-  { href: '/admin/announcements', label: '公告管理', icon: Bell },
-  { href: '/admin/settings', label: '系统设置', icon: Settings },
+  { href: "/admin", label: "仪表盘", icon: LayoutDashboard },
+  { href: "/admin/users", label: "用户管理", icon: Users },
+  { href: "/admin/churches", label: "小组管理", icon: Building2 },
+  { href: "/admin/messages", label: "私信管理", icon: Mail },
+  { href: "/admin/feedback", label: "反馈管理", icon: MessageCircle },
+  { href: "/admin/announcements", label: "公告管理", icon: Bell },
+  { href: "/admin/settings", label: "系统设置", icon: Settings },
 ];
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
-  // 关闭移动端菜单当路由变化
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
-
-  // 根据屏幕宽度自动折叠侧边栏
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setCollapsed(true);
-      }
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const saved = localStorage.getItem("admin-dark-mode");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = saved ? saved === "true" : prefersDark;
+    setDarkMode(isDark);
+    document.documentElement.classList.toggle("dark", isDark);
   }, []);
 
+  const toggleDarkMode = useCallback(() => {
+    setDarkMode((prev) => {
+      const next = !prev;
+      localStorage.setItem("admin-dark-mode", String(next));
+      document.documentElement.classList.toggle("dark", next);
+      return next;
+    });
+  }, []);
+
+  const isActive = (href: string) => {
+    if (href === "/admin") return pathname === "/admin";
+    return pathname.startsWith(href);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* 移动端遮罩 */}
-      {mobileMenuOpen && (
+    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={cn(
-          "bg-white border-r border-slate-200 flex flex-col transition-all duration-300",
-          "fixed md:relative z-50 h-full",
-          // 桌面端
-          collapsed ? "md:w-16" : "md:w-64",
-          // 移动端
-          mobileMenuOpen ? "w-64 translate-x-0" : "-translate-x-full md:translate-x-0"
-        )}
+        className={`
+          fixed lg:static inset-y-0 left-0 z-50
+          w-72 flex flex-col
+          bg-card dark:bg-card border-r border-border
+          transition-transform duration-300 ease-out
+          lg:translate-x-0
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
       >
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200">
-          {!collapsed && (
-            <span className="font-semibold text-lg text-[#0066cc]">管理后台</span>
-          )}
-          {/* 移动端关闭按钮 */}
+        {/* Logo area */}
+        <div className="h-16 flex items-center px-6 border-b border-border">
+          <Link href="/admin" className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-apple-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-semibold text-sm">AI</span>
+            </div>
+            <span className="apple-headline text-lg">AI读 · 管理</span>
+          </Link>
           <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 md:hidden transition-colors"
+            onClick={() => setSidebarOpen(false)}
+            className="ml-auto lg:hidden p-2 rounded-apple-sm hover:bg-accent active:scale-95 transition-all"
           >
-            <X size={20} />
-          </button>
-          {/* 桌面端折叠按钮 */}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hidden md:block transition-colors"
-          >
-            {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 overflow-y-auto">
-          <ul className="space-y-1 px-2">
+        <nav className="flex-1 overflow-y-auto py-4 px-3">
+          <div className="space-y-1">
             {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
+              const active = isActive(item.href);
               return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
-                      isActive
-                        ? "bg-[#0066cc]/5 text-[#0066cc]"
-                        : "text-slate-600 hover:bg-slate-100"
-                    )}
-                    title={collapsed ? item.label : undefined}
-                  >
-                    <Icon size={20} className="shrink-0" />
-                    {(!collapsed || mobileMenuOpen) && <span>{item.label}</span>}
-                  </Link>
-                </li>
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`
+                    flex items-center gap-3 px-3 min-h-[44px] rounded-apple-md
+                    transition-all duration-150 active:scale-95
+                    ${
+                      active
+                        ? "bg-primary/10 text-primary font-semibold"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    }
+                  `}
+                >
+                  <item.icon className="w-5 h-5 shrink-0" />
+                  <span className="text-[15px]">{item.label}</span>
+                  {active && (
+                    <ChevronRight className="w-4 h-4 ml-auto text-primary" />
+                  )}
+                </Link>
               );
             })}
-          </ul>
+          </div>
         </nav>
 
-        {/* Footer */}
-        <div className="border-t border-slate-200 p-4">
+        {/* Sidebar footer */}
+        <div className="p-4 border-t border-border">
           <Link
             href="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
-            title={collapsed ? "返回前台" : undefined}
+            className="flex items-center gap-2 px-3 py-2 rounded-apple-md text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-150 active:scale-95 text-[15px]"
           >
-            <Home size={20} className="shrink-0" />
-            {(!collapsed || mobileMenuOpen) && <span>返回前台</span>}
+            <span>← 返回主站</span>
           </Link>
         </div>
       </aside>
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-4 md:px-6 shrink-0">
-          {/* 移动端菜单按钮 */}
+        {/* Top bar — glassmorphism */}
+        <header className="glass-nav sticky top-0 z-30 h-16 flex items-center px-6 border-b border-border">
+          {/* Mobile menu button */}
           <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 md:hidden mr-3 transition-colors"
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden p-2 -ml-2 rounded-apple-sm hover:bg-accent active:scale-95 transition-all"
           >
-            <Menu size={22} />
+            <Menu className="w-5 h-5" />
           </button>
 
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm overflow-x-auto">
-            <Link href="/admin" className="text-slate-500 hover:text-slate-700 whitespace-nowrap">
-              管理后台
-            </Link>
-            {pathname !== '/admin' && (
+          <div className="flex items-center gap-2 ml-2 lg:ml-0">
+            <span className="text-muted-foreground text-[15px]">管理后台</span>
+            {pathname !== "/admin" && (
               <>
-                <span className="text-slate-400">/</span>
-                <span className="text-slate-900 font-medium whitespace-nowrap">
-                  {navItems.find(item => item.href === pathname)?.label || ''}
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <span className="text-foreground text-[15px] font-semibold">
+                  {navItems.find((i) => isActive(i.href))?.label || ""}
                 </span>
               </>
             )}
-          </nav>
+          </div>
+
+          {/* Right actions */}
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={toggleDarkMode}
+              className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-accent active:scale-95 transition-all duration-150"
+              aria-label="切换深色模式"
+            >
+              {darkMode ? (
+                <Sun className="w-5 h-5 text-muted-foreground" />
+              ) : (
+                <Moon className="w-5 h-5 text-muted-foreground" />
+              )}
+            </button>
+          </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
           {children}
         </main>
       </div>

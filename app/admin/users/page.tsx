@@ -185,26 +185,26 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <h1 className="text-xl md:text-2xl font-semibold text-slate-900">{t('admin.userManagement')}</h1>
+      <h1 className="text-xl md:text-2xl font-semibold text-foreground apple-headline">{t('admin.userManagement')}</h1>
 
       {/* 搜索和筛选 */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-3 md:p-4">
+      <div className="bg-card rounded-lg border border-border p-3 md:p-4">
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3 md:gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
             <input
               type="text"
               placeholder={t('admin.searchNameOrEmail')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
+              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-primary/20 focus:border-[#0066cc]"
             />
           </div>
           <div className="flex gap-3">
             <select
               value={roleFilter}
               onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-              className="flex-1 md:flex-none px-4 py-2 border border-slate-300 rounded-lg focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
+              className="flex-1 md:flex-none px-4 py-2 border border-border rounded-lg focus:ring-primary/20 focus:border-[#0066cc]"
             >
               <option value="">{t('admin.allRoles')}</option>
               <option value="user">{t('admin.userRole')}</option>
@@ -222,43 +222,43 @@ export default function AdminUsersPage() {
       </div>
 
       {/* 用户列表 - 桌面端表格 */}
-      <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+      <div className="hidden md:block bg-card rounded-lg border border-border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-accent/50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.user')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.role')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.status')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.stats')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.registered')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">{t('admin.actions')}</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('admin.user')}</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('admin.role')}</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('admin.status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('admin.stats')}</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('admin.registered')}</th>
+                <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('admin.actions')}</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-slate-200">
+            <tbody className="bg-card divide-y divide-border">
               {data?.users.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-50">
+                <tr key={user.id} className="hover:bg-accent/50 transition-colors min-h-[44px]">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
+                      <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center overflow-hidden">
                         {user.image ? (
                           <img src={user.image} alt="" className="h-10 w-10 object-cover" />
                         ) : (
-                          <User size={20} className="text-slate-500" />
+                          <User size={20} className="text-muted-foreground" />
                         )}
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-slate-900">{user.name || t('admin.notSet')}</div>
-                        <div className="text-sm text-slate-500">{user.email}</div>
+                        <div className="text-sm font-semibold text-foreground">{user.name || t('admin.notSet')}</div>
+                        <div className="text-sm text-muted-foreground">{user.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={cn(
-                      "px-2 py-1 text-xs font-medium rounded-full",
+                      "px-2 py-1 text-xs font-semibold rounded-full",
                       user.role === 'admin'
-                        ? "bg-purple-100 text-purple-700"
-                        : "bg-slate-100 text-slate-700"
+                        ? "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                        : "bg-accent text-muted-foreground"
                     )}>
                       {user.role === 'admin' ? t('admin.adminRole') : t('admin.userRole')}
                     </span>
@@ -267,23 +267,23 @@ export default function AdminUsersPage() {
                     {user.isMuted ? (
                       <div className="flex items-center gap-1">
                         <Ban className="w-4 h-4 text-red-500" />
-                        <span className="text-xs text-red-600">{t('admin.muted')}</span>
+                        <span className="text-xs text-red-600 dark:text-red-400">{t('admin.muted')}</span>
                       </div>
                     ) : (
-                      <span className="text-xs text-green-600">{t('admin.normal')}</span>
+                      <span className="text-xs text-green-600 dark:text-green-400">{t('admin.normal')}</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                     <div className="flex gap-3">
                       <span title={t('admin.highlights')}>{user._count.highlights} {t('admin.highlights')}</span>
                       <span title={t('admin.notes')}>{user._count.notes} {t('admin.notes')}</span>
                       <span title={t('admin.groups')}>{user._count.churchMemberships} {t('admin.groups')}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                     {formatDateClient(new Date(user.createdAt))}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold">
                     <div className="flex items-center justify-end gap-2">
                       {user.isMuted ? (
                         <button

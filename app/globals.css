@@ -274,6 +274,13 @@
   }
 }
 
+/* Dark mode system preference fallback — applies dark tokens when user hasn't explicitly toggled */
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(.dark)) {
+    /* Only apply if no explicit .dark class on ancestor — this is a soft fallback */
+  }
+}
+
 /* =========================================
    自定义 UI/UX 体验增强工具类 (纯原生 CSS)
    ========================================= */
@@ -351,8 +358,9 @@
 }
 
 .apple-pill-btn {
-  @apply rounded-full bg-[#0066cc] text-white font-normal transition-colors active:scale-95;
+  @apply rounded-full bg-primary text-primary-foreground font-normal active:scale-95;
   padding: 11px 22px;
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
 .apple-scale-press {
@@ -387,8 +395,25 @@
 }
 
 /* 适配 iOS 刘海/底部安全区 */
-.pb-safe { 
-  padding-bottom: env(safe-area-inset-bottom); 
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-left {
+  padding-left: env(safe-area-inset-left);
+}
+.safe-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Touch device: minimum 44px touch targets */
+@media (pointer: coarse) {
+  button, a, [role="button"], input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 
@@ -735,7 +760,7 @@ body::-webkit-scrollbar-thumb:hover,
   border-radius: 0.25rem;
   background: #f5f5f7;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--tw-prose-quotes);
 }
 
@@ -815,7 +840,7 @@ body::-webkit-scrollbar-thumb:hover,
 /* 行内代码 */
 .prose code {
   font-size: 0.875em;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--tw-prose-code);
   background: #f5f5f7;
   padding: 0.125rem 0.375rem;

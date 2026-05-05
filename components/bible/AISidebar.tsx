@@ -823,7 +823,7 @@ export function AISidebar() {
             </Button>
             {/* [P3-1修复] 自定义确认对话框替代原生 confirm() */}
             {showClearConfirm && (
-              <div className="absolute top-12 right-2 z-50 bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8] rounded-lg border border-[#e0e0e0] dark:border-[#3a3a3c] p-3 text-sm">
+              <div className="absolute top-12 right-2 z-50 glass-panel rounded-lg border border-border dark:border-border p-3 text-sm">
                 <p className="mb-2 text-[#1d1d1f] dark:text-white/80">{t('ai.clearAllConfirm')}</p>
                 <div className="flex gap-2 justify-end">
                   <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-xl bg-[#f5f5f7] dark:bg-[#2a2a2c] text-[#1d1d1f] dark:text-white/80 hover:bg-[#e0e0e0]">{t('common.cancel')}</button>

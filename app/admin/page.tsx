@@ -90,7 +90,7 @@ export default function AdminDashboard() {
 
   if (error) {
     return (
-      <div className="bg-red-50 text-red-600 p-4 rounded-lg flex items-center gap-2">
+      <div className="bg-destructive/10 text-destructive p-4 rounded-lg flex items-center gap-2">
         <AlertCircle size={20} />
         <span>{error}</span>
       </div>
@@ -101,7 +101,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-900">{t('admin.dashboard')}</h1>
+      <h1 className="text-2xl font-semibold text-foreground apple-headline">{t('admin.dashboard')}</h1>
 
       {/* 关键指标卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -133,8 +133,8 @@ export default function AdminDashboard() {
 
       {/* 访问统计趋势图 */}
       {analytics && analytics.trend.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+        <div className="bg-card rounded-lg border border-border p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
             <Eye className="text-cyan-600" size={20} />
             {t('admin.sevenDayVisitTrend')}
           </h2>
@@ -151,13 +151,13 @@ export default function AdminDashboard() {
                       style={{ height: `${Math.max(height, 2)}%` }}
                     >
                       {day.pv > 0 && (
-                        <div className="text-center text-xs text-white font-medium py-1">
+                        <div className="text-center text-xs text-white font-semibold py-1">
                           {day.pv}
                         </div>
                       )}
                     </div>
                   </div>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-muted-foreground">
                     {formatDateClient(new Date(day.date), { month: 'numeric', day: 'numeric' })}
                   </span>
                 </div>
@@ -169,10 +169,10 @@ export default function AdminDashboard() {
           <div className="mt-4 flex items-center justify-center gap-6 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-cyan-500"></div>
-              <span className="text-slate-600">{t('admin.pageViewsPV')}</span>
+              <span className="text-muted-foreground">{t('admin.pageViewsPV')}</span>
             </div>
-            <div className="text-slate-400">|</div>
-            <div className="text-slate-600">
+            <div className="text-muted-foreground">|</div>
+            <div className="text-muted-foreground">
               {t('admin.uniqueVisitorsUV')}: {analytics.trend.map(d => d.uv).reduce((a, b) => a + b, 0)} {t('admin.total')}
             </div>
           </div>
@@ -180,8 +180,8 @@ export default function AdminDashboard() {
       )}
 
       {/* 用户统计 */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+      <div className="bg-card rounded-lg border border-border p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
           <Users className="text-[#0066cc]" size={20} />
           {t('admin.userStatistics')}
         </h2>
@@ -195,7 +195,7 @@ export default function AdminDashboard() {
 
         {/* 用户增长趋势图 */}
         <div className="mt-8">
-          <h3 className="text-sm font-medium text-slate-500 mb-4">{t('admin.sevenDayUserGrowthTrend')}</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground mb-4">{t('admin.sevenDayUserGrowthTrend')}</h3>
           <div className="h-48 flex items-end gap-2">
             {stats.activity.newUsersDaily.map((day, i) => {
               const maxCount = Math.max(...stats.activity.newUsersDaily.map(d => d.count), 1);
@@ -208,13 +208,13 @@ export default function AdminDashboard() {
                       style={{ height: `${Math.max(height, 2)}%` }}
                     >
                       {day.count > 0 && (
-                        <div className="text-center text-xs text-white font-medium py-1">
+                        <div className="text-center text-xs text-white font-semibold py-1">
                           {day.count}
                         </div>
                       )}
                     </div>
                   </div>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-muted-foreground">
                     {formatDateClient(new Date(day.date), { month: 'numeric', day: 'numeric' })}
                   </span>
                 </div>
@@ -225,8 +225,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* 小组统计 */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+      <div className="bg-card rounded-lg border border-border p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
           <BookOpen className="text-purple-600" size={20} />
           {t('admin.groupStatistics')}
         </h2>
@@ -240,49 +240,49 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 读经计划统计 */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+        <div className="bg-card rounded-lg border border-border p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
             <Target className="text-orange-600" size={20} />
             {t('admin.readingPlanStatistics')}
           </h2>
 
           <div className="grid grid-cols-2 gap-6">
             <StatItem label={t('admin.activePlans')} value={stats.plans.active} color="blue" />
-            <StatItem label={t('admin.completedPlans')} value={stats.plans.completed} color="slate" />
+            <StatItem label={t('admin.completedPlans')} value={stats.plans.completed} color="muted" />
           </div>
         </div>
 
         {/* 反馈统计 */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+        <div className="bg-card rounded-lg border border-border p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
             <TrendingUp className="text-green-600" size={20} />
             {t('admin.feedbackStatistics')}
           </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-slate-50 rounded-lg">
+            <div className="text-center p-4 bg-accent rounded-lg">
               <div className="text-2xl font-semibold">{stats.feedback.total}</div>
-              <div className="text-sm text-slate-600">{t('admin.total')}</div>
+              <div className="text-sm text-muted-foreground">{t('admin.total')}</div>
             </div>
-            <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <div className="text-2xl font-semibold text-orange-600">{stats.feedback.open}</div>
-              <div className="text-sm text-slate-600">{t('admin.pending')}</div>
+            <div className="text-center p-4 bg-amber-500/10 rounded-lg">
+              <div className="text-2xl font-semibold text-amber-600 dark:text-amber-400">{stats.feedback.open}</div>
+              <div className="text-sm text-muted-foreground">{t('admin.pending')}</div>
             </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-semibold text-blue-600">{stats.feedback.inProgress}</div>
-              <div className="text-sm text-slate-600">{t('admin.inProgress')}</div>
+            <div className="text-center p-4 bg-primary/10 rounded-lg">
+              <div className="text-2xl font-semibold text-primary">{stats.feedback.inProgress}</div>
+              <div className="text-sm text-muted-foreground">{t('admin.inProgress')}</div>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-semibold text-green-600">{stats.feedback.resolved}</div>
-              <div className="text-sm text-slate-600">{t('admin.resolved')}</div>
+            <div className="text-center p-4 bg-green-500/10 rounded-lg">
+              <div className="text-2xl font-semibold text-green-600 dark:text-green-400">{stats.feedback.resolved}</div>
+              <div className="text-sm text-muted-foreground">{t('admin.resolved')}</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* 活跃度趋势 */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
+      <div className="bg-card rounded-lg border border-border p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
           <Calendar className="text-teal-600" size={20} />
           {t('admin.sevenDayActiveUsers')}
         </h2>
@@ -299,13 +299,13 @@ export default function AdminDashboard() {
                     style={{ height: `${Math.max(height, 2)}%` }}
                   >
                     {day.count > 0 && (
-                      <div className="text-center text-xs text-white font-medium py-1">
+                      <div className="text-center text-xs text-white font-semibold py-1">
                         {day.count}
                       </div>
                     )}
                   </div>
                 </div>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-muted-foreground">
                   {formatDateClient(new Date(day.date), { month: 'numeric', day: 'numeric' })}
                 </span>
               </div>
@@ -330,10 +330,10 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6">
+    <div className="bg-card rounded-lg border border-border p-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-600">{title}</p>
+          <p className="text-sm text-muted-foreground">{title}</p>
           <p className="text-3xl font-semibold mt-1">{value}</p>
         </div>
         <div className={cn("p-3 rounded-lg text-white", color)}>
@@ -352,20 +352,20 @@ function StatItem({
 }: {
   label: string;
   value: number;
-  color?: 'default' | 'green' | 'blue' | 'orange' | 'slate';
+  color?: 'default' | 'green' | 'blue' | 'orange' | 'muted';
 }) {
   const colorClasses = {
-    default: 'text-slate-900',
-    green: 'text-green-600',
+    default: 'text-foreground',
+    green: 'text-green-600 dark:text-green-400',
     blue: 'text-[#0066cc]',
     orange: 'text-orange-600',
-    slate: 'text-slate-600'
+    muted: 'text-muted-foreground'
   };
 
   return (
-    <div className="text-center p-4 bg-slate-50 rounded-lg">
+    <div className="text-center p-4 bg-accent rounded-lg">
       <div className={cn("text-3xl font-semibold", colorClasses[color])}>{value}</div>
-      <div className="text-sm text-slate-600 mt-1">{label}</div>
+      <div className="text-sm text-muted-foreground mt-1">{label}</div>
     </div>
   );
 }

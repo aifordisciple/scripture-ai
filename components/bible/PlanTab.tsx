@@ -296,7 +296,7 @@ export function PlanTab() {
                           {completedTasks.includes('devotional') ? <CheckCircle2 className="w-7 h-7 text-primary" /> : <Circle className="w-7 h-7 text-border dark:text-muted-foreground hover:text-primary/60" />}
                         </button>
                         <div className="flex flex-col">
-                           <span className="font-semibold text-lg text-[#1d1d1f] dark:text-[#e0e0e0]">{t('plan.day', { day: task.day })}</span>
+                           <span className="font-semibold text-lg text-foreground dark:text-foreground">{t('plan.day', { day: task.day })}</span>
                            <div className="flex items-center gap-1.5 mt-0.5">
                              <span className={cn("text-xs font-medium", isToday ? "text-[#0066cc] dark:text-[#0066cc]/80" : "text-[#7a7a7a] dark:text-[#7a7a7a]")}>
                                {isToday ? t('plan.today') : dateStr}
