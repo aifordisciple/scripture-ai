@@ -671,7 +671,7 @@ export function AISidebar() {
         ref={sidebarRef}
         style={{ '--sidebar-width': `${sidebarWidth}px` } as any}
         className={cn(
-          "fixed inset-y-0 right-0 z-50 bg-white dark:bg-slate-900 shadow-2xl shadow-black/15 border-l dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out",
+          "fixed inset-y-0 right-0 z-50 bg-white dark:bg-[#272729] border-l border-[#e0e0e0] dark:border-[#3a3a3c] flex flex-col transition-transform duration-300 ease-in-out",
           "w-full md:w-[var(--sidebar-width)]",
           isAiOpen ? "translate-x-0" : "translate-x-full",
           isResizing && "transition-none"
@@ -681,14 +681,14 @@ export function AISidebar() {
         <div
           onMouseDown={startResizing}
           onTouchStart={startResizing}
-          className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-400/50 transition-colors z-50 group"
+          className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-[#0066cc]/30 transition-colors z-50 group"
         >
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-slate-200 dark:bg-slate-700 rounded group-hover:bg-blue-500 transition-colors" />
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-[#e0e0e0] dark:bg-[#3a3a3c] rounded group-hover:bg-[#0066cc] transition-colors" />
         </div>
 
         {/* 头部 */}
         <div className={cn(
-          "flex items-center justify-between px-4 bg-slate-50 dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden border-b dark:border-slate-800",
+          "flex items-center justify-between px-4 bg-[#f5f5f7] dark:bg-[#272729] flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden border-b border-[#e0e0e0] dark:border-[#3a3a3c]",
           isImmersive ? "h-0 opacity-0 border-none p-0" : "h-14 opacity-100 py-3"
         )}>
           <div className="flex items-center gap-2">
@@ -704,7 +704,7 @@ export function AISidebar() {
             />
 
             {(currentAiRequest || aiQueue.length > 0) && (
-              <span className="text-xs font-normal bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-normal bg-[#0066cc]/10 text-[#0066cc] px-2 py-0.5 rounded-full">
                 {currentAiRequest?.status === 'processing' && t('ai.processing')}
                 {aiQueue.length > 0 && ` · ${t('ai.queuedCount', { count: aiQueue.length })}`}
               </span>
@@ -718,11 +718,11 @@ export function AISidebar() {
                 onClick={() => { setShowModeSelector(!showModeSelector); setShowFontSizeSelector(false); setShowSessionList(false); }}
                 className={cn(
                   "flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-medium transition-colors",
-                  aiMode === 'general' ? "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" : "",
-                  aiMode === 'tutor' ? "text-violet-600 bg-violet-50 dark:bg-violet-900/20" : "",
-                  aiMode === 'sermon' ? "text-orange-600 bg-orange-50 dark:bg-orange-900/20" : "",
-                  aiMode === 'study-guide' ? "text-teal-600 bg-teal-50 dark:bg-teal-900/20" : "",
-                  aiMode === 'custom' ? "text-slate-600 bg-slate-100 dark:bg-slate-800" : ""
+                  aiMode === 'general' ? "text-[#7a7a7a] hover:bg-black/[0.04]" : "",
+                  aiMode === 'tutor' ? "text-[#0066cc] bg-[#0066cc]/10" : "",
+                  aiMode === 'sermon' ? "text-[#0066cc] bg-[#0066cc]/10" : "",
+                  aiMode === 'study-guide' ? "text-[#0066cc] bg-[#0066cc]/10" : "",
+                  aiMode === 'custom' ? "text-[#0066cc] bg-[#0066cc]/10" : ""
                 )}
               >
                 {aiMode === 'tutor' && <GraduationCap className="w-3.5 h-3.5" />}
@@ -745,14 +745,14 @@ export function AISidebar() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="fixed top-20 right-20 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-black/10 border dark:border-slate-700 z-[200] overflow-hidden"
+                    className="fixed top-20 right-20 w-40 bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8] rounded-lg border border-[#e0e0e0] dark:border-[#3a3a3c] z-[200] overflow-hidden"
                   >
                     {[
-                      { mode: 'general' as const, icon: Sparkles, label: t('ai.generalDesc'), color: 'text-slate-600' },
-                      { mode: 'tutor' as const, icon: GraduationCap, label: t('ai.tutorDesc'), color: 'text-violet-600' },
-                      { mode: 'sermon' as const, icon: FileText, label: t('ai.sermonDesc'), color: 'text-orange-600' },
-                      { mode: 'study-guide' as const, icon: BookMarked, label: t('ai.studyGuideDesc'), color: 'text-teal-600' },
-                      { mode: 'custom' as const, icon: Settings, label: t('ai.custom'), color: 'text-slate-600' },
+                      { mode: 'general' as const, icon: Sparkles, label: t('ai.generalDesc'), color: 'text-[#0066cc]' },
+                      { mode: 'tutor' as const, icon: GraduationCap, label: t('ai.tutorDesc'), color: 'text-[#0066cc]' },
+                      { mode: 'sermon' as const, icon: FileText, label: t('ai.sermonDesc'), color: 'text-[#0066cc]' },
+                      { mode: 'study-guide' as const, icon: BookMarked, label: t('ai.studyGuideDesc'), color: 'text-[#0066cc]' },
+                      { mode: 'custom' as const, icon: Settings, label: t('ai.custom'), color: 'text-[#0066cc]' },
                     ].map(item => (
                       <button
                         key={item.mode}
@@ -760,8 +760,8 @@ export function AISidebar() {
                         className={cn(
                           "w-full flex items-center gap-2 px-3 py-2.5 text-sm transition-colors",
                           aiMode === item.mode
-                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600"
-                            : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                            ? "bg-[#0066cc]/10 text-[#0066cc]"
+                            : "hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                         )}
                       >
                         <item.icon className={cn("w-4 h-4", item.color)} />
@@ -779,7 +779,7 @@ export function AISidebar() {
                 onClick={() => { setShowFontSizeSelector(!showFontSizeSelector); setShowModeSelector(false); setShowSessionList(false); }}
                 className={cn(
                   "flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-medium transition-colors",
-                  aiFontSize === 'medium' ? "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" : "text-blue-600 bg-blue-50 dark:bg-blue-900/20"
+                  aiFontSize === 'medium' ? "text-[#7a7a7a] hover:bg-black/[0.04]" : "text-[#0066cc] bg-[#0066cc]/10"
                 )}
                 title={t('ai.fontSize')}
               >
@@ -792,7 +792,7 @@ export function AISidebar() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="fixed top-20 right-32 w-32 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-black/10 border dark:border-slate-700 z-[200] overflow-hidden"
+                    className="fixed top-20 right-32 w-32 bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8] rounded-lg border border-[#e0e0e0] dark:border-[#3a3a3c] z-[200] overflow-hidden"
                   >
                     {[
                       { size: 'small' as const, label: t('ai.fontSmall') },
@@ -806,8 +806,8 @@ export function AISidebar() {
                         className={cn(
                           "w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors",
                           aiFontSize === item.size
-                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600"
-                            : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                            ? "bg-[#0066cc]/10 text-[#0066cc]"
+                            : "hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                         )}
                       >
                         <span>{item.label}</span>
@@ -819,19 +819,19 @@ export function AISidebar() {
             </div>
 
             <Button variant="ghost" size="icon" onClick={handleClearChat} title={t('ai.clear')}>
-              <Eraser className="w-4 h-4 text-slate-400" />
+              <Eraser className="w-4 h-4 text-[#7a7a7a]" />
             </Button>
             {/* [P3-1修复] 自定义确认对话框替代原生 confirm() */}
             {showClearConfirm && (
-              <div className="absolute top-12 right-2 z-50 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-black/10 border border-slate-200 dark:border-slate-700 p-3 text-sm">
+              <div className="absolute top-12 right-2 z-50 bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8] rounded-lg border border-[#e0e0e0] dark:border-[#3a3a3c] p-3 text-sm">
                 <p className="mb-2 text-slate-700 dark:text-slate-200">{t('ai.clearAllConfirm')}</p>
                 <div className="flex gap-2 justify-end">
-                  <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200">{t('common.cancel')}</button>
+                  <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-xl bg-[#f5f5f7] dark:bg-[#2a2a2c] text-[#1d1d1f] dark:text-white/80 hover:bg-[#e0e0e0]">{t('common.cancel')}</button>
                   <button onClick={confirmClearChat} className="px-3 py-1 text-xs rounded-xl bg-red-500 text-white hover:bg-red-600">{t('common.confirm')}</button>
                 </div>
               </div>
             )}
-            <Button variant="ghost" size="icon" onClick={() => { setAiOpen(false); clearSelection(); }} className="dark:text-slate-400 dark:hover:bg-slate-800">
+            <Button variant="ghost" size="icon" onClick={() => { setAiOpen(false); clearSelection(); }} className="dark:text-white/50 dark:hover:bg-white/[0.06]">
               <X className="w-5 h-5" />
             </Button>
           </div>
@@ -839,7 +839,7 @@ export function AISidebar() {
 
         {/* 消息列表 */}
         <div
-          className="flex-1 overflow-y-auto p-4 bg-slate-50/50 dark:bg-slate-950/50 min-h-0 space-y-6 relative scroll-smooth"
+          className="flex-1 overflow-y-auto p-4 bg-[#f5f5f7]/50 dark:bg-[#1d1d1f]/50 min-h-0 space-y-6 relative scroll-smooth"
           ref={scrollRef}
           onScroll={handleScroll}
           onClick={() => {
@@ -885,8 +885,8 @@ export function AISidebar() {
 
         {/* 输入表单 */}
         <div className={cn(
-          "bg-white dark:bg-slate-900 flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
-          isImmersive ? "h-0 opacity-0 shadow-none" : "opacity-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
+          "bg-white dark:bg-[#272729] flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
+          isImmersive ? "h-0 opacity-0" : "opacity-100"
         )}>
           <AIInputForm
             input={input}
@@ -963,11 +963,11 @@ function RenameModal({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-black/10 p-5 w-full max-w-sm"
+          className="bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8] rounded-lg p-5 w-full max-w-sm"
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 className="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            <Edit className="w-5 h-5 text-blue-500" />
+          <h3 className="text-lg font-bold mb-4 text-[#1d1d1f] dark:text-white flex items-center gap-2">
+            <Edit className="w-5 h-5 text-[#0066cc]" />
             {t('ai.renameChat')}
           </h3>
           <div className="flex gap-2 mb-4">
@@ -976,7 +976,7 @@ function RenameModal({
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
               placeholder={t('ai.renamePlaceholder')}
-              className="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-slate-900 dark:text-white"
+              className="flex-1 px-4 py-3 border border-[#e0e0e0] dark:border-[#3a3a3c] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] bg-white dark:bg-[#272729] dark:text-white"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') onSubmit()
@@ -985,7 +985,7 @@ function RenameModal({
             />
             <button
               disabled={isGenerating}
-              className="px-3 py-3 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors disabled:opacity-50"
+              className="px-3 py-3 text-xs text-[#0066cc] hover:bg-[#0066cc]/5 rounded-xl transition-colors disabled:opacity-50"
             >
               {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
             </button>
@@ -993,14 +993,14 @@ function RenameModal({
           <div className="flex justify-end gap-2">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+              className="px-5 py-2.5 text-sm font-medium text-[#1d1d1f] dark:text-white/60 hover:bg-black/[0.04] rounded-xl transition-colors"
             >
               {t('ai.cancel')}
             </button>
             <button
               onClick={onSubmit}
               disabled={!title.trim()}
-              className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="px-5 py-2.5 text-sm font-medium text-white bg-[#0066cc] hover:bg-[#0071e3] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t('ai.save')}
             </button>
@@ -1039,7 +1039,7 @@ function DeleteConfirmModal({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-black/10 p-5 w-full max-w-sm"
+          className="bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8] rounded-lg p-5 w-full max-w-sm"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-3 mb-4">
@@ -1047,23 +1047,23 @@ function DeleteConfirmModal({
               <Trash2 className="w-5 h-5 text-red-500" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('ai.deleteChat')}</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('ai.deleteChatHint')}</p>
+              <h3 className="text-lg font-bold text-[#1d1d1f] dark:text-white">{t('ai.deleteChat')}</h3>
+              <p className="text-sm text-[#7a7a7a]">{t('ai.deleteChatHint')}</p>
             </div>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-300 mb-5 px-1">
+          <p className="text-sm text-[#7a7a7a] mb-5 px-1">
             {t('ai.deleteChatConfirm', { title: session.title || t('ai.unnamedChat') })}
           </p>
           <div className="flex justify-end gap-2">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+              className="px-5 py-2.5 text-sm font-medium text-[#1d1d1f] dark:text-white/60 hover:bg-black/[0.04] rounded-xl transition-colors"
             >
               {t('ai.cancel')}
             </button>
             <button
               onClick={onConfirm}
-              className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl transition-colors shadow-sm"
+              className="px-5 py-2.5 text-sm font-medium text-white bg-[#cc0000] hover:bg-[#dd0000] rounded-lg transition-colors"
             >
               {t('ai.confirmDelete')}
             </button>

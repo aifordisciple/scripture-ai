@@ -126,11 +126,11 @@ const MessageBubble = memo(function MessageBubble({
       <div className={cn(
         'relative transition-all',
         role === 'user'
-          ? 'max-w-[88%] rounded-2xl rounded-tr-md px-4 py-3 shadow-sm bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-indigo-600 text-white text-[14.5px]'
+          ? 'max-w-[88%] rounded-2xl rounded-tr-md px-4 py-3 shadow-sm bg-[#0066cc] text-white text-[14.5px]'
           : 'w-full'
       )}>
         {role === 'user' && (
-          <div className="absolute -top-5 right-0 flex items-center gap-1 text-[10px] font-medium opacity-50 select-none text-blue-400 flex-row-reverse">
+          <div className="absolute -top-5 right-0 flex items-center gap-1 text-[10px] font-medium opacity-50 select-none text-white/50 flex-row-reverse">
             <User className="w-3 h-3" />
             <span>{t('bible.you')}</span>
           </div>
@@ -192,7 +192,7 @@ const MessageBubble = memo(function MessageBubble({
                       onClick={() => { onSaveInsight(); setBookmarked(true); }}
                       className={cn(
                         'flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg',
-                        bookmarked ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                        bookmarked ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-white/50' : 'text-slate-400 hover:text-blue-600 dark:hover:text-white/50 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                       )}
                     >
                       <Bookmark className={cn('w-3.5 h-3.5', bookmarked && 'fill-current')} />
@@ -222,7 +222,7 @@ const MessageBubble = memo(function MessageBubble({
                 </div>
 
                 <div onClick={(e) => e.stopPropagation()}>
-                  <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 h-8 px-2.5 text-[11px] rounded-lg" label={t('bible.readAloud')} />
+                  <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 dark:hover:text-white/50 h-8 px-2.5 text-[11px] rounded-lg" label={t('bible.readAloud')} />
                 </div>
               </div>
             )}

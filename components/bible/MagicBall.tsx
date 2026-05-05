@@ -190,17 +190,11 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     }
   }, [selectedVerses, enqueueAI, setAiOpen, setActiveQuickAction]);
 
-  // --- 待机呼吸动画 ---
+  // --- Apple HIG: No decorative idle animations ---
+  // Always stop and reset position - no breathing/bobbing
   useEffect(() => {
-    if (!isAiGenerating && !isRepositioning && !isAiFinishedButUnseen && !isAiOpen && !isQueuePanelOpen && !isRadialMenuOpen) {
-      controls.start({
-        y: [0, -6, 0],
-        transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }
-      });
-    } else {
-      controls.stop();
-      controls.set({ y: 0 });
-    }
+    controls.stop();
+    controls.set({ y: 0 });
   }, [isAiGenerating, isRepositioning, isAiFinishedButUnseen, isAiOpen, isQueuePanelOpen, isRadialMenuOpen, controls]);
 
   // --- 监听 AI 状态变化 ---
@@ -210,11 +204,10 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
       // 只有当侧边栏没打开时，才进入"待查看"模式
       if (!isAiOpen) {
         setIsAiFinishedButUnseen(true);
-        // 快乐抖动
+        // Apple HIG: subtle press feedback only
         controls.start({
-          y: [0, -15, 0, -5, 0],
-          scale: [1, 1.1, 1],
-          transition: { duration: 0.6, ease: "easeInOut", times: [0, 0.2, 0.6, 0.8, 1] }
+          scale: [1, 0.95, 1],
+          transition: { duration: 0.3 }
         });
         if (typeof navigator !== 'undefined' && navigator.vibrate) {
           navigator.vibrate([50, 100, 50]);
@@ -395,8 +388,9 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             exit={{ scale: 0.9, opacity: 0, y: 10 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className={cn(
-              "fixed z-[99] w-72 rounded-2xl shadow-2xl shadow-black/15 overflow-hidden",
-              "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
+              "fixed z-[99] w-72 rounded-lg overflow-hidden",
+              "bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8]",
+              "border border-[#e0e0e0] dark:border-[#3a3a3c]"
             )}
             style={{
               bottom: position.bottom + 65,
@@ -404,14 +398,14 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             }}
           >
             {/* 头部 */}
-            <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <ListOrdered className="w-4 h-4 text-blue-500" />
+            <div className="flex items-center justify-between px-4 py-3 bg-[#f5f5f7] dark:bg-[#2a2a2c] border-b border-[#e0e0e0] dark:border-[#3a3a3c]">
+              <div className="flex items-center gap-2 text-sm font-semibold text-[#1d1d1f] dark:text-white/80">
+                <ListOrdered className="w-4 h-4 text-[#0066cc]" />
                 {t('ai.queueTitle')}
               </div>
               <button
                 onClick={closeQueuePanel}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                className="text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -419,9 +413,9 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
 
             {/* 已完成的解读（待查看） */}
             {isAiFinishedButUnseen && !currentAiRequest && (
-              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-[#0066cc]/5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
+                  <span className="text-xs font-bold text-[#0066cc] flex items-center gap-1">
                     <BookOpenCheck className="w-3.5 h-3.5" />
                     {t('ai.interpretationDone')}
                   </span>
@@ -432,7 +426,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                     setIsAiFinishedButUnseen(false);
                     setIsQueuePanelOpen(false);
                   }}
-                  className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white text-sm font-medium shadow-sm transition-all hover:shadow-md"
+                  className="w-full py-2 px-3 rounded-xl bg-[#0066cc] hover:bg-[#0071e3] text-white text-sm font-medium transition-all"
                 >
                   {t('ai.clickToView')}
                 </button>
@@ -443,7 +437,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             {currentAiRequest && currentAiRequest.status === 'processing' && (
               <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                  <span className="text-xs font-bold text-[#0066cc] flex items-center gap-1">
                     <Loader2 className="w-3 h-3 animate-spin" />
                     {t('ai.processing')}
                   </span>
@@ -458,12 +452,12 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                   </button>
                 </div>
                 <div className="flex items-start gap-2">
-                  <BookOpen className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                  <BookOpen className="w-4 h-4 text-[#7a7a7a] shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+                    <div className="text-sm font-medium text-[#1d1d1f] dark:text-white/80 truncate">
                       {getShortRef(currentAiRequest.ref)}
                     </div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                    <div className="text-xs text-[#7a7a7a] truncate">
                       {truncatePrompt(currentAiRequest.prompt, 30)}
                     </div>
                   </div>
@@ -474,30 +468,30 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             {/* 等待队列 */}
             {aiQueue.length > 0 && (
               <div className="max-h-48 overflow-y-auto">
-                <div className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-50/50 dark:bg-slate-800/50">
+                <div className="px-4 py-2 text-xs text-[#7a7a7a] font-medium bg-[#f5f5f7]/50 dark:bg-[#2a2a2c]/50">
                   {t('ai.waiting')} ({aiQueue.length})
                 </div>
                 {aiQueue.map((item, index) => (
                   <div
                     key={item.id}
-                    className="px-4 py-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                    className="px-4 py-2.5 flex items-center justify-between hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
                   >
                     <div className="flex items-start gap-2 flex-1 min-w-0">
-                      <span className="text-xs text-slate-400 font-mono w-4 shrink-0">
+                      <span className="text-xs text-[#7a7a7a] font-mono w-4 shrink-0">
                         {index + 1}.
                       </span>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm text-slate-700 dark:text-slate-200 truncate">
+                        <div className="text-sm text-[#1d1d1f] dark:text-white/80 truncate">
                           {getShortRef(item.ref)}
                         </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                        <div className="text-xs text-[#7a7a7a] truncate">
                           {truncatePrompt(item.prompt, 25)}
                         </div>
                       </div>
                     </div>
                     <button
                       onClick={() => cancelAIRequest(item.id)}
-                      className="ml-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
+                      className="ml-2 text-[#7a7a7a] hover:text-[#cc0000] dark:hover:text-[#cc0000] transition-colors shrink-0"
                       title={t('ai.removeFromQueue')}
                     >
                       <X className="w-3.5 h-3.5" />
@@ -523,7 +517,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                 setAiOpen(true);
                 setIsQueuePanelOpen(false);
               }}
-              className="w-full px-4 py-2.5 text-center text-xs font-medium text-blue-600 dark:text-blue-400 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors border-t border-slate-200 dark:border-slate-700"
+              className="w-full px-4 py-2.5 text-center text-xs font-medium text-[#0066cc] bg-[#f5f5f7] dark:bg-[#2a2a2c] hover:bg-[#0066cc]/5 transition-colors border-t border-[#e0e0e0] dark:border-[#3a3a3c]"
             >
               {t('ai.openAISidebar')}
             </button>
@@ -538,15 +532,15 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
       >
         {/* 1. AI 完成后的点击提醒 */}
         <div className={cn(
-          "absolute right-[60px] whitespace-nowrap transition-all duration-500 ease-out-back",
+          "absolute right-[60px] whitespace-nowrap transition-all duration-500 ease-out",
           isAiFinishedButUnseen
             ? "translate-x-0 opacity-100 scale-100"
             : "translate-x-10 opacity-0 scale-50 pointer-events-none"
         )}>
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full shadow-lg shadow-black/10 flex items-center gap-2 font-bold text-sm animate-pulse-subtle">
+          <div className="bg-[#0066cc] text-white px-4 py-2 rounded-full flex items-center gap-2 font-semibold text-sm">
             <MousePointerClick className="w-4 h-4" /> {t('ai.clickToView')}
           </div>
-          <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-purple-600"></div>
+          <div className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-[#0066cc]"></div>
         </div>
 
         {/* 2. 队列徽章提示 */}
@@ -558,7 +552,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg shadow-black/10 flex items-center gap-1"
+              className="bg-[#cc0000] text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1"
             >
               {isProcessing ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -575,18 +569,18 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
           <>
             <div className={cn("absolute transition-all duration-300 ease-out", showHint === "ai-toggle" ? "-translate-x-28 opacity-100 scale-100" : "translate-x-0 opacity-0 scale-50")}>
               {isAiOpen ? (
-                <div className="bg-slate-500 text-white px-3 py-2 rounded-full shadow-xl shadow-black/10 flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20"><X className="w-4 h-4" /> {t('ai.closeAssistant')}</div>
+                <div className="bg-[#1d1d1f]/80 text-white px-3 py-2 rounded-full flex items-center gap-2 font-bold text-xs"><X className="w-4 h-4" /> {t('ai.closeAssistant')}</div>
               ) : (
-                <div className="bg-blue-600 text-white px-3 py-2 rounded-full shadow-xl shadow-black/10 flex items-center gap-2 font-bold text-xs backdrop-blur-md border border-white/20"><Bot className="w-4 h-4" /> {t('ai.openInterpretation')}</div>
+                <div className="bg-[#0066cc] text-white px-3 py-2 rounded-full flex items-center gap-2 font-bold text-xs"><Bot className="w-4 h-4" /> {t('ai.openInterpretation')}</div>
               )}
             </div>
             <div className={cn("absolute transition-all duration-300 ease-out", showHint === "menu-toggle" ? "-translate-y-24 opacity-100 scale-100" : "translate-y-0 opacity-0 scale-50")}>
-              <div className="bg-primary/90 text-white p-2.5 rounded-full shadow-xl shadow-black/10 backdrop-blur-md border border-white/20">
+              <div className="bg-[#0066cc]/90 text-white p-2.5 rounded-full">
                 {onOpenBookPicker ? <BookOpenCheck className="w-5 h-5" /> : (isSidebarOpen ? <X className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />)}
               </div>
             </div>
             <div className={cn("absolute transition-all duration-300 ease-out", (showHint === "fullscreen" || showHint === "exit-fullscreen") ? "translate-y-24 opacity-100 scale-100" : "translate-y-0 opacity-0 scale-50")}>
-              <div className="bg-slate-700/80 text-white p-2.5 rounded-full shadow-xl shadow-black/10 backdrop-blur-md border border-white/20">{showHint === "exit-fullscreen" ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}</div>
+              <div className="bg-[#1d1d1f]/80 text-white p-2.5 rounded-full">{showHint === "exit-fullscreen" ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}</div>
             </div>
           </>
         )}
@@ -608,168 +602,55 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
           "fixed z-[100] touch-none",
           isRepositioning ? "cursor-move" : "cursor-grab"
         )}
-        style={{ width: 52, height: 52, bottom: position.bottom, right: position.right }}
+        style={{ width: 44, height: 44, bottom: position.bottom, right: position.right }}
       >
         <div
           data-magic-ball="true"
           className={cn(
-            "relative w-full h-full overflow-hidden transition-all duration-500",
-            // 强制圆形 - iOS Safari 兼容
-            "rounded-full",
-            // 背景色：保持蓝色调，不仅限于暗色，而是通透感
-            "bg-gradient-to-br from-white/60 via-blue-50/50 to-blue-200/40",
-            "dark:from-slate-800/80 dark:via-slate-900/80 dark:to-black/80",
-            // backdrop-blur 兼容性处理
-            "backdrop-blur-xl [-webkit-backdrop-filter:blur(24px)]",
-            "border border-white/40 dark:border-white/10",
-            "shadow-[inset_0_4px_8px_rgba(255,255,255,0.9),_inset_0_-6px_6px_rgba(0,0,0,0.1),_0_8px_24px_rgba(0,0,0,0.2)]",
-            "dark:shadow-[inset_0_2px_6px_rgba(255,255,255,0.15),_inset_0_-6px_10px_rgba(0,0,0,0.5),_0_10px_30px_rgba(0,0,0,0.5)]",
-            // 状态 Ring
-            isRepositioning ? "ring-4 ring-blue-400/30 scale-110" :
-            (isAiFinishedButUnseen ? "scale-105 ring-2 ring-purple-400/50 animate-pulse-subtle" :
-            (isQueuePanelOpen ? "ring-2 ring-purple-400/50 scale-105" :
-            (isAiGenerating ? "ring-2 ring-blue-400/30" :
-            (hasQueueContent ? "ring-2 ring-purple-400/30 scale-105" :
-            (isAiOpen ? "ring-2 ring-blue-400/20 scale-105" : "hover:scale-105")))))
+            "relative w-full h-full rounded-full transition-all duration-300",
+            // Solid Action Blue background
+            "bg-[#0066cc] dark:bg-[#2997ff]",
+            // State rings (simplified)
+            isRepositioning ? "ring-4 ring-[#0066cc]/30 scale-110" :
+            (isAiFinishedButUnseen ? "ring-2 ring-[#0066cc]/40" :
+            (isQueuePanelOpen ? "ring-2 ring-[#0066cc]/40" :
+            (isAiGenerating ? "ring-2 ring-[#0066cc]/20" :
+            (hasQueueContent ? "ring-2 ring-[#0066cc]/20" :
+            (isAiOpen ? "ring-2 ring-[#0066cc]/15" : "")))))
           )}
-          style={{
-            // iOS Safari 圆形强制修复
-            WebkitMaskImage: '-webkit-radial-gradient(circle, white 100%, black 100%)',
-            maskImage: 'radial-gradient(circle, white 100%, black 100%)',
-            borderRadius: '50%',
-            // iOS Safari 硬件加速
-            WebkitTransform: 'translateZ(0)',
-            transform: 'translateZ(0)',
-            // iOS Safari 强制裁剪溢出内容
-            WebkitOverflowScrolling: 'touch',
-          }}
         >
-          {/* 内部水波纹层 - iOS Safari 需要额外处理 */}
-          <div
-            data-magic-ball="true"
-            className={cn(
-              "absolute inset-0 z-0 flex items-end justify-center pointer-events-none opacity-80 transition-all duration-500",
-              (isAiFinishedButUnseen || isQueuePanelOpen) ? "mix-blend-color-burn" : "mix-blend-multiply dark:mix-blend-overlay"
-            )}
-            style={{
-              // iOS Safari 圆形强制裁剪
-              WebkitMaskImage: '-webkit-radial-gradient(circle, white 100%, black 100%)',
-              maskImage: 'radial-gradient(circle, white 100%, black 100%)',
-              borderRadius: '50%',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              className={cn(
-                "w-[200%] h-[200%] absolute left-[-50%]",
-                (isAiFinishedButUnseen || isQueuePanelOpen) ? "bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 animate-gradient-spin" :
-                "bg-gradient-to-t from-blue-500 to-cyan-300",
-
-                // [状态逻辑]
-                // Generating: 波浪起伏
-                // Finished: 底部微波
-                // QueueOpen: 满水状态
-                // Open: 满水状态 (-10%)
-                // Default: 隐藏 (-160%)
-                isAiGenerating ? "animate-wave-rise" :
-                ((isAiFinishedButUnseen || isQueuePanelOpen) ? "bottom-[-5%]" :
-                (isAiOpen ? "bottom-[-10%] rotate-[120deg]" : "bottom-[-160%]")) + " transition-all duration-1000 ease-out"
-              )}
-              style={{
-                // iOS Safari 圆形近似 - 使用 50% 而非 38%
-                borderRadius: '50%',
-                WebkitTransform: 'translateZ(0)',
-                transform: 'translateZ(0)',
-              }}
-            />
-          </div>
-
-          {/* 核心图标 */}
+          {/* Core icon - simple white icon on solid blue */}
           <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
             {isRepositioning ? (
-              <Move className="w-5 h-5 text-blue-600 dark:text-white/90 animate-pulse" />
+              <Move className="w-5 h-5 text-white/90" />
             ) : isAiFinishedButUnseen ? (
-              <MousePointerClick className="w-6 h-6 text-white drop-shadow-md animate-bounce-subtle" />
+              <MousePointerClick className="w-6 h-6 text-white" />
             ) : isQueuePanelOpen ? (
-              <ListOrdered className="w-5 h-5 text-white drop-shadow-md" />
+              <ListOrdered className="w-5 h-5 text-white" />
             ) : hasQueueContent && !isAiOpen ? (
-              <ListOrdered className="w-5 h-5 text-white drop-shadow-md animate-pulse" />
+              <ListOrdered className="w-5 h-5 text-white" />
             ) : isAiOpen ? (
-              <Sparkles className="w-5 h-5 text-white drop-shadow-md" />
+              <Sparkles className="w-5 h-5 text-white" />
             ) : isAiGenerating ? (
-              <Sparkles className="w-5 h-5 text-white animate-pulse drop-shadow-md" />
+              <Sparkles className="w-5 h-5 text-white animate-pulse" />
             ) : (
-              <Sparkles
-                className="w-5 h-5 drop-shadow-sm animate-sparkle-glow dark:text-amber-400 text-blue-500"
-              />
+              <Sparkles className="w-5 h-5 text-white" />
             )}
           </div>
 
-          {/* 队列数字徽章（内嵌） */}
+          {/* Queue count badge */}
           {hasQueueContent && !isQueuePanelOpen && !isAiFinishedButUnseen && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute -top-1 -right-1 z-20 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg shadow-black/10"
+              className="absolute -top-1 -right-1 z-20 bg-[#cc0000] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center"
             >
               {queueCount + (currentAiRequest ? 1 : 0)}
             </motion.div>
           )}
-
-          {/* 顶部高光反射 */}
-          <div className="absolute top-[10%] left-[20%] w-[30%] h-[15%] bg-gradient-to-b from-white to-transparent opacity-90 rounded-full rotate-[-15deg] blur-[0.5px]" />
         </div>
       </motion.div>
 
-      {/* 动画定义 */}
-      <style jsx global>{`
-        @keyframes wave-rise {
-          0% { transform: rotate(0deg); bottom: -160%; }
-          100% { transform: rotate(360deg); bottom: -5%; }
-        }
-        .animate-wave-rise {
-          animation: wave-rise 3s ease-in-out infinite alternate;
-          animation-fill-mode: forwards;
-        }
-        @keyframes gradient-spin {
-          0% { transform: rotate(0deg); filter: hue-rotate(0deg); }
-          100% { transform: rotate(360deg); filter: hue-rotate(360deg); }
-        }
-        .animate-gradient-spin {
-          animation: gradient-spin 8s linear infinite;
-          bottom: -5% !important;
-        }
-        @keyframes pulse-subtle {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.9; transform: scale(0.98); }
-        }
-        .animate-pulse-subtle { animation: pulse-subtle 2s ease-in-out infinite; }
-
-        @keyframes bounce-subtle {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-3px); }
-        }
-        .animate-bounce-subtle { animation: bounce-subtle 1.5s ease-in-out infinite; }
-
-        /* 星星闪烁发光动画 - 使用当前元素颜色 */
-        @keyframes sparkle-glow {
-          0%, 100% {
-            opacity: 0.6;
-            filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 8px currentColor);
-            transform: scale(1);
-          }
-          50% {
-            opacity: 1;
-            filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
-            transform: scale(1.1);
-          }
-        }
-        .animate-sparkle-glow {
-          animation: sparkle-glow 2s ease-in-out infinite;
-        }
-
-        .ease-out-back { transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
-      `}</style>
     </>
   );
 }
