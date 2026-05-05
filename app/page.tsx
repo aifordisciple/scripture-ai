@@ -744,7 +744,7 @@ export default function Home() {
         {activeTab?.type !== 'sermon' && (
         <div
           className={cn(
-            "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-nav border-t border-border border-b-0 rounded-t-lg flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
+            "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-nav border-t border-border border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
             isNavVisible ? "translate-y-0" : "translate-y-full"
           )}
         >
