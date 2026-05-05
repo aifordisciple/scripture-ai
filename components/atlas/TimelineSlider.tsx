@@ -99,7 +99,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
     <div className="h-full flex flex-col p-4">
       {/* 当前年份显示 */}
       <div className="text-center mb-6">
-        <div className="text-3xl font-semibold text-[#1d1d1f] dark:text-white">
+        <div className="text-3xl font-semibold text-foreground dark:text-foreground">
           {formatYear(year)}
         </div>
       </div>
@@ -108,10 +108,10 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
       <div className="flex-1 overflow-y-auto">
         <div className="relative py-8">
           {/* 时间线 */}
-          <div className="relative h-2 bg-[#e0e0e0] dark:bg-[#3a3a3c] rounded-full">
+          <div className="relative h-2 bg-accent dark:bg-apple-tile3 rounded-full">
             {/* 当前位置指示器 */}
             <div
-              className="absolute top-0 h-2 bg-[#0066cc] rounded-full transition-all duration-300"
+              className="absolute top-0 h-2 bg-primary rounded-full transition-all duration-300"
               style={{ width: `${yearPosition}%` }}
             />
           </div>
@@ -135,8 +135,8 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
                 className="absolute top-6 flex flex-col items-center"
                 style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
               >
-                <div className="w-3 h-3 rounded-full bg-[#0066cc] border-2 border-white" />
-                <span className="mt-2 text-xs text-[#7a7a7a] dark:text-[#7a7a7a] whitespace-nowrap">
+                <div className="w-3 h-3 rounded-full bg-primary border-2 border-white" />
+                <span className="mt-2 text-xs text-muted-foreground dark:text-muted-foreground whitespace-nowrap">
                   {t(event.labelKey)}
                 </span>
               </div>
@@ -146,7 +146,7 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
 
         {/* 该年份的事件列表 */}
         <div className="mt-8">
-          <h3 className="text-sm font-medium text-[#7a7a7a] dark:text-[#7a7a7a] mb-3">
+          <h3 className="text-sm font-semibold text-muted-foreground dark:text-muted-foreground mb-3">
             {t('atlas.eventsInPeriod')}
           </h3>
           <EventList year={year} range={50} />
@@ -154,22 +154,22 @@ export default function TimelineSlider({ year, onYearChange }: TimelineSliderPro
       </div>
 
       {/* 控制按钮 */}
-      <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-[#e0e0e0] dark:border-[#3a3a3c]">
+      <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-border dark:border-border">
         <button
           onClick={() => step('backward')}
-          className="p-2 rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] text-[#1d1d1f] dark:text-[#7a7a7a] active:scale-95"
+          className="p-2 rounded-lg hover:bg-accent dark:hover:bg-apple-tile3 text-foreground dark:text-muted-foreground active:scale-95"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
         <button
           onClick={togglePlay}
-          className="p-3 rounded-full bg-[#0066cc] text-white hover:bg-[#0071e3] active:scale-95"
+          className="p-3 rounded-full bg-primary text-white hover:bg-apple-focus active:scale-95"
         >
           {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
         </button>
         <button
           onClick={() => step('forward')}
-          className="p-2 rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] text-[#1d1d1f] dark:text-[#7a7a7a] active:scale-95"
+          className="p-2 rounded-lg hover:bg-accent dark:hover:bg-apple-tile3 text-foreground dark:text-muted-foreground active:scale-95"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
@@ -237,11 +237,11 @@ function EventList({ year, range }: { year: number; range: number }) {
   };
 
   if (loading) {
-    return <div className="text-[#7a7a7a] text-sm">{t('atlas.loading')}</div>;
+    return <div className="text-muted-foreground text-sm">{t('atlas.loading')}</div>;
   }
 
   if (events.length === 0) {
-    return <div className="text-[#7a7a7a] text-sm">{t('atlas.noEventsInPeriod')}</div>;
+    return <div className="text-muted-foreground text-sm">{t('atlas.noEventsInPeriod')}</div>;
   }
 
   return (
@@ -250,21 +250,21 @@ function EventList({ year, range }: { year: number; range: number }) {
         <div
           key={event.id}
           onClick={() => handleEventClick(event)}
-          className={`p-3 bg-[#f5f5f7] dark:bg-[#1d1d1f] rounded-lg transition-colors ${
+          className={`p-3 bg-secondary dark:bg-background rounded-lg transition-colors ${
             event.locationId
-              ? 'cursor-pointer hover:bg-[#e0e0e0] dark:hover:bg-[#3a3a3c]'
+              ? 'cursor-pointer hover:bg-accent dark:hover:bg-apple-tile3'
               : 'cursor-default'
           }`}
         >
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
-              <div className="font-medium text-[#1d1d1f] dark:text-white flex items-center gap-2">
+              <div className="font-semibold text-foreground dark:text-foreground flex items-center gap-2">
                 {event.titleZh}
                 {event.locationId && (
-                  <MapPin className="w-3.5 h-3.5 text-[#0066cc]" />
+                  <MapPin className="w-3.5 h-3.5 text-primary" />
                 )}
               </div>
-              <div className="text-sm text-[#7a7a7a] dark:text-[#7a7a7a] mt-1">
+              <div className="text-sm text-muted-foreground dark:text-muted-foreground mt-1">
                 {event.yearStart && (
                   <span>
                     {event.yearStart < 0 ? t('atlas.bc') : t('atlas.ad')}
@@ -275,12 +275,12 @@ function EventList({ year, range }: { year: number; range: number }) {
                 )}
               </div>
               {event.description && (
-                <p className="text-sm text-[#1d1d1f] dark:text-[#e0e0e0] mt-2 line-clamp-2">
+                <p className="text-sm text-foreground dark:text-muted-foreground mt-2 line-clamp-2">
                   {event.description}
                 </p>
               )}
               {event.location && (
-                <div className="text-xs text-[#0066cc] dark:text-[#4d9fe0] mt-1">
+                <div className="text-xs text-primary dark:text-primary mt-1">
                   📍 {event.location.nameZh}
                 </div>
               )}

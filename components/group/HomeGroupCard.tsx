@@ -227,11 +227,11 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
       <Card className="overflow-hidden border-dashed">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-xl">
+            <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-lg">
               <Users className="w-5 h-5" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-sm">{t('group.joinReadingGroup')}</p>
+              <p className="font-semibold text-sm">{t('group.joinReadingGroup')}</p>
               <p className="text-xs text-muted-foreground">{t('group.joinReadingGroupDesc')}</p>
             </div>
             <Button
@@ -254,11 +254,11 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
       <Card className="overflow-hidden">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-xl">
+            <div className="p-2.5 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary rounded-lg">
               <Users className="w-5 h-5" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-sm">{data.churchName}</p>
+              <p className="font-semibold text-sm">{data.churchName}</p>
               <p className="text-xs text-muted-foreground">{t('group.noActivePlan')}</p>
             </div>
             <Button
@@ -290,7 +290,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
         <div className="flex items-start gap-3">
           {/* Icon */}
           <div className={cn(
-            "p-2.5 rounded-xl",
+            "p-2.5 rounded-lg",
             isTodayCompleted
               ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
               : "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"
@@ -305,7 +305,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
-              <p className="font-medium text-sm truncate">{data.churchName}</p>
+              <p className="font-semibold text-sm truncate">{data.churchName}</p>
               <span className="text-xs text-muted-foreground">
                 {t('group.dayProgress', { day: activePlan.day, total: activePlan.totalDays })}
               </span>
@@ -319,7 +319,7 @@ export function HomeGroupCard({ onJoinGroup }: HomeGroupCardProps) {
             <div className="space-y-1 mb-3">
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">{t('group.todayProgress')}</span>
-                <span className="font-medium">{progressPercent}%</span>
+                <span className="font-semibold">{progressPercent}%</span>
               </div>
               <Progress value={progressPercent} className="h-2" />
             </div>

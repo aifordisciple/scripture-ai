@@ -35,17 +35,17 @@ function StrengthBar({ strength }: { strength: number }) {
       ? 'bg-blue-500'
       : percentage >= 40
       ? 'bg-amber-500'
-      : 'bg-slate-400';
+      : 'bg-accent';
 
   return (
     <div className="flex items-center gap-2">
-      <div className="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+      <div className="w-16 h-1.5 bg-accent dark:bg-accent rounded-full overflow-hidden">
         <div
           className={cn('h-full rounded-full transition-all', barColor)}
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <span className="text-xs text-slate-400">{percentage}%</span>
+      <span className="text-xs text-muted-foreground">{percentage}%</span>
     </div>
   );
 }
@@ -57,8 +57,8 @@ export function CrossRefItem({ item, onClick }: CrossRefItemProps) {
       onClick={onClick}
       className={cn(
         'group p-3 rounded-xl transition-all cursor-pointer',
-        'hover:bg-slate-50 dark:hover:bg-slate-800/50',
-        'border border-transparent hover:border-slate-200 dark:hover:border-slate-700'
+        'hover:bg-accent/50 dark:hover:bg-accent/50',
+        'border border-transparent hover:border-border dark:hover:border-border'
       )}
     >
       {/* Header: Reference + Badge + Strength */}
@@ -76,7 +76,7 @@ export function CrossRefItem({ item, onClick }: CrossRefItemProps) {
       </div>
 
       {/* Content */}
-      <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+      <p className="text-sm text-muted-foreground dark:text-muted-foreground line-clamp-2 leading-relaxed">
         {item.content}
       </p>
 
@@ -106,14 +106,14 @@ export function CrossRefItemSkeleton() {
     <div className="p-3 rounded-xl animate-pulse">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
-          <div className="h-4 w-12 bg-slate-200 dark:bg-slate-700 rounded-full" />
+          <div className="h-4 w-24 bg-accent dark:bg-accent rounded" />
+          <div className="h-4 w-12 bg-accent dark:bg-accent rounded-full" />
         </div>
-        <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+        <div className="h-3 w-20 bg-accent dark:bg-accent rounded" />
       </div>
       <div className="space-y-1.5">
-        <div className="h-3 w-full bg-slate-200 dark:bg-slate-700 rounded" />
-        <div className="h-3 w-3/4 bg-slate-200 dark:bg-slate-700 rounded" />
+        <div className="h-3 w-full bg-accent dark:bg-accent rounded" />
+        <div className="h-3 w-3/4 bg-accent dark:bg-accent rounded" />
       </div>
     </div>
   );
@@ -126,13 +126,13 @@ export function CrossRefEmpty() {
   const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+      <div className="w-16 h-16 rounded-full bg-accent dark:bg-accent flex items-center justify-center mb-4">
         <span className="text-2xl">🔍</span>
       </div>
-      <p className="text-slate-500 dark:text-slate-400 text-sm">
+      <p className="text-muted-foreground dark:text-muted-foreground text-sm">
         {t('bible.noRelatedVerses')}
       </p>
-      <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
+      <p className="text-muted-foreground dark:text-muted-foreground text-xs mt-1">
         {t('bible.noRelatedVersesHint')}
       </p>
     </div>

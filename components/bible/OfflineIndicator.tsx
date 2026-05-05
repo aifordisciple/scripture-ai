@@ -59,7 +59,7 @@ export function OfflineIndicator({
 
       {/* 展开详情 */}
       {isExpanded && (
-        <div className="absolute top-full left-0 mt-2 p-4 rounded-xl bg-white dark:bg-slate-900 border dark:border-slate-800 shadow-lg min-w-[200px] z-50">
+        <div className="absolute top-full left-0 mt-2 p-4 rounded-xl bg-white dark:bg-card border dark:border-border shadow-lg min-w-[200px] z-50">
           <div className="space-y-3">
             {/* 状态 */}
             <div className="flex items-center justify-between">
@@ -110,7 +110,7 @@ export function OfflineIndicator({
 
             {/* 离线提示 */}
             {!isOnline && (
-              <p className="text-xs text-muted-foreground pt-2 border-t dark:border-slate-800">
+              <p className="text-xs text-muted-foreground pt-2 border-t dark:border-border">
                 {t('bible.offlineNotice')}
               </p>
             )}

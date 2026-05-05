@@ -92,7 +92,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
       case 1:
         return <Crown className="w-5 h-5 text-yellow-500" />;
       case 2:
-        return <Medal className="w-5 h-5 text-slate-400" />;
+        return <Medal className="w-5 h-5 text-muted-foreground" />;
       case 3:
         return <Medal className="w-5 h-5 text-amber-600" />;
       default:
@@ -103,11 +103,11 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
   const getRankBg = (rank: number) => {
     switch (rank) {
       case 1:
-        return "bg-[#f5f5f7] dark:bg-[#2a2a2c] border-[#e0e0e0] dark:border-[#3a3a3c]";
+        return "bg-secondary dark:bg-card border-border dark:border-border";
       case 2:
-        return "bg-[#f5f5f7] dark:bg-[#2a2a2c] border-[#e0e0e0] dark:border-[#3a3a3c]";
+        return "bg-secondary dark:bg-card border-border dark:border-border";
       case 3:
-        return "bg-primary/5 dark:bg-primary/10 border-[#0066cc]/20 dark:border-[#0066cc]/30";
+        return "bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/30";
       default:
         return "bg-card border-border";
     }
@@ -196,7 +196,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
                   {myEntry.rank}
                 </span>
                 <div className="flex-1">
-                  <p className="font-medium text-sm">{t('group.myRank')}</p>
+                  <p className="font-semibold text-sm">{t('group.myRank')}</p>
                   <p className="text-xs text-muted-foreground">
                     {getDisplayValue(myEntry).value} {getDisplayValue(myEntry).unit}
                   </p>
@@ -220,7 +220,7 @@ export function Leaderboard({ churchId, planId, currentUserId }: LeaderboardProp
                 >
                   {getRankIcon(entry.rank)}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
+                    <p className="font-semibold text-sm truncate">
                       {entry.user.name || t('group.anonymousUser')}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">

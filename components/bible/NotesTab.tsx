@@ -275,7 +275,7 @@ export function NotesTab() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-slate-400 hover:text-primary bg-secondary hover:bg-primary/5 dark:bg-card dark:hover:bg-primary/10 rounded-full active:scale-95"
+                              className="h-8 w-8 text-muted-foreground hover:text-primary bg-secondary hover:bg-primary/5 dark:bg-card dark:hover:bg-primary/10 rounded-full active:scale-95"
                               onClick={(e) => handleEdit(e, item.bookId, item.chapter, item.verse)}
                               title={t('bible.editBtn')}
                             >
@@ -284,7 +284,7 @@ export function NotesTab() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-slate-400 hover:text-red-600 bg-secondary hover:bg-red-50 dark:bg-card dark:hover:bg-red-900/20 rounded-full active:scale-95"
+                              className="h-8 w-8 text-muted-foreground hover:text-red-600 bg-secondary hover:bg-red-50 dark:bg-card dark:hover:bg-red-900/20 rounded-full active:scale-95"
                               onClick={(e) => handleDelete(e, item.id)}
                               title={t('bible.deleteBtn')}
                             >

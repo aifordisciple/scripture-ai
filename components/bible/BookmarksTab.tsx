@@ -57,7 +57,7 @@ export function BookmarksTab() {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
-      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-slate-800">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b dark:border-border">
         <div className="p-2.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl">
           <Bookmark className="w-6 h-6" />
         </div>
@@ -92,7 +92,7 @@ export function BookmarksTab() {
                       onClick={() => handleJump(item.bookId, item.chapter)}
                       className={cn(
                         "group relative flex flex-col p-4 rounded-xl cursor-pointer",
-                        "bg-white dark:bg-slate-900 border dark:border-slate-800",
+                        "bg-white dark:bg-card border dark:border-border",
                         "shadow-sm hover:shadow-md hover:border-purple-200 dark:hover:border-purple-800",
                         "transition-all duration-300"
                       )}
@@ -104,7 +104,7 @@ export function BookmarksTab() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-slate-400 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                          className="h-6 w-6 text-muted-foreground hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                           onClick={(e) => handleRemove(e, item.id)}
                           title={t('bible.removeBookmark')}
                         >

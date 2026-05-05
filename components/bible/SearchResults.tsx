@@ -175,7 +175,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
                 <span className="text-xs font-semibold text-primary dark:text-primary bg-primary/10 dark:bg-primary/20 px-2 py-1 rounded">
                   {getBookDisplayName(verse.bookId, locale)} {verse.chapter}:{verse.verse}
                 </span>
-                <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ExternalLink className="w-4 h-4 text-foreground group-hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
               <div
                 className="text-foreground dark:text-foreground/70 font-serif"

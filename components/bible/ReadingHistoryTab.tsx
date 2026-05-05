@@ -130,7 +130,7 @@ export function ReadingHistoryTab() {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
       {/* 头部 */}
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-slate-800">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b dark:border-border">
         <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
           <History className="w-6 h-6" />
         </div>
@@ -253,7 +253,7 @@ export function ReadingHistoryTab() {
                       onClick={() => handleJump(item.bookId, item.chapter)}
                       className={cn(
                         "group flex items-center justify-between p-4 rounded-xl cursor-pointer",
-                        "bg-white dark:bg-slate-900 border dark:border-slate-800",
+                        "bg-white dark:bg-card border dark:border-border",
                         "hover:border-emerald-200 dark:hover:border-emerald-800",
                         "shadow-sm hover:shadow-md transition-all duration-300"
                       )}

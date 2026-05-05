@@ -203,17 +203,17 @@ export default function DesktopLoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-foreground dark:text-foreground mb-2">
             AI读
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-muted-foreground dark:text-muted-foreground">
             {isTauri ? "登录以同步您的数据" : "欢迎回来"}
           </p>
         </div>
 
         {/* Login Form Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-700">
-          <h2 className="text-xl font-semibold text-center mb-6 text-slate-900 dark:text-white">
+        <div className="bg-white dark:bg-card rounded-2xl shadow-xl p-8 border border-border dark:border-border">
+          <h2 className="text-xl font-semibold text-center mb-6 text-foreground dark:text-foreground">
             {isLogin ? "登录账户" : "创建账户"}
           </h2>
 
@@ -221,7 +221,7 @@ export default function DesktopLoginPage() {
             {!isLogin && (
               <div className="space-y-2">
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="昵称"
                     className="pl-9"
@@ -235,7 +235,7 @@ export default function DesktopLoginPage() {
 
             <div className="space-y-2">
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="email"
                   placeholder="邮箱地址"
@@ -249,7 +249,7 @@ export default function DesktopLoginPage() {
 
             <div className="space-y-2">
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="password"
                   placeholder="密码"
@@ -275,7 +275,7 @@ export default function DesktopLoginPage() {
             </Button>
           </form>
 
-          <div className="text-center text-sm text-slate-500 mt-6">
+          <div className="text-center text-sm text-muted-foreground mt-6">
             {isLogin ? "还没有账号？" : "已有账号？"}
             <button
               onClick={() => setIsLogin(!isLogin)}
@@ -290,7 +290,7 @@ export default function DesktopLoginPage() {
         {!isTauri && (
           <button
             onClick={handleBack}
-            className="flex items-center justify-center gap-2 w-full mt-4 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
+            className="flex items-center justify-center gap-2 w-full mt-4 text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-white transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             返回首页
@@ -299,7 +299,7 @@ export default function DesktopLoginPage() {
 
         {/* Tauri indicator */}
         {isTauri && (
-          <p className="text-center text-xs text-slate-400 mt-4">
+          <p className="text-center text-xs text-muted-foreground mt-4">
             桌面端登录模式
           </p>
         )}

@@ -219,7 +219,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
       case "USER_UNMUTED":
         return "text-green-500 bg-green-100 dark:bg-green-900/30";
       default:
-        return "text-slate-500 bg-slate-100 dark:bg-slate-800";
+        return "text-muted-foreground bg-accent dark:bg-accent";
     }
   };
 

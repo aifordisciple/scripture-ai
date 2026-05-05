@@ -52,12 +52,12 @@ export function OnboardingStep({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden"
+          className="relative w-full max-w-md bg-white dark:bg-card rounded-3xl shadow-2xl overflow-hidden"
         >
           {/* 跳过按钮 */}
           <button
             onClick={onSkip}
-            className="absolute top-4 right-4 z-10 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="absolute top-4 right-4 z-10 p-2 text-muted-foreground hover:text-muted-foreground dark:hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -75,7 +75,7 @@ export function OnboardingStep({
                       ? "w-6 bg-gradient-to-r from-blue-500 to-purple-500"
                       : index < currentStep
                       ? "bg-blue-500"
-                      : "bg-slate-200 dark:bg-slate-700"
+                      : "bg-accent dark:bg-accent"
                   )}
                 />
               ))}
@@ -83,7 +83,7 @@ export function OnboardingStep({
 
             {/* 标题 */}
             {title && (
-              <p className="text-center text-sm text-slate-500 dark:text-slate-400 mb-2">
+              <p className="text-center text-sm text-muted-foreground dark:text-muted-foreground mb-2">
                 {title}
               </p>
             )}
@@ -99,7 +99,7 @@ export function OnboardingStep({
                   className={cn(
                     "w-24 h-24 rounded-full flex items-center justify-center",
                     "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900",
-                    "border-2 border-slate-200 dark:border-slate-700"
+                    "border-2 border-border dark:border-border"
                   )}
                 >
                   {step.icon}
@@ -117,10 +117,10 @@ export function OnboardingStep({
                 transition={{ duration: 0.2 }}
                 className="text-center"
               >
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
+                <h2 className="text-xl font-bold text-foreground dark:text-foreground mb-3">
                   {step.title}
                 </h2>
-                <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+                <p className="text-muted-foreground dark:text-foreground text-sm leading-relaxed">
                   {step.description}
                 </p>
               </motion.div>
@@ -128,15 +128,15 @@ export function OnboardingStep({
           </div>
 
           {/* 底部按钮 */}
-          <div className="flex items-center justify-between px-6 py-4 bg-slate-50 dark:bg-slate-800/50">
+          <div className="flex items-center justify-between px-6 py-4 bg-accent/50 dark:bg-accent/50">
             <button
               onClick={onPrev}
               disabled={isFirstStep}
               className={cn(
                 "flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                 isFirstStep
-                  ? "text-slate-300 dark:text-slate-600 cursor-not-allowed"
-                  : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700"
+                  ? "text-foreground dark:text-muted-foreground cursor-not-allowed"
+                  : "text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-white hover:bg-accent dark:hover:bg-accent"
               )}
             >
               <ChevronLeft className="w-4 h-4" />

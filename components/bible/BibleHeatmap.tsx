@@ -36,8 +36,8 @@ export interface BibleHeatmapProps {
 }
 
 const COLOR_SCALES = {
-  blue:   ['bg-slate-100 dark:bg-slate-800', 'bg-blue-200 dark:bg-blue-900', 'bg-blue-400 dark:bg-blue-700', 'bg-blue-600 dark:bg-blue-500', 'bg-blue-800 dark:bg-blue-400'],
-  green:  ['bg-slate-100 dark:bg-slate-800', 'bg-emerald-200 dark:bg-emerald-900', 'bg-emerald-400 dark:bg-emerald-700', 'bg-emerald-600 dark:bg-emerald-500', 'bg-emerald-800 dark:bg-emerald-400'],
+  blue:   ['bg-accent dark:bg-accent', 'bg-blue-200 dark:bg-blue-900', 'bg-blue-400 dark:bg-blue-700', 'bg-blue-600 dark:bg-blue-500', 'bg-blue-800 dark:bg-blue-400'],
+  green:  ['bg-accent dark:bg-accent', 'bg-emerald-200 dark:bg-emerald-900', 'bg-emerald-400 dark:bg-emerald-700', 'bg-emerald-600 dark:bg-emerald-500', 'bg-emerald-800 dark:bg-emerald-400'],
 };
 
 export function BibleHeatmap({
@@ -182,14 +182,14 @@ export function BibleHeatmap({
       {tooltip.visible && (
         <div
           className={cn(
-             "absolute z-50 px-2.5 py-1.5 text-xs font-bold text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded shadow-xl pointer-events-none transform -translate-x-1/2 whitespace-nowrap animate-in fade-in zoom-in-95 duration-100",
+             "absolute z-50 px-2.5 py-1.5 text-xs font-bold text-white bg-card dark:bg-white dark:text-foreground rounded shadow-xl pointer-events-none transform -translate-x-1/2 whitespace-nowrap animate-in fade-in zoom-in-95 duration-100",
              tooltip.isBelow ? "translate-y-0" : "-translate-y-full"
           )}
           style={{ left: tooltip.x, top: tooltip.y }}
         >
           {tooltip.text}
           <div className={cn(
-              "absolute left-1/2 w-2 h-2 bg-slate-900 dark:bg-white transform -translate-x-1/2 rotate-45",
+              "absolute left-1/2 w-2 h-2 bg-card dark:bg-white transform -translate-x-1/2 rotate-45",
               tooltip.isBelow ? "top-0 -translate-y-1/2" : "bottom-0 translate-y-1/2"
           )} />
         </div>

@@ -153,7 +153,7 @@ export function GroupBadgeGallery({
                 <div key={rarity} className="space-y-2">
                   <div className="flex items-center gap-2">
                     <span
-                      className="text-xs font-medium px-2 py-0.5 rounded-full"
+                      className="text-xs font-semibold px-2 py-0.5 rounded-full"
                       style={{
                         backgroundColor: `${getRarityColor(rarity)}20`,
                         color: getRarityColor(rarity)
@@ -187,7 +187,7 @@ export function GroupBadgeGallery({
                               )}>
                                 {badge.icon}
                               </span>
-                              <span className="text-[9px] font-medium text-center px-1 truncate w-full">
+                              <span className="text-[9px] font-semibold text-center px-1 truncate w-full">
                                 {t(badge.nameKey)}
                               </span>
                               {!isEarned && (
@@ -232,7 +232,7 @@ export function GroupBadgeGallery({
                                 <div className="space-y-1">
                                   <div className="flex justify-between text-xs">
                                     <span className="text-muted-foreground">{t('group.progress')}</span>
-                                    <span className="font-medium">
+                                    <span className="font-semibold">
                                       {progress.current}/{progress.target}
                                     </span>
                                   </div>
@@ -267,7 +267,7 @@ export function GroupBadgeGallery({
             <div className="pt-3 border-t">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-muted-foreground">{t('group.collectionProgress')}</span>
-                <span className="font-medium">{Math.round((totalEarned / totalBadges) * 100)}%</span>
+                <span className="font-semibold">{Math.round((totalEarned / totalBadges) * 100)}%</span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div

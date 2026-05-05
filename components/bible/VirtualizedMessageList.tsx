@@ -174,13 +174,13 @@ const MessageBubble = memo(function MessageBubble({
 
             {/* 底部工具栏 */}
             {(mainText || !isThinking) && (
-              <div className="mt-5 pt-4 border-t border-slate-100/80 dark:border-border/60 flex justify-between items-center opacity-100 select-none">
+              <div className="mt-5 pt-4 border-t border-border/80 dark:border-border/60 flex justify-between items-center opacity-100 select-none">
                 <div className="flex items-center gap-0.5 flex-wrap">
                   <button
                     onClick={handleCopy}
                     className={cn(
                       'flex items-center gap-1.5 text-[11px] font-semibold transition-all px-2.5 py-1.5 rounded-lg',
-                      copied ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-muted-foreground hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      copied ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-muted-foreground hover:text-muted-foreground dark:hover:text-foreground hover:bg-accent dark:hover:bg-accent/60'
                     )}
                   >
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -192,7 +192,7 @@ const MessageBubble = memo(function MessageBubble({
                       onClick={() => { onSaveInsight(); setBookmarked(true); }}
                       className={cn(
                         'flex items-center gap-1.5 text-[11px] font-semibold transition-all px-2.5 py-1.5 rounded-lg',
-                        bookmarked ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                        bookmarked ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:bg-accent dark:hover:bg-accent/60'
                       )}
                     >
                       <Bookmark className={cn('w-3.5 h-3.5', bookmarked && 'fill-current')} />
@@ -203,7 +203,7 @@ const MessageBubble = memo(function MessageBubble({
                   {onShare && (
                     <button
                       onClick={onShare}
-                      className="flex items-center gap-1.5 text-[11px] font-semibold transition-all px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                      className="flex items-center gap-1.5 text-[11px] font-semibold transition-all px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-teal-600 dark:hover:text-teal-400 hover:bg-accent dark:hover:bg-accent/60"
                     >
                       <Share2 className="w-3.5 h-3.5" />
                       {t('bible.share')}
@@ -213,7 +213,7 @@ const MessageBubble = memo(function MessageBubble({
                   {onRetry && (
                     <button
                       onClick={onRetry}
-                      className="flex items-center gap-1.5 text-[11px] font-semibold transition-all px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                      className="flex items-center gap-1.5 text-[11px] font-semibold transition-all px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-muted-foreground dark:hover:text-foreground hover:bg-accent dark:hover:bg-accent/60"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                       {t('bible.retry')}

@@ -72,7 +72,7 @@ export const CheckInCard = memo(function CheckInCard({
           onClick={onClose}
           className="absolute -top-2 -right-2 z-10 w-8 h-8 flex items-center justify-center bg-white dark:bg-card rounded-full"
         >
-          <X className="w-4 h-4 text-slate-500" />
+          <X className="w-4 h-4 text-muted-foreground" />
         </button>
 
         {/* Card content - for image generation */}

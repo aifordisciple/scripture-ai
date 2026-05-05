@@ -76,15 +76,15 @@ export function SermonEditorHeader() {
   const statusConfig: Record<string, { label: string; bg: string; text: string; dot: string }> = {
     DRAFT: {
       label: t('sermon.draft'),
-      bg: 'bg-[#fafafc] dark:bg-white/[0.06]',
-      text: 'text-[#333] dark:text-[#ccc]',
-      dot: 'bg-[#7a7a7a]',
+      bg: 'bg-secondary dark:bg-card/[0.06]',
+      text: 'text-apple-inkMuted80 dark:text-muted-foreground',
+      dot: 'bg-muted-foreground',
     },
     IN_PROGRESS: {
       label: t('sermon.inProgress'),
-      bg: 'bg-[#0066cc]/10 dark:bg-[#0066cc]/20',
-      text: 'text-[#0066cc] dark:text-[#2997ff]',
-      dot: 'bg-[#0066cc]',
+      bg: 'bg-primary/10 dark:bg-primary/20',
+      text: 'text-primary dark:text-primary',
+      dot: 'bg-primary',
     },
     COMPLETED: {
       label: t('sermon.completed'),
@@ -99,7 +99,7 @@ export function SermonEditorHeader() {
   return (
     <div className={cn(
       'flex items-center border-b border-black/[0.04] dark:border-white/[0.06]',
-      'bg-[#f5f5f7]/80 dark:bg-[#272729]/80 backdrop-blur-xl backdrop-saturate-[180%]',
+      'bg-secondary/80 dark:bg-card/80 backdrop-blur-xl',
       isMd ? 'h-[52px] px-5 gap-3' : 'h-[48px] px-3 gap-2'
     )}
       style={{ fontFamily: "'SF Pro Display', 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif" }}
@@ -108,7 +108,7 @@ export function SermonEditorHeader() {
       {!isMd && (
         <button
           onClick={() => setSermonMobileView('list')}
-          className="w-11 h-11 flex items-center justify-center rounded-lg -ml-1 text-[#1d1d1f] dark:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 transition-all flex-shrink-0"
+          className="w-11 h-11 flex items-center justify-center rounded-lg -ml-1 text-foreground dark:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 transition-all flex-shrink-0"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
@@ -125,7 +125,7 @@ export function SermonEditorHeader() {
             if (e.key === 'Enter') handleTitleSave()
             if (e.key === 'Escape') { setEditingTitle(false) }
           }}
-          className="flex-1 text-sm font-semibold bg-white dark:bg-white/[0.06] border border-[#e0e0e0] dark:border-white/[0.08] rounded-lg px-3 py-1 focus:outline-none focus:border-[#0066cc]/40 focus:ring-2 focus:ring-[#0066cc]/20 transition-shadow min-w-0"
+          className="flex-1 text-sm font-semibold bg-white dark:bg-white/[0.06] border border-border dark:border-white/[0.08] rounded-lg px-3 py-1 focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/20 transition-shadow min-w-0"
           style={{ letterSpacing: '-0.224px' }}
         />
       ) : (
@@ -135,7 +135,7 @@ export function SermonEditorHeader() {
             setEditingTitle(true)
           }}
           className={cn(
-            'flex-1 text-left font-semibold text-[#1d1d1f] dark:text-white truncate hover:bg-black/[0.04] dark:hover:bg-white/[0.06] rounded-lg transition-colors active:scale-[0.98] min-w-0',
+            'flex-1 text-left font-semibold text-foreground dark:text-foreground truncate hover:bg-black/[0.04] dark:hover:bg-white/[0.06] rounded-lg transition-colors active:scale-[0.98] min-w-0',
             isMd ? 'text-[15px] px-2 py-1 -ml-2' : 'text-sm px-1 py-1'
           )}
           style={{ letterSpacing: '-0.224px' }}
@@ -146,12 +146,12 @@ export function SermonEditorHeader() {
 
       {/* Saving indicator */}
       {isSermonSaving && (
-        <span className="text-[10px] text-[#7a7a7a] dark:text-[#999] animate-pulse flex-shrink-0">{t('sermon.saving')}</span>
+        <span className="text-[10px] text-muted-foreground dark:text-muted-foreground animate-pulse flex-shrink-0">{t('sermon.saving')}</span>
       )}
 
       {/* Style badge — hidden on mobile to save space */}
       {isMd && (
-        <span className="text-[11px] px-2.5 py-1 rounded-[11px] bg-[#fafafc] dark:bg-white/[0.06] text-[#7a7a7a] dark:text-[#999] border border-[#e0e0e0] dark:border-white/[0.08] flex-shrink-0"
+        <span className="text-[11px] px-2.5 py-1 rounded-[11px] bg-secondary dark:bg-card/[0.06] text-muted-foreground dark:text-muted-foreground border border-border dark:border-white/[0.08] flex-shrink-0"
           style={{ letterSpacing: '-0.12px' }}
         >
           {t(`sermon.${currentSermon.style.toLowerCase()}`)}
@@ -166,7 +166,7 @@ export function SermonEditorHeader() {
             'flex items-center gap-1.5 text-[11px] rounded-[11px] border transition-all duration-150 active:scale-95',
             isMd ? 'px-2.5 py-1' : 'px-2 py-1.5 min-h-[44px]',
             currentStatus.bg, currentStatus.text,
-            'border-[#e0e0e0] dark:border-white/[0.08] hover:border-[#0066cc]/30'
+            'border-border dark:border-white/[0.08] hover:border-primary/30'
           )}
           style={{ letterSpacing: '-0.12px' }}
         >
@@ -175,7 +175,7 @@ export function SermonEditorHeader() {
           <ChevronDown className="w-2.5 h-2.5" />
         </button>
         {showStatusMenu && (
-          <div className="absolute right-0 top-full mt-1.5 z-50 bg-[#f5f5f7]/90 dark:bg-[#272729]/90 backdrop-blur-xl backdrop-saturate-[180%] rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.12)] border border-black/[0.04] dark:border-white/[0.06] py-1.5 min-w-[140px]">
+          <div className="absolute right-0 top-full mt-1.5 z-50 bg-secondary/90 dark:bg-card/90 backdrop-blur-xl rounded-lg border border-black/[0.04] dark:border-white/[0.06] py-1.5 min-w-[140px]">
             {Object.entries(statusConfig).map(([key, { label, bg, text, dot }]) => (
               <button
                 key={key}
@@ -184,8 +184,8 @@ export function SermonEditorHeader() {
                 style={{ letterSpacing: '-0.12px' }}
               >
                 <span className={cn('w-2 h-2 rounded-full', dot)} />
-                <span className="text-[#1d1d1f] dark:text-[#ccc]">{label}</span>
-                {currentSermon.status === key && <Check className="w-3 h-3 text-[#0066cc] dark:text-[#2997ff] ml-auto" />}
+                <span className="text-foreground dark:text-muted-foreground">{label}</span>
+                {currentSermon.status === key && <Check className="w-3 h-3 text-primary dark:text-primary ml-auto" />}
               </button>
             ))}
           </div>

@@ -52,7 +52,7 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
   return (
     <Card
       className={cn(
-        isChallenge && "border-[#e0e0e0] dark:border-[#3a3a3c] bg-gradient-to-br from-orange-50 to-amber-50 dark:from-[#272729] dark:to-[#2a2a2c]"
+        isChallenge && "border-border dark:border-border bg-gradient-to-br from-orange-50 to-amber-50 dark:from-card dark:to-card"
       )}
     >
       <CardHeader className="pb-3">
@@ -86,20 +86,20 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
 
         {/* Stats grid */}
         <div className="grid grid-cols-3 gap-3 pt-2">
-          <div className="text-center p-3 rounded-lg bg-[#f5f5f7] dark:bg-[#2a2a2c]">
+          <div className="text-center p-3 rounded-lg bg-secondary dark:bg-card">
             <div className="text-2xl font-semibold text-primary dark:text-primary">
               {progress.chaptersRead}
             </div>
             <div className="text-xs text-muted-foreground">{t('group.chaptersRead')}</div>
           </div>
-          <div className="text-center p-3 rounded-lg bg-[#f5f5f7] dark:bg-[#2a2a2c]">
+          <div className="text-center p-3 rounded-lg bg-secondary dark:bg-card">
             <div className="text-2xl font-semibold text-orange-500 flex items-center justify-center gap-1">
               <Flame className="w-5 h-5" />
               {progress.streakDays}
             </div>
             <div className="text-xs text-muted-foreground">{t('group.streakDays')}</div>
           </div>
-          <div className="text-center p-3 rounded-lg bg-[#f5f5f7] dark:bg-[#2a2a2c]">
+          <div className="text-center p-3 rounded-lg bg-secondary dark:bg-card">
             <div className="text-2xl font-semibold text-green-600 dark:text-green-400">
               {progress.completedDays}
             </div>
@@ -109,11 +109,11 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
 
         {/* Reward info */}
         {isChallenge && rewardTitle && (
-          <div className="p-3 rounded-lg bg-[#f5f5f7] dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#3a3a3c]">
+          <div className="p-3 rounded-lg bg-secondary dark:bg-card border border-border dark:border-border">
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-600" />
               <div>
-                <p className="font-medium text-sm">{t('group.rewardLabel', { title: rewardTitle })}</p>
+                <p className="font-semibold text-sm">{t('group.rewardLabel', { title: rewardTitle })}</p>
                 {rewardBadge && (
                   <p className="text-xs text-muted-foreground">
                     {t('group.badgeRewardDesc', { badge: rewardBadge })}
@@ -127,7 +127,7 @@ export function ChallengeProgress({ plan, progress }: ChallengeProgressProps) {
         {/* Streak encouragement */}
         {progress.streakDays >= 3 && (
           <div className="text-center p-2 rounded-lg bg-orange-50 dark:bg-orange-900/30">
-            <p className="text-sm font-medium text-orange-700 dark:text-orange-300">
+            <p className="text-sm font-semibold text-orange-700 dark:text-orange-300">
               🔥 {t('group.streakEncouragement', { count: progress.streakDays })}
             </p>
           </div>

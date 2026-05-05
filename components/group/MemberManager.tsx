@@ -206,7 +206,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
               className={cn(
                 "flex items-center justify-between p-3 rounded-lg border",
                 member.role === "OWNER"
-                  ? "bg-primary/5 dark:bg-primary/10 border-[#0066cc]/20 dark:border-[#0066cc]/30"
+                  ? "bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/30"
                   : "bg-muted/30"
               )}
             >
@@ -223,7 +223,7 @@ export function MemberManager({ churchId, isOwner, isAdmin, onGroupDisbanded }: 
                   )}
                 </div>
                 <div>
-                  <div className="font-medium">{member.user.name || t('group.anonymousUser')}</div>
+                  <div className="font-semibold">{member.user.name || t('group.anonymousUser')}</div>
                   <div className="flex items-center gap-2">
                     {getRoleBadge(member.role)}
                     <span className="text-xs text-muted-foreground">

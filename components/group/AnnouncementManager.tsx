@@ -263,7 +263,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                       id="pinned"
                       checked={pinned}
                       onChange={(e) => setPinned(e.target.checked)}
-                      className="rounded border-[#e0e0e0] dark:border-[#3a3a3c]"
+                      className="rounded border-border dark:border-border"
                     />
                     <Label htmlFor="pinned" className="text-sm font-normal">
                       {t('group.pinThisAnnouncement')}
@@ -305,7 +305,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                   className={cn(
                     "p-4 rounded-lg border",
                     announcement.pinned
-                      ? "bg-primary/5 dark:bg-primary/10 border-[#e0e0e0] dark:border-[#3a3a3c]"
+                      ? "bg-primary/5 dark:bg-primary/10 border-border dark:border-border"
                       : "bg-muted/30"
                   )}
                 >
@@ -407,7 +407,7 @@ export function AnnouncementManager({ churchId, isAdmin }: AnnouncementManagerPr
                   id="edit-pinned"
                   checked={pinned}
                   onChange={(e) => setPinned(e.target.checked)}
-                  className="rounded border-[#e0e0e0] dark:border-[#3a3a3c]"
+                  className="rounded border-border dark:border-border"
                 />
                 <Label htmlFor="edit-pinned" className="text-sm font-normal">
                   {t('group.pinThisAnnouncement')}

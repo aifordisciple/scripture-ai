@@ -121,28 +121,28 @@ export function DashboardDialog() {
         {/* --- [新增] 清空数据内部确认遮罩 --- */}
         {showClearMenu && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl w-full max-w-sm border dark:border-slate-800">
+            <div className="bg-white dark:bg-card p-6 rounded-2xl shadow-2xl w-full max-w-sm border dark:border-border">
               <h3 className="text-xl font-bold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2">
                 <Trash2 className="w-5 h-5"/> {t('bible.selectDataToClear')}
               </h3>
               
               <div className="space-y-3 mb-8">
                 {/* 选项 1: 高亮 */}
-                <button onClick={() => toggleOpt('highlights')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                   {clearOpts.highlights ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
+                <button onClick={() => toggleOpt('highlights')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-accent/50 dark:hover:bg-accent transition-colors">
+                   {clearOpts.highlights ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-muted-foreground" />}
                    <span className="flex-1 text-sm font-semibold">{t('bible.clearAllHighlightNotes', { count: highlights.length })}</span>
                 </button>
                 {/* 选项 2: 笔记 */}
-                <button onClick={() => toggleOpt('notes')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                   {clearOpts.notes ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
+                <button onClick={() => toggleOpt('notes')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-accent/50 dark:hover:bg-accent transition-colors">
+                   {clearOpts.notes ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-muted-foreground" />}
                    <span className="flex-1 text-sm font-semibold">{t('bible.clearAllDeepNotes', { count: notes.length })}</span>
                 </button>
                 {/* 选项 3: 阅读足迹 */}
-                <button onClick={() => toggleOpt('interactions')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                   {clearOpts.interactions ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
-                   <span className="flex-1 text-sm font-semibold text-slate-600 dark:text-slate-300">
+                <button onClick={() => toggleOpt('interactions')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-accent/50 dark:hover:bg-accent transition-colors">
+                   {clearOpts.interactions ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-muted-foreground" />}
+                   <span className="flex-1 text-sm font-semibold text-muted-foreground dark:text-foreground">
                       {t('bible.clearReadingFootprint')} <br/>
-                      <span className="text-xs text-slate-400 font-normal">{t('bible.heatmapResetNote')}</span>
+                      <span className="text-xs text-muted-foreground font-normal">{t('bible.heatmapResetNote')}</span>
                    </span>
                 </button>
               </div>
@@ -162,7 +162,7 @@ export function DashboardDialog() {
           </div>
         )}
 
-        <DialogHeader className="p-5 md:p-6 pb-4 border-b dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0">
+        <DialogHeader className="p-5 md:p-6 pb-4 border-b dark:border-border bg-accent/50 dark:bg-card/50 shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
@@ -195,7 +195,7 @@ export function DashboardDialog() {
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-2 md:px-6 pb-10 bg-white dark:bg-slate-950">
+        <div className="flex-1 overflow-y-auto px-2 md:px-6 pb-10 bg-white dark:bg-card">
            <BibleHeatmap 
              data={heatmapData} 
              onCellClick={handleCellClick}

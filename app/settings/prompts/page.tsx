@@ -56,15 +56,15 @@ function PromptFormModal({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+        className="bg-white dark:bg-accent rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
       >
-        <div className="p-4 border-b dark:border-slate-700 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-white">
+        <div className="p-4 border-b dark:border-border flex items-center justify-between">
+          <h2 className="text-lg font-bold text-foreground dark:text-foreground">
             {isEditing ? '编辑自定义问题' : '添加自定义问题'}
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+            className="text-muted-foreground hover:text-muted-foreground dark:hover:text-foreground"
           >
             <span className="text-xl">&times;</span>
           </button>
@@ -72,7 +72,7 @@ function PromptFormModal({
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-sm font-medium text-foreground dark:text-foreground mb-1">
               标签名称（支持emoji）
             </label>
             <input
@@ -80,23 +80,23 @@ function PromptFormModal({
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="例如: ❤️ 爱心解读"
-              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-border dark:border-border rounded-lg bg-white dark:bg-accent text-foreground dark:text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               maxLength={30}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-sm font-medium text-foreground dark:text-foreground mb-1">
               问题内容
             </label>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="请输入问题内容，例如: 请从爱的角度解读这段经文，关注神对人的爱..."
-              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 min-h-[120px] resize-none"
+              className="w-full px-3 py-2 border border-border dark:border-border rounded-lg bg-white dark:bg-accent text-foreground dark:text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 min-h-[120px] resize-none"
               maxLength={500}
             />
-            <p className="text-xs text-slate-400 mt-1">{prompt.length}/500</p>
+            <p className="text-xs text-muted-foreground mt-1">{prompt.length}/500</p>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
@@ -236,15 +236,15 @@ export default function PromptsSettingsPage() {
 
   return (
     <>
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-accent/50 dark:bg-card">
       {/* Unauthenticated state */}
       {status === 'unauthenticated' && (
         <div className="flex flex-col items-center justify-center min-h-screen px-4">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-slate-800 dark:text-white mb-2">
+            <h2 className="text-xl font-semibold text-foreground dark:text-foreground mb-2">
               请先登录
             </h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-4">
+            <p className="text-muted-foreground dark:text-muted-foreground mb-4">
               登录后即可管理自定义问题
             </p>
             <Button onClick={() => window.location.href = '/'}>
@@ -258,16 +258,16 @@ export default function PromptsSettingsPage() {
       {status === 'authenticated' && (
         <>
           {/* Header */}
-          <header className="sticky top-0 z-40 bg-white dark:bg-slate-800 border-b dark:border-slate-700">
+          <header className="sticky top-0 z-40 bg-white dark:bg-accent border-b dark:border-border">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => window.history.back()}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-accent dark:hover:bg-accent rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              <ArrowLeft className="w-5 h-5 text-muted-foreground dark:text-foreground" />
             </button>
-            <h1 className="text-lg font-bold text-slate-800 dark:text-white">
+            <h1 className="text-lg font-bold text-foreground dark:text-foreground">
               自定义问题
             </h1>
           </div>
@@ -292,13 +292,13 @@ export default function PromptsSettingsPage() {
           </div>
         ) : customPrompts.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-accent dark:bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">📝</span>
             </div>
-            <h2 className="text-lg font-medium text-slate-600 dark:text-slate-300 mb-2">
+            <h2 className="text-lg font-medium text-muted-foreground dark:text-foreground mb-2">
               还没有自定义问题
             </h2>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-muted-foreground mb-6">
               创建自定义快捷问题，一键发送常用提问
             </p>
             <Button
@@ -319,12 +319,12 @@ export default function PromptsSettingsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="bg-white dark:bg-slate-800 rounded-xl border dark:border-slate-700 p-4 shadow-sm"
+                  className="bg-white dark:bg-accent rounded-xl border dark:border-border p-4 shadow-sm"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium text-slate-800 dark:text-white truncate">
+                        <h3 className="font-medium text-foreground dark:text-foreground truncate">
                           {prompt.label}
                         </h3>
                         {prompt.isDefault && (
@@ -333,7 +333,7 @@ export default function PromptsSettingsPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
+                      <p className="text-sm text-muted-foreground dark:text-muted-foreground line-clamp-2">
                         {prompt.prompt}
                       </p>
                     </div>
@@ -344,7 +344,7 @@ export default function PromptsSettingsPage() {
                           "p-2 rounded-lg transition-colors",
                           prompt.isDefault
                             ? "text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
-                            : "text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                            : "text-muted-foreground hover:bg-accent dark:hover:bg-accent"
                         )}
                         title={prompt.isDefault ? "取消默认" : "设为默认"}
                       >
@@ -359,14 +359,14 @@ export default function PromptsSettingsPage() {
                           setEditingPrompt(prompt);
                           setShowForm(true);
                         }}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                        className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-accent dark:hover:bg-accent rounded-lg transition-colors"
                         title="编辑"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(prompt.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                        className="p-2 text-muted-foreground hover:text-red-600 hover:bg-accent dark:hover:bg-accent rounded-lg transition-colors"
                         title="删除"
                       >
                         <Trash2 className="w-4 h-4" />

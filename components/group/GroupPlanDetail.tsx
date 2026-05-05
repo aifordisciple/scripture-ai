@@ -437,7 +437,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-medium text-orange-700 dark:text-orange-300">
+                <p className="font-semibold text-orange-700 dark:text-orange-300">
                   {t('group.overdueDaysTask', { count: overdueDays.length })}
                 </p>
                 <p className="text-sm text-orange-600/70 dark:text-orange-400/70 mt-1">
@@ -506,7 +506,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                 >
                   {t('group.prevDay')}
                 </Button>
-                <span className="text-sm font-medium px-2">{t('group.dayLabel', { day: selectedDay })}</span>
+                <span className="text-sm font-semibold px-2">{t('group.dayLabel', { day: selectedDay })}</span>
                 <Button
                   variant="outline"
                   size="sm"
@@ -627,7 +627,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                       allCompleted
                         ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
                         : isCurrentDay
-                          ? "bg-primary/5 dark:bg-primary/10 border-[#0066cc]/20 dark:border-[#0066cc]/30"
+                          ? "bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/30"
                           : "bg-muted/30 border-border"
                     )}
                   >
@@ -636,7 +636,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                         <span className="font-semibold">{t('group.dayLabel', { day: task.day })}</span>
                         <span className={cn(
                           "text-xs",
-                          isCurrentDay ? "text-primary dark:text-primary font-medium" : "text-muted-foreground"
+                          isCurrentDay ? "text-primary dark:text-primary font-semibold" : "text-muted-foreground"
                         )}>
                           {isCurrentDay ? t('group.today') : taskDate}
                         </span>
@@ -659,13 +659,13 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                       <div className="mb-2 p-2 rounded bg-muted/50">
                         <div className="flex items-center gap-2 mb-1">
                           <Sparkles className="w-3 h-3 text-primary" />
-                          <span className="text-xs font-medium text-muted-foreground">{t('group.devotional')}</span>
+                          <span className="text-xs font-semibold text-muted-foreground">{t('group.devotional')}</span>
                           {isCurrentDay && (
                             <span className={cn(
                               "text-xs px-1 py-0.5 rounded",
                               devotionalCompleted
                                 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                                : "bg-[#f5f5f7] dark:bg-[#2a2a2c] text-[#7a7a7a]"
+                                : "bg-secondary dark:bg-card text-muted-foreground"
                             )}>
                               {devotionalCompleted ? t('group.read') : t('group.unread')}
                             </span>
@@ -690,7 +690,7 @@ export function GroupPlanDetail({ churchId, plan, onBack, isAdmin }: GroupPlanDe
                               "text-xs px-2 py-1 rounded transition-colors hover:opacity-80 flex items-center gap-1",
                               completed
                                 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                                : "bg-[#f5f5f7] dark:bg-[#2a2a2c] text-[#7a7a7a] hover:bg-primary/5 dark:hover:bg-primary/10"
+                                : "bg-secondary dark:bg-card text-muted-foreground hover:bg-primary/5 dark:hover:bg-primary/10"
                             )}
                           >
                             {t('group.bookChapterShort', { book: bookName, chapter: r.chapter })}

@@ -42,7 +42,7 @@ export function FeedbackButton({ className, variant = "floating" }: FeedbackButt
         className={cn(
           "fixed bottom-20 left-4 md:bottom-6 md:left-6 z-30",
           "w-12 h-12 rounded-full shadow-lg",
-          "bg-white dark:bg-slate-800 border-border",
+          "bg-white dark:bg-accent border-border",
           "hover:bg-primary hover:text-white hover:border-primary",
           "transition-all duration-200",
           className

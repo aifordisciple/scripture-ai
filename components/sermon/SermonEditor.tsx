@@ -151,7 +151,7 @@ export function SermonEditor() {
       </div>
 
       {/* Status Bar — Apple fine-print */}
-      <div className={`border-t border-[#e0e0e0] dark:border-white/[0.06] flex items-center gap-4 text-[12px] text-[#7a7a7a] dark:text-[#999] ${isMd ? 'px-5 py-1.5' : 'px-3 py-2 pb-safe'}`}
+      <div className={`border-t border-border dark:border-white/[0.06] flex items-center gap-4 text-[12px] text-muted-foreground dark:text-muted-foreground ${isMd ? 'px-5 py-1.5' : 'px-3 py-2 pb-safe'}`}
         style={{ fontFamily: "'SF Pro Text', system-ui, -apple-system, sans-serif", letterSpacing: '-0.12px' }}
       >
         <span>{charCount}{t('sermon.editorWords')}</span>
@@ -170,7 +170,7 @@ export function SermonEditor() {
         >A+</button>
         {isMd && (
           <>
-            <span className="mx-1 text-[#e0e0e0] dark:text-white/[0.08]">|</span>
+            <span className="mx-1 text-border dark:text-foreground/[0.08]">|</span>
             <button
               onClick={() => setLineHeight(h => Math.round(Math.max(1.2, h - 0.2) * 10) / 10)}
               className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"

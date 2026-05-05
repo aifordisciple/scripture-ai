@@ -282,14 +282,14 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                     <div className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold",
                       index === 0 ? "bg-amber-100 text-amber-700" :
-                      index === 1 ? "bg-slate-100 text-slate-700" :
+                      index === 1 ? "bg-accent text-foreground" :
                       index === 2 ? "bg-orange-100 text-orange-700" :
                       "bg-muted text-muted-foreground"
                     )}>
                       {index + 1}
                     </div>
                     <div>
-                      <div className="font-medium">{member.user?.name || t('group.anonymousUser')}</div>
+                      <div className="font-semibold">{member.user?.name || t('group.anonymousUser')}</div>
                       <div className="text-xs text-muted-foreground">
                         {member.lastActive
                           ? t('group.lastActiveAt', { time: new Date(member.lastActive).toLocaleDateString() })
@@ -334,7 +334,7 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                   className={cn(
                     "flex items-center justify-between p-3 rounded-lg",
                     index === 0 && "bg-primary/5 dark:bg-primary/10",
-                    index === 1 && "bg-[#f5f5f7] dark:bg-[#2a2a2c]",
+                    index === 1 && "bg-secondary dark:bg-card",
                     index === 2 && "bg-primary/5 dark:bg-primary/10"
                   )}
                 >
@@ -342,13 +342,13 @@ export function GroupStats({ churchId, plans }: GroupStatsProps) {
                     <div className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold",
                       index === 0 ? "bg-amber-100 text-amber-700" :
-                      index === 1 ? "bg-slate-100 text-slate-700" :
+                      index === 1 ? "bg-accent text-foreground" :
                       index === 2 ? "bg-orange-100 text-orange-700" :
                       "bg-muted text-muted-foreground"
                     )}>
                       {index + 1}
                     </div>
-                    <span className="font-medium">{entry.user.name || t('group.anonymousUser')}</span>
+                    <span className="font-semibold">{entry.user.name || t('group.anonymousUser')}</span>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
                     <div className="text-center">

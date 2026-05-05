@@ -143,7 +143,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
       case "RESOLVED":
         return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
       default:
-        return "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300";
+        return "bg-accent text-foreground dark:bg-accent dark:text-foreground";
     }
   };
 
@@ -260,8 +260,8 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             </div>
 
             {/* 原始反馈 */}
-            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg">
-              <div className="text-xs text-slate-500 mb-1">
+            <div className="bg-accent/50 dark:bg-accent p-3 rounded-lg">
+              <div className="text-xs text-muted-foreground mb-1">
                 {t('feedback.yourFeedback')} · {formatTime(selectedFeedback.createdAt)}
               </div>
               <p className="text-sm whitespace-pre-wrap">{selectedFeedback.content}</p>
@@ -269,8 +269,8 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
 
             {/* 截图 */}
             {selectedFeedback.screenshot && (
-              <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg">
-                <div className="text-xs text-slate-500 mb-2">{t('feedback.screenshot')}</div>
+              <div className="bg-accent/50 dark:bg-accent p-3 rounded-lg">
+                <div className="text-xs text-muted-foreground mb-2">{t('feedback.screenshot')}</div>
                 <img
                   src={selectedFeedback.screenshot}
                   alt={t('feedback.screenshotAlt')}
@@ -282,7 +282,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             {/* 回复历史 */}
             {parseReplies(selectedFeedback.replies).length > 0 && (
               <div>
-                <div className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <div className="text-sm font-medium text-foreground dark:text-foreground mb-2">
                   {t('feedback.conversationHistory')}
                 </div>
                 <ScrollArea className="max-h-[200px] border rounded-lg p-3">
@@ -293,10 +293,10 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                         "mb-3 last:mb-0 p-3 rounded-lg",
                         reply.type === "admin"
                           ? "bg-blue-50 dark:bg-blue-900/20"
-                          : "bg-slate-100 dark:bg-slate-700"
+                          : "bg-accent dark:bg-accent"
                       )}
                     >
-                      <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                         {reply.type === "admin" ? (
                           <>
                             <Badge variant="secondary" className="text-xs py-0 h-5">{t('feedback.admin')}</Badge>
@@ -304,7 +304,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                           </>
                         ) : (
                           <>
-                            <span className="text-slate-600 dark:text-slate-400">{t('feedback.you')}</span>
+                            <span className="text-muted-foreground dark:text-muted-foreground">{t('feedback.you')}</span>
                             <span>·</span>
                             {formatTime(reply.createdAt)}
                           </>
@@ -358,7 +358,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             {/* 搜索和筛选栏 */}
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder={t('feedback.searchPlaceholder')}
                   value={searchQuery}
@@ -389,7 +389,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
             </div>
 
             {/* 统计信息 */}
-            <div className="flex items-center gap-4 text-xs text-slate-500">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span>{t('feedback.totalFeedback', { count: feedbacks.length })}</span>
               <span>·</span>
               <span>{t('feedback.newReplyCount', { count: feedbacks.filter(f => hasNewAdminReply(f)).length })}</span>
@@ -418,7 +418,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                         onClick={() => handleSelectFeedback(feedback)}
                         className={cn(
                           "p-3 rounded-lg border cursor-pointer transition-colors",
-                          "hover:bg-slate-50 dark:hover:bg-slate-800",
+                          "hover:bg-accent/50 dark:hover:bg-accent",
                           hasNewReply && "border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10"
                         )}
                       >
@@ -431,11 +431,11 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                                   {t('feedback.hasNewReply')}
                                 </Badge>
                               ) : feedback.adminReply ? (
-                                <Badge variant="outline" className="text-xs text-slate-500">
+                                <Badge variant="outline" className="text-xs text-muted-foreground">
                                   {t('feedback.replied')}
                                 </Badge>
                               ) : (
-                                <Badge variant="outline" className="text-xs text-slate-400">
+                                <Badge variant="outline" className="text-xs text-muted-foreground">
                                   {t('feedback.pendingReply')}
                                 </Badge>
                               )}
@@ -444,7 +444,7 @@ export function UserFeedbackPanel({ open, onOpenChange }: UserFeedbackPanelProps
                               </Badge>
                             </div>
                           </div>
-                          <span className="text-xs text-slate-500 shrink-0">
+                          <span className="text-xs text-muted-foreground shrink-0">
                             {formatTime(feedback.createdAt)}
                           </span>
                         </div>

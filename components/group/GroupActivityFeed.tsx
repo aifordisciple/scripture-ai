@@ -134,7 +134,7 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
       case "completion":
         return <CheckCircle2 className="w-4 h-4 text-orange-500" />;
       default:
-        return <CheckCircle2 className="w-4 h-4 text-[#7a7a7a]" />;
+        return <CheckCircle2 className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
@@ -148,16 +148,16 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
       case "devotional":
         return (
           <>
-            <span className="font-medium">{userName}</span>
+            <span className="font-semibold">{userName}</span>
             <span className="text-muted-foreground"> {t('group.completedDayDevotional', { day: activity.day })}</span>
           </>
         );
       case "reading":
         return (
           <>
-            <span className="font-medium">{userName}</span>
+            <span className="font-semibold">{userName}</span>
             <span className="text-muted-foreground"> {t('group.readBook')}</span>
-            <span className="font-medium text-green-600 dark:text-green-400">
+            <span className="font-semibold text-green-600 dark:text-green-400">
               {t('group.bookChapter', { book: bookName, chapter: activity.chapter })}
             </span>
           </>
@@ -165,14 +165,14 @@ export function GroupActivityFeed({ churchId, planId }: GroupActivityFeedProps) 
       case "completion":
         return (
           <>
-            <span className="font-medium">{userName}</span>
+            <span className="font-semibold">{userName}</span>
             <span className="text-muted-foreground"> {t('group.completedDayAll', { day: activity.day })} 🎉</span>
           </>
         );
       default:
         return (
           <>
-            <span className="font-medium">{userName}</span>
+            <span className="font-semibold">{userName}</span>
             <span className="text-muted-foreground"> {t('group.completedTask')}</span>
           </>
         );

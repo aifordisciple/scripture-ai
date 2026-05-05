@@ -208,13 +208,13 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
                     )}
                   >
                     {msg.userId !== currentUserId && (
-                      <p className="text-xs font-medium text-muted-foreground mb-1">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">
                         {msg.user.name || t('group.anonymousUser')}
                       </p>
                     )}
                     {msg.type === "SHARE_VERSE" && msg.metadata && (
                       <div className="mb-2 p-2 bg-white/10 rounded-lg text-sm">
-                        <p className="font-medium text-[#2997ff] text-xs mb-1">
+                        <p className="font-semibold text-primary text-xs mb-1">
                           <BookOpen className="w-3 h-3 inline mr-1" />
                           {getBookName(msg.metadata.bookId || "")} {msg.metadata.chapter}
                         </p>
@@ -253,7 +253,7 @@ export function GroupChat({ churchId, currentUserId, onShareVerse }: GroupChatPr
             placeholder={t('group.inputPlaceholder')}
             disabled={sending}
             rows={1}
-            className="flex-1 resize-none max-h-32 rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 resize-none max-h-32 rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
           <Button onClick={sendMessage} disabled={sending || !input.trim()} size="icon" className="shrink-0 active:scale-95">
             {sending ? (

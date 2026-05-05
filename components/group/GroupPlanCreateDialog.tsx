@@ -389,8 +389,8 @@ export function GroupPlanCreateDialog({ churchId, onSuccess }: GroupPlanCreateDi
                   className={cn(
                     "p-4 rounded-lg border cursor-pointer transition-colors",
                     selectedTemplate === template.id
-                      ? "border-[#0066cc] bg-primary/5 dark:bg-primary/10"
-                      : "border-border hover:border-[#0066cc]/50"
+                      ? "border-primary bg-primary/5 dark:bg-primary/10"
+                      : "border-border hover:border-primary/50"
                   )}
                 >
                   <div className="font-semibold">{template.name}</div>

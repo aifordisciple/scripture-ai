@@ -61,10 +61,10 @@ export function SermonMobileBottomBar() {
             onClick={() => !disabled && handleTabPress(type)}
             disabled={disabled}
             className={cn(
-              'flex flex-col items-center justify-center w-11 h-11 rounded-xl transition-all duration-150 active:scale-95',
+              'flex flex-col items-center justify-center w-11 h-11 rounded-lg transition-all duration-150 active:scale-95',
               active
-                ? 'text-[#0066cc]'
-                : 'text-[#7a7a7a] dark:text-[#999]',
+                ? 'text-primary'
+                : 'text-muted-foreground dark:text-muted-foreground',
  disabled && 'opacity-30'
             )}
           >

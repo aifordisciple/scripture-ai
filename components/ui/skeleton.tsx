@@ -86,7 +86,7 @@ export function Skeleton({
     <div
       className={cn(
         // 基础样式
-        'bg-slate-200 dark:bg-slate-700',
+        'bg-accent dark:bg-accent',
         variantStyles[variant],
         animationStyles[animation],
         className

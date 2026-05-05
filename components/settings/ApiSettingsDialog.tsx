@@ -141,10 +141,10 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md rounded-2xl">
+      <DialogContent className="sm:max-w-md rounded-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <BrainCircuit className="w-5 h-5 text-[#0066cc]" />
+            <BrainCircuit className="w-5 h-5 text-primary" />
             {t('settings.aiModelSettings')}
           </DialogTitle>
           <DialogDescription>
@@ -153,7 +153,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
         </DialogHeader>
 
         {/* Current active config display */}
-        <div className="bg-[#0066cc]/5 dark:bg-[#0066cc]/10 text-[#0066cc] dark:text-[#2997ff] p-3 rounded-xl text-sm font-medium flex items-center justify-between mt-2 mb-4 border border-[#0066cc]/20 dark:border-[#0066cc]/30">
+        <div className="bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary p-3 rounded-lg text-sm font-semibold flex items-center justify-between mt-2 mb-4 border border-primary/20 dark:border-primary/30">
           <div className="flex items-center gap-2">
             <div className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -167,11 +167,11 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
                 {syncedToCloud ? (
                   <><Cloud className="w-3 h-3 text-emerald-500" /> {t('settings.synced')}</>
                 ) : (
-                  <><CloudOff className="w-3 h-3 text-slate-400" /> {t('settings.localOnly')}</>
+                  <><CloudOff className="w-3 h-3 text-muted-foreground" /> {t('settings.localOnly')}</>
                 )}
               </span>
             )}
-            <span className="bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md text-xs font-semibold border border-slate-200 dark:border-slate-700 font-mono tracking-tight">
+            <span className="bg-card dark:bg-card px-2.5 py-1 rounded-md text-xs font-semibold border border-border dark:border-border font-mono tracking-tight">
               {apiConfig.model || t('settings.unknownModel')}
             </span>
           </div>
@@ -199,42 +199,42 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium flex items-center gap-1">
-              <Server className="w-4 h-4 text-slate-500" />
+            <label className="text-sm font-semibold flex items-center gap-1">
+              <Server className="w-4 h-4 text-muted-foreground" />
               {t('settings.baseUrl')}
             </label>
             <Input
               value={localConfig.baseUrl}
               onChange={e => setLocalConfig({...localConfig, baseUrl: e.target.value})}
-              className="bg-slate-50"
+              className="bg-accent/50"
               placeholder={isLocal ? "http://host.docker.internal:11434/v1" : "https://api.openai.com/v1"}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium flex items-center gap-1">
-              <Cpu className="w-4 h-4 text-slate-500" />
+            <label className="text-sm font-semibold flex items-center gap-1">
+              <Cpu className="w-4 h-4 text-muted-foreground" />
               {t('settings.modelName')}
             </label>
             <Input
               value={localConfig.model}
               onChange={e => setLocalConfig({...localConfig, model: e.target.value})}
-              className="bg-slate-50"
+              className="bg-accent/50"
               placeholder={isLocal ? "qwen3-coder-next:latest" : "gpt-4o-mini"}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium flex items-center gap-1">
-              <Key className="w-4 h-4 text-slate-500" />
+            <label className="text-sm font-semibold flex items-center gap-1">
+              <Key className="w-4 h-4 text-muted-foreground" />
               {t('settings.apiKey')} {!isLocal && <span className="text-red-500">*</span>}
             </label>
             <Input
               type="password"
               value={localConfig.apiKey}
               onChange={e => setLocalConfig({...localConfig, apiKey: e.target.value})}
-              className="bg-slate-50"
+              className="bg-accent/50"
               placeholder={isLocal ? t('settings.localNoKeyPlaceholder') : "sk-..."}
             />
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-muted-foreground">
               {isLocal ? t('settings.localNoKey') : t('settings.compatibleApis')}
             </p>
           </div>
@@ -242,7 +242,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
 
         <div className="flex justify-end gap-3 mt-4">
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-full">{t('common.cancel')}</Button>
-          <Button onClick={handleSave} disabled={isSyncing} className="rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white gap-1 active:scale-95">
+          <Button onClick={handleSave} disabled={isSyncing} className="rounded-full bg-primary hover:bg-apple-focus text-white gap-1 active:scale-95">
             {showSuccess ? (
               <><CheckCircle2 className="w-4 h-4" /> {t('settings.applied')}</>
             ) : isSyncing ? (

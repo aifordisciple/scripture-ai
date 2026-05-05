@@ -129,7 +129,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
           <div className="space-y-6">
             {/* 邮件通知 */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-foreground">
                 <Mail className="w-4 h-4" />
                 {t('settings.emailNotification')}
               </div>
@@ -137,7 +137,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
               <div className="flex items-center justify-between pl-6">
                 <div className="space-y-0.5">
                   <Label htmlFor="email-feedback" className="text-sm">{t('settings.feedbackNotify')}</Label>
-                  <p className="text-xs text-slate-500">{t('settings.feedbackNotifyDesc')}</p>
+                  <p className="text-xs text-muted-foreground">{t('settings.feedbackNotifyDesc')}</p>
                 </div>
                 <Switch
                   id="email-feedback"
@@ -149,7 +149,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
               <div className="flex items-center justify-between pl-6">
                 <div className="space-y-0.5">
                   <Label htmlFor="email-system" className="text-sm">{t('settings.systemNotify')}</Label>
-                  <p className="text-xs text-slate-500">{t('settings.systemNotifyDesc')}</p>
+                  <p className="text-xs text-muted-foreground">{t('settings.systemNotifyDesc')}</p>
                 </div>
                 <Switch
                   id="email-system"
@@ -161,7 +161,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
 
             {/* 浏览器通知 */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-foreground">
                 <Globe className="w-4 h-4" />
                 {t('settings.browserNotification')}
               </div>
@@ -169,7 +169,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
               <div className="flex items-center justify-between pl-6">
                 <div className="space-y-0.5">
                   <Label htmlFor="browser-notify" className="text-sm">{t('settings.pushNotify')}</Label>
-                  <p className="text-xs text-slate-500">{t('settings.pushNotifyDesc')}</p>
+                  <p className="text-xs text-muted-foreground">{t('settings.pushNotifyDesc')}</p>
                 </div>
                 <Switch
                   id="browser-notify"
@@ -181,7 +181,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
 
             {/* 声音提醒 */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-foreground">
                 <Volume2 className="w-4 h-4" />
                 {t('settings.soundNotification')}
               </div>
@@ -189,7 +189,7 @@ export function NotificationSettings({ open, onOpenChange }: NotificationSetting
               <div className="flex items-center justify-between pl-6">
                 <div className="space-y-0.5">
                   <Label htmlFor="sound-notify" className="text-sm">{t('settings.notifySound')}</Label>
-                  <p className="text-xs text-slate-500">{t('settings.notifySoundDesc')}</p>
+                  <p className="text-xs text-muted-foreground">{t('settings.notifySoundDesc')}</p>
                 </div>
                 <Switch
                   id="sound-notify"

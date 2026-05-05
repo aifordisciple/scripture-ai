@@ -78,10 +78,10 @@ export function InstallPrompt() {
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-96 z-50"
           >
-            <div className="glass-panel rounded-2xl p-4 border border-primary/20">
+            <div className="glass-panel rounded-lg p-4 border border-primary/20">
               <div className="flex items-start gap-3">
                 {/* 图标 */}
-                <div className="shrink-0 w-12 h-12 rounded-xl bg-[#0066cc] flex items-center justify-center">
+                <div className="shrink-0 w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
                   <Download className="w-6 h-6 text-white" />
                 </div>
 

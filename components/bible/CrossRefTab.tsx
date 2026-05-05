@@ -208,7 +208,7 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
       </motion.div>
 
       {/* AI Toggle */}
-      <div className="flex items-center justify-between px-4 py-3 mb-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border">
+      <div className="flex items-center justify-between px-4 py-3 mb-4 rounded-xl bg-accent/50 dark:bg-accent/50 border">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-500" />
           <span className="text-sm text-foreground">{t('bible.aiConnectionDesc')}</span>
@@ -223,7 +223,7 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
               "relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0",
               enableAI
                 ? "bg-primary"
-                : "bg-slate-200 dark:bg-slate-700"
+                : "bg-accent dark:bg-accent"
             )}
           >
             <span

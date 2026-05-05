@@ -114,30 +114,30 @@ export default function DashboardPage() {
   const totalInteractions = heatmapData.reduce((sum, item) => sum + item.weight, 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col relative">
+    <div className="min-h-screen bg-accent/50 dark:bg-card flex flex-col relative">
 
       {/* 确认遮罩 */}
       {showClearMenu && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-2xl w-full max-w-sm border dark:border-slate-800">
+          <div className="bg-white dark:bg-card p-6 rounded-2xl shadow-2xl w-full max-w-sm border dark:border-border">
             <h3 className="text-xl font-bold text-red-600 dark:text-red-500 mb-4 flex items-center gap-2">
               <Trash2 className="w-5 h-5"/> {t('dashboard.selectDataToClear') || '选择要清空的数据'}
             </h3>
 
             <div className="space-y-3 mb-8">
-              <button onClick={() => toggleOpt('highlights')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                 {clearOpts.highlights ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
+              <button onClick={() => toggleOpt('highlights')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-accent/50 dark:hover:bg-accent transition-colors">
+                 {clearOpts.highlights ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-muted-foreground" />}
                  <span className="flex-1 text-sm font-medium">{t('dashboard.clearHighlights') || '清空所有高亮笔记'} ({highlights.length})</span>
               </button>
-              <button onClick={() => toggleOpt('notes')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                 {clearOpts.notes ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
+              <button onClick={() => toggleOpt('notes')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-accent/50 dark:hover:bg-accent transition-colors">
+                 {clearOpts.notes ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-muted-foreground" />}
                  <span className="flex-1 text-sm font-medium">{t('dashboard.clearNotes') || '清空所有深入笔记'} ({notes.length})</span>
               </button>
-              <button onClick={() => toggleOpt('interactions')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                 {clearOpts.interactions ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
-                 <span className="flex-1 text-sm font-medium text-slate-600 dark:text-slate-300">
+              <button onClick={() => toggleOpt('interactions')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-accent/50 dark:hover:bg-accent transition-colors">
+                 {clearOpts.interactions ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-muted-foreground" />}
+                 <span className="flex-1 text-sm font-medium text-muted-foreground dark:text-foreground">
                     {t('dashboard.clearInteractions') || '清空基础阅读足迹'} <br/>
-                    <span className="text-xs text-slate-400 font-normal">{t('dashboard.clearInteractionsHint') || '热力图将重置，不影响高亮和笔记'}</span>
+                    <span className="text-xs text-muted-foreground font-normal">{t('dashboard.clearInteractionsHint') || '热力图将重置，不影响高亮和笔记'}</span>
                  </span>
               </button>
             </div>
@@ -158,12 +158,12 @@ export default function DashboardPage() {
       )}
 
       {/* 顶部导航 */}
-      <header className="bg-white dark:bg-slate-900 border-b dark:border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+      <header className="bg-white dark:bg-card border-b dark:border-border px-6 py-4 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-6">
-          <Link href="/" className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2 text-sm font-medium">
+          <Link href="/" className="text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors flex items-center gap-2 text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> {t('dashboard.backToReading')}
           </Link>
-          <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
+          <div className="h-6 w-px bg-accent dark:bg-accent hidden sm:block"></div>
           <div>
             <h1 className="text-xl font-bold flex items-center gap-2">
               <Activity className="w-5 h-5 text-blue-500" />
@@ -189,10 +189,10 @@ export default function DashboardPage() {
                <span className="text-4xl font-black text-foreground">{totalInteractions}</span>
                <span className="text-sm text-muted-foreground font-medium uppercase tracking-wider mt-1">{t('dashboard.totalInteractionWeight') || '总互动权重'}</span>
             </div>
-            <p className="text-sm text-slate-500 mt-4">{t('dashboard.heatmapDescription') || '记录你的每一次阅读、高亮与思考。点击热力方块可快速跳回对应的经文进行研读。'}</p>
+            <p className="text-sm text-muted-foreground mt-4">{t('dashboard.heatmapDescription') || '记录你的每一次阅读、高亮与思考。点击热力方块可快速跳回对应的经文进行研读。'}</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border dark:border-slate-800 p-6 overflow-x-auto">
+        <div className="bg-white dark:bg-card rounded-2xl shadow-sm border dark:border-border p-6 overflow-x-auto">
            <BibleHeatmap
              data={heatmapData}
              onCellClick={handleCellClick}

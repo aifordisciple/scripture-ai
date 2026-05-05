@@ -222,9 +222,9 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
 
   if (loading) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-[#f5f5f7] dark:bg-[#1d1d1f]">
-        <Loader2 className="w-6 h-6 animate-spin text-[#0066cc] mr-2" />
-        <span className="text-[#7a7a7a]">{t('atlas.loadingLocationData')}</span>
+      <div className="w-full h-full flex items-center justify-center bg-secondary dark:bg-background">
+        <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
+        <span className="text-muted-foreground">{t('atlas.loadingLocationData')}</span>
       </div>
     );
   }
@@ -237,31 +237,31 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
       <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
         <button
           onClick={() => mapInstanceRef.current?.zoomIn()}
-          className="p-2 bg-white dark:bg-[#272729] rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] active:scale-95"
+          className="p-2 bg-card dark:bg-card rounded-lg hover:bg-accent dark:hover:bg-apple-tile3 active:scale-95"
         >
-          <Plus className="w-5 h-5 text-[#1d1d1f] dark:text-[#e0e0e0]" />
+          <Plus className="w-5 h-5 text-foreground dark:text-muted-foreground" />
         </button>
         <button
           onClick={() => mapInstanceRef.current?.zoomOut()}
-          className="p-2 bg-white dark:bg-[#272729] rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] active:scale-95"
+          className="p-2 bg-card dark:bg-card rounded-lg hover:bg-accent dark:hover:bg-apple-tile3 active:scale-95"
         >
-          <Minus className="w-5 h-5 text-[#1d1d1f] dark:text-[#e0e0e0]" />
+          <Minus className="w-5 h-5 text-foreground dark:text-muted-foreground" />
         </button>
         <button
           onClick={toggleFullscreen}
-          className="p-2 bg-white dark:bg-[#272729] rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] active:scale-95"
+          className="p-2 bg-card dark:bg-card rounded-lg hover:bg-accent dark:hover:bg-apple-tile3 active:scale-95"
         >
-          {isFullscreen ? <Minimize className="w-5 h-5 text-[#1d1d1f] dark:text-[#e0e0e0]" /> : <Maximize className="w-5 h-5 text-[#1d1d1f] dark:text-[#e0e0e0]" />}
+          {isFullscreen ? <Minimize className="w-5 h-5 text-foreground dark:text-muted-foreground" /> : <Maximize className="w-5 h-5 text-foreground dark:text-muted-foreground" />}
         </button>
         <div className="relative">
           <button
             onClick={() => setShowLayers(!showLayers)}
-            className="p-2 bg-white dark:bg-[#272729] rounded-lg hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c] active:scale-95"
+            className="p-2 bg-card dark:bg-card rounded-lg hover:bg-accent dark:hover:bg-apple-tile3 active:scale-95"
           >
-            <Layers className="w-5 h-5 text-[#1d1d1f] dark:text-[#e0e0e0]" />
+            <Layers className="w-5 h-5 text-foreground dark:text-muted-foreground" />
           </button>
           {showLayers && (
-            <div className="absolute right-0 top-10 bg-white dark:bg-[#272729] rounded-lg p-2 min-w-[120px] border border-[#e0e0e0] dark:border-[#3a3a3c]">
+            <div className="absolute right-0 top-10 bg-card dark:bg-card rounded-lg p-2 min-w-[120px] border border-border dark:border-border">
               {['standard', 'satellite', 'terrain'].map((layer) => (
                 <button
                   key={layer}
@@ -271,8 +271,8 @@ export default function MapView({ selectedLocationId, onLocationSelect }: MapVie
                   }}
                   className={`w-full text-left px-3 py-2 text-sm rounded ${
                     selectedLayer === layer
-                      ? 'bg-[#0066cc]/10 dark:bg-[#0066cc]/20 text-[#0066cc] dark:text-[#4d9fe0]'
-                      : 'text-[#1d1d1f] dark:text-[#e0e0e0] hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c]'
+                      ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary'
+                      : 'text-foreground dark:text-muted-foreground hover:bg-accent dark:hover:bg-apple-tile3'
                   }`}
                 >
                   {layer === 'standard' ? t('atlas.tabMap') : layer === 'satellite' ? 'Satellite' : 'Terrain'}

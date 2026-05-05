@@ -172,7 +172,7 @@ export function PlanCompletionCelebration({
               transition={{ type: "spring", damping: 20 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <Card className="w-full max-w-md bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300 dark:from-[#272729] dark:via-[#2a2a2c] dark:to-[#272729] dark:border-amber-700">
+              <Card className="w-full max-w-md bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300 dark:from-card dark:via-card dark:to-card dark:border-amber-700">
                 <CardContent className="p-6 text-center">
                   {/* Close button */}
                   <button
@@ -203,7 +203,7 @@ export function PlanCompletionCelebration({
                     <h2 className="text-2xl font-semibold text-amber-800 dark:text-amber-200 mb-2">
                       🎉 {t('group.congratulations')}
                     </h2>
-                    <p className="text-lg text-amber-700 dark:text-amber-300 font-medium mb-4">
+                    <p className="text-lg text-amber-700 dark:text-amber-300 font-semibold mb-4">
                       {t('group.youCompletedPlan', { planName })}
                     </p>
                   </motion.div>
@@ -277,7 +277,7 @@ export function PlanCompletionCelebration({
                     </Button>
                     <Button
                       onClick={onClose}
-                      className="flex-1 gap-1 bg-primary hover:bg-[#0055b3] dark:bg-primary dark:hover:bg-[#0a84ff] active:scale-95"
+                      className="flex-1 gap-1 bg-primary hover:bg-apple-focus dark:bg-primary dark:hover:bg-primary active:scale-95"
                     >
                       <PartyPopper className="w-4 h-4" />
                       {t('group.awesome')}

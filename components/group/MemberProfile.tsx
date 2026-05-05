@@ -220,7 +220,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                         title={`${badge.type} - ${formatDate(badge.earnedAt)}`}
                       >
                         <span className="text-lg">{getBadgeIcon(badge.type)}</span>
-                        <span className="text-sm font-medium">{badge.type.replace(/_/g, ' ')}</span>
+                        <span className="text-sm font-semibold">{badge.type.replace(/_/g, ' ')}</span>
                       </div>
                     ))}
                   </div>
@@ -245,7 +245,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                         className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
                       >
                         <div>
-                          <div className="font-medium">{progress.planName}</div>
+                          <div className="font-semibold">{progress.planName}</div>
                           <div className="text-sm text-muted-foreground">
                             {t('group.readChaptersStreak', { chapters: progress.chaptersRead, streak: progress.streakDays })}
                           </div>
@@ -279,7 +279,7 @@ export function MemberProfile({ userId, churchId, trigger }: MemberProfileProps)
                         className="p-3 rounded-lg bg-muted/30"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-primary dark:text-primary">
+                          <span className="text-sm font-semibold text-primary dark:text-primary">
                             {getBookName(note.bookId)} {note.chapter}:{note.verse}
                           </span>
                           <span className="text-xs text-muted-foreground">

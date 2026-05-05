@@ -346,7 +346,7 @@ export function ShareCard() {
                             layoutMode === 'modern' ? "flex-col items-start border-t border-current/30" : "justify-between items-end border-t border-current/20",
                             layoutMode === 'poster' || layoutMode === 'film' ? "border-white/30" : "",
                             layoutMode === 'minimal' ? "border-none justify-center flex-col items-center gap-1" : "",
-                            layoutMode === 'split' ? "border-slate-200" : ""
+                            layoutMode === 'split' ? "border-border" : ""
                         )}
                         style={{
                             color: (layoutMode === 'card' || layoutMode === 'split') ? '#666' : infoColor,

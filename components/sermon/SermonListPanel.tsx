@@ -164,18 +164,18 @@ export function SermonListPanel() {
   const tagItemPad = isMd ? 'px-3 py-1' : 'px-3.5 py-1.5'
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-[#1d1d1f]">
+    <div className="h-full flex flex-col bg-card dark:bg-background">
       {/* Search */}
       <div className={cn('px-4', isMd ? 'pt-4 pb-3' : 'pt-3 pb-2')}>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a7a7a]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             value={sermonSearchQuery}
             onChange={(e) => setSermonSearchQuery(e.target.value)}
             placeholder={t('sermon.searchPlaceholder')}
             className={cn(
-              'w-full pl-9 pr-4 text-sm rounded-full border border-black/[0.08] dark:border-white/[0.08] bg-[#f5f5f7] dark:bg-white/[0.06] placeholder:text-[#7a7a7a] focus:outline-none focus:border-[#0066cc]/40 focus:ring-2 focus:ring-[#0066cc]/20 transition-shadow',
+              'w-full pl-9 pr-4 text-sm rounded-full border border-black/[0.08] dark:border-white/[0.08] bg-secondary dark:bg-card/[0.06] placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/20 transition-shadow',
               isMd ? 'py-2' : 'py-2.5'
             )}
           />
@@ -183,16 +183,16 @@ export function SermonListPanel() {
       </div>
 
       {/* Folder section */}
-      <div className="px-3 pb-2 border-b border-[#f0f0f0] dark:border-white/[0.06]">
+      <div className="px-3 pb-2 border-b border-border dark:border-white/[0.06]">
         <div className="flex items-center justify-between px-2 mb-1">
-          <span className="text-[10px] font-semibold text-[#7a7a7a] dark:text-[#999] uppercase tracking-wider"
+          <span className="text-[10px] font-semibold text-muted-foreground dark:text-muted-foreground uppercase tracking-wider"
             style={{ letterSpacing: '-0.08px' }}
           >
             {t('sermon.panelList')}
           </span>
           <button
             onClick={handleCreateFolder}
-            className="text-[#7a7a7a] dark:text-[#999] hover:text-[#1d1d1f] dark:hover:text-white transition-colors p-1"
+            className="text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground transition-colors p-1"
             title={t('sermon.newFolder')}
           >
             <FolderPlus className="w-3.5 h-3.5" />
@@ -205,13 +205,13 @@ export function SermonListPanel() {
             'w-full flex items-center gap-2 rounded-lg text-xs transition-all duration-150',
             folderItemPad,
             !sermonSelectedFolderId
-              ? 'bg-[#0066cc]/10 text-[#0066cc] font-semibold'
-              : 'text-[#7a7a7a] dark:text-[#999] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+              ? 'bg-primary/10 text-primary font-semibold'
+              : 'text-muted-foreground dark:text-muted-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
           )}
         >
           <FolderOpen className="w-4 h-4 flex-shrink-0" />
           {t('sermon.allSermons')}
-          <span className="ml-auto text-[10px] text-[#7a7a7a] dark:text-[#999]">{sermons.length}</span>
+          <span className="ml-auto text-[10px] text-muted-foreground dark:text-muted-foreground">{sermons.length}</span>
         </button>
 
         {folderTree.map(folder => (
@@ -240,10 +240,10 @@ export function SermonListPanel() {
 
       {/* Tags */}
       {allTags.length > 0 && (
-        <div className="px-4 py-2 border-b border-[#f0f0f0] dark:border-white/[0.06]">
+        <div className="px-4 py-2 border-b border-border dark:border-white/[0.06]">
           <div className="flex items-center gap-1.5 mb-2">
-            <Tag className="w-3 h-3 text-[#7a7a7a]" />
-            <span className="text-[10px] font-semibold text-[#7a7a7a] uppercase tracking-wider"
+            <Tag className="w-3 h-3 text-muted-foreground" />
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"
               style={{ letterSpacing: '-0.08px' }}
             >
               Tags
@@ -264,8 +264,8 @@ export function SermonListPanel() {
                   'text-xs rounded-full border transition-all duration-150',
                   tagItemPad,
                   sermonSelectedTags.includes(tag)
-                    ? 'border-[#0066cc] bg-[#0066cc]/10 text-[#0066cc] font-medium'
-                    : 'border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.06] text-[#7a7a7a] dark:text-[#999] hover:border-[#0066cc]/40'
+                    ? 'border-primary bg-primary/10 text-primary font-semibold'
+                    : 'border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-white/[0.06] text-muted-foreground dark:text-muted-foreground hover:border-primary/40'
                 )}
               >
                 {tag}
@@ -278,7 +278,7 @@ export function SermonListPanel() {
       {/* Sermon list */}
       <div className={cn('flex-1 overflow-y-auto', isMd ? 'px-3 py-2 space-y-2' : 'px-2 py-1.5 space-y-1.5')}>
         {filteredSermons.length === 0 ? (
-          <div className="text-center py-12 text-sm text-[#7a7a7a]">{t('sermon.noSermons')}</div>
+          <div className="text-center py-12 text-sm text-muted-foreground">{t('sermon.noSermons')}</div>
         ) : (
           filteredSermons.map(sermon => (
             <SermonCard
@@ -296,11 +296,11 @@ export function SermonListPanel() {
       </div>
 
       {/* New sermon CTA */}
-      <div className="px-4 py-3 border-t border-[#f0f0f0] dark:border-white/[0.06]">
+      <div className="px-4 py-3 border-t border-border dark:border-white/[0.06]">
         <button
           onClick={() => setShowNewDialog(true)}
           className={cn(
-            'w-full flex items-center justify-center gap-2 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-sm font-normal transition-colors active:scale-95',
+            'w-full flex items-center justify-center gap-2 rounded-full bg-primary hover:bg-apple-focus text-white text-sm font-normal transition-colors active:scale-95',
             isMd ? 'py-2.5' : 'py-3'
           )}
         >
@@ -312,7 +312,7 @@ export function SermonListPanel() {
       {/* Context menu */}
       {contextMenu && (
         <div
-          className="fixed z-50 bg-[#f5f5f7]/90 dark:bg-[#272729]/90 backdrop-blur-xl backdrop-saturate-[180%] rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.12)] border border-black/[0.04] dark:border-white/[0.06] py-1 min-w-[140px]"
+          className="fixed z-50 bg-secondary/90 dark:bg-card/90 backdrop-blur-xl rounded-lg border border-black/[0.04] dark:border-white/[0.06] py-1 min-w-[140px]"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={() => setContextMenu(null)}
         >
@@ -359,8 +359,8 @@ function FolderItem({ folder, isSelected, isExpanded, isMd, onToggle, onShowCont
           'w-full flex items-center gap-2 rounded-lg text-xs transition-all duration-150',
           isMd ? 'px-2.5 py-1.5' : 'px-3 py-2.5',
           isSelected
-            ? 'bg-[#0066cc]/10 text-[#0066cc] font-semibold'
-            : 'text-[#7a7a7a] dark:text-[#999] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+            ? 'bg-primary/10 text-primary font-semibold'
+            : 'text-muted-foreground dark:text-muted-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
         )}
         onContextMenu={(e) => { e.preventDefault(); onShowContextMenu(e.clientX, e.clientY) }}
         {...longPress}
@@ -394,8 +394,8 @@ function FolderChildItem({ folder, isSelected, isMd, onSelect, onShowContextMenu
         'w-full flex items-center gap-2 rounded-lg text-xs transition-all duration-150',
         isMd ? 'pl-8 pr-2.5 py-1.5' : 'pl-8 pr-3 py-2.5',
         isSelected
-          ? 'bg-[#0066cc]/10 text-[#0066cc] font-semibold'
-          : 'text-[#7a7a7a] dark:text-[#999] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+          ? 'bg-primary/10 text-primary font-semibold'
+          : 'text-muted-foreground dark:text-muted-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
       )}
       onContextMenu={(e) => { e.preventDefault(); onShowContextMenu(e.clientX, e.clientY) }}
       {...longPress}
@@ -437,10 +437,10 @@ function SermonCard({ sermon, selected, isMd, isTouch, onSelect, onDelete, onSho
       onClick={onSelect}
       className={cn(
         'group cursor-pointer transition-all duration-200',
-        isMd ? 'rounded-[18px] p-4' : 'rounded-xl p-3',
+        isMd ? 'rounded-[18px] p-4' : 'rounded-lg p-3',
         selected
-          ? 'bg-[#0066cc] text-white shadow-[0_2px_8px_rgba(0,102,204,0.2)]'
-          : 'bg-white dark:bg-[#2a2a2c] border border-[#e0e0e0] dark:border-white/[0.06] hover:border-[#0066cc]/30 hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)]'
+          ? 'bg-primary text-white'
+          : 'bg-card dark:bg-card border border-border dark:border-white/[0.06] hover:border-primary/30'
       )}
       onContextMenu={(e) => { e.preventDefault(); onShowContextMenu(e.clientX, e.clientY) }}
       {...longPress}
@@ -448,7 +448,7 @@ function SermonCard({ sermon, selected, isMd, isTouch, onSelect, onDelete, onSho
       <h3 className={cn(
         'font-semibold truncate leading-tight',
         isMd ? 'text-sm' : 'text-[13px]',
-        selected ? 'text-white' : 'text-[#1d1d1f] dark:text-white'
+        selected ? 'text-white' : 'text-foreground dark:text-foreground'
       )}
         style={{ letterSpacing: '-0.224px' }}
       >
@@ -458,29 +458,29 @@ function SermonCard({ sermon, selected, isMd, isTouch, onSelect, onDelete, onSho
       <div className="flex items-center gap-2 mt-1.5">
         {sermon.verseRefs ? (
           <span className={cn(
-            'text-xs font-medium',
-            selected ? 'text-white/80' : 'text-[#0066cc] dark:text-[#2997ff]'
+            'text-xs font-semibold',
+            selected ? 'text-white/80' : 'text-primary dark:text-primary'
           )}>
             {sermon.verseRefs}
           </span>
         ) : (
           <span className={cn(
             'text-xs',
-            selected ? 'text-white/70' : 'text-[#7a7a7a] dark:text-[#999]'
+            selected ? 'text-white/70' : 'text-muted-foreground dark:text-muted-foreground'
           )}>
             {sermon.status === 'DRAFT' ? t('sermon.draft') : sermon.status === 'IN_PROGRESS' ? t('sermon.inProgress') : t('sermon.completed')}
           </span>
         )}
         <span className={cn(
           'text-[10px]',
-          selected ? 'text-white/50' : 'text-[#7a7a7a] dark:text-[#999]'
+          selected ? 'text-white/50' : 'text-muted-foreground dark:text-muted-foreground'
         )}>
           {styleLabel(sermon.style)}{sermon.wordCount > 0 ? ` · ${sermon.wordCount}${t('sermon.editorWords')}` : ''}
         </span>
         <div className="flex-1" />
         <span className={cn(
           'text-[10px]',
-          selected ? 'text-white/60' : 'text-[#7a7a7a] dark:text-[#999]'
+          selected ? 'text-white/60' : 'text-muted-foreground dark:text-muted-foreground'
         )}>
           {sermon.sermonDate ? new Date(sermon.sermonDate).toLocaleDateString() : new Date(sermon.createdAt).toLocaleDateString()}
         </span>
@@ -490,8 +490,8 @@ function SermonCard({ sermon, selected, isMd, isTouch, onSelect, onDelete, onSho
           className={cn(
             'rounded-lg transition-all duration-150 active:scale-95',
             isTouch
-              ? cn('p-2.5', selected ? 'text-white/60 hover:text-white hover:bg-white/10' : 'text-[#7a7a7a] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30')
-              : cn('p-1', selected ? 'text-white/60 hover:text-white hover:bg-white/10' : 'text-[#7a7a7a] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100')
+              ? cn('p-2.5', selected ? 'text-white/60 hover:text-white hover:bg-white/10' : 'text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30')
+              : cn('p-1', selected ? 'text-white/60 hover:text-white hover:bg-white/10' : 'text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100')
           )}
           title={t('sermon.delete')}
         >

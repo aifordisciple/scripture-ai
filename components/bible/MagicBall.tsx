@@ -413,7 +413,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
 
             {/* 已完成的解读（待查看） */}
             {isAiFinishedButUnseen && !currentAiRequest && (
-              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-primary/5">
+              <div className="px-4 py-3 border-b border-border dark:border-border bg-primary/5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold text-primary flex items-center gap-1">
                     <BookOpenCheck className="w-3.5 h-3.5" />
@@ -435,7 +435,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
 
             {/* 当前处理中 */}
             {currentAiRequest && currentAiRequest.status === 'processing' && (
-              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="px-4 py-3 border-b border-border dark:border-border">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-xs font-bold text-primary flex items-center gap-1">
                     <Loader2 className="w-3 h-3 animate-spin" />

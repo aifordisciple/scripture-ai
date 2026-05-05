@@ -102,7 +102,7 @@ export function UserMenu() {
         variant="ghost"
         size="sm"
         onClick={() => setAuthOpen(true)}
-        className="text-[#1d1d1f] dark:text-white/80 gap-2"
+        className="text-foreground dark:text-foreground/80 gap-2"
       >
         <UserCircle className="w-5 h-5" />
         <span className="hidden sm:inline">{t('auth.login')}</span>
@@ -124,10 +124,10 @@ export function UserMenu() {
 
   // Sub-menu items for "我的"
   const mySubMenuItems = [
-    { key: 'highlights', icon: <Highlighter className="w-4 h-4 text-[#0066cc]" />, label: t('auth.myHighlights') },
-    { key: 'notes', icon: <StickyNote className="w-4 h-4 text-[#0066cc]" />, label: t('auth.myNotes') },
-    { key: 'insights', icon: <Star className="w-4 h-4 text-[#0066cc]" />, label: t('auth.myFavorites') },
-    { key: 'sermon', icon: <BookOpen className="w-4 h-4 text-[#0066cc]" />, label: t('auth.mySermons') },
+    { key: 'highlights', icon: <Highlighter className="w-4 h-4 text-primary" />, label: t('auth.myHighlights') },
+    { key: 'notes', icon: <StickyNote className="w-4 h-4 text-primary" />, label: t('auth.myNotes') },
+    { key: 'insights', icon: <Star className="w-4 h-4 text-primary" />, label: t('auth.myFavorites') },
+    { key: 'sermon', icon: <BookOpen className="w-4 h-4 text-primary" />, label: t('auth.mySermons') },
   ];
 
   return (
@@ -136,7 +136,7 @@ export function UserMenu() {
         ref={buttonRef}
         variant="ghost"
         size="icon"
-        className="rounded-full bg-[#0066cc]/10 text-[#0066cc] dark:text-[#2997ff] border-2 border-transparent hover:border-[#0066cc]/20"
+        className="rounded-full bg-primary/10 text-primary dark:text-primary border-2 border-transparent hover:border-primary/20"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="font-bold">{userInitial}</span>
@@ -154,7 +154,7 @@ export function UserMenu() {
           <div
             ref={menuRef}
             className={cn(
-              "fixed bg-white/80 dark:bg-[#272729]/80 backdrop-blur-xl saturate-[1.8] rounded-lg border border-[#e0e0e0] dark:border-[#3a3a3c] py-2 z-[9999] animate-in duration-200",
+              "fixed bg-white/80 dark:bg-card/80 backdrop-blur-xl saturate-[1.8] rounded-lg border border-border dark:border-border py-2 z-[9999] animate-in duration-200",
               isMobile
                 ? "bottom-0 left-0 right-0 rounded-b-none max-h-[80vh] overflow-y-auto slide-in-from-bottom duration-300 w-full"
                 : "fade-in zoom-in-95 w-56"
@@ -164,20 +164,20 @@ export function UserMenu() {
           {/* 移动端拖拽指示条 */}
           {isMobile && (
             <div className="flex justify-center py-2">
-              <div className="w-10 h-1 bg-[#7a7a7a]/30 dark:bg-white/20 rounded-full" />
+              <div className="w-10 h-1 bg-apple-chip/30 dark:bg-apple-chip/20 rounded-full" />
             </div>
           )}
-          <div className="px-4 py-3 border-b border-[#e0e0e0] dark:border-[#3a3a3c] mb-2 bg-[#f5f5f7]/50 dark:bg-[#2a2a2c]/30 flex items-center gap-3">
+          <div className="px-4 py-3 border-b border-border dark:border-border mb-2 bg-secondary/50 dark:bg-card/30 flex items-center gap-3">
             {session.user?.image ? (
               <img src={session.user.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-[#0066cc]/10 flex items-center justify-center shrink-0">
-                <span className="font-bold text-[#0066cc] dark:text-[#2997ff]">{userInitial}</span>
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <span className="font-bold text-primary dark:text-primary">{userInitial}</span>
               </div>
             )}
             <div className="min-w-0">
-              <p className="font-bold text-sm text-[#1d1d1f] dark:text-white truncate">{session.user?.name}</p>
-              <p className="text-xs text-[#7a7a7a] truncate mt-0.5">{session.user?.email}</p>
+              <p className="font-bold text-sm text-foreground dark:text-foreground truncate">{session.user?.name}</p>
+              <p className="text-xs text-muted-foreground truncate mt-0.5">{session.user?.email}</p>
             </div>
           </div>
 
@@ -185,14 +185,14 @@ export function UserMenu() {
           <div className="px-2 mb-2">
             <button
               onClick={() => openTab('dashboard')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-[#0066cc] dark:text-[#2997ff] bg-[#0066cc]/5 hover:bg-[#0066cc]/10 active:scale-95 rounded-lg transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-primary dark:text-primary bg-primary/5 hover:bg-primary/10 active:scale-95 rounded-lg transition-colors"
             >
               <BarChart3 className="w-4 h-4" />
               <span className="flex-1 text-left">{t('auth.dashboard')}</span>
               {streakCount > 0 && (
-                <div className="flex items-center gap-1 px-2 py-0.5 bg-[#0066cc]/10 rounded-full">
-                  <Flame className="w-3.5 h-3.5 text-[#0066cc]" />
-                  <span className="text-xs font-bold text-[#0066cc]">{streakCount}</span>
+                <div className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded-full">
+                  <Flame className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-bold text-primary">{streakCount}</span>
                 </div>
               )}
             </button>
@@ -204,28 +204,28 @@ export function UserMenu() {
             onClick={() => { setIsOpen(false); setMobileSettingsOpen(true); }}
           />
           <MenuItem
-            icon={<BrainCircuit className="w-4 h-4 text-[#0066cc]" />}
+            icon={<BrainCircuit className="w-4 h-4 text-primary" />}
             label={t('auth.aiModelApiSettings')}
             onClick={() => { setIsOpen(false); setApiSettingsOpen(true); }}
           />
 
-          <div className="my-1 border-t border-[#e0e0e0] dark:border-[#3a3a3c]" />
+          <div className="my-1 border-t border-border dark:border-border" />
 
           {/* 通知中心 */}
           <MenuItem
-            icon={<Bell className="w-4 h-4 text-[#0066cc]" />}
+            icon={<Bell className="w-4 h-4 text-primary" />}
             label={t('auth.notifications')}
             onClick={() => { setIsOpen(false); setNotificationOpen(true); }}
           />
 
           <MenuItem
-            icon={<Calendar className="w-4 h-4 text-[#0066cc]" />}
+            icon={<Calendar className="w-4 h-4 text-primary" />}
             label={t('auth.readingPlan')}
             onClick={() => openTab('plan')}
           />
 
           <MenuItem
-            icon={<Users className="w-4 h-4 text-[#0066cc]" />}
+            icon={<Users className="w-4 h-4 text-primary" />}
             label={t('auth.groupReading')}
             onClick={() => openTab('group')}
             rightElement={groupUnread > 0 ? (
@@ -235,12 +235,12 @@ export function UserMenu() {
             ) : undefined}
           />
 
-          <div className="my-1 border-t border-[#e0e0e0] dark:border-[#3a3a3c]" />
+          <div className="my-1 border-t border-border dark:border-border" />
 
           {/* "我的" 子菜单 */}
           <div className="relative">
             <button
-              className="w-full flex items-center gap-3 px-5 py-2.5 text-sm text-[#1d1d1f] dark:text-white/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-left"
+              className="w-full flex items-center gap-3 px-5 py-2.5 text-sm text-foreground dark:text-foreground/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-left"
               onClick={() => {
                 if (isMobile) {
                   setSubMenuOpen(!subMenuOpen);
@@ -258,22 +258,22 @@ export function UserMenu() {
                 }
               }}
             >
-              <UserCircle className="w-4 h-4 text-[#0066cc]" />
+              <UserCircle className="w-4 h-4 text-primary" />
               <span className="flex-1">{t('auth.myMenu')}</span>
               <ChevronRight className={cn(
-                "w-3.5 h-3.5 text-slate-400 transition-transform duration-200",
+                "w-3.5 h-3.5 text-muted-foreground transition-transform duration-200",
                 subMenuOpen && isMobile && "rotate-90"
               )} />
             </button>
 
             {/* Sub-menu: 移动端内联展开，桌面端左侧飞出 */}
             {subMenuOpen && isMobile && (
-              <div className="bg-[#f5f5f7]/80 dark:bg-[#2a2a2c]/30 border-t border-b border-[#e0e0e0] dark:border-[#3a3a3c]">
+              <div className="bg-secondary/80 dark:bg-card/30 border-t border-b border-border dark:border-border">
                 {mySubMenuItems.map((item) => (
                   <button
                     key={item.key}
                     onClick={() => openTab(item.key)}
-                    className="w-full flex items-center gap-3 px-5 pl-9 py-2.5 text-sm text-[#1d1d1f] dark:text-white/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-5 pl-9 py-2.5 text-sm text-foreground dark:text-foreground/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-left"
                   >
                     {item.icon}
                     <span>{item.label}</span>
@@ -285,7 +285,7 @@ export function UserMenu() {
             {subMenuOpen && !isMobile && (
               <div
                 ref={subMenuRef}
-                className="absolute right-full top-0 mr-1 bg-white/80 dark:bg-[#272729]/80 backdrop-blur-xl saturate-[1.8] rounded-lg border border-[#e0e0e0] dark:border-[#3a3a3c] py-2 z-[10000] w-44 animate-in fade-in zoom-in-95 duration-150"
+                className="absolute right-full top-0 mr-1 bg-white/80 dark:bg-card/80 backdrop-blur-xl saturate-[1.8] rounded-lg border border-border dark:border-border py-2 z-[10000] w-44 animate-in fade-in zoom-in-95 duration-150"
                 onMouseEnter={() => {
                   if (subMenuTimerRef.current) clearTimeout(subMenuTimerRef.current);
                 }}
@@ -297,7 +297,7 @@ export function UserMenu() {
                   <button
                     key={item.key}
                     onClick={() => openTab(item.key)}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#1d1d1f] dark:text-white/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground dark:text-foreground/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-left"
                   >
                     {item.icon}
                     <span>{item.label}</span>
@@ -307,11 +307,11 @@ export function UserMenu() {
             )}
           </div>
 
-          <div className="my-1 border-t border-[#e0e0e0] dark:border-[#3a3a3c]" />
+          <div className="my-1 border-t border-border dark:border-border" />
 
           {/* 反馈 */}
           <MenuItem
-            icon={<MessageSquare className="w-4 h-4 text-[#0066cc]" />}
+            icon={<MessageSquare className="w-4 h-4 text-primary" />}
             label={t('auth.feedback')}
             onClick={() => { setIsOpen(false); setFeedbackDialogOpen(true); }}
           />
@@ -319,18 +319,18 @@ export function UserMenu() {
           {/* Admin */}
           {isAdmin && (
             <>
-              <div className="my-1 border-t border-[#e0e0e0] dark:border-[#3a3a3c]" />
+              <div className="my-1 border-t border-border dark:border-border" />
               <Link href="/admin/feedback" onClick={() => setIsOpen(false)}>
-                <div className="w-full flex items-center gap-3 px-5 py-2.5 text-sm text-[#1d1d1f] dark:text-white/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-left">
-                  <Shield className="w-4 h-4 text-[#0066cc]" />
+                <div className="w-full flex items-center gap-3 px-5 py-2.5 text-sm text-foreground dark:text-foreground/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-left">
+                  <Shield className="w-4 h-4 text-primary" />
                   {t('auth.feedbackManagement')}
-                  <span className="ml-auto text-[10px] bg-[#0066cc]/10 px-1.5 py-0.5 rounded text-[#0066cc]">Admin</span>
+                  <span className="ml-auto text-[10px] bg-primary/10 px-1.5 py-0.5 rounded text-primary">Admin</span>
                 </div>
               </Link>
             </>
           )}
 
-          <div className="my-1 border-t border-[#e0e0e0] dark:border-[#3a3a3c]" />
+          <div className="my-1 border-t border-border dark:border-border" />
 
           <MenuItem
             icon={<LogOut className="w-4 h-4" />}
@@ -358,7 +358,7 @@ function MenuItem({ icon, label, onClick, className, rightElement }: any) {
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 px-5 py-2.5 text-sm text-[#1d1d1f] dark:text-white/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 transition-colors text-left",
+        "w-full flex items-center gap-3 px-5 py-2.5 text-sm text-foreground dark:text-foreground/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 transition-colors text-left",
  className
       )}
     >

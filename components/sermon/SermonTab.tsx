@@ -84,7 +84,7 @@ export function SermonTab() {
   return (
     <SermonEditorProvider isDark={isDarkMode}>
       <div
-        className="flex h-full antialiased bg-[#f5f5f7] dark:bg-[#272729] text-[#1d1d1f] dark:text-white"
+        className="flex h-full antialiased bg-secondary dark:bg-card text-foreground dark:text-foreground"
         style={{ fontFamily: "'SF Pro Display', 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif" }}
       >
         {isMd ? (

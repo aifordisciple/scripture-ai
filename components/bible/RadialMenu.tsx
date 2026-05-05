@@ -167,10 +167,10 @@ export function RadialMenu({ isOpen, actions, onSelect, onClose, position }: Rad
               className={cn(
                 "absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto",
                 "w-10 h-10 rounded-full",
-                "bg-slate-200 dark:bg-slate-700",
+                "bg-accent dark:bg-accent",
                 "flex items-center justify-center",
-                "text-slate-600 dark:text-slate-300",
-                "hover:bg-slate-300 dark:hover:bg-slate-600",
+                "text-muted-foreground dark:text-foreground",
+                "hover:bg-accent dark:hover:bg-accent",
                 "transition-colors duration-150"
               )}
               style={{

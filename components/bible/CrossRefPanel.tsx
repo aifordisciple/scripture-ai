@@ -209,7 +209,7 @@ export function CrossRefPanel({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ duration: 0.2 }}
-        className="fixed z-50 max-w-[calc(100vw-20px)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl shadow-black/15 border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"
+        className="fixed z-50 max-w-[calc(100vw-20px)] bg-white dark:bg-card rounded-2xl shadow-2xl shadow-black/15 border border-border dark:border-border overflow-hidden flex flex-col"
         style={{
           top: adjustedTop,
           left: adjustedLeft,
@@ -219,26 +219,26 @@ export function CrossRefPanel({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border dark:border-border bg-accent/50 dark:bg-accent/50">
           <div className="flex items-center gap-2">
             <GitBranch className="w-4 h-4 text-primary" />
             <span className="font-semibold text-foreground">{t('bible.crossRefTitle')}</span>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="p-1 rounded-xl hover:bg-accent dark:hover:bg-accent transition-colors"
           >
-            <X className="w-4 h-4 text-slate-500" />
+            <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
 
         {/* Source Verse */}
         {sourceVerse && (
-          <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-primary/5">
+          <div className="px-4 py-3 border-b border-border dark:border-border bg-primary/5">
             <div className="text-sm font-semibold text-primary mb-1">
               {sourceVerse.bookName} {sourceVerse.chapter}:{sourceVerse.verse}
             </div>
-            <div className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
+            <div className="text-xs text-muted-foreground dark:text-muted-foreground line-clamp-2">
               {sourceVerse.content}
             </div>
           </div>
@@ -255,10 +255,10 @@ export function CrossRefPanel({
 
         {/* AI Toggle */}
         {!loading && connections.length > 0 && (
-          <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-border dark:border-border">
             <div className="flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span className="text-xs text-slate-600 dark:text-slate-400">{t('bible.aiConnectionDesc')}</span>
+              <span className="text-xs text-muted-foreground dark:text-muted-foreground">{t('bible.aiConnectionDesc')}</span>
             </div>
             <div className="flex items-center gap-2">
               {aiLoading && (
@@ -270,7 +270,7 @@ export function CrossRefPanel({
                   "relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0",
                   enableAI
                     ? "bg-primary"
-                    : "bg-slate-200 dark:bg-slate-700"
+                    : "bg-accent dark:bg-accent"
                 )}
               >
                 <span
@@ -319,8 +319,8 @@ export function CrossRefPanel({
 
         {/* Footer */}
         {!loading && connections.length > 0 && (
-          <div className="px-4 py-2 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-            <p className="text-xs text-slate-400 text-center">
+          <div className="px-4 py-2 border-t border-border dark:border-border bg-accent/50 dark:bg-accent/50">
+            <p className="text-xs text-muted-foreground text-center">
               {t('bible.crossRefFooter')}
             </p>
           </div>

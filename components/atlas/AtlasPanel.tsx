@@ -15,8 +15,8 @@ import LocationVersesView from './LocationVersesView';
 const MapView = dynamic(() => import('./MapView'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-[#f5f5f7] dark:bg-[#1d1d1f]">
-      <div className="text-[#7a7a7a]">...</div>
+    <div className="w-full h-full flex items-center justify-center bg-secondary dark:bg-background">
+      <div className="text-muted-foreground">...</div>
     </div>
   ),
 });
@@ -132,11 +132,11 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
   ] as const;
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-[#272729]">
+    <div className="flex flex-col h-full bg-card dark:bg-card">
       {/* 经文信息提示 */}
       {verseContext && (
-        <div className="px-4 py-2 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 border-b border-[#0066cc]/20 dark:border-[#0066cc]/30">
-          <div className="text-sm text-[#0066cc] dark:text-[#4d9fe0]">
+        <div className="px-4 py-2 bg-primary/10 dark:bg-primary/20 border-b border-primary/20 dark:border-primary/30">
+          <div className="text-sm text-primary dark:text-primary">
             📖 {verseContext.bookName} {verseContext.chapter}:{verseContext.verseStart}
             {verseContext.verseEnd !== verseContext.verseStart && `-${verseContext.verseEnd}`}
           </div>
@@ -145,9 +145,9 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
 
       {/* AI 提取状态 */}
       {extractingLocations && (
-        <div className="px-4 py-3 bg-[#0066cc]/10 dark:bg-[#0066cc]/20 border-b border-[#0066cc]/20 dark:border-[#0066cc]/30 flex items-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin text-[#0066cc]" />
-          <span className="text-sm text-[#0066cc] dark:text-[#4d9fe0]">{t('atlas.extractingLocations')}</span>
+        <div className="px-4 py-3 bg-primary/10 dark:bg-primary/20 border-b border-primary/20 dark:border-primary/30 flex items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+          <span className="text-sm text-primary dark:text-primary">{t('atlas.extractingLocations')}</span>
         </div>
       )}
 
@@ -182,7 +182,7 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
       )}
 
       {/* 搜索栏 */}
-      <div className="px-4 py-3 border-b border-[#e0e0e0] dark:border-[#3a3a3c]">
+      <div className="px-4 py-3 border-b border-border dark:border-border">
         <LocationSearch onSelectLocation={(loc) => {
           setSelectedLocation(loc);
           setSelectedLocationId(loc.id);
@@ -192,15 +192,15 @@ export default function AtlasPanel({ onClose, initialLocationId, initialYear }: 
       </div>
 
       {/* Tab 切换 */}
-      <div className="flex border-b border-[#e0e0e0] dark:border-[#3a3a3c]">
+      <div className="flex border-b border-border dark:border-border">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setAtlasPanelTab(tab.id)}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors active:scale-95 ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors active:scale-95 ${
               atlasPanelTab === tab.id
-                ? 'text-[#0066cc] dark:text-[#4d9fe0] border-b-2 border-[#0066cc] dark:border-[#4d9fe0]'
-                : 'text-[#7a7a7a] dark:text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-[#e0e0e0]'
+                ? 'text-primary dark:text-primary border-b-2 border-primary dark:border-primary'
+                : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-muted-foreground'
             }`}
           >
             <tab.icon className="w-4 h-4" />

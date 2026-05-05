@@ -195,7 +195,7 @@ export function GroupProgressCalendar({
         {/* Week day headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {weekDays.map(day => (
-            <div key={day} className="text-center text-xs font-medium text-muted-foreground py-1">
+            <div key={day} className="text-center text-xs font-semibold text-muted-foreground py-1">
               {day}
             </div>
           ))}
@@ -223,16 +223,16 @@ export function GroupProgressCalendar({
                 disabled={isFuture}
                 className={cn(
                   "aspect-square rounded-lg flex flex-col items-center justify-center text-xs transition-all",
-                  "hover:ring-2 hover:ring-[#0066cc]/30",
+                  "hover:ring-2 hover:ring-primary/30",
                   dayProgress.completed && "bg-green-100 dark:bg-green-900/30",
                   dayProgress.partial && !dayProgress.completed && "bg-yellow-100 dark:bg-yellow-900/30",
                   !dayProgress.completed && !dayProgress.partial && !isFuture && "bg-red-50 dark:bg-red-900/20",
                   isFuture && "opacity-40",
-                  isToday && "ring-2 ring-[#0066cc]"
+                  isToday && "ring-2 ring-primary"
                 )}
               >
                 <span className={cn(
-                  "font-medium",
+                  "font-semibold",
                   dayProgress.completed ? "text-green-700 dark:text-green-300" :
                   dayProgress.partial ? "text-yellow-700 dark:text-yellow-300" :
                   isFuture ? "text-muted-foreground" : "text-red-600 dark:text-red-400"

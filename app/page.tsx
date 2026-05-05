@@ -513,20 +513,20 @@ export default function Home() {
 
             {/* 左侧：菜单 + 搜索 */}
             <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
-              <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
+              <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
                 <Menu className="h-5 w-5" />
               </Button>
 
-              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-muted-foreground dark:text-muted-foreground dark:text-white/60" : "text-foreground dark:text-white")} onClick={toggleDesktopSidebar}>
+              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-muted-foreground dark:text-muted-foreground dark:text-foreground/60" : "text-foreground dark:text-foreground")} onClick={toggleDesktopSidebar}>
                 <PanelLeft className="h-5 w-5" />
               </Button>
 
               <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-black/[0.04] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 border-none ml-1 active:scale-95" onClick={() => setIsSearchOpen(true)}>
-                  <Search className="w-4 h-4 text-muted-foreground dark:text-white/60" />
-                  <span className="text-xs text-muted-foreground dark:text-white/60 pr-2">{t('reader.searchPlaceholder')}</span>
+                  <Search className="w-4 h-4 text-muted-foreground dark:text-foreground/60" />
+                  <span className="text-xs text-muted-foreground dark:text-foreground/60 pr-2">{t('reader.searchPlaceholder')}</span>
               </Button>
 
-              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
+              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
                 <Search className="h-5 w-5" />
               </Button>
             </div>
@@ -577,7 +577,7 @@ export default function Home() {
                   size="icon"
                   onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
                   className={cn(
-                    "text-muted-foreground dark:text-white/60 hover:text-foreground dark:hover:text-white rounded-full hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95",
+                    "text-muted-foreground dark:text-foreground/60 hover:text-foreground dark:hover:text-white rounded-full hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95",
                     showSettingsDropdown && "bg-black/[0.04] dark:bg-white/10"
                   )}
                   title={t('settings.readingSettings')}
@@ -674,7 +674,7 @@ export default function Home() {
                 )}
               </div>
 
-              <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white active:scale-95">
+              <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white active:scale-95">
                 <BookOpenCheck className="h-4 w-4" />{bibleVersion}
               </Button>
               <div className="mx-1 border-l h-5 border-border dark:border-white/20"></div>
@@ -723,7 +723,7 @@ export default function Home() {
 
               <UserMenu />
 
-              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground dark:text-white/60 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
+              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground dark:text-foreground/60 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>
             </div>

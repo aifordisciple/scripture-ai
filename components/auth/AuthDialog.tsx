@@ -76,7 +76,7 @@ export function AuthDialog() {
 
   return (
     <Dialog open={isAuthOpen} onOpenChange={setAuthOpen}>
-      <DialogContent className="sm:max-w-md bg-white dark:bg-[#272729] border-[#e0e0e0] dark:border-[#3a3a3c]">
+      <DialogContent className="sm:max-w-md bg-card dark:bg-card border-border dark:border-border">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-semibold">
             {isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}
@@ -87,10 +87,10 @@ export function AuthDialog() {
           {!isLogin && (
             <div className="space-y-2">
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-[#7a7a7a]" />
+                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t('auth.enterName')}
-                  className="pl-9 border-[#e0e0e0] dark:border-[#3a3a3c] focus:ring-[#0066cc]/20 focus:border-[#0066cc] rounded-full bg-[#f5f5f7] dark:bg-[#1d1d1f]"
+                  className="pl-9 border-border dark:border-border focus:ring-primary/20 focus:border-primary rounded-full bg-secondary dark:bg-background"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -101,11 +101,11 @@ export function AuthDialog() {
           
           <div className="space-y-2">
             <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-[#7a7a7a]" />
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                   type="email"
                   placeholder={t('auth.enterEmail')}
-                  className="pl-9 border-[#e0e0e0] dark:border-[#3a3a3c] focus:ring-[#0066cc]/20 focus:border-[#0066cc] rounded-full bg-[#f5f5f7] dark:bg-[#1d1d1f]"
+                  className="pl-9 border-border dark:border-border focus:ring-primary/20 focus:border-primary rounded-full bg-secondary dark:bg-background"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -115,11 +115,11 @@ export function AuthDialog() {
 
           <div className="space-y-2">
             <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-[#7a7a7a]" />
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                   type="password"
                   placeholder={t('auth.enterPassword')}
-                  className="pl-9 border-[#e0e0e0] dark:border-[#3a3a3c] focus:ring-[#0066cc]/20 focus:border-[#0066cc] rounded-full bg-[#f5f5f7] dark:bg-[#1d1d1f]"
+                  className="pl-9 border-border dark:border-border focus:ring-primary/20 focus:border-primary rounded-full bg-secondary dark:bg-background"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -131,17 +131,17 @@ export function AuthDialog() {
             <p className="text-sm text-red-500 text-center">{error}</p>
           )}
 
-          <Button type="submit" className="w-full bg-[#0066cc] hover:bg-[#0071e3] text-white rounded-full active:scale-95" disabled={loading}>
+          <Button type="submit" className="w-full bg-primary hover:bg-apple-focus text-white rounded-full active:scale-95" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isLogin ? t('auth.login') : t('auth.register')}
           </Button>
         </form>
 
-        <div className="text-center text-sm text-[#7a7a7a] mt-4">
+        <div className="text-center text-sm text-muted-foreground mt-4">
           {isLogin ? t('auth.noAccount') : t('auth.hasAccount')}
           <button 
             onClick={() => setIsLogin(!isLogin)} 
-            className="text-[#0066cc] hover:text-[#0071e3] hover:underline ml-1 font-medium"
+            className="text-primary hover:text-apple-focus hover:underline ml-1 font-semibold"
           >
             {isLogin ? t('auth.goToRegister') : t('auth.goToLogin')}
           </button>
