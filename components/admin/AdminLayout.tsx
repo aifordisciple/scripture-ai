@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import {
   LayoutDashboard,
   Users,
@@ -37,24 +38,8 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("admin-dark-mode");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const isDark = saved ? saved === "true" : prefersDark;
-    setDarkMode(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
-  }, []);
-
-  const toggleDarkMode = useCallback(() => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      localStorage.setItem("admin-dark-mode", String(next));
-      document.documentElement.classList.toggle("dark", next);
-      return next;
-    });
-  }, []);
+  const { theme, toggleTheme } = useTheme();
+  const darkMode = theme === "dark";
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathname === "/admin";
@@ -168,7 +153,7 @@ export default function AdminLayout({
           {/* Right actions */}
           <div className="ml-auto flex items-center gap-2">
             <button
-              onClick={toggleDarkMode}
+              onClick={toggleTheme}
               className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-accent active:scale-95 transition-all duration-150"
               aria-label="切换深色模式"
             >
