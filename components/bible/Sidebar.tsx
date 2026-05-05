@@ -103,7 +103,7 @@ export function Sidebar() {
                     className={cn(
                       "flex items-center justify-between w-full px-4 py-3 rounded-2xl transition-all duration-300 text-[15px]",
                       isActiveBook 
-                        ? "bg-[#0066cc]/10 text-[#0066cc] font-semibold"
+                        ? "bg-primary/10 text-primary font-semibold"
                         : "text-foreground/80 hover:bg-secondary hover:text-foreground"
                     )}
                   >
@@ -127,7 +127,7 @@ export function Sidebar() {
                       isExpanded ? "max-h-[min(800px,70vh)] opacity-100 mt-2 mb-2" : "max-h-0 opacity-0 m-0"
                     )}
                   >
-                    <div className="grid grid-cols-5 gap-2 p-3 bg-[#f5f5f7] dark:bg-[#2a2a2c] rounded-lg mx-1 border border-[#e0e0e0] dark:border-[#3a3a3c]">
+                    <div className="grid grid-cols-5 gap-2 p-3 bg-secondary dark:bg-apple-tile-3 rounded-lg mx-1 border border-border dark:border-border">
                       {Array.from({ length: book.chapters }, (_, i) => i + 1).map(chapter => {
                          const isActiveChapter = isActiveBook && currentChapter === chapter.toString();
                          return (
@@ -136,9 +136,9 @@ export function Sidebar() {
                              onClick={() => handleChapterClick(book.id, chapter)}
                              className={cn(
                                "aspect-square flex items-center justify-center rounded-xl text-[13px] transition-all duration-300",
-                               isActiveChapter 
-                                 ? "bg-[#0066cc] text-white font-semibold" 
-                                 : "bg-white dark:bg-[#2a2a2c] text-[#1d1d1f] dark:text-white/80 hover:bg-[#f5f5f7] hover:text-[#1d1d1f] active:scale-95 border border-[#e0e0e0] dark:border-[#3a3a3c]"
+                               isActiveChapter
+                                 ? "bg-primary text-white font-semibold"
+                                 : "bg-card dark:bg-card text-foreground dark:text-foreground/80 hover:bg-secondary hover:text-foreground active:scale-95 border border-border dark:border-border"
                              )}
                            >
                              {chapter}
@@ -159,22 +159,22 @@ export function Sidebar() {
     <div className="flex flex-col h-full bg-transparent">
       
       {/* 顶部标题与搜索栏 (毛玻璃悬浮效果) */}
-      <div className="pt-6 pb-4 px-4 shrink-0 bg-white/80 dark:bg-[#272729]/80 backdrop-blur-xl saturate-[1.8] rounded-none border-x-0 border-t-0 border-b border-[#e0e0e0] dark:border-[#3a3a3c] z-10 sticky top-0">
+      <div className="pt-6 pb-4 px-4 shrink-0 glass-nav rounded-none border-x-0 border-t-0 border-b border-border dark:border-border z-10 sticky top-0">
         <div className="flex items-center gap-2.5 mb-5 px-2">
-           <div className="p-1.5 bg-[#0066cc]/10 rounded-lg">
+           <div className="p-1.5 bg-primary/10 rounded-lg">
              <Library className="w-5 h-5 text-primary" />
            </div>
            <h2 className="text-xl font-serif font-semibold text-foreground tracking-widest select-none">{t('sidebar.title')}</h2>
         </div>
         
         <div className="relative group">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a7a7a] group-focus-within:text-[#0066cc] transition-colors" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <input 
             type="text" 
             placeholder={t('sidebar.searchPlaceholder')} 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#f5f5f7] dark:bg-[#2a2a2c] text-foreground text-sm rounded-full pl-10 pr-10 py-2.5 border-none focus:outline-none focus:ring-2 focus:ring-[#0066cc]/30 h-11 px-10 transition-all placeholder:text-[#7a7a7a]"
+            className="w-full bg-secondary dark:bg-apple-tile-3 text-foreground text-sm rounded-full pl-10 pr-10 py-2.5 border-none focus:outline-none focus:ring-2 focus:ring-primary/30 h-11 px-10 transition-all placeholder:text-muted-foreground"
           />
           {searchQuery && (
             <button 
@@ -223,10 +223,10 @@ export function Sidebar() {
                   if (isSidebarOpen) toggleSidebar();
                   router.push('/');
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-[#0066cc]/5 border border-[#0066cc]/10 hover:bg-[#0066cc]/10 active:scale-[0.98] rounded-2xl transition-all group"
+                className="w-full flex items-center gap-3 px-4 py-3 bg-primary/5 border border-primary/10 hover:bg-primary/10 active:scale-[0.98] rounded-2xl transition-all group"
               >
-                <div className="p-2 bg-[#0066cc]/10 rounded-xl">
-                  <Users className="w-5 h-5 text-[#0066cc]" />
+                <div className="p-2 bg-primary/10 rounded-xl">
+                  <Users className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="font-bold text-sm text-foreground">{t('sidebar.familyGroup')}</p>

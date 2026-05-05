@@ -133,6 +133,28 @@
   --apple-surface-black: #000000;
   --apple-chip-translucent: #d2d2d7;
   --apple-product-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px;
+  --apple-on-dark: #ffffff;
+  --apple-body-on-dark: #ffffff;
+  --apple-body-muted: #cccccc;
+
+  /* === Glass Tokens === */
+  --glass-bg-light: rgba(245, 245, 247, 0.8);
+  --glass-bg-dark: rgba(39, 39, 41, 0.8);
+  --glass-blur: blur(20px);
+  --glass-saturate: saturate(180%);
+
+  /* === Typography Tokens === */
+  --text-body: 17px;
+  --lh-body: 1.47;
+  --ls-body: -0.374px;
+  --ls-display: -0.022em;
+  --ls-hero: -0.005em;
+
+  /* === Weight Tokens === */
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 700;
 
   /* === 间距系统 === */
   --spacing-0: 0;
@@ -224,6 +246,23 @@
   --shadow-lg: none;
   --shadow-xl: none;
   --shadow-2xl: none;
+
+  /* === Dark Mode Apple Tokens === */
+  --apple-on-dark: #ffffff;
+  --apple-body-on-dark: #ffffff;
+  --apple-body-muted: #cccccc;
+  --apple-ink-muted-80: #cccccc;
+  --apple-ink-muted-48: #999999;
+  --apple-divider-soft: #3a3a3c;
+  --apple-hairline: #3a3a3c;
+  --apple-canvas: #2a2a2c;
+  --apple-parchment: #272729;
+  --apple-pearl: #252527;
+  --apple-chip-translucent: #636366;
+
+  /* === Dark Glass Tokens === */
+  --glass-bg-light: rgba(39, 39, 41, 0.8);
+  --glass-bg-dark: rgba(39, 39, 41, 0.8);
 }
 
 @layer base {
@@ -282,27 +321,33 @@
 
 /* Apple Design Language 工具类 */
 .apple-display {
-  font-family: 'SF Pro Display', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'SF Pro Display', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .apple-text {
-  font-family: 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'SF Pro Text', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .apple-body {
-  font-family: 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 17px;
-  font-weight: 400;
-  line-height: 1.47;
-  letter-spacing: -0.374px;
+  font-family: 'SF Pro Text', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+  font-weight: var(--weight-regular);
+}
+
+.apple-headline {
+  font-family: 'SF Pro Display', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--ls-display);
 }
 
 .apple-caption {
-  font-family: 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'SF Pro Text', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
-  font-weight: 400;
   line-height: 1.43;
   letter-spacing: -0.224px;
+  font-weight: var(--weight-regular);
 }
 
 .apple-pill-btn {

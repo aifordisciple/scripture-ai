@@ -21,6 +21,28 @@ const config = {
     },
     extend: {
       colors: {
+        /* Apple Design Language — Semantic Tokens */
+        apple: {
+          primary: 'var(--primary)',
+          focus: 'var(--apple-primary-focus)',
+          'on-dark': 'var(--apple-primary-on-dark)',
+          ink: 'var(--apple-ink)',
+          'ink-muted-80': 'var(--apple-ink-muted-80)',
+          'ink-muted-48': 'var(--apple-ink-muted-48)',
+          parchment: 'var(--apple-parchment)',
+          pearl: 'var(--apple-pearl)',
+          canvas: 'var(--apple-canvas)',
+          'tile-1': 'var(--apple-tile-1)',
+          'tile-2': 'var(--apple-tile-2)',
+          'tile-3': 'var(--apple-tile-3)',
+          'surface-black': 'var(--apple-surface-black)',
+          chip: 'var(--apple-chip-translucent)',
+          hairline: 'var(--apple-hairline)',
+          'divider-soft': 'var(--apple-divider-soft)',
+          'on-dark-text': 'var(--apple-on-dark)',
+          'body-on-dark': 'var(--apple-body-on-dark)',
+          'body-muted': 'var(--apple-body-muted)',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -62,6 +84,13 @@ const config = {
         xl: "22px",
         "2xl": "26px",
         pill: "9999px",
+        /* Apple Radius Scale */
+        'apple-xs': '5px',
+        'apple-sm': '8px',
+        'apple-md': '11px',
+        'apple-lg': '18px',
+        'apple-pill': '9999px',
+        'apple-full': '9999px',
       },
       fontFamily: {
         'apple-display': ['SF Pro Display', 'system-ui', '-apple-system', 'sans-serif'],
@@ -85,6 +114,28 @@ const config = {
         'inner': 'var(--shadow-inner)',
         'primary': 'var(--shadow-primary)',
         'destructive': 'var(--shadow-destructive)',
+        /* Apple product shadow — ONLY for product imagery */
+        'apple-product': 'rgba(0, 0, 0, 0.22) 3px 5px 30px',
+      },
+      /* Backdrop blur */
+      backdropBlur: {
+        'apple': '20px',
+      },
+      /* Apple Typography Scale */
+      fontSize: {
+        'headline-lg': ['48px', { lineHeight: '1.08', letterSpacing: '-0.003em', fontWeight: '600' }],
+        'headline-md': ['32px', { lineHeight: '1.12', letterSpacing: '-0.022em', fontWeight: '600' }],
+        'headline-sm': ['24px', { lineHeight: '1.21', letterSpacing: '-0.022em', fontWeight: '600' }],
+        'body': ['17px', { lineHeight: '1.47', letterSpacing: '-0.374px', fontWeight: '400' }],
+        'caption': ['14px', { lineHeight: '1.43', letterSpacing: '-0.224px', fontWeight: '400' }],
+        'fine-print': ['12px', { lineHeight: '1.0', letterSpacing: '-0.12px', fontWeight: '400' }],
+      },
+      /* Apple Weight Ladder — no 500 */
+      fontWeight: {
+        'light': '300',
+        'regular': '400',
+        'semibold': '600',
+        'bold': '700',
       },
       /* 动画时长 */
       transitionDuration: {
