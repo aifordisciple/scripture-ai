@@ -740,11 +740,12 @@ export default function Home() {
           />
         </div>
 
-        {/* Mobile Tab Bar - 始终可见，防止导航丢失（讲章模块有自己的底部栏，隐藏应用栏避免重叠） */}
+        {/* Mobile Tab Bar - 向下滚动自动隐藏，向上滚动自动显示（与菜单栏一致） */}
         {activeTab?.type !== 'sermon' && (
         <div
           className={cn(
-            "md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#f5f5f7]/80 dark:bg-[#272729]/80 backdrop-blur-xl saturate-[1.8] border-t border-[#e0e0e0] dark:border-[#3a3a3c] border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe"
+            "md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#f5f5f7]/80 dark:bg-[#272729]/80 backdrop-blur-xl saturate-[1.8] border-t border-[#e0e0e0] dark:border-[#3a3a3c] border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
+            isNavVisible ? "translate-y-0" : "translate-y-full"
           )}
         >
             <TabList 
