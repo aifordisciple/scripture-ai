@@ -25,7 +25,7 @@ export function TestamentTabs({ testament, onChange }: TestamentTabsProps) {
             key={tab.id}
             onClick={() => onChange(tab.id)}
             className={cn(
-              "relative px-4 py-2 text-sm font-medium rounded-full transition-colors",
+              "relative px-4 py-2 text-sm font-semibold rounded-full transition-colors",
               testament === tab.id
                 ? "text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"

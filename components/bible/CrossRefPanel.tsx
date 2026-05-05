@@ -235,7 +235,7 @@ export function CrossRefPanel({
         {/* Source Verse */}
         {sourceVerse && (
           <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-primary/5">
-            <div className="text-sm font-medium text-primary mb-1">
+            <div className="text-sm font-semibold text-primary mb-1">
               {sourceVerse.bookName} {sourceVerse.chapter}:{sourceVerse.verse}
             </div>
             <div className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">

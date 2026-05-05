@@ -42,7 +42,7 @@ export function OfflineIndicator({
         ) : (
           <WifiOff className="w-4 h-4" />
         )}
-        <span className="text-sm font-medium">
+        <span className="text-sm font-semibold">
           {isOnline ? t('bible.online') : t('bible.offline')}
         </span>
         {cachedChapters > 0 && (
@@ -82,14 +82,14 @@ export function OfflineIndicator({
             {/* 缓存 */}
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t('bible.cachedChapterCount')}</span>
-              <span className="text-sm font-medium">{t('bible.cachedChapterValue', { count: cachedChapters })}</span>
+              <span className="text-sm font-semibold">{t('bible.cachedChapterValue', { count: cachedChapters })}</span>
             </div>
 
             {/* 待同步 */}
             {pendingSync > 0 && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{t('bible.pendingSync')}</span>
-                <span className="text-sm font-medium text-amber-600">{t('bible.pendingSyncValue', { count: pendingSync })}</span>
+                <span className="text-sm font-semibold text-amber-600">{t('bible.pendingSyncValue', { count: pendingSync })}</span>
               </div>
             )}
 

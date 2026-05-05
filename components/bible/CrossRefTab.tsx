@@ -199,7 +199,7 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
         animate={{ opacity: 1, y: 0 }}
         className="mb-6 p-4 rounded-2xl bg-primary/5 border border-primary/10"
       >
-        <div className="text-sm font-medium text-primary mb-2">
+        <div className="text-sm font-semibold text-primary mb-2">
           {currentSource.bookName} {currentSource.chapter}:{currentSource.verse}
         </div>
         <div className="text-foreground leading-relaxed">

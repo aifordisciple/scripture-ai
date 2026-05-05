@@ -293,7 +293,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <p className={cn(
-                          "text-sm font-medium",
+                          "text-sm font-semibold",
                           !notification.read && "text-foreground"
                         )}>
                           {notification.title}

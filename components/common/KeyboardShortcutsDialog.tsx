@@ -81,7 +81,7 @@ export function KeyboardShortcutsDialog({ open, onOpenChange }: KeyboardShortcut
                     className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-muted/50"
                   >
                     <span className="text-sm">{t(shortcut.descriptionKey)}</span>
-                    <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono font-medium">
+                    <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono font-semibold">
                       {shortcut.key}
                     </kbd>
                   </div>

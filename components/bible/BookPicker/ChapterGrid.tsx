@@ -32,7 +32,7 @@ export function ChapterGrid({ chapters, selectedChapter, onSelect }: ChapterGrid
             transition={{ delay: (index / chapters) * MAX_ANIMATION_DURATION, duration: 0.1 }}
             onClick={() => onSelect(chapter)}
             className={cn(
-              "aspect-square flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-150",
+              "aspect-square flex items-center justify-center rounded-lg text-sm font-semibold transition-all duration-150",
               "border border-transparent",
               isSelected
                 ? "bg-primary text-primary-foreground border-primary/20"

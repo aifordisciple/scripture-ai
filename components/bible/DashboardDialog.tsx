@@ -130,17 +130,17 @@ export function DashboardDialog() {
                 {/* 选项 1: 高亮 */}
                 <button onClick={() => toggleOpt('highlights')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                    {clearOpts.highlights ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
-                   <span className="flex-1 text-sm font-medium">{t('bible.clearAllHighlightNotes', { count: highlights.length })}</span>
+                   <span className="flex-1 text-sm font-semibold">{t('bible.clearAllHighlightNotes', { count: highlights.length })}</span>
                 </button>
                 {/* 选项 2: 笔记 */}
                 <button onClick={() => toggleOpt('notes')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                    {clearOpts.notes ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
-                   <span className="flex-1 text-sm font-medium">{t('bible.clearAllDeepNotes', { count: notes.length })}</span>
+                   <span className="flex-1 text-sm font-semibold">{t('bible.clearAllDeepNotes', { count: notes.length })}</span>
                 </button>
                 {/* 选项 3: 阅读足迹 */}
                 <button onClick={() => toggleOpt('interactions')} className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                    {clearOpts.interactions ? <CheckSquare className="w-5 h-5 text-red-500" /> : <Square className="w-5 h-5 text-slate-400" />}
-                   <span className="flex-1 text-sm font-medium text-slate-600 dark:text-slate-300">
+                   <span className="flex-1 text-sm font-semibold text-slate-600 dark:text-slate-300">
                       {t('bible.clearReadingFootprint')} <br/>
                       <span className="text-xs text-slate-400 font-normal">{t('bible.heatmapResetNote')}</span>
                    </span>
@@ -190,7 +190,7 @@ export function DashboardDialog() {
           <div className="flex gap-6 mt-4">
              <div className="flex flex-col">
                 <span className="text-3xl font-black text-foreground">{totalInteractions}</span>
-                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t('bible.totalInteractionWeight')}</span>
+                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">{t('bible.totalInteractionWeight')}</span>
              </div>
           </div>
         </DialogHeader>

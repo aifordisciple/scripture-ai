@@ -338,7 +338,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             ) : error ? (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
                     <AlertCircle className="w-16 h-16 text-destructive mb-4" />
-                    <p className="text-lg font-medium text-destructive mb-2">{error}</p>
+                    <p className="text-lg font-semibold text-destructive mb-2">{error}</p>
                     <Button variant="outline" onClick={refetch} className="mt-4">
                         <Loader2 className="w-4 h-4 mr-2" />
                         {t('common.retry')}
@@ -347,7 +347,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             ) : renderList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
                     <BookOpenCheck className="w-16 h-16 text-muted-foreground/50 mb-4" />
-                    <p className="text-lg font-medium text-muted-foreground mb-2">{t('reader.noContent')}</p>
+                    <p className="text-lg font-semibold text-muted-foreground mb-2">{t('reader.noContent')}</p>
                     <p className="text-sm text-muted-foreground/70">{t('reader.noContentHint')}</p>
                 </div>
             ) : (
@@ -393,7 +393,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
                             <div className="flex-1 min-w-0">
                                 <div
-                                  className={cn("font-serif tracking-wide transition-colors text-start", isSelected ? "text-foreground font-medium" : "text-foreground/90")}
+                                  className={cn("font-serif tracking-wide transition-colors text-start", isSelected ? "text-foreground font-semibold" : "text-foreground/90")}
                                   style={{ fontSize: `${fontSize}px`, lineHeight: lineHeight }}
                                 >
                                     {mainVerse.content}
@@ -438,7 +438,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
                         }} 
                         className={cn(
                           "group inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full",
-                          "bg-primary hover:bg-apple-focus text-white font-medium text-sm",
+                          "bg-primary hover:bg-apple-focus text-white font-semibold text-sm",
                           "transition-all duration-300 active:scale-95"
                         )}
                     >

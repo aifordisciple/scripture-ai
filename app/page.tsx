@@ -88,7 +88,7 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             key={tab.id}
             onClick={() => onSwitchTab(tab.id)}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full text-sm md:text-xs font-medium cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group/tab shrink-0 active:scale-95",
+              "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full text-sm md:text-xs font-semibold cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group/tab shrink-0 active:scale-95",
               activeTabId === tab.id
                 ? "bg-white dark:bg-card border-border dark:border-border text-primary"
                 : "bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-lg border-border/60 dark:border-white/10 text-muted-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.1]"
@@ -393,7 +393,7 @@ export default function Home() {
           <div className="space-y-6">
             {/* 明暗模式设置 */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+              <span className="text-sm text-muted-foreground font-semibold flex items-center gap-2">
                 {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
                 {isDarkMode ? t('settings.darkMode') : t('settings.lightMode')}
               </span>
@@ -411,11 +411,11 @@ export default function Home() {
               </div>
             )}
             <div className="space-y-2">
-              <div className="flex justify-between text-sm text-muted-foreground font-medium"><span>{t('settings.fontSize')}</span><span>{fontSize}px</span></div>
+              <div className="flex justify-between text-sm text-muted-foreground font-semibold"><span>{t('settings.fontSize')}</span><span>{fontSize}px</span></div>
               <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} className="py-2" />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground font-medium">{t('settings.lineHeight')}</span>
+              <span className="text-sm text-muted-foreground font-semibold">{t('settings.lineHeight')}</span>
               <div className="flex bg-secondary/50 p-1 rounded-lg">
                 {[1.4, 1.8, 2.2].map(lh => (
                   <button
@@ -429,13 +429,13 @@ export default function Home() {
               </div>
             </div>
                         <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground font-medium">{t('settings.bilingual')}</span>
+              <span className="text-sm text-muted-foreground font-semibold">{t('settings.bilingual')}</span>
               <Button variant={showDualVersion ? "default" : "secondary"} size="sm" onClick={toggleDualVersion} className="rounded-full px-4 active:scale-95">
                 {showDualVersion ? t('settings.enabled') : t('settings.disabled')}
               </Button>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+              <span className="text-sm text-muted-foreground font-semibold flex items-center gap-2">
                 <Languages className="w-4 h-4" />
                 {t('settings.language')}
               </span>
@@ -459,7 +459,7 @@ export default function Home() {
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground font-medium">{t('settings.bibleVersion')}</span>
+              <span className="text-sm text-muted-foreground font-semibold">{t('settings.bibleVersion')}</span>
               <div className="flex bg-secondary/50 p-1 rounded-lg">
                 <button
                   onClick={() => setBibleVersion('CUV')}
@@ -509,7 +509,7 @@ export default function Home() {
             isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
-          <header className="h-11 flex items-center justify-between px-2 md:px-4 glass-nav border-b border-border dark:border-border rounded-none pointer-events-auto">
+          <header className="h-11 flex items-center justify-between px-2 md:px-4 glass-nav border-b border-border rounded-none pointer-events-auto">
 
             {/* 左侧：菜单 + 搜索 */}
             <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
@@ -658,7 +658,7 @@ export default function Home() {
                             <Type className="w-4 h-4" />
                             {t('settings.fontSize')}
                           </span>
-                          <span className="text-xs text-muted-foreground font-medium">{fontSize}px</span>
+                          <span className="text-xs text-muted-foreground font-semibold">{fontSize}px</span>
                         </div>
                         <Slider
                           value={[fontSize]}

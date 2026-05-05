@@ -159,7 +159,7 @@ export function ReadingHistoryTab() {
           <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/40 border border-emerald-200 dark:border-emerald-800">
             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-1">
               <Clock className="w-4 h-4" />
-              <span className="text-xs font-medium">{t('bible.todayReading')}</span>
+              <span className="text-xs font-semibold">{t('bible.todayReading')}</span>
             </div>
             <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
               {formatDuration(todayStats.totalDuration)}
@@ -168,7 +168,7 @@ export function ReadingHistoryTab() {
           <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/40 border border-blue-200 dark:border-blue-800">
             <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-1">
               <BookOpen className="w-4 h-4" />
-              <span className="text-xs font-medium">{t('bible.readChapters')}</span>
+              <span className="text-xs font-semibold">{t('bible.readChapters')}</span>
             </div>
             <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
               {t('bible.chaptersUnit', { count: todayStats.chaptersRead })}
@@ -177,7 +177,7 @@ export function ReadingHistoryTab() {
           <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-900/40 border border-purple-200 dark:border-purple-800">
             <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-1">
               <TrendingUp className="w-4 h-4" />
-              <span className="text-xs font-medium">{t('bible.readCount')}</span>
+              <span className="text-xs font-semibold">{t('bible.readCount')}</span>
             </div>
             <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
               {t('bible.countUnit', { count: todayStats.recordCount })}
@@ -240,7 +240,7 @@ export function ReadingHistoryTab() {
         <div className="space-y-8">
           {Object.entries(groupedHistory).map(([date, items]) => (
             <div key={date} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <h2 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 {date}
               </h2>
@@ -265,7 +265,7 @@ export function ReadingHistoryTab() {
                           </span>
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">{bookName}</p>
+                          <p className="font-semibold text-foreground">{bookName}</p>
                           <p className="text-xs text-muted-foreground">
                             {formatTime(item.timestamp)} · {formatDuration(item.duration)}
                           </p>

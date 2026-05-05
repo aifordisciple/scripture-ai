@@ -74,7 +74,7 @@ function SearchHistory({
 
   return (
     <div className="mb-2">
-      <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 uppercase tracking-wide">
+      <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wide">
         <Clock className="w-3.5 h-3.5" />
         {t('bible.recentSearches')}
       </div>
@@ -107,7 +107,7 @@ function VerseSuggestions({
 
   return (
     <div>
-      <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 uppercase tracking-wide">
+      <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wide">
         <BookOpen className="w-3.5 h-3.5" />
         {t('bible.verses')}
       </div>
@@ -141,7 +141,7 @@ function TopicSuggestions({
 
   return (
     <div>
-      <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 uppercase tracking-wide">
+      <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wide">
         <Tag className="w-3.5 h-3.5" />
         {t('bible.topics')}
       </div>

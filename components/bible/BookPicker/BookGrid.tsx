@@ -50,7 +50,7 @@ export function BookGrid({ books, selectedBookId, onSelect, searchQuery = "" }: 
             transition={{ delay: index * 0.02, duration: 0.15 }}
             onClick={() => onSelect(book)}
             className={cn(
-              "relative px-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+              "relative px-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200",
               "border border-transparent",
               isSelected
                 ? "bg-primary text-primary-foreground border-primary/20"

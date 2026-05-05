@@ -426,7 +426,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                     setIsAiFinishedButUnseen(false);
                     setIsQueuePanelOpen(false);
                   }}
-                  className="w-full py-2 px-3 rounded-xl bg-primary hover:bg-apple-focus text-white text-sm font-medium transition-all"
+                  className="w-full py-2 px-3 rounded-xl bg-primary hover:bg-apple-focus text-white text-sm font-semibold transition-all"
                 >
                   {t('ai.clickToView')}
                 </button>
@@ -446,7 +446,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                       cancelAIRequest(currentAiRequest.id);
                       if (!isAiOpen) setAiOpen(true);
                     }}
-                    className="text-xs text-red-500 hover:text-red-600 dark:hover:text-red-400 font-medium"
+                    className="text-xs text-red-500 hover:text-red-600 dark:hover:text-red-400 font-semibold"
                   >
                     {t('ai.cancel')}
                   </button>
@@ -454,7 +454,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                 <div className="flex items-start gap-2">
                   <BookOpen className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-foreground dark:text-foreground/80 truncate">
+                    <div className="text-sm font-semibold text-foreground dark:text-foreground/80 truncate">
                       {getShortRef(currentAiRequest.ref)}
                     </div>
                     <div className="text-xs text-muted-foreground truncate">
@@ -468,7 +468,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
             {/* 等待队列 */}
             {aiQueue.length > 0 && (
               <div className="max-h-48 overflow-y-auto">
-                <div className="px-4 py-2 text-xs text-muted-foreground font-medium bg-secondary/50 dark:bg-card/50">
+                <div className="px-4 py-2 text-xs text-muted-foreground font-semibold bg-secondary/50 dark:bg-card/50">
                   {t('ai.waiting')} ({aiQueue.length})
                 </div>
                 {aiQueue.map((item, index) => (
@@ -517,7 +517,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
                 setAiOpen(true);
                 setIsQueuePanelOpen(false);
               }}
-              className="w-full px-4 py-2.5 text-center text-xs font-medium text-primary bg-secondary dark:bg-card hover:bg-primary/5 transition-colors border-t border-border dark:border-border"
+              className="w-full px-4 py-2.5 text-center text-xs font-semibold text-primary bg-secondary dark:bg-card hover:bg-primary/5 transition-colors border-t border-border dark:border-border"
             >
               {t('ai.openAISidebar')}
             </button>

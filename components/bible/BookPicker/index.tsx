@@ -160,7 +160,7 @@ export function BookPicker({
                   className="pt-4 border-t border-border/50"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-muted-foreground">
+                    <span className="text-sm font-semibold text-muted-foreground">
                       {selectedBook.name} · {t('reader.selectChapter')}
                     </span>
                     <span className="text-xs text-muted-foreground">

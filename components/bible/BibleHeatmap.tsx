@@ -140,7 +140,7 @@ export function BibleHeatmap({
           <div key={book.id} className="flex items-center">
             {/* 书卷中文名称 - 唯一渲染 */}
             <div 
-               className="w-20 md:w-24 shrink-0 text-[10px] md:text-xs text-muted-foreground font-medium whitespace-nowrap mr-2 text-right tracking-wider hover:text-foreground transition-colors cursor-default flex items-center justify-end"
+               className="w-20 md:w-24 shrink-0 text-[10px] md:text-xs text-muted-foreground font-semibold whitespace-nowrap mr-2 text-right tracking-wider hover:text-foreground transition-colors cursor-default flex items-center justify-end"
                style={{ height: `${cellSize}px` }} 
                title={book.name}
             >
