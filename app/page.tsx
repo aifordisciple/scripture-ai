@@ -504,36 +504,69 @@ export default function Home() {
         )}
       >
         
-        {/* Header - 仅 Header 可隐藏 */}
+        {/* Header - Apple Dual-Layer Navigation: Global Nav + Sub Nav */}
         <div
           className={cn(
-            "absolute top-0 left-0 right-0 z-30 p-2 md:p-4 pointer-events-none transition-transform duration-300 ease-in-out",
+            "absolute top-0 left-0 right-0 z-30 pointer-events-none transition-transform duration-300 ease-in-out",
             isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
-          <header className="h-11 flex items-center justify-between px-2 md:px-4 glass-nav border-b border-border rounded-none pointer-events-auto">
-
-            {/* 左侧：菜单 + 搜索 */}
-            <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
-              <Button variant="ghost" size="icon" className="md:hidden text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
+          {/* Layer 1 — Global Nav (44px, black bar) */}
+          <div className="h-11 bg-apple-surface-black text-white flex items-center justify-between px-2 md:px-4 pointer-events-auto">
+            {/* Left side: mobile hamburger / desktop logo */}
+            <div className="flex items-center gap-2 shrink-0">
+              <Button variant="ghost" size="icon" className="md:hidden text-white/80 hover:text-white hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
                 <Menu className="h-5 w-5" />
               </Button>
+              <span className="hidden md:block text-xs font-regular tracking-tight select-none">AI读</span>
+            </div>
 
+            {/* Center: desktop search button */}
+            <button
+              className="hidden md:flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/15 px-4 py-1.5 text-xs text-white/70 active:scale-95 transition-colors pointer-events-auto"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>{t('reader.searchPlaceholder')}</span>
+            </button>
+
+            {/* Right side: User menu */}
+            <div className="flex items-center shrink-0">
+              <UserMenu />
+            </div>
+          </div>
+
+          {/* Layer 2 — Sub Nav Frosted (52px) */}
+          <div className="h-[52px] bg-[var(--glass-bg-light)] dark:bg-[var(--glass-bg-dark)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border flex items-center justify-between px-2 md:px-4 pointer-events-auto">
+            {/* Left side: desktop sidebar toggle / mobile book-chapter name */}
+            <div className="flex items-center shrink-0">
               <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-muted-foreground dark:text-muted-foreground dark:text-foreground/60" : "text-foreground dark:text-foreground")} onClick={toggleDesktopSidebar}>
                 <PanelLeft className="h-5 w-5" />
               </Button>
 
-              <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-black/[0.04] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 border-none ml-1 active:scale-95" onClick={() => setIsSearchOpen(true)}>
-                  <Search className="w-4 h-4 text-muted-foreground dark:text-foreground/60" />
-                  <span className="text-xs text-muted-foreground dark:text-foreground/60 pr-2">{t('reader.searchPlaceholder')}</span>
-              </Button>
-
-              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
-                <Search className="h-5 w-5" />
-              </Button>
+              {/* Mobile: Book/chapter name in Apple tagline style */}
+              <div className="md:hidden flex-1 text-center min-w-0 px-1">
+                <button
+                  onClick={() => {
+                    if (activeTab.type === 'read') {
+                      setIsBookPickerOpen(true);
+                    }
+                  }}
+                  className={cn(
+                    "inline-flex items-center text-[21px] font-semibold tracking-[0.231px] text-foreground max-w-full active:scale-95",
+                    activeTab.type === 'read' && "hover:text-foreground/80 dark:hover:text-foreground/80 transition-colors"
+                  )}
+                >
+                  <span className="truncate">
+                    {activeTab.type === 'read' ? (
+                      <>{activeTab.book} {activeTab.chapter}</>
+                    ) : activeTab.type === 'search' ? t('tabs.search') : activeTab.type === 'dashboard' ? t('tabs.dashboard') : activeTab.type === 'highlights' ? t('tabs.highlights') : activeTab.type === 'notes' ? t('tabs.notes') : activeTab.type === 'cross-ref' ? t('tabs.crossref') : activeTab.type === 'group' ? t('tabs.group') : activeTab.type === 'atlas' ? t('tabs.atlas') : activeTab.type === 'insights' ? t('tabs.insights') : t('tabs.plan')}
+                  </span>
+                </button>
+              </div>
             </div>
 
-            {/* 桌面端 Tab 列表 */}
+            {/* Center: desktop tab pills */}
             <div className="hidden md:flex flex-1 items-center overflow-hidden mx-4 mask-linear-fade pl-2 min-w-0">
                <TabList
                  tabs={tabs}
@@ -544,196 +577,129 @@ export default function Home() {
                />
             </div>
 
-            {/* 移动端中间：书卷章节选择器 */}
-            <div className="md:hidden flex-1 text-center min-w-0 px-1">
-              <button
-                onClick={() => {
-                  if (activeTab.type === 'read') {
-                    setIsBookPickerOpen(true);
-                  }
-                }}
-                className={cn(
-                  "inline-flex items-center font-serif font-semibold text-base text-foreground dark:text-foreground tracking-wide max-w-full active:scale-95",
-                  activeTab.type === 'read' && "hover:text-foreground/80 dark:hover:text-foreground/80 transition-colors"
+            {/* Right side: AI action button + mobile tools */}
+            <div className="flex items-center gap-1 shrink-0">
+              {/* Mobile: search + settings */}
+              <Button variant="ghost" size="icon" className="md:hidden flex text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
+                <Search className="h-5 w-5" />
+              </Button>
+
+              {/* Desktop: right-side tools (settings dropdown, version, streak, plan, etc.) */}
+              <div className="hidden sm:flex items-center gap-1">
+                {activeTab.type === 'read' && (
+                   <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="full" />
                 )}
-              >
-                <span className="truncate">
-                  {activeTab.type === 'read' ? (
-                    <>{activeTab.book} {activeTab.chapter}</>
-                  ) : activeTab.type === 'search' ? t('tabs.search') : activeTab.type === 'dashboard' ? t('tabs.dashboard') : activeTab.type === 'highlights' ? t('tabs.highlights') : activeTab.type === 'notes' ? t('tabs.notes') : activeTab.type === 'cross-ref' ? t('tabs.crossref') : activeTab.type === 'group' ? t('tabs.group') : activeTab.type === 'atlas' ? t('tabs.atlas') : activeTab.type === 'insights' ? t('tabs.insights') : t('tabs.plan')}
-                </span>
-              </button>
-            </div>
 
-            {/* 桌面端右侧工具栏 */}
-            <div className="hidden sm:flex items-center gap-1 shrink-0">
+                {/* Reading settings dropdown */}
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+                    className={cn(
+                      "text-muted-foreground dark:text-foreground/60 hover:text-foreground dark:hover:text-white rounded-full hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95",
+                      showSettingsDropdown && "bg-black/[0.04] dark:bg-white/10"
+                    )}
+                    title={t('settings.readingSettings')}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
 
-              {activeTab.type === 'read' && (
-                 <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="full" />
-              )}
-
-              {/* [新增] 阅读设置下拉菜单 - 整合全屏、行高、文字大小 */}
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
-                  className={cn(
-                    "text-muted-foreground dark:text-foreground/60 hover:text-foreground dark:hover:text-white rounded-full hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95",
-                    showSettingsDropdown && "bg-black/[0.04] dark:bg-white/10"
-                  )}
-                  title={t('settings.readingSettings')}
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-
-                {/* 设置下拉面板 */}
-                {showSettingsDropdown && (
-                  <>
-                    {/* 点击外部关闭 */}
-                    <div
-                      className="fixed inset-0 z-[100]"
-                      onClick={() => setShowSettingsDropdown(false)}
-                    />
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-card border border-border dark:border-border rounded-lg z-[100] p-3 space-y-3">
-                      {/* 深色模式 */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground flex items-center gap-2">
-                          {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                          {isDarkMode ? t('settings.darkMode') : t('settings.lightMode')}
-                        </span>
-                        <Button
-                          variant={isDarkMode ? "default" : "secondary"}
-                          size="sm"
-                          onClick={toggleDarkMode}
-                          className="rounded-full px-3 h-7 text-xs active:scale-95"
-                        >
-                          {isDarkMode ? t('settings.toggleLight') : t('settings.toggleDark')}
-                        </Button>
-                      </div>
-
-                      {/* 全屏模式 */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground flex items-center gap-2">
-                          {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-                          {t('reader.fullscreen')}
-                        </span>
-                        <Button
-                          variant={isFullscreen ? "default" : "secondary"}
-                          size="sm"
-                          onClick={toggleFullscreen}
-                          className="rounded-full px-3 h-7 text-xs active:scale-95"
-                        >
-                          {isFullscreen ? t('settings.exitFullscreen') : t('settings.enterFullscreen')}
-                        </Button>
-                      </div>
-
-                      {/* 分隔线 */}
-                      <div className="border-t border-border/50" />
-
-                      {/* 行间距 */}
-                      <div className="space-y-1.5">
-                        <span className="text-sm text-muted-foreground flex items-center gap-2">
-                          <AlignJustify className="w-4 h-4" />
-                          {t('settings.lineHeight')}
-                        </span>
-                        <div className="flex bg-secondary/50 p-1 rounded-lg">
-                          {[1.4, 1.8, 2.2].map(lh => (
-                            <button
-                              key={lh}
-                              onClick={() => setLineHeight(lh)}
-                              className={cn(
-                                "flex-1 px-2 py-1 text-xs rounded-md transition-all active:scale-95",
-                                lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                              )}
-                            >
-                              {lh === 1.4 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* 字号大小 */}
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between items-center">
+                  {/* Settings dropdown panel */}
+                  {showSettingsDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-[100]" onClick={() => setShowSettingsDropdown(false)} />
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-card border border-border dark:border-border rounded-lg z-[100] p-3 space-y-3">
+                        <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground flex items-center gap-2">
-                            <Type className="w-4 h-4" />
-                            {t('settings.fontSize')}
+                            {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                            {isDarkMode ? t('settings.darkMode') : t('settings.lightMode')}
                           </span>
-                          <span className="text-xs text-muted-foreground font-semibold">{fontSize}px</span>
+                          <Button variant={isDarkMode ? "default" : "secondary"} size="sm" onClick={toggleDarkMode} className="rounded-full px-3 h-7 text-xs active:scale-95">
+                            {isDarkMode ? t('settings.toggleLight') : t('settings.toggleDark')}
+                          </Button>
                         </div>
-                        <Slider
-                          value={[fontSize]}
-                          min={14}
-                          max={32}
-                          step={1}
-                          onValueChange={(val) => setFontSize(val[0])}
-                          className="cursor-pointer"
-                        />
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground flex items-center gap-2">
+                            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                            {t('reader.fullscreen')}
+                          </span>
+                          <Button variant={isFullscreen ? "default" : "secondary"} size="sm" onClick={toggleFullscreen} className="rounded-full px-3 h-7 text-xs active:scale-95">
+                            {isFullscreen ? t('settings.exitFullscreen') : t('settings.enterFullscreen')}
+                          </Button>
+                        </div>
+                        <div className="border-t border-border/50" />
+                        <div className="space-y-1.5">
+                          <span className="text-sm text-muted-foreground flex items-center gap-2">
+                            <AlignJustify className="w-4 h-4" />
+                            {t('settings.lineHeight')}
+                          </span>
+                          <div className="flex bg-secondary/50 p-1 rounded-lg">
+                            {[1.4, 1.8, 2.2].map(lh => (
+                              <button key={lh} onClick={() => setLineHeight(lh)} className={cn("flex-1 px-2 py-1 text-xs rounded-md transition-all active:scale-95", lineHeight === lh ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                                {lh === 1.4 ? t('common.compact') : lh === 1.8 ? t('common.standard') : t('common.loose')}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground flex items-center gap-2">
+                              <Type className="w-4 h-4" />
+                              {t('settings.fontSize')}
+                            </span>
+                            <span className="text-xs text-muted-foreground font-semibold">{fontSize}px</span>
+                          </div>
+                          <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} className="cursor-pointer" />
+                        </div>
                       </div>
-                    </div>
-                  </>
+                    </>
+                  )}
+                </div>
+
+                <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white active:scale-95">
+                  <BookOpenCheck className="h-4 w-4" />{bibleVersion}
+                </Button>
+                <div className="mx-1 border-l h-5 border-border dark:border-white/20"></div>
+
+                {streakCount > 0 && (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-primary/10 rounded-full">
+                    <Flame className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-bold text-primary">{streakCount}</span>
+                  </div>
                 )}
+
+                <Button variant="ghost" size="icon" onClick={() => {
+                  const planTab = tabs.find(t => t.type === 'plan');
+                  if (planTab) { setActiveTab(planTab.id); } else { addTab({ type: 'plan' }); }
+                }} className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors relative active:scale-95" title={t('tabs.plan')}>
+                  <Calendar className="h-5 w-5" />
+                </Button>
               </div>
 
-              <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-foreground/80 dark:text-foreground/80 hover:text-foreground dark:hover:text-white active:scale-95">
-                <BookOpenCheck className="h-4 w-4" />{bibleVersion}
-              </Button>
-              <div className="mx-1 border-l h-5 border-border dark:border-white/20"></div>
-
-              {/* 火苗动效 - 桌面端 */}
-              {streakCount > 0 && (
-                <div className="flex items-center gap-1 px-2 py-1 bg-primary/10 rounded-full">
-                  <Flame className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-bold text-primary">{streakCount}</span>
-                </div>
-              )}
-
-              {/* 读经计划入口 - 桌面端 */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  const planTab = tabs.find(t => t.type === 'plan');
-                  if (planTab) {
-                    setActiveTab(planTab.id);
-                  } else {
-                    addTab({ type: 'plan' });
-                  }
-                }}
-                className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors relative active:scale-95"
-                title={t('tabs.plan')}
+              {/* AI action button (all screens) */}
+              <button
+                className="bg-primary text-white rounded-full px-4 py-1.5 text-[17px] font-regular tracking-[-0.374px] active:scale-95 transition-transform"
+                onClick={() => setAiOpen(!isAiOpen)}
               >
-                <Calendar className="h-5 w-5" />
-              </Button>
+                ✨ AI
+              </button>
 
-              {/* Notification moved to UserMenu */}
-
-               <div className="pl-1">
-                 <UserMenu />
-               </div>
-            </div>
-
-            {/* 移动端右侧：精简工具栏 */}
-            <div className="flex sm:hidden items-center gap-0.5 shrink-0">
-              {/* 朗读播放 - 移动端 */}
-              {activeTab.type === 'read' && (
-                <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="minimal" />
-              )}
-
-              {/* Notification moved to UserMenu */}
-
-              <UserMenu />
-
-              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground dark:text-foreground/60 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
+              {/* Mobile: settings */}
+              <Button variant="ghost" size="icon" className="sm:hidden rounded-full text-muted-foreground dark:text-foreground/60 hover:text-foreground dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>
+
+              {/* Mobile: TTS */}
+              {activeTab.type === 'read' && (
+                <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none sm:hidden" mode="minimal" />
+              )}
             </div>
-          </header>
+          </div>
         </div>
 
         {/* Main Content Area */}
-        <div id="reader-scroll-container" onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-smooth pt-20 md:pt-24 pb-4 relative z-0">
+        <div id="reader-scroll-container" onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-smooth pt-24 md:pt-[104px] pb-4 relative z-0">
           <TabContentRenderer
             tabs={tabs}
             activeTabId={activeTabId}
@@ -746,7 +712,7 @@ export default function Home() {
         {activeTab?.type !== 'sermon' && (
         <div
           className={cn(
-            "md:hidden fixed bottom-0 left-0 right-0 h-16 glass-nav border-t border-border border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
+            "md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--glass-bg-light)] dark:bg-[var(--glass-bg-dark)] backdrop-blur-[20px] backdrop-saturate-[180%] border-t border-border border-b-0 rounded-t-2xl flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
             isNavVisible ? "translate-y-0" : "translate-y-full"
           )}
         >
