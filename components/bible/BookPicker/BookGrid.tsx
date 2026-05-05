@@ -53,8 +53,8 @@ export function BookGrid({ books, selectedBookId, onSelect, searchQuery = "" }: 
               "relative px-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
               "border border-transparent",
               isSelected
-                ? "bg-primary text-primary-foreground shadow-md border-primary/20"
-                : "bg-secondary/50 text-foreground hover:bg-secondary hover:border-border hover:shadow-sm"
+                ? "bg-primary text-primary-foreground border-primary/20"
+                : "bg-secondary/50 text-foreground hover:bg-secondary hover:border-border"
             )}
           >
             <span className="block truncate">{displayName}</span>

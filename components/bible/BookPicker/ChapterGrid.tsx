@@ -35,8 +35,8 @@ export function ChapterGrid({ chapters, selectedChapter, onSelect }: ChapterGrid
               "aspect-square flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-150",
               "border border-transparent",
               isSelected
-                ? "bg-primary text-primary-foreground shadow-md scale-105 border-primary/20"
-                : "bg-secondary/40 text-foreground hover:bg-secondary hover:border-border hover:scale-105"
+                ? "bg-primary text-primary-foreground border-primary/20"
+                : "bg-secondary/40 text-foreground hover:bg-secondary hover:border-border"
             )}
           >
             {chapter}

@@ -31,7 +31,7 @@ export function DashboardTab() {
   }, []);
 
   // 图表主色（从 CSS 变量读取）
-  const chartColor1 = getThemeColor('--chart-1', '#0066cc'); // indigo
+  const chartColor1 = getThemeColor('--chart-1', '#0066cc'); // action blue
   const chartColor2 = getThemeColor('--chart-2', '#0071e3'); // blue
   const chartGridColor = getThemeColor('--border', '#e0e0e0');
   const chartTickColor = getThemeColor('--muted-foreground', '#7a7a7a');
@@ -260,7 +260,7 @@ export function DashboardTab() {
          <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
            <Clock className="w-4 h-4" /> {t('bible.yearlyOverview')}
          </h3>
-         <BibleHeatmap data={heatmapData} onCellClick={handleCellClick} colorTheme="indigo" />
+         <BibleHeatmap data={heatmapData} onCellClick={handleCellClick} colorTheme="blue" />
       </div>
     </div>
   );

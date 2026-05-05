@@ -47,7 +47,7 @@ export function WelcomeOnboarding({ onComplete, onSkip }: WelcomeOnboardingProps
       id: "plan",
       title: t('onboarding.readingPlanTitle'),
       description: t('onboarding.readingPlanDesc'),
-      icon: <Calendar className="w-12 h-12 text-indigo-500" />,
+      icon: <Calendar className="w-12 h-12 text-[#0066cc]" />,
     },
     {
       id: "group",

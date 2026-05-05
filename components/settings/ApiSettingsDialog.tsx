@@ -144,7 +144,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
       <DialogContent className="sm:max-w-md rounded-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <BrainCircuit className="w-5 h-5 text-indigo-500" />
+            <BrainCircuit className="w-5 h-5 text-[#0066cc]" />
             {t('settings.aiModelSettings')}
           </DialogTitle>
           <DialogDescription>
@@ -153,7 +153,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
         </DialogHeader>
 
         {/* Current active config display */}
-        <div className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 p-3 rounded-xl text-sm font-medium flex items-center justify-between mt-2 mb-4 border border-indigo-100 dark:border-indigo-800/50">
+        <div className="bg-[#0066cc]/5 dark:bg-[#0066cc]/10 text-[#0066cc] dark:text-[#2997ff] p-3 rounded-xl text-sm font-medium flex items-center justify-between mt-2 mb-4 border border-[#0066cc]/20 dark:border-[#0066cc]/30">
           <div className="flex items-center gap-2">
             <div className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -171,7 +171,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
                 )}
               </span>
             )}
-            <span className="bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700 shadow-sm font-mono tracking-tight">
+            <span className="bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md text-xs font-semibold border border-slate-200 dark:border-slate-700 font-mono tracking-tight">
               {apiConfig.model || t('settings.unknownModel')}
             </span>
           </div>
@@ -242,7 +242,7 @@ export function ApiSettingsDialog({ open, onOpenChange }: { open: boolean; onOpe
 
         <div className="flex justify-end gap-3 mt-4">
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-full">{t('common.cancel')}</Button>
-          <Button onClick={handleSave} disabled={isSyncing} className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md gap-1">
+          <Button onClick={handleSave} disabled={isSyncing} className="rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white gap-1 active:scale-95">
             {showSuccess ? (
               <><CheckCircle2 className="w-4 h-4" /> {t('settings.applied')}</>
             ) : isSyncing ? (

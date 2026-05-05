@@ -78,16 +78,16 @@ export function InstallPrompt() {
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-96 z-50"
           >
-            <div className="glass-panel rounded-2xl p-4 shadow-lg border border-primary/20">
+            <div className="glass-panel rounded-2xl p-4 border border-primary/20">
               <div className="flex items-start gap-3">
                 {/* 图标 */}
-                <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md">
+                <div className="shrink-0 w-12 h-12 rounded-xl bg-[#0066cc] flex items-center justify-center">
                   <Download className="w-6 h-6 text-white" />
                 </div>
 
                 {/* 内容 */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-foreground text-sm mb-1">
+                  <h3 className="font-semibold text-foreground text-sm mb-1">
                     {t('pwa.addToHomeScreen')}
                   </h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">

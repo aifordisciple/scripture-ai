@@ -79,7 +79,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200">
           {!collapsed && (
-            <span className="font-bold text-lg text-indigo-600">管理后台</span>
+            <span className="font-semibold text-lg text-[#0066cc]">管理后台</span>
           )}
           {/* 移动端关闭按钮 */}
           <button
@@ -110,7 +110,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
                       isActive
-                        ? "bg-indigo-50 text-indigo-600"
+                        ? "bg-[#0066cc]/5 text-[#0066cc]"
                         : "text-slate-600 hover:bg-slate-100"
                     )}
                     title={collapsed ? item.label : undefined}

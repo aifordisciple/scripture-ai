@@ -88,7 +88,7 @@ export function PlanDailyFlow() {
        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-md animate-in slide-in-from-bottom-8 duration-500">
          <div className="bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl p-4 rounded-lg border border-[#0066cc]/20 flex items-center justify-between">
            <div className="flex flex-col pl-2">
-             <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-semibold tracking-widest uppercase mb-0.5">{t('plan.currentlyReading')}</span>
+             <span className="text-[10px] text-[#0066cc] dark:text-[#2997ff] font-semibold tracking-widest uppercase mb-0.5">{t('plan.currentlyReading')}</span>
              <span className="text-sm font-semibold text-foreground">
                {bookName} {t('plan.chapterNum', { chapter: step.chapter ?? '' })}
              </span>

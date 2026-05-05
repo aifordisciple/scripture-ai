@@ -234,7 +234,7 @@ export default function FeedbackAdminPanel() {
         {[
           { label: t('adminFeedback.statsAll'), value: stats.total, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20" },
           { label: t('adminFeedback.statsPending'), value: stats.pending, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20" },
-          { label: t('adminFeedback.statsProcessing'), value: stats.processing, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
+          { label: t('adminFeedback.statsProcessing'), value: stats.processing, color: "text-[#0066cc] dark:text-[#2997ff]", bg: "bg-[#0066cc]/5 dark:bg-[#0066cc]/10" },
           { label: t('adminFeedback.statsResolved'), value: stats.resolved, color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20" },
           { label: t('adminFeedback.statsClosed'), value: stats.closed, color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-700/30" },
         ].map((stat) => (

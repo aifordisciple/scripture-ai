@@ -43,7 +43,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
       id: "long-press",
       title: t('onboarding.longPressTitle'),
       description: t('onboarding.longPressDesc'),
-      icon: <Move className="w-12 h-12 text-indigo-500" />,
+      icon: <Move className="w-12 h-12 text-[#0066cc]" />,
       animation: "long-press",
     },
     {
@@ -161,7 +161,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
                 transition={{ duration: 0.2 }}
                 className="text-center"
               >
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
                   {step.title}
                 </h2>
                 <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
@@ -197,7 +197,7 @@ export function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
             <button
               onClick={handleNext}
               className={cn(
-                "flex items-center gap-1 px-6 py-2.5 rounded-xl text-sm font-bold transition-all",
+                "flex items-center gap-1 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all",
                 "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600",
                 "text-white shadow-lg shadow-blue-500/25",
                 "active:scale-95"
