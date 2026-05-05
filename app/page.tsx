@@ -91,7 +91,7 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
               "flex items-center gap-1.5 px-3 py-1.5 md:py-1 rounded-full text-sm md:text-xs font-medium cursor-pointer transition-all border whitespace-nowrap min-w-[90px] justify-between group/tab shrink-0 active:scale-95",
               activeTabId === tab.id
                 ? "bg-white dark:bg-[#2a2a2c] border-[#e0e0e0] dark:border-[#3a3a3c] text-primary"
-                : "bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-lg border-white/20 dark:border-white/10 text-muted-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.1]"
+                : "bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-lg border-[#e0e0e0]/60 dark:border-white/10 text-muted-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.1]"
             )}
           >
             <span className="max-w-[120px] truncate select-none">
@@ -509,24 +509,24 @@ export default function Home() {
             isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
-          <header className="h-11 flex items-center justify-between px-2 md:px-4 bg-[#000000] dark:bg-[#1d1d1f] rounded-none pointer-events-auto">
+          <header className="h-11 flex items-center justify-between px-2 md:px-4 bg-white/80 dark:bg-[#1d1d1f]/80 backdrop-blur-xl saturate-[1.8] border-b border-[#e0e0e0] dark:border-[#3a3a3c] rounded-none pointer-events-auto">
 
             {/* 左侧：菜单 + 搜索 */}
             <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
-              <Button variant="ghost" size="icon" className="md:hidden text-white/80 hover:text-white hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
+              <Button variant="ghost" size="icon" className="md:hidden text-[#1d1d1f]/80 dark:text-white/80 hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => toggleSidebar()}>
                 <Menu className="h-5 w-5" />
               </Button>
 
-              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-white/60" : "text-white")} onClick={toggleDesktopSidebar}>
+              <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-[#1d1d1f]/80 dark:text-white/80 hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-[#7a7a7a] dark:text-[#7a7a7a] dark:text-white/60" : "text-[#1d1d1f] dark:text-white")} onClick={toggleDesktopSidebar}>
                 <PanelLeft className="h-5 w-5" />
               </Button>
 
-              <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-white/10 hover:bg-white/15 border-none ml-1 active:scale-95" onClick={() => setIsSearchOpen(true)}>
-                  <Search className="w-4 h-4 text-white/60" />
-                  <span className="text-xs text-white/60 pr-2">{t('reader.searchPlaceholder')}</span>
+              <Button variant="secondary" size="sm" className="gap-2 hidden md:flex rounded-full bg-black/[0.04] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 border-none ml-1 active:scale-95" onClick={() => setIsSearchOpen(true)}>
+                  <Search className="w-4 h-4 text-[#7a7a7a] dark:text-white/60" />
+                  <span className="text-xs text-[#7a7a7a] dark:text-white/60 pr-2">{t('reader.searchPlaceholder')}</span>
               </Button>
 
-              <Button variant="ghost" size="icon" className="md:hidden flex text-white/80 hover:text-white hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
+              <Button variant="ghost" size="icon" className="md:hidden flex text-[#1d1d1f]/80 dark:text-white/80 hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-9 w-9 active:scale-95" onClick={() => setIsSearchOpen(true)}>
                 <Search className="h-5 w-5" />
               </Button>
             </div>
@@ -551,8 +551,8 @@ export default function Home() {
                   }
                 }}
                 className={cn(
-                  "inline-flex items-center font-serif font-bold text-base text-white tracking-wide max-w-full active:scale-95",
-                  activeTab.type === 'read' && "hover:text-white/80 transition-colors"
+                  "inline-flex items-center font-serif font-semibold text-base text-[#1d1d1f] dark:text-white tracking-wide max-w-full active:scale-95",
+                  activeTab.type === 'read' && "hover:text-[#1d1d1f]/80 dark:hover:text-white/80 transition-colors"
                 )}
               >
                 <span className="truncate">
@@ -577,8 +577,8 @@ export default function Home() {
                   size="icon"
                   onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
                   className={cn(
-                    "text-white/60 hover:text-white rounded-full hover:bg-white/10 active:scale-95",
-                    showSettingsDropdown && "bg-white/10"
+                    "text-[#7a7a7a] dark:text-white/60 hover:text-[#1d1d1f] dark:hover:text-white rounded-full hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95",
+                    showSettingsDropdown && "bg-black/[0.04] dark:bg-white/10"
                   )}
                   title={t('settings.readingSettings')}
                 >
@@ -674,10 +674,10 @@ export default function Home() {
                 )}
               </div>
 
-              <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-bold rounded-full text-white/80 hover:text-white active:scale-95">
+              <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-[#1d1d1f]/80 dark:text-white/80 hover:text-[#1d1d1f] dark:hover:text-white active:scale-95">
                 <BookOpenCheck className="h-4 w-4" />{bibleVersion}
               </Button>
-              <div className="mx-1 border-l h-5 border-white/20"></div>
+              <div className="mx-1 border-l h-5 border-[#e0e0e0] dark:border-white/20"></div>
 
               {/* 火苗动效 - 桌面端 */}
               {streakCount > 0 && (
@@ -723,7 +723,7 @@ export default function Home() {
 
               <UserMenu />
 
-              <Button variant="ghost" size="icon" className="rounded-full text-white/60 hover:text-white hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
+              <Button variant="ghost" size="icon" className="rounded-full text-[#7a7a7a] dark:text-white/60 hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 h-9 w-9 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>
             </div>
