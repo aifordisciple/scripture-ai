@@ -509,7 +509,7 @@ export function PlanTab() {
       )}
 
 {/* AI 定制区 */}
-      <div className="mb-10 relative overflow-hidden bg-primary rounded-full p-6 md:p-8 border border-primary/30">
+      <div className="mb-10 relative overflow-hidden bg-primary rounded-lg p-6 md:p-8 border border-primary/30">
         
         {/* 装饰性背景光晕 (增加蓝宝石的通透折射感) */}
         <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
