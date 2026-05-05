@@ -48,7 +48,7 @@ export function SessionSelector({
     <div className="relative" data-session-selector>
       <button
         onClick={onToggleSessionList}
-        className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 font-bold select-none hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-lg transition-colors"
+        className="flex items-center gap-1.5 text-[#0066cc] dark:text-[#2997ff] font-semibold select-none hover:bg-[#0066cc]/5 px-2 py-1 rounded-lg transition-colors"
         aria-label={t('bible.switchSession')}
       >
         <MessageSquare className="w-4 h-4" />
@@ -60,20 +60,20 @@ export function SessionSelector({
 
       {/* 会话列表下拉 */}
       {showSessionList && (
-        <div className="fixed inset-0 md:inset-auto md:top-20 md:left-4 md:w-80 bg-white dark:bg-slate-800 md:rounded-xl shadow-xl border-0 md:border dark:border-slate-700 z-[200] md:max-h-[70vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 md:inset-auto md:top-20 md:left-4 md:w-80 bg-white/90 dark:bg-[#272729]/90 backdrop-blur-xl saturate-[1.8] md:rounded-lg border border-[#e0e0e0] dark:border-[#3a3a3c] z-[200] md:max-h-[70vh] overflow-hidden flex flex-col">
           {/* 顶部：新建按钮 + 搜索框 */}
-          <div className="p-3 border-b dark:border-slate-700 space-y-2 flex-shrink-0">
+          <div className="p-3 border-b border-[#e0e0e0] dark:border-[#3a3a3c] space-y-2 flex-shrink-0">
             <div className="flex items-center gap-2">
               <button
                 onClick={onNewSession}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-colors shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-white bg-[#0066cc] hover:bg-[#0071e3] rounded-lg transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 {t('bible.newSession')}
               </button>
               <button
                 onClick={() => onToggleSessionList()}
-                className="md:hidden p-2.5 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                className="md:hidden p-2.5 text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06] rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -82,18 +82,18 @@ export function SessionSelector({
             {/* 搜索框 */}
             {sessions.length > 3 && (
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a7a7a]" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('bible.searchSession')}
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full pl-9 pr-3 py-2 text-sm bg-[#f5f5f7] dark:bg-[#1d1d1f] border border-[#e0e0e0] dark:border-[#3a3a3c] rounded-full focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc]"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a7a7a] hover:text-[#1d1d1f]"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -105,7 +105,7 @@ export function SessionSelector({
           {/* 会话列表 */}
           <div className="flex-1 overflow-y-auto overscroll-contain">
             {filteredSessions.length === 0 ? (
-              <div className="px-3 py-8 text-center text-slate-400 text-sm">
+              <div className="px-3 py-8 text-center text-[#7a7a7a] text-sm">
                 {searchQuery ? t('bible.noMatchSession') : t('bible.noHistorySession')}
               </div>
             ) : (
@@ -117,15 +117,15 @@ export function SessionSelector({
                     className={cn(
                       'flex items-center justify-between px-3 py-3 rounded-xl cursor-pointer transition-all',
                       currentSessionId === session.id
-                        ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800'
-                        : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 border border-transparent'
+                        ? 'bg-[#0066cc]/10 border border-[#0066cc]/20'
+                        : 'hover:bg-black/[0.04] dark:hover:bg-white/[0.06] border border-transparent'
                     )}
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate text-slate-800 dark:text-slate-200">
+                      <div className="text-sm font-medium truncate text-[#1d1d1f] dark:text-white/80">
                         {session.title || t('bible.unnamedSession')}
                       </div>
-                      <div className="text-xs text-slate-400 mt-0.5">
+                      <div className="text-xs text-[#7a7a7a] mt-0.5">
                         {formatDateClient(new Date(session.updatedAt), {
                           month: 'short',
                           day: 'numeric',
@@ -141,10 +141,10 @@ export function SessionSelector({
                           e.stopPropagation()
                           onRenameSession(session)
                         }}
-                        className="p-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-all active:scale-95"
+                        className="p-2 hover:bg-[#0066cc]/10 rounded-lg transition-all active:scale-95"
                         title={t('bible.renameBtn')}
                       >
-                        <Edit className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                        <Edit className="w-4 h-4 text-[#7a7a7a]" />
                       </button>
                       <button
                         onClick={(e) => {
@@ -154,7 +154,7 @@ export function SessionSelector({
                         className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all active:scale-95"
                         title={t('bible.deleteSession')}
                       >
-                        <Trash2 className="w-4 h-4 text-slate-500 dark:text-slate-400 hover:text-red-500" />
+                        <Trash2 className="w-4 h-4 text-[#7a7a7a] hover:text-red-500" />
                       </button>
                     </div>
                   </div>
@@ -165,7 +165,7 @@ export function SessionSelector({
 
           {/* 底部统计 */}
           {sessions.length > 0 && (
-            <div className="p-2 border-t dark:border-slate-700 text-center text-xs text-slate-400">
+            <div className="p-2 border-t border-[#e0e0e0] dark:border-[#3a3a3c] text-center text-xs text-[#7a7a7a]">
               {t('bible.sessionCount', { count: sessions.length })}
             </div>
           )}

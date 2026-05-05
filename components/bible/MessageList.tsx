@@ -144,20 +144,20 @@ const MessageBubble = memo(function MessageBubble({
           <>
             {/* AI 标识 */}
             <div className="flex items-center gap-2 mb-4 select-none">
-              <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-sm">
+              <div className="w-5 h-5 rounded-lg bg-[#0066cc] flex items-center justify-center">
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
-              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('bible.aiInterpretation')}</span>
+              <span className="text-[11px] font-medium text-[#7a7a7a]">{t('bible.aiInterpretation')}</span>
             </div>
 
             {isThinking && (
               <div className="flex items-center gap-2.5 text-blue-500 mb-4 text-[13px] font-medium select-none">
                 <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                  <span className="w-1.5 h-1.5 bg-[#0066cc] rounded-full animate-pulse"></span>
+                  <span className="w-1.5 h-1.5 bg-[#0066cc] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                  <span className="w-1.5 h-1.5 bg-[#0066cc] rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
                 </div>
-                <span className="text-slate-500 dark:text-slate-400">{t('bible.deepInterpreting')}</span>
+                <span className="text-[#7a7a7a]">{t('bible.deepInterpreting')}</span>
               </div>
             )}
 
@@ -174,13 +174,13 @@ const MessageBubble = memo(function MessageBubble({
 
             {/* 底部工具栏 */}
             {(mainText || !isThinking) && (
-              <div className="mt-5 pt-4 border-t border-slate-100/80 dark:border-slate-800/60 flex justify-between items-center opacity-100 select-none">
+              <div className="mt-5 pt-4 border-t border-[#e0e0e0]/80 dark:border-[#3a3a3c]/60 flex justify-between items-center opacity-100 select-none">
                 <div className="flex items-center gap-0.5 flex-wrap">
                   <button
                     onClick={handleCopy}
                     className={cn(
                       'flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg',
-                      copied ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      copied ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
                     )}
                   >
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -192,7 +192,7 @@ const MessageBubble = memo(function MessageBubble({
                       onClick={() => { onSaveInsight(); setBookmarked(true); }}
                       className={cn(
                         'flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg',
-                        bookmarked ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-white/50' : 'text-slate-400 hover:text-blue-600 dark:hover:text-white/50 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                        bookmarked ? 'bg-[#0066cc]/10 text-[#0066cc]' : 'text-[#7a7a7a] hover:text-[#0066cc] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
                       )}
                     >
                       <Bookmark className={cn('w-3.5 h-3.5', bookmarked && 'fill-current')} />
@@ -203,7 +203,7 @@ const MessageBubble = memo(function MessageBubble({
                   {onShare && (
                     <button
                       onClick={onShare}
-                      className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                      className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-[#7a7a7a] hover:text-[#0066cc] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                     >
                       <Share2 className="w-3.5 h-3.5" />
                       {t('bible.share')}
@@ -213,7 +213,7 @@ const MessageBubble = memo(function MessageBubble({
                   {onRetry && (
                     <button
                       onClick={onRetry}
-                      className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                      className="flex items-center gap-1.5 text-[11px] font-medium transition-all px-2.5 py-1.5 rounded-lg text-[#7a7a7a] hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                       {t('bible.retry')}
@@ -222,7 +222,7 @@ const MessageBubble = memo(function MessageBubble({
                 </div>
 
                 <div onClick={(e) => e.stopPropagation()}>
-                  <AudioButton text={mainText} size="sm" variant="ghost" className="text-slate-400 hover:text-blue-600 dark:hover:text-white/50 h-8 px-2.5 text-[11px] rounded-lg" label={t('bible.readAloud')} />
+                  <AudioButton text={mainText} size="sm" variant="ghost" className="text-[#7a7a7a] hover:text-[#0066cc] h-8 px-2.5 text-[11px] rounded-lg" label={t('bible.readAloud')} />
                 </div>
               </div>
             )}
@@ -230,7 +230,7 @@ const MessageBubble = memo(function MessageBubble({
         )}
 
         {role === 'assistant' && isLatest && !isThinking && (
-          <span className="inline-block w-2.5 h-2.5 ml-1 bg-gradient-to-tr from-blue-400 to-purple-400 rounded-full animate-pulse align-baseline shadow-[0_0_10px_rgba(96,165,250,0.8)]" />
+          <span className="inline-block w-2.5 h-2.5 ml-1 bg-[#0066cc] rounded-full animate-pulse align-baseline" />
         )}
       </div>
     </div>
@@ -242,14 +242,14 @@ function EmptyState() {
   const { t } = useTranslation()
   return (
     <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-500 select-none opacity-60">
-      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center mb-5">
+      <div className="w-20 h-20 rounded-2xl bg-[#0066cc]/5 flex items-center justify-center mb-5">
         <svg className="w-10 h-10 stroke-1 text-slate-400 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <rect x="3" y="11" width="18" height="10" rx="2" />
           <circle cx="12" cy="16" r="1" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
       </div>
-      <p className="text-[13px] text-slate-500 dark:text-slate-400">{t('bible.emptyStateHint')}</p>
+      <p className="text-[13px] text-[#7a7a7a]">{t('bible.emptyStateHint')}</p>
     </div>
   )
 }
@@ -258,20 +258,20 @@ function EmptyState() {
 function ErrorState({ error, onRetry }: { error: Error; onRetry?: () => void }) {
   const { t } = useTranslation()
   return (
-    <div className="flex flex-col items-center justify-center p-4 mt-2 mb-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/20">
+    <div className="flex flex-col items-center justify-center p-4 mt-2 mb-4 bg-[#cc0000]/5 border border-[#cc0000]/10 rounded-lg">
       <svg className="w-6 h-6 text-amber-500 mb-2 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
         <circle cx="12" cy="12" r="10" />
         <line x1="12" y1="8" x2="12" y2="12" />
         <line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
-      <span className="text-xs text-amber-600 dark:text-amber-400 text-center mb-3">
+      <span className="text-xs text-[#7a7a7a] text-center mb-3">
         {t('bible.errorInterrupted')}<br />
         {t('bible.errorReasons')}
       </span>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="h-8 text-xs rounded-full border border-amber-200 text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/30 px-4"
+          className="h-8 text-xs rounded-full border border-[#e0e0e0] text-[#0066cc] hover:bg-[#0066cc]/5 px-4"
         >
           <RefreshCw className="w-3 h-3 mr-1 inline" /> {t('bible.regenerate')}
         </button>
