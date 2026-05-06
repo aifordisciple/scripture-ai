@@ -216,9 +216,9 @@ export async function getAIModel(requestConfig?: AIConfig, userId?: string): Pro
     const attemptRequest = async (attempt: number): Promise<Response> => {
       const bodyStr = makeBody(init?.body);
 
-      // P1-9: Add 30s timeout with AbortController
+      // P1-9: Add 120s timeout with AbortController (AI search needs longer)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
 
       let response: Response;
       try {
