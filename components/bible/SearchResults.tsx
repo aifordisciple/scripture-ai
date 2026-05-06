@@ -46,7 +46,7 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
         });
         if (!res.ok) {
           const errJson = await res.json().catch(() => ({}));
-          setError(errJson.error || (locale === 'en' ? 'Search failed, please try again' : '搜索失败，请重试'));
+          setError(errJson.error || '搜索失败，请重试');
           setResults([]);
           return;
         }
