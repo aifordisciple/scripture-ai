@@ -141,12 +141,6 @@ export function SermonEditor() {
     }
   }, [markdownContent, currentSermon?.title])
 
-  // Verse picker trigger
-  const handleOpenVersePicker = useCallback(() => {
-    const btn = document.querySelector('[data-verse-picker-trigger]') as HTMLButtonElement
-    btn?.click()
-  }, [])
-
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -165,10 +159,8 @@ export function SermonEditor() {
 
       <EditorToolbar
         editorRef={editorRef}
-        onOpenVersePicker={handleOpenVersePicker}
         onAIAssist={handleAIAssist}
         isGenerating={isGenerating}
-        onInsertVerse={(verseMarkdown: string) => editorRef.current?.insertValue(verseMarkdown)}
       />
       <div className="flex-1 min-h-0">
         <VditorEditor
