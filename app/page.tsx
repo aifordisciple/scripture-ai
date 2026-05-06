@@ -645,8 +645,8 @@ export default function Home() {
                   )}
                 </div>
 
-                <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-foreground/60 hover:text-foreground active:scale-95 h-8 px-2.5">
-                  <BookOpenCheck className="h-[18px] w-[18px]" />{bibleVersion}
+                <Button variant="ghost" size="sm" onClick={() => setBibleVersion(bibleVersion === 'CUV' ? 'KJV' : 'CUV')} className="gap-1 text-xs font-semibold rounded-full text-foreground/60 hover:text-foreground active:scale-95 h-7 px-2">
+                  <BookOpenCheck className="h-4 w-4" />{bibleVersion}
                 </Button>
               </div>
 
@@ -656,7 +656,7 @@ export default function Home() {
               <div className="hidden sm:flex items-center gap-0.5">
                 {streakCount > 0 && (
                   <div className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded-full">
-                    <Flame className="h-[18px] w-[18px] text-primary" />
+                    <Flame className="h-4 w-4 text-primary" />
                     <span className="text-xs font-semibold text-primary">{streakCount}</span>
                   </div>
                 )}
@@ -664,14 +664,14 @@ export default function Home() {
                 <Button variant="ghost" size="icon" onClick={() => {
                   const planTab = tabs.find(t => t.type === 'plan');
                   if (planTab) { setActiveTab(planTab.id); } else { addTab({ type: 'plan' }); }
-                }} className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors active:scale-95 h-8 w-8" title={t('tabs.plan')}>
-                  <Calendar className="h-[18px] w-[18px]" />
+                }} className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors active:scale-95 h-7 w-7" title={t('tabs.plan')}>
+                  <Calendar className="h-4 w-4" />
                 </Button>
               </div>
 
               {/* Mobile: settings */}
-              <Button variant="ghost" size="icon" className="md:hidden rounded-full text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 h-8 w-8 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
-                <Settings className="h-[18px] w-[18px]" />
+              <Button variant="ghost" size="icon" className="md:hidden rounded-full text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 h-7 w-7 active:scale-95" onClick={() => setMobileSettingsOpen(true)}>
+                <Settings className="h-4 w-4" />
               </Button>
 
               {/* User menu */}
