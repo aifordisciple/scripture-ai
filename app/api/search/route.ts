@@ -103,6 +103,7 @@ export async function POST(req: Request) {
         system: systemPrompt,
         prompt: locale === 'en' ? `Query: "${query}"` : `查询："${query}"`,
         temperature: 0.7,
+        timeout: 60000,
       });
 
       const jsonString = cleanAIResponse(text);
@@ -134,7 +135,11 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error("Search API Error:", error);
-    return NextResponse.json({ data: [], error: 'Search failed, please try again' }, { status: 500 });
+    const isTimeout = error instanceof Error && ('code' in error && (error as any).code === 'TIMEOUT_ERROR');
+    const msg = isTimeout
+      ? (locale === 'en' ? 'AI search timed out, please try again' : 'AI搜索超时，请重试')
+      : (locale === 'en' ? 'Search failed, please try again' : '搜索失败，请重试');
+    return NextResponse.json({ data: [], error: msg }, { status: 500 });
   }
 }
 
@@ -172,6 +177,7 @@ export async function GET(request: Request) {
         system: systemPrompt,
         prompt: locale === 'en' ? `Query: "${query}"` : `查询："${query}"`,
         temperature: 0.7,
+        timeout: 60000,
       });
 
       const jsonString = cleanAIResponse(text);
@@ -203,6 +209,10 @@ export async function GET(request: Request) {
 
   } catch (error) {
     console.error("Search API Error:", error);
-    return NextResponse.json({ data: [], error: 'Search failed, please try again' }, { status: 500 });
+    const isTimeout = error instanceof Error && ('code' in error && (error as any).code === 'TIMEOUT_ERROR');
+    const msg = isTimeout
+      ? (locale === 'en' ? 'AI search timed out, please try again' : 'AI搜索超时，请重试')
+      : (locale === 'en' ? 'Search failed, please try again' : '搜索失败，请重试');
+    return NextResponse.json({ data: [], error: msg }, { status: 500 });
   }
 }
