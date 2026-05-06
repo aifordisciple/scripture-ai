@@ -53,16 +53,39 @@ function cleanAIResponse(text: string): string {
   return jsonString;
 }
 
-// Book ID mapping: common AI model abbreviations -> our database abbreviations
+// Book ID mapping: normalize any AI-returned abbreviation to our database format
+// Database stores: Gen, Exo, Lev, Num, Deu, Jos, Jdg, Rut, 1Sa, 2Sa, 1Ki, 2Ki,
+//   1Ch, 2Ch, Ezr, Neh, Est, Job, Psa, Pro, Ecc, Sng, Isa, Jer, Lam, Eze, Dan,
+//   Hos, Jol, Amo, Oba, Jon, Mic, Nah, Hab, Zep, Hag, Zec, Mal, Mat, Mrk, Luk,
+//   Jhn, Act, Rom, 1Co, 2Co, Gal, Eph, Php, Col, 1Th, 2Th, 1Ti, 2Ti, Tit, Phm,
+//   Heb, Jas, 1Pe, 2Pe, 1Jn, 2Jn, 3Jn, Jud, Rev
 const BOOK_ID_MAP: Record<string, string> = {
-  '1JO': '1Jn', '2JO': '2Jn', '3JO': '3Jn',
-  'JOE': 'Jol', 'MAR': 'Mrk', 'JOH': 'Jhn',
-  'SGS': 'Sng', 'RUT': 'Rut',
+  // OT
+  'GEN': 'Gen', 'EXO': 'Exo', 'LEV': 'Lev', 'NUM': 'Num', 'DEU': 'Deu',
+  'JOS': 'Jos', 'JDG': 'Jdg', 'RUT': 'Rut', 'RUTH': 'Rut',
+  '1SA': '1Sa', '2SA': '2Sa', '1KI': '1Ki', '2KI': '2Ki',
+  '1CH': '1Ch', '2CH': '2Ch', 'EZR': 'Ezr', 'NEH': 'Neh', 'EST': 'Est',
+  'JOB': 'Job', 'PSA': 'Psa', 'PRO': 'Pro', 'ECC': 'Ecc',
+  'SNG': 'Sng', 'SGS': 'Sng', 'SOS': 'Sng', 'SONG': 'Sng',
+  'ISA': 'Isa', 'JER': 'Jer', 'LAM': 'Lam', 'EZE': 'Eze',
+  'DAN': 'Dan', 'HOS': 'Hos', 'JOL': 'Jol', 'JOE': 'Jol', 'JOEL': 'Jol',
+  'AMO': 'Amo', 'OBA': 'Oba', 'JON': 'Jon', 'MIC': 'Mic',
+  'NAH': 'Nah', 'HAB': 'Hab', 'ZEP': 'Zep', 'HAG': 'Hag', 'ZEC': 'Zec', 'MAL': 'Mal',
+  // NT
+  'MAT': 'Mat', 'MRK': 'Mrk', 'MAR': 'Mrk', 'MK': 'Mrk',
+  'LUK': 'Luk', 'JHN': 'Jhn', 'JOH': 'Jhn', 'JN': 'Jhn',
+  'ACT': 'Act', 'ROM': 'Rom',
+  '1CO': '1Co', '2CO': '2Co', 'GAL': 'Gal', 'EPH': 'Eph', 'PHP': 'Php', 'PHI': 'Php',
+  'COL': 'Col', '1TH': '1Th', '2TH': '2Th', '1TI': '1Ti', '2TI': '2Ti',
+  'TIT': 'Tit', 'PHM': 'Phm', 'HEB': 'Heb', 'JAS': 'Jas',
+  '1PE': '1Pe', '2PE': '2Pe',
+  '1JN': '1Jn', '2JN': '2Jn', '3JN': '3Jn', '1JO': '1Jn', '2JO': '2Jn', '3JO': '3Jn',
+  'JUD': 'Jud', 'REV': 'Rev',
 };
 
 function normalizeBookId(bookId: string): string {
-  const upper = (bookId || '').toUpperCase();
-  return BOOK_ID_MAP[upper] || upper;
+  const upper = (bookId || '').toUpperCase().trim();
+  return BOOK_ID_MAP[upper] || bookId;
 }
 
 function buildBookIdConditions(verses: any[], searchVersion: string) {
