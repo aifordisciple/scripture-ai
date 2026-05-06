@@ -22,7 +22,7 @@ JSON 格式：
 要求：
 - summary 要有温度，像一位理解你的牧者在说话
 - 推荐 15-30 节最相关的经文
-- bookId 必须是标准英文缩写（如：Gen, Exo, Lev, Num, Deu, Jos, Jdg, Rut, 1Sa, 2Sa, 1Ki, 2Ki, 1Ch, 2Ch, Ezr, Neh, Est, Job, Psa, Pro, Ecc, Sgs, Isa, Jer, Lam, Eze, Dan, Hos, Joe, Amo, Oba, Jon, Mic, Nah, Hab, Zep, Hag, Zec, Mal, Mat, Mar, Luk, Joh, Act, Rom, 1Co, 2Co, Gal, Eph, Php, Col, 1Th, 2Th, 1Ti, 2Ti, Tit, Phm, Heb, Jas, 1Pe, 2Pe, 1Jo, 2Jo, 3Jo, Jud, Rev）
+- bookId 必须是标准英文缩写（如：Gen, Exo, Lev, Num, Deu, Jos, Jdg, Rut, 1Sa, 2Sa, 1Ki, 2Ki, 1Ch, 2Ch, Ezr, Neh, Est, Job, Psa, Pro, Ecc, Sng, Isa, Jer, Lam, Eze, Dan, Hos, Jol, Amo, Oba, Jon, Mic, Nah, Hab, Zep, Hag, Zec, Mal, Mat, Mrk, Luk, Jhn, Act, Rom, 1Co, 2Co, Gal, Eph, Php, Col, 1Th, 2Th, 1Ti, 2Ti, Tit, Phm, Heb, Jas, 1Pe, 2Pe, 1Jn, 2Jn, 3Jn, Jud, Rev）
 - 章和节必须是真实存在的数字`;
 
 const AI_SEARCH_PROMPT_EN = `You are a wise biblical scholar. Based on the user's query, recommend the most relevant real Bible verses and provide deep spiritual insights.
@@ -41,7 +41,7 @@ JSON format:
 Requirements:
 - summary should be warm, like a caring pastor speaking to you
 - Recommend 15-30 most relevant verses
-- bookId must be the standard English abbreviation (e.g., Gen, Exo, Lev, Num, Deu, Jos, Jdg, Rut, 1Sa, 2Sa, 1Ki, 2Ki, 1Ch, 2Ch, Ezr, Neh, Est, Job, Psa, Pro, Ecc, Sgs, Isa, Jer, Lam, Eze, Dan, Hos, Joe, Amo, Oba, Jon, Mic, Nah, Hab, Zep, Hag, Zec, Mal, Mat, Mar, Luk, Joh, Act, Rom, 1Co, 2Co, Gal, Eph, Php, Col, 1Th, 2Th, 1Ti, 2Ti, Tit, Phm, Heb, Jas, 1Pe, 2Pe, 1Jo, 2Jo, 3Jo, Jud, Rev)
+- bookId must be the standard English abbreviation (e.g., Gen, Exo, Lev, Num, Deu, Jos, Jdg, Rut, 1Sa, 2Sa, 1Ki, 2Ki, 1Ch, 2Ch, Ezr, Neh, Est, Job, Psa, Pro, Ecc, Sng, Isa, Jer, Lam, Eze, Dan, Hos, Jol, Amo, Oba, Jon, Mic, Nah, Hab, Zep, Hag, Zec, Mal, Mat, Mrk, Luk, Jhn, Act, Rom, 1Co, 2Co, Gal, Eph, Php, Col, 1Th, 2Th, 1Ti, 2Ti, Tit, Phm, Heb, Jas, 1Pe, 2Pe, 1Jn, 2Jn, 3Jn, Jud, Rev)
 - Chapter and verse must be real numbers`;
 
 function cleanAIResponse(text: string): string {
@@ -53,10 +53,22 @@ function cleanAIResponse(text: string): string {
   return jsonString;
 }
 
+// Book ID mapping: common AI model abbreviations -> our database abbreviations
+const BOOK_ID_MAP: Record<string, string> = {
+  '1JO': '1Jn', '2JO': '2Jn', '3JO': '3Jn',
+  'JOE': 'Jol', 'MAR': 'Mrk', 'JOH': 'Jhn',
+  'SGS': 'Sng', 'RUT': 'Rut',
+};
+
+function normalizeBookId(bookId: string): string {
+  const upper = (bookId || '').toUpperCase();
+  return BOOK_ID_MAP[upper] || upper;
+}
+
 function buildBookIdConditions(verses: any[], searchVersion: string) {
   return verses
     .map((v: any) => ({
-      bookId: (v.bookId || '').toUpperCase(),
+      bookId: normalizeBookId(v.bookId),
       chapter: v.chapter,
       verse: v.verse,
       version: searchVersion,
@@ -67,7 +79,7 @@ function buildBookIdConditions(verses: any[], searchVersion: string) {
 function matchByBookId(verses: any[], results: any[]) {
   return verses
     .map((v: any) =>
-      results.find((r: any) => r.bookId === (v.bookId || '').toUpperCase() && r.chapter === v.chapter && r.verse === v.verse)
+      results.find((r: any) => r.bookId === normalizeBookId(v.bookId) && r.chapter === v.chapter && r.verse === v.verse)
     )
     .filter(Boolean);
 }
@@ -119,13 +131,20 @@ export async function POST(req: Request) {
       const verses = parsed.verses || [];
       const aiSummary = parsed.summary || '';
 
-      if (!Array.isArray(verses) || verses.length === 0) return NextResponse.json({ data: [] });
+      if (!Array.isArray(verses) || verses.length === 0) {
+        console.log('[Search] AI returned no verses. Parsed:', JSON.stringify(parsed).slice(0, 500));
+        return NextResponse.json({ data: [], aiSummary });
+      }
+
+      console.log('[Search] AI returned verses:', verses.slice(0, 5).map((v: any) => `${v.bookId} ${v.chapter}:${v.verse}`).join(', '), `... total ${verses.length}`);
 
       const orConditions = buildBookIdConditions(verses, searchVersion);
       const results = orConditions.length > 0
         ? await prisma.bibleVerse.findMany({ where: { OR: orConditions } })
         : [];
       const sortedResults = matchByBookId(verses, results);
+
+      console.log('[Search] DB found:', results.length, 'matched:', sortedResults.length);
 
       return NextResponse.json({ data: sortedResults, aiSummary });
 
