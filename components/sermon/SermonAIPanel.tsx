@@ -10,6 +10,11 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useSermonEditor } from './SermonEditorContext'
 
+/** 过滤 AI 回复中的 <think>...</think> 标签及内容 */
+function stripThinkTags(content: string): string {
+  return content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim()
+}
+
 export function SermonAIPanel() {
   const { t } = useTranslation()
   const { isMd } = useBreakpoint()
@@ -111,14 +116,14 @@ export function SermonAIPanel() {
             }`}>
               <div className="whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                 {msg.role === 'assistant' ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripThinkTags(msg.content)}</ReactMarkdown>
                 ) : (
                   msg.content
                 )}
               </div>
               {msg.role === 'assistant' && (
                 <button
-                  onClick={() => handleInsertToEditor(msg.content)}
+                  onClick={() => handleInsertToEditor(stripThinkTags(msg.content))}
                   className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-primary hover:text-primary/80"
                 >
                   <ClipboardPaste className="w-2.5 h-2.5" />
