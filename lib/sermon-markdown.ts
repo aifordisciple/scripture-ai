@@ -3,6 +3,8 @@
  * 将讲道 Markdown 内容解析为结构化数据，支持经文引用块渲染
  */
 
+import { tiptapToMarkdown } from '@/lib/tiptap-to-markdown'
+
 /** 经文引用块解析结果 */
 export interface ParsedVerseRef {
   reference: string
@@ -14,6 +16,32 @@ export interface ParsedSection {
   level: number
   title: string
   emoji?: string
+}
+
+/**
+ * 检查内容是否为 Tiptap JSON 格式（旧版讲章数据）
+ */
+export function isTiptapJson(content: string): boolean {
+  if (!content || !content.trim()) return false
+  try {
+    const parsed = JSON.parse(content)
+    return parsed.type === 'doc' && Array.isArray(parsed.content)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * 将 Tiptap JSON 转换为 Markdown（旧版讲章数据迁移）
+ */
+export function convertTiptapToMarkdown(content: string): string {
+  if (!isTiptapJson(content)) return content
+  try {
+    return tiptapToMarkdown(JSON.parse(content))
+  } catch {
+    console.error('[sermon-markdown] Failed to convert Tiptap JSON to Markdown')
+    return content
+  }
 }
 
 /**
