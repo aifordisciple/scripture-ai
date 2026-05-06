@@ -67,14 +67,14 @@ export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderP
             size="icon" 
             onClick={() => play(text)} 
             disabled={isLoading || !text}
-            className={cn("h-7 w-7 rounded-full dark:text-foreground/80", className)}
+            className={cn("h-9 w-9 rounded-full dark:text-foreground/80", className)}
         >
             {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             ) : isPlaying ? (
-                <Pause className="h-4 w-4 text-primary fill-current" />
+                <Pause className="h-5 w-5 text-primary fill-current" />
             ) : (
-                <Play className="h-4 w-4 fill-current" />
+                <Play className="h-5 w-5 fill-current" />
             )}
         </Button>
       );
@@ -90,7 +90,7 @@ export function HeaderPlayer({ player, text, className, mode = 'full' }: HeaderP
         size="icon" 
         onClick={() => play(text)} 
         disabled={isLoading || !text}
-        className="h-7 w-7 rounded-full hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 shrink-0"
+        className="h-8 w-8 rounded-full hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 shrink-0"
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
