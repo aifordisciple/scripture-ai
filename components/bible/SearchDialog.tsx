@@ -4,7 +4,7 @@
 import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Search, Sparkles, TextSearch } from "lucide-react";
+import { Search, Sparkles, TextSearch, Clock } from "lucide-react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
@@ -17,13 +17,14 @@ interface SearchDialogProps {
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<'exact' | 'ai'>('exact');
-  const { addTab } = useBibleStore();
+  const { addTab, addSearchHistory, searchHistory } = useBibleStore();
   const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSearch = () => {
     if (!query.trim()) return;
 
+    addSearchHistory(query.trim(), mode);
     addTab({
       type: 'search',
       query: query,
@@ -102,6 +103,37 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             {mode === 'exact' && t('search.exactHint')}
             {mode === 'ai' && t('search.aiHint')}
           </div>
+
+          {/* 最近搜索 */}
+          {searchHistory.length > 0 && (
+            <div>
+              <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {t('bible.recentSearchesLabel')}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {searchHistory.slice(0, 8).map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => { setQuery(item.query); setMode(item.searchMode); }}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm",
+                      "bg-secondary/80 text-secondary-foreground",
+                      "hover:bg-primary/10 hover:text-primary",
+                      "transition-colors active:scale-95"
+                    )}
+                  >
+                    {item.searchMode === 'ai' ? (
+                      <Sparkles className="w-3 h-3" />
+                    ) : (
+                      <TextSearch className="w-3 h-3" />
+                    )}
+                    <span className="truncate max-w-[120px]">{item.query}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

@@ -22,10 +22,11 @@ const ReadingHistoryTab = dynamic(() => import('@/components/bible/ReadingHistor
 const ThemeGraphTab = dynamic(() => import('@/components/bible/ThemeGraphTab').then(mod => ({ default: mod.ThemeGraphTab })), { ssr: false })
 // 讲章Tab
 const SermonTab = dynamic(() => import('@/components/sermon/SermonTab').then(m => ({ default: m.SermonTab })), { ssr: false })
+const SearchHistoryTab = dynamic(() => import('@/components/bible/SearchHistoryTab').then(mod => ({ default: mod.SearchHistoryTab })), { ssr: false })
 
 export interface Tab {
   id: string
-  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'cross-ref' | 'group' | 'atlas' | 'insights' | 'plan' | 'bookmarks' | 'reading-history' | 'theme-graph' | 'sermon'
+  type: 'read' | 'search' | 'dashboard' | 'highlights' | 'notes' | 'cross-ref' | 'group' | 'atlas' | 'insights' | 'plan' | 'bookmarks' | 'reading-history' | 'theme-graph' | 'sermon' | 'search-history'
   book?: string
   chapter?: number | string
   query?: string
@@ -113,6 +114,7 @@ const TabContent = memo(function TabContent({
 
       {/* 讲章Tab */}
       {tab.type === 'sermon' && <SermonTab key={tab.id} />}
+{tab.type === 'search-history' && <SearchHistoryTab key={tab.id} />}
     </div>
   )
 })

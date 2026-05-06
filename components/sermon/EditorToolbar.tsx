@@ -1,133 +1,104 @@
 'use client'
 
-import React, { useCallback } from 'react'
-import {
-  Undo2,
-  Redo2,
-  Bold,
-  Italic,
-  Strikethrough,
-  Heading1,
-  Heading2,
-  Heading3,
-  List,
-  ListOrdered,
-  Quote,
-  Minus,
-  BookOpen,
-  LayoutTemplate,
-} from 'lucide-react'
-import { toggleStrongCommand, toggleEmphasisCommand, wrapInHeadingCommand, wrapInBlockquoteCommand, wrapInBulletListCommand, wrapInOrderedListCommand, insertHrCommand } from '@milkdown/preset-commonmark'
-import { toggleStrikethroughCommand } from '@milkdown/preset-gfm'
-import { undo, redo } from '@milkdown/prose/history'
-import { commandsCtx } from '@milkdown/core'
+import React, { useCallback, useState, useRef } from 'react'
+import { type VditorEditorHandle } from './VditorEditor'
+import { generateSectionMarkdown, SECTION_TYPES, SECTION_LABELS, type SectionType } from '@/lib/sermon-vditor'
+import { BookOpen, LayoutTemplate, Sparkles, Loader2 } from 'lucide-react'
 import { useBreakpoint } from '@/hooks/use-media-query'
-import { useSermonEditor } from './SermonEditorContext'
-import { insertSectionBlockCommand } from './extensions/sectionBlock'
-import VersePickerPopover from './VersePickerPopover'
 
 interface EditorToolbarProps {
-  isDark: boolean
+  editorRef: React.RefObject<VditorEditorHandle | null>
+  onOpenVersePicker: () => void
+  onAIAssist: (action: string) => void
+  isGenerating: boolean
+  onInsertVerse: (verseMarkdown: string) => void
 }
 
-export default function EditorToolbar({ isDark }: EditorToolbarProps) {
+export default function EditorToolbar({
+  editorRef,
+  onOpenVersePicker,
+  onAIAssist,
+  isGenerating,
+}: EditorToolbarProps) {
   const { isMd } = useBreakpoint()
-  const { getEditor } = useSermonEditor()
+  const [showSectionMenu, setShowSectionMenu] = useState(false)
+  const sectionMenuRef = useRef<HTMLDivElement>(null)
+
   const iconSize = isMd ? 16 : 20
 
-  const callCommand = useCallback((commandKey: any, payload?: any) => {
-    const editor = getEditor()
-    if (!editor) return
-    editor.action((ctx) => {
-      const commands = ctx.get(commandsCtx)
-      commands.call(commandKey, payload)
-      const view = ctx.get('editorView' as any) as any
-      view.focus()
-    })
-  }, [getEditor])
+  const handleInsertSection = useCallback((sectionType: SectionType) => {
+    const label = SECTION_LABELS[sectionType]
+    const md = generateSectionMarkdown(sectionType, label)
+    editorRef.current?.insertValue(md)
+    setShowSectionMenu(false)
+  }, [editorRef])
 
-  const handleUndo = useCallback(() => {
-    const editor = getEditor()
-    if (!editor) return
-    editor.action((ctx) => {
-      const view = ctx.get('editorView' as any) as any
-      undo(view.state, view.dispatch)
-      view.focus()
-    })
-  }, [getEditor])
+  const handleAIContinue = useCallback(() => {
+    onAIAssist('continue')
+  }, [onAIAssist])
 
-  const handleRedo = useCallback(() => {
-    const editor = getEditor()
-    if (!editor) return
-    editor.action((ctx) => {
-      const view = ctx.get('editorView' as any) as any
-      redo(view.state, view.dispatch)
-      view.focus()
-    })
-  }, [getEditor])
-
-  const handleInsertSection = useCallback(() => {
-    callCommand(insertSectionBlockCommand.key, {
-      sectionType: 'introduction',
-      text: '段落内容',
-    })
-  }, [callCommand])
-
-  const btnStyle = {
-    color: isDark ? '#d1d5db' : '#4b5563',
-  }
-
-  const separator = <div className="w-px h-5 mx-1 flex-shrink-0" style={{ backgroundColor: isDark ? '#374151' : '#e5e7eb' }} />
-
-  const buttons = [
-    { icon: <Undo2 size={iconSize} />, label: '撤回', action: handleUndo },
-    { icon: <Redo2 size={iconSize} />, label: '重做', action: handleRedo, sep: true },
-    { icon: <Bold size={iconSize} />, label: '加粗', action: () => callCommand(toggleStrongCommand.key) },
-    { icon: <Italic size={iconSize} />, label: '斜体', action: () => callCommand(toggleEmphasisCommand.key) },
-    { icon: <Strikethrough size={iconSize} />, label: '删除线', action: () => callCommand(toggleStrikethroughCommand.key), sep: true },
-    { icon: <Heading1 size={iconSize} />, label: '标题1', action: () => callCommand(wrapInHeadingCommand.key, 1) },
-    { icon: <Heading2 size={iconSize} />, label: '标题2', action: () => callCommand(wrapInHeadingCommand.key, 2) },
-    { icon: <Heading3 size={iconSize} />, label: '标题3', action: () => callCommand(wrapInHeadingCommand.key, 3), sep: true },
-    { icon: <List size={iconSize} />, label: '无序列表', action: () => callCommand(wrapInBulletListCommand.key) },
-    { icon: <ListOrdered size={iconSize} />, label: '有序列表', action: () => callCommand(wrapInOrderedListCommand.key) },
-    { icon: <Quote size={iconSize} />, label: '引用', action: () => callCommand(wrapInBlockquoteCommand.key) },
-    { icon: <Minus size={iconSize} />, label: '分割线', action: () => callCommand(insertHrCommand.key), sep: true },
-    { icon: <LayoutTemplate size={iconSize} />, label: '段落', action: handleInsertSection },
-  ]
+  const handleAIPolish = useCallback(() => {
+    onAIAssist('polish')
+  }, [onAIAssist])
 
   return (
-    <div
-      className={`flex items-center gap-0.5 px-2 py-1 border-b flex-shrink-0 ${!isMd ? 'overflow-x-auto no-scrollbar' : ''}`}
-      style={{
-        backgroundColor: isDark ? '#1f2937' : '#ffffff',
-        borderColor: isDark ? '#374151' : '#e5e7eb',
-      }}
-    >
-      {/* Verse picker button */}
-      <VersePickerPopover isDark={isDark}>
-        <button
-          title="经文"
-          className={`${isMd ? 'p-1.5' : 'p-2.5'} rounded hover:bg-blue-500/10 transition-colors active:scale-95 flex-shrink-0`}
-          style={btnStyle}
-        >
-          <BookOpen size={iconSize} />
-        </button>
-      </VersePickerPopover>
-      {separator}
+    <div className="flex items-center gap-0.5 px-2 py-1 border-b border-border dark:border-white/[0.06] flex-shrink-0 bg-white dark:bg-[#1f2937]">
+      {/* Verse picker */}
+      <button
+        onClick={onOpenVersePicker}
+        title="插入经文"
+        className={`${isMd ? 'p-1.5' : 'p-2.5'} rounded hover:bg-blue-500/10 transition-colors active:scale-95 flex-shrink-0 text-gray-600 dark:text-gray-300`}
+      >
+        <BookOpen size={iconSize} />
+      </button>
 
-      {buttons.map((btn, i) => (
-        <React.Fragment key={i}>
-          {btn.sep && separator}
-          <button
-            onClick={btn.action}
-            title={btn.label}
-            className={`${isMd ? 'p-1.5' : 'p-2.5'} rounded hover:bg-blue-500/10 transition-colors active:scale-95 flex-shrink-0`}
-            style={btnStyle}
-          >
-            {btn.icon}
-          </button>
-        </React.Fragment>
-      ))}
+      <div className="w-px h-5 mx-1 bg-gray-200 dark:bg-gray-700" />
+
+      {/* Section heading */}
+      <div className="relative" ref={sectionMenuRef}>
+        <button
+          onClick={() => setShowSectionMenu(prev => !prev)}
+          title="插入段落标题"
+          className={`${isMd ? 'p-1.5' : 'p-2.5'} rounded hover:bg-blue-500/10 transition-colors active:scale-95 flex-shrink-0 text-gray-600 dark:text-gray-300`}
+        >
+          <LayoutTemplate size={iconSize} />
+        </button>
+
+        {showSectionMenu && (
+          <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 py-1 min-w-[120px]">
+            {SECTION_TYPES.map((type) => (
+              <button
+                key={type}
+                onClick={() => handleInsertSection(type)}
+                className="w-full px-3 py-1.5 text-xs text-left hover:bg-blue-500/10 transition-colors text-gray-700 dark:text-gray-300"
+              >
+                {SECTION_LABELS[type]}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="w-px h-5 mx-1 bg-gray-200 dark:bg-gray-700" />
+
+      {/* AI assist */}
+      <button
+        onClick={handleAIContinue}
+        disabled={isGenerating}
+        title="AI 续写"
+        className={`${isMd ? 'p-1.5' : 'p-2.5'} rounded hover:bg-blue-500/10 transition-colors active:scale-95 flex-shrink-0 text-gray-600 dark:text-gray-300 disabled:opacity-50`}
+      >
+        {isGenerating ? <Loader2 size={iconSize} className="animate-spin" /> : <Sparkles size={iconSize} />}
+      </button>
+
+      <button
+        onClick={handleAIPolish}
+        disabled={isGenerating}
+        title="AI 润色"
+        className={`${isMd ? 'p-1.5' : 'p-2.5'} rounded hover:bg-blue-500/10 transition-colors active:scale-95 flex-shrink-0 text-gray-600 dark:text-gray-300 disabled:opacity-50`}
+      >
+        <Sparkles size={iconSize} className="text-purple-500" />
+      </button>
     </div>
   )
 }

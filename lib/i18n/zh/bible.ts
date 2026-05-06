@@ -262,6 +262,16 @@ export const bible = {
     heatmapLess: '少',
     heatmapMore: '多',
 
+    // SearchHistoryTab
+    searchHistoryTitle: '搜索历史',
+    searchHistoryCount: '共 {count} 条搜索记录',
+    clearSearchHistory: '清除搜索历史',
+    filterSearchHistory: '搜索搜索记录...',
+    noSearchHistory: '暂无搜索历史',
+    noSearchHistoryHint: '进行搜索后，搜索记录将自动保存',
+    confirmClearSearchHistory: '确定要清除所有搜索历史吗？此操作无法撤销。',
+    recentSearchesLabel: '最近搜索',
+
     // BookGrid
     noMatchingBooks: '未找到匹配的书卷',
   },

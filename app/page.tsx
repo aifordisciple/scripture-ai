@@ -97,7 +97,7 @@ const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) 
             )}
           >
             <span className="max-w-[120px] truncate select-none">
-              {tab.type === 'read' ? `${getBookDisplayName(tab.book, locale)} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? `📊 ${t('tabs.dashboard')}` : tab.type === 'highlights' ? `🖍️ ${t('tabs.highlights')}` : tab.type === 'notes' ? `📝 ${t('tabs.notes')}` : tab.type === 'cross-ref' ? `🔗 ${t('tabs.crossref')}` : tab.type === 'group' ? `👥 ${t('tabs.group')}` : tab.type === 'atlas' ? `🗺️ ${t('tabs.atlas')}` : tab.type === 'insights' ? `⭐ ${t('tabs.insights')}` : tab.type === 'sermon' ? `📝 ${t('sermon.title')}` : tab.type === 'theme-graph' ? `🕸️ ${t('tabs.theme')}` : `📅 ${t('tabs.plan')}`}
+              {tab.type === 'read' ? `${getBookDisplayName(tab.book, locale)} ${tab.chapter}` : tab.type === 'search' ? `${tab.searchMode === 'ai' ? '✨' : '🔍'} ${tab.query}` : tab.type === 'dashboard' ? `📊 ${t('tabs.dashboard')}` : tab.type === 'highlights' ? `🖍️ ${t('tabs.highlights')}` : tab.type === 'notes' ? `📝 ${t('tabs.notes')}` : tab.type === 'cross-ref' ? `🔗 ${t('tabs.crossref')}` : tab.type === 'group' ? `👥 ${t('tabs.group')}` : tab.type === 'atlas' ? `🗺️ ${t('tabs.atlas')}` : tab.type === 'insights' ? `⭐ ${t('tabs.insights')}` : tab.type === 'sermon' ? `📝 ${t('sermon.title')}` : tab.type === 'theme-graph' ? `🕸️ ${t('tabs.theme')}` : tab.type === 'search-history' ? `🔍 ${t('tabs.searchHistory')}` : `📅 ${t('tabs.plan')}`}
             </span>
             <X
               className={cn(
@@ -549,7 +549,7 @@ export default function Home() {
                 <span className="truncate">
                   {activeTab.type === 'read' ? (
                     <>{activeTab.book} {activeTab.chapter}</>
-                  ) : activeTab.type === 'search' ? t('tabs.search') : activeTab.type === 'dashboard' ? t('tabs.dashboard') : activeTab.type === 'highlights' ? t('tabs.highlights') : activeTab.type === 'notes' ? t('tabs.notes') : activeTab.type === 'cross-ref' ? t('tabs.crossref') : activeTab.type === 'group' ? t('tabs.group') : activeTab.type === 'atlas' ? t('tabs.atlas') : activeTab.type === 'insights' ? t('tabs.insights') : t('tabs.plan')}
+                  ) : activeTab.type === 'search' ? t('tabs.search') : activeTab.type === 'dashboard' ? t('tabs.dashboard') : activeTab.type === 'highlights' ? t('tabs.highlights') : activeTab.type === 'notes' ? t('tabs.notes') : activeTab.type === 'cross-ref' ? t('tabs.crossref') : activeTab.type === 'group' ? t('tabs.group') : activeTab.type === 'atlas' ? t('tabs.atlas') : activeTab.type === 'insights' ? t('tabs.insights') : activeTab.type === 'search-history' ? `🔍 ${t('tabs.searchHistory')}` : t('tabs.plan')}
                 </span>
               </button>
             </div>

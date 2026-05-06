@@ -14,12 +14,6 @@
   "dependencies": {
     "@ai-sdk/openai": "^0.0.66",
     "@ducanh2912/next-pwa": "^10.2.9",
-    "@milkdown/core": "^7.20.0",
-    "@milkdown/kit": "^7.20.0",
-    "@milkdown/plugin-listener": "^7.20.0",
-    "@milkdown/prose": "^7.20.0",
-    "@milkdown/react": "^7.20.0",
-    "@milkdown/transformer": "^7.20.0",
     "@prisma/client": "^5.22.0",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -60,6 +54,7 @@
     "simple-mind-map": "^0.14.0-fix.2",
     "tailwind-merge": "^3.5.0",
     "tailwindcss-animate": "^1.0.7",
+    "vditor": "^3.11.2",
     "zod": "^3.25.76",
     "zustand": "^5.0.12"
   },

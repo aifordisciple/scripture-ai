@@ -4,18 +4,10 @@ import { useEffect, useCallback, useRef, useState } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { useBreakpoint } from '@/hooks/use-media-query'
+import VditorEditor, { type VditorEditorHandle } from './VditorEditor'
+import EditorToolbar from './EditorToolbar'
 import { SermonEditorHeader } from './SermonEditorHeader'
-import MilkdownEditor from './MilkdownEditor'
-import { isTiptapJson } from '@/lib/sermon-markdown'
-import { tiptapToMarkdown } from '@/lib/tiptap-to-markdown'
-import { DEFAULT_FONT_SIZE, DEFAULT_LINE_HEIGHT } from './extensions/milkdownTheme'
-
-/** Convert content to Markdown: if it's Tiptap JSON, convert; otherwise return as-is */
-function ensureMarkdown(raw: string): string {
-  if (!raw || raw.trim() === '' || raw.trim() === '{}') return ''
-  if (isTiptapJson(raw)) return tiptapToMarkdown(raw)
-  return raw
-}
+import { useSermonEditor } from './SermonEditorContext'
 
 export function SermonEditor() {
   const { t } = useTranslation()
@@ -29,31 +21,33 @@ export function SermonEditor() {
     isDarkMode,
     sermonAutoSave,
   } = useBibleStore()
+  const { registerEditorHandle } = useSermonEditor()
 
+  const editorRef = useRef<VditorEditorHandle>(null)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savingRef = useRef(false)
   const sermonsRef = useRef(sermons)
   sermonsRef.current = sermons
   const currentSermonRef = useRef(currentSermon)
   currentSermonRef.current = currentSermon
+  const isEditorSourceRef = useRef(false)
 
   const [markdownContent, setMarkdownContent] = useState('')
-  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE)
-  const [lineHeight, setLineHeight] = useState(DEFAULT_LINE_HEIGHT)
-  // Track whether the last content change was from the editor itself
-  // to avoid syncing external changes back into the editor (loop prevention)
-  const isEditorSourceRef = useRef(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  // Register editor handle with context so SermonAIPanel/SermonVersePanel can insert content
+  useEffect(() => {
+    registerEditorHandle(editorRef.current)
+  })
 
   // Sync content when switching sermons or when content changes externally
   useEffect(() => {
     if (currentSermon) {
-      // If the change came from the editor itself, skip syncing
       if (isEditorSourceRef.current) {
         isEditorSourceRef.current = false
         return
       }
-      const md = ensureMarkdown(currentSermon.content)
-      // Only update if content actually differs (avoid unnecessary re-renders)
+      const md = currentSermon.content || ''
       if (md !== markdownContent) {
         setMarkdownContent(md)
       }
@@ -62,7 +56,7 @@ export function SermonEditor() {
     }
   }, [currentSermon?.id, currentSermon?.content])
 
-  // Auto-save - uses refs to avoid stale closure; guarded against concurrent saves
+  // Auto-save
   const autoSave = useCallback(async (content: string) => {
     if (savingRef.current) return
     const sermon = currentSermonRef.current
@@ -96,7 +90,7 @@ export function SermonEditor() {
     }
   }, [setIsSermonSaving, setSermons])
 
-  // Handle content change from Milkdown
+  // Handle content change from Vditor
   const handleContentChange = useCallback((content: string) => {
     setMarkdownContent(content)
     isEditorSourceRef.current = true
@@ -104,7 +98,6 @@ export function SermonEditor() {
     if (sermon && sermon.content !== content) {
       const updated = { ...sermon, content }
       setCurrentSermon(updated)
-      // Sync content to sermons list so switching sermons doesn't lose edits
       setSermons(sermonsRef.current.map(s => s.id === sermon.id ? updated : s))
     }
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
@@ -122,6 +115,38 @@ export function SermonEditor() {
     autoSave(markdownContent)
   }, [autoSave, markdownContent])
 
+  // AI assist
+  const handleAIAssist = useCallback(async (action: string) => {
+    const md = editorRef.current?.getValue() || markdownContent
+    if (!md && action !== 'generate') return
+    setIsGenerating(true)
+    try {
+      const res = await fetch('/api/chat/sermon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, content: md, title: currentSermon?.title }),
+      })
+      const data = await res.json()
+      if (data.content) {
+        if (action === 'continue') {
+          editorRef.current?.insertValue(data.content)
+        } else {
+          editorRef.current?.setValue(data.content)
+        }
+      }
+    } catch (err) {
+      console.error('[SermonEditor] AI assist failed:', err)
+    } finally {
+      setIsGenerating(false)
+    }
+  }, [markdownContent, currentSermon?.title])
+
+  // Verse picker trigger
+  const handleOpenVersePicker = useCallback(() => {
+    const btn = document.querySelector('[data-verse-picker-trigger]') as HTMLButtonElement
+    btn?.click()
+  }, [])
+
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -135,55 +160,32 @@ export function SermonEditor() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      {/* Header */}
+      {/* Header with title editing and status */}
       <SermonEditorHeader />
 
-      {/* Milkdown Editor */}
+      <EditorToolbar
+        editorRef={editorRef}
+        onOpenVersePicker={handleOpenVersePicker}
+        onAIAssist={handleAIAssist}
+        isGenerating={isGenerating}
+        onInsertVerse={(verseMarkdown: string) => editorRef.current?.insertValue(verseMarkdown)}
+      />
       <div className="flex-1 min-h-0">
-        <MilkdownEditor
+        <VditorEditor
+          ref={editorRef}
           content={markdownContent}
           onChange={handleContentChange}
           isDark={isDarkMode}
           onSave={handleSave}
-          fontSize={fontSize}
-          lineHeight={lineHeight}
         />
       </div>
 
-      {/* Status Bar — Apple fine-print */}
+      {/* Status Bar */}
       <div className={`border-t border-border dark:border-white/[0.06] flex items-center gap-4 text-[12px] text-muted-foreground dark:text-muted-foreground ${isMd ? 'px-5 py-1.5' : 'px-3 py-2 pb-safe'}`}
         style={{ fontFamily: "'SF Pro Text', system-ui, -apple-system, sans-serif", letterSpacing: '-0.12px' }}
       >
         <span>{charCount}{t('sermon.editorWords')}</span>
         <span>~{Math.max(1, Math.round(charCount / 300))}{t('sermon.editorMinutes')}</span>
-        <div className="flex-1" />
-        <button
-          onClick={() => setFontSize(s => Math.max(12, s - 1))}
-          className={`${isMd ? 'px-1.5 py-0.5' : 'px-3 py-2 min-h-[44px] min-w-[44px]'} rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95`}
-          title="减小字号"
-        >A-</button>
-        <span>{fontSize}px</span>
-        <button
-          onClick={() => setFontSize(s => Math.min(24, s + 1))}
-          className={`${isMd ? 'px-1.5 py-0.5' : 'px-3 py-2 min-h-[44px] min-w-[44px]'} rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95`}
-          title="增大字号"
-        >A+</button>
-        {isMd && (
-          <>
-            <span className="mx-1 text-border dark:text-foreground/[0.08]">|</span>
-            <button
-              onClick={() => setLineHeight(h => Math.round(Math.max(1.2, h - 0.2) * 10) / 10)}
-              className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
-              title="减小行距"
-            >≡-</button>
-            <span>{lineHeight.toFixed(1)}</span>
-            <button
-              onClick={() => setLineHeight(h => Math.round(Math.min(3.5, h + 0.2) * 10) / 10)}
-              className="px-1.5 py-0.5 rounded hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors active:scale-95"
-              title="增大行距"
-            >≡+</button>
-          </>
-        )}
       </div>
     </div>
   )

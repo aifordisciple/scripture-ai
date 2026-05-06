@@ -5,7 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Settings, Loader2, Calendar, BrainCircuit, Flame, Shield, Users, BarChart3, Bell, MessageSquare, BookOpen, ChevronRight, Highlighter, StickyNote, Star } from "lucide-react";
+import { UserCircle, LogOut, Settings, Loader2, Calendar, BrainCircuit, Flame, Shield, Users, BarChart3, Bell, MessageSquare, BookOpen, ChevronRight, Highlighter, StickyNote, Star, Search } from "lucide-react";
 import { ApiSettingsDialog } from "@/components/settings/ApiSettingsDialog";
 import { FeedbackDialog } from "@/components/feedback/FeedbackDialog";
 import { NotificationDialog } from "@/components/common/NotificationDialog";
@@ -128,6 +128,7 @@ export function UserMenu() {
     { key: 'notes', icon: <StickyNote className="w-4 h-4 text-primary" />, label: t('auth.myNotes') },
     { key: 'insights', icon: <Star className="w-4 h-4 text-primary" />, label: t('auth.myFavorites') },
     { key: 'sermon', icon: <BookOpen className="w-4 h-4 text-primary" />, label: t('auth.mySermons') },
+    { key: 'search-history', icon: <Search className="w-4 h-4 text-primary" />, label: t('auth.searchHistory') },
   ];
 
   return (

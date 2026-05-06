@@ -1,83 +1,150 @@
 /**
- * Sermon Markdown utilities
- * Handles parsing and generating sermon-specific Markdown syntax
+ * 讲道 Markdown 解析工具
+ * 将讲道 Markdown 内容解析为结构化数据，支持经文引用块渲染
  */
 
-/** Verse block parsed from ```verse:Reference ... ``` */
-export interface VerseBlock {
-  type: 'verse';
-  reference: string;
-  text: string;
+/** 经文引用块解析结果 */
+export interface ParsedVerseRef {
+  reference: string
+  text: string
 }
 
-/** Section block parsed from ```section:type ... ``` */
-export interface SectionBlock {
-  type: 'section';
-  sectionType: string;
-  content: string;
+/** 段落标题解析结果 */
+export interface ParsedSection {
+  level: number
+  title: string
+  emoji?: string
 }
 
-export type SermonBlock = VerseBlock | SectionBlock;
+/**
+ * 从 Markdown 中解析所有经文引用块
+ * 匹配格式：> 📖 **书卷 章:节**
+ */
+export function parseVerseRefs(markdown: string): ParsedVerseRef[] {
+  const results: ParsedVerseRef[] = []
+  const lines = markdown.split('\n')
+  let i = 0
 
-/** Section types for sermon sections */
-export const SECTION_TYPES = [
-  'introduction',
-  'main_point',
-  'sub_point',
-  'illustration',
-  'application',
-  'conclusion',
-  'prayer',
-] as const;
+  while (i < lines.length) {
+    const line = lines[i]
+    const headerMatch = line.match(/^>\s*📖\s*\*\*(.+?)\*\*\s*$/)
+    if (headerMatch) {
+      const reference = headerMatch[1]
+      const textLines: string[] = []
+      i++
 
-export type SectionType = (typeof SECTION_TYPES)[number];
+      // Skip empty quote line (> )
+      if (i < lines.length && lines[i].match(/^>\s*$/)) {
+        i++
+      }
 
-/** Generate a verse fenced block */
-export function generateVerseBlock(reference: string, text: string): string {
-  return `\`\`\`verse:${reference}\n${text}\n\`\`\``;
+      // Collect quote content
+      while (i < lines.length) {
+        const contentMatch = lines[i].match(/^>\s?(.*)$/)
+        if (contentMatch) {
+          textLines.push(contentMatch[1])
+          i++
+        } else {
+          break
+        }
+      }
+
+      results.push({ reference, text: textLines.join('\n') })
+    } else {
+      i++
+    }
+  }
+
+  return results
 }
 
-/** Generate a section fenced block */
-export function generateSectionBlock(sectionType: SectionType, content: string): string {
-  return `\`\`\`section:${sectionType}\n${content}\n\`\`\``;
+/**
+ * 从 Markdown 中解析段落标题
+ * 匹配格式：## 🎯 标题
+ */
+export function parseSections(markdown: string): ParsedSection[] {
+  const results: ParsedSection[] = []
+  const lines = markdown.split('\n')
+
+  for (const line of lines) {
+    const match = line.match(/^(#{1,6})\s+(?:(\p{Emoji_Presentation}|[\u{1F300}-\u{1F9FF}])\s*)?(.+)$/u)
+    if (match) {
+      results.push({
+        level: match[1].length,
+        title: match[3].trim(),
+        emoji: match[2],
+      })
+    }
+  }
+
+  return results
 }
 
-/** Parse a verse fenced block, returns null if not a verse block */
-export function parseVerseBlock(line: string): { reference: string } | null {
-  const match = line.match(/^```verse:(.+)$/);
-  if (!match) return null;
-  return { reference: match[1].trim() };
+/**
+ * 将讲道 Markdown 渲染为 HTML
+ * 经文引用块渲染为带样式的卡片
+ */
+export function renderSermonMarkdown(markdown: string): string {
+  const lines = markdown.split('\n')
+  const output: string[] = []
+  let i = 0
+
+  while (i < lines.length) {
+    const line = lines[i]
+
+    // Check for verse blockquote
+    const headerMatch = line.match(/^>\s*📖\s*\*\*(.+?)\*\*\s*$/)
+    if (headerMatch) {
+      const reference = headerMatch[1]
+      const textLines: string[] = []
+      i++
+
+      // Skip empty quote line
+      if (i < lines.length && lines[i].match(/^>\s*$/)) {
+        i++
+      }
+
+      // Collect content
+      while (i < lines.length) {
+        const contentMatch = lines[i].match(/^>\s?(.*)$/)
+        if (contentMatch) {
+          textLines.push(contentMatch[1])
+          i++
+        } else {
+          break
+        }
+      }
+
+      // Render as styled card
+      const verseText = textLines
+        .map(l => l.replace(/^(\d+)\s/, '<sup class="verse-num">$1</sup> '))
+        .join('<br/>')
+      output.push(
+        `<div class="verse-card">` +
+        `<div class="verse-ref">📖 <strong>${reference}</strong></div>` +
+        `<div class="verse-text">${verseText}</div>` +
+        `</div>`
+      )
+      continue
+    }
+
+    // Regular line - escape HTML and pass through
+    output.push(line)
+    i++
+  }
+
+  return output.join('\n')
 }
 
-/** Parse a section fenced block, returns null if not a section block */
-export function parseSectionBlock(line: string): { sectionType: string } | null {
-  const match = line.match(/^```section:(.+)$/);
-  if (!match) return null;
-  return { sectionType: match[1].trim() };
-}
-
-/** Generate excerpt from Markdown content (first ~200 chars of plain text) */
-export function generateExcerpt(markdown: string, maxLength: number = 200): string {
-  const plainText = markdown
-    .replace(/```[\s\S]*?```/g, '') // remove fenced blocks
-    .replace(/#{1,6}\s+/g, '')       // remove headings
-    .replace(/\*\*|__|_|\*|~~/g, '') // remove emphasis
-    .replace(/>\s+/g, '')             // remove blockquotes
-    .replace(/[-*+]\s+/g, '')         // remove list markers
-    .replace(/\d+\.\s+/g, '')         // remove ordered list markers
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links to text
-    .replace(/\n{2,}/g, ' ')          // double newlines to space
-    .replace(/\n/g, ' ')              // single newlines to space
-    .trim();
-
-  if (plainText.length <= maxLength) return plainText;
-  return plainText.slice(0, maxLength).replace(/\s+\S*$/, '') + '...';
-}
-
-/** Check if content is Tiptap JSON (legacy format from before CodeMirror migration) */
-export function isTiptapJson(content: string): boolean {
-  const trimmed = content.trimStart();
-  // Check for the standard Tiptap document root signature
-  // A simple '{' check is too broad and would match any JSON-like content
-  return trimmed.startsWith('{"type":"doc"') || trimmed.startsWith('{ "type": "doc"');
+/**
+ * 生成讲道大纲（目录）
+ * 从 Markdown 标题中提取
+ */
+export function generateOutline(markdown: string): Array<{ level: number; title: string; id: string }> {
+  const sections = parseSections(markdown)
+  return sections.map((s, idx) => ({
+    level: s.level,
+    title: s.title,
+    id: `section-${idx}`,
+  }))
 }

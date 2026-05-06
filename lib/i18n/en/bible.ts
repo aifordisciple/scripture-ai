@@ -262,6 +262,16 @@ export const bible = {
     heatmapLess: 'Less',
     heatmapMore: 'More',
 
+    // SearchHistoryTab
+    searchHistoryTitle: 'Search History',
+    searchHistoryCount: '{count} search records',
+    clearSearchHistory: 'Clear Search History',
+    filterSearchHistory: 'Filter search history...',
+    noSearchHistory: 'No search history yet',
+    noSearchHistoryHint: 'Search records will be saved automatically after searching',
+    confirmClearSearchHistory: 'Are you sure you want to clear all search history? This action cannot be undone.',
+    recentSearchesLabel: 'Recent Searches',
+
     // BookGrid
     noMatchingBooks: 'No matching books',
   },

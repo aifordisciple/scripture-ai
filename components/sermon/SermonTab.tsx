@@ -88,7 +88,7 @@ export function SermonTab() {
         style={{ fontFamily: "'SF Pro Display', 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif" }}
       >
         {isMd ? (
-          /* ── Desktop: 3-column layout ── */
+          /* Desktop: 3-column layout */
           <>
             <SermonSidebar />
             <div className={cn(
@@ -106,7 +106,7 @@ export function SermonTab() {
             </div>
           </>
         ) : (
-          /* ── Mobile: single-column view ── */
+          /* Mobile: single-column view */
           <>
             <div className="flex-1 flex flex-col min-h-0 pb-20">
               {sermonMobileView === 'list' ? (

@@ -2,14 +2,13 @@
 
 import React, { useState, useMemo, useCallback } from 'react'
 import { BIBLE_BOOKS, getBookDisplayName } from '@/lib/constants'
-import { generateVerseBlock } from '@/lib/sermon-markdown'
+import { generateVerseMarkdown } from '@/lib/sermon-vditor'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { BookOpen, X, Plus, ChevronLeft, Search, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useBreakpoint } from '@/hooks/use-media-query'
-import { useSermonEditor } from './SermonEditorContext'
 
 type VerseSelectorStep = 'book' | 'chapter' | 'verse'
 
@@ -23,15 +22,15 @@ interface SelectedRef {
 interface VersePickerPopoverProps {
   isDark: boolean
   children: React.ReactNode
+  onInsert?: (markdown: string) => void
 }
 
 const MAX_VERSE = 50
 
-export default function VersePickerPopover({ isDark, children }: VersePickerPopoverProps) {
+export default function VersePickerPopover({ isDark, children, onInsert }: VersePickerPopoverProps) {
   const { locale } = useBibleStore()
   const { t } = useTranslation()
   const { isMd } = useBreakpoint()
-  const { insertContent } = useSermonEditor()
 
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<VerseSelectorStep>('book')
@@ -96,7 +95,7 @@ export default function VersePickerPopover({ isDark, children }: VersePickerPopo
     return `${name} ${ref.chapter}:${ref.verseStart}${ref.verseEnd > ref.verseStart ? `-${ref.verseEnd}` : ''}`
   }, [locale])
 
-  /** Insert all selected verse refs into the editor via context */
+  /** Insert all selected verse refs as Markdown blockquotes */
   const handleInsert = useCallback(async () => {
     if (selectedRefs.length === 0) return
     setInserting(true)
@@ -115,17 +114,17 @@ export default function VersePickerPopover({ isDark, children }: VersePickerPopo
         })
         const verseText = filtered.map(v => `${v.verse} ${v.content}`).join('\n')
         const displayRef = formatRef(ref)
-        blocks.push(generateVerseBlock(displayRef, verseText || '...'))
+        blocks.push(generateVerseMarkdown(displayRef, verseText || '...'))
       }
       const combined = blocks.join('\n\n')
-      insertContent(combined)
+      onInsert?.(combined)
       setOpen(false)
     } catch (err) {
       console.error('[VersePickerPopover] Insert failed:', err)
     } finally {
       setInserting(false)
     }
-  }, [selectedRefs, formatRef, insertContent])
+  }, [selectedRefs, formatRef, onInsert])
 
   const bgColor = isDark ? '#1e293b' : '#ffffff'
   const borderColor = isDark ? '#334155' : '#e2e8f0'

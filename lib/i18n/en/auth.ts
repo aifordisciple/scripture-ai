@@ -25,6 +25,7 @@ export const auth = {
     notifications: 'Notifications',
     groupReading: 'Group Reading',
     mySermons: 'My Sermons',
+    searchHistory: 'Search History',
     feedbackManagement: 'Feedback Management',
     feedback: 'Feedback',
     logout: 'Log Out',

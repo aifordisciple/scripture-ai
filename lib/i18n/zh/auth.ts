@@ -25,6 +25,7 @@ export const auth = {
     notifications: '通知',
     groupReading: '小组读经',
     mySermons: '我的讲章',
+    searchHistory: '搜索历史',
     feedbackManagement: '反馈管理',
     feedback: '意见反馈',
     logout: '退出登录',

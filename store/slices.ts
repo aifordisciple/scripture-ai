@@ -1,6 +1,6 @@
 // store/slices.ts
 import { StateCreator } from 'zustand';
-import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, SessionStatus, SessionError, ReadingHistoryData, LocaleSlice, SermonSlice } from './types';
+import { StoreState, UISlice, ReaderSlice, AISlice, UserDataSlice, Tab, SyncSlice, AIQueueItem, GroupSlice, GroupPlanContext, ChatSession, AIStyleSettings, CustomPrompt, SavedInsight, QuickAction, AtlasSlice, DMSlice, OnboardingStatus, SessionStatus, SessionError, ReadingHistoryData, SearchHistoryData, LocaleSlice, SermonSlice } from './types';
 import { createLocaleSlice } from './slices/localeSlice';
 export { createLocaleSlice };
 import { createSermonSlice } from './slices/sermonSlice';
@@ -818,6 +818,28 @@ export const createUserDataSlice: StateCreator<StoreState, [], [], UserDataSlice
     if (chapter + 1 > maxAllowed) return null; // 已读完该书卷
     return { bookId, chapter: chapter + 1 };
   },
+
+  // 搜索历史系统
+  searchHistory: [],
+  addSearchHistory: (query, searchMode) => set((state) => {
+    const existingIndex = state.searchHistory.findIndex(
+      h => h.query === query && h.searchMode === searchMode
+    );
+    const id = `search-history-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const newEntry: SearchHistoryData = { id, query, searchMode, timestamp: Date.now() };
+    let newHistory: SearchHistoryData[];
+    if (existingIndex >= 0) {
+      // 去重：将已有记录移到顶部并更新时间戳
+      newHistory = [newEntry, ...state.searchHistory.filter((_, i) => i !== existingIndex)].slice(0, 100);
+    } else {
+      newHistory = [newEntry, ...state.searchHistory].slice(0, 100);
+    }
+    return { searchHistory: newHistory };
+  }),
+  removeSearchHistory: (id) => set((state) => ({
+    searchHistory: state.searchHistory.filter(h => h.id !== id)
+  })),
+  clearSearchHistory: () => set({ searchHistory: [] }),
 });
 
 export const createSyncSlice: StateCreator<StoreState, [], [], SyncSlice> = (set) => ({
