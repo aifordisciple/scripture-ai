@@ -17,7 +17,7 @@ export function SyncProvider() {
     lastSyncTime, setLastSyncTime,
     isSyncing, setIsSyncing,
     syncError, setSyncError,
-    customPlans, // [修复] 从 store 中解构 customPlans
+    customPlans,
   } = useBibleStore();
 
   const { addToast } = useToast();
@@ -29,14 +29,20 @@ export function SyncProvider() {
     if (session?.user && !isLoadedRef.current) {
       setIsSyncing(true);
       setSyncError(null);
-      
+
       fetch("/api/user/sync")
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            console.warn(`Sync fetch failed with status ${res.status}`);
+            return null;
+          }
+          return res.json();
+        })
         .then((data) => {
+          if (!data) return;
           setAllUserData(data);
           setLastSyncTime(Date.now());
           isLoadedRef.current = true;
-          console.log("User data synced from server");
           // 检查勋章解锁
           useBibleStore.getState().checkAndUnlockBadges();
         })
@@ -54,12 +60,11 @@ export function SyncProvider() {
   // 2. 手动同步函数（支持 merge/overwrite 模式）
   const syncToServer = useCallback(async () => {
     if (!session?.user) return;
-    
+
     setIsSyncing(true);
     setSyncError(null);
-    
+
     const activeTab = tabs.find(t => t.id === activeTabId);
-    // [修复] 避免传递 undefined，避免 parseInt 产生 NaN
     const currentBook = activeTab?.type === 'read' ? (activeTab.book || null) : null;
     const currentChapter = activeTab?.type === 'read' && activeTab.chapter ? parseInt(activeTab.chapter) : null;
 
@@ -76,7 +81,7 @@ export function SyncProvider() {
             showDualVersion,
             lastBook: currentBook,
             lastChapter: currentChapter,
-            customPlans, // [修复] 使用解构的 customPlans 变量
+            customPlans,
           },
           highlights: highlights.map(h => ({
             bookId: h.bookId,
@@ -103,13 +108,15 @@ export function SyncProvider() {
          }),
        });
 
-       if (!res.ok) throw new Error("Sync failed");
+       if (!res.ok) {
+         console.warn(`Sync save failed with status ${res.status}`);
+         return;
+       }
 
       const data = await res.json();
-      
+
       if (data.success) {
         setLastSyncTime(Date.now());
-        console.log(`Data synced to server (${syncMode} mode)`);
       }
     } catch (err) {
       console.error("Sync to server failed", err);
