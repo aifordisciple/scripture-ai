@@ -4,7 +4,7 @@ import React, { useCallback, useState, useRef } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { type VditorEditorHandle } from './VditorEditor'
 import { generateSectionMarkdown, SECTION_TYPES, SECTION_LABELS, type SectionType } from '@/lib/sermon-vditor'
-import { BookOpen, LayoutTemplate, Sparkles, Loader2 } from 'lucide-react'
+import { BookOpen, LayoutTemplate, Sparkles } from 'lucide-react'
 import { useBreakpoint } from '@/hooks/use-media-query'
 import VersePickerPopover from './VersePickerPopover'
 
@@ -32,14 +32,6 @@ export default function EditorToolbar({
     editorRef.current?.insertValue(md)
     setShowSectionMenu(false)
   }, [editorRef])
-
-  const handleAIContinue = useCallback(() => {
-    onAIAssist('continue')
-  }, [onAIAssist])
-
-  const handleAIPolish = useCallback(() => {
-    onAIAssist('polish')
-  }, [onAIAssist])
 
   const handleInsertVerse = useCallback((verseMarkdown: string) => {
     editorRef.current?.insertValue(verseMarkdown)
@@ -86,24 +78,24 @@ export default function EditorToolbar({
 
       <div className="w-px h-5 mx-1 bg-gray-200 dark:bg-gray-700" />
 
-      {/* AI assist */}
+      {/* AI assist — single button for Cmd+J trigger */}
       <button
-        onClick={handleAIContinue}
+        onClick={() => onAIAssist('continue')}
         disabled={isGenerating}
-        title="AI 续写"
+        title="AI 续写 (⌘J)"
         className={`${isMd ? 'p-1.5' : 'p-2.5'} rounded hover:bg-blue-500/10 transition-colors active:scale-95 flex-shrink-0 text-gray-600 dark:text-gray-300 disabled:opacity-50`}
       >
-        {isGenerating ? <Loader2 size={iconSize} className="animate-spin" /> : <Sparkles size={iconSize} />}
+        {isGenerating ? (
+          <svg className="animate-spin" width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2v4m0 12v4m-7.07-3.93l2.83-2.83m8.48-8.48l2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83" />
+          </svg>
+        ) : (
+          <Sparkles size={iconSize} />
+        )}
       </button>
 
-      <button
-        onClick={handleAIPolish}
-        disabled={isGenerating}
-        title="AI 润色"
-        className={`${isMd ? 'p-1.5' : 'p-2.5'} rounded hover:bg-blue-500/10 transition-colors active:scale-95 flex-shrink-0 text-gray-600 dark:text-gray-300 disabled:opacity-50`}
-      >
-        <Sparkles size={iconSize} className="text-purple-500" />
-      </button>
+      {/* Slash command hint */}
+      <span className="text-[10px] text-muted-foreground ml-1 hidden md:inline">/ 命令</span>
     </div>
   )
 }

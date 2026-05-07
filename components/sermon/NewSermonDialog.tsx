@@ -35,6 +35,7 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
   const [topic, setTopic] = useState('')
   const [style, setStyle] = useState<'EXPOSITORY' | 'TOPICAL' | 'NARRATIVE' | 'FREE'>('EXPOSITORY')
   const [loading, setLoading] = useState(false)
+  const [generateOutline, setGenerateOutline] = useState(true)
   const [recommendedVerses, setRecommendedVerses] = useState<RecommendedVerse[]>([])
   const [selectedVerses, setSelectedVerses] = useState<Set<number>>(new Set())
 
@@ -157,6 +158,32 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
     setLoading(true)
     try {
       const finalVerseRefs = mode === 'topic' ? buildVerseRefsFromSelected() : verseRefs
+
+      // If generateOutline is enabled, call the sermon outline generator first
+      let initialContent = `# ${title}\n\n## 🎯 引言\n\n## 💡 要点\n\n## ✅ 结论\n\n`
+
+      if (generateOutline && finalVerseRefs) {
+        try {
+          const outlineRes = await fetch('/api/chat/sermon', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              verseRef: finalVerseRefs,
+              title,
+              style: style.toLowerCase(),
+              locale,
+              apiConfig,
+            }),
+          })
+          const outlineData = await outlineRes.json()
+          if (outlineData.sermon) {
+            initialContent = outlineData.sermon
+          }
+        } catch {
+          // Fall back to default template if outline generation fails
+        }
+      }
+
       const res = await fetch('/api/sermon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -164,14 +191,14 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
           title,
           verseRefs: finalVerseRefs,
           style,
-          content: `# ${title}\n\n\`\`\`section:introduction\n## 引言\n\n\`\`\`\n\n\`\`\`section:main_point\n## 要点\n\n\`\`\`\n\n\`\`\`section:conclusion\n## 结论\n\n\`\`\`\n`,
+          content: initialContent,
         }),
       })
       const data = await res.json()
       if (data.data) {
         setSermons([data.data, ...sermons])
         setCurrentSermon(data.data)
-        setActiveSermonPanel('ai')
+        setActiveSermonPanel(generateOutline ? 'ai' : 'ai')
         onClose()
       }
     } catch {
@@ -385,6 +412,43 @@ export function NewSermonDialog({ open, onClose, initialVerseRefs }: NewSermonDi
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* AI Outline Toggle */}
+          <div>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+              {locale === 'en' ? 'Initial Content' : '初始内容'}
+            </label>
+            <div className="mt-1 grid grid-cols-2 gap-1.5">
+              <button
+                onClick={() => setGenerateOutline(true)}
+                className={cn(
+                  'py-2 rounded-lg text-[11px] font-semibold transition-colors flex items-center justify-center gap-1',
+                  generateOutline
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-secondary'
+                )}
+              >
+                <Lightbulb className="w-3 h-3" />
+                {locale === 'en' ? 'AI Outline' : 'AI 生成大纲'}
+              </button>
+              <button
+                onClick={() => setGenerateOutline(false)}
+                className={cn(
+                  'py-2 rounded-lg text-[11px] font-semibold transition-colors',
+                  !generateOutline
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-secondary'
+                )}
+              >
+                {locale === 'en' ? 'Blank Template' : '空白模板'}
+              </button>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {generateOutline
+                ? (locale === 'en' ? 'AI will generate a sermon outline based on your verses and style' : 'AI 将根据经文和风格自动生成讲章大纲')
+                : (locale === 'en' ? 'Start with a blank template' : '从空白模板开始撰写')}
+            </p>
           </div>
         </div>
 

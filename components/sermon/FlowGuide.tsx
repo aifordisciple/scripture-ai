@@ -4,7 +4,6 @@ import React from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { FLOW_STAGES, getStageInfo } from '@/lib/sermon-flow'
-import type { SermonFlowStage } from '@/store/types'
 import { Check } from 'lucide-react'
 
 /** Horizontal progress bar for sermon preparation stages */

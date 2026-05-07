@@ -8,6 +8,12 @@ import VditorEditor, { type VditorEditorHandle } from './VditorEditor'
 import EditorToolbar from './EditorToolbar'
 import { SermonEditorHeader } from './SermonEditorHeader'
 import { useSermonEditor } from './SermonEditorContext'
+import { FlowGuide } from './FlowGuide'
+import { FlowSuggestions } from './FlowSuggestions'
+import { FloatingToolbar } from './FloatingToolbar'
+import { SlashCommandMenu, type SlashCommand } from './SlashCommandMenu'
+import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
+import { useSlashCommands } from '@/hooks/use-slash-commands'
 
 export function SermonEditor() {
   const { t } = useTranslation()
@@ -20,6 +26,9 @@ export function SermonEditor() {
     sermons,
     isDarkMode,
     sermonAutoSave,
+    setSermonFlowStage,
+    setSermonAiSuggestions,
+    locale,
   } = useBibleStore()
   const { registerEditorHandle } = useSermonEditor()
 
@@ -34,6 +43,22 @@ export function SermonEditor() {
 
   const [markdownContent, setMarkdownContent] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [floatingToolbar, setFloatingToolbar] = useState<{ visible: boolean; x: number; y: number; selectedText: string }>({
+    visible: false, x: 0, y: 0, selectedText: '',
+  })
+
+  // Slash commands
+  const {
+    visible: slashVisible,
+    filter: slashFilter,
+    selectedIndex: slashSelectedIndex,
+    commands: slashCommands,
+    handleKeyDown: handleSlashKeyDown,
+    handleInput: handleSlashInput,
+    selectCommand: selectSlashCommand,
+    close: closeSlash,
+    menuPosition: slashPosition,
+  } = useSlashCommands()
 
   // Register editor handle with context so SermonAIPanel/SermonVersePanel can insert content
   useEffect(() => {
@@ -51,6 +76,10 @@ export function SermonEditor() {
       if (md !== markdownContent) {
         setMarkdownContent(md)
       }
+      // Update flow stage based on content
+      const flowUpdate = updateSermonFlowStage(md, md.length)
+      setSermonFlowStage(flowUpdate.sermonFlowStage!)
+      setSermonAiSuggestions(flowUpdate.sermonAiSuggestions!)
     } else {
       setMarkdownContent('')
     }
@@ -104,7 +133,11 @@ export function SermonEditor() {
     if (sermonAutoSave) {
       saveTimerRef.current = setTimeout(() => autoSave(content), 1500)
     }
-  }, [setCurrentSermon, setSermons, autoSave, sermonAutoSave])
+    // Update flow stage
+    const flowUpdate = updateSermonFlowStage(content, content.length)
+    setSermonFlowStage(flowUpdate.sermonFlowStage!)
+    setSermonAiSuggestions(flowUpdate.sermonAiSuggestions!)
+  }, [setCurrentSermon, setSermons, autoSave, sermonAutoSave, setSermonFlowStage, setSermonAiSuggestions])
 
   // Manual save handler for Cmd+S
   const handleSave = useCallback(() => {
@@ -115,23 +148,38 @@ export function SermonEditor() {
     autoSave(markdownContent)
   }, [autoSave, markdownContent])
 
-  // AI assist
+  // AI assist — now uses streaming inline completion
   const handleAIAssist = useCallback(async (action: string) => {
     const md = editorRef.current?.getValue() || markdownContent
     if (!md && action !== 'generate') return
     setIsGenerating(true)
     try {
-      const res = await fetch('/api/chat/sermon', {
+      const res = await fetch('/api/sermon/ai-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, content: md, title: currentSermon?.title }),
+        body: JSON.stringify({
+          action,
+          selectedText: md.slice(-500), // Send last 500 chars as context
+          verseRefs: currentSermon?.verseRefs,
+          style: currentSermon?.style,
+          locale: useBibleStore.getState().locale,
+        }),
       })
-      const data = await res.json()
-      if (data.content) {
+      // Read the streaming response
+      const reader = res.body?.getReader()
+      if (!reader) return
+      const decoder = new TextDecoder()
+      let result = ''
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        result += decoder.decode(value, { stream: true })
+      }
+      if (result) {
         if (action === 'continue') {
-          editorRef.current?.insertValue(data.content)
+          editorRef.current?.insertValue(result)
         } else {
-          editorRef.current?.setValue(data.content)
+          editorRef.current?.setValue(result)
         }
       }
     } catch (err) {
@@ -140,6 +188,55 @@ export function SermonEditor() {
       setIsGenerating(false)
     }
   }, [markdownContent, currentSermon?.title])
+
+  // Handle floating toolbar action
+  const handleFloatingAction = useCallback((action: string) => {
+    if (!floatingToolbar.selectedText) return
+    setIsGenerating(true)
+    fetch('/api/sermon/ai-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action,
+        selectedText: floatingToolbar.selectedText,
+        verseRefs: currentSermon?.verseRefs,
+        style: currentSermon?.style,
+        locale: useBibleStore.getState().locale,
+      }),
+    })
+      .then(res => res.text())
+      .then(result => {
+        if (result) {
+          editorRef.current?.insertValue(result)
+        }
+      })
+      .catch(err => console.error('[SermonEditor] Floating action failed:', err))
+      .finally(() => {
+        setIsGenerating(false)
+        setFloatingToolbar(prev => ({ ...prev, visible: false }))
+      })
+  }, [floatingToolbar.selectedText, currentSermon])
+
+  // Handle slash command selection
+  const handleSlashSelect = useCallback((command: SlashCommand) => {
+    closeSlash()
+    const action = command.action
+    if (action === 'verse' || action === 'section' || action === 'template') {
+      // These are handled by the toolbar — switch to the appropriate panel
+      return
+    }
+    if (action === 'review') {
+      useBibleStore.getState().setActiveSermonPanel('review')
+      return
+    }
+    // AI actions
+    handleAIAssist(action)
+  }, [handleAIAssist, closeSlash])
+
+  // Handle flow suggestion action
+  const handleFlowAction = useCallback((action: string) => {
+    handleAIAssist(action)
+  }, [handleAIAssist])
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -154,6 +251,9 @@ export function SermonEditor() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
+      {/* Flow Guide progress bar */}
+      <FlowGuide />
+
       {/* Header with title editing and status */}
       <SermonEditorHeader />
 
@@ -162,13 +262,35 @@ export function SermonEditor() {
         onAIAssist={handleAIAssist}
         isGenerating={isGenerating}
       />
-      <div className="flex-1 min-h-0">
+
+      {/* Flow Suggestions */}
+      <FlowSuggestions onAction={handleFlowAction} />
+
+      <div className="flex-1 min-h-0 relative">
         <VditorEditor
           ref={editorRef}
           content={markdownContent}
           onChange={handleContentChange}
           isDark={isDarkMode}
           onSave={handleSave}
+        />
+
+        {/* Floating Toolbar for selected text */}
+        <FloatingToolbar
+          position={{ x: floatingToolbar.x, y: floatingToolbar.y }}
+          onAction={handleFloatingAction}
+          visible={floatingToolbar.visible}
+        />
+
+        {/* Slash Command Menu */}
+        <SlashCommandMenu
+          visible={slashVisible}
+          position={slashPosition}
+          filter={slashFilter}
+          onSelect={handleSlashSelect}
+          onClose={closeSlash}
+          selectedIndex={slashSelectedIndex}
+          onSelectedIndexChange={() => {}}
         />
       </div>
 
@@ -178,6 +300,7 @@ export function SermonEditor() {
       >
         <span>{charCount}{t('sermon.editorWords')}</span>
         <span>~{Math.max(1, Math.round(charCount / 300))}{t('sermon.editorMinutes')}</span>
+        <span className="text-[10px] text-muted-foreground/60">⌘J {locale === 'en' ? 'AI' : 'AI续写'}</span>
       </div>
     </div>
   )

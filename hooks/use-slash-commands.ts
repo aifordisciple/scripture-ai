@@ -8,8 +8,8 @@ import {
 } from '@/components/sermon/SlashCommandMenu'
 
 interface UseSlashCommandsOptions {
-  /** Callback when a command is selected */
-  onSelectCommand: (command: SlashCommand) => void
+  /** Callback when a command is selected — optional, use selectCommand return value instead */
+  onSelectCommand?: (command: SlashCommand) => void
 }
 
 interface UseSlashCommandsReturn {
@@ -39,7 +39,7 @@ interface UseSlashCommandsReturn {
  * Detects "/" input, maintains filter text and menu visibility,
  * and handles keyboard navigation (up/down/enter/escape).
  */
-export function useSlashCommands(options: UseSlashCommandsOptions): UseSlashCommandsReturn {
+export function useSlashCommands(options: UseSlashCommandsOptions = {}): UseSlashCommandsReturn {
   const { onSelectCommand } = options
   const { locale } = useBibleStore()
 

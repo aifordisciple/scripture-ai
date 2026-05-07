@@ -54,7 +54,25 @@ export async function POST(req: Request) {
 
     const result = await streamText({ model, prompt: fullPrompt, maxTokens: 2048 });
 
-    return result.toDataStreamResponse();
+    // Stream the response as plain text for editor consumption
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of result.textStream) {
+            controller.enqueue(encoder.encode(chunk))
+          }
+        } catch (err) {
+          console.error('[ai-action] Stream error:', err)
+        } finally {
+          controller.close()
+        }
+      },
+    })
+
+    return new Response(stream, {
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
   } catch (error) {
     console.error('❌ Sermon AI Action Error:', error);
     return new Response(JSON.stringify({ error: 'AI action failed' }), { status: 500 });

@@ -4,18 +4,23 @@ import { createContext, useContext, useCallback, useRef } from 'react'
 import type { VditorEditorHandle } from './VditorEditor'
 
 interface SermonEditorContextValue {
-  /** Register the VditorEditorHandle (called by SermonEditor on mount) */
   registerEditorHandle: (handle: VditorEditorHandle | null) => void
-  /** Insert markdown content at cursor position in the editor */
   insertContent: (markdown: string) => void
-  /** Whether the editor is in dark mode */
   isDark: boolean
+  getSelectedText: () => string
+  showGhostText: (text: string) => void
+  acceptGhostText: () => void
+  rejectGhostText: () => void
 }
 
 const SermonEditorContext = createContext<SermonEditorContextValue>({
   registerEditorHandle: () => {},
   insertContent: () => {},
   isDark: false,
+  getSelectedText: () => '',
+  showGhostText: () => {},
+  acceptGhostText: () => {},
+  rejectGhostText: () => {},
 })
 
 export function SermonEditorProvider({ children, isDark }: { children: React.ReactNode; isDark: boolean }) {
@@ -31,8 +36,38 @@ export function SermonEditorProvider({ children, isDark }: { children: React.Rea
     handle.insertValue(markdown + '\n')
   }, [])
 
+  const getSelectedText = useCallback(() => {
+    const handle = handleRef.current
+    if (!handle) return ''
+    return handle.getSelectedText()
+  }, [])
+
+  const showGhostText = useCallback((text: string) => {
+    // Ghost text is managed via store — SermonEditor reads it
+    // This is a placeholder for future DOM-level ghost text injection
+  }, [])
+
+  const acceptGhostText = useCallback(() => {
+    const handle = handleRef.current
+    if (!handle) return
+    // Insert the ghost text into the editor
+    // Ghost text state is managed by the store
+  }, [])
+
+  const rejectGhostText = useCallback(() => {
+    // Clear ghost text from the store
+  }, [])
+
   return (
-    <SermonEditorContext.Provider value={{ registerEditorHandle, insertContent, isDark }}>
+    <SermonEditorContext.Provider value={{
+      registerEditorHandle,
+      insertContent,
+      isDark,
+      getSelectedText,
+      showGhostText,
+      acceptGhostText,
+      rejectGhostText,
+    }}>
       {children}
     </SermonEditorContext.Provider>
   )

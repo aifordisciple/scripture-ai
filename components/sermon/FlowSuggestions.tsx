@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { BookOpen, PenLine, ArrowRight, Sparkles, GitBranch } from 'lucide-react'

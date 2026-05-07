@@ -32,25 +32,15 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
   const {
     sermonGhostText,
     setSermonGhostText,
-    sermonGhostTextVisible,
     setSermonGhostTextVisible,
     currentSermon,
     locale,
-    sermonAiPreference,
   } = useBibleStore()
 
   const [isGenerating, setIsGenerating] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
   const onInsertRef = useRef(options.onInsert)
   onInsertRef.current = options.onInsert
-
-  /** Extract text around cursor for context */
-  const getCursorContext = useCallback((content: string, cursorPos: number): string => {
-    // Take up to 500 chars before cursor and 200 after for context
-    const start = Math.max(0, cursorPos - 500)
-    const end = Math.min(content.length, cursorPos + 200)
-    return content.slice(start, end)
-  }, [])
 
   /** Trigger ghost text generation */
   const triggerCompletion = useCallback((content: string, cursorPosition: number) => {
@@ -69,32 +59,7 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
     setSermonGhostText('')
     setSermonGhostTextVisible(true)
 
-    const styleMap: Record<string, Record<string, string>> = {
-      EXPOSITORY: { zh: '释经式', en: 'Expository' },
-      TOPICAL: { zh: '主题式', en: 'Topical' },
-      NARRATIVE: { zh: '叙事式', en: 'Narrative' },
-      FREE: { zh: '自由', en: 'Free' },
-    }
-    const styleLabel = currentSermon?.style
-      ? (styleMap[currentSermon.style]?.[locale] || currentSermon.style)
-      : ''
-
-    const localeInstruction = locale === 'en'
-      ? 'Continue in English.'
-      : '请用中文续写。'
-
-    const prompt = `You are a sermon writing assistant. Continue the sermon text from where the cursor is placed. Output ONLY the continuation text - no explanations, no headers, no markdown formatting beyond what the author is already using.
-
-Sermon style: ${styleLabel || 'Free'}
-
-### Text before cursor:
-${contextBefore}
-
-${localeInstruction}
-
-Continue naturally from where the text ends. Write 2-4 sentences.`
-
-    // Use streaming via fetch
+    // Use the ai-action endpoint which handles prompt construction
     fetch('/api/sermon/ai-action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
