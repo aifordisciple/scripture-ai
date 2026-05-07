@@ -1,44 +1,26 @@
 // app/api/card-image/route.tsx
-// 服务端渲染经文卡片 - Satori (支持多分辨率 + 全10种布局 + 多字体 + QR码)
+// 服务端渲染经文卡片 - @vercel/og ImageResponse (支持多分辨率 + 全10种布局 + 多字体 + QR码)
 
+import { ImageResponse } from '@vercel/og';
 import { NextRequest, NextResponse } from 'next/server';
-import satori from 'satori';
-import { Resvg } from '@resvg/resvg-js';
+import fs from 'fs';
+import path from 'path';
 
-// 字体加载缓存
-let fontsCache: Array<{ name: string; data: ArrayBuffer; weight: number; style: string }> | null = null;
-
-async function loadFonts() {
-  if (fontsCache) return fontsCache;
-
-  const fonts: Array<{ name: string; data: ArrayBuffer; weight: number; style: string }> = [];
-
+// 字体加载
+function loadFontSafe(filename: string): ArrayBuffer | null {
   try {
-    // Noto Serif SC (宋体)
-    const serifRes = await fetch(new URL('../../../public/fonts/NotoSerifSC-Bold.otf', import.meta.url));
-    if (serifRes.ok) {
-      fonts.push({ name: 'NotoSerifSC', data: await serifRes.arrayBuffer(), weight: 700, style: 'normal' });
-    }
+    const fontPath = path.join(process.cwd(), 'public/fonts', filename);
+    if (!fs.existsSync(fontPath)) return null;
+    const fileBuffer = fs.readFileSync(fontPath);
+    return new Uint8Array(fileBuffer).buffer;
   } catch (e) {
-    console.error('Load NotoSerifSC failed:', e);
+    console.error(`[Font Error] Load ${filename} failed:`, e);
+    return null;
   }
-
-  try {
-    // Noto Sans SC (黑体)
-    const sansRes = await fetch(new URL('../../../public/fonts/NotoSansSC-Bold.ttf', import.meta.url));
-    if (sansRes.ok) {
-      fonts.push({ name: 'NotoSansSC', data: await sansRes.arrayBuffer(), weight: 700, style: 'normal' });
-    }
-  } catch (e) {
-    console.error('Load NotoSansSC failed:', e);
-  }
-
-  fontsCache = fonts;
-  return fonts;
 }
 
 // --------------------------------------------------
-// 布局渲染组件
+// 布局渲染
 // --------------------------------------------------
 
 type LayoutMode = 'classic' | 'poster' | 'card' | 'modern' | 'split' | 'frame' | 'film' | 'minimal' | 'magazine' | 'stamp';
@@ -72,7 +54,6 @@ function buildCardJSX(params: CardParams) {
     aiTitle, qrCodeUrl, qrCodePosition,
   } = params;
 
-  // 缩放系数
   const scale = width / 1080;
   const scaledFontSize = Math.round(fontSize * scale * 1.8);
   const scaledTitleSize = Math.round(fontSize * scale * 2.2);
@@ -80,18 +61,17 @@ function buildCardJSX(params: CardParams) {
   const padding = Math.round(60 * scale);
   const infoText = `${bookName} ${chapter}:${verseRange}`;
 
-  // 背景样式
-  const bgStyle: Record<string, string> = bgImage
+  const bgStyle: Record<string, string | undefined> = bgImage
     ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : { background: bgGradient || 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)' };
 
-  // QR码 SVG（简化版 - 使用占位符）
+  // QR码占位
   const qrSize = Math.round(80 * scale);
   const qrElement = qrCodePosition && qrCodePosition !== 'none' && qrCodeUrl ? (
     <div style={{
       position: 'absolute',
       bottom: padding,
-      [qrCodePosition === 'bottom-left' ? 'left' : 'right']: padding,
+      ...(qrCodePosition === 'bottom-left' ? { left: padding } : { right: padding }),
       width: qrSize,
       height: qrSize,
       backgroundColor: 'rgba(255,255,255,0.9)',
@@ -111,72 +91,25 @@ function buildCardJSX(params: CardParams) {
         <rect x="10" y="10" width="10" height="10" fill="#333" rx="1" />
         <rect x="80" y="10" width="10" height="10" fill="#333" rx="1" />
         <rect x="10" y="80" width="10" height="10" fill="#333" rx="1" />
-        <rect x="35" y="5" width="5" height="5" fill="#333" />
-        <rect x="45" y="15" width="5" height="5" fill="#333" />
-        <rect x="35" y="25" width="5" height="5" fill="#333" />
-        <rect x="55" y="35" width="5" height="5" fill="#333" />
-        <rect x="40" y="45" width="5" height="5" fill="#333" />
-        <rect x="50" y="55" width="5" height="5" fill="#333" />
-        <rect x="35" y="65" width="5" height="5" fill="#333" />
-        <rect x="60" y="70" width="5" height="5" fill="#333" />
-        <rect x="45" y="80" width="5" height="5" fill="#333" />
-        <rect x="70" y="45" width="5" height="5" fill="#333" />
-        <rect x="80" y="55" width="5" height="5" fill="#333" />
-        <rect x="70" y="70" width="5" height="5" fill="#333" />
       </svg>
     </div>
   ) : null;
 
-  // 通用内容组件
+  // 通用内容
   const contentElement = (
     <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
+      display: 'flex', flexDirection: 'column', justifyContent: 'center',
       alignItems: textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start',
-      width: '100%',
-      height: '100%',
-      padding,
-      color: textColor,
-      fontFamily,
+      width: '100%', height: '100%', padding, color: textColor, fontFamily,
     }}>
-      {aiTitle && (
-        <div style={{
-          fontSize: scaledTitleSize,
-          fontWeight: 700,
-          marginBottom: 16 * scale,
-          opacity: 0.9,
-          textAlign,
-          width: '100%',
-        }}>
-          {aiTitle}
-        </div>
-      )}
-      <div style={{
-        fontSize: scaledFontSize,
-        lineHeight: lineHeight,
-        textAlign,
-        width: '100%',
-        maxWidth: width - padding * 2,
-      }}>
-        {verseContent.map((line, i) => (
-          <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>
-        ))}
+      {aiTitle && <div style={{ fontSize: scaledTitleSize, fontWeight: 700, marginBottom: 16 * scale, opacity: 0.9, textAlign, width: '100%' }}>{aiTitle}</div>}
+      <div style={{ fontSize: scaledFontSize, lineHeight, textAlign, width: '100%', maxWidth: width - padding * 2 }}>
+        {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
       </div>
-      <div style={{
-        fontSize: scaledInfoSize,
-        color: infoColor,
-        marginTop: 24 * scale,
-        opacity: 0.7,
-        textAlign,
-        width: '100%',
-      }}>
-        {infoText}
-      </div>
+      <div style={{ fontSize: scaledInfoSize, color: infoColor, marginTop: 24 * scale, opacity: 0.7, textAlign, width: '100%' }}>{infoText}</div>
     </div>
   );
 
-  // 根据布局模式构建不同的 JSX
   switch (layoutMode) {
     case 'poster':
       return (
@@ -191,17 +124,8 @@ function buildCardJSX(params: CardParams) {
     case 'card':
       return (
         <div style={{ width: '100%', height: '100%', background: bgGradient || '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 * scale }}>
-          <div style={{
-            width: '90%',
-            backgroundColor: 'white',
-            borderRadius: 16 * scale,
-            padding: padding * 1.5,
-            boxShadow: `0 ${4 * scale}px ${24 * scale}px rgba(0,0,0,0.1)`,
-            color: '#333',
-          }}>
-            {aiTitle && (
-              <div style={{ fontSize: scaledTitleSize, fontWeight: 700, marginBottom: 16 * scale, color: '#1a1a1a' }}>{aiTitle}</div>
-            )}
+          <div style={{ width: '90%', backgroundColor: 'white', borderRadius: 16 * scale, padding: padding * 1.5, boxShadow: `0 ${4 * scale}px ${24 * scale}px rgba(0,0,0,0.1)`, color: '#333' }}>
+            {aiTitle && <div style={{ fontSize: scaledTitleSize, fontWeight: 700, marginBottom: 16 * scale, color: '#1a1a1a' }}>{aiTitle}</div>}
             <div style={{ fontSize: scaledFontSize, lineHeight, color: '#333' }}>
               {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
             </div>
@@ -251,13 +175,8 @@ function buildCardJSX(params: CardParams) {
     case 'film':
       return (
         <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', position: 'relative' }}>
-          {/* 电影条纹 */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 24 * scale, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 * scale }}>
-            {Array.from({ length: 20 }).map((_, i) => <div key={i} style={{ width: 8 * scale, height: 12 * scale, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 2 * scale }} />)}
-          </div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 24 * scale, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 * scale }}>
-            {Array.from({ length: 20 }).map((_, i) => <div key={i} style={{ width: 8 * scale, height: 12 * scale, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 2 * scale }} />)}
-          </div>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 24 * scale, backgroundColor: 'rgba(0,0,0,0.7)' }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 24 * scale, backgroundColor: 'rgba(0,0,0,0.7)' }} />
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: `${40 * scale}px ${padding}px`, width: '100%', height: '100%', color: textColor, fontFamily, textAlign: 'center' }}>
             {aiTitle && <div style={{ fontSize: scaledTitleSize, fontWeight: 700, marginBottom: 16 * scale, opacity: 0.9 }}>{aiTitle}</div>}
             <div style={{ fontSize: scaledFontSize, lineHeight, textAlign: 'center', width: '100%' }}>
@@ -287,22 +206,11 @@ function buildCardJSX(params: CardParams) {
       return (
         <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', position: 'relative' }}>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding, width: '100%', height: '100%', color: textColor, fontFamily }}>
-            {aiTitle && (
-              <div style={{
-                fontSize: scaledTitleSize * 1.5,
-                fontWeight: 900,
-                lineHeight: 1.1,
-                marginBottom: 20 * scale,
-                textTransform: 'uppercase',
-                letterSpacing: 2 * scale,
-              }}>
-                {aiTitle}
-              </div>
-            )}
+            {aiTitle && <div style={{ fontSize: scaledTitleSize * 1.5, fontWeight: 900, lineHeight: 1.1, marginBottom: 20 * scale, letterSpacing: 2 * scale }}>{aiTitle}</div>}
             <div style={{ fontSize: scaledFontSize * 0.85, lineHeight, textAlign: 'left', maxWidth: width * 0.65 }}>
               {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
             </div>
-            <div style={{ fontSize: scaledInfoSize, color: infoColor, marginTop: 20 * scale, opacity: 0.6, textTransform: 'uppercase', letterSpacing: 1 * scale }}>{infoText}</div>
+            <div style={{ fontSize: scaledInfoSize, color: infoColor, marginTop: 20 * scale, opacity: 0.6, letterSpacing: 1 * scale }}>{infoText}</div>
           </div>
           {qrElement}
         </div>
@@ -311,17 +219,7 @@ function buildCardJSX(params: CardParams) {
     case 'stamp':
       return (
         <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          <div style={{
-            border: `${3 * scale}px solid ${textColor}`,
-            borderRadius: 4 * scale,
-            padding: padding,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            maxWidth: width * 0.8,
-            opacity: 0.85,
-          }}>
+          <div style={{ border: `${3 * scale}px solid ${textColor}`, borderRadius: 4 * scale, padding, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', maxWidth: width * 0.8, opacity: 0.85 }}>
             <div style={{ fontSize: scaledFontSize * 1.2, lineHeight, textAlign: 'center', color: textColor, fontFamily }}>
               &ldquo;{verseContent.join(' ')}&rdquo;
             </div>
@@ -350,7 +248,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      verseContent, bookName, chapter, verseRange,
+      verseContent, bookName = '', chapter = '', verseRange = '',
       width = 1080, height = 1440,
       bgImage, bgGradient, layoutMode = 'classic',
       textColor = '#333333', infoColor = '#666666',
@@ -364,10 +262,16 @@ export async function POST(req: NextRequest) {
     }
 
     // 加载字体
-    const fonts = await loadFonts();
-    if (fonts.length === 0) {
-      return NextResponse.json({ success: false, error: 'No fonts loaded' }, { status: 500 });
-    }
+    const serifData = loadFontSafe('NotoSerifSC-Bold.otf');
+    const sansData = loadFontSafe('NotoSansSC-Bold.ttf');
+
+    const fonts: Array<{ name: string; data: ArrayBuffer; style: 'normal'; weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 }> = [];
+    if (serifData) fonts.push({ name: 'NotoSerifSC', data: serifData, style: 'normal', weight: 700 });
+    if (sansData) fonts.push({ name: 'NotoSansSC', data: sansData, style: 'normal', weight: 700 });
+
+    // 确定使用的字体名
+    const satoriFont = fontFamily.includes('Sans') ? 'NotoSansSC' : 'NotoSerifSC';
+    const fallbackFont = fonts.length > 0 ? satoriFont : 'sans-serif';
 
     // 构建 JSX
     const jsx = buildCardJSX({
@@ -376,28 +280,13 @@ export async function POST(req: NextRequest) {
       layoutMode: layoutMode as LayoutMode,
       textColor, infoColor, fontSize,
       textAlign: textAlign as 'left' | 'center' | 'right',
-      lineHeight, fontFamily, aiTitle, qrCodeUrl, qrCodePosition,
+      lineHeight, fontFamily: fallbackFont, aiTitle, qrCodeUrl, qrCodePosition,
     });
 
-    // Satori 渲染
-    const svg = await satori(jsx, {
+    return new ImageResponse(jsx, {
       width,
       height,
-      fonts,
-    });
-
-    // SVG → PNG
-    const resvg = new Resvg(svg, {
-      fitTo: { mode: 'width', value: width },
-    });
-    const pngData = resvg.render();
-    const pngBuffer = pngData.asPng();
-
-    return new NextResponse(pngBuffer, {
-      headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'no-store',
-      },
+      fonts: fonts.length > 0 ? fonts : undefined,
     });
   } catch (error) {
     console.error('Card image generation error:', error);

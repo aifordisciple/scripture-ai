@@ -19,14 +19,8 @@ export function ShareActions({ onClose, onBack }: ShareActionsProps) {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const { cardConfig, setCardGenerating, setCardResultImage, setCardStep, cardGenerating } = useBibleStore();
-  const [canShare, setCanShare] = useState(false);
-  const [canCopy, setCanCopy] = useState(false);
-
-  // 检测 Web Share API 支持
-  if (typeof navigator !== 'undefined') {
-    setCanShare(typeof navigator.share === 'function');
-    setCanCopy(typeof navigator.clipboard?.write === 'function');
-  }
+  const [canShare] = useState(() => typeof navigator !== 'undefined' && typeof navigator.share === 'function');
+  const [canCopy] = useState(() => typeof navigator !== 'undefined' && typeof navigator.clipboard?.write === 'function');
 
   const generateImage = async () => {
     setCardGenerating(true);

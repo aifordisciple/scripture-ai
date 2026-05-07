@@ -30,7 +30,7 @@ export function HistoryPanel() {
 
   // 应用历史配置
   const handleApply = (history: CardHistoryData) => {
-    const config = history.config as ReturnType<typeof useBibleStore.getState>['cardConfig'];
+    const config = history.config as unknown as typeof cardConfig;
     updateCardConfig(config);
   };
 

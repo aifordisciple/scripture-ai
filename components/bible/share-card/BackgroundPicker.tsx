@@ -37,6 +37,8 @@ export function BackgroundPicker({
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'featured' | 'online' | 'gradient' | 'custom'>('featured');
 
+  const [activeGallery, setActiveGallery] = useState<'picsum' | 'bing' | 'unsplash'>('picsum');
+
   // 图库搜索状态
   const [picsumPage, setPicsumPage] = useState(1);
   const [picsumImages, setPicsumImages] = useState<{ id: number; author: string; url: string }[]>([]);
@@ -200,12 +202,13 @@ export function BackgroundPicker({
               <button
                 key={source}
                 onClick={() => {
+                  setActiveGallery(source);
                   if (source === 'picsum' && picsumImages.length === 0) loadPicsumImages(1);
                   if (source === 'bing' && bingDailyImages.length === 0) loadBingDaily();
                 }}
                 className={cn(
                   "px-2 py-1 text-xs rounded transition-colors",
-                  "text-primary bg-primary/5" : "text-muted-foreground hover:bg-secondary"
+                  activeGallery === source ? "text-primary bg-primary/5" : "text-muted-foreground hover:bg-secondary"
                 )}
               >
                 {t(`shareCard.gallery_${source}`)}

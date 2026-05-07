@@ -5,6 +5,11 @@ import { NextRequest, NextResponse } from 'next/server';
 const ALLOWED_DOMAINS = [
   'images.unsplash.com',
   'plus.unsplash.com',
+  'picsum.photos',
+  'www.bing.com',
+  'bing.com',
+  'th.bing.com',
+  'tse.mm.bing.net',
 ];
 
 function isAllowedUrl(url: string): boolean {
