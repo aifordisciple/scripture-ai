@@ -333,6 +333,8 @@ export interface ReaderSlice {
   updateActiveTab: (data: Partial<Tab>) => void;
   chapterSpeechText: string;
   setChapterSpeechText: (text: string) => void;
+  ttsVoice: string;
+  setTtsVoice: (voice: string) => void;
   scrollToVerse: number | null;
   setScrollToVerse: (verse: number | null) => void;
 }

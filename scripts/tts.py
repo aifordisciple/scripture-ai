@@ -3,14 +3,10 @@ import sys
 import asyncio
 import edge_tts
 
-# 接收命令行参数：1. 要朗读的文本 2. 输出文件路径
+# 接收命令行参数：1. 要朗读的文本 2. 输出文件路径 3. 声音名称（可选，默认晓晓）
 TEXT = sys.argv[1]
 OUTPUT_FILE = sys.argv[2]
-
-# 推荐的声音：
-# zh-CN-XiaoxiaoNeural (女声，非常自然，适合朗读)
-# zh-CN-YunxiNeural (男声，沉稳，适合新闻或叙述)
-VOICE = "zh-CN-XiaoxiaoNeural"
+VOICE = sys.argv[3] if len(sys.argv) > 3 else "zh-CN-XiaoxiaoNeural"
 
 async def amain():
     communicate = edge_tts.Communicate(TEXT, VOICE)

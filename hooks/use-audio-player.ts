@@ -225,10 +225,11 @@ export function useAudioPlayer(onFinished?: () => void) {
 
       // 尝试服务器 TTS
       try {
+        const { ttsVoice } = useBibleStore.getState();
         const response = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, voice: ttsVoice }),
         });
 
         if (!response.ok) throw new Error('TTS request failed');

@@ -144,6 +144,8 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
   
   chapterSpeechText: "",
   setChapterSpeechText: (text) => set({ chapterSpeechText: text }),
+  ttsVoice: 'zh-CN-XiaoxiaoNeural',
+  setTtsVoice: (voice) => set({ ttsVoice: voice }),
   scrollToVerse: null,
   setScrollToVerse: (verse) => set({ scrollToVerse: verse }),
 });

@@ -27,6 +27,19 @@ export const DEFAULT_VERSION: Record<'zh' | 'en', 'CUV' | 'KJV'> = {
 
 export type BibleVersionCode = 'CUV' | 'KJV';
 
+// TTS voice options (edge-tts)
+export const TTS_VOICES = [
+  { id: 'zh-CN-XiaoxiaoNeural', label: '晓晓', lang: 'zh', gender: 'female' },
+  { id: 'zh-CN-YunxiNeural', label: '云希', lang: 'zh', gender: 'male' },
+  { id: 'zh-CN-YunjianNeural', label: '云健', lang: 'zh', gender: 'male' },
+  { id: 'en-US-AriaNeural', label: 'Aria', lang: 'en', gender: 'female' },
+  { id: 'en-US-GuyNeural', label: 'Guy', lang: 'en', gender: 'male' },
+  { id: 'en-US-JennyNeural', label: 'Jenny', lang: 'en', gender: 'female' },
+] as const;
+
+export type TtsVoiceId = typeof TTS_VOICES[number]['id'];
+export const DEFAULT_TTS_VOICE: TtsVoiceId = 'zh-CN-XiaoxiaoNeural';
+
 // 1. 深度优化的 System Prompt (基于您的版本进行了增强)
 export const SYSTEM_PROMPT: DualLangString = {
   zh: `

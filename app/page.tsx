@@ -13,9 +13,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen, BookOpenCheck, Moon, Sun, ChevronDown, Type, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
-import { BIBLE_BOOKS, getBookDisplayName } from "@/lib/constants";
+import { BIBLE_BOOKS, getBookDisplayName, TTS_VOICES } from "@/lib/constants";
 import { useTranslation } from "@/lib/i18n";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { useGroupUnread } from "@/hooks/use-group-unread";
@@ -149,6 +150,7 @@ export default function Home() {
     sidebarWidth,
     isDarkMode, toggleDarkMode,
     chapterSpeechText,
+    ttsVoice, setTtsVoice,
     isMobileSettingsOpen,
     setMobileSettingsOpen,
     streakCount,
@@ -411,6 +413,23 @@ export default function Home() {
                     <Headphones className="w-4 h-4 text-primary" /> {t('settings.tts')}
                  </div>
                  <HeaderPlayer player={player} text={chapterSpeechText || ""} mode="full" className="bg-background border border-border shadow-sm w-full rounded-lg" />
+                 <div className="mt-3">
+                   <div className="flex items-center justify-between">
+                     <span className="text-sm text-muted-foreground font-semibold">{t('settings.ttsVoice')}</span>
+                     <Select value={ttsVoice} onValueChange={setTtsVoice}>
+                       <SelectTrigger className="w-40">
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         {TTS_VOICES.map((v) => (
+                           <SelectItem key={v.id} value={v.id}>
+                             {v.label} ({v.lang === 'zh' ? t('settings.ttsVoiceZh') : t('settings.ttsVoiceEn')} · {v.gender === 'female' ? t('settings.ttsVoiceFemale') : t('settings.ttsVoiceMale')})
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 </div>
               </div>
             )}
             <div className="space-y-2">

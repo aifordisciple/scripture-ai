@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   let tempFilePath = '';
 
   try {
-    const { text } = await req.json();
+    const { text, voice } = await req.json();
     if (!text || typeof text !== 'string') return new NextResponse('Missing text', { status: 400 });
 
     const safeText = text.slice(0, 5000);
@@ -28,7 +28,9 @@ export async function POST(req: NextRequest) {
     // 优先使用项目 venv 中的 python，回退到系统 python3
     const venvPython = path.join(process.cwd(), '.venv/bin/python3');
     const pythonBin = fs.existsSync(venvPython) ? venvPython : 'python3';
-    const { stderr } = await execFileAsync(pythonBin, [scriptPath, safeText, tempFilePath], { timeout: 30000 });
+    const args = [scriptPath, safeText, tempFilePath];
+    if (voice && typeof voice === 'string') args.push(voice);
+    const { stderr } = await execFileAsync(pythonBin, args, { timeout: 30000 });
     if (stderr) console.warn('[TTS] Python stderr:', stderr);
 
     const audioBuffer = fs.readFileSync(tempFilePath);
