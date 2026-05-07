@@ -255,6 +255,17 @@ export type SermonPanelType = 'list' | 'ai' | 'verse' | 'template' | 'review' | 
 
 export type SermonMobileView = 'list' | 'editor';
 
+export type SermonFlowStage = 'verse-study' | 'outline' | 'draft' | 'refine' | 'review';
+
+export interface SermonAiSuggestion {
+  id: string
+  stage: SermonFlowStage
+  labelZh: string
+  labelEn: string
+  action: string
+  icon?: string
+}
+
 export interface SermonReviewItem {
   key: string;
   label: string;
@@ -563,6 +574,17 @@ export interface SermonSlice {
   // Mobile view navigation (only used below md:768px)
   sermonMobileView: SermonMobileView;
   setSermonMobileView: (view: SermonMobileView) => void;
+  // Flow guide stage
+  sermonFlowStage: SermonFlowStage;
+  setSermonFlowStage: (stage: SermonFlowStage) => void;
+  // AI suggestions for current stage
+  sermonAiSuggestions: SermonAiSuggestion[];
+  setSermonAiSuggestions: (suggestions: SermonAiSuggestion[]) => void;
+  // Ghost text state for inline AI completion
+  sermonGhostText: string;
+  setSermonGhostText: (text: string) => void;
+  sermonGhostTextVisible: boolean;
+  setSermonGhostTextVisible: (visible: boolean) => void;
 }
 
 // --------------------------------------------------

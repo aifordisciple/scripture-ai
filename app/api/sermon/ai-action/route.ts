@@ -1,4 +1,4 @@
-import { generateText } from 'ai';
+import { streamText } from 'ai';
 import { auth } from '@/lib/auth';
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 import { SERMON_ACTION_PROMPTS, type DualLangString } from '@/lib/constants';
@@ -52,11 +52,9 @@ export async function POST(req: Request) {
     if (styleLabel) fullPrompt += `\n\n### Sermon Style: ${styleLabel}`;
     if (verseRefs) fullPrompt += `\n### Verse References: ${verseRefs}`;
 
-    const result = await generateText({ model, prompt: fullPrompt, maxTokens: 2048 });
+    const result = await streamText({ model, prompt: fullPrompt, maxTokens: 2048 });
 
-    return new Response(JSON.stringify({ result: result.text }), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return result.toDataStreamResponse();
   } catch (error) {
     console.error('❌ Sermon AI Action Error:', error);
     return new Response(JSON.stringify({ error: 'AI action failed' }), { status: 500 });

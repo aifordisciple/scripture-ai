@@ -1,5 +1,6 @@
 import { StateCreator } from 'zustand';
 import { StoreState, SermonSlice } from '../types';
+import { detectFlowStage, getStageSuggestions } from '@/lib/sermon-flow';
 
 export const createSermonSlice: StateCreator<StoreState, [], [], SermonSlice> = (set) => ({
   currentSermon: null,
@@ -38,4 +39,22 @@ export const createSermonSlice: StateCreator<StoreState, [], [], SermonSlice> = 
   setSermonAiPreference: (pref) => set({ sermonAiPreference: pref }),
   sermonMobileView: 'list',
   setSermonMobileView: (view) => set({ sermonMobileView: view }),
+  sermonFlowStage: 'verse-study',
+  setSermonFlowStage: (stage) => set({ sermonFlowStage: stage }),
+  sermonAiSuggestions: [],
+  setSermonAiSuggestions: (suggestions) => set({ sermonAiSuggestions: suggestions }),
+  sermonGhostText: '',
+  setSermonGhostText: (text) => set({ sermonGhostText: text }),
+  sermonGhostTextVisible: false,
+  setSermonGhostTextVisible: (visible) => set({ sermonGhostTextVisible: visible }),
 });
+
+/** Update flow stage based on sermon content changes */
+export function updateSermonFlowStage(content: string, wordCount: number): Partial<SermonSlice> {
+  const stage = detectFlowStage(content, wordCount)
+  const suggestions = getStageSuggestions(stage)
+  return {
+    sermonFlowStage: stage,
+    sermonAiSuggestions: suggestions,
+  }
+}

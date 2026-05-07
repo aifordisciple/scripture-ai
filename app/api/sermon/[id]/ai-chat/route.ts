@@ -53,9 +53,10 @@ export async function POST(
 
     const { id } = await params;
     const { apiConfig, body } = await extractApiConfig(req);
-    const { messages, locale = 'zh' } = body as {
+    const { messages, locale = 'zh', cursorContext } = body as {
       messages: Array<{ role: string; content: string }>;
       locale?: string;
+      cursorContext?: string;
     };
 
     if (!messages || !Array.isArray(messages)) {
@@ -76,7 +77,10 @@ export async function POST(
 
     const resolvedLocale = (locale === 'en' ? 'en' : 'zh') as keyof DualLangString;
     const sermonContext = buildSermonContext(sermon, resolvedLocale);
-    const fullSystemPrompt = (SERMON_CHAT_PROMPT[resolvedLocale] || SERMON_CHAT_PROMPT.zh) + '\n\n' + sermonContext;
+    let fullSystemPrompt = (SERMON_CHAT_PROMPT[resolvedLocale] || SERMON_CHAT_PROMPT.zh) + '\n\n' + sermonContext;
+    if (cursorContext) {
+      fullSystemPrompt += '\n\n' + cursorContext;
+    }
 
     const result = await streamText({
       model,
