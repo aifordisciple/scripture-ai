@@ -13,7 +13,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Menu, Settings, Languages, Plus, X, AlignJustify, Search, PanelLeft, Maximize, Minimize, Headphones, ChevronLeft, ChevronRight, Flame, Users, BookOpen, BookOpenCheck, Moon, Sun, ChevronDown, Type, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from "@/lib/utils";
 import { HeaderPlayer } from "@/components/bible/HeaderPlayer";
 import { BIBLE_BOOKS, getBookDisplayName, TTS_VOICES } from "@/lib/constants";
@@ -416,18 +415,17 @@ export default function Home() {
                  <div className="mt-3">
                    <div className="flex items-center justify-between">
                      <span className="text-sm text-muted-foreground font-semibold">{t('settings.ttsVoice')}</span>
-                     <Select value={ttsVoice} onValueChange={setTtsVoice}>
-                       <SelectTrigger className="w-40">
-                         <SelectValue />
-                       </SelectTrigger>
-                       <SelectContent>
-                         {TTS_VOICES.map((v) => (
-                           <SelectItem key={v.id} value={v.id}>
-                             {v.label} ({v.lang === 'zh' ? t('settings.ttsVoiceZh') : t('settings.ttsVoiceEn')} · {v.gender === 'female' ? t('settings.ttsVoiceFemale') : t('settings.ttsVoiceMale')})
-                           </SelectItem>
-                         ))}
-                       </SelectContent>
-                     </Select>
+                     <select
+                       value={ttsVoice}
+                       onChange={(e) => setTtsVoice(e.target.value)}
+                       className="w-40 h-9 rounded-lg border border-input bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer"
+                     >
+                       {TTS_VOICES.map((v) => (
+                         <option key={v.id} value={v.id}>
+                           {v.label} ({v.lang === 'zh' ? t('settings.ttsVoiceZh') : t('settings.ttsVoiceEn')} · {v.gender === 'female' ? t('settings.ttsVoiceFemale') : t('settings.ttsVoiceMale')})
+                         </option>
+                       ))}
+                     </select>
                    </div>
                  </div>
               </div>
