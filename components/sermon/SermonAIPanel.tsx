@@ -9,11 +9,7 @@ import { Bot, Send, StopCircle, ClipboardPaste, Sparkles, PenLine, BookOpen, Lig
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useSermonEditor } from './SermonEditorContext'
-
-/** 过滤 AI 回复中的 <think>...</think> 标签及内容 */
-function stripThinkTags(content: string): string {
-  return content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim()
-}
+import { stripThinkTags } from '@/lib/ai'
 
 export function SermonAIPanel() {
   const { t } = useTranslation()

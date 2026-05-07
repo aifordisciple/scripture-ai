@@ -3,6 +3,7 @@ import { generateText } from 'ai';
 import { NextResponse } from 'next/server';
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
 import { DEVOTIONAL_PROMPT, type DualLangString } from '@/lib/constants';
+import { stripAllThinkTags } from '@/lib/ai';
 
 export async function POST(req: Request) {
   const { apiConfig, body } = await extractApiConfig(req);
@@ -35,9 +36,7 @@ export async function POST(req: Request) {
     // 清理文本：移除 Markdown 标记和 AI 思考标签
     let cleanText = text.trim();
 
-    // 移除 <think>...</think> 标签（某些 AI 模型会返回）
-    cleanText = cleanText.replace(/<think>[\s\S]*?<\/think>/gi, '');
-    cleanText = cleanText.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+    cleanText = stripAllThinkTags(cleanText);
 
     // 移除常见的 Markdown 标记
     cleanText = cleanText.replace(/\*\*(.+?)\*\*/g, '$1'); // 粗体

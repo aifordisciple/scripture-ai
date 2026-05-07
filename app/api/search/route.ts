@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateText } from 'ai';
 import { getAIModel, extractApiConfig } from '@/lib/ai-client';
+import { stripAllThinkTags } from '@/lib/ai';
 
 export const maxDuration = 60;
 
@@ -45,12 +46,7 @@ Requirements:
 - Chapter and verse must be real numbers`;
 
 function cleanAIResponse(text: string): string {
-  let jsonString = text;
-  jsonString = jsonString.replace(/<think>[\s\S]*?<\/think>/gi, '');
-  jsonString = jsonString.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
-  jsonString = jsonString.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
-  jsonString = jsonString.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-  return jsonString;
+  return stripAllThinkTags(text).replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
 }
 
 // Book ID mapping: normalize any AI-returned abbreviation to our database format

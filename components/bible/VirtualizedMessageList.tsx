@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm'
 import { Copy, Check, Bookmark, Share2, RefreshCw, User, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AudioButton } from './AudioButton'
+import { parseThinkTags } from '@/lib/ai'
 import { useToast } from '@/components/ui/toast'
 import { useTranslation } from '@/lib/i18n'
 
@@ -51,23 +52,7 @@ const MessageBubble = memo(function MessageBubble({
   const { addToast } = useToast()
   const { role, content } = message
 
-  // 处理 <think> 标签
-  let mainText = content
-  let isThinking = false
-
-  const thinkStart = content.indexOf('<think>')
-  const thinkEnd = content.indexOf('</think>')
-
-  if (thinkStart !== -1) {
-    if (thinkEnd !== -1) {
-      mainText = (content.substring(0, thinkStart) + content.substring(thinkEnd + 8)).trim()
-      isThinking = false
-    } else {
-      mainText = content.substring(0, thinkStart).trim()
-      isThinking = true
-    }
-  }
-
+  const { displayText: mainText, isThinking } = parseThinkTags(content)
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation()
     const copyText = mainText || content

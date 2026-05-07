@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { AudioButton } from './AudioButton'
 import { useToast } from '@/components/ui/toast'
 import { useTranslation } from '@/lib/i18n'
+import { parseThinkTags } from '@/lib/ai'
 
 export interface Message {
   id: string
@@ -51,22 +52,8 @@ const MessageBubble = memo(function MessageBubble({
   const { t } = useTranslation()
   const { addToast } = useToast()
 
-  // 处理 <think> 标签
-  let mainText = content
-  let isThinking = false
+  const { displayText: mainText, isThinking } = parseThinkTags(content)
 
-  const thinkStart = content.indexOf('<think>')
-  const thinkEnd = content.indexOf('</think>')
-
-  if (thinkStart !== -1) {
-    if (thinkEnd !== -1) {
-      mainText = (content.substring(0, thinkStart) + content.substring(thinkEnd + 8)).trim()
-      isThinking = false
-    } else {
-      mainText = content.substring(0, thinkStart).trim()
-      isThinking = true
-    }
-  }
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation()

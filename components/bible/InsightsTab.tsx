@@ -16,6 +16,7 @@ import { useTranslation } from "@/lib/i18n";
 import { getClientLocale } from "@/lib/locale";
 import { useToast } from '@/components/ui/toast';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { stripThinkTags } from '@/lib/ai';
 
 interface PopulatedInsight {
   id: string;
@@ -160,17 +161,11 @@ export function InsightsTab() {
     setEditTags("");
   };
 
-  // 移除 think 标签及其内容
-  const removeThinkTags = (content: string) => {
-    return content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-  };
-
   // 获取摘要（前100字）
   const getSummary = (content: string) => {
-    const cleanContent = removeThinkTags(content);
-    const text = cleanContent.replace(/[#*`>\-\[\]]/g, '').trim();
-    return text.length > 100 ? text.substring(0, 100) + '...' : text;
+    const cleanContent = stripThinkTags(content);
   };
+
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 pb-4">
@@ -334,7 +329,7 @@ export function InsightsTab() {
                         )}
                         {expandedId === item.id ? (
                           <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{removeThinkTags(item.content || '')}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripThinkTags(item.content || '')}</ReactMarkdown>
                           </div>
                         ) : (
                           <p className="text-[15px] leading-relaxed text-foreground/80 line-clamp-2">
