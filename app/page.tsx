@@ -132,6 +132,8 @@ export default function Home() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isBookPickerOpen, setIsBookPickerOpen] = useState(false);
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false); // [新增] 设置下拉菜单状态
+  const settingsDropdownRef = useRef<HTMLDivElement>(null);
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false); // 快捷键帮助对话框
   
   const [isNavVisible, setIsNavVisible] = useState(true);
@@ -155,6 +157,26 @@ export default function Home() {
     streakCount,
     aiMode, // [P0优化] AI模式状态
   } = useBibleStore();
+
+  // 点击外部关闭设置悬浮窗
+  useEffect(() => {
+    if (!showSettingsDropdown) return;
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      if (
+        settingsDropdownRef.current && !settingsDropdownRef.current.contains(target) &&
+        settingsButtonRef.current && !settingsButtonRef.current.contains(target)
+      ) {
+        setShowSettingsDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [showSettingsDropdown]);
 
   // 用于追踪 activeTabId 变化，以重置滚动检测状态
   const prevActiveTabIdRef = useRef(activeTabId);
@@ -598,6 +620,7 @@ export default function Home() {
                 {/* Reading settings dropdown */}
                 <div className="relative">
                   <Button
+                    ref={settingsButtonRef}
                     variant="ghost"
                     size="icon"
                     onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
@@ -612,9 +635,10 @@ export default function Home() {
 
                   {/* Settings dropdown panel */}
                   {showSettingsDropdown && (
-                    <>
-                      <div className="fixed inset-0 z-[100] pointer-events-auto" onClick={() => setShowSettingsDropdown(false)} />
-                      <div className="absolute right-0 top-full mt-2 w-64 bg-card/80 backdrop-blur-[20px] backdrop-saturate-[180%] border border-border/50 dark:border-border rounded-lg z-[100] p-3 space-y-3">
+                    <div
+                      ref={settingsDropdownRef}
+                      className="absolute right-0 top-full mt-2 w-64 bg-card/80 backdrop-blur-[20px] backdrop-saturate-[180%] border border-border/50 dark:border-border rounded-lg z-[100] p-3 space-y-3 animate-in fade-in zoom-in-95 duration-150"
+                    >
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground flex items-center gap-2">
                             {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
@@ -658,7 +682,6 @@ export default function Home() {
                           <Slider value={[fontSize]} min={14} max={32} step={1} onValueChange={(val) => setFontSize(val[0])} className="cursor-pointer" />
                         </div>
                       </div>
-                    </>
                   )}
                 </div>
 
