@@ -5,9 +5,12 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { randomUUID } from 'crypto';
+import { TTS_VOICES } from '@/lib/constants';
 
 const execFileAsync = promisify(execFile);
 export const runtime = 'nodejs';
+
+const VALID_VOICES = new Set(TTS_VOICES.map(v => v.id));
 
 export async function POST(req: NextRequest) {
   let tempFilePath = '';
@@ -29,7 +32,7 @@ export async function POST(req: NextRequest) {
     const venvPython = path.join(process.cwd(), '.venv/bin/python3');
     const pythonBin = fs.existsSync(venvPython) ? venvPython : 'python3';
     const args = [scriptPath, safeText, tempFilePath];
-    if (voice && typeof voice === 'string') args.push(voice);
+    if (voice && typeof voice === 'string' && VALID_VOICES.has(voice)) args.push(voice);
     const { stderr } = await execFileAsync(pythonBin, args, { timeout: 30000 });
     if (stderr) console.warn('[TTS] Python stderr:', stderr);
 
