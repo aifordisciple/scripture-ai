@@ -1,4 +1,3 @@
-// app/api/tts/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { execFile } from 'child_process';
 import fs from 'fs';
@@ -6,6 +5,13 @@ import path from 'path';
 import { promisify } from 'util';
 import { randomUUID } from 'crypto';
 import { TTS_VOICES } from '@/lib/constants';
+import {
+  getTtsCacheKey,
+  getCachedAudio,
+  setCachedAudio,
+  getInFlightPromise,
+  setInFlightPromise,
+} from '@/lib/tts-cache';
 
 const execFileAsync = promisify(execFile);
 export const runtime = 'nodejs';
@@ -13,42 +19,75 @@ export const runtime = 'nodejs';
 const VALID_VOICES = new Set(TTS_VOICES.map(v => v.id));
 
 export async function POST(req: NextRequest) {
-  let tempFilePath = '';
-
   try {
-    const { text, voice } = await req.json();
-    if (!text || typeof text !== 'string') return new NextResponse('Missing text', { status: 400 });
+    const body = await req.json();
+    const { text, voice } = body;
+
+    if (!text || typeof text !== 'string') {
+      return NextResponse.json({ error: 'Missing text' }, { status: 400 });
+    }
 
     const safeText = text.slice(0, 5000);
-    const fileName = `tts-${randomUUID()}.mp3`;
-    const tempDir = process.platform === 'win32' ? path.join(process.cwd(), '.next/cache') : '/tmp';
+    const safeVoice = (voice && typeof voice === 'string' && VALID_VOICES.has(voice)) ? voice : '';
+    const cacheKey = getTtsCacheKey(safeText, safeVoice);
 
-    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+    // 1. Check disk cache
+    const cached = getCachedAudio(cacheKey);
+    if (cached) {
+      return new NextResponse(cached, {
+        headers: {
+          'Content-Type': 'audio/mpeg',
+          'X-TTS-Cache': 'HIT',
+        },
+      });
+    }
 
-    tempFilePath = path.join(tempDir, fileName);
-    const scriptPath = path.join(process.cwd(), 'scripts/tts.py');
+    // 2. Check in-flight dedup
+    const inFlight = getInFlightPromise(cacheKey);
+    if (inFlight) {
+      const buffer = await inFlight;
+      return new NextResponse(buffer, {
+        headers: {
+          'Content-Type': 'audio/mpeg',
+          'X-TTS-Cache': 'DEDUP',
+        },
+      });
+    }
 
-    // 优先使用项目 venv 中的 python，回退到系统 python3
-    const venvPython = path.join(process.cwd(), '.venv/bin/python3');
-    const pythonBin = fs.existsSync(venvPython) ? venvPython : 'python3';
-    const args = [scriptPath, safeText, tempFilePath];
-    if (voice && typeof voice === 'string' && VALID_VOICES.has(voice)) args.push(voice);
-    const { stderr } = await execFileAsync(pythonBin, args, { timeout: 30000 });
-    if (stderr) console.warn('[TTS] Python stderr:', stderr);
+    // 3. Generate audio
+    const generatePromise = generateAudio(safeText, safeVoice);
+    setInFlightPromise(cacheKey, generatePromise);
 
-    const audioBuffer = fs.readFileSync(tempFilePath);
-    fs.unlink(tempFilePath, () => {}); // 异步清理
+    const audioBuffer = await generatePromise;
+
+    // 4. Write to cache (non-blocking)
+    setCachedAudio(cacheKey, audioBuffer);
 
     return new NextResponse(audioBuffer, {
       headers: {
         'Content-Type': 'audio/mpeg',
-        'Content-Length': audioBuffer.length.toString(),
+        'X-TTS-Cache': 'MISS',
       },
     });
+  } catch (error) {
+    console.error('[TTS] Error:', error);
+    return NextResponse.json({ error: 'TTS generation failed' }, { status: 500 });
+  }
+}
 
-  } catch (error: any) {
-    console.error('TTS Error:', error?.message || error);
-    if (tempFilePath && fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-    return new NextResponse(JSON.stringify({ error: 'TTS Failed', detail: error?.message || String(error) }), { status: 500 });
+async function generateAudio(text: string, voice: string): Promise<Buffer> {
+  const tmpId = randomUUID();
+  const tmpPath = `/tmp/tts-${tmpId}.mp3`;
+
+  try {
+    const args = [path.join(process.cwd(), 'scripts/tts.py'), text, tmpPath];
+    if (voice) args.push(voice);
+
+    await execFileAsync('python3', args, { timeout: 30000 });
+
+    const buffer = fs.readFileSync(tmpPath);
+    return buffer;
+  } finally {
+    try { fs.unlinkSync(tmpPath); } catch { /* ignore */ }
   }
 }

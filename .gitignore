@@ -46,4 +46,5 @@ next-env.d.ts
 sftp.json
 
 pgdata/
+tts-cache/
 /public

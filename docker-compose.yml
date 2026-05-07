@@ -15,12 +15,14 @@ services:
     volumes:
       - ./prisma:/app/prisma  # 关键：挂载 prisma 目录
       - ./data:/app/data:ro  # ro 表示只读挂载，确保安全
+      - ./tts-cache:/app/.cache/tts  # TTS 音频缓存持久化
     environment:
       # 这里的变量会覆盖 .env.local 中的同名变量
       # 确保容器内部连接数据库使用的是服务名 'db' 而不是 'localhost'
       - DATABASE_URL=postgresql://user:password@db:5432/scripture_db
       - PRISMA_BINARIES_MIRROR=https://registry.npmmirror.com/-/binary/prisma # 镜像加速
       - AUTH_TRUST_HOST=true
+      - TTS_CACHE_DIR=/app/.cache/tts
     depends_on:
       db:
         condition: service_healthy

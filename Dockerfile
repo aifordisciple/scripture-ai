@@ -69,6 +69,8 @@ COPY --chown=nextjs:nodejs data ./data
 # 建议在 docker-compose 中使用 entrypoint 或手动执行一次
 
 
+RUN mkdir -p /app/.cache/tts && chown nextjs:nodejs /app/.cache/tts
+
 USER nextjs
 EXPOSE 3000
 
