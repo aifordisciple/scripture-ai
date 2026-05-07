@@ -14,6 +14,7 @@ import {
   createLocaleSlice,
   createSermonSlice
 } from './slices';
+import { createShareSlice } from './slices/shareSlice';
 
 // --------------------------------------------------
 // 组合主 Store
@@ -31,6 +32,7 @@ export const useBibleStore = create<StoreState>()(
       ...createDMSlice(...a),
       ...createLocaleSlice(...a),
       ...createSermonSlice(...a),
+      ...createShareSlice(...a),
     }),
     {
       name: 'bible-storage',
@@ -132,6 +134,12 @@ export const useBibleStore = create<StoreState>()(
           sermonAiLoading: false,
           sermonAiError: null,
           sermonAiActionLoading: false, sermonReviewData: null, sermonReviewLoading: false, sermonInitialVerseRefs: '',
+          // Share/Card 状态不持久化（模板和历史通过独立 localStorage 管理）
+          cardGenerating: false,
+          cardResultImage: null,
+          cardStep: 'edit',
+          cardAiGenerating: false,
+          cardAiConfigBackup: null,
         };
       },
     }

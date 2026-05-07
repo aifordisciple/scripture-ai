@@ -1178,3 +1178,77 @@ body::-webkit-scrollbar-thumb:hover,
 [data-slot="sheet-content"] {
   z-index: var(--z-modal) !important;
 }
+
+/* =========================================
+   Vditor 编辑器 Tailwind Preflight 修复
+   ========================================= */
+
+/* Tailwind's preflight resets h1-h6, p, ul, ol, blockquote etc. to inherit,
+   which breaks Vditor's IR mode rendering. Restore Vditor's expected styles. */
+.vditor-reset h1,
+.vditor-reset h2,
+.vditor-reset h3,
+.vditor-reset h4,
+.vditor-reset h5,
+.vditor-reset h6 {
+  font-weight: revert;
+  font-size: revert;
+  margin: revert;
+  line-height: revert;
+}
+
+.vditor-reset p {
+  margin: revert;
+  line-height: revert;
+}
+
+.vditor-reset ul,
+.vditor-reset ol {
+  list-style: revert;
+  margin: revert;
+  padding: revert;
+}
+
+.vditor-reset blockquote {
+  margin: revert;
+  padding: revert;
+  border: revert;
+}
+
+.vditor-reset pre {
+  margin: revert;
+  padding: revert;
+}
+
+.vditor-reset code {
+  font-size: revert;
+  padding: revert;
+}
+
+.vditor-reset a {
+  color: revert;
+  text-decoration: revert;
+}
+
+.vditor-reset img {
+  max-width: revert;
+}
+
+.vditor-reset hr {
+  border: revert;
+  margin: revert;
+}
+
+/* Ensure Vditor IR mode content is always visible regardless of focus state */
+.vditor-ir .vditor-reset {
+  color: var(--text-color, #1d1d1f);
+}
+
+.dark .vditor-ir .vditor-reset {
+  color: var(--text-color, #cccccc);
+}
+
+/* Ensure IR node markers are properly visible when expanded */
+.vditor-ir__node--expand .vditor-ir__marker {
+  color: var(--second-color, #4285f4);
+}

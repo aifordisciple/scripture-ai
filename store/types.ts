@@ -590,7 +590,70 @@ export interface SermonSlice {
 // --------------------------------------------------
 // 3. 聚合总状态类型
 // --------------------------------------------------
-export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & DMSlice & LocaleSlice & SermonSlice;
+// --------------------------------------------------
+// 8. 经文卡片编辑状态 (ShareSlice)
+// --------------------------------------------------
+
+export interface CardTemplateData {
+  id: string;
+  name: string;
+  config: Record<string, unknown>;
+  thumbnail?: string;
+  createdAt: string;
+}
+
+export interface CardHistoryData {
+  id: string;
+  config: Record<string, unknown>;
+  imageUrl?: string;
+  resolution: string;
+  createdAt: string;
+}
+
+export interface ShareSlice {
+  // 卡片编辑配置
+  cardConfig: import('@/lib/card-presets').CardConfig;
+  setCardConfig: (config: import('@/lib/card-presets').CardConfig) => void;
+  updateCardConfig: (partial: Partial<import('@/lib/card-presets').CardConfig>) => void;
+
+  // 生成状态
+  cardGenerating: boolean;
+  setCardGenerating: (generating: boolean) => void;
+  cardResultImage: string | null;
+  setCardResultImage: (image: string | null) => void;
+  cardStep: 'edit' | 'result';
+  setCardStep: (step: 'edit' | 'result') => void;
+
+  // AI 生成状态
+  cardAiGenerating: boolean;
+  setCardAiGenerating: (generating: boolean) => void;
+  cardAiConfigBackup: import('@/lib/card-presets').CardConfig | null;
+  setCardAiConfigBackup: (backup: import('@/lib/card-presets').CardConfig | null) => void;
+
+  // 模板收藏
+  cardTemplates: CardTemplateData[];
+  setCardTemplates: (templates: CardTemplateData[]) => void;
+  addCardTemplate: (template: CardTemplateData) => void;
+  removeCardTemplate: (id: string) => void;
+
+  // 生成历史
+  cardHistories: CardHistoryData[];
+  setCardHistories: (histories: CardHistoryData[]) => void;
+  addCardHistory: (history: CardHistoryData) => void;
+  clearCardHistories: () => void;
+
+  // 便捷操作
+  initCardConfig: (book: string, chapter: number, verses: number[]) => void;
+  changeLayoutMode: (mode: import('@/lib/card-presets').LayoutMode) => void;
+  selectBgImage: (base64Image: string) => void;
+  selectBgGradient: (gradient: string, textColor: string, infoColor: string) => void;
+  uploadBgImage: (base64Image: string) => void;
+  applyAiConfig: (aiConfig: Partial<import('@/lib/card-presets').CardConfig>) => void;
+  undoAiConfig: () => void;
+  resetCardConfig: () => void;
+}
+
+export type StoreState = UISlice & ReaderSlice & AISlice & UserDataSlice & SyncSlice & GroupSlice & AtlasSlice & DMSlice & LocaleSlice & SermonSlice & ShareSlice;
 
 // --------------------------------------------------
 // 4. 小组读经计划状态 (GroupSlice)

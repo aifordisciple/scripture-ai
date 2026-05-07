@@ -1,270 +1,474 @@
-# SPEC: 讲章系统深度重构 — 心流体验与AI写作助手对齐
+# SPEC: 经文卡片定制功能全面升级
 
-## Objective
+## 1. Objective
 
-将讲章功能从"工具集合"重构为"心流引导系统"，让用户在准备讲道的过程中始终处于沉浸、连贯的创作状态。核心对标千问等一流AI写作助手的内联补全体验，同时保留讲章特有的结构化引导能力。
+### 目标
+将现有的经文卡片（ShareCard）从简单的客户端截图工具升级为专业级的经文图片生成器，支持多分辨率输出、多图库来源、服务端渲染、AI 全套生成、模板收藏与历史同步。
 
 ### 目标用户
+- **日常读经用户**：快速生成社交媒体分享图（微信朋友圈、Instagram）
+- **教会服事人员**：制作讲道PPT背景、周报插图
+- **内容创作者**：批量生成不同尺寸的经文壁纸
 
-- **传道人/牧师**：系统性讲章准备流程
-- **带职传道/平信徒**：更多AI辅助和指导
-- **神学生**：学习讲章写作，需要模板和AI教练
+### 核心价值
+1. **一次编辑，多端输出** — 同一张卡片可导出为手机壁纸、桌面壁纸、社交分享图等
+2. **丰富图库** — 从3个来源（Picsum/Bing/Unsplash）按关键词搜索背景
+3. **专业品质** — 服务端 Satori 渲染，像素级精确，字体无缺失
+4. **AI 加持** — 一键生成完整卡片（背景+配色+标题+布局+字体）
+5. **模板复用** — 收藏喜欢的配置，跨设备同步
 
-### 核心体验目标
-
-1. **零切换心流**：AI辅助直接在编辑器内发生，无需切换面板
-2. **渐进式引导**：从经文研读→大纲→初稿→精修→审查，每一步都有智能建议
-3. **即时响应**：AI操作流式输出、内联呈现，像千问写作助手一样自然
-
----
-
-## Current Pain Points (现状痛点分析)
-
-### P1: 面板切换割裂
-- **现状**：6个面板（列表/AI/经文/模板/审查/设置）通过侧边栏切换，编辑器和AI面板分处两列
-- **痛点**：写稿时需要AI续写→切到AI面板→输入→等回复→点"插入"→切回编辑器，至少4步操作
-- **理想**：在编辑器中直接触发AI，结果内联呈现
-
-### P2: AI响应不连贯
-- **现状**：`EditorToolbar`的续写/润色调用`/api/chat/sermon`（非流式），`SermonAIPanel`的聊天调用`/api/sermon/[id]/ai-chat`（流式），两套独立系统
-- **痛点**：工具栏AI操作是同步等待整段返回，用户看到loading spinner无法继续编辑；AI面板的流式输出又需要手动插入
-- **理想**：所有AI操作统一流式输出，内联补全式呈现
-
-### P3: 操作步骤繁琐
-- **现状**：插入经文需要点工具栏→3步选择器→确认；插入段落标题需要点工具栏→下拉菜单→选择
-- **痛点**：频繁的弹窗和选择打断写作节奏
-- **理想**：AI自动识别上下文建议插入经文/段落，或用快捷键/斜杠命令快速触发
-
-### P4: 缺少流程引导
-- **现状**：创建讲章后直接进入空白编辑器，用户需要自己知道下一步做什么
-- **痛点**：新手不知道从何开始，老手也需要记住流程
-- **理想**：根据讲章当前状态智能建议下一步操作
+### 验收标准
+- [ ] 支持 6 种预设分辨率 + 自定义宽高输入
+- [ ] Picsum 随机图库集成（按分类浏览）
+- [ ] Bing 每日壁纸 + 图片搜索集成
+- [ ] Unsplash 关键词搜索集成
+- [ ] 服务端 Satori 渲染替代客户端 html-to-image
+- [ ] 所有 10 种布局模式在服务端完整支持
+- [ ] AI 全套生成（背景+配色+标题+布局+字体推荐）
+- [ ] 模板收藏（本地优先 + 登录同步）
+- [ ] 生成历史记录（本地优先 + 登录同步）
+- [ ] Web Share API 集成
+- [ ] QR 码水印选项
+- [ ] 中英文 i18n 完整覆盖
 
 ---
 
-## Architecture Changes
+## 2. Commands
 
-### 1. 编辑器内AI补全系统 (Inline AI Completion)
-
-**替换**：`EditorToolbar`的AI续写/润色按钮 + `SermonAIPanel`的"插入到编辑器"流程
-
-**新设计**：
-- 在Vditor编辑器中实现"幽灵文本"(ghost text)补全
-- 用户按`Tab`接受补全，按`Esc`拒绝，继续打字则忽略
-- 选中文字后出现浮动工具条（floating toolbar），提供：润色、扩写、缩写、插入经文、添加例证
-- AI操作统一走流式API，补全文本以半透明灰色内联显示
-
-**技术方案**：
-- Vditor不支持原生ghost text，需要通过CSS + DOM操作模拟
-- 在编辑器的contenteditable区域中，在光标位置插入一个`<span class="ai-ghost-text">`元素
-- 流式更新该span的内容
-- Tab键监听：将ghost text转为正式文本
-- 选中文字时：在selection上方显示浮动工具条
-
-**新增文件**：
-- `components/sermon/InlineAICompletion.tsx` — 内联补全控制器
-- `components/sermon/FloatingToolbar.tsx` — 选中文本的浮动工具条
-- `hooks/use-inline-ai.ts` — 内联AI补全hook
-
-**修改文件**：
-- `components/sermon/VditorEditor.tsx` — 添加ghost text渲染支持、Tab键监听
-- `components/sermon/EditorToolbar.tsx` — 简化为快捷操作入口（保留经文选择器、段落标题，移除AI续写/润色按钮）
-- `app/api/sermon/ai-action/route.ts` — 改为流式响应（streamText替代generateText）
-
-### 2. AI助手面板重构 (AI Copilot Panel)
-
-**替换**：`SermonAIPanel`的独立聊天面板
-
-**新设计**：
-- 面板从"聊天窗口"变为"AI副驾驶"面板，始终可见于编辑器右侧
-- 三个标签页：
-  - **对话**：保留当前聊天功能，但AI回复自动高亮可插入段落
-  - **建议**：根据当前讲章状态智能推荐下一步操作（如"建议添加引言"、"建议插入经文引用"）
-  - **上下文**：显示当前讲章的经文引用、大纲结构、写作进度
-
-**修改文件**：
-- `components/sermon/SermonAIPanel.tsx` — 重构为三标签页AI副驾驶面板
-- `store/slices/sermonSlice.ts` — 添加`sermonAiSuggestions`、`sermonOutline`状态
-- `app/api/sermon/[id]/ai-chat/route.ts` — 增强上下文感知（传入当前光标位置的内容片段）
-
-### 3. 讲章流程引导系统 (Flow Guide)
-
-**新增**：基于讲章状态的智能引导
-
-**设计**：
-- 讲章生命周期：`经文研读 → 大纲构建 → 初稿撰写 → 内容精修 → 审查完善`
-- 每个阶段有对应的AI建议和快捷操作
-- 在编辑器顶部显示进度条和当前阶段
-- 阶段转换条件：
-  - 经文研读→大纲构建：用户开始输入标题或大纲
-  - 大纲构建→初稿撰写：大纲结构完整（有引言+至少1个要点+结论）
-  - 初稿撰写→内容精修：字数超过500
-  - 内容精修→审查完善：用户触发审查或字数超过1500
-
-**新增文件**：
-- `components/sermon/FlowGuide.tsx` — 流程引导组件（进度条+阶段提示）
-- `components/sermon/FlowSuggestions.tsx` — 阶段性建议卡片
-- `lib/sermon-flow.ts` — 讲章阶段判断逻辑、建议生成
-
-**修改文件**：
-- `components/sermon/SermonEditor.tsx` — 集成FlowGuide
-- `store/slices/sermonSlice.ts` — 添加`sermonFlowStage`状态
-- `store/types.ts` — 添加`SermonFlowStage`类型
-
-### 4. 快捷操作系统 (Slash Commands & Quick Actions)
-
-**替换**：`EditorToolbar`的多级菜单
-
-**新设计**：
-- 在编辑器中输入`/`触发斜杠命令菜单：
-  - `/verse` — 插入经文引用
-  - `/section` — 插入段落标题
-  - `/continue` — AI续写
-  - `/polish` — AI润色选中文字
-  - `/example` — AI添加例证
-  - `/crossref` — AI交叉引用
-  - `/template` — 应用模板
-  - `/review` — 生成审查报告
-- 键盘快捷键：
-  - `Cmd+J` / `Ctrl+J` — 触发AI续写（ghost text）
-  - `Cmd+Shift+J` — 打开AI副驾驶面板
-  - `Cmd+/` — 打开斜杠命令菜单
-
-**新增文件**：
-- `components/sermon/SlashCommandMenu.tsx` — 斜杠命令菜单组件
-- `hooks/use-slash-commands.ts` — 斜杠命令hook
-
-**修改文件**：
-- `components/sermon/VditorEditor.tsx` — 添加`/`键监听和命令触发
-- `components/sermon/EditorToolbar.tsx` — 简化，保留核心按钮但减少层级
-
-### 5. 创建流程优化
-
-**修改**：`NewSermonDialog`
-
-**新设计**：
-- 创建后自动生成大纲（而非空白模板）
-- 创建流程增加"AI生成大纲"选项
-- 大纲生成后进入编辑器，FlowGuide显示在"大纲构建"阶段
-- 如果用户选择跳过AI大纲，FlowGuide显示在"经文研读"阶段
-
-**修改文件**：
-- `components/sermon/NewSermonDialog.tsx` — 添加"AI生成大纲"选项
-- `app/api/sermon/route.ts` — POST时可选触发大纲生成
-
----
-
-## Commands
-
+### 开发命令
 ```bash
-# Development
-npm run dev
+npm run dev                    # 开发服务器 (port 3000)
+npm run build                  # 生产构建
+npx prisma generate            # 生成 Prisma client
+npx prisma db push             # 推送 schema 变更
+docker-compose up -d --build   # Docker 重建
+```
 
-# Build & Deploy
-docker-compose down && docker-compose up -d --build
+### 测试命令
+```bash
+npm run lint                   # ESLint 检查
+```
 
-# Auto Deploy
-./auto_deploy.sh -s "<summary>" -d "<detail>"
+### 部署命令
+```bash
+./auto_deploy.sh -s "feat: 经文卡片升级" -d "详细说明"
 ```
 
 ---
 
-## Project Structure (Changes Only)
+## 3. Project Structure
+
+### 新增文件
 
 ```
-components/sermon/
-├── SermonTab.tsx                  # MODIFY: 集成FlowGuide，调整布局
-├── SermonEditor.tsx               # MODIFY: 集成FlowGuide、InlineAI
-├── SermonAIPanel.tsx              # REWRITE: AI Copilot三标签面板
-├── EditorToolbar.tsx              # MODIFY: 简化，移除AI按钮
-├── VditorEditor.tsx               # MODIFY: ghost text、斜杠命令、快捷键
-├── NewSermonDialog.tsx            # MODIFY: 添加AI大纲生成选项
-├── InlineAICompletion.tsx         # NEW: 内联AI补全控制器
-├── FloatingToolbar.tsx            # NEW: 选中文本浮动工具条
-├── FlowGuide.tsx                  # NEW: 流程引导进度条
-├── FlowSuggestions.tsx            # NEW: 阶段性建议卡片
-├── SlashCommandMenu.tsx           # NEW: 斜杠命令菜单
-├── SermonSidebar.tsx              # MODIFY: 精简面板切换
-├── SermonVersePanel.tsx           # KEEP: 保留经文面板
-├── SermonTemplatePanel.tsx        # KEEP: 保留模板面板
-├── SermonReviewPanel.tsx          # MODIFY: 审查结果可一键应用建议
-├── SermonSettingsPanel.tsx        # KEEP: 保留设置面板
-├── SermonListPanel.tsx            # KEEP: 保留列表面板
-├── SermonEditorContext.tsx        # MODIFY: 添加ghost text控制方法
-├── SermonErrorBoundary.tsx        # KEEP
-├── SermonMobileBottomBar.tsx      # MODIFY: 适配新面板结构
-└── VersePickerPopover.tsx         # KEEP
+app/api/
+├── card-image/route.tsx           # 重写：服务端渲染（支持多分辨率+完整布局）
+├── card-theme/route.ts            # 重写：AI 全套生成（背景+配色+标题+布局+字体）
+├── card-template/route.ts         # 新增：模板 CRUD（收藏/列表/删除）
+├── card-history/route.ts          # 新增：生成历史 CRUD
+├── proxy/route.ts                 # 扩展：增加 Picsum/Bing/Unsplash 域名白名单
+├── picsum/route.ts                # 新增：Picsum 图片代理+分类列表
+├── bing-wallpaper/route.ts        # 新增：Bing 每日壁纸 + 搜索代理
+└── unsplash-search/route.ts       # 新增：Unsplash 关键词搜索代理
 
-hooks/
-├── use-inline-ai.ts               # NEW: 内联AI补全hook
-└── use-slash-commands.ts          # NEW: 斜杠命令hook
-
+components/bible/
+├── ShareCard.tsx                  # 重写：全面升级的主组件（精简为容器）
+├── share-card/
+│   ├── CardPreview.tsx            # 新增：卡片实时预览（客户端轻量预览）
+│   ├── ResolutionPicker.tsx       # 新增：分辨率选择器（预设+自定义）
+│   ├── BackgroundPicker.tsx       # 新增：背景选择器（图库+渐变+上传）
+│   ├── TextStylePanel.tsx         # 新增：文字样式面板
+│   ├── LayoutPicker.tsx           # 新增：布局选择器
+│   ├── AIGeneratePanel.tsx        # 新增：AI 一键生成面板
+│   ├── TemplatePanel.tsx          # 新增：模板收藏面板
+│   ├── HistoryPanel.tsx           # 新增：历史记录面板
+│   ├── QRWatermark.tsx            # 新增：QR 码水印组件
+│   └── ShareActions.tsx           # 新增：分享/下载操作栏
+│
 lib/
-├── sermon-flow.ts                 # NEW: 讲章阶段判断逻辑
-├── sermon-vditor.ts               # MODIFY: 添加ghost text渲染支持
-└── constants.ts                   # MODIFY: 更新AI提示词
+├── card-presets.ts                # 新增：分辨率预设、渐变预设、字体选项等常量
+├── card-renderer.ts               # 新增：服务端渲染参数构建工具
+└── i18n/
+    ├── zh/shareCard.ts            # 扩展：新增翻译键
+    └── en/shareCard.ts            # 扩展：新增翻译键
 
-app/api/sermon/
-├── ai-action/route.ts             # MODIFY: 改为流式响应
-├── [id]/ai-chat/route.ts          # MODIFY: 增强上下文感知
-└── [id]/ai-suggest/route.ts       # NEW: 阶段性建议API
+store/
+├── slices.ts                      # 扩展：新增 ShareSlice（卡片编辑状态）
+└── types.ts                       # 扩展：新增 ShareSlice 类型
+```
 
-store/slices/
-└── sermonSlice.ts                 # MODIFY: 添加flow stage、suggestions状态
+### 修改文件
+
+```
+prisma/schema.prisma               # 新增 CardTemplate + CardHistory 模型
+app/api/proxy/route.ts             # 扩展白名单域名
+package.json                       # 移除 html2canvas 僵尸依赖
 ```
 
 ---
 
-## Code Style
+## 4. Code Style
 
-- TypeScript strict mode, no `as any` or `@ts-ignore`
-- Immutable state updates (spread operator)
-- Components: PascalCase files, functional components with hooks
-- Hooks: kebab-case files (`use-inline-ai.ts`)
-- API routes: lowercase paths
-- Path alias `@/` for all imports
-- `"use client"` for client components
-- Files < 400 lines preferred, 800 max
-- Functions < 50 lines
-- No deep nesting (> 4 levels)
+### TypeScript 严格模式
+- 无 `as any`、`@ts-ignore`
+- 所有组件 Props 使用 `interface` 定义
+- API 请求/响应使用 Zod schema 验证
+
+### 不可变状态更新
+```typescript
+// 正确：使用展开运算符
+setTemplates(prev => [...prev, newTemplate]);
+
+// 错误：直接修改
+templates.push(newTemplate);
+```
+
+### 组件拆分原则
+- 每个文件 < 400 行
+- 单一职责：一个组件只做一件事
+- Props 向下传递，状态提升到 ShareSlice
+
+### API 路由规范
+- 所有外部图片必须通过 `/api/proxy` 代理（SSRF 防护）
+- 响应格式：`{ success: boolean, data?: T, error?: string }`
+- 错误处理：显式 try-catch，不吞异常
+
+### i18n 规范
+- 所有用户可见文本必须通过 `useTranslation()` 获取
+- 新增键同时更新 zh/ 和 en/ 两个文件
+- 键名格式：`shareCard.<feature>.<detail>`
 
 ---
 
-## Testing Strategy
+## 5. Testing Strategy
 
-### Unit Tests
-- `lib/sermon-flow.ts` — 阶段判断逻辑
-- `hooks/use-inline-ai.ts` — 内联AI补全状态管理
-- `hooks/use-slash-commands.ts` — 斜杠命令解析
+### 单元测试（覆盖率目标 80%）
+- `lib/card-presets.ts` — 预设数据验证
+- `lib/card-renderer.ts` — 渲染参数构建逻辑
+- 各 Picker 组件的交互逻辑
 
-### Integration Tests
-- API routes: `/api/sermon/ai-action`（流式响应验证）
-- API routes: `/api/sermon/[id]/ai-suggest`（建议生成）
+### 集成测试
+- `/api/card-image` — 服务端渲染输出验证（不同分辨率、布局模式）
+- `/api/card-theme` — AI 生成结果格式验证
+- `/api/proxy` — 域名白名单、SSRF 防护
+- `/api/picsum`、`/api/bing-wallpaper`、`/api/unsplash-search` — 图库代理
+- `/api/card-template`、`/api/card-history` — CRUD 操作
 
-### E2E Tests (Playwright)
-- 创建讲章→AI大纲生成→编辑→内联补全→审查 完整流程
-- 斜杠命令触发和执行
-- 浮动工具条交互
+### E2E 测试（Playwright）
+- 完整的卡片生成流程：选经文 → 选背景 → 调样式 → 生成 → 下载
+- 分辨率切换：验证输出图片尺寸正确
+- AI 一键生成：验证生成结果完整
+- 模板收藏：保存 → 刷新 → 验证持久化
 
 ---
 
-## Boundaries
+## 6. Boundaries
 
-### Always Do
-- 所有AI操作必须走流式响应（streamText），不允许同步等待
-- 编辑器内的AI交互必须不阻断用户操作（ghost text模式）
-- 保留现有数据模型和API兼容性（不破坏已有讲章数据）
-- 移动端适配所有新交互（触摸友好的浮动工具条、底部命令面板）
-- i18n支持所有新增UI文本
+### Always Do（必须做）
+- 所有外部图片请求必须通过 `/api/proxy` 代理，维护域名白名单
+- 服务端渲染使用 Satori（`@vercel/og`），不使用 Puppeteer 等重量级方案
+- 新增 API 端点必须包含错误处理和输入验证
+- 所有用户可见文本必须 i18n
+- Prisma 模型变更必须通过 `npx prisma db push` 同步
 
-### Ask First About
-- Vditor编辑器的ghost text实现方案（可能需要评估是否切换到支持更好的编辑器）
-- AI大纲生成的触发时机（创建时自动 vs 用户手动）
-- 流程引导的强制程度（建议性 vs 阻断性）
+### Ask First（先确认）
+- 新增第三方 API Key（如 Bing Image Search API Key）— 需确认环境变量配置方式
+- 修改现有 Zustand store 的 slice 结构 — 可能影响其他组件
+- 更改 Dialog/Modal 的打开/关闭逻辑 — 可能影响 FloatingMenu 等触发点
+- 新增 npm 依赖 — 需评估包大小和安全性
 
-### Never Do
-- 不删除现有API端点（保持向后兼容）
-- 不修改Prisma schema中的Sermon模型核心字段
-- 不引入新的外部编辑器依赖（在Vditor上扩展）
-- 不在编辑器外弹窗显示AI结果（所有AI输出内联或侧边面板）
-- 不自动保存AI生成的内容（必须用户明确接受）
+### Never Do（绝不做）
+- 不在客户端直接请求外部图库 API（必须走服务端代理）
+- 不在源码中硬编码 API Key
+- 不使用 `html2canvas`（已废弃，统一用 Satori）
+- 不修改 `FloatingMenu.tsx` 的触发逻辑（只扩展 `openShareModal` 的参数）
+- 不删除现有的 10 种布局模式
+- 不破坏桌面端（Tauri）的 ShareCard 兼容性
+
+---
+
+## 7. Feature Specifications
+
+### 7.1 分辨率定制
+
+#### 预设模板
+| 名称 | 宽 x 高 | 用途 |
+|------|---------|------|
+| 手机壁纸 | 1080 x 1920 | iPhone/Android 锁屏 |
+| 平板壁纸 | 1536 x 2048 | iPad 锁屏 |
+| 桌面壁纸 | 1920 x 1080 | PC 桌面 (16:9) |
+| 社交卡片 | 1080 x 1440 | 微信朋友圈/小红书 (3:4) |
+| 正方形 | 1080 x 1080 | Instagram 帖子 |
+| 微信头像 | 640 x 640 | 头像尺寸 |
+
+#### 自定义输入
+- 宽度输入框：范围 320-3840px
+- 高度输入框：范围 320-3840px
+- 宽高比锁定开关（默认开启）
+- 常用宽高比快捷按钮：1:1, 3:4, 9:16, 16:9, 4:3
+
+#### 实现要点
+- 预览区域根据选定分辨率动态调整宽高比
+- 服务端渲染时使用用户选择的实际分辨率
+- 预览使用缩放适配（保持宽高比，fit 到预览容器内）
+
+### 7.2 在线图库
+
+#### Picsum Photos
+- **随机浏览**：按分类（Nature/City/People/Tech 等）获取随机图片
+- **按 ID 获取**：支持指定图片 ID（高级用户）
+- **API**：`https://picsum.photos/v2/list?page=1&limit=30`
+- **图片 URL**：`https://picsum.photos/id/{id}/1080/1920`
+- **代理**：通过 `/api/picsum` 代理，域名白名单添加 `picsum.photos`
+- **无需 API Key**
+
+#### Bing 壁纸
+- **每日壁纸**：`https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=8`
+  - 获取最近 8 天的 Bing 每日壁纸
+  - 无需 API Key
+- **图片搜索**：Bing Image Search API（需 `BING_SEARCH_API_KEY` 环境变量）
+  - 用户输入关键词（如"山"、"海"、"日落"）
+  - 返回缩略图列表供选择
+  - 代理：通过 `/api/bing-wallpaper` 代理
+- **降级策略**：无 API Key 时只显示每日壁纸，隐藏搜索入口
+
+#### Unsplash 搜索
+- **关键词搜索**：用户输入关键词搜索 Unsplash 图片
+- **API**：使用 Unsplash Search API（需 `UNSPLASH_ACCESS_KEY` 环境变量）
+  - 搜索端点：`https://api.unsplash.com/search/photos?query={keyword}&per_page=12`
+- **保留现有预设**：11 张精选 Unsplash 图片保留
+- **代理**：通过 `/api/unsplash-search` 代理
+- **降级策略**：无 API Key 时只显示预设图片，隐藏搜索入口
+
+#### 图库 UI 设计
+- 新增"在线图库"标签页（在"精选美图"和"简约渐变"之间）
+- 三个图库来源以 Tab 切换：Picsum / Bing / Unsplash
+- 每个图库显示缩略图网格（3列），点击加载大图
+- 搜索框在 Bing 和 Unsplash Tab 下显示
+- 加载状态：骨架屏 + 加载动画
+- 分页：滚动加载更多
+
+### 7.3 服务端渲染（全面切换）
+
+#### 架构变更
+- **移除**客户端 `html-to-image`（`toPng`）生成方式
+- **使用**服务端 `/api/card-image`（Satori）作为唯一渲染引擎
+- **客户端预览**：保留 DOM 预览用于实时编辑反馈，但最终输出走服务端
+
+#### 服务端渲染增强
+1. **支持所有 10 种布局模式**：补充 `frame`、`magazine`、`stamp` 三种布局的服务端实现
+2. **多分辨率输出**：根据用户选择的分辨率动态设置 `width`/`height`
+3. **多字体支持**：加载 `NotoSerifSC-Bold.otf`、`NotoSansSC-Bold.ttf`、`KaiTi`（如可用）
+4. **Base64 图片传入**：客户端先将选中图片通过 proxy 转为 Base64，再 POST 给服务端
+
+#### 渲染流程
+```
+用户点击"生成" → 客户端收集所有参数 → POST /api/card-image → 服务端 Satori 渲染 → 返回 PNG blob → 客户端展示/下载
+```
+
+#### API 参数扩展
+```typescript
+interface CardImageRequest {
+  // 内容
+  verseContent: string[];
+  bookName: string;
+  chapter: string;
+  verseRange: string;
+
+  // 分辨率（新增）
+  width: number;       // 输出宽度（px）
+  height: number;      // 输出高度（px）
+
+  // 背景
+  bgImage?: string;    // Base64 data URL
+  bgGradient?: string; // CSS linear-gradient
+
+  // 布局
+  layoutMode: LayoutMode; // 全部10种
+
+  // 文字
+  textColor: string;
+  infoColor: string;
+  fontSize: number;
+  textAlign: 'left' | 'center' | 'right';
+  lineHeight: number;
+  fontFamily: string;  // 新增：字体选择
+
+  // AI 标题（新增）
+  aiTitle?: string;
+
+  // QR 码（新增）
+  qrCodeUrl?: string;  // 生成 QR 码的 URL
+  qrCodePosition?: 'bottom-left' | 'bottom-right' | 'none';
+}
+```
+
+### 7.4 AI 全套生成
+
+#### 升级 `/api/card-theme`
+现有接口只返回 `title` + `gradient`，升级为返回完整卡片配置：
+
+```typescript
+interface AICardThemeResponse {
+  title: string;           // 4-8字标题
+  gradient: string;        // CSS gradient
+  layoutMode: LayoutMode;  // 推荐布局
+  fontFamily: string;      // 推荐字体
+  textColor: string;       // 推荐文字颜色
+  infoColor: string;       // 推荐信息颜色
+  fontSize: number;        // 推荐字号
+  textAlign: 'left' | 'center' | 'right';
+  bgSearchQuery?: string;  // 推荐搜索关键词（用于图库搜索）
+}
+```
+
+#### AI 生成流程
+1. 用户点击"AI 一键生成"按钮
+2. 前端发送经文内容到 `/api/card-theme`
+3. AI 返回完整配置
+4. 前端应用配置到编辑器
+5. 如果返回了 `bgSearchQuery`，自动搜索图库并应用第一张图
+6. 用户可在此基础上微调
+
+#### AI 面板 UI
+- 大按钮"AI 一键生成"
+- 生成中显示加载动画 + "AI 正在创作..."
+- 生成后显示"已应用 AI 推荐"提示，可一键撤销
+
+### 7.5 模板收藏
+
+#### Prisma 模型
+```prisma
+model CardTemplate {
+  id          String   @id @default(cuid())
+  userId      String?  // 关联用户（可选，未登录为 null）
+  name        String   // 模板名称
+  config      Json     // 完整卡片配置 JSON
+  thumbnail   String?  // 缩略图 Base64
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+```
+
+#### 存储策略
+- **未登录用户**：模板保存到 `localStorage`，key: `scripture-card-templates`
+- **已登录用户**：模板保存到数据库，同时缓存到 `localStorage`
+- **登录时同步**：将 localStorage 中的模板上传到数据库，合并去重
+- **读取优先级**：先读 localStorage 缓存，登录用户异步同步数据库
+
+#### 模板操作
+- **保存当前配置为模板**：弹出命名对话框
+- **应用模板**：一键恢复所有配置
+- **删除模板**：确认后删除
+- **模板缩略图**：保存时自动生成小尺寸预览
+
+### 7.6 生成历史
+
+#### Prisma 模型
+```prisma
+model CardHistory {
+  id          String   @id @default(cuid())
+  userId      String?  // 关联用户（可选）
+  config      Json     // 使用的配置
+  imageUrl    String?  // 生成的图片 URL（临时存储）
+  resolution  String   // 如 "1080x1920"
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+}
+```
+
+#### 存储策略
+- 与模板相同的本地优先 + 登录同步策略
+- 历史记录保留最近 50 条
+- 图片使用 Base64 存储在 localStorage（限制 5MB），数据库只存配置
+
+### 7.7 Web Share API 集成
+
+#### 实现要点
+- 检测 `navigator.share` 支持
+- 支持时显示"分享"按钮，调用 `navigator.share({ title, text, files: [imageFile] })`
+- 不支持时显示"下载"按钮（现有行为）
+- 同时提供"复制到剪贴板"选项（`navigator.clipboard.write`）
+
+### 7.8 QR 码水印
+
+#### 实现要点
+- 可选功能，默认关闭
+- 开启后，在卡片底部角落添加 QR 码
+- QR 码内容：当前经文的引用 URL（如 `https://app.example.com/genesis/1/1`）
+- QR 码大小：根据卡片分辨率自适应（约 80x80px 在 1080 宽度下）
+- 位置选项：左下角 / 右下角 / 关闭
+- 服务端渲染时使用 `qrcode` 包生成 QR 码图片，嵌入 Satori JSX
+
+---
+
+## 8. Implementation Phases
+
+### Phase 1: 基础架构重构
+1. 创建 `lib/card-presets.ts`（分辨率预设、常量提取）
+2. 创建 `lib/card-renderer.ts`（服务端渲染参数构建）
+3. 扩展 Zustand ShareSlice
+4. 拆分 ShareCard.tsx 为子组件
+
+### Phase 2: 服务端渲染升级
+1. 重写 `/api/card-image/route.tsx`（多分辨率 + 全布局 + 多字体）
+2. 扩展 `/api/proxy/route.ts`（新增域名白名单）
+3. 新增 `/api/picsum/route.ts`
+4. 新增 `/api/bing-wallpaper/route.ts`
+5. 新增 `/api/unsplash-search/route.ts`
+6. 客户端切换到服务端渲染
+
+### Phase 3: 分辨率 + 图库 UI
+1. 实现 `ResolutionPicker.tsx`
+2. 实现 `BackgroundPicker.tsx`（含图库搜索）
+3. 更新 `CardPreview.tsx`（动态宽高比预览）
+
+### Phase 4: AI + 高级功能
+1. 重写 `/api/card-theme/route.ts`（全套 AI 生成）
+2. 实现 `AIGeneratePanel.tsx`
+3. 实现 `QRWatermark.tsx`
+4. 实现 `ShareActions.tsx`（Web Share API）
+
+### Phase 5: 模板 + 历史
+1. Prisma 模型迁移
+2. 新增 `/api/card-template/route.ts`
+3. 新增 `/api/card-history/route.ts`
+4. 实现 `TemplatePanel.tsx`
+5. 实现 `HistoryPanel.tsx`
+6. 本地优先 + 登录同步逻辑
+
+### Phase 6: i18n + 测试 + 清理
+1. 扩展 i18n 翻译
+2. 移除 `html2canvas` 依赖
+3. 单元测试 + 集成测试
+4. Docker 构建验证 + 部署
+
+---
+
+## 9. Environment Variables
+
+| 变量 | 用途 | 必需 |
+|------|------|------|
+| `BING_SEARCH_API_KEY` | Bing 图片搜索 API | 否（降级为仅每日壁纸） |
+| `UNSPLASH_ACCESS_KEY` | Unsplash 搜索 API | 否（降级为仅预设图片） |
+| `AI_PROVIDER` | AI 提供商 | 是（已有） |
+| `OPENAI_API_KEY` / `DEEPSEEK_API_KEY` | AI 生成主题 | 是（已有） |
+
+---
+
+## 10. Risk Assessment
+
+| 风险 | 影响 | 缓解措施 |
+|------|------|----------|
+| Satori 不支持某些 CSS 特性 | 部分布局渲染不一致 | 预览与最终输出对比测试，限制 CSS 子集 |
+| Bing/Unsplash API Key 不可用 | 图库搜索不可用 | 降级策略：只显示免费功能 |
+| 大尺寸图片（如 1920x1080）服务端渲染慢 | 用户体验差 | 添加加载动画，考虑缓存 |
+| localStorage 5MB 限制 | 历史记录/模板存储溢出 | 限制条数，图片压缩，数据库同步 |
+| Satori 字体加载失败 | 中文显示异常 | 多字体 fallback，启动时验证字体文件 |
