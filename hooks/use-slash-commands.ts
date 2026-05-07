@@ -19,6 +19,8 @@ interface UseSlashCommandsReturn {
   filter: string
   /** Index of the currently selected command */
   selectedIndex: number
+  /** Set the selected index (for parent-controlled hover) */
+  setSelectedIndex: (index: number) => void
   /** Filtered list of commands matching the current filter */
   commands: SlashCommand[]
   /** Handle keydown events for navigation (up/down/enter/escape) */
@@ -31,6 +33,8 @@ interface UseSlashCommandsReturn {
   close: () => void
   /** Position for the menu (relative to editor) */
   menuPosition: { x: number; y: number }
+  /** Set the menu position (for parent-controlled positioning) */
+  setMenuPosition: (pos: { x: number; y: number }) => void
 }
 
 /**
@@ -169,11 +173,13 @@ export function useSlashCommands(options: UseSlashCommandsOptions = {}): UseSlas
     visible,
     filter,
     selectedIndex,
+    setSelectedIndex,
     commands,
     handleKeyDown,
     handleInput,
     selectCommand,
     close,
     menuPosition,
+    setMenuPosition,
   }
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useCallback, useRef } from 'react'
+import { useBibleStore } from '@/store/useBibleStore'
 import type { VditorEditorHandle } from './VditorEditor'
 
 interface SermonEditorContextValue {
@@ -43,19 +44,24 @@ export function SermonEditorProvider({ children, isDark }: { children: React.Rea
   }, [])
 
   const showGhostText = useCallback((text: string) => {
-    // Ghost text is managed via store — SermonEditor reads it
-    // This is a placeholder for future DOM-level ghost text injection
+    useBibleStore.getState().setSermonGhostText(text)
+    useBibleStore.getState().setSermonGhostTextVisible(true)
   }, [])
 
   const acceptGhostText = useCallback(() => {
+    const { sermonGhostText, setSermonGhostText, setSermonGhostTextVisible } = useBibleStore.getState()
     const handle = handleRef.current
-    if (!handle) return
-    // Insert the ghost text into the editor
-    // Ghost text state is managed by the store
+    if (handle && sermonGhostText) {
+      handle.insertValue(sermonGhostText)
+    }
+    setSermonGhostText('')
+    setSermonGhostTextVisible(false)
   }, [])
 
   const rejectGhostText = useCallback(() => {
-    // Clear ghost text from the store
+    const { setSermonGhostText, setSermonGhostTextVisible } = useBibleStore.getState()
+    setSermonGhostText('')
+    setSermonGhostTextVisible(false)
   }, [])
 
   return (

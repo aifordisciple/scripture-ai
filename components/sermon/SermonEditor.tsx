@@ -33,6 +33,7 @@ export function SermonEditor() {
   const { registerEditorHandle } = useSermonEditor()
 
   const editorRef = useRef<VditorEditorHandle>(null)
+  const editorContainerRef = useRef<HTMLDivElement>(null)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savingRef = useRef(false)
   const sermonsRef = useRef(sermons)
@@ -47,23 +48,54 @@ export function SermonEditor() {
     visible: false, x: 0, y: 0, selectedText: '',
   })
 
-  // Slash commands
+  // Slash commands — pass onSelectCommand so keyboard selection works
   const {
     visible: slashVisible,
     filter: slashFilter,
     selectedIndex: slashSelectedIndex,
+    setSelectedIndex: setSlashSelectedIndex,
     commands: slashCommands,
     handleKeyDown: handleSlashKeyDown,
     handleInput: handleSlashInput,
     selectCommand: selectSlashCommand,
     close: closeSlash,
     menuPosition: slashPosition,
-  } = useSlashCommands()
+    setMenuPosition: setSlashPosition,
+  } = useSlashCommands({
+    onSelectCommand: (cmd: SlashCommand) => {
+      const action = cmd.action
+      if (action === 'verse' || action === 'section' || action === 'template') {
+        return
+      }
+      if (action === 'review') {
+        useBibleStore.getState().setActiveSermonPanel('review')
+        return
+      }
+      handleAIAssist(action)
+    },
+  })
 
   // Register editor handle with context so SermonAIPanel/SermonVersePanel can insert content
   useEffect(() => {
     registerEditorHandle(editorRef.current)
   })
+
+  // Listen for custom events from VditorEditor
+  useEffect(() => {
+    const handleAIContinue = () => {
+      handleAIAssist('continue')
+    }
+    const handleToggleAIPanel = () => {
+      const { activeSermonPanel, setActiveSermonPanel } = useBibleStore.getState()
+      setActiveSermonPanel(activeSermonPanel === 'ai' ? 'list' : 'ai')
+    }
+    window.addEventListener('sermon:ai-continue', handleAIContinue)
+    window.addEventListener('sermon:toggle-ai-panel', handleToggleAIPanel)
+    return () => {
+      window.removeEventListener('sermon:ai-continue', handleAIContinue)
+      window.removeEventListener('sermon:toggle-ai-panel', handleToggleAIPanel)
+    }
+  }, [])
 
   // Sync content when switching sermons or when content changes externally
   useEffect(() => {
@@ -148,7 +180,7 @@ export function SermonEditor() {
     autoSave(markdownContent)
   }, [autoSave, markdownContent])
 
-  // AI assist — now uses streaming inline completion
+  // AI assist — streaming inline completion
   const handleAIAssist = useCallback(async (action: string) => {
     const md = editorRef.current?.getValue() || markdownContent
     if (!md && action !== 'generate') return
@@ -159,13 +191,12 @@ export function SermonEditor() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action,
-          selectedText: md.slice(-500), // Send last 500 chars as context
+          selectedText: md.slice(-500),
           verseRefs: currentSermon?.verseRefs,
           style: currentSermon?.style,
           locale: useBibleStore.getState().locale,
         }),
       })
-      // Read the streaming response
       const reader = res.body?.getReader()
       if (!reader) return
       const decoder = new TextDecoder()
@@ -187,7 +218,51 @@ export function SermonEditor() {
     } finally {
       setIsGenerating(false)
     }
-  }, [markdownContent, currentSermon?.title])
+  }, [markdownContent, currentSermon?.verseRefs, currentSermon?.style])
+
+  // Handle selection change from VditorEditor
+  const handleSelectionChange = useCallback((selectedText: string, rect: DOMRect | null) => {
+    if (selectedText && selectedText.length > 0 && rect) {
+      // Convert absolute rect to relative position within the editor container
+      const container = editorContainerRef.current
+      if (container) {
+        const containerRect = container.getBoundingClientRect()
+        const x = rect.left - containerRect.left + rect.width / 2
+        const y = rect.top - containerRect.top
+        setFloatingToolbar({ visible: true, x, y, selectedText })
+      }
+    } else {
+      setFloatingToolbar(prev => ({ ...prev, visible: false }))
+    }
+  }, [])
+
+  // Handle cursor activity from VditorEditor (for slash commands)
+  const handleCursorActivity = useCallback((textBeforeCursor: string, cursorOffset: number) => {
+    // Get full text from editor and pass to slash command handler
+    const fullText = editorRef.current?.getValue() || ''
+    handleSlashInput(fullText, cursorOffset)
+
+    // Update slash menu position based on cursor
+    if (slashVisible) {
+      const container = editorContainerRef.current
+      if (container) {
+        // Approximate position: use a fixed offset from top-left since we can't get exact cursor coords
+        // from Vditor easily. The menu will appear near the top of the editor.
+        const containerRect = container.getBoundingClientRect()
+        // Try to get cursor coordinates from Vditor's CodeMirror
+        const vd = editorRef.current?.getVditor()
+        const cm = (vd as any)?.vditor?.sv?.codeMirror || (vd as any)?.vditor?.ir?.codeMirror
+        if (cm) {
+          try {
+            const cursorCoords = cm.cursorCoords?.(cm.getCursor(), 'local')
+            if (cursorCoords) {
+              setSlashPosition({ x: cursorCoords.left, y: cursorCoords.top + 20 })
+            }
+          } catch {}
+        }
+      }
+    }
+  }, [handleSlashInput, slashVisible, setSlashPosition])
 
   // Handle floating toolbar action
   const handleFloatingAction = useCallback((action: string) => {
@@ -217,19 +292,17 @@ export function SermonEditor() {
       })
   }, [floatingToolbar.selectedText, currentSermon])
 
-  // Handle slash command selection
+  // Handle slash command selection (from click events)
   const handleSlashSelect = useCallback((command: SlashCommand) => {
     closeSlash()
     const action = command.action
     if (action === 'verse' || action === 'section' || action === 'template') {
-      // These are handled by the toolbar — switch to the appropriate panel
       return
     }
     if (action === 'review') {
       useBibleStore.getState().setActiveSermonPanel('review')
       return
     }
-    // AI actions
     handleAIAssist(action)
   }, [handleAIAssist, closeSlash])
 
@@ -237,6 +310,18 @@ export function SermonEditor() {
   const handleFlowAction = useCallback((action: string) => {
     handleAIAssist(action)
   }, [handleAIAssist])
+
+  // Global keyboard handler for slash command navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (slashVisible) {
+        const handled = handleSlashKeyDown(e)
+        if (handled) return
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [slashVisible, handleSlashKeyDown])
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -266,13 +351,15 @@ export function SermonEditor() {
       {/* Flow Suggestions */}
       <FlowSuggestions onAction={handleFlowAction} />
 
-      <div className="flex-1 min-h-0 relative">
+      <div ref={editorContainerRef} className="flex-1 min-h-0 relative">
         <VditorEditor
           ref={editorRef}
           content={markdownContent}
           onChange={handleContentChange}
           isDark={isDarkMode}
           onSave={handleSave}
+          onSelectionChange={handleSelectionChange}
+          onCursorActivity={handleCursorActivity}
         />
 
         {/* Floating Toolbar for selected text */}
@@ -290,7 +377,7 @@ export function SermonEditor() {
           onSelect={handleSlashSelect}
           onClose={closeSlash}
           selectedIndex={slashSelectedIndex}
-          onSelectedIndexChange={() => {}}
+          onSelectedIndexChange={setSlashSelectedIndex}
         />
       </div>
 
