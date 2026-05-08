@@ -251,7 +251,7 @@ export interface SermonFolderData {
   updatedAt: string;
 }
 
-export type SermonPanelType = 'list' | 'ai' | 'verse' | 'template' | 'review' | 'settings';
+export type SermonPanelType = 'list' | 'ai' | 'verse' | 'template' | 'outline' | 'review' | 'settings';
 
 export type SermonMobileView = 'list' | 'editor';
 

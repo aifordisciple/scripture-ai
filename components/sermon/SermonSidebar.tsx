@@ -8,6 +8,7 @@ import {
   Bot,
   BookMarked,
   LayoutTemplate,
+  ListChecks,
   CheckCircle2,
   Settings,
 } from 'lucide-react'
@@ -18,6 +19,7 @@ const PANEL_ICONS: { type: SermonPanelType; icon: typeof BookOpen; key: string }
   { type: 'ai', icon: Bot, key: 'panelAi' },
   { type: 'verse', icon: BookMarked, key: 'panelVerse' },
   { type: 'template', icon: LayoutTemplate, key: 'panelTemplate' },
+  { type: 'outline', icon: ListChecks, key: 'panelOutline' },
   { type: 'review', icon: CheckCircle2, key: 'panelReview' },
   { type: 'settings', icon: Settings, key: 'panelSettings' },
 ]

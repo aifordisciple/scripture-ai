@@ -14,6 +14,7 @@ import { SermonVersePanel } from './SermonVersePanel'
 import { SermonTemplatePanel } from './SermonTemplatePanel'
 import { SermonReviewPanel } from './SermonReviewPanel'
 import { SermonSettingsPanel } from './SermonSettingsPanel'
+import { OutlinePanel } from './OutlinePanel'
 import { SermonMobileBottomBar } from './SermonMobileBottomBar'
 import { SermonEditorProvider } from './SermonEditorContext'
 import { SermonErrorBoundary } from './SermonErrorBoundary'
@@ -75,6 +76,7 @@ export function SermonTab() {
       case 'ai': return <SermonAIPanel />
       case 'verse': return <SermonVersePanel />
       case 'template': return <SermonTemplatePanel />
+      case 'outline': return <OutlinePanel />
       case 'review': return <SermonReviewPanel />
       case 'settings': return <SermonSettingsPanel />
       default: return <SermonListPanel />

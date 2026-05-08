@@ -30,6 +30,7 @@ export function SermonEditor() {
     sermonAutoSave,
     setSermonFlowStage,
     setSermonAiSuggestions,
+    parseOutlineToSections,
     locale,
   } = useBibleStore()
   const { registerEditorHandle } = useSermonEditor()
@@ -117,6 +118,10 @@ export function SermonEditor() {
       const flowUpdate = updateSermonFlowStage(md, md.length)
       setSermonFlowStage(flowUpdate.sermonFlowStage!)
       setSermonAiSuggestions(flowUpdate.sermonAiSuggestions!)
+      // Parse outline sections when content has headings
+      if (md.includes('## ')) {
+        parseOutlineToSections(md)
+      }
     } else {
       setMarkdownContent('')
     }
@@ -174,7 +179,11 @@ export function SermonEditor() {
     const flowUpdate = updateSermonFlowStage(content, content.length)
     setSermonFlowStage(flowUpdate.sermonFlowStage!)
     setSermonAiSuggestions(flowUpdate.sermonAiSuggestions!)
-  }, [setCurrentSermon, setSermons, autoSave, sermonAutoSave, setSermonFlowStage, setSermonAiSuggestions])
+    // Parse outline sections when content has headings
+    if (content.includes('## ')) {
+      parseOutlineToSections(content)
+    }
+  }, [setCurrentSermon, setSermons, autoSave, sermonAutoSave, setSermonFlowStage, setSermonAiSuggestions, parseOutlineToSections])
 
   // Manual save handler for Cmd+S
   const handleSave = useCallback(() => {

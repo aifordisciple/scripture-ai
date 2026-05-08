@@ -45,6 +45,7 @@ export const sermon = {
     panelAi: 'AI Assistant',
     panelVerse: 'Verses',
     panelTemplate: 'Templates',
+    panelOutline: 'Outline',
     panelReview: 'Review',
     panelSettings: 'Settings',
     templateExpository: 'Expository Sermon',

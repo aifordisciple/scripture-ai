@@ -87,28 +87,36 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     const justFinishedLoading = prevLoadingRef.current && !loading;
     prevLoadingRef.current = loading;
 
+    console.log('[scrollToVerse DEBUG]', {
+      scrollToVerse,
+      loading,
+      justFinishedLoading,
+      versesLen: verses.length,
+      book,
+      chapter,
+      firstVerse: verses.find(v => v.version === primaryVersion)
+        ? { bookId: verses.find(v => v.version === primaryVersion)!.bookId, chapter: verses.find(v => v.version === primaryVersion)!.chapter }
+        : null,
+    });
+
     if (!scrollToVerse) return;
     if (loading) return;
     if (verses.length === 0) return;
     if (scrollToVerse.bookId !== book || scrollToVerse.chapter !== chapter) return;
 
-    // 关键判断：如果刚刚完成 loading（true→false），说明新章节数据已就绪，可以执行
-    // 如果没有经历 loading 变化（同章节跳转），也直接执行
-    // 唯一需要阻止的是：跨章节跳转但 verses 还是旧数据的情况
-    // 判断方法：如果 scrollToVerse 的章节与 verses 中的实际数据不匹配，说明数据还没更新
     const firstVerse = verses.find(v => v.version === primaryVersion);
     if (firstVerse && (firstVerse.bookId !== scrollToVerse.bookId || firstVerse.chapter.toString() !== scrollToVerse.chapter)) {
-      // verses 数据还是旧章节的，等 loading 完成后再执行
+      console.log('[scrollToVerse DEBUG] BLOCKED: verses data mismatch');
       return;
     }
 
     const verseNum = scrollToVerse.verse;
-    // 立即清除，防止重复触发
+    console.log('[scrollToVerse DEBUG] EXECUTING highlight for verse', verseNum);
     setScrollToVerse(null);
 
-    // 延迟执行，等待 DOM 渲染完成
     const timer = setTimeout(() => {
         const element = document.getElementById(`verse-${verseNum}`);
+        console.log('[scrollToVerse DEBUG] DOM element found?', !!element, `verse-${verseNum}`, 'rect:', element?.getBoundingClientRect());
         if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             element.classList.add("animate-highlight-pulse");

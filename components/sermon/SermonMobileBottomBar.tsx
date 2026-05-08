@@ -8,6 +8,7 @@ import {
   Bot,
   BookMarked,
   LayoutTemplate,
+  ListChecks,
   CheckCircle2,
   Settings,
   PenLine,
@@ -22,6 +23,7 @@ const MOBILE_TAB_ICONS: { type: MobileTabType; icon: typeof BookOpen; key: strin
   { type: 'ai', icon: Bot, key: 'panelAi' },
   { type: 'verse', icon: BookMarked, key: 'panelVerse' },
   { type: 'template', icon: LayoutTemplate, key: 'panelTemplate' },
+  { type: 'outline', icon: ListChecks, key: 'panelOutline' },
   { type: 'review', icon: CheckCircle2, key: 'panelReview' },
   { type: 'settings', icon: Settings, key: 'panelSettings' },
 ]

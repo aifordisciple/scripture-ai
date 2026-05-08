@@ -45,6 +45,7 @@ export const sermon = {
     panelAi: 'AI 助手',
     panelVerse: '经文参考',
     panelTemplate: '模板',
+    panelOutline: '大纲',
     panelReview: '审查',
     panelSettings: '设置',
     templateExpository: '释经式讲章',
