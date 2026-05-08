@@ -217,85 +217,91 @@ export function BackgroundPicker({
           </div>
 
           {/* Picsum */}
-          <div className="space-y-2">
-            {picsumLoading && <div className="flex items-center justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" /></div>}
-            {picsumImages.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
-                {picsumImages.map((img) => (
-                  <button
-                    key={img.id}
-                    onClick={() => handleImageSelect(`https://picsum.photos/id/${img.id}/1080/1920`)}
-                    className="w-full aspect-square rounded-lg bg-cover bg-center border border-transparent hover:border-primary transition-all active:scale-95"
-                    style={{ backgroundImage: `url(https://picsum.photos/id/${img.id}/200/200)` }}
-                  />
-                ))}
-              </div>
-            )}
-            {picsumImages.length > 0 && (
-              <Button variant="outline" size="sm" className="w-full" onClick={() => loadPicsumImages(picsumPage + 1)} disabled={picsumLoading}>
-                {t('shareCard.loadMore')}
-              </Button>
-            )}
-          </div>
+          {activeGallery === 'picsum' && (
+            <div className="space-y-2">
+              {picsumLoading && <div className="flex items-center justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" /></div>}
+              {picsumImages.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {picsumImages.map((img) => (
+                    <button
+                      key={img.id}
+                      onClick={() => handleImageSelect(`https://picsum.photos/id/${img.id}/1080/1920`)}
+                      className="w-full aspect-square rounded-lg bg-cover bg-center border border-transparent hover:border-primary transition-all active:scale-95"
+                      style={{ backgroundImage: `url(https://picsum.photos/id/${img.id}/200/200)` }}
+                    />
+                  ))}
+                </div>
+              )}
+              {picsumImages.length > 0 && (
+                <Button variant="outline" size="sm" className="w-full" onClick={() => loadPicsumImages(picsumPage + 1)} disabled={picsumLoading}>
+                  {t('shareCard.loadMore')}
+                </Button>
+              )}
+            </div>
+          )}
 
           {/* Bing */}
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={bingSearchQuery}
-                onChange={(e) => setBingSearchQuery(e.target.value)}
-                placeholder={t('shareCard.searchPlaceholder')}
-                className="flex-1 px-2 py-1 text-xs border rounded bg-background"
-              />
-              <Button variant="outline" size="sm" onClick={searchBing} disabled={bingLoading}>
-                <Search className="w-3 h-3" />
-              </Button>
-            </div>
-            {bingLoading && <div className="flex items-center justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" /></div>}
-            {bingDailyImages.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
-                {bingDailyImages.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleImageSelect(img.url)}
-                    className="w-full aspect-square rounded-lg bg-cover bg-center border border-transparent hover:border-primary transition-all active:scale-95"
-                    style={{ backgroundImage: `url(${img.url}&w=200)` }}
-                    title={img.title}
-                  />
-                ))}
+          {activeGallery === 'bing' && (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={bingSearchQuery}
+                  onChange={(e) => setBingSearchQuery(e.target.value)}
+                  placeholder={t('shareCard.searchPlaceholder')}
+                  className="flex-1 px-2 py-1 text-xs border rounded bg-background"
+                />
+                <Button variant="outline" size="sm" onClick={searchBing} disabled={bingLoading}>
+                  <Search className="w-3 h-3" />
+                </Button>
               </div>
-            )}
-          </div>
+              {bingLoading && <div className="flex items-center justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" /></div>}
+              {bingDailyImages.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {bingDailyImages.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleImageSelect(img.url)}
+                      className="w-full aspect-square rounded-lg bg-cover bg-center border border-transparent hover:border-primary transition-all active:scale-95"
+                      style={{ backgroundImage: `url(${img.url}&w=200)` }}
+                      title={img.title}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Unsplash */}
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={unsplashSearchQuery}
-                onChange={(e) => setUnsplashSearchQuery(e.target.value)}
-                placeholder={t('shareCard.searchPlaceholder')}
-                className="flex-1 px-2 py-1 text-xs border rounded bg-background"
-              />
-              <Button variant="outline" size="sm" onClick={searchUnsplash} disabled={unsplashLoading}>
-                <Search className="w-3 h-3" />
-              </Button>
-            </div>
-            {unsplashLoading && <div className="flex items-center justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" /></div>}
-            {unsplashResults.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
-                {unsplashResults.map((img) => (
-                  <button
-                    key={img.id}
-                    onClick={() => handleImageSelect(img.url)}
-                    className="w-full aspect-square rounded-lg bg-cover bg-center border border-transparent hover:border-primary transition-all active:scale-95"
-                    style={{ backgroundImage: `url(${img.thumb})` }}
-                  />
-                ))}
+          {activeGallery === 'unsplash' && (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={unsplashSearchQuery}
+                  onChange={(e) => setUnsplashSearchQuery(e.target.value)}
+                  placeholder={t('shareCard.searchPlaceholder')}
+                  className="flex-1 px-2 py-1 text-xs border rounded bg-background"
+                />
+                <Button variant="outline" size="sm" onClick={searchUnsplash} disabled={unsplashLoading}>
+                  <Search className="w-3 h-3" />
+                </Button>
               </div>
-            )}
-          </div>
+              {unsplashLoading && <div className="flex items-center justify-center py-4"><Loader2 className="w-4 h-4 animate-spin" /></div>}
+              {unsplashResults.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {unsplashResults.map((img) => (
+                    <button
+                      key={img.id}
+                      onClick={() => handleImageSelect(img.url)}
+                      className="w-full aspect-square rounded-lg bg-cover bg-center border border-transparent hover:border-primary transition-all active:scale-95"
+                      style={{ backgroundImage: `url(${img.thumb})` }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
