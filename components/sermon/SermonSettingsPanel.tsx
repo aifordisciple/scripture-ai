@@ -8,6 +8,9 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { VoiceProfilePanel } from './VoiceProfilePanel'
 import { TheologyPanel } from './TheologyPanel'
+import { CommentPanel } from './CommentPanel'
+import { ExportPanel } from './ExportPanel'
+import { SeriesPanel } from './SeriesPanel'
 
 export function SermonSettingsPanel() {
   const { t } = useTranslation()
@@ -144,6 +147,21 @@ export function SermonSettingsPanel() {
         {/* Theology Resources */}
         <div className="rounded-lg border border-border bg-card p-2">
           <TheologyPanel />
+        </div>
+
+        {/* Comments */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <CommentPanel />
+        </div>
+
+        {/* Export */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <ExportPanel />
+        </div>
+
+        {/* Series */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <SeriesPanel />
         </div>
 
         {/* Current Sermon Info */}

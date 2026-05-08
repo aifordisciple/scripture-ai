@@ -350,6 +350,30 @@ export interface ToneMetrics {
   timestamp: number;
 }
 
+// [P3.1] 讲章评论批注
+export interface SermonComment {
+  id: string;
+  sermonId: string;
+  content: string;
+  authorId: string;
+  authorName: string;
+  position: { line: number; col: number }; // position in the document
+  selectedText?: string; // the text being commented on
+  parentId?: string; // for replies
+  createdAt: number;
+  resolved: boolean;
+}
+
+// [P3.3] 讲章系列
+export interface SermonSeries {
+  id: string;
+  name: string;
+  description: string;
+  sermonIds: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface UISlice {
   isAuthOpen: boolean;
   setAuthOpen: (open: boolean) => void;
@@ -681,6 +705,18 @@ export interface SermonSlice {
   // [P2.3] 语调仪表盘
   toneMetrics: ToneMetrics;
   setToneMetrics: (metrics: ToneMetrics) => void;
+  // [P3.1] 讲章评论批注
+  sermonComments: SermonComment[];
+  setSermonComments: (comments: SermonComment[]) => void;
+  addSermonComment: (comment: Omit<SermonComment, 'id' | 'createdAt' | 'resolved'>) => void;
+  resolveSermonComment: (commentId: string) => void;
+  deleteSermonComment: (commentId: string) => void;
+  // [P3.3] 讲章系列
+  sermonSeries: SermonSeries[];
+  setSermonSeries: (series: SermonSeries[]) => void;
+  addSermonSeries: (series: Omit<SermonSeries, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateSermonSeries: (seriesId: string, updates: Partial<SermonSeries>) => void;
+  deleteSermonSeries: (seriesId: string) => void;
 }
 
 // --------------------------------------------------
