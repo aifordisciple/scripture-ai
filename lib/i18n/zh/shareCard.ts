@@ -65,6 +65,8 @@ export const shareCard = {
     gallery_picsum: 'Picsum',
     gallery_bing: 'Bing',
     gallery_unsplash: 'Unsplash',
+    clickToLoad: '点击标签加载图片',
+    searchToFind: '输入关键词搜索图片',
 
     // 渐变
     gradientPureWhite: '纯净白',
