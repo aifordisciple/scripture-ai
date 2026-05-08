@@ -262,6 +262,24 @@ export default function Home() {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
+  // iOS 全屏切换事件监听（来自 MagicBall 下拉手势）
+  useEffect(() => {
+    const handleIOSFullscreen = () => {
+      setIsFullscreen(prev => {
+        const next = !prev;
+        // 同步 data 属性，供 MagicBall 读取全屏状态
+        if (next) {
+          document.documentElement.setAttribute('data-ios-fullscreen', 'true');
+        } else {
+          document.documentElement.removeAttribute('data-ios-fullscreen');
+        }
+        return next;
+      });
+    };
+    window.addEventListener('toggle-ios-fullscreen', handleIOSFullscreen);
+    return () => window.removeEventListener('toggle-ios-fullscreen', handleIOSFullscreen);
+  }, []);
+
   useEffect(() => {
     const book = searchParams.get("book");
     const chapter = searchParams.get("chapter");
@@ -318,11 +336,7 @@ export default function Home() {
         switch (e.key.toLowerCase()) {
           case 'f':
             e.preventDefault();
-            if (!document.fullscreenElement) {
-              document.documentElement.requestFullscreen().catch(() => {});
-            } else {
-              if (document.exitFullscreen) document.exitFullscreen();
-            }
+            toggleFullscreen();
             break;
           case 'd':
             e.preventDefault();
@@ -374,7 +388,15 @@ export default function Home() {
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
     if (isIOS) {
-      setIsFullscreen(prev => !prev);
+      setIsFullscreen(prev => {
+        const next = !prev;
+        if (next) {
+          document.documentElement.setAttribute('data-ios-fullscreen', 'true');
+        } else {
+          document.documentElement.removeAttribute('data-ios-fullscreen');
+        }
+        return next;
+      });
       return;
     }
 
@@ -382,7 +404,15 @@ export default function Home() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {
         // 原生全屏失败时回退到 CSS 模拟全屏
-        setIsFullscreen(prev => !prev);
+        setIsFullscreen(prev => {
+          const next = !prev;
+          if (next) {
+            document.documentElement.setAttribute('data-ios-fullscreen', 'true');
+          } else {
+            document.documentElement.removeAttribute('data-ios-fullscreen');
+          }
+          return next;
+        });
       });
     } else {
       if (document.exitFullscreen) { document.exitFullscreen(); }
@@ -390,7 +420,10 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex h-screen w-full overflow-hidden bg-background relative transition-colors duration-500">
+    <main className={cn(
+      "flex h-screen w-full overflow-hidden bg-background relative transition-colors duration-500",
+      isFullscreen && "ios-fullscreen"
+    )}>
       <AuthDialog />
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <KeyboardShortcutsDialog open={showShortcutsDialog} onOpenChange={setShowShortcutsDialog} />
@@ -402,6 +435,17 @@ export default function Home() {
         onCloseBookPicker={() => setIsBookPickerOpen(false)}
       />
       <InstallPrompt />
+
+      {/* iOS 模拟全屏时的退出按钮 */}
+      {isFullscreen && (
+        <button
+          onClick={toggleFullscreen}
+          className="fixed top-3 right-3 z-[200] w-10 h-10 rounded-full bg-black/50 dark:bg-white/20 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform"
+          aria-label={t('settings.exitFullscreen')}
+        >
+          <Minimize className="w-5 h-5" />
+        </button>
+      )}
       <OnboardingManager />
 
       {/* Mobile BookPicker - 移动端经文选择器 */}
@@ -566,7 +610,7 @@ export default function Home() {
         <div
           className={cn(
             "absolute top-2 left-2 right-4 z-30 pointer-events-none transition-transform duration-300 ease-in-out",
-            isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
+            isNavVisible && !isFullscreen ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
           <div className="pointer-events-auto rounded-2xl bg-card/40 dark:bg-card/40 backdrop-blur-xl backdrop-saturate-[180%] shadow-sm h-12 flex items-center justify-between px-2 md:px-3 gap-1">
@@ -741,7 +785,10 @@ export default function Home() {
         </div>
 
         {/* Main Content Area */}
-        <div id="reader-scroll-container" onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-smooth pt-16 md:pt-16 pb-4 relative z-0">
+        <div id="reader-scroll-container" onScroll={handleScroll} className={cn(
+          "flex-1 overflow-y-auto scroll-smooth pb-4 relative z-0 transition-[padding] duration-300",
+          isFullscreen ? "pt-2" : "pt-16 md:pt-16"
+        )}>
           <TabContentRenderer
             tabs={tabs}
             activeTabId={activeTabId}
@@ -751,7 +798,7 @@ export default function Home() {
         </div>
 
         {/* Mobile Tab Bar - 向下滚动自动隐藏，向上滚动自动显示（与菜单栏一致） */}
-        {activeTab?.type !== 'sermon' && !isAiOpen && (
+        {activeTab?.type !== 'sermon' && !isAiOpen && !isFullscreen && (
         <div
           className={cn(
             "md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--glass-bg-light)] dark:bg-[var(--glass-bg-dark)] backdrop-blur-[20px] backdrop-saturate-[180%] border-t border-border flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",
