@@ -14,6 +14,7 @@ import { FloatingToolbar } from './FloatingToolbar'
 import { SlashCommandMenu, type SlashCommand } from './SlashCommandMenu'
 import { DiffPreview } from './DiffPreview'
 import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
+import { analyzeTone } from '@/lib/sermon-flow'
 import { useSlashCommands } from '@/hooks/use-slash-commands'
 import { buildSermonContext, serializeContext } from '@/lib/sermon-context'
 
@@ -31,6 +32,7 @@ export function SermonEditor() {
     setSermonFlowStage,
     setSermonAiSuggestions,
     parseOutlineToSections,
+    setToneMetrics,
     locale,
   } = useBibleStore()
   const { registerEditorHandle } = useSermonEditor()
@@ -95,11 +97,19 @@ export function SermonEditor() {
       const { activeSermonPanel, setActiveSermonPanel } = useBibleStore.getState()
       setActiveSermonPanel(activeSermonPanel === 'ai' ? 'list' : 'ai')
     }
+    const handleInspiration = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail?.action) {
+        handleAIAssist(detail.action)
+      }
+    }
     window.addEventListener('sermon:ai-continue', handleAIContinue)
     window.addEventListener('sermon:toggle-ai-panel', handleToggleAIPanel)
+    window.addEventListener('sermon-inspiration', handleInspiration)
     return () => {
       window.removeEventListener('sermon:ai-continue', handleAIContinue)
       window.removeEventListener('sermon:toggle-ai-panel', handleToggleAIPanel)
+      window.removeEventListener('sermon-inspiration', handleInspiration)
     }
   }, [])
 
@@ -122,6 +132,9 @@ export function SermonEditor() {
       if (md.includes('## ')) {
         parseOutlineToSections(md)
       }
+      // [P2.3] Analyze tone metrics
+      const tone = analyzeTone(md)
+      setToneMetrics({ ...tone, timestamp: Date.now() })
     } else {
       setMarkdownContent('')
     }
@@ -209,6 +222,7 @@ export function SermonEditor() {
           verseRefs: currentSermon?.verseRefs,
           style: currentSermon?.style,
           locale: useBibleStore.getState().locale,
+          voiceProfile: useBibleStore.getState().voiceProfile,
         }),
       })
       const reader = res.body?.getReader()

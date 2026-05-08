@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     }
 
     const { apiConfig, body } = await extractApiConfig(req);
-    const { action, selectedText, verseRefs, style, locale = 'zh', sermonContext } = body as {
+    const { action, selectedText, verseRefs, style, locale = 'zh', sermonContext, voiceProfile } = body as {
       action: 'continue' | 'polish' | 'insert-verse' | 'add-example' | 'cross-ref' | 'expand' | 'shrink';
       selectedText: string;
       verseRefs?: string;
@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       sermonContext?: string;
       expandDegree?: 'slight' | 'moderate' | 'extensive';
       expandDirection?: 'depth' | 'breadth' | 'illustration';
+      voiceProfile?: { tone?: string; formality?: string; audience?: string; description?: string };
     };
 
     if (!action || !selectedText) {
@@ -84,6 +85,38 @@ export async function POST(req: Request) {
     );
     if (sermonContext) {
       systemParts.push(sermonContext);
+    }
+    // [P2.1] Inject voice profile into system prompt
+    if (voiceProfile) {
+      const toneMap: Record<string, Record<string, string>> = {
+        solemn: { zh: '庄重、敬畏、神圣', en: 'solemn, reverent, sacred' },
+        warm: { zh: '温暖、关怀、贴近', en: 'warm, caring, approachable' },
+        passionate: { zh: '充满热情、激励人心', en: 'passionate, inspiring, fervent' },
+        gentle: { zh: '柔和、安慰、医治', en: 'gentle, comforting, healing' },
+        scholarly: { zh: '严谨、深入、思辨', en: 'rigorous, deep, analytical' },
+        conversational: { zh: '轻松、互动、日常', en: 'relaxed, interactive, everyday' },
+      };
+      const formalityMap: Record<string, Record<string, string>> = {
+        formal: { zh: '正式', en: 'formal' },
+        'semi-formal': { zh: '半正式', en: 'semi-formal' },
+        casual: { zh: '随意', en: 'casual' },
+      };
+      const audienceMap: Record<string, Record<string, string>> = {
+        general: { zh: '一般会众', en: 'general congregation' },
+        youth: { zh: '青年', en: 'youth' },
+        elderly: { zh: '长者', en: 'elderly' },
+        scholarly: { zh: '学者', en: 'scholarly audience' },
+        'new-believer': { zh: '初信者', en: 'new believers' },
+      };
+      const lang = resolvedLocale;
+      const voiceParts: string[] = [];
+      if (voiceProfile.tone) voiceParts.push(lang === 'zh' ? `语气风格：${toneMap[voiceProfile.tone]?.zh || voiceProfile.tone}` : `Tone: ${toneMap[voiceProfile.tone]?.en || voiceProfile.tone}`);
+      if (voiceProfile.formality) voiceParts.push(lang === 'zh' ? `正式程度：${formalityMap[voiceProfile.formality]?.zh || voiceProfile.formality}` : `Formality: ${formalityMap[voiceProfile.formality]?.en || voiceProfile.formality}`);
+      if (voiceProfile.audience) voiceParts.push(lang === 'zh' ? `目标听众：${audienceMap[voiceProfile.audience]?.zh || voiceProfile.audience}` : `Audience: ${audienceMap[voiceProfile.audience]?.en || voiceProfile.audience}`);
+      if (voiceProfile.description) voiceParts.push(lang === 'zh' ? `自定义风格：${voiceProfile.description}` : `Custom voice: ${voiceProfile.description}`);
+      if (voiceParts.length > 0) {
+        systemParts.push(lang === 'zh' ? `### 语音特征要求\n${voiceParts.join('\n')}\n\n请确保生成的内容符合以上语音特征。` : `### Voice Profile\n${voiceParts.join('\n')}\n\nEnsure generated content matches the above voice profile.`);
+      }
     }
     const systemMessage = systemParts.join('\n\n');
 

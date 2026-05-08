@@ -313,6 +313,43 @@ export interface SectionVersion {
   label?: string; // optional user label like "初稿", "精修版"
 }
 
+// [P2.1] 语音特征配置
+export type VoiceTone = 'solemn' | 'warm' | 'passionate' | 'gentle' | 'scholarly' | 'conversational';
+export type VoiceFormality = 'formal' | 'semi-formal' | 'casual';
+export type VoiceAudience = 'general' | 'youth' | 'elderly' | 'scholarly' | 'new-believer';
+
+export interface VoiceProfile {
+  name: string;
+  tone: VoiceTone;
+  formality: VoiceFormality;
+  audience: VoiceAudience;
+  description?: string; // custom description of the desired voice
+  samplePhrases?: string[]; // example phrases that match the voice
+}
+
+// [P2.2] 神学知识资源
+export type TheologyTradition = 'reformed' | 'arminian' | 'catholic' | 'orthodox' | 'pentecostal' | 'baptist' | 'interdenominational';
+
+export interface TheologyResource {
+  id: string;
+  book: string; // Bible book reference
+  tradition: TheologyTradition;
+  title: string;
+  summary: string;
+  keyInsights: string[];
+  relatedVerses: string[];
+}
+
+// [P2.3] 语调指标
+export interface ToneMetrics {
+  formality: number; // 0-100, 0=casual, 100=very formal
+  emotion: number; // 0-100, 0=neutral, 100=very emotional
+  doctrinalDensity: number; // 0-100, 0=narrative, 100=heavy doctrine
+  readability: number; // 0-100, 0=complex, 100=very readable
+  engagement: number; // 0-100, estimated audience engagement
+  timestamp: number;
+}
+
 export interface UISlice {
   isAuthOpen: boolean;
   setAuthOpen: (open: boolean) => void;
@@ -635,6 +672,15 @@ export interface SermonSlice {
   deleteSectionVersion: (versionId: string) => void;
   setActiveVersionId: (versionId: string | null) => void;
   getSectionVersions: (sectionId: string) => SectionVersion[];
+  // [P2.1] 语音特征配置
+  voiceProfile: VoiceProfile;
+  setVoiceProfile: (profile: VoiceProfile) => void;
+  // [P2.2] 神学知识注入
+  theologyResources: TheologyResource[];
+  setTheologyResources: (resources: TheologyResource[]) => void;
+  // [P2.3] 语调仪表盘
+  toneMetrics: ToneMetrics;
+  setToneMetrics: (metrics: ToneMetrics) => void;
 }
 
 // --------------------------------------------------

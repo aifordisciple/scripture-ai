@@ -6,6 +6,8 @@ import { useBreakpoint } from '@/hooks/use-media-query'
 import { Settings, ToggleLeft, ToggleRight, PenLine, Download, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { VoiceProfilePanel } from './VoiceProfilePanel'
+import { TheologyPanel } from './TheologyPanel'
 
 export function SermonSettingsPanel() {
   const { t } = useTranslation()
@@ -132,6 +134,16 @@ export function SermonSettingsPanel() {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Voice Profile */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <VoiceProfilePanel />
+        </div>
+
+        {/* Theology Resources */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <TheologyPanel />
         </div>
 
         {/* Current Sermon Info */}

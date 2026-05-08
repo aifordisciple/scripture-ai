@@ -156,3 +156,69 @@ export function getNextStage(stage: SermonFlowStage): SermonFlowStage | null {
   if (idx < 0 || idx >= FLOW_STAGES.length - 1) return null
   return FLOW_STAGES[idx + 1].stage
 }
+
+/**
+ * [P2.3] 分析讲章语调指标
+ * 基于内容特征计算5个维度的语调指标
+ */
+export function analyzeTone(content: string): {
+  formality: number
+  emotion: number
+  doctrinalDensity: number
+  readability: number
+  engagement: number
+} {
+  if (!content || content.trim().length < 20) {
+    return { formality: 50, emotion: 50, doctrinalDensity: 30, readability: 70, engagement: 60 }
+  }
+
+  const text = content.replace(/[#*_\[\]()]/g, '') // strip markdown syntax
+
+  // Formality: based on sentence length, use of formal markers
+  const sentences = text.split(/[。！？.!?]+/).filter(s => s.trim().length > 0)
+  const avgSentenceLen = sentences.length > 0
+    ? sentences.reduce((sum, s) => sum + s.length, 0) / sentences.length
+    : 0
+  const formalMarkers = (text.match(/因此|所以|然而|并且|从而|由此可见|综上所述/g) || []).length
+  const casualMarkers = (text.match(/吧|啊|呢|哦|呀|哈|嘿/g) || []).length
+  const formality = Math.min(100, Math.max(0,
+    40 + (avgSentenceLen > 30 ? 15 : avgSentenceLen > 20 ? 5 : -10)
+    + formalMarkers * 3 - casualMarkers * 2
+  ))
+
+  // Emotion: based on emotional words and exclamation marks
+  const emotionWords = (text.match(/爱|恩|苦|痛|喜|乐|哭|笑|感动|震撼|温暖|安慰|盼望|信靠|赞美|感谢|哈利路亚/g) || []).length
+  const exclamations = (text.match(/[！!]{2,}/g) || []).length
+  const emotion = Math.min(100, Math.max(0,
+    30 + emotionWords * 2 + exclamations * 5
+  ))
+
+  // Doctrinal density: based on theological terms
+  const doctrineTerms = (text.match(/称义|成圣|救赎|预知|拣选|恩典|信心|悔改|重生|三位一体|道成肉身|十字架|复活|升天|再来|圣灵|圣父|圣子|创造|启示|圣约|律法|福音/g) || []).length
+  const totalWords = text.length / 2 // rough Chinese word count
+  const doctrinalDensity = Math.min(100, Math.max(0,
+    20 + (totalWords > 0 ? (doctrineTerms / totalWords) * 2000 : 0)
+  ))
+
+  // Readability: shorter sentences + common words = more readable
+  const readability = Math.min(100, Math.max(0,
+    80 - (avgSentenceLen > 40 ? 20 : avgSentenceLen > 30 ? 10 : 0)
+    - doctrinalDensity * 0.2
+  ))
+
+  // Engagement: questions, stories, direct address
+  const questions = (text.match(/[？?]/g) || []).length
+  const directAddress = (text.match(/你们|我们|弟兄|姐妹|亲爱的/g) || []).length
+  const storyMarkers = (text.match(/有一天|曾经|有个|就像|好比|例如/g) || []).length
+  const engagement = Math.min(100, Math.max(0,
+    40 + questions * 2 + directAddress * 3 + storyMarkers * 5
+  ))
+
+  return {
+    formality: Math.round(formality),
+    emotion: Math.round(emotion),
+    doctrinalDensity: Math.round(doctrinalDensity),
+    readability: Math.round(readability),
+    engagement: Math.round(engagement),
+  }
+}
