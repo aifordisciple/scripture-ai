@@ -87,18 +87,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     const justFinishedLoading = prevLoadingRef.current && !loading;
     prevLoadingRef.current = loading;
 
-    console.log('[scrollToVerse DEBUG]', {
-      scrollToVerse,
-      loading,
-      justFinishedLoading,
-      versesLen: verses.length,
-      book,
-      chapter,
-      firstVerse: verses.find(v => v.version === primaryVersion)
-        ? { bookId: verses.find(v => v.version === primaryVersion)!.bookId, chapter: verses.find(v => v.version === primaryVersion)!.chapter }
-        : null,
-    });
-
     if (!scrollToVerse) return;
     if (loading) return;
     if (verses.length === 0) return;
@@ -106,22 +94,23 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
 
     const firstVerse = verses.find(v => v.version === primaryVersion);
     if (firstVerse && (firstVerse.bookId !== scrollToVerse.bookId || firstVerse.chapter.toString() !== scrollToVerse.chapter)) {
-      console.log('[scrollToVerse DEBUG] BLOCKED: verses data mismatch');
       return;
     }
 
     const verseNum = scrollToVerse.verse;
-    console.log('[scrollToVerse DEBUG] EXECUTING highlight for verse', verseNum);
-    setScrollToVerse(null);
+    // 注意：不能在这里调用 setScrollToVerse(null)！
+    // 因为它会触发 effect 重新执行，cleanup 会清除下面的 setTimeout
+    // 必须在 setTimeout 回调内部，滚动和高亮执行后再清除
 
     const timer = setTimeout(() => {
         const element = document.getElementById(`verse-${verseNum}`);
-        console.log('[scrollToVerse DEBUG] DOM element found?', !!element, `verse-${verseNum}`, 'rect:', element?.getBoundingClientRect());
         if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             element.classList.add("animate-highlight-pulse");
             setTimeout(() => element.classList.remove("animate-highlight-pulse"), 2500);
         }
+        // 滚动和高亮执行后，清除 scrollToVerse 防止重复触发
+        setScrollToVerse(null);
     }, 300);
     return () => clearTimeout(timer);
   }, [loading, scrollToVerse, verses, book, chapter, setScrollToVerse, primaryVersion]);
