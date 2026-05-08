@@ -80,18 +80,23 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
   }, [book, chapter]);
 
   useEffect(() => {
-    if (!loading && scrollToVerse && verses.length > 0) {
-        setTimeout(() => {
-            const element = document.getElementById(`verse-${scrollToVerse}`);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                element.classList.add("animate-highlight-pulse");
-                setTimeout(() => element.classList.remove("animate-highlight-pulse"), 2500);
-                setScrollToVerse(null);
-            }
-        }, 300);
-    }
-  }, [loading, scrollToVerse, verses, setScrollToVerse]);
+    if (!scrollToVerse) return;
+    // 如果经文还在加载中，等 loading 变为 false 后再处理
+    if (loading) return;
+    if (verses.length === 0) return;
+
+    const verseNum = scrollToVerse;
+    const timer = setTimeout(() => {
+        const element = document.getElementById(`verse-${verseNum}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.classList.add("animate-highlight-pulse");
+            setTimeout(() => element.classList.remove("animate-highlight-pulse"), 2500);
+        }
+        setScrollToVerse(null);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [loading, scrollToVerse, verses.length, setScrollToVerse]);
 
 // [新增探针] 自动判定阅读有效性
   // 逻辑：只要用户在一个加载完毕的章节停留超过 3.5 秒，就自动在 Store 记录 1 个互动权重。

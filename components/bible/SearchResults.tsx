@@ -72,14 +72,11 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
   }, [query, mode, cachedResults, apiConfig, locale]);
 
   const handleResultClick = (bookId: string, chapter: number, verse: number) => {
-    // 1. 先设置滚动目标，Reader 加载完经文后会处理
-    setScrollToVerse(verse);
-
-    // 2. 查找是否已经存在专用的阅读标签页 (type === 'read')
+    // 1. 查找是否已经存在专用的阅读标签页 (type === 'read')
     const readTab = tabs.find((t: any) => t.type === 'read');
 
     if (readTab) {
-       // 3. 如果存在，先更新书卷和章节数据，再激活标签页
+       // 2. 如果存在，先更新书卷和章节数据，再激活标签页
        useBibleStore.setState((state) => ({
            tabs: state.tabs.map((t: any) =>
                t.id === readTab.id
@@ -89,9 +86,15 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
        }));
        setActiveTab(readTab.id);
     } else {
-       // 4. 只有在极少数情况下（比如用户把阅读页关了），才新建一个标签页
+       // 3. 只有在极少数情况下（比如用户把阅读页关了），才新建一个标签页
        addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
     }
+
+    // 4. 延迟设置滚动目标，确保 Reader 先检测到章节变化并开始加载数据
+    // 这样 scrollToVerse 的 useEffect 会在新数据加载完成后触发，避免在旧数据上执行
+    requestAnimationFrame(() => {
+      setScrollToVerse(verse);
+    });
   };
 
   if (loading) {
