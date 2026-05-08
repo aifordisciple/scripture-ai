@@ -79,17 +79,31 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     clearSelection();
   }, [book, chapter]);
 
+  // 使用 ref 持久保存 scrollToVerse 目标，避免 useEffect 依赖项时序问题
+  const scrollToVerseRef = useRef<{ bookId: string; chapter: string; verse: number } | null>(null);
+
+  // 每次 scrollToVerse store 值变化时，同步到 ref
   useEffect(() => {
-    if (!scrollToVerse) return;
-    // 数据加载中，等待加载完成后再处理
+    scrollToVerseRef.current = scrollToVerse;
+  }, [scrollToVerse]);
+
+  // 当数据加载完成时，检查 ref 中是否有待处理的 scrollToVerse
+  // 这种方式不依赖 useEffect 依赖项的触发时序，而是主动在数据就绪时检查
+  useEffect(() => {
     if (loading) return;
     if (verses.length === 0) return;
 
-    // 校验当前章节是否匹配 scrollToVerse 的目标章节
-    // 避免在旧章节数据上执行高亮（跨章节跳转时旧数据可能还在）
-    if (scrollToVerse.bookId !== book || scrollToVerse.chapter !== chapter) return;
+    const target = scrollToVerseRef.current;
+    if (!target) return;
 
-    const verseNum = scrollToVerse.verse;
+    // 校验当前章节是否匹配目标章节
+    if (target.bookId !== book || target.chapter !== chapter) return;
+
+    const verseNum = target.verse;
+    // 立即清除 ref 和 store，防止重复触发
+    scrollToVerseRef.current = null;
+    setScrollToVerse(null);
+
     const timer = setTimeout(() => {
         const element = document.getElementById(`verse-${verseNum}`);
         if (element) {
@@ -97,11 +111,9 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
             element.classList.add("animate-highlight-pulse");
             setTimeout(() => element.classList.remove("animate-highlight-pulse"), 2500);
         }
-        // 无论是否找到元素，都清除 scrollToVerse，避免卡住
-        setScrollToVerse(null);
     }, 300);
     return () => clearTimeout(timer);
-  }, [loading, scrollToVerse, verses.length, book, chapter, setScrollToVerse]);
+  }, [loading, verses.length, book, chapter, setScrollToVerse]);
 
 // [新增探针] 自动判定阅读有效性
   // 逻辑：只要用户在一个加载完毕的章节停留超过 3.5 秒，就自动在 Store 记录 1 个互动权重。
