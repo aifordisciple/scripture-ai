@@ -299,6 +299,20 @@ export interface OutlineSection {
 // [P1.3] 大纲变更策略
 export type OutlineChangeStrategy = 'regenerate-affected' | 'adjust-existing' | 'mark-outdated';
 
+// [P1.4] 段落版本来源
+export type SectionVersionSource = 'ai-generated' | 'ai-expanded' | 'ai-adjusted' | 'manual-edit' | 'manual-restore';
+
+// [P1.4] 段落版本
+export interface SectionVersion {
+  id: string;
+  sectionId: string;
+  content: string;
+  source: SectionVersionSource;
+  wordCount: number;
+  createdAt: number; // timestamp
+  label?: string; // optional user label like "初稿", "精修版"
+}
+
 export interface UISlice {
   isAuthOpen: boolean;
   setAuthOpen: (open: boolean) => void;
@@ -602,6 +616,25 @@ export interface SermonSlice {
   setSermonGhostText: (text: string) => void;
   sermonGhostTextVisible: boolean;
   setSermonGhostTextVisible: (visible: boolean) => void;
+  // [P1.3] 大纲锁定与段落独立操作
+  outlineSections: OutlineSection[];
+  outlineChangeStrategy: OutlineChangeStrategy;
+  setOutlineSections: (sections: OutlineSection[]) => void;
+  toggleSectionLock: (sectionId: string) => void;
+  lockAllSections: () => void;
+  unlockAllSections: () => void;
+  updateSectionStatus: (sectionId: string, status: OutlineSection['status']) => void;
+  setOutlineChangeStrategy: (strategy: OutlineChangeStrategy) => void;
+  parseOutlineToSections: (markdown: string) => void;
+  // [P1.4] 段落级版本管理
+  sectionVersions: SectionVersion[];
+  activeVersionId: string | null;
+  setSectionVersions: (versions: SectionVersion[]) => void;
+  addSectionVersion: (sectionId: string, content: string, source: SectionVersionSource, label?: string) => void;
+  restoreSectionVersion: (versionId: string) => void;
+  deleteSectionVersion: (versionId: string) => void;
+  setActiveVersionId: (versionId: string | null) => void;
+  getSectionVersions: (sectionId: string) => SectionVersion[];
 }
 
 // --------------------------------------------------

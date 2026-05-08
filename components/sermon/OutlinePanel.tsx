@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useCallback, useMemo } from 'react'
-import { Lock, Unlock, RefreshCw, ChevronRight, GripVertical, AlertTriangle, CheckCircle2, Loader2, Pencil } from 'lucide-react'
+import React, { useCallback, useMemo, useState } from 'react'
+import { Lock, Unlock, RefreshCw, ChevronRight, GripVertical, AlertTriangle, CheckCircle2, Loader2, Pencil, History } from 'lucide-react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import type { OutlineSection, OutlineSectionStatus, OutlineChangeStrategy } from '@/store/types'
+import { VersionHistoryPanel } from './VersionHistoryPanel'
 
 /** Status icon mapping */
 function StatusIcon({ status }: { status: OutlineSectionStatus }) {
@@ -58,6 +59,7 @@ interface OutlinePanelProps {
 export function OutlinePanel({ onGenerateSection, onNavigateToSection }: OutlinePanelProps) {
   const { locale } = useTranslation()
   const isZh = locale !== 'en'
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null)
 
   const {
     outlineSections,
@@ -229,6 +231,22 @@ export function OutlinePanel({ onGenerateSection, onNavigateToSection }: Outline
               <button
                 onClick={(e) => {
                   e.stopPropagation()
+                  setSelectedSectionId(selectedSectionId === section.id ? null : section.id)
+                }}
+                className={`
+                  p-1 rounded transition-colors
+                  ${selectedSectionId === section.id
+                    ? 'text-blue-500 bg-blue-100 dark:bg-blue-900/30'
+                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                  }
+                `}
+                title={isZh ? '版本历史' : 'Version history'}
+              >
+                <History size={11} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
                   onNavigateToSection?.(section.id)
                 }}
                 className="p-1 rounded text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
@@ -240,6 +258,13 @@ export function OutlinePanel({ onGenerateSection, onNavigateToSection }: Outline
           </div>
         ))}
       </div>
+
+      {/* Version history for selected section */}
+      {selectedSectionId && (
+        <div className="border-t border-border">
+          <VersionHistoryPanel sectionId={selectedSectionId} />
+        </div>
+      )}
     </div>
   )
 }

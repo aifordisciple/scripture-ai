@@ -221,10 +221,46 @@ export function SermonEditor() {
         result += decoder.decode(value, { stream: true })
       }
       if (result) {
+        // Determine version source based on action
+        const versionSource = action === 'continue' ? 'ai-generated'
+          : action === 'expand' ? 'ai-expanded'
+          : action === 'shrink' ? 'ai-adjusted'
+          : 'ai-generated'
+
         if (action === 'continue') {
           editorRef.current?.insertValue(result)
         } else {
           editorRef.current?.setValue(result)
+        }
+
+        // Create version snapshots for affected outline sections
+        const { outlineSections, addSectionVersion } = useBibleStore.getState()
+        if (outlineSections.length > 0 && result.includes('## ')) {
+          const fullContent = editorRef.current?.getValue() || result
+          const lines = fullContent.split('\n')
+          let currentSectionId: string | null = null
+          let currentSectionContent: string[] = []
+          const flushSection = () => {
+            if (currentSectionId && currentSectionContent.length > 0) {
+              const content = currentSectionContent.join('\n').trim()
+              if (content) {
+                addSectionVersion(currentSectionId, content, versionSource)
+              }
+            }
+            currentSectionContent = []
+          }
+          for (const line of lines) {
+            const match = line.match(/^##\s+(.+)/)
+            if (match) {
+              flushSection()
+              const title = match[1].trim()
+              const section = outlineSections.find(s => s.title === title)
+              currentSectionId = section?.id || null
+            } else if (currentSectionId) {
+              currentSectionContent.push(line)
+            }
+          }
+          flushSection()
         }
       }
     } catch (err) {
