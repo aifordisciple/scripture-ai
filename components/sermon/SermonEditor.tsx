@@ -12,8 +12,10 @@ import { FlowGuide } from './FlowGuide'
 import { FlowSuggestions } from './FlowSuggestions'
 import { FloatingToolbar } from './FloatingToolbar'
 import { SlashCommandMenu, type SlashCommand } from './SlashCommandMenu'
+import { DiffPreview } from './DiffPreview'
 import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
 import { useSlashCommands } from '@/hooks/use-slash-commands'
+import { buildSermonContext, serializeContext } from '@/lib/sermon-context'
 
 export function SermonEditor() {
   const { t } = useTranslation()
@@ -46,6 +48,9 @@ export function SermonEditor() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [floatingToolbar, setFloatingToolbar] = useState<{ visible: boolean; x: number; y: number; selectedText: string }>({
     visible: false, x: 0, y: 0, selectedText: '',
+  })
+  const [diffPreview, setDiffPreview] = useState<{ visible: boolean; original: string; modified: string }>({
+    visible: false, original: '', modified: '',
   })
 
   // Slash commands — pass onSelectCommand so keyboard selection works
@@ -267,22 +272,61 @@ export function SermonEditor() {
   // Handle floating toolbar action
   const handleFloatingAction = useCallback((action: string) => {
     if (!floatingToolbar.selectedText) return
+
+    // Parse sub-actions like "expand-slight" → action="expand", degree="slight"
+    let aiAction = action
+    let expandDegree: 'slight' | 'moderate' | 'extensive' | undefined
+    if (action.startsWith('expand-')) {
+      aiAction = 'expand'
+      expandDegree = action.replace('expand-', '') as 'slight' | 'moderate' | 'extensive'
+    } else if (action.startsWith('shrink-')) {
+      aiAction = 'shrink'
+      expandDegree = action.replace('shrink-', '') as 'slight' | 'moderate' | 'extensive'
+    }
+
+    // Actions that modify selected text (show diff preview)
+    const isModifyAction = ['polish', 'expand', 'shrink'].includes(aiAction)
+    // Actions that insert new content (no diff needed)
+    const isInsertAction = ['insert-verse', 'add-example', 'cross-ref'].includes(aiAction)
+
+    // Build sermon context for full-text awareness
+    const fullContent = editorRef.current?.getValue() || markdownContent
+    const sermonCtx = buildSermonContext(fullContent, fullContent.length, {
+      title: currentSermon?.title,
+      verseRefs: currentSermon?.verseRefs,
+      style: currentSermon?.style,
+      flowStage: useBibleStore.getState().sermonFlowStage,
+    })
+    const sermonContextStr = serializeContext(sermonCtx)
+
     setIsGenerating(true)
     fetch('/api/sermon/ai-action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        action,
+        action: aiAction,
         selectedText: floatingToolbar.selectedText,
         verseRefs: currentSermon?.verseRefs,
         style: currentSermon?.style,
         locale: useBibleStore.getState().locale,
+        sermonContext: sermonContextStr,
+        expandDegree,
       }),
     })
       .then(res => res.text())
       .then(result => {
         if (result) {
-          editorRef.current?.insertValue(result)
+          if (isModifyAction) {
+            // Show diff preview for modification actions
+            setDiffPreview({
+              visible: true,
+              original: floatingToolbar.selectedText,
+              modified: result,
+            })
+          } else {
+            // Insert directly for additive actions
+            editorRef.current?.insertValue(result)
+          }
         }
       })
       .catch(err => console.error('[SermonEditor] Floating action failed:', err))
@@ -290,7 +334,7 @@ export function SermonEditor() {
         setIsGenerating(false)
         setFloatingToolbar(prev => ({ ...prev, visible: false }))
       })
-  }, [floatingToolbar.selectedText, currentSermon])
+  }, [floatingToolbar.selectedText, currentSermon, markdownContent])
 
   // Handle slash command selection (from click events)
   const handleSlashSelect = useCallback((command: SlashCommand) => {
@@ -378,6 +422,25 @@ export function SermonEditor() {
           onClose={closeSlash}
           selectedIndex={slashSelectedIndex}
           onSelectedIndexChange={setSlashSelectedIndex}
+        />
+
+        {/* Diff Preview for AI modification actions */}
+        <DiffPreview
+          original={diffPreview.original}
+          modified={diffPreview.modified}
+          visible={diffPreview.visible}
+          onAccept={(text) => {
+            // Replace selected text with accepted modification
+            editorRef.current?.insertValue(text)
+            setDiffPreview({ visible: false, original: '', modified: '' })
+          }}
+          onReject={() => {
+            setDiffPreview({ visible: false, original: '', modified: '' })
+          }}
+          onPartialAccept={(text) => {
+            editorRef.current?.insertValue(text)
+            setDiffPreview({ visible: false, original: '', modified: '' })
+          }}
         />
       </div>
 

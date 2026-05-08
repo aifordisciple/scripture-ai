@@ -10,6 +10,8 @@ import {
   GitBranch,
   FileText,
   ShieldCheck,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
 
@@ -52,6 +54,24 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     descEn: 'AI continues writing current content',
     icon: ArrowRight,
     action: 'continue',
+  },
+  {
+    key: 'expand',
+    labelZh: '扩展',
+    labelEn: 'Expand',
+    descZh: '扩展选中文本，增加深度和细节',
+    descEn: 'Expand selected text with more depth and detail',
+    icon: Maximize2,
+    action: 'expand',
+  },
+  {
+    key: 'shrink',
+    labelZh: '精简',
+    labelEn: 'Shrink',
+    descZh: '精简选中文本，去除冗余表达',
+    descEn: 'Condense selected text, removing redundancy',
+    icon: Minimize2,
+    action: 'shrink',
   },
   {
     key: 'polish',

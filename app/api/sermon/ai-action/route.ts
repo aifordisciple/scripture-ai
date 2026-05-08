@@ -19,12 +19,15 @@ export async function POST(req: Request) {
     }
 
     const { apiConfig, body } = await extractApiConfig(req);
-    const { action, selectedText, verseRefs, style, locale = 'zh' } = body as {
-      action: 'continue' | 'polish' | 'insert-verse' | 'add-example' | 'cross-ref';
+    const { action, selectedText, verseRefs, style, locale = 'zh', sermonContext } = body as {
+      action: 'continue' | 'polish' | 'insert-verse' | 'add-example' | 'cross-ref' | 'expand' | 'shrink';
       selectedText: string;
       verseRefs?: string;
       style?: string;
       locale?: string;
+      sermonContext?: string;
+      expandDegree?: 'slight' | 'moderate' | 'extensive';
+      expandDirection?: 'depth' | 'breadth' | 'illustration';
     };
 
     if (!action || !selectedText) {
@@ -40,6 +43,20 @@ export async function POST(req: Request) {
       return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400 });
     }
 
+    // Degree modifiers for expand/shrink actions
+    const degreeModifiers: Record<string, Record<string, string>> = {
+      expand: {
+        slight: resolvedLocale === 'zh' ? '请仅略微扩展，增加1-2个补充说明即可，不要大幅改写。' : 'Expand only slightly, adding 1-2 supplementary points. Do not heavily rewrite.',
+        moderate: '', // default prompt is already moderate
+        extensive: resolvedLocale === 'zh' ? '请大幅扩展，深入阐述每个论点，添加详细的经文分析、例证和应用。' : 'Expand extensively, deeply elaborating each point with detailed Scripture analysis, illustrations, and applications.',
+      },
+      shrink: {
+        slight: resolvedLocale === 'zh' ? '请仅略微精简，去除少量冗余表达即可，保留大部分内容。' : 'Condense only slightly, removing minor redundancies while preserving most content.',
+        moderate: '', // default prompt is already moderate
+        extensive: resolvedLocale === 'zh' ? '请大幅精简，只保留最核心的论点，去除所有非必要的阐述和例证。' : 'Condense extensively, keeping only the core arguments and removing all non-essential elaboration and illustrations.',
+      },
+    };
+
     const styleMap: Record<string, Record<string, string>> = {
       EXPOSITORY: { zh: '释经式', en: 'Expository' },
       TOPICAL: { zh: '主题式', en: 'Topical' },
@@ -48,11 +65,34 @@ export async function POST(req: Request) {
     };
     const styleLabel = style ? (styleMap[style]?.[resolvedLocale] || style) : '';
 
-    let fullPrompt = `${actionPrompt}\n\n### Selected Text\n${selectedText}`;
-    if (styleLabel) fullPrompt += `\n\n### Sermon Style: ${styleLabel}`;
-    if (verseRefs) fullPrompt += `\n### Verse References: ${verseRefs}`;
+    // Build user message with action prompt and selected text
+    let userMessage = `${actionPrompt}`;
+    // Apply degree modifier if applicable
+    const degree = body.expandDegree as string | undefined;
+    if (degree && degreeModifiers[action]?.[degree]) {
+      userMessage += `\n\n${degreeModifiers[action][degree]}`;
+    }
+    userMessage += `\n\n### Selected Text\n${selectedText}`;
+    if (styleLabel) userMessage += `\n\n### Sermon Style: ${styleLabel}`;
+    if (verseRefs) userMessage += `\n### Verse References: ${verseRefs}`;
 
-    const result = await streamText({ model, prompt: fullPrompt, maxTokens: 2048 });
+    // Build system message with sermon context for full-text awareness
+    const systemParts: string[] = [];
+    systemParts.push(resolvedLocale === 'en'
+      ? 'You are an experienced sermon writing assistant. Help write and improve sermon content with biblical faithfulness and pastoral warmth.'
+      : '你是一位经验丰富的讲章写作助手，帮助撰写和改进讲章内容，确保圣经真理的准确性和牧养的温暖。'
+    );
+    if (sermonContext) {
+      systemParts.push(sermonContext);
+    }
+    const systemMessage = systemParts.join('\n\n');
+
+    const result = await streamText({
+      model,
+      system: systemMessage,
+      prompt: userMessage,
+      maxTokens: 2048,
+    });
 
     // Stream the response as plain text for editor consumption
     const encoder = new TextEncoder()
