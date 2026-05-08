@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { stripThinkTags } from '@/lib/ai';
+import { getEnvConfig } from '@/lib/ai-client';
 
 const LAYOUT_MODES = ['classic', 'poster', 'card', 'modern', 'split', 'frame', 'film', 'minimal', 'magazine', 'stamp'] as const;
 type LayoutMode = typeof LAYOUT_MODES[number];
@@ -19,16 +20,6 @@ interface AICardThemeResponse {
   bgSearchQuery?: string;
 }
 
-function getAIProvider() {
-  const provider = process.env.AI_PROVIDER || 'openai';
-  const apiKey = provider === 'deepseek' ? process.env.DEEPSEEK_API_KEY : process.env.OPENAI_API_KEY;
-  const baseUrl = provider === 'deepseek'
-    ? (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com')
-    : (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1');
-  const model = provider === 'deepseek' ? 'deepseek-chat' : 'gpt-4o-mini';
-  return { apiKey, baseUrl, model };
-}
-
 export async function POST(req: NextRequest) {
   try {
     const { content } = await req.json();
@@ -37,7 +28,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'content is required' }, { status: 400 });
     }
 
-    const { apiKey, baseUrl, model } = getAIProvider();
+    const { apiKey, baseUrl, model } = getEnvConfig();
 
     if (!apiKey) {
       return NextResponse.json({ success: false, error: 'AI API key not configured' }, { status: 500 });

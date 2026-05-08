@@ -100,7 +100,7 @@ async function getDbConfig(userId?: string): Promise<AIConfig | null> {
  * Get environment variable config as fallback
  * Now defaults to cloud MiniMax
  */
-function getEnvConfig(): AIConfig {
+export function getEnvConfig(): AIConfig {
   const envProvider = process.env.AI_PROVIDER?.toLowerCase();
 
   // Determine provider from env, default to cloud

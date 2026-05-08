@@ -69,6 +69,7 @@ function buildCardJSX(params: CardParams) {
   const qrSize = Math.round(80 * scale);
   const qrElement = qrCodePosition && qrCodePosition !== 'none' && qrCodeUrl ? (
     <div style={{
+      display: 'flex',
       position: 'absolute',
       bottom: padding,
       ...(qrCodePosition === 'bottom-left' ? { left: padding } : { right: padding }),
@@ -77,7 +78,6 @@ function buildCardJSX(params: CardParams) {
       backgroundColor: 'rgba(255,255,255,0.9)',
       borderRadius: 4 * scale,
       padding: 4 * scale,
-      display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
     }}>
@@ -103,7 +103,7 @@ function buildCardJSX(params: CardParams) {
       width: '100%', height: '100%', padding, color: textColor, fontFamily,
     }}>
       {aiTitle && <div style={{ fontSize: scaledTitleSize, fontWeight: 700, marginBottom: 16 * scale, opacity: 0.9, textAlign, width: '100%' }}>{aiTitle}</div>}
-      <div style={{ fontSize: scaledFontSize, lineHeight, textAlign, width: '100%', maxWidth: width - padding * 2 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', fontSize: scaledFontSize, lineHeight, textAlign, width: '100%', maxWidth: width - padding * 2 }}>
         {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
       </div>
       <div style={{ fontSize: scaledInfoSize, color: infoColor, marginTop: 24 * scale, opacity: 0.7, textAlign, width: '100%' }}>{infoText}</div>
@@ -113,9 +113,13 @@ function buildCardJSX(params: CardParams) {
   switch (layoutMode) {
     case 'poster':
       return (
-        <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', position: 'relative' }}>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding, background: 'linear-gradient(transparent, rgba(0,0,0,0.6))' }}>
-            {contentElement}
+        <div style={{ display: 'flex', width: '100%', height: '100%', ...bgStyle, position: 'relative' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', position: 'absolute', bottom: 0, left: 0, right: 0, padding, background: 'linear-gradient(transparent, rgba(0,0,0,0.6))' }}>
+            {aiTitle && <div style={{ fontSize: scaledTitleSize, fontWeight: 700, marginBottom: 16 * scale, opacity: 0.9, textAlign, width: '100%', color: textColor, fontFamily }}>{aiTitle}</div>}
+            <div style={{ display: 'flex', flexDirection: 'column', fontSize: scaledFontSize, lineHeight, textAlign, width: '100%', color: textColor, fontFamily }}>
+              {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
+            </div>
+            <div style={{ fontSize: scaledInfoSize, color: infoColor, marginTop: 24 * scale, opacity: 0.7, textAlign, width: '100%' }}>{infoText}</div>
           </div>
           {qrElement}
         </div>
@@ -123,10 +127,10 @@ function buildCardJSX(params: CardParams) {
 
     case 'card':
       return (
-        <div style={{ width: '100%', height: '100%', background: bgGradient || '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 * scale }}>
-          <div style={{ width: '90%', backgroundColor: 'white', borderRadius: 16 * scale, padding: padding * 1.5, boxShadow: `0 ${4 * scale}px ${24 * scale}px rgba(0,0,0,0.1)`, color: '#333' }}>
+        <div style={{ display: 'flex', width: '100%', height: '100%', background: bgGradient || '#f5f5f5', alignItems: 'center', justifyContent: 'center', padding: 40 * scale }}>
+          <div style={{ display: 'flex', flexDirection: 'column', width: '90%', backgroundColor: 'white', borderRadius: 16 * scale, padding: padding * 1.5, boxShadow: `0 ${4 * scale}px ${24 * scale}px rgba(0,0,0,0.1)`, color: '#333' }}>
             {aiTitle && <div style={{ fontSize: scaledTitleSize, fontWeight: 700, marginBottom: 16 * scale, color: '#1a1a1a' }}>{aiTitle}</div>}
-            <div style={{ fontSize: scaledFontSize, lineHeight, color: '#333' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', fontSize: scaledFontSize, lineHeight, color: '#333' }}>
               {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
             </div>
             <div style={{ fontSize: scaledInfoSize, color: '#999', marginTop: 24 * scale }}>{infoText}</div>
@@ -136,11 +140,11 @@ function buildCardJSX(params: CardParams) {
 
     case 'modern':
       return (
-        <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', position: 'relative' }}>
+        <div style={{ display: 'flex', width: '100%', height: '100%', ...bgStyle, position: 'relative' }}>
           <div style={{ position: 'absolute', top: padding, left: padding, width: 4 * scale, height: 60 * scale, backgroundColor: textColor, opacity: 0.6, borderRadius: 2 * scale }} />
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: `${padding * 2}px ${padding}px ${padding}px ${padding * 2}px`, width: '100%', height: '100%', color: textColor, fontFamily }}>
             {aiTitle && <div style={{ fontSize: scaledTitleSize, fontWeight: 700, marginBottom: 16 * scale, opacity: 0.9 }}>{aiTitle}</div>}
-            <div style={{ fontSize: scaledFontSize, lineHeight, width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', fontSize: scaledFontSize, lineHeight, width: '100%' }}>
               {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
             </div>
             <div style={{ fontSize: scaledInfoSize, color: infoColor, marginTop: 24 * scale, opacity: 0.7 }}>{infoText}</div>
@@ -151,11 +155,11 @@ function buildCardJSX(params: CardParams) {
 
     case 'split':
       return (
-        <div style={{ width: '100%', height: '100%', display: 'flex' }}>
+        <div style={{ display: 'flex', width: '100%', height: '100%' }}>
           <div style={{ width: '45%', ...bgStyle }} />
-          <div style={{ width: '55%', backgroundColor: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding, color: '#333', fontFamily }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '55%', backgroundColor: 'white', padding, color: '#333', fontFamily }}>
             {aiTitle && <div style={{ fontSize: scaledTitleSize, fontWeight: 700, marginBottom: 16 * scale, color: '#1a1a1a' }}>{aiTitle}</div>}
-            <div style={{ fontSize: scaledFontSize, lineHeight, color: '#333' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', fontSize: scaledFontSize, lineHeight, color: '#333' }}>
               {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
             </div>
             <div style={{ fontSize: scaledInfoSize, color: '#999', marginTop: 24 * scale }}>{infoText}</div>
@@ -165,7 +169,7 @@ function buildCardJSX(params: CardParams) {
 
     case 'frame':
       return (
-        <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', position: 'relative' }}>
+        <div style={{ display: 'flex', width: '100%', height: '100%', ...bgStyle, position: 'relative' }}>
           <div style={{ position: 'absolute', top: 20 * scale, left: 20 * scale, right: 20 * scale, bottom: 20 * scale, border: `${2 * scale}px solid ${textColor}`, borderRadius: 8 * scale, opacity: 0.3 }} />
           {contentElement}
           {qrElement}
@@ -174,12 +178,12 @@ function buildCardJSX(params: CardParams) {
 
     case 'film':
       return (
-        <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', position: 'relative' }}>
+        <div style={{ display: 'flex', width: '100%', height: '100%', ...bgStyle, position: 'relative' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 24 * scale, backgroundColor: 'rgba(0,0,0,0.7)' }} />
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 24 * scale, backgroundColor: 'rgba(0,0,0,0.7)' }} />
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: `${40 * scale}px ${padding}px`, width: '100%', height: '100%', color: textColor, fontFamily, textAlign: 'center' }}>
             {aiTitle && <div style={{ fontSize: scaledTitleSize, fontWeight: 700, marginBottom: 16 * scale, opacity: 0.9 }}>{aiTitle}</div>}
-            <div style={{ fontSize: scaledFontSize, lineHeight, textAlign: 'center', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', fontSize: scaledFontSize, lineHeight, textAlign: 'center', width: '100%' }}>
               {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
             </div>
             <div style={{ fontSize: scaledInfoSize, color: infoColor, marginTop: 24 * scale, opacity: 0.7 }}>{infoText}</div>
@@ -190,9 +194,9 @@ function buildCardJSX(params: CardParams) {
 
     case 'minimal':
       return (
-        <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', position: 'relative' }}>
+        <div style={{ display: 'flex', width: '100%', height: '100%', ...bgStyle, position: 'relative' }}>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: padding * 2, width: '100%', height: '100%', color: textColor, fontFamily }}>
-            <div style={{ fontSize: scaledFontSize * 0.9, lineHeight, textAlign: 'center', maxWidth: width * 0.7 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', fontSize: scaledFontSize * 0.9, lineHeight, textAlign: 'center', maxWidth: width * 0.7 }}>
               {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
             </div>
             <div style={{ width: 40 * scale, height: 1, backgroundColor: textColor, opacity: 0.3, margin: `${20 * scale}px 0` }} />
@@ -204,10 +208,10 @@ function buildCardJSX(params: CardParams) {
 
     case 'magazine':
       return (
-        <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', position: 'relative' }}>
+        <div style={{ display: 'flex', width: '100%', height: '100%', ...bgStyle, position: 'relative' }}>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding, width: '100%', height: '100%', color: textColor, fontFamily }}>
             {aiTitle && <div style={{ fontSize: scaledTitleSize * 1.5, fontWeight: 900, lineHeight: 1.1, marginBottom: 20 * scale, letterSpacing: 2 * scale }}>{aiTitle}</div>}
-            <div style={{ fontSize: scaledFontSize * 0.85, lineHeight, textAlign: 'left', maxWidth: width * 0.65 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', fontSize: scaledFontSize * 0.85, lineHeight, textAlign: 'left', maxWidth: width * 0.65 }}>
               {verseContent.map((line, i) => <div key={i} style={{ marginBottom: 4 * scale }}>{line}</div>)}
             </div>
             <div style={{ fontSize: scaledInfoSize, color: infoColor, marginTop: 20 * scale, opacity: 0.6, letterSpacing: 1 * scale }}>{infoText}</div>
@@ -218,10 +222,10 @@ function buildCardJSX(params: CardParams) {
 
     case 'stamp':
       return (
-        <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          <div style={{ border: `${3 * scale}px solid ${textColor}`, borderRadius: 4 * scale, padding, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', maxWidth: width * 0.8, opacity: 0.85 }}>
-            <div style={{ fontSize: scaledFontSize * 1.2, lineHeight, textAlign: 'center', color: textColor, fontFamily }}>
-              &ldquo;{verseContent.join(' ')}&rdquo;
+        <div style={{ display: 'flex', width: '100%', height: '100%', ...bgStyle, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: `${3 * scale}px solid ${textColor}`, borderRadius: 4 * scale, padding, maxWidth: width * 0.8, opacity: 0.85 }}>
+            <div style={{ display: 'flex', fontSize: scaledFontSize * 1.2, lineHeight, textAlign: 'center', color: textColor, fontFamily }}>
+              {`\u201C${verseContent.join(' ')}\u201D`}
             </div>
             <div style={{ fontSize: scaledInfoSize, color: infoColor, marginTop: 16 * scale, opacity: 0.7 }}>{infoText}</div>
           </div>
@@ -232,7 +236,7 @@ function buildCardJSX(params: CardParams) {
     // classic (default)
     default:
       return (
-        <div style={{ width: '100%', height: '100%', ...bgStyle, display: 'flex', position: 'relative' }}>
+        <div style={{ display: 'flex', width: '100%', height: '100%', ...bgStyle, position: 'relative' }}>
           {contentElement}
           {qrElement}
         </div>
