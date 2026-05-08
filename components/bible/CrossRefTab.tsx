@@ -162,8 +162,8 @@ export function CrossRefTab({ sourceVerse: initialSourceVerse }: CrossRefTabProp
     const existingReadTab = store.tabs.find(t => t.type === 'read');
 
     if (existingReadTab) {
-      // Set the verse to scroll to
-      store.setScrollToVerse(item.verse);
+      // Set the verse to scroll to (携带目标章节信息)
+      store.setScrollToVerse({ bookId: item.bookId, chapter: item.chapter.toString(), verse: item.verse });
 
       // Switch to the read tab first
       store.setActiveTab(existingReadTab.id);

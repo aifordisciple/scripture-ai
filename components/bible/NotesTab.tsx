@@ -81,7 +81,7 @@ export function NotesTab() {
     } else {
       addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
     }
-    useBibleStore.getState().setScrollToVerse(verse);
+    useBibleStore.getState().setScrollToVerse({ bookId, chapter: chapter.toString(), verse });
 
     // 强制修改 URL
     router.push(`/?book=${bookId}&chapter=${chapter}`);

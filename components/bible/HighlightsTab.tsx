@@ -148,8 +148,8 @@ export function HighlightsTab() {
     } else {
       addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
     }
-    // 设置阅读器滚动锚点
-    useBibleStore.getState().setScrollToVerse(verse);
+    // 设置阅读器滚动锚点（携带目标章节信息）
+    useBibleStore.getState().setScrollToVerse({ bookId, chapter: chapter.toString(), verse });
 
     // 强制修改 URL，触发 Next.js 和 Reader 的跨章节数据抓取
     router.push(`/?book=${bookId}&chapter=${chapter}`);

@@ -147,7 +147,7 @@ export const createReaderSlice: StateCreator<StoreState, [], [], ReaderSlice> = 
   ttsVoice: 'zh-CN-XiaoxiaoNeural',
   setTtsVoice: (voice) => set({ ttsVoice: voice }),
   scrollToVerse: null,
-  setScrollToVerse: (verse) => set({ scrollToVerse: verse }),
+  setScrollToVerse: (target) => set({ scrollToVerse: target }),
 });
 
 export const createAISlice: StateCreator<StoreState, [], [], AISlice> = (set, get) => ({

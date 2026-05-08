@@ -90,11 +90,8 @@ export function SearchResults({ query, mode, cachedResults, onUpdateResults }: S
        addTab({ type: 'read', book: bookId, chapter: chapter.toString() });
     }
 
-    // 4. 延迟设置滚动目标，确保 Reader 先检测到章节变化并开始加载数据
-    // 这样 scrollToVerse 的 useEffect 会在新数据加载完成后触发，避免在旧数据上执行
-    requestAnimationFrame(() => {
-      setScrollToVerse(verse);
-    });
+    // 4. 设置滚动目标，携带目标章节信息，Reader 会校验章节匹配后才执行高亮
+    setScrollToVerse({ bookId, chapter: chapter.toString(), verse });
   };
 
   if (loading) {

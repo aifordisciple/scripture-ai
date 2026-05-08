@@ -346,8 +346,8 @@ export interface ReaderSlice {
   setChapterSpeechText: (text: string) => void;
   ttsVoice: string;
   setTtsVoice: (voice: string) => void;
-  scrollToVerse: number | null;
-  setScrollToVerse: (verse: number | null) => void;
+  scrollToVerse: { bookId: string; chapter: string; verse: number } | null;
+  setScrollToVerse: (target: { bookId: string; chapter: string; verse: number } | null) => void;
 }
 
 export interface AISlice {
