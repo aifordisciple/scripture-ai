@@ -4,36 +4,29 @@
 import { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
-import { GRADIENT_PRESETS, UNSPLASH_PRESETS, PICSUM_CATEGORIES, TEXT_COLOR_PRESETS, INFO_COLOR_PRESETS } from '@/lib/card-presets';
+import { GRADIENT_PRESETS, UNSPLASH_PRESETS, PICSUM_CATEGORIES } from '@/lib/card-presets';
 import { fetchImageAsBase64 } from '@/lib/card-renderer';
 import { Button } from '@/components/ui/button';
-import { Loader2, Upload, Search, Palette, Info } from 'lucide-react';
+import { Loader2, Upload, Search } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
 interface BackgroundPickerProps {
   bgImage: string | null;
   selectedBgUrl: string | null;
   bgGradient: string;
-  textColor: string;
-  infoColor: string;
   layoutMode: string;
   onBgImageSelect: (base64: string) => void;
   onBgGradientSelect: (gradient: string, textColor: string, infoColor: string) => void;
   onBgImageUpload: (base64: string) => void;
-  onTextColorChange: (color: string) => void;
-  onInfoColorChange: (color: string) => void;
 }
 
 export function BackgroundPicker({
-  bgImage, selectedBgUrl, bgGradient, textColor, infoColor, layoutMode,
+  bgImage, selectedBgUrl, bgGradient, layoutMode,
   onBgImageSelect, onBgGradientSelect, onBgImageUpload,
-  onTextColorChange, onInfoColorChange,
 }: BackgroundPickerProps) {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const mainColorRef = useRef<HTMLInputElement>(null);
-  const infoColorRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'featured' | 'online' | 'gradient' | 'custom'>('featured');
 
@@ -323,7 +316,7 @@ export function BackgroundPicker({
         </div>
       )}
 
-      {/* 自定义上传 + 颜色 */}
+      {/* 自定义上传 */}
       {activeTab === 'custom' && (
         <div className="space-y-4">
           <div>
@@ -332,38 +325,6 @@ export function BackgroundPicker({
             <Button variant="outline" size="sm" className="w-full border-dashed active:scale-95" onClick={() => fileInputRef.current?.click()}>
               <Upload className="w-4 h-4 mr-2" /> {t('shareCard.uploadImage')}
             </Button>
-          </div>
-
-          {/* 文字颜色 */}
-          <div className="space-y-3">
-            <label className="text-xs font-semibold text-muted-foreground">{t('shareCard.mainColor')}</label>
-            <div className="flex gap-3 flex-wrap items-center">
-              {TEXT_COLOR_PRESETS.map(c => (
-                <button key={c} onClick={() => onTextColorChange(c)} className={cn("w-8 h-8 rounded-full border transition-transform active:scale-95", textColor === c && "ring-2 ring-primary ring-offset-2")} style={{ backgroundColor: c }} />
-              ))}
-              <div className="relative">
-                <button onClick={() => mainColorRef.current?.click()} className="w-8 h-8 rounded-full border border-dashed border-muted-foreground flex items-center justify-center hover:bg-secondary active:scale-95" title={t('shareCard.customColor')}>
-                  <Palette className="w-4 h-4 text-muted-foreground" />
-                </button>
-                <input ref={mainColorRef} type="color" className="absolute opacity-0 w-0 h-0" onChange={(e) => onTextColorChange(e.target.value)} />
-              </div>
-            </div>
-          </div>
-
-          {/* 信息颜色 */}
-          <div className="space-y-3 border-t pt-3">
-            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><Info className="w-3 h-3" /> {t('shareCard.infoColor')}</label>
-            <div className="flex gap-3 flex-wrap items-center">
-              {INFO_COLOR_PRESETS.map(c => (
-                <button key={c} onClick={() => onInfoColorChange(c)} className={cn("w-6 h-6 rounded-full border transition-transform active:scale-95", infoColor === c && "ring-2 ring-primary ring-offset-2")} style={{ backgroundColor: c }} />
-              ))}
-              <div className="relative">
-                <button onClick={() => infoColorRef.current?.click()} className="w-6 h-6 rounded-full border border-dashed border-muted-foreground flex items-center justify-center hover:bg-secondary active:scale-95" title={t('shareCard.customColor')}>
-                  <Palette className="w-3 h-3 text-muted-foreground" />
-                </button>
-                <input ref={infoColorRef} type="color" className="absolute opacity-0 w-0 h-0" onChange={(e) => onInfoColorChange(e.target.value)} />
-              </div>
-            </div>
           </div>
         </div>
       )}

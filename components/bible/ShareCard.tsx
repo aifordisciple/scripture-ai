@@ -188,14 +188,10 @@ export function ShareCard() {
                     bgImage={cardConfig.bgImage}
                     selectedBgUrl={cardConfig.selectedBgUrl}
                     bgGradient={cardConfig.bgGradient}
-                    textColor={cardConfig.textColor}
-                    infoColor={cardConfig.infoColor}
                     layoutMode={cardConfig.layoutMode}
                     onBgImageSelect={selectBgImage}
                     onBgGradientSelect={selectBgGradient}
                     onBgImageUpload={uploadBgImage}
-                    onTextColorChange={(c) => updateCardConfig({ textColor: c })}
-                    onInfoColorChange={(c) => updateCardConfig({ infoColor: c })}
                   />
                 </TabsContent>
 
@@ -206,10 +202,14 @@ export function ShareCard() {
                     fontSize={cardConfig.fontSize}
                     lineHeight={cardConfig.lineHeight}
                     textAlign={cardConfig.textAlign}
+                    textColor={cardConfig.textColor}
+                    infoColor={cardConfig.infoColor}
                     onFontFamilyChange={(f) => updateCardConfig({ fontFamily: f })}
                     onFontSizeChange={(s) => updateCardConfig({ fontSize: s })}
                     onLineHeightChange={(h) => updateCardConfig({ lineHeight: h })}
                     onTextAlignChange={(a) => updateCardConfig({ textAlign: a })}
+                    onTextColorChange={(c) => updateCardConfig({ textColor: c })}
+                    onInfoColorChange={(c) => updateCardConfig({ infoColor: c })}
                   />
                 </TabsContent>
 
