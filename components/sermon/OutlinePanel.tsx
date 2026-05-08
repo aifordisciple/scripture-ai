@@ -6,6 +6,7 @@ import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import type { OutlineSection, OutlineSectionStatus, OutlineChangeStrategy } from '@/store/types'
 import { VersionHistoryPanel } from './VersionHistoryPanel'
+import { PipelineVisualization } from './PipelineVisualization'
 
 /** Status icon mapping */
 function StatusIcon({ status }: { status: OutlineSectionStatus }) {
@@ -96,6 +97,9 @@ export function OutlinePanel({ onGenerateSection, onNavigateToSection }: Outline
 
   return (
     <div className="flex flex-col">
+      {/* Pipeline visualization */}
+      <PipelineVisualization />
+
       {/* Header with lock controls */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
         <span className="text-xs font-medium text-foreground">

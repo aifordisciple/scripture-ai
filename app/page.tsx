@@ -253,6 +253,10 @@ export default function Home() {
   }, [isDarkMode, setTheme]);
 
   useEffect(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) return; // iOS 使用 CSS 模拟全屏，不依赖 fullscreenchange 事件
+
     const handleFullscreenChange = () => { setIsFullscreen(!!document.fullscreenElement); };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
@@ -364,10 +368,26 @@ export default function Home() {
     else if (lineHeight <= 1.8) setLineHeight(2.2);
     else setLineHeight(1.4);
   };
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
-    else { if (document.exitFullscreen) { document.exitFullscreen(); } }
-  };
+  const toggleFullscreen = useCallback(() => {
+    // iOS Safari 不支持 Fullscreen API，使用 CSS 模拟全屏
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+      setIsFullscreen(prev => !prev);
+      return;
+    }
+
+    // 非 iOS：使用原生 Fullscreen API
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {
+        // 原生全屏失败时回退到 CSS 模拟全屏
+        setIsFullscreen(prev => !prev);
+      });
+    } else {
+      if (document.exitFullscreen) { document.exitFullscreen(); }
+    }
+  }, []);
 
   return (
     <main className="flex h-screen w-full overflow-hidden bg-background relative transition-colors duration-500">
