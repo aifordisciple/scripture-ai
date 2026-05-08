@@ -4,6 +4,35 @@
 import type { CardConfig, LayoutMode } from './card-presets';
 
 // --------------------------------------------------
+// 统一缩放计算 - 预览与服务端共用同一公式
+// --------------------------------------------------
+
+export interface PreviewScaling {
+  scale: number;
+  fontSize: number;
+  titleSize: number;
+  infoSize: number;
+  padding: number;
+  qrSize: number;
+}
+
+/**
+ * 计算预览/渲染用的统一缩放参数
+ * 与 app/api/card-image/route.tsx 中的 buildCardJSX 使用完全相同的公式
+ */
+export function getPreviewScaling(outputWidth: number, baseFontSize: number): PreviewScaling {
+  const scale = outputWidth / 1080;
+  return {
+    scale,
+    fontSize: Math.round(baseFontSize * scale * 1.8),
+    titleSize: Math.round(baseFontSize * scale * 2.2),
+    infoSize: Math.round(baseFontSize * scale * 1.2),
+    padding: Math.round(60 * scale),
+    qrSize: Math.round(80 * scale),
+  };
+}
+
+// --------------------------------------------------
 // 1. Satori 渲染请求参数
 // --------------------------------------------------
 
