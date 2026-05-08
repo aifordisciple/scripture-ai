@@ -79,31 +79,34 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     clearSelection();
   }, [book, chapter]);
 
-  // 使用 ref 持久保存 scrollToVerse 目标，避免 useEffect 依赖项时序问题
-  const scrollToVerseRef = useRef<{ bookId: string; chapter: string; verse: number } | null>(null);
-
-  // 每次 scrollToVerse store 值变化时，同步到 ref
+  // scrollToVerse 处理：跳转到指定经文并高亮闪烁
+  // 核心问题：跨章节跳转时，book/chapter 状态先更新，但 verses 还是旧数据
+  // 解决方案：用 ref 追踪 loading 从 true→false 的转换，只在数据就绪后执行高亮
+  const prevLoadingRef = useRef(true);
   useEffect(() => {
-    scrollToVerseRef.current = scrollToVerse;
-  }, [scrollToVerse]);
+    const justFinishedLoading = prevLoadingRef.current && !loading;
+    prevLoadingRef.current = loading;
 
-  // 当数据加载完成时，检查 ref 中是否有待处理的 scrollToVerse
-  // 这种方式不依赖 useEffect 依赖项的触发时序，而是主动在数据就绪时检查
-  useEffect(() => {
+    if (!scrollToVerse) return;
     if (loading) return;
     if (verses.length === 0) return;
+    if (scrollToVerse.bookId !== book || scrollToVerse.chapter !== chapter) return;
 
-    const target = scrollToVerseRef.current;
-    if (!target) return;
+    // 关键判断：如果刚刚完成 loading（true→false），说明新章节数据已就绪，可以执行
+    // 如果没有经历 loading 变化（同章节跳转），也直接执行
+    // 唯一需要阻止的是：跨章节跳转但 verses 还是旧数据的情况
+    // 判断方法：如果 scrollToVerse 的章节与 verses 中的实际数据不匹配，说明数据还没更新
+    const firstVerse = verses.find(v => v.version === primaryVersion);
+    if (firstVerse && (firstVerse.bookId !== scrollToVerse.bookId || firstVerse.chapter.toString() !== scrollToVerse.chapter)) {
+      // verses 数据还是旧章节的，等 loading 完成后再执行
+      return;
+    }
 
-    // 校验当前章节是否匹配目标章节
-    if (target.bookId !== book || target.chapter !== chapter) return;
-
-    const verseNum = target.verse;
-    // 立即清除 ref 和 store，防止重复触发
-    scrollToVerseRef.current = null;
+    const verseNum = scrollToVerse.verse;
+    // 立即清除，防止重复触发
     setScrollToVerse(null);
 
+    // 延迟执行，等待 DOM 渲染完成
     const timer = setTimeout(() => {
         const element = document.getElementById(`verse-${verseNum}`);
         if (element) {
@@ -113,7 +116,7 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         }
     }, 300);
     return () => clearTimeout(timer);
-  }, [loading, verses.length, book, chapter, setScrollToVerse]);
+  }, [loading, scrollToVerse, verses, book, chapter, setScrollToVerse, primaryVersion]);
 
 // [新增探针] 自动判定阅读有效性
   // 逻辑：只要用户在一个加载完毕的章节停留超过 3.5 秒，就自动在 Store 记录 1 个互动权重。

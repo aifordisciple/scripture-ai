@@ -282,6 +282,23 @@ export interface SermonReviewData {
   estimatedMinutes: number;
 }
 
+// [P1.3] 大纲段落状态
+export type OutlineSectionStatus = 'locked' | 'editable' | 'generating' | 'generated' | 'reviewed';
+
+// [P1.3] 大纲段落结构
+export interface OutlineSection {
+  id: string;
+  title: string;
+  keyPoints: string[];
+  targetWordCount: number;
+  status: OutlineSectionStatus;
+  locked: boolean;
+  contentId: string;
+}
+
+// [P1.3] 大纲变更策略
+export type OutlineChangeStrategy = 'regenerate-affected' | 'adjust-existing' | 'mark-outdated';
+
 export interface UISlice {
   isAuthOpen: boolean;
   setAuthOpen: (open: boolean) => void;

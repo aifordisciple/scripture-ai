@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { StoreState, SermonSlice } from '../types';
+import { StoreState, SermonSlice, OutlineSection, OutlineChangeStrategy } from '../types';
 import { detectFlowStage, getStageSuggestions } from '@/lib/sermon-flow';
 
 export const createSermonSlice: StateCreator<StoreState, [], [], SermonSlice> = (set) => ({
