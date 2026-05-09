@@ -19,8 +19,8 @@ export async function POST(req: Request) {
     }
 
     const { apiConfig, body } = await extractApiConfig(req);
-    const { action, selectedText, verseRefs, style, locale = 'zh', sermonContext, voiceProfile, typeHint } = body as {
-      action: 'continue' | 'polish' | 'insert-verse' | 'add-example' | 'add-application' | 'add-transition' | 'add-prayer' | 'cross-ref' | 'expand' | 'shrink';
+    const { action, selectedText, verseRefs, style, locale = 'zh', sermonContext, voiceProfile, typeHint, injectedContext } = body as {
+      action: string;
       selectedText: string;
       verseRefs?: string;
       style?: string;
@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       expandDirection?: 'depth' | 'breadth' | 'illustration';
       voiceProfile?: { tone?: string; formality?: string; audience?: string; description?: string };
       typeHint?: string;
+      injectedContext?: string;
     };
 
     if (!action || !selectedText) {
@@ -82,6 +83,8 @@ export async function POST(req: Request) {
     userMessage += `\n\n### Selected Text\n${selectedText}`;
     if (styleLabel) userMessage += `\n\n### Sermon Style: ${styleLabel}`;
     if (verseRefs) userMessage += `\n### Verse References: ${verseRefs}`;
+    // [@-command] Inject user-selected context (scripture, commentary, outline, etc.)
+    if (injectedContext) userMessage += `\n\n### User-Injected Context\n${injectedContext}`;
 
     // Build system message with sermon context for full-text awareness
     const systemParts: string[] = [];

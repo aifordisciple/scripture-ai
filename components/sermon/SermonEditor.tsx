@@ -13,6 +13,8 @@ import { FlowSuggestions } from './FlowSuggestions'
 import { FloatingToolbar } from './FloatingToolbar'
 import { GhostTextToolbar } from './GhostTextToolbar'
 import { useSermonKeyboardShortcuts } from './KeyboardShortcutsPanel'
+import { AtCommandMenu } from './AtCommandMenu'
+import { useAtCommand } from '@/hooks/use-at-command'
 import type { GhostTextType } from '@/hooks/use-inline-ai'
 import { SlashCommandMenu, type SlashCommand } from './SlashCommandMenu'
 import { DiffPreview } from './DiffPreview'
@@ -29,6 +31,17 @@ export function SermonEditor() {
 
   // Register global keyboard shortcuts
   useSermonKeyboardShortcuts()
+  const {
+    atCommandState,
+    triggerAtCommand,
+    updateFilter,
+    selectCommand,
+    closeAtCommand,
+    setSelectedIndex: setAtSelectedIndex,
+    consumeInjectedContext,
+    resolveContexts,
+    hasInjectedContext,
+  } = useAtCommand()
   const {
     currentSermon,
     setCurrentSermon,
@@ -227,6 +240,12 @@ export function SermonEditor() {
     if (!md && action !== 'generate') return
     setIsGenerating(true)
     try {
+      // Consume any @-command injected context
+      const injectedContexts = consumeInjectedContext()
+      const resolvedContext = injectedContexts.length > 0
+        ? await resolveContexts(injectedContexts)
+        : undefined
+
       const res = await fetch('/api/sermon/ai-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -237,6 +256,7 @@ export function SermonEditor() {
           style: currentSermon?.style,
           locale: useBibleStore.getState().locale,
           voiceProfile: useBibleStore.getState().voiceProfile,
+          injectedContext: resolvedContext,
         }),
       })
       const reader = res.body?.getReader()
@@ -299,7 +319,7 @@ export function SermonEditor() {
     } finally {
       setIsGenerating(false)
     }
-  }, [markdownContent, currentSermon?.verseRefs, currentSermon?.style])
+  }, [markdownContent, currentSermon?.verseRefs, currentSermon?.style, consumeInjectedContext, resolveContexts])
 
   // Handle selection change from VditorEditor
   const handleSelectionChange = useCallback((selectedText: string, rect: DOMRect | null) => {
@@ -431,17 +451,85 @@ export function SermonEditor() {
     handleAIAssist(action)
   }, [handleAIAssist])
 
-  // Global keyboard handler for slash command navigation
+  // Global keyboard handler for slash command and @-command navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (slashVisible) {
         const handled = handleSlashKeyDown(e)
         if (handled) return
       }
+      // @-command menu keyboard navigation
+      if (atCommandState.visible) {
+        if (e.key === 'Escape') {
+          e.preventDefault()
+          closeAtCommand()
+          return
+        }
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault()
+          // Calculate total items (commands + scripture results if visible)
+          const totalItems = 4 // AT_COMMANDS.length
+          const delta = e.key === 'ArrowDown' ? 1 : -1
+          setAtSelectedIndex(Math.max(0, Math.min(totalItems - 1, atCommandState.selectedIndex + delta)))
+          return
+        }
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          // Select current item — handled by AtCommandMenu click
+          return
+        }
+      }
     }
+
+    // @-command detection: listen for @ character input in editor
+    const handleInputEvent = (e: InputEvent) => {
+      if (e.data === '@' && !slashVisible) {
+        // Get cursor position for menu placement
+        const container = editorContainerRef.current
+        if (container) {
+          const vd = editorRef.current?.getVditor()
+          const cm = (vd as any)?.vditor?.sv?.codeMirror || (vd as any)?.vditor?.ir?.codeMirror
+          if (cm) {
+            try {
+              const cursorCoords = cm.cursorCoords?.(cm.getCursor(), 'local')
+              if (cursorCoords) {
+                triggerAtCommand({ x: cursorCoords.left, y: cursorCoords.top + 20 })
+              }
+            } catch {
+              // Fallback position
+              triggerAtCommand({ x: 20, y: 100 })
+            }
+          } else {
+            triggerAtCommand({ x: 20, y: 100 })
+          }
+        }
+      }
+      // Update @-command filter as user types after @
+      if (atCommandState.visible) {
+        const fullText = editorRef.current?.getValue() || ''
+        // Find the @ character and extract filter text after it
+        const atIndex = fullText.lastIndexOf('@')
+        if (atIndex !== -1) {
+          const cursorPos = fullText.length // approximate
+          const filterText = fullText.slice(atIndex + 1, cursorPos)
+          updateFilter(filterText)
+        }
+      }
+    }
+
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [slashVisible, handleSlashKeyDown])
+    // Listen for input events on the editor container
+    const container = editorContainerRef.current
+    if (container) {
+      container.addEventListener('input', handleInputEvent as EventListener)
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      if (container) {
+        container.removeEventListener('input', handleInputEvent as EventListener)
+      }
+    }
+  }, [slashVisible, handleSlashKeyDown, atCommandState.visible, atCommandState.selectedIndex, closeAtCommand, setAtSelectedIndex, triggerAtCommand, updateFilter])
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -598,6 +686,9 @@ export function SermonEditor() {
         <span>{charCount}{t('sermon.editorWords')}</span>
         <span>~{Math.max(1, Math.round(charCount / 300))}{t('sermon.editorMinutes')}</span>
         <span className="text-[10px] text-muted-foreground/60">⌘J {locale === 'en' ? 'AI' : 'AI续写'}</span>
+        {hasInjectedContext && (
+          <span className="text-[10px] text-primary/70">@ {locale === 'en' ? 'context ready' : '上下文已注入'}</span>
+        )}
       </div>
     </div>
   )
