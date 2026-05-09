@@ -678,6 +678,18 @@ export const SERMON_ACTION_PROMPTS: Record<string, DualLangString> = {
     zh: `请找出与以下讲章内容最相关的2-3处交叉引用经文，并简要说明关联。格式：经文出处 + 内容 + 关联说明。`,
     en: `Please find 2-3 cross-reference Scriptures most related to the following sermon content, and briefly explain the connection. Format: verse reference + content + connection explanation.`,
   },
+  'add-application': {
+    zh: `请为以下讲章段落添加实际的应用指引，帮助会众将真理落实到生活中。应用要具体、可操作、贴近日常。直接输出应用内容。`,
+    en: `Please add practical application guidance for the following sermon passage, helping the congregation apply the truth to daily life. The application should be specific, actionable, and relatable. Output the application directly.`,
+  },
+  'add-transition': {
+    zh: `请为以下讲章段落撰写一段自然的过渡语，连接当前段落与下一个论点。过渡要流畅、有逻辑、引导思考。直接输出过渡内容。`,
+    en: `Please write a natural transition for the following sermon passage, connecting the current section to the next point. The transition should be smooth, logical, and thought-provoking. Output the transition directly.`,
+  },
+  'add-prayer': {
+    zh: `请根据以下讲章内容撰写一段祷告词，呼应讲章主题，引导会众回应。祷告要真诚、贴切、有属灵深度。直接输出祷告内容。`,
+    en: `Please write a prayer based on the following sermon content, echoing the sermon theme and guiding the congregation's response. The prayer should be sincere, fitting, and spiritually deep. Output the prayer directly.`,
+  },
 };
 
 // --- 查经材料专用 Prompt ---

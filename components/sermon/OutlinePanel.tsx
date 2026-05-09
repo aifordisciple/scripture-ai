@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useCallback, useMemo, useState } from 'react'
-import { Lock, Unlock, RefreshCw, ChevronRight, GripVertical, AlertTriangle, CheckCircle2, Loader2, Pencil, History } from 'lucide-react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { Lock, Unlock, RefreshCw, ChevronRight, GripVertical, AlertTriangle, CheckCircle2, Loader2, Pencil, History, ArrowUp, ArrowDown } from 'lucide-react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import type { OutlineSection, OutlineSectionStatus, OutlineChangeStrategy } from '@/store/types'
@@ -62,6 +62,11 @@ export function OutlinePanel({ onGenerateSection, onNavigateToSection }: Outline
   const isZh = locale !== 'en'
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null)
 
+  // Drag-and-drop state
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null)
+  const dragCounterRef = useRef(0)
+
   const {
     outlineSections,
     outlineChangeStrategy,
@@ -70,6 +75,7 @@ export function OutlinePanel({ onGenerateSection, onNavigateToSection }: Outline
     unlockAllSections,
     updateSectionStatus,
     setOutlineChangeStrategy,
+    setOutlineSections,
   } = useBibleStore()
 
   const lockedCount = useMemo(() => outlineSections.filter(s => s.locked).length, [outlineSections])
@@ -86,6 +92,76 @@ export function OutlinePanel({ onGenerateSection, onNavigateToSection }: Outline
     updateSectionStatus(sectionId, 'generating')
     onGenerateSection?.(sectionId)
   }, [updateSectionStatus, onGenerateSection])
+
+  /** Move a section up or down by one position */
+  const handleMoveSection = useCallback((index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= outlineSections.length) return
+    const updated = [...outlineSections]
+    const [moved] = updated.splice(index, 1)
+    updated.splice(targetIndex, 0, moved)
+    setOutlineSections(updated)
+  }, [outlineSections, setOutlineSections])
+
+  /** Drag-and-drop handlers */
+  const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
+    setDragIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+    // Set a minimal drag image for cleaner UX
+    const ghost = e.currentTarget.cloneNode(true) as HTMLElement
+    ghost.style.opacity = '0.6'
+    ghost.style.position = 'absolute'
+    ghost.style.top = '-9999px'
+    document.body.appendChild(ghost)
+    e.dataTransfer.setDragImage(ghost, 12, 12)
+    // Clean up ghost after drag image is captured
+    requestAnimationFrame(() => document.body.removeChild(ghost))
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dragIndex !== null && dragIndex !== index) {
+      setDropTargetIndex(index)
+    }
+  }, [dragIndex])
+
+  const handleDragEnter = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    dragCounterRef.current++
+    if (dragIndex !== null && dragIndex !== index) {
+      setDropTargetIndex(index)
+    }
+  }, [dragIndex])
+
+  const handleDragLeave = useCallback(() => {
+    dragCounterRef.current--
+    if (dragCounterRef.current === 0) {
+      setDropTargetIndex(null)
+    }
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    dragCounterRef.current = 0
+    if (dragIndex === null || dragIndex === index) {
+      setDragIndex(null)
+      setDropTargetIndex(null)
+      return
+    }
+    const updated = [...outlineSections]
+    const [moved] = updated.splice(dragIndex, 1)
+    updated.splice(index, 0, moved)
+    setOutlineSections(updated)
+    setDragIndex(null)
+    setDropTargetIndex(null)
+  }, [dragIndex, outlineSections, setOutlineSections])
+
+  const handleDragEnd = useCallback(() => {
+    dragCounterRef.current = 0
+    setDragIndex(null)
+    setDropTargetIndex(null)
+  }, [])
 
   if (outlineSections.length === 0) {
     return (
@@ -157,18 +233,41 @@ export function OutlinePanel({ onGenerateSection, onNavigateToSection }: Outline
 
       {/* Section list */}
       <div className="flex-1 overflow-y-auto">
-        {outlineSections.map((section, idx) => (
-          <div
-            key={section.id}
-            className={`
-              group flex items-start gap-2 px-3 py-2 border-b border-border/50
-              hover:bg-accent/30 transition-colors cursor-pointer
-              ${section.locked ? 'bg-amber-50/30 dark:bg-amber-900/5' : ''}
-            `}
-            onClick={() => onNavigateToSection?.(section.id)}
-          >
-            {/* Drag handle */}
-            <GripVertical size={12} className="mt-1 text-muted-foreground/40 cursor-grab shrink-0" />
+        {outlineSections.map((section, idx) => {
+          const isDragging = dragIndex === idx
+          const isDropTarget = dropTargetIndex === idx && dragIndex !== idx
+          const isDropBefore = isDropTarget && dragIndex !== null && dragIndex > idx
+          const isDropAfter = isDropTarget && dragIndex !== null && dragIndex < idx
+
+          return (
+            <div
+              key={section.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, idx)}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDragEnter={(e) => handleDragEnter(e, idx)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, idx)}
+              onDragEnd={handleDragEnd}
+              className={`
+                group flex items-start gap-2 px-3 py-2 border-b border-border/50
+                hover:bg-accent/30 transition-colors cursor-pointer
+                ${section.locked ? 'bg-amber-50/30 dark:bg-amber-900/5' : ''}
+                ${isDragging ? 'opacity-40 bg-muted/20' : ''}
+                ${isDropTarget ? 'border-t-2 border-b-2' : ''}
+                ${isDropBefore ? 'border-t-primary border-b-border/50' : ''}
+                ${isDropAfter ? 'border-b-primary border-t-border/50' : ''}
+              `}
+              onClick={() => onNavigateToSection?.(section.id)}
+            >
+              {/* Drag handle */}
+              <GripVertical
+                size={12}
+                className={`
+                  mt-1 shrink-0 cursor-grab active:cursor-grabbing
+                  ${isDragging ? 'text-primary' : 'text-muted-foreground/40 hover:text-muted-foreground/70'}
+                `}
+              />
 
             {/* Section number */}
             <span className="text-[10px] font-mono text-muted-foreground mt-0.5 shrink-0 w-4 text-right">
@@ -206,6 +305,29 @@ export function OutlinePanel({ onGenerateSection, onNavigateToSection }: Outline
 
             {/* Actions */}
             <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+              {/* Move up/down buttons */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleMoveSection(idx, 'up')
+                }}
+                disabled={idx === 0}
+                className="p-1 rounded text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                title={isZh ? '上移' : 'Move up'}
+              >
+                <ArrowUp size={11} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleMoveSection(idx, 'down')
+                }}
+                disabled={idx === outlineSections.length - 1}
+                className="p-1 rounded text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                title={isZh ? '下移' : 'Move down'}
+              >
+                <ArrowDown size={11} />
+              </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation()
@@ -260,7 +382,8 @@ export function OutlinePanel({ onGenerateSection, onNavigateToSection }: Outline
               </button>
             </div>
           </div>
-        ))}
+        )
+        })}
       </div>
 
       {/* Version history for selected section */}
