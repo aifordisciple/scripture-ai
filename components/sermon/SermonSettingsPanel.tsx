@@ -11,6 +11,10 @@ import { TheologyPanel } from './TheologyPanel'
 import { CommentPanel } from './CommentPanel'
 import { ExportPanel } from './ExportPanel'
 import { SeriesPanel } from './SeriesPanel'
+import { SnippetPanel } from './SnippetPanel'
+import { SmartReviewPanel } from './SmartReviewPanel'
+import { KeyboardShortcutsPanel } from './KeyboardShortcutsPanel'
+import { WritingProgressPanel } from './WritingProgressPanel'
 
 export function SermonSettingsPanel() {
   const { t } = useTranslation()
@@ -162,6 +166,29 @@ export function SermonSettingsPanel() {
         {/* Series */}
         <div className="rounded-lg border border-border bg-card p-2">
           <SeriesPanel />
+        </div>
+
+        {/* Snippets */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <SnippetPanel />
+        </div>
+
+        {/* Smart Review */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <SmartReviewPanel onAction={(action) => {
+            // Dispatch action to editor via custom event
+            window.dispatchEvent(new CustomEvent('sermon-inspiration', { detail: { action } }))
+          }} />
+        </div>
+
+        {/* Keyboard Shortcuts */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <KeyboardShortcutsPanel />
+        </div>
+
+        {/* Writing Progress */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <WritingProgressPanel />
         </div>
 
         {/* Current Sermon Info */}

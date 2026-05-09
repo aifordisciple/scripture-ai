@@ -12,6 +12,9 @@ import {
   ShieldCheck,
   Maximize2,
   Minimize2,
+  Clipboard,
+  Heart,
+  Hand,
 } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
 
@@ -117,6 +120,33 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     descEn: 'AI review sermon quality',
     icon: ShieldCheck,
     action: 'review',
+  },
+  {
+    key: 'snippet',
+    labelZh: '片段',
+    labelEn: 'Snippet',
+    descZh: '插入快捷模板片段',
+    descEn: 'Insert a quick template snippet',
+    icon: Clipboard,
+    action: 'snippet',
+  },
+  {
+    key: 'apply',
+    labelZh: '应用',
+    labelEn: 'Apply',
+    descZh: '添加生活应用点',
+    descEn: 'Add application points',
+    icon: Heart,
+    action: 'add-application',
+  },
+  {
+    key: 'pray',
+    labelZh: '祷告',
+    labelEn: 'Pray',
+    descZh: '撰写结束祷告',
+    descEn: 'Write a closing prayer',
+    icon: Hand,
+    action: 'add-prayer',
   },
 ]
 

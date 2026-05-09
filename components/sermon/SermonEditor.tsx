@@ -12,6 +12,7 @@ import { FlowGuide } from './FlowGuide'
 import { FlowSuggestions } from './FlowSuggestions'
 import { FloatingToolbar } from './FloatingToolbar'
 import { GhostTextToolbar } from './GhostTextToolbar'
+import { useSermonKeyboardShortcuts } from './KeyboardShortcutsPanel'
 import type { GhostTextType } from '@/hooks/use-inline-ai'
 import { SlashCommandMenu, type SlashCommand } from './SlashCommandMenu'
 import { DiffPreview } from './DiffPreview'
@@ -23,6 +24,9 @@ import { buildSermonContext, serializeContext } from '@/lib/sermon-context'
 export function SermonEditor() {
   const { t } = useTranslation()
   const { isMd } = useBreakpoint()
+
+  // Register global keyboard shortcuts
+  useSermonKeyboardShortcuts()
   const {
     currentSermon,
     setCurrentSermon,
@@ -80,6 +84,10 @@ export function SermonEditor() {
       }
       if (action === 'review') {
         useBibleStore.getState().setActiveSermonPanel('review')
+        return
+      }
+      if (action === 'snippet') {
+        useBibleStore.getState().setActiveSermonPanel('settings')
         return
       }
       handleAIAssist(action)
