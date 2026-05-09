@@ -19,8 +19,8 @@ export async function POST(req: Request) {
     }
 
     const { apiConfig, body } = await extractApiConfig(req);
-    const { action, selectedText, verseRefs, style, locale = 'zh', sermonContext, voiceProfile } = body as {
-      action: 'continue' | 'polish' | 'insert-verse' | 'add-example' | 'cross-ref' | 'expand' | 'shrink';
+    const { action, selectedText, verseRefs, style, locale = 'zh', sermonContext, voiceProfile, typeHint } = body as {
+      action: 'continue' | 'polish' | 'insert-verse' | 'add-example' | 'add-application' | 'add-transition' | 'add-prayer' | 'cross-ref' | 'expand' | 'shrink';
       selectedText: string;
       verseRefs?: string;
       style?: string;
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
       expandDegree?: 'slight' | 'moderate' | 'extensive';
       expandDirection?: 'depth' | 'breadth' | 'illustration';
       voiceProfile?: { tone?: string; formality?: string; audience?: string; description?: string };
+      typeHint?: string;
     };
 
     if (!action || !selectedText) {
@@ -40,7 +41,12 @@ export async function POST(req: Request) {
     const resolvedLocale = (locale === 'en' ? 'en' : 'zh') as keyof DualLangString;
     const actionPrompt = SERMON_ACTION_PROMPTS[action]?.[resolvedLocale] || SERMON_ACTION_PROMPTS[action]?.zh;
 
-    if (!actionPrompt) {
+    // For new action types without predefined prompts, generate from typeHint or action name
+    const effectivePrompt = actionPrompt || typeHint || (resolvedLocale === 'zh'
+      ? `请根据以下内容执行"${action}"操作：`
+      : `Perform the "${action}" action based on the following content:`);
+
+    if (!effectivePrompt) {
       return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400 });
     }
 

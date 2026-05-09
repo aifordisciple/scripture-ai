@@ -17,8 +17,12 @@ interface UseInlineAIReturn {
   ghostText: string
   /** Whether AI is currently generating a completion */
   isGenerating: boolean
+  /** Type of the current ghost text suggestion */
+  ghostTextType: GhostTextType
   /** Trigger ghost text generation at the cursor position */
   triggerCompletion: (content: string, cursorPosition: number) => void
+  /** Trigger a specific type of ghost text */
+  triggerTypedCompletion: (content: string, cursorPosition: number, type: GhostTextType) => void
   /** Schedule auto-trigger after cursor stops moving */
   scheduleAutoTrigger: (content: string, cursorPosition: number) => void
   /** Cancel any pending auto-trigger */
@@ -27,6 +31,27 @@ interface UseInlineAIReturn {
   acceptCompletion: () => void
   /** Reject the current ghost text (clear it) */
   rejectCompletion: () => void
+}
+
+/** Ghost text suggestion types */
+export type GhostTextType = 'continue' | 'illustration' | 'application' | 'transition' | 'prayer'
+
+/** Maps GhostTextType to the AI action endpoint parameter */
+const GHOST_TYPE_TO_ACTION: Record<GhostTextType, string> = {
+  continue: 'continue',
+  illustration: 'add-example',
+  application: 'add-application',
+  transition: 'add-transition',
+  prayer: 'add-prayer',
+}
+
+/** Maps GhostTextType to a context hint injected into the prompt */
+const GHOST_TYPE_HINT: Record<GhostTextType, string> = {
+  continue: '',
+  illustration: 'Add a vivid illustration or real-life story that connects to the preceding content.',
+  application: 'Add practical application points — how the reader/listener can apply this truth in daily life.',
+  transition: 'Write a smooth transition paragraph that bridges from the preceding content to the next section.',
+  prayer: 'Write a closing prayer that reflects the themes of the preceding content.',
 }
 
 /**
@@ -52,6 +77,7 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
   const autoTriggerDelay = options.autoTriggerDelay ?? 1500
 
   const [isGenerating, setIsGenerating] = useState(false)
+  const [ghostTextType, setGhostTextType] = useState<GhostTextType>('continue')
   const abortRef = useRef<AbortController | null>(null)
   const autoTriggerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onInsertRef = useRef(options.onInsert)
@@ -67,6 +93,11 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
 
   /** Trigger ghost text generation */
   const triggerCompletion = useCallback((content: string, cursorPosition: number) => {
+    triggerTypedCompletion(content, cursorPosition, 'continue')
+  }, []) // stub — real implementation is triggerTypedCompletion
+
+  /** Trigger a specific type of ghost text */
+  const triggerTypedCompletion = useCallback((content: string, cursorPosition: number, type: GhostTextType) => {
     if (!content || content.trim().length < 5) return
     if (isGenerating) return
 
@@ -77,6 +108,8 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
+
+    setGhostTextType(type)
 
     // Take more context: 800 chars before cursor for better context awareness
     const contextBefore = content.slice(Math.max(0, cursorPosition - 800), cursorPosition)
@@ -95,17 +128,21 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
     setSermonGhostText('')
     setSermonGhostTextVisible(true)
 
+    const action = GHOST_TYPE_TO_ACTION[type]
+    const typeHint = GHOST_TYPE_HINT[type]
+
     // Use the ai-action endpoint with streaming
     fetch('/api/sermon/ai-action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
       body: JSON.stringify({
-        action: 'continue',
+        action,
         selectedText: contextBefore,
         style: currentSermon?.style,
         locale,
         sermonContext: sermonContextStr,
+        typeHint,
       }),
     })
       .then(async (res) => {
@@ -161,9 +198,9 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
   const scheduleAutoTrigger = useCallback((content: string, cursorPosition: number) => {
     cancelAutoTrigger()
     autoTriggerTimerRef.current = setTimeout(() => {
-      triggerCompletion(content, cursorPosition)
+      triggerTypedCompletion(content, cursorPosition, 'continue')
     }, autoTriggerDelay)
-  }, [triggerCompletion, cancelAutoTrigger, autoTriggerDelay])
+  }, [triggerTypedCompletion, cancelAutoTrigger, autoTriggerDelay])
 
   /** Accept ghost text: insert into editor */
   const acceptCompletion = useCallback(() => {
@@ -187,8 +224,10 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
 
   return {
     ghostText: sermonGhostText,
+    ghostTextType,
     isGenerating,
     triggerCompletion,
+    triggerTypedCompletion,
     scheduleAutoTrigger,
     cancelAutoTrigger,
     acceptCompletion,

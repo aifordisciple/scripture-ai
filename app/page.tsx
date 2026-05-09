@@ -253,31 +253,9 @@ export default function Home() {
   }, [isDarkMode, setTheme]);
 
   useEffect(() => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (isIOS) return; // iOS 使用 CSS 模拟全屏，不依赖 fullscreenchange 事件
-
     const handleFullscreenChange = () => { setIsFullscreen(!!document.fullscreenElement); };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
-
-  // iOS 全屏切换事件监听（来自 MagicBall 下拉手势）
-  useEffect(() => {
-    const handleIOSFullscreen = () => {
-      setIsFullscreen(prev => {
-        const next = !prev;
-        // 同步 data 属性，供 MagicBall 读取全屏状态
-        if (next) {
-          document.documentElement.setAttribute('data-ios-fullscreen', 'true');
-        } else {
-          document.documentElement.removeAttribute('data-ios-fullscreen');
-        }
-        return next;
-      });
-    };
-    window.addEventListener('toggle-ios-fullscreen', handleIOSFullscreen);
-    return () => window.removeEventListener('toggle-ios-fullscreen', handleIOSFullscreen);
   }, []);
 
   useEffect(() => {
@@ -336,7 +314,11 @@ export default function Home() {
         switch (e.key.toLowerCase()) {
           case 'f':
             e.preventDefault();
-            toggleFullscreen();
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+              if (document.exitFullscreen) document.exitFullscreen();
+            }
             break;
           case 'd':
             e.preventDefault();
@@ -382,48 +364,13 @@ export default function Home() {
     else if (lineHeight <= 1.8) setLineHeight(2.2);
     else setLineHeight(1.4);
   };
-  const toggleFullscreen = useCallback(() => {
-    // iOS Safari 不支持 Fullscreen API，使用 CSS 模拟全屏
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-    if (isIOS) {
-      setIsFullscreen(prev => {
-        const next = !prev;
-        if (next) {
-          document.documentElement.setAttribute('data-ios-fullscreen', 'true');
-        } else {
-          document.documentElement.removeAttribute('data-ios-fullscreen');
-        }
-        return next;
-      });
-      return;
-    }
-
-    // 非 iOS：使用原生 Fullscreen API
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {
-        // 原生全屏失败时回退到 CSS 模拟全屏
-        setIsFullscreen(prev => {
-          const next = !prev;
-          if (next) {
-            document.documentElement.setAttribute('data-ios-fullscreen', 'true');
-          } else {
-            document.documentElement.removeAttribute('data-ios-fullscreen');
-          }
-          return next;
-        });
-      });
-    } else {
-      if (document.exitFullscreen) { document.exitFullscreen(); }
-    }
-  }, []);
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
+    else { if (document.exitFullscreen) { document.exitFullscreen(); } }
+  };
 
   return (
-    <main className={cn(
-      "flex h-screen w-full overflow-hidden bg-background relative transition-colors duration-500",
-      isFullscreen && "ios-fullscreen"
-    )}>
+    <main className="flex h-screen w-full overflow-hidden bg-background relative transition-colors duration-500">
       <AuthDialog />
       <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       <KeyboardShortcutsDialog open={showShortcutsDialog} onOpenChange={setShowShortcutsDialog} />
@@ -435,17 +382,6 @@ export default function Home() {
         onCloseBookPicker={() => setIsBookPickerOpen(false)}
       />
       <InstallPrompt />
-
-      {/* iOS 模拟全屏时的退出按钮 */}
-      {isFullscreen && (
-        <button
-          onClick={toggleFullscreen}
-          className="fixed top-3 right-3 z-[200] w-10 h-10 rounded-full bg-black/50 dark:bg-white/20 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform"
-          aria-label={t('settings.exitFullscreen')}
-        >
-          <Minimize className="w-5 h-5" />
-        </button>
-      )}
       <OnboardingManager />
 
       {/* Mobile BookPicker - 移动端经文选择器 */}
@@ -610,7 +546,7 @@ export default function Home() {
         <div
           className={cn(
             "absolute top-2 left-2 right-4 z-30 pointer-events-none transition-transform duration-300 ease-in-out",
-            isNavVisible && !isFullscreen ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
+            isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-[120%] opacity-0"
           )}
         >
           <div className="pointer-events-auto rounded-2xl bg-card/40 dark:bg-card/40 backdrop-blur-xl backdrop-saturate-[180%] shadow-sm h-12 flex items-center justify-between px-2 md:px-3 gap-1">
@@ -785,10 +721,7 @@ export default function Home() {
         </div>
 
         {/* Main Content Area */}
-        <div id="reader-scroll-container" onScroll={handleScroll} className={cn(
-          "flex-1 overflow-y-auto scroll-smooth pb-4 relative z-0 transition-[padding] duration-300",
-          isFullscreen ? "pt-2" : "pt-16 md:pt-16"
-        )}>
+        <div id="reader-scroll-container" onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-smooth pt-16 md:pt-16 pb-4 relative z-0">
           <TabContentRenderer
             tabs={tabs}
             activeTabId={activeTabId}
@@ -798,7 +731,7 @@ export default function Home() {
         </div>
 
         {/* Mobile Tab Bar - 向下滚动自动隐藏，向上滚动自动显示（与菜单栏一致） */}
-        {activeTab?.type !== 'sermon' && !isAiOpen && !isFullscreen && (
+        {activeTab?.type !== 'sermon' && !isAiOpen && (
         <div
           className={cn(
             "md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--glass-bg-light)] dark:bg-[var(--glass-bg-dark)] backdrop-blur-[20px] backdrop-saturate-[180%] border-t border-border flex items-center px-2 z-50 pb-safe transition-transform duration-300 ease-in-out",

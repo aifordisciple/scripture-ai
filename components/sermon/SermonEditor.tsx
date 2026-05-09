@@ -11,6 +11,8 @@ import { useSermonEditor } from './SermonEditorContext'
 import { FlowGuide } from './FlowGuide'
 import { FlowSuggestions } from './FlowSuggestions'
 import { FloatingToolbar } from './FloatingToolbar'
+import { GhostTextToolbar } from './GhostTextToolbar'
+import type { GhostTextType } from '@/hooks/use-inline-ai'
 import { SlashCommandMenu, type SlashCommand } from './SlashCommandMenu'
 import { DiffPreview } from './DiffPreview'
 import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
@@ -55,6 +57,7 @@ export function SermonEditor() {
   const [diffPreview, setDiffPreview] = useState<{ visible: boolean; original: string; modified: string }>({
     visible: false, original: '', modified: '',
   })
+  const [ghostTextType, setGhostTextType] = useState<GhostTextType>('continue')
 
   // Slash commands — pass onSelectCommand so keyboard selection works
   const {
@@ -239,9 +242,12 @@ export function SermonEditor() {
         const versionSource = action === 'continue' ? 'ai-generated'
           : action === 'expand' ? 'ai-expanded'
           : action === 'shrink' ? 'ai-adjusted'
+          : action.startsWith('add-') ? 'ai-generated'
           : 'ai-generated'
 
-        if (action === 'continue') {
+        // Insert-type actions append; replace-type actions set full content
+        const isInsertAction = ['continue', 'add-example', 'add-application', 'add-transition', 'add-prayer'].includes(action)
+        if (isInsertAction) {
           editorRef.current?.insertValue(result)
         } else {
           editorRef.current?.setValue(result)
@@ -453,6 +459,16 @@ export function SermonEditor() {
 
       {/* Flow Suggestions */}
       <FlowSuggestions onAction={handleFlowAction} />
+
+      {/* Ghost Text Type Selector */}
+      <GhostTextToolbar
+        ghostTextType={ghostTextType}
+        isGenerating={isGenerating}
+        onTriggerType={(type) => {
+          setGhostTextType(type)
+          handleAIAssist(type === 'continue' ? 'continue' : type === 'illustration' ? 'add-example' : type === 'application' ? 'add-application' : type === 'transition' ? 'add-transition' : 'add-prayer')
+        }}
+      />
 
       <div ref={editorContainerRef} className="flex-1 min-h-0 relative">
         <VditorEditor

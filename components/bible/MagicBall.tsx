@@ -216,24 +216,13 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     prevAiGenRef.current = isAiGenerating;
   }, [isAiGenerating, isAiOpen, controls]);
 
-  const toggleFullscreen = useCallback(() => {
-    // iOS Safari 不支持 Fullscreen API，使用 CSS 模拟全屏
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-    if (isIOS) {
-      // iOS: 通过自定义事件通知 page.tsx 切换 CSS 模拟全屏
-      window.dispatchEvent(new CustomEvent('toggle-ios-fullscreen'));
-      return;
-    }
-
-    // 非 iOS：使用原生 Fullscreen API
+  const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
+      document.documentElement.requestFullscreen().catch((e) => console.log(e));
     } else {
       if (document.exitFullscreen) document.exitFullscreen();
     }
-  }, []);
+  };
 
   // --- 交互逻辑 ---
 
@@ -299,11 +288,7 @@ export function MagicBall({ onOpenBookPicker, isBookPickerOpen, onCloseBookPicke
     if (x < -threshold) setShowHint("ai-toggle");
     else if (x > threshold) setShowHint(null);
     else if (y < -threshold) setShowHint("menu-toggle");
-    else if (y > threshold) {
-      // iOS Safari 不支持 document.fullscreenElement，通过自定义属性判断
-      const isFullscreenNow = document.fullscreenElement || document.documentElement.hasAttribute('data-ios-fullscreen');
-      setShowHint(isFullscreenNow ? "exit-fullscreen" : "fullscreen");
-    }
+    else if (y > threshold) setShowHint(document.fullscreenElement ? "exit-fullscreen" : "fullscreen");
     else setShowHint(null);
   };
 
