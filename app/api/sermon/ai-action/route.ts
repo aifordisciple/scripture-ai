@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     }
 
     const { apiConfig, body } = await extractApiConfig(req);
-    const { action, selectedText, verseRefs, style, locale = 'zh', sermonContext, voiceProfile, typeHint, injectedContext } = body as {
+    const { action, selectedText, verseRefs, style, locale = 'zh', sermonContext, voiceProfile, typeHint, injectedContext, sermonAudience } = body as {
       action: string;
       selectedText: string;
       verseRefs?: string;
@@ -31,6 +31,7 @@ export async function POST(req: Request) {
       voiceProfile?: { tone?: string; formality?: string; audience?: string; description?: string };
       typeHint?: string;
       injectedContext?: string;
+      sermonAudience?: 'youth' | 'sunday' | 'seminary' | 'smallgroup';
     };
 
     if (!action || !selectedText) {
@@ -85,6 +86,19 @@ export async function POST(req: Request) {
     if (verseRefs) userMessage += `\n### Verse References: ${verseRefs}`;
     // [@-command] Inject user-selected context (scripture, commentary, outline, etc.)
     if (injectedContext) userMessage += `\n\n### User-Injected Context\n${injectedContext}`;
+    // [Audience Tone] Adjust output based on target audience
+    if (sermonAudience) {
+      const audienceMap: Record<string, { zh: string; en: string }> = {
+        youth: { zh: '青年团契 — 轻松活泼，故事驱动，贴近青年生活', en: 'Youth group — casual, story-driven, youth-relatable' },
+        sunday: { zh: '主日崇拜 — 庄重但易懂，兼顾深度与广度', en: 'Sunday service — reverent but accessible, balanced depth' },
+        seminary: { zh: '神学院 — 精确学术，注重原文与神学框架', en: 'Seminary — precise, academic, original language focus' },
+        smallgroup: { zh: '小组查经 — 对话讨论式，互动引导', en: 'Small group — conversational, discussion-oriented' },
+      };
+      const audienceDesc = audienceMap[sermonAudience];
+      if (audienceDesc) {
+        userMessage += `\n\n### Target Audience\n${locale === 'en' ? audienceDesc.en : audienceDesc.zh}`;
+      }
+    }
 
     // Build system message with sermon context for full-text awareness
     const systemParts: string[] = [];

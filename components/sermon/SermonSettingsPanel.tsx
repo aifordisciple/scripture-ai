@@ -16,6 +16,10 @@ import { SmartReviewPanel } from './SmartReviewPanel'
 import { KeyboardShortcutsPanel } from './KeyboardShortcutsPanel'
 import { WritingProgressPanel } from './WritingProgressPanel'
 import { WritingSessionPanel } from './WritingSessionPanel'
+import { DescribePanel } from './DescribePanel'
+import { StyleHighlightPanel } from './StyleHighlightPanel'
+import { PulpitPace } from './PulpitPace'
+import { AudienceTonePanel } from './AudienceTonePanel'
 
 export function SermonSettingsPanel() {
   const { t } = useTranslation()
@@ -149,6 +153,11 @@ export function SermonSettingsPanel() {
           <VoiceProfilePanel />
         </div>
 
+        {/* Audience Tone */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <AudienceTonePanel />
+        </div>
+
         {/* Theology Resources */}
         <div className="rounded-lg border border-border bg-card p-2">
           <TheologyPanel />
@@ -182,6 +191,18 @@ export function SermonSettingsPanel() {
           }} />
         </div>
 
+        {/* Describe — Example Expansion */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <DescribePanel onExpand={(text, type) => {
+            window.dispatchEvent(new CustomEvent('sermon-inspiration', { detail: { action: type, text } }))
+          }} />
+        </div>
+
+        {/* Style Highlight */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <StyleHighlightPanel />
+        </div>
+
         {/* Keyboard Shortcuts */}
         <div className="rounded-lg border border-border bg-card p-2">
           <KeyboardShortcutsPanel />
@@ -190,6 +211,11 @@ export function SermonSettingsPanel() {
         {/* Writing Progress */}
         <div className="rounded-lg border border-border bg-card p-2">
           <WritingProgressPanel />
+        </div>
+
+        {/* Pulpit Pace — Writing Momentum */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <PulpitPace />
         </div>
 
         {/* Writing Session */}
