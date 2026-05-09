@@ -15,6 +15,7 @@ import { SnippetPanel } from './SnippetPanel'
 import { SmartReviewPanel } from './SmartReviewPanel'
 import { KeyboardShortcutsPanel } from './KeyboardShortcutsPanel'
 import { WritingProgressPanel } from './WritingProgressPanel'
+import { WritingSessionPanel } from './WritingSessionPanel'
 
 export function SermonSettingsPanel() {
   const { t } = useTranslation()
@@ -189,6 +190,11 @@ export function SermonSettingsPanel() {
         {/* Writing Progress */}
         <div className="rounded-lg border border-border bg-card p-2">
           <WritingProgressPanel />
+        </div>
+
+        {/* Writing Session */}
+        <div className="rounded-lg border border-border bg-card p-2">
+          <WritingSessionPanel />
         </div>
 
         {/* Current Sermon Info */}

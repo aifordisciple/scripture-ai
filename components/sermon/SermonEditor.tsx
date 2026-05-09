@@ -17,6 +17,7 @@ import type { GhostTextType } from '@/hooks/use-inline-ai'
 import { SlashCommandMenu, type SlashCommand } from './SlashCommandMenu'
 import { DiffPreview } from './DiffPreview'
 import { FocusMode } from './FocusMode'
+import { GhostTextOverlay } from './GhostTextOverlay'
 import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
 import { analyzeTone } from '@/lib/sermon-flow'
 import { useSlashCommands } from '@/hooks/use-slash-commands'
@@ -533,6 +534,23 @@ export function SermonEditor() {
           onSave={handleSave}
           onSelectionChange={handleSelectionChange}
           onCursorActivity={handleCursorActivity}
+        />
+
+        {/* Ghost Text Overlay */}
+        <GhostTextOverlay
+          editorContainerRef={editorContainerRef}
+          onAccept={() => {
+            const { sermonGhostText } = useBibleStore.getState()
+            if (sermonGhostText) {
+              editorRef.current?.insertValue(sermonGhostText)
+            }
+            useBibleStore.getState().setSermonGhostText('')
+            useBibleStore.getState().setSermonGhostTextVisible(false)
+          }}
+          onReject={() => {
+            useBibleStore.getState().setSermonGhostText('')
+            useBibleStore.getState().setSermonGhostTextVisible(false)
+          }}
         />
 
         {/* Floating Toolbar for selected text */}
