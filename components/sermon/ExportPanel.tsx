@@ -10,7 +10,7 @@ type ExportFormat = 'markdown' | 'text' | 'html' | 'pdf'
 /** Format options with icons and descriptions */
 const FORMAT_OPTIONS: { value: ExportFormat; icon: typeof FileText; zhName: string; enName: string; zhDesc: string; enDesc: string }[] = [
   { value: 'markdown', icon: Code, zhName: 'Markdown', enName: 'Markdown', zhDesc: '保留格式标记，适合二次编辑', enDesc: 'With formatting, good for re-editing' },
-  { value: 'text', icon: FileText, zhName: '纯文本', enDesc: 'Plain text without formatting', zhDesc: '无格式纯文本' },
+  { value: 'text', icon: FileText, zhName: '纯文本', enName: 'Plain Text', zhDesc: '无格式纯文本', enDesc: 'Plain text without formatting' },
   { value: 'html', icon: Code, zhName: 'HTML', enName: 'HTML', zhDesc: '网页格式，可直接发布', enDesc: 'Web format, ready to publish' },
   { value: 'pdf', icon: File, zhName: 'PDF', enName: 'PDF', zhDesc: '打印和分享的最佳格式', enDesc: 'Best for printing and sharing' },
 ]

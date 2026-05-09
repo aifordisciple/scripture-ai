@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { BookOpen, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
+import { BookOpen, ChevronDown, ChevronUp } from 'lucide-react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import type { TheologyResource, TheologyTradition } from '@/store/types'
@@ -24,7 +24,7 @@ function traditionLabel(tradition: TheologyTradition, isZh: boolean): string {
 function traditionColor(tradition: TheologyTradition): string {
   const map: Record<TheologyTradition, string> = {
     'reformed': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-    'arminian': { zh: '', en: '' } as never || 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
+    'arminian': 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
     'catholic': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
     'orthodox': 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
     'pentecostal': 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300',
