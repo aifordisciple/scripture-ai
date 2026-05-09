@@ -5,7 +5,7 @@ import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
 import { useBreakpoint } from '@/hooks/use-media-query'
 import VditorEditor, { type VditorEditorHandle } from './VditorEditor'
-import EditorToolbar from './EditorToolbar'
+import { EditorToolbar } from './EditorToolbar'
 import { SermonEditorHeader } from './SermonEditorHeader'
 import { useSermonEditor } from './SermonEditorContext'
 import { FlowGuide } from './FlowGuide'
@@ -16,6 +16,7 @@ import { useSermonKeyboardShortcuts } from './KeyboardShortcutsPanel'
 import type { GhostTextType } from '@/hooks/use-inline-ai'
 import { SlashCommandMenu, type SlashCommand } from './SlashCommandMenu'
 import { DiffPreview } from './DiffPreview'
+import { FocusMode } from './FocusMode'
 import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
 import { analyzeTone } from '@/lib/sermon-flow'
 import { useSlashCommands } from '@/hooks/use-slash-commands'
@@ -62,6 +63,7 @@ export function SermonEditor() {
     visible: false, original: '', modified: '',
   })
   const [ghostTextType, setGhostTextType] = useState<GhostTextType>('continue')
+  const [isFocusMode, setIsFocusMode] = useState(false)
 
   // Slash commands — pass onSelectCommand so keyboard selection works
   const {
@@ -451,6 +453,19 @@ export function SermonEditor() {
 
   const charCount = markdownContent.length
 
+  // Focus mode overlay
+  if (isFocusMode) {
+    return (
+      <FocusMode
+        content={markdownContent}
+        onContentChange={handleContentChange}
+        onAIAssist={handleAIAssist}
+        isGenerating={isGenerating}
+        onExit={() => setIsFocusMode(false)}
+      />
+    )
+  }
+
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Flow Guide progress bar */}
@@ -460,9 +475,40 @@ export function SermonEditor() {
       <SermonEditorHeader />
 
       <EditorToolbar
-        editorRef={editorRef}
-        onAIAssist={handleAIAssist}
         isGenerating={isGenerating}
+        onAIAssist={handleAIAssist}
+        onFormat={(type: 'bold' | 'italic' | 'h2' | 'h3' | 'list' | 'quote') => {
+          const vd = editorRef.current?.getVditor()
+          if (!vd) return
+          // Use Vditor's built-in toolbar API for formatting
+          const toolbarKeys: Record<string, string> = {
+            bold: 'bold',
+            italic: 'italic',
+            h2: 'heading2',
+            h3: 'heading3',
+            list: 'list',
+            quote: 'quote',
+          }
+          const key = toolbarKeys[type]
+          if (key) {
+            try {
+              vd.toolbar?.handler?.(key)
+            } catch {
+              // Fallback: insert markdown syntax
+              const syntax: Record<string, string> = {
+                bold: '**text**',
+                italic: '*text*',
+                h2: '\n## ',
+                h3: '\n### ',
+                list: '\n- ',
+                quote: '\n> ',
+              }
+              editorRef.current?.insertValue(syntax[type])
+            }
+          }
+        }}
+        onFocusMode={() => setIsFocusMode(true)}
+        isFocusMode={isFocusMode}
       />
 
       {/* Flow Suggestions */}
