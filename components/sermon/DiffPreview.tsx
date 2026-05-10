@@ -208,7 +208,7 @@ export function DiffPreview({ original, modified, onAccept, onReject, onPartialA
         </div>
         <div className="flex items-center gap-1">
           <button
-            onClick={onAccept}
+            onClick={() => onAccept(modified)}
             className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
             title={isZh ? '接受全部 (Tab)' : 'Accept all (Tab)'}
           >
@@ -216,7 +216,7 @@ export function DiffPreview({ original, modified, onAccept, onReject, onPartialA
             <span>{isZh ? '接受' : 'Accept'}</span>
           </button>
           <button
-            onClick={onReject}
+            onClick={() => onReject()}
             className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
             title={isZh ? '拒绝 (Esc)' : 'Reject (Esc)'}
           >
