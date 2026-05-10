@@ -26,9 +26,7 @@ const SHORTCUTS: ShortcutDef[] = [
   { keys: '⌘⇧E', action: 'export', zhLabel: '导出', enLabel: 'Export', category: 'navigation' },
   { keys: '⌘/', action: 'slash', zhLabel: '命令菜单', enLabel: 'Command Menu', category: 'editor' },
   { keys: '⌘⇧S', action: 'snippet', zhLabel: '片段面板', enLabel: 'Snippets', category: 'navigation' },
-  { keys: 'Tab', action: 'accept-ghost', zhLabel: '接受建议', enLabel: 'Accept Ghost', category: 'editor' },
-  { keys: 'Esc', action: 'reject-ghost', zhLabel: '拒绝建议', enLabel: 'Reject Ghost', category: 'editor' },
-]
+  ]
 
 const CATEGORY_LABELS = {
   editor: { zh: '编辑', en: 'Editor' },

@@ -92,10 +92,6 @@ export const createSermonSlice: StateCreator<StoreState, [], [], SermonSlice> = 
   setSermonFlowStage: (stage) => set({ sermonFlowStage: stage }),
   sermonAiSuggestions: [],
   setSermonAiSuggestions: (suggestions) => set({ sermonAiSuggestions: suggestions }),
-  sermonGhostText: '',
-  setSermonGhostText: (text) => set({ sermonGhostText: text }),
-  sermonGhostTextVisible: false,
-  setSermonGhostTextVisible: (visible) => set({ sermonGhostTextVisible: visible }),
 
   // [P1.3] 大纲锁定与段落独立操作
   outlineSections: [],

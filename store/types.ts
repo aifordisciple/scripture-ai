@@ -672,11 +672,6 @@ export interface SermonSlice {
   // AI suggestions for current stage
   sermonAiSuggestions: SermonAiSuggestion[];
   setSermonAiSuggestions: (suggestions: SermonAiSuggestion[]) => void;
-  // Ghost text state for inline AI completion
-  sermonGhostText: string;
-  setSermonGhostText: (text: string) => void;
-  sermonGhostTextVisible: boolean;
-  setSermonGhostTextVisible: (visible: boolean) => void;
   // [P1.3] 大纲锁定与段落独立操作
   outlineSections: OutlineSection[];
   outlineChangeStrategy: OutlineChangeStrategy;

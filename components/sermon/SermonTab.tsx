@@ -18,7 +18,7 @@ import { PanelLeftClose, PanelLeftOpen, PenLine } from 'lucide-react'
  * SermonTab — Main sermon writing layout
  *
  * Layout: Left sidebar (sermon list) + Main editor area + optional right panels
- * AI interaction via: Cmd+K (Command Palette), Cmd+J (AI Drawer), floating toolbar, ghost text
+ * AI interaction via: Cmd+K (Command Palette), Cmd+J (AI Drawer), floating toolbar
  */
 export function SermonTab() {
   const { t } = useTranslation()

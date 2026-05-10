@@ -462,7 +462,7 @@ export function useCommandPalette(options: UseCommandPaletteOptions): UseCommand
         return true
       }
       case 'Tab': {
-        // Tab also accepts (like ghost text)
+        // Tab accepts the selected command
         e.preventDefault()
         executeSelected()
         return true

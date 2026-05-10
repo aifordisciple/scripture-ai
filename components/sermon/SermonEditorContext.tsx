@@ -9,9 +9,6 @@ interface SermonEditorContextValue {
   insertContent: (markdown: string) => void
   isDark: boolean
   getSelectedText: () => string
-  showGhostText: (text: string) => void
-  acceptGhostText: () => void
-  rejectGhostText: () => void
 }
 
 const SermonEditorContext = createContext<SermonEditorContextValue>({
@@ -19,9 +16,6 @@ const SermonEditorContext = createContext<SermonEditorContextValue>({
   insertContent: () => {},
   isDark: false,
   getSelectedText: () => '',
-  showGhostText: () => {},
-  acceptGhostText: () => {},
-  rejectGhostText: () => {},
 })
 
 export function SermonEditorProvider({ children, isDark }: { children: React.ReactNode; isDark: boolean }) {
@@ -43,36 +37,12 @@ export function SermonEditorProvider({ children, isDark }: { children: React.Rea
     return handle.getSelectedText()
   }, [])
 
-  const showGhostText = useCallback((text: string) => {
-    useBibleStore.getState().setSermonGhostText(text)
-    useBibleStore.getState().setSermonGhostTextVisible(true)
-  }, [])
-
-  const acceptGhostText = useCallback(() => {
-    const { sermonGhostText, setSermonGhostText, setSermonGhostTextVisible } = useBibleStore.getState()
-    const handle = handleRef.current
-    if (handle && sermonGhostText) {
-      handle.insertValue(sermonGhostText)
-    }
-    setSermonGhostText('')
-    setSermonGhostTextVisible(false)
-  }, [])
-
-  const rejectGhostText = useCallback(() => {
-    const { setSermonGhostText, setSermonGhostTextVisible } = useBibleStore.getState()
-    setSermonGhostText('')
-    setSermonGhostTextVisible(false)
-  }, [])
-
   return (
     <SermonEditorContext.Provider value={{
       registerEditorHandle,
       insertContent,
       isDark,
       getSelectedText,
-      showGhostText,
-      acceptGhostText,
-      rejectGhostText,
     }}>
       {children}
     </SermonEditorContext.Provider>

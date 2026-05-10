@@ -13,7 +13,6 @@ import { FloatingToolbar } from './FloatingToolbar'
 import { useSermonKeyboardShortcuts } from './KeyboardShortcutsPanel'
 import { DiffPreview } from './DiffPreview'
 import { FocusMode } from './FocusMode'
-import { GhostTextOverlay } from './GhostTextOverlay'
 import CommandPalette from './CommandPalette'
 import { AIDrawer } from './AIDrawer'
 import { InlineWeakMarker } from './InlineWeakMarker'
@@ -21,8 +20,6 @@ import { type CommandItem } from '@/hooks/use-command-palette'
 import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
 import { analyzeTone } from '@/lib/sermon-flow'
 import { buildSermonContext, serializeContext } from '@/lib/sermon-context'
-import { useInlineAI } from '@/hooks/use-inline-ai'
-
 export function SermonEditor() {
   const { t } = useTranslation()
   const { isMd } = useBreakpoint()
@@ -67,22 +64,6 @@ export function SermonEditor() {
   })
   const [isFocusMode, setIsFocusMode] = useState(false)
   const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false)
-
-  // Ghost text auto-trigger integration
-  const {
-    ghostText: sermonGhostText,
-    isGenerating: isGhostGenerating,
-    scheduleAutoTrigger,
-    cancelAutoTrigger,
-    acceptCompletion,
-    rejectCompletion,
-  } = useInlineAI({
-    onInsert: (text) => {
-      editorRef.current?.insertValue(text)
-    },
-    autoTriggerDelay: 1500,
-  })
-
   // Register editor handle with context so other panels can insert content
   useEffect(() => {
     registerEditorHandle(editorRef.current)
@@ -209,13 +190,7 @@ export function SermonEditor() {
     if (content.includes('## ')) {
       parseOutlineToSections(content)
     }
-
-    // Ghost text auto-trigger: schedule completion after user pauses typing
-    const cursorPos = content.length
-    if (content.trim().length > 50) {
-      scheduleAutoTrigger(content, cursorPos)
-    }
-  }, [setCurrentSermon, setSermons, autoSave, sermonAutoSave, setSermonFlowStage, setSermonAiSuggestions, parseOutlineToSections, scheduleAutoTrigger])
+  }, [setCurrentSermon, setSermons, autoSave, sermonAutoSave, setSermonFlowStage, setSermonAiSuggestions, parseOutlineToSections])
 
   // Manual save handler for Cmd+S
   const handleSave = useCallback(() => {
@@ -318,10 +293,6 @@ export function SermonEditor() {
     }
   }, [])
 
-  // Handle cursor activity — cancel ghost text auto-trigger when user is actively typing
-  const handleCursorActivity = useCallback((textBeforeCursor: string, cursorOffset: number) => {
-    cancelAutoTrigger()
-  }, [cancelAutoTrigger])
 
   // Handle floating toolbar action
   const handleFloatingAction = useCallback((action: string) => {
@@ -545,14 +516,6 @@ export function SermonEditor() {
             isDark={isDarkMode}
             onSave={handleSave}
             onSelectionChange={handleSelectionChange}
-            onCursorActivity={handleCursorActivity}
-          />
-
-          {/* Ghost Text Overlay — auto-triggered, Tab to accept, Esc to reject */}
-          <GhostTextOverlay
-            editorContainerRef={editorContainerRef}
-            onAccept={acceptCompletion}
-            onReject={rejectCompletion}
           />
 
           {/* Floating Toolbar for selected text */}

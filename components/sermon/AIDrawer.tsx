@@ -22,7 +22,7 @@ interface AIDrawerProps {
  *
  * Key improvements over SermonAIPanel:
  * - Slides in from right as overlay (doesn't shrink editor)
- * - Chat-only interface (suggest/context tabs removed — covered by CommandPalette + ghost text)
+ * - Chat-only interface (suggest/context tabs removed — covered by CommandPalette)
  * - AI responses auto-flow into editor by default
  * - Quick prompts reduced to 3 most useful
  * - Cmd+J shortcut to toggle
