@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import { NewSermonDialog } from './NewSermonDialog'
 
+const LAST_SERMON_ID_KEY = 'sermon-last-opened-id'
+
 export function SermonListPanel() {
   const { t } = useTranslation()
   const { isMd } = useBreakpoint()
@@ -35,11 +37,57 @@ export function SermonListPanel() {
     sermonSelectedTags,
     setSermonSelectedTags,
     setSermons,
+    sermonsLoading,
+    setSermonsLoading,
+    locale,
   } = useBibleStore()
 
   const [showNewDialog, setShowNewDialog] = useState(false)
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
   const [contextMenu, setContextMenu] = useState<{ type: 'sermon' | 'folder'; id: string; x: number; y: number } | null>(null)
+
+  // Load sermons and folders from API on mount
+  useEffect(() => {
+    let cancelled = false
+    const loadData = async () => {
+      setSermonsLoading(true)
+      try {
+        const [sermonsRes, foldersRes] = await Promise.all([
+          fetch('/api/sermon'),
+          fetch('/api/sermon/folder'),
+        ])
+        if (cancelled) return
+        const sermonsData = await sermonsRes.json()
+        const foldersData = await foldersRes.json()
+        setSermons(sermonsData.data || [])
+        setSermonFolders(foldersData.data || [])
+
+        // Restore last-opened sermon
+        const lastId = localStorage.getItem(LAST_SERMON_ID_KEY)
+        if (lastId && sermonsData.data) {
+          const found = sermonsData.data.find((s: { id: string }) => s.id === lastId)
+          if (found) {
+            setCurrentSermon(found)
+          }
+        }
+      } catch {
+        // Silent — user can retry by refreshing
+      } finally {
+        if (!cancelled) setSermonsLoading(false)
+      }
+    }
+    loadData()
+    return () => { cancelled = true }
+  }, [])
+
+  // Persist currentSermon.id when it changes
+  useEffect(() => {
+    if (currentSermon?.id) {
+      localStorage.setItem(LAST_SERMON_ID_KEY, currentSermon.id)
+    } else {
+      localStorage.removeItem(LAST_SERMON_ID_KEY)
+    }
+  }, [currentSermon?.id])
 
   useEffect(() => {
     if (!contextMenu) return
@@ -277,7 +325,9 @@ export function SermonListPanel() {
 
       {/* Sermon list */}
       <div className={cn('flex-1 overflow-y-auto', isMd ? 'px-3 py-2 space-y-2' : 'px-2 py-1.5 space-y-1.5')}>
-        {filteredSermons.length === 0 ? (
+        {sermonsLoading ? (
+          <div className="text-center py-12 text-sm text-muted-foreground">{locale === 'en' ? 'Loading...' : '加载中...'}</div>
+        ) : filteredSermons.length === 0 ? (
           <div className="text-center py-12 text-sm text-muted-foreground">{t('sermon.noSermons')}</div>
         ) : (
           filteredSermons.map(sermon => (
