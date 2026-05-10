@@ -80,10 +80,13 @@ const VditorEditor = forwardRef<VditorEditorHandle, VditorEditorProps>(
         toolbar: [],
         counter: { enable: false },
         preview: { mode: 'editor' },
-        input: (value) => {
+        input: () => {
           if (isSettingContentRef.current) return
-          contentRef.current = value
-          onChangeRef.current(value)
+          // Use getValue() to get clean Markdown — the `value` param in IR mode
+          // is Vditor's internal format, not pure Markdown
+          const md = vd.getValue()
+          contentRef.current = md
+          onChangeRef.current(md)
         },
         after: () => {
           vditorRef.current = vd

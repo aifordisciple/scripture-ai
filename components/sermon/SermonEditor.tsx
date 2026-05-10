@@ -165,9 +165,13 @@ export function SermonEditor() {
           status: sermon.status,
         }),
       })
-      const data = await res.json()
-      const currentSermons = sermonsRef.current
-      setSermons(currentSermons.map(s => s.id === sermon.id ? { ...s, wordCount, updatedAt: data.data?.updatedAt } : s))
+      if (!res.ok) {
+        console.error('[SermonEditor] Auto-save API error:', res.status)
+      } else {
+        const data = await res.json()
+        const currentSermons = sermonsRef.current
+        setSermons(currentSermons.map(s => s.id === sermon.id ? { ...s, wordCount, updatedAt: data.data?.updatedAt } : s))
+      }
     } catch (error) {
       console.error('[SermonEditor] Auto-save failed:', error)
     } finally {
