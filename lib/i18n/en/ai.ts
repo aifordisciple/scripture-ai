@@ -91,5 +91,6 @@ export const ai = {
     copiedToClipboard: 'Copied to clipboard',
     copyFailed: 'Copy failed, please copy manually',
     copyVerse: 'Copy Verse',
+    insertToSermon: 'Insert to Sermon',
   },
 } as const

@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp, Map, FileText } from "lucide-react";
+import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp, Map, FileText, ArrowDownToLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useSession } from "next-auth/react";
@@ -22,6 +22,7 @@ interface FloatingMenuProps {
   onCrossRef?: () => void;
   onAtlas?: () => void;
   showAbove?: boolean; // 菜单显示在选中元素上方还是下方
+  onInsertToSermon?: () => void; // 插入选中经文到讲章编辑器
 }
 
 const COLORS = [

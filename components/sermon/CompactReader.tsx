@@ -8,6 +8,9 @@ import { useTranslation } from '@/lib/i18n'
 import { useBibleData, type Verse } from '@/hooks/use-bible-data'
 import { ChevronLeft, ChevronRight, Loader2, AlertCircle, BookOpenCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { BookPicker } from '@/components/bible/BookPicker'
+import { FloatingMenu } from '@/components/bible/FloatingMenu'
+import { useVerseMenu } from '@/hooks/use-verse-menu'
 
 interface CompactReaderProps {
   /** Initial book ID (e.g. 'Gen') */
@@ -34,7 +37,7 @@ const slideVariants = {
 export function CompactReader({ book: initialBook, chapter: initialChapter, onNavigate }: CompactReaderProps) {
   const { t, locale } = useTranslation()
   const bibleVersion = useBibleStore((s) => s.bibleVersion)
-  const { fontSize, lineHeight, showDualVersion, highlights } = useBibleStore()
+  const { fontSize, lineHeight, showDualVersion, highlights, selectedVerses, clearSelection } = useBibleStore()
 
   const primaryVersion = bibleVersion
   const secondaryVersion = bibleVersion === 'CUV' ? 'KJV' : 'CUV'
@@ -42,6 +45,7 @@ export function CompactReader({ book: initialBook, chapter: initialChapter, onNa
   const [book, setBook] = useState(initialBook)
   const [chapter, setChapter] = useState(initialChapter)
   const [direction, setDirection] = useState(0)
+  const [bookPickerOpen, setBookPickerOpen] = useState(false)
 
   // Sync with external prop changes (e.g. from sermon verse refs)
   useEffect(() => {
@@ -51,7 +55,32 @@ export function CompactReader({ book: initialBook, chapter: initialChapter, onNa
     }
   }, [initialBook, initialChapter])
 
+  const handleBookPickerSelect = useCallback((bookId: string, chapterNum: number) => {
+    const newChapter = String(chapterNum)
+    setBook(bookId)
+    setChapter(newChapter)
+    setDirection(0)
+    onNavigate?.(bookId, newChapter)
+  }, [onNavigate])
+
   const { verses, loading, error, refetch } = useBibleData(book, chapter)
+  const { menuPosition, isMenuVisible, setIsMenuVisible, handleVerseClick, handleAIExplain, handleCopy, showAbove } = useVerseMenu(verses)
+
+  // Insert selected verses into the sermon editor
+  const handleInsertToSermon = useCallback(() => {
+    if (selectedVerses.length === 0) return
+    const primaryVersion = locale === 'en' ? 'KJV' : 'CUV'
+    const selectedContent = verses
+      .filter(v => selectedVerses.includes(v.verse) && v.version === primaryVersion)
+      .sort((a, b) => a.verse - b.verse)
+      .map(v => `${v.content} (${getBookDisplayName(v.bookId, locale)} ${v.chapter}:${v.verse})`)
+      .join('\n')
+    if (selectedContent) {
+      window.dispatchEvent(new CustomEvent('sermon:insert-content', { detail: { content: `\n> ${selectedContent}\n` } }))
+    }
+    clearSelection()
+    setIsMenuVisible(false)
+  }, [selectedVerses, verses, locale, clearSelection, setIsMenuVisible])
 
   const handleNextChapter = useCallback(() => {
     const currentBookIndex = BIBLE_BOOKS.findIndex(b => b.id === book)
@@ -123,9 +152,16 @@ export function CompactReader({ book: initialBook, chapter: initialChapter, onNa
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
-        <h2 className="text-sm font-semibold text-foreground select-none">
-          {getBookDisplayName(book, locale)} <span className="opacity-60 mx-0.5">·</span> {chapter}
-        </h2>
+        <button
+          onClick={() => setBookPickerOpen(true)}
+          className="flex items-center gap-1 px-2 py-0.5 rounded-md hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
+          title={t('reader.selectScripture')}
+        >
+          <BookOpenCheck className="w-3.5 h-3.5 text-primary/70" />
+          <h2 className="text-sm font-semibold text-foreground select-none">
+            {getBookDisplayName(book, locale)} <span className="opacity-60 mx-0.5">·</span> {chapter}
+          </h2>
+        </button>
         <button
           onClick={handleNextChapter}
           className="p-1.5 rounded-lg hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground hover:text-foreground transition-colors"
@@ -179,26 +215,35 @@ export function CompactReader({ book: initialBook, chapter: initialChapter, onNa
 
                   if (!mainVerse) return null
 
+                  const isSelected = selectedVerses.includes(verseNum)
                   const highlight = highlights.find(h => h.verse === verseNum && h.bookId === book && h.chapter === parseInt(chapter))
                   const highlightClass = highlight ? HIGHLIGHT_COLORS[highlight.color] : ''
 
                   return (
                     <div
                       key={mainVerse.id}
+                      onClick={(e) => handleVerseClick(mainVerse, e)}
                       className={cn(
-                        'flex items-start px-2 py-1.5 rounded-lg',
+                        'flex items-start px-2 py-1.5 rounded-lg cursor-pointer transition-all duration-200',
+                        isSelected ? 'bg-primary/10 border-l-[3px] border-l-primary' :
                         highlightClass || 'hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'
                       )}
                     >
                       <span
-                        className="text-[11px] text-foreground/40 mr-2 select-none shrink-0 mt-[0.2em]"
+                        className={cn(
+                          'text-[11px] mr-2 select-none shrink-0 mt-[0.2em]',
+                          isSelected ? 'text-primary font-semibold' : 'text-foreground/40'
+                        )}
                         style={{ fontSize: Math.max(fontSize * 0.5, 9) }}
                       >
                         {verseNum}
                       </span>
                       <div className="flex-1 min-w-0">
                         <div
-                          className="text-[15px] leading-[1.6] text-foreground/90"
+                          className={cn(
+                            'text-[15px] leading-[1.6]',
+                            isSelected ? 'text-foreground font-medium' : 'text-foreground/90'
+                          )}
                           style={{ fontSize: `${fontSize * 0.9}px`, lineHeight }}
                         >
                           {mainVerse.content}
@@ -220,6 +265,29 @@ export function CompactReader({ book: initialBook, chapter: initialChapter, onNa
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* Book/Chapter Picker */}
+      <BookPicker
+        open={bookPickerOpen}
+        onOpenChange={setBookPickerOpen}
+        currentBook={book}
+        currentChapter={parseInt(chapter, 10) || 1}
+        onSelect={handleBookPickerSelect}
+      />
+
+      {/* Floating menu for verse actions */}
+      <FloatingMenu
+        visible={isMenuVisible && selectedVerses.length > 0}
+        position={menuPosition}
+        selectedCount={selectedVerses.length}
+        currentBook={book}
+        currentChapter={parseInt(chapter, 10) || 1}
+        onClose={() => { setIsMenuVisible(false); clearSelection() }}
+        onExplain={handleAIExplain}
+        onCopy={handleCopy}
+        showAbove={showAbove}
+        onInsertToSermon={handleInsertToSermon}
+      />
     </div>
   )
 }

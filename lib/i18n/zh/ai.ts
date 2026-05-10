@@ -102,5 +102,6 @@ export const ai = {
     copiedToClipboard: '已复制到剪贴板',
     copyFailed: '复制失败，请手动复制',
     copyVerse: '复制经文',
+    insertToSermon: '插入讲章',
   },
 } as const
