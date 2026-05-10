@@ -12,7 +12,7 @@ import { SermonVersePanel } from './SermonVersePanel'
 import { SermonReviewPanel } from './SermonReviewPanel'
 import { SermonDualPane } from './SermonDualPane'
 import { Button } from '@/components/ui/button'
-import { PanelLeftOpen, PanelLeftClose, Settings, List, BookOpen, PenLine, ShieldCheck } from 'lucide-react'
+import { PanelLeftClose, PanelLeftOpen, PenLine } from 'lucide-react'
 
 /**
  * SermonTab — Main sermon writing layout
@@ -38,71 +38,30 @@ export function SermonTab() {
 
   return (
     <div className="flex-1 flex min-h-0 h-full">
-      {/* Left Sidebar — sermon list with create button (always available) */}
+      {/* Left Sidebar — sermon list with create button */}
       {sidebarOpen && (
         <div className={`${isMd ? 'w-[280px]' : 'w-[240px]'} border-r border-border dark:border-white/[0.06] flex-shrink-0 overflow-hidden`}>
           <SermonListPanel />
         </div>
       )}
 
-      {/* Main Editor Area — full width */}
+      {/* Main Editor Area */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Toolbar with sidebar toggle and quick panel buttons */}
-        <div className="flex items-center gap-1 px-2 py-1 border-b border-border dark:border-white/[0.06] bg-muted/30">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleSidebar}
-            className="h-7 w-7 p-0"
-          >
-            {sidebarOpen ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeftOpen className="w-3.5 h-3.5" />}
-          </Button>
+        {/* Sidebar toggle — minimal, only when sidebar is closed */}
+        {!sidebarOpen && (
+          <div className="px-1 py-1 border-b border-border dark:border-white/[0.06]">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSidebar}
+              className="h-6 w-6 p-0"
+            >
+              <PanelLeftOpen className="w-3 h-3" />
+            </Button>
+          </div>
+        )}
 
-          <div className="flex-1" />
-
-          {/* Quick panel access buttons — only when a sermon is selected */}
-          {currentSermon && (
-            <div className="flex items-center gap-0.5">
-              <Button
-                variant={activeSermonPanel === 'outline' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveSermonPanel(activeSermonPanel === 'outline' ? 'list' : 'outline')}
-                className="h-7 px-2 text-[10px] gap-1"
-              >
-                <List className="w-3 h-3" />
-                {isMd && (t('sermon.outline') || '大纲')}
-              </Button>
-              <Button
-                variant={activeSermonPanel === 'verse' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveSermonPanel(activeSermonPanel === 'verse' ? 'list' : 'verse')}
-                className="h-7 px-2 text-[10px] gap-1"
-              >
-                <BookOpen className="w-3 h-3" />
-                {isMd && (t('sermon.verse') || '经文')}
-              </Button>
-              <Button
-                variant={activeSermonPanel === 'review' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveSermonPanel(activeSermonPanel === 'review' ? 'list' : 'review')}
-                className="h-7 px-2 text-[10px] gap-1"
-              >
-                <ShieldCheck className="w-3 h-3" />
-                {isMd && (t('sermon.review') || '审查')}
-              </Button>
-              <Button
-                variant={activeSermonPanel === 'settings' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveSermonPanel(activeSermonPanel === 'settings' ? 'list' : 'settings')}
-                className="h-7 px-2 text-[10px] gap-1"
-              >
-                <Settings className="w-3 h-3" />
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Content area — either dual pane, single editor, or empty state */}
+        {/* Content area */}
         <div className="flex-1 min-h-0 flex">
           {currentSermon ? (
             <>
