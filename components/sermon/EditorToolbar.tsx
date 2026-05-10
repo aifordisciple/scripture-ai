@@ -4,10 +4,11 @@ import React, { useState } from 'react'
 import {
   Bold, Italic, Heading2, Heading3, List, Quote,
   Sparkles, Wand2, Eye, EyeOff, Maximize2, Minimize2,
-  Loader2, ChevronDown
+  Loader2, ChevronDown, BookOpen, Columns2
 } from 'lucide-react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
+import VersePickerPopover from './VersePickerPopover'
 
 interface EditorToolbarProps {
   isGenerating: boolean
@@ -15,6 +16,7 @@ interface EditorToolbarProps {
   onFormat: (type: 'bold' | 'italic' | 'h2' | 'h3' | 'list' | 'quote') => void
   onFocusMode?: () => void
   isFocusMode?: boolean
+  onInsertVerse?: (markdown: string) => void
 }
 
 /** AI assist dropdown options */
@@ -29,8 +31,8 @@ const AI_OPTIONS = [
   { action: 'shrink', zhLabel: '精简', enLabel: 'Shrink', icon: Minimize2 },
 ]
 
-export function EditorToolbar({ isGenerating, onAIAssist, onFormat, onFocusMode, isFocusMode }: EditorToolbarProps) {
-  const { locale } = useBibleStore()
+export function EditorToolbar({ isGenerating, onAIAssist, onFormat, onFocusMode, isFocusMode, onInsertVerse }: EditorToolbarProps) {
+  const { locale, isDarkMode, sermonDualPane, setSermonDualPane } = useBibleStore()
   const isZh = locale !== 'en'
   const [showAIMenu, setShowAIMenu] = useState(false)
 
@@ -79,6 +81,36 @@ export function EditorToolbar({ isGenerating, onAIAssist, onFormat, onFocusMode,
           title={isZh ? '引用' : 'Quote'}
         >
           <Quote size={14} />
+        </button>
+      </div>
+
+      {/* Verse insert button — opens VersePickerPopover */}
+      {onInsertVerse && (
+        <div className="border-r border-border/50 pr-2">
+          <VersePickerPopover isDark={isDarkMode} onInsert={onInsertVerse}>
+            <button
+              className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+              title={isZh ? '插入经文' : 'Insert Verse'}
+            >
+              <BookOpen size={12} />
+              {isZh ? '经文' : 'Verse'}
+            </button>
+          </VersePickerPopover>
+        </div>
+      )}
+
+      {/* Dual pane toggle — open Bible reader side-by-side */}
+      <div className="border-r border-border/50 pr-2">
+        <button
+          onClick={() => setSermonDualPane(!sermonDualPane)}
+          className={`p-1.5 rounded transition-colors ${
+            sermonDualPane
+              ? 'bg-primary/15 text-primary'
+              : 'hover:bg-muted/60 text-muted-foreground hover:text-foreground'
+          }`}
+          title={sermonDualPane ? (isZh ? '关闭经文面板' : 'Close Bible Panel') : (isZh ? '打开经文面板' : 'Open Bible Panel')}
+        >
+          <Columns2 size={14} />
         </button>
       </div>
 

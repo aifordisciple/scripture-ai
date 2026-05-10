@@ -534,6 +534,7 @@ export function SermonEditor() {
           }}
           onFocusMode={() => setIsFocusMode(true)}
           isFocusMode={isFocusMode}
+          onInsertVerse={(markdown) => editorRef.current?.insertValue(markdown)}
         />
 
         <div ref={editorContainerRef} className="flex-1 min-h-0 relative">
