@@ -18,6 +18,7 @@ import { type CommandItem } from '@/hooks/use-command-palette'
 import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
 import { analyzeTone } from '@/lib/sermon-flow'
 import { buildSermonContext, serializeContext } from '@/lib/sermon-context'
+import { stripThinkTags } from '@/lib/ai'
 export function SermonEditor() {
   const { t } = useTranslation()
   const { isMd } = useBreakpoint()
@@ -46,6 +47,9 @@ export function SermonEditor() {
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savingRef = useRef(false)
+  const pendingSaveRef = useRef<string | null>(null)
+  const selectedTextRef = useRef('')
+  const selectedRangeRef = useRef<Range | null>(null)
   const sermonsRef = useRef(sermons)
   sermonsRef.current = sermons
   const currentSermonRef = useRef(currentSermon)
@@ -136,7 +140,11 @@ export function SermonEditor() {
 
   // Auto-save
   const autoSave = useCallback(async (content: string) => {
-    if (savingRef.current) return
+    if (savingRef.current) {
+      // Record pending save — will be flushed after current save completes
+      pendingSaveRef.current = content
+      return
+    }
     const sermon = currentSermonRef.current
     if (!sermon) return
     savingRef.current = true
@@ -165,6 +173,12 @@ export function SermonEditor() {
     } finally {
       savingRef.current = false
       setIsSermonSaving(false)
+      // Flush any content that changed during the save
+      if (pendingSaveRef.current) {
+        const pending = pendingSaveRef.current
+        pendingSaveRef.current = null
+        autoSave(pending)
+      }
     }
   }, [setIsSermonSaving, setSermons])
 
@@ -278,7 +292,13 @@ export function SermonEditor() {
 
   // Handle selection change from VditorEditor
   const handleSelectionChange = useCallback((selectedText: string, rect: DOMRect | null) => {
+    selectedTextRef.current = selectedText
     if (selectedText && selectedText.length > 0 && rect) {
+      // Save the selection range for later replacement
+      const selection = document.getSelection()
+      if (selection && selection.rangeCount > 0) {
+        selectedRangeRef.current = selection.getRangeAt(0).cloneRange()
+      }
       const container = editorContainerRef.current
       if (container) {
         const containerRect = container.getBoundingClientRect()
@@ -287,6 +307,7 @@ export function SermonEditor() {
         setFloatingToolbar({ visible: true, x, y, selectedText })
       }
     } else {
+      selectedRangeRef.current = null
       setFloatingToolbar(prev => ({ ...prev, visible: false }))
     }
   }, [])
@@ -295,6 +316,22 @@ export function SermonEditor() {
   // Handle floating toolbar action
   const handleFloatingAction = useCallback((action: string) => {
     if (!floatingToolbar.selectedText) return
+
+    // Special action: crossref — trigger cross-reference
+    if (action === 'crossref') {
+      window.dispatchEvent(new CustomEvent('sermon:cross-ref', {
+        detail: { text: floatingToolbar.selectedText }
+      }))
+      setFloatingToolbar(prev => ({ ...prev, visible: false }))
+      return
+    }
+
+    // Special action: insert-verse — open verse picker panel
+    if (action === 'insert-verse') {
+      useBibleStore.getState().setActiveSermonPanel('verse')
+      setFloatingToolbar(prev => ({ ...prev, visible: false }))
+      return
+    }
 
     let aiAction = action
     let expandDegree: 'slight' | 'moderate' | 'extensive' | undefined
@@ -331,7 +368,20 @@ export function SermonEditor() {
         expandDegree,
       }),
     })
-      .then(res => res.text())
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`AI action failed: ${res.status}`)
+        // Stream-read the response
+        const reader = res.body?.getReader()
+        if (!reader) return ''
+        const decoder = new TextDecoder()
+        let result = ''
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          result += decoder.decode(value, { stream: true })
+        }
+        return stripThinkTags(result)
+      })
       .then(result => {
         if (result) {
           if (isModifyAction) {
@@ -341,7 +391,14 @@ export function SermonEditor() {
               modified: result,
             })
           } else {
-            editorRef.current?.insertValue(result)
+            // For add-example, add-application, etc. — collapse to end of selection then insert
+            const selection = document.getSelection()
+            if (selectedRangeRef.current) {
+              selection?.removeAllRanges()
+              selection?.addRange(selectedRangeRef.current)
+              selection?.collapseToEnd()
+            }
+            editorRef.current?.insertValue('\n\n' + result)
           }
         }
       })
@@ -350,7 +407,7 @@ export function SermonEditor() {
         setIsGenerating(false)
         setFloatingToolbar(prev => ({ ...prev, visible: false }))
       })
-  }, [floatingToolbar.selectedText, currentSermon, markdownContent])
+  }, [floatingToolbar.selectedText, currentSermon, markdownContent, setIsGenerating, setDiffPreview, setFloatingToolbar])
 
   // Handle command palette command execution
   const handleCommandPaletteCommand = useCallback((command: CommandItem) => {
@@ -527,6 +584,14 @@ export function SermonEditor() {
             modified={diffPreview.modified}
             visible={diffPreview.visible}
             onAccept={(text) => {
+              // Replace the selected text with AI result
+              const selection = document.getSelection()
+              if (selectedRangeRef.current) {
+                selection?.removeAllRanges()
+                selection?.addRange(selectedRangeRef.current)
+                selectedRangeRef.current.deleteContents()
+                selectedRangeRef.current = null
+              }
               editorRef.current?.insertValue(text)
               setDiffPreview({ visible: false, original: '', modified: '' })
             }}
@@ -534,6 +599,14 @@ export function SermonEditor() {
               setDiffPreview({ visible: false, original: '', modified: '' })
             }}
             onPartialAccept={(text) => {
+              // Replace the selected text with partial accept result
+              const selection = document.getSelection()
+              if (selectedRangeRef.current) {
+                selection?.removeAllRanges()
+                selection?.addRange(selectedRangeRef.current)
+                selectedRangeRef.current.deleteContents()
+                selectedRangeRef.current = null
+              }
               editorRef.current?.insertValue(text)
               setDiffPreview({ visible: false, original: '', modified: '' })
             }}

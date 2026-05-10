@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Sparkles, Maximize2, Minimize2, BookOpen, Lightbulb, ShieldCheck, GitBranch, PenLine, MoreHorizontal } from 'lucide-react'
+import { Sparkles, Maximize2, Minimize2, Lightbulb, ShieldCheck, GitBranch, PenLine, MoreHorizontal } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
 
 /** Floating toolbar action definition */
@@ -33,7 +33,6 @@ const PRIMARY_ACTIONS: FloatingToolbarAction[] = [
       { key: 'shrink-extensive', icon: Minimize2, labelZh: '大幅', labelEn: 'Extensive' },
     ],
   },
-  { key: 'insert-verse', icon: BookOpen, labelZh: '经文', labelEn: 'Verse' },
   { key: 'add-example', icon: Lightbulb, labelZh: '例证', labelEn: 'Example' },
 ]
 
@@ -42,7 +41,7 @@ const SECONDARY_ACTIONS: FloatingToolbarAction[] = [
   { key: 'deepen', icon: ShieldCheck, labelZh: '深化', labelEn: 'Deepen' },
   { key: 'simplify', icon: Minimize2, labelZh: '通俗化', labelEn: 'Simplify' },
   { key: 'rewrite', icon: PenLine, labelZh: '改写', labelEn: 'Rewrite' },
-  { key: 'crossref', icon: GitBranch, labelZh: '交叉引用', labelEn: 'Cross Ref' },
+  { key: 'crossref', icon: GitBranch, labelZh: '串珠', labelEn: 'Cross Ref' },
 ]
 
 interface FloatingToolbarProps {
