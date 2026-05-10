@@ -48,6 +48,8 @@ export const sermon = {
     panelOutline: 'Outline',
     panelReview: 'Review',
     panelSettings: 'Settings',
+    dualPaneOn: 'Dual Pane Mode',
+    dualPaneOff: 'Exit Dual Pane',
     templateExpository: 'Expository Sermon',
     templateTopical: 'Topical Sermon',
     templateNarrative: 'Narrative Sermon',

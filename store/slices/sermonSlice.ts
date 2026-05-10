@@ -214,6 +214,16 @@ export const createSermonSlice: StateCreator<StoreState, [], [], SermonSlice> = 
   deleteSermonSeries: (seriesId) => set({
     sermonSeries: get().sermonSeries.filter(s => s.id !== seriesId),
   }),
+
+  // 双窗格模式
+  sermonDualPane: false,
+  setSermonDualPane: (enabled) => set({ sermonDualPane: enabled }),
+  sermonSplitRatio: 0.4,
+  setSermonSplitRatio: (ratio) => set({ sermonSplitRatio: ratio }),
+  sermonSplitBook: 'Gen',
+  setSermonSplitBook: (book) => set({ sermonSplitBook: book }),
+  sermonSplitChapter: '1',
+  setSermonSplitChapter: (chapter) => set({ sermonSplitChapter: chapter }),
 });
 
 /** Update flow stage based on sermon content changes */

@@ -717,6 +717,15 @@ export interface SermonSlice {
   addSermonSeries: (series: Omit<SermonSeries, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateSermonSeries: (seriesId: string, updates: Partial<SermonSeries>) => void;
   deleteSermonSeries: (seriesId: string) => void;
+  // 双窗格模式
+  sermonDualPane: boolean;
+  setSermonDualPane: (enabled: boolean) => void;
+  sermonSplitRatio: number;
+  setSermonSplitRatio: (ratio: number) => void;
+  sermonSplitBook: string;
+  setSermonSplitBook: (book: string) => void;
+  sermonSplitChapter: string;
+  setSermonSplitChapter: (chapter: string) => void;
 }
 
 // --------------------------------------------------

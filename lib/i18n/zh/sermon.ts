@@ -48,6 +48,8 @@ export const sermon = {
     panelOutline: '大纲',
     panelReview: '审查',
     panelSettings: '设置',
+    dualPaneOn: '双窗格模式',
+    dualPaneOff: '退出双窗格',
     templateExpository: '释经式讲章',
     templateTopical: '主题式讲章',
     templateNarrative: '叙事式讲章',

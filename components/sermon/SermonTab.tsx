@@ -22,6 +22,8 @@ import { InspirationBubble } from './InspirationBubble'
 import { SermonMobileBottomBar } from './SermonMobileBottomBar'
 import { SermonEditorProvider } from './SermonEditorContext'
 import { SermonErrorBoundary } from './SermonErrorBoundary'
+import { SermonDualPane } from './SermonDualPane'
+import { getFirstVerseRef } from '@/lib/verse-utils'
 
 export function SermonTab() {
   const { t } = useTranslation()
@@ -36,6 +38,9 @@ export function SermonTab() {
     setSermons,
     setSermonFolders,
     isDarkMode,
+    sermonDualPane,
+    setSermonSplitBook,
+    setSermonSplitChapter,
   } = useBibleStore()
 
   // Load sermons and folders on mount
@@ -74,6 +79,16 @@ export function SermonTab() {
     }
   }, [currentSermon, isMd, setSermonMobileView])
 
+  // Auto-sync: when dual pane is active and sermon has verseRefs, navigate left pane
+  useEffect(() => {
+    if (!sermonDualPane || !currentSermon?.verseRefs) return
+    const ref = getFirstVerseRef(currentSermon.verseRefs)
+    if (ref) {
+      setSermonSplitBook(ref.bookId)
+      setSermonSplitChapter(ref.chapter)
+    }
+  }, [sermonDualPane, currentSermon?.verseRefs, setSermonSplitBook, setSermonSplitChapter])
+
   const panelContent = () => {
     switch (activeSermonPanel) {
       case 'list': return <SermonListPanel />
@@ -93,6 +108,13 @@ export function SermonTab() {
     }
   }
 
+  // The editor area (right side of dual pane or full width)
+  const editorArea = currentSermon ? (
+    <SermonErrorBoundary><SermonEditor /></SermonErrorBoundary>
+  ) : (
+    <SermonEmptyState />
+  )
+
   return (
     <SermonEditorProvider isDark={isDarkMode}>
       <div
@@ -100,7 +122,7 @@ export function SermonTab() {
         style={{ fontFamily: "'SF Pro Display', 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif" }}
       >
         {isMd ? (
-          /* Desktop: 3-column layout */
+          /* Desktop layout */
           <>
             <SermonSidebar />
             <div className={cn(
@@ -109,13 +131,15 @@ export function SermonTab() {
             )}>
               {panelContent()}
             </div>
-            <div className="flex-1 flex flex-col min-w-0">
-              {currentSermon ? (
-                <SermonErrorBoundary><SermonEditor /></SermonErrorBoundary>
-              ) : (
-                <SermonEmptyState />
-              )}
-            </div>
+            {sermonDualPane ? (
+              <SermonDualPane>
+                {editorArea}
+              </SermonDualPane>
+            ) : (
+              <div className="flex-1 flex flex-col min-w-0">
+                {editorArea}
+              </div>
+            )}
           </>
         ) : (
           /* Mobile: single-column view */

@@ -11,6 +11,7 @@ import {
   ListChecks,
   CheckCircle2,
   Settings,
+  Columns2,
 } from 'lucide-react'
 import type { SermonPanelType } from '@/store/types'
 
@@ -26,7 +27,7 @@ const PANEL_ICONS: { type: SermonPanelType; icon: typeof BookOpen; key: string }
 
 export function SermonSidebar() {
   const { t } = useTranslation()
-  const { activeSermonPanel, setActiveSermonPanel } = useBibleStore()
+  const { activeSermonPanel, setActiveSermonPanel, sermonDualPane, setSermonDualPane } = useBibleStore()
 
   return (
     <div className="w-12 bg-secondary/80 dark:bg-card/80 backdrop-blur-xl flex flex-col items-center py-3 gap-1 border-r border-black/[0.04] dark:border-white/[0.06]">
@@ -48,6 +49,23 @@ export function SermonSidebar() {
           </button>
         )
       })}
+
+      {/* Divider */}
+      <div className="w-6 h-[1px] bg-black/[0.06] dark:bg-white/[0.06] my-1" />
+
+      {/* Dual pane toggle */}
+      <button
+        onClick={() => setSermonDualPane(!sermonDualPane)}
+        className={cn(
+          'w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-150',
+          sermonDualPane
+            ? 'bg-primary/20 text-primary active:scale-95'
+            : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+        )}
+        title={sermonDualPane ? t('sermon.dualPaneOff') : t('sermon.dualPaneOn')}
+      >
+        <Columns2 className="w-[18px] h-[18px]" />
+      </button>
     </div>
   )
 }
