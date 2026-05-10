@@ -86,6 +86,12 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
   const onInsertRef = useRef(options.onInsert)
   onInsertRef.current = options.onInsert
   const lastRejectionTimeRef = useRef<number>(0)
+  const isGeneratingRef = useRef(false)
+
+  // Keep ref in sync with state so callbacks can read latest value
+  useEffect(() => {
+    isGeneratingRef.current = isGenerating
+  }, [isGenerating])
 
   /** Cancel any pending auto-trigger timer */
   const cancelAutoTrigger = useCallback(() => {
