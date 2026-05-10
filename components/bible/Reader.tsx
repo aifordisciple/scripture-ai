@@ -467,7 +467,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
         currentBook={book}
         currentChapter={parseInt(chapter)}
         onCopy={handleCopy}
-        onCrossRef={handleCrossRef}
         onAtlas={handleAtlas}
         showAbove={showAbove}
       />
