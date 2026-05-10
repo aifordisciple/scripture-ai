@@ -8,14 +8,12 @@ import VditorEditor, { type VditorEditorHandle } from './VditorEditor'
 import { EditorToolbar } from './EditorToolbar'
 import { SermonEditorHeader } from './SermonEditorHeader'
 import { useSermonEditor } from './SermonEditorContext'
-import { FlowGuide } from './FlowGuide'
 import { FloatingToolbar } from './FloatingToolbar'
 import { useSermonKeyboardShortcuts } from './KeyboardShortcutsPanel'
 import { DiffPreview } from './DiffPreview'
 import { FocusMode } from './FocusMode'
 import CommandPalette from './CommandPalette'
 import { AIDrawer } from './AIDrawer'
-import { InlineWeakMarker } from './InlineWeakMarker'
 import { type CommandItem } from '@/hooks/use-command-palette'
 import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
 import { analyzeTone } from '@/lib/sermon-flow'
@@ -478,9 +476,7 @@ export function SermonEditor() {
   return (
     <>
       <div className="flex-1 flex flex-col min-h-0">
-        {/* Flow Guide progress bar */}
-        <FlowGuide />
-
+        
         {/* Header with title editing and status */}
         <SermonEditorHeader />
 
@@ -543,12 +539,6 @@ export function SermonEditor() {
             }}
           />
 
-          {/* Inline weak paragraph markers — expand chips for thin paragraphs */}
-          <InlineWeakMarker
-            editorContainerRef={editorContainerRef}
-            content={markdownContent}
-            onExpand={(text, action) => handleAIAssist(action)}
-          />
         </div>
 
         {/* Status Bar */}
