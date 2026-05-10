@@ -135,7 +135,7 @@ const VditorEditor = forwardRef<VditorEditorHandle, VditorEditorProps>(
       }
     }, [])
 
-    // Cursor activity detection for slash commands
+    // Cursor activity detection for slash/@ commands
     useEffect(() => {
       const container = containerRef.current
       if (!container) return
@@ -159,6 +159,24 @@ const VditorEditor = forwardRef<VditorEditorHandle, VditorEditorProps>(
             // Get text around cursor (last 50 chars before cursor)
             const textBeforeCursor = fullText.slice(Math.max(0, offset - 50), offset)
             onCursorActivityRef.current(textBeforeCursor, offset)
+
+            // Detect / or @ triggers at line start or after whitespace
+            const lastChar = textBeforeCursor.slice(-1)
+            const prevChar = textBeforeCursor.slice(-2, -1)
+            if ((lastChar === '/' || lastChar === '@') && (prevChar === '' || prevChar === '\n' || prevChar === ' ' || prevChar === '　')) {
+              // Dispatch custom event to open CommandPalette with category pre-filter
+              const category = lastChar === '/' ? 'ai' : 'insert'
+              window.dispatchEvent(new CustomEvent('sermon:open-command-palette', { detail: { category } }))
+              // Remove the trigger character from editor
+              vd.insertValue('')
+              // Use undo or backspace simulation to remove the / or @
+              try {
+                const cmInstance = (vd as any).vditor?.sv?.codeMirror || (vd as any).vditor?.ir?.codeMirror
+                if (cmInstance) {
+                  cmInstance.execCommand('deleteCharBefore')
+                }
+              } catch {}
+            }
           }
         } catch {}
       }

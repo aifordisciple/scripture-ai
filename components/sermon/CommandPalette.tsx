@@ -53,8 +53,21 @@ export default function CommandPalette({ onCommand, initialCategory }: CommandPa
         else open()
       }
     }
+    // Listen for / and @ trigger events from VditorEditor
+    function handleOpenCommandPalette(e: Event) {
+      const detail = (e as CustomEvent).detail
+      if (detail?.category) {
+        open(detail.category as CommandCategory)
+      } else {
+        open()
+      }
+    }
     window.addEventListener('keydown', handleGlobalKeyDown)
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown)
+    window.addEventListener('sermon:open-command-palette', handleOpenCommandPalette)
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown)
+      window.removeEventListener('sermon:open-command-palette', handleOpenCommandPalette)
+    }
   }, [visible, open, close])
 
   // Scroll selected item into view

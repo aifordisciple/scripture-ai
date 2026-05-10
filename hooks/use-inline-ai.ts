@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { stripThinkTags } from '@/lib/ai'
 import { buildSermonContext, serializeContext } from '@/lib/sermon-context'
@@ -86,9 +86,15 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
   const onInsertRef = useRef(options.onInsert)
   onInsertRef.current = options.onInsert
   const lastRejectionTimeRef = useRef<number>(0)
-  const isGeneratingRef = useRef(false)
 
-  // Keep ref in sync with state so callbacks can read latest value
+  // Use refs for values needed inside callbacks to avoid stale closures
+  const isGeneratingRef = useRef(false)
+  const currentSermonRef = useRef(currentSermon)
+  currentSermonRef.current = currentSermon
+  const localeRef = useRef(locale)
+  localeRef.current = locale
+
+  // Sync isGenerating state to ref
   useEffect(() => {
     isGeneratingRef.current = isGenerating
   }, [isGenerating])
@@ -101,22 +107,10 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
     }
   }, [])
 
-  /** Trigger ghost text generation */
-  const triggerCompletion = useCallback((content: string, cursorPosition: number) => {
-    // Auto-detect type based on context
-    const ctx = analyzeGhostTextContext(
-      content,
-      cursorPosition,
-      useBibleStore.getState().sermonFlowStage,
-    )
-    const detectedType = detectGhostTextType(ctx)
-    triggerTypedCompletion(content, cursorPosition, detectedType)
-  }, [])
-
-  /** Trigger a specific type of ghost text */
+  /** Trigger a specific type of ghost text — core implementation, no circular deps */
   const triggerTypedCompletion = useCallback((content: string, cursorPosition: number, type: GhostTextType) => {
-    if (!content || content.trim().length < 5) return
-    if (isGenerating) return
+    if (!content || content.trim().length < 50) return
+    if (isGeneratingRef.current) return
 
     // Don't auto-trigger if within rejection cooldown
     const timeSinceRejection = Date.now() - lastRejectionTimeRef.current
@@ -134,13 +128,14 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
 
     // Take more context: 800 chars before cursor for better context awareness
     const contextBefore = content.slice(Math.max(0, cursorPosition - 800), cursorPosition)
-    if (contextBefore.trim().length < 5) return
+    if (contextBefore.trim().length < 50) return
 
-    // Build full sermon context for AI awareness (outline, adjacent sections, etc.)
+    // Build full sermon context for AI awareness
+    const sermon = currentSermonRef.current
     const sermonCtx = buildSermonContext(content, cursorPosition, {
-      title: currentSermon?.title,
-      verseRefs: currentSermon?.verseRefs,
-      style: currentSermon?.style,
+      title: sermon?.title,
+      verseRefs: sermon?.verseRefs,
+      style: sermon?.style,
       flowStage: useBibleStore.getState().sermonFlowStage,
     })
     const sermonContextStr = serializeContext(sermonCtx)
@@ -152,7 +147,6 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
     const action = GHOST_TYPE_TO_ACTION[type]
     const typeHint = GHOST_TYPE_HINT[type]
 
-    // Use the ai-action endpoint with streaming
     fetch('/api/sermon/ai-action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -160,8 +154,8 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
       body: JSON.stringify({
         action,
         selectedText: contextBefore,
-        style: currentSermon?.style,
-        locale,
+        style: sermon?.style,
+        locale: localeRef.current,
         sermonContext: sermonContextStr,
         typeHint,
       }),
@@ -170,10 +164,8 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
         if (!res.ok) {
           throw new Error(`AI action failed: ${res.status}`)
         }
-        // Handle streaming response
         const reader = res.body?.getReader()
         if (!reader) {
-          // Fallback: try JSON response
           const text = await res.text()
           const result = stripThinkTags(text)
           if (result) {
@@ -187,7 +179,6 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
           const { done, value } = await reader.read()
           if (done) break
           accumulated += decoder.decode(value, { stream: true })
-          // Update ghost text progressively for faster perceived response
           const clean = stripThinkTags(accumulated)
           if (clean) {
             setSermonGhostText(clean.trim())
@@ -196,7 +187,6 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
       })
       .catch((err: unknown) => {
         if (err instanceof DOMException && err.name === 'AbortError') return
-        // Silently fail for ghost text - it's a non-critical feature
         setSermonGhostText('')
         setSermonGhostTextVisible(false)
       })
@@ -204,17 +194,22 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
         setIsGenerating(false)
         abortRef.current = null
       })
-  }, [
-    isGenerating,
-    rejectionCooldown,
-    currentSermon?.style,
-    currentSermon?.title,
-    currentSermon?.verseRefs,
-    locale,
-    setSermonGhostText,
-    setSermonGhostTextVisible,
-    cancelAutoTrigger,
-  ])
+  }, [rejectionCooldown, cancelAutoTrigger, setSermonGhostText, setSermonGhostTextVisible])
+
+  // Use a ref for triggerTypedCompletion so scheduleAutoTrigger doesn't create circular deps
+  const triggerTypedCompletionRef = useRef(triggerTypedCompletion)
+  triggerTypedCompletionRef.current = triggerTypedCompletion
+
+  /** Trigger ghost text generation with auto-detected type */
+  const triggerCompletion = useCallback((content: string, cursorPosition: number) => {
+    const ctx = analyzeGhostTextContext(
+      content,
+      cursorPosition,
+      useBibleStore.getState().sermonFlowStage,
+    )
+    const detectedType = detectGhostTextType(ctx)
+    triggerTypedCompletionRef.current(content, cursorPosition, detectedType)
+  }, [])
 
   /** Schedule auto-trigger after cursor stops moving */
   const scheduleAutoTrigger = useCallback((content: string, cursorPosition: number) => {
@@ -225,12 +220,12 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
     if (timeSinceRejection < rejectionCooldown) return
 
     // Don't schedule if already generating
-    if (isGenerating) return
+    if (isGeneratingRef.current) return
 
     autoTriggerTimerRef.current = setTimeout(() => {
       triggerCompletion(content, cursorPosition)
     }, autoTriggerDelay)
-  }, [triggerCompletion, cancelAutoTrigger, autoTriggerDelay, rejectionCooldown, isGenerating])
+  }, [triggerCompletion, cancelAutoTrigger, autoTriggerDelay, rejectionCooldown])
 
   /** Accept ghost text: insert into editor */
   const acceptCompletion = useCallback(() => {
@@ -242,12 +237,9 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
 
   /** Reject ghost text: clear it and record rejection time for cooldown */
   const rejectCompletion = useCallback(() => {
-    // Cancel any pending auto-trigger
     cancelAutoTrigger()
-    // Abort any in-flight request
     abortRef.current?.abort()
     abortRef.current = null
-    // Record rejection time for cooldown
     lastRejectionTimeRef.current = Date.now()
     setSermonGhostText('')
     setSermonGhostTextVisible(false)

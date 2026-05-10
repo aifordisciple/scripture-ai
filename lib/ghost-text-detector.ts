@@ -110,7 +110,7 @@ export function analyzeGhostTextContext(
   const textAfterCursor = content.slice(cursorPosition)
 
   // Find current section (nearest ## above cursor)
-  const headingBeforeMatch = textBeforeCursor.match(/##\s+([^\n]+)(?:\n[^\n]*)*$/)
+  const headingBeforeMatch = textBeforeCursor.match(/##\s+([^\n]+)\s*$/)
   const currentSectionTitle = headingBeforeMatch?.[1]?.trim()
 
   // Find next section (nearest ## below cursor)
