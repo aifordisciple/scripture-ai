@@ -657,6 +657,48 @@ export const SERMON_CHAT_PROMPT: DualLangString = {
 - If the user requests content to insert into the editor, provide the insertable text directly without extra explanation`,
 };
 
+// --- 串珠专用 Prompt ---
+export const CROSS_REF_PROMPT: DualLangString = {
+  zh: `请为以下经文找出5-8处最相关的串珠经文（cross-references），并说明每处的关联。
+
+要求：
+1. 每处串珠包含：经文出处、经文内容摘要、关联类型、关联说明
+2. 关联类型分为：引用（旧约被新约引用）、平行（福音书平行记载）、主题（主题相关）、预言（预言与应验）
+3. 关联说明要具体，说明两处经文在神学、历史或文学上的联系
+4. 优先列出引用和平行类型的串珠，其次为主题和预言类型
+5. 请用以下格式输出：
+
+### 📖 串珠经文
+
+**1. [经文出处]** — [关联类型]
+> 经文内容摘要
+💡 关联说明：...
+
+**2. [经文出处]** — [关联类型]
+> 经文内容摘要
+💡 关联说明：...
+`,
+  en: `Please find 5-8 most relevant cross-reference Scriptures for the following verse, and explain each connection.
+
+Requirements:
+1. Each cross-reference should include: verse reference, content summary, connection type, connection explanation
+2. Connection types: Quotation (OT quoted in NT), Parallel (Gospel parallels), Thematic (thematic link), Prophecy (prophecy & fulfillment)
+3. Connection explanations should be specific about theological, historical, or literary links
+4. Prioritize Quotation and Parallel types, then Thematic and Prophecy
+5. Use the following format:
+
+### 📖 Cross References
+
+**1. [Verse Reference]** — [Connection Type]
+> Content summary
+💡 Connection: ...
+
+**2. [Verse Reference]** — [Connection Type]
+> Content summary
+💡 Connection: ...
+`,
+};
+
 export const SERMON_ACTION_PROMPTS: Record<string, DualLangString> = {
   continue: {
     zh: `请继续撰写以下讲章内容，保持风格和语气一致。直接输出续写内容，不要添加额外解释。`,

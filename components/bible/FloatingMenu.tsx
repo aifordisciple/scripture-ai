@@ -6,7 +6,7 @@ import { Sparkles, Copy, X, PenLine, Share2, GitBranch, ChevronDown, ChevronUp, 
 import { cn } from "@/lib/utils";
 import { useBibleStore } from "@/store/useBibleStore";
 import { useSession } from "next-auth/react";
-import { THEOLOGICAL_PROMPTS } from "@/lib/constants";
+import { THEOLOGICAL_PROMPTS, CROSS_REF_PROMPT } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "@/lib/i18n";
 
@@ -19,7 +19,6 @@ interface FloatingMenuProps {
   currentBook: string;
   currentChapter: number;
   onCopy: () => void;
-  onCrossRef?: () => void;
   onAtlas?: () => void;
   showAbove?: boolean; // 菜单显示在选中元素上方还是下方
   onInsertToSermon?: () => void; // 插入选中经文到讲章编辑器
@@ -41,7 +40,7 @@ const AI_OPTIONS = [
   { id: 'prayer', labelKey: 'floatingMenu.prayerRespond', prompt: THEOLOGICAL_PROMPTS[4].prompt },
 ];
 
-export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onCrossRef, onAtlas, showAbove = true }: FloatingMenuProps) {
+export function FloatingMenu({ visible, position, onClose, onExplain, selectedCount, currentBook, currentChapter, onCopy, onAtlas, showAbove = true }: FloatingMenuProps) {
   const { t } = useTranslation();
   const [render, setRender] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -163,6 +162,13 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
     useBibleStore.getState().setSermonInitialVerseRefs(verseRefs);
     clearSelection();
     onClose();
+  };
+
+  // AI串珠 - 使用专用prompt调用AI侧边栏
+  const handleCrossRef = () => {
+    const prompt = CROSS_REF_PROMPT[locale] || CROSS_REF_PROMPT.zh;
+    onClose();
+    onExplain(prompt);
   };
 
   if (!render) return null;
@@ -341,18 +347,16 @@ export function FloatingMenu({ visible, position, onClose, onExplain, selectedCo
           <span className="text-[10px] text-muted-foreground">{t('floatingMenu.share')}</span>
         </button>
 
-        {onCrossRef && (
-          <button
-            onClick={(e) => { handleMenuClick(e); onCrossRef(); }}
-            onMouseDown={handleMenuClick}
-            onPointerDown={handleMenuClick}
-            className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 transition-colors"
-            aria-label={t('floatingMenu.viewCrossRef')}
-          >
-            <GitBranch className="w-4 h-4 text-muted-foreground dark:text-foreground/50 mb-1" />
-            <span className="text-[10px] text-muted-foreground">{t('floatingMenu.crossRef')}</span>
-          </button>
-        )}
+        <button
+          onClick={(e) => { handleMenuClick(e); handleCrossRef(); }}
+          onMouseDown={handleMenuClick}
+          onPointerDown={handleMenuClick}
+          className="flex flex-col items-center justify-center py-3 min-h-[44px] min-w-[44px] rounded-lg hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-95 transition-colors"
+          aria-label={t('floatingMenu.viewCrossRef')}
+        >
+          <GitBranch className="w-4 h-4 text-muted-foreground dark:text-foreground/50 mb-1" />
+          <span className="text-[10px] text-muted-foreground">{t('floatingMenu.crossRef')}</span>
+        </button>
 
         {onAtlas && (
           <button

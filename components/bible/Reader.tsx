@@ -274,31 +274,6 @@ export function Reader({ initialBook, initialChapter }: ReaderProps) {
     return { verseMap: map, renderList: Array.from(map.keys()).sort((a, b) => a - b) };
   }, [verses]);
 
-  // [新增] 处理经文串珠 - 在新标签页打开
-  const handleCrossRef = useCallback(() => {
-    if (selectedVerses.length === 0) return;
-
-    const primaryVerses = verses.filter(v => v.version === primaryVersion && selectedVerses.includes(v.verse));
-    if (primaryVerses.length === 0) return;
-
-    const firstVerse = primaryVerses[0];
-    const content = primaryVerses.map(v => v.content).join('');
-
-    // 在新标签页打开串珠
-    addTab({
-      type: 'cross-ref',
-      crossRefSource: {
-        bookId: firstVerse.bookId,
-        bookName: firstVerse.bookName,
-        chapter: firstVerse.chapter,
-        verse: firstVerse.verse,
-        content,
-      },
-    });
-    setIsMenuVisible(false);
-    clearSelection();
-  }, [selectedVerses, verses, addTab, setIsMenuVisible, clearSelection, primaryVersion]);
-
   // [新增] 处理查看地图 - 打开Atlas面板并提取地点
   const handleAtlas = useCallback(() => {
     if (selectedVerses.length === 0) return;
