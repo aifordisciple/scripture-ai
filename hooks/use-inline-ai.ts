@@ -4,12 +4,15 @@ import { useState, useCallback, useRef } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { stripThinkTags } from '@/lib/ai'
 import { buildSermonContext, serializeContext } from '@/lib/sermon-context'
+import { detectGhostTextType, analyzeGhostTextContext, type GhostTextType } from '@/lib/ghost-text-detector'
 
 interface UseInlineAIOptions {
   /** Editor insert callback - accepts the ghost text to insert */
   onInsert?: (text: string) => void
   /** Delay in ms before auto-triggering completion after cursor stops (default 1500) */
   autoTriggerDelay?: number
+  /** Cooldown in ms after a rejection before auto-triggering again (default 30000) */
+  rejectionCooldown?: number
 }
 
 interface UseInlineAIReturn {
@@ -32,9 +35,6 @@ interface UseInlineAIReturn {
   /** Reject the current ghost text (clear it) */
   rejectCompletion: () => void
 }
-
-/** Ghost text suggestion types */
-export type GhostTextType = 'continue' | 'illustration' | 'application' | 'transition' | 'prayer'
 
 /** Maps GhostTextType to the AI action endpoint parameter */
 const GHOST_TYPE_TO_ACTION: Record<GhostTextType, string> = {
@@ -63,6 +63,8 @@ const GHOST_TYPE_HINT: Record<GhostTextType, string> = {
  * P0 enhancements:
  * - Full sermon context injection (outline, adjacent sections, flow stage)
  * - Auto-trigger after cursor stops (1.5s default)
+ * - Context-aware type detection (auto-detect what kind of suggestion to show)
+ * - Rejection cooldown (30s after reject, don't auto-trigger again)
  * - Streaming response handling
  */
 export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn {
@@ -75,6 +77,7 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
   } = useBibleStore()
 
   const autoTriggerDelay = options.autoTriggerDelay ?? 1500
+  const rejectionCooldown = options.rejectionCooldown ?? 30000
 
   const [isGenerating, setIsGenerating] = useState(false)
   const [ghostTextType, setGhostTextType] = useState<GhostTextType>('continue')
@@ -82,6 +85,7 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
   const autoTriggerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onInsertRef = useRef(options.onInsert)
   onInsertRef.current = options.onInsert
+  const lastRejectionTimeRef = useRef<number>(0)
 
   /** Cancel any pending auto-trigger timer */
   const cancelAutoTrigger = useCallback(() => {
@@ -93,13 +97,24 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
 
   /** Trigger ghost text generation */
   const triggerCompletion = useCallback((content: string, cursorPosition: number) => {
-    triggerTypedCompletion(content, cursorPosition, 'continue')
-  }, []) // stub — real implementation is triggerTypedCompletion
+    // Auto-detect type based on context
+    const ctx = analyzeGhostTextContext(
+      content,
+      cursorPosition,
+      useBibleStore.getState().sermonFlowStage,
+    )
+    const detectedType = detectGhostTextType(ctx)
+    triggerTypedCompletion(content, cursorPosition, detectedType)
+  }, [])
 
   /** Trigger a specific type of ghost text */
   const triggerTypedCompletion = useCallback((content: string, cursorPosition: number, type: GhostTextType) => {
     if (!content || content.trim().length < 5) return
     if (isGenerating) return
+
+    // Don't auto-trigger if within rejection cooldown
+    const timeSinceRejection = Date.now() - lastRejectionTimeRef.current
+    if (timeSinceRejection < rejectionCooldown) return
 
     // Cancel any pending auto-trigger
     cancelAutoTrigger()
@@ -185,6 +200,7 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
       })
   }, [
     isGenerating,
+    rejectionCooldown,
     currentSermon?.style,
     currentSermon?.title,
     currentSermon?.verseRefs,
@@ -197,10 +213,18 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
   /** Schedule auto-trigger after cursor stops moving */
   const scheduleAutoTrigger = useCallback((content: string, cursorPosition: number) => {
     cancelAutoTrigger()
+
+    // Don't schedule if within rejection cooldown
+    const timeSinceRejection = Date.now() - lastRejectionTimeRef.current
+    if (timeSinceRejection < rejectionCooldown) return
+
+    // Don't schedule if already generating
+    if (isGenerating) return
+
     autoTriggerTimerRef.current = setTimeout(() => {
-      triggerTypedCompletion(content, cursorPosition, 'continue')
+      triggerCompletion(content, cursorPosition)
     }, autoTriggerDelay)
-  }, [triggerTypedCompletion, cancelAutoTrigger, autoTriggerDelay])
+  }, [triggerCompletion, cancelAutoTrigger, autoTriggerDelay, rejectionCooldown, isGenerating])
 
   /** Accept ghost text: insert into editor */
   const acceptCompletion = useCallback(() => {
@@ -210,13 +234,15 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
     setSermonGhostTextVisible(false)
   }, [sermonGhostText, setSermonGhostText, setSermonGhostTextVisible])
 
-  /** Reject ghost text: clear it */
+  /** Reject ghost text: clear it and record rejection time for cooldown */
   const rejectCompletion = useCallback(() => {
     // Cancel any pending auto-trigger
     cancelAutoTrigger()
     // Abort any in-flight request
     abortRef.current?.abort()
     abortRef.current = null
+    // Record rejection time for cooldown
+    lastRejectionTimeRef.current = Date.now()
     setSermonGhostText('')
     setSermonGhostTextVisible(false)
     setIsGenerating(false)
@@ -234,3 +260,6 @@ export function useInlineAI(options: UseInlineAIOptions = {}): UseInlineAIReturn
     rejectCompletion,
   }
 }
+
+// Re-export GhostTextType for backward compatibility
+export type { GhostTextType }

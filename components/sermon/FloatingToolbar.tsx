@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Sparkles, Maximize2, Minimize2, BookOpen, Lightbulb } from 'lucide-react'
+import { Sparkles, Maximize2, Minimize2, BookOpen, Lightbulb, ShieldCheck, GitBranch, PenLine, MoreHorizontal } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
 
 /** Floating toolbar action definition */
@@ -14,8 +14,8 @@ export interface FloatingToolbarAction {
   subActions?: FloatingToolbarAction[]
 }
 
-/** Default actions for the floating toolbar */
-export const FLOATING_TOOLBAR_ACTIONS: FloatingToolbarAction[] = [
+/** Primary actions — always visible */
+const PRIMARY_ACTIONS: FloatingToolbarAction[] = [
   { key: 'polish', icon: Sparkles, labelZh: '润色', labelEn: 'Polish' },
   {
     key: 'expand', icon: Maximize2, labelZh: '扩展', labelEn: 'Expand',
@@ -33,8 +33,16 @@ export const FLOATING_TOOLBAR_ACTIONS: FloatingToolbarAction[] = [
       { key: 'shrink-extensive', icon: Minimize2, labelZh: '大幅', labelEn: 'Extensive' },
     ],
   },
-  { key: 'insert-verse', icon: BookOpen, labelZh: '插入经文', labelEn: 'Insert Verse' },
-  { key: 'add-example', icon: Lightbulb, labelZh: '添加例证', labelEn: 'Add Example' },
+  { key: 'insert-verse', icon: BookOpen, labelZh: '经文', labelEn: 'Verse' },
+  { key: 'add-example', icon: Lightbulb, labelZh: '例证', labelEn: 'Example' },
+]
+
+/** Secondary actions — shown when "..." is clicked */
+const SECONDARY_ACTIONS: FloatingToolbarAction[] = [
+  { key: 'deepen', icon: ShieldCheck, labelZh: '深化', labelEn: 'Deepen' },
+  { key: 'simplify', icon: Minimize2, labelZh: '通俗化', labelEn: 'Simplify' },
+  { key: 'rewrite', icon: PenLine, labelZh: '改写', labelEn: 'Rewrite' },
+  { key: 'crossref', icon: GitBranch, labelZh: '交叉引用', labelEn: 'Cross Ref' },
 ]
 
 interface FloatingToolbarProps {
@@ -46,12 +54,23 @@ interface FloatingToolbarProps {
   visible: boolean
 }
 
-/** Floating toolbar that appears above selected text in the editor */
+/**
+ * FloatingToolbar — Enhanced floating toolbar for selected text AI actions
+ *
+ * Primary actions (polish, expand, shrink, verse, example) always visible.
+ * Secondary actions (deepen, simplify, rewrite, crossref) behind "..." menu.
+ * This is now the PRIMARY AI interface for text selection.
+ */
 export function FloatingToolbar({ position, onAction, visible }: FloatingToolbarProps) {
   const { locale } = useTranslation()
   const [hoveredAction, setHoveredAction] = useState<string | null>(null)
+  const [showMore, setShowMore] = useState(false)
 
   if (!visible) return null
+
+  const allActions = showMore
+    ? [...PRIMARY_ACTIONS, ...SECONDARY_ACTIONS]
+    : PRIMARY_ACTIONS
 
   return (
     <div
@@ -69,7 +88,7 @@ export function FloatingToolbar({ position, onAction, visible }: FloatingToolbar
       }}
       onMouseDown={(e) => e.preventDefault()}
     >
-      {FLOATING_TOOLBAR_ACTIONS.map((action) => {
+      {allActions.map((action) => {
         const Icon = action.icon
         const label = locale === 'en' ? action.labelEn : action.labelZh
         const hasSubActions = action.subActions && action.subActions.length > 0
@@ -137,6 +156,22 @@ export function FloatingToolbar({ position, onAction, visible }: FloatingToolbar
           </div>
         )
       })}
+
+      {/* More actions toggle */}
+      <button
+        onClick={() => setShowMore(prev => !prev)}
+        onMouseEnter={() => setHoveredAction('more')}
+        onMouseLeave={() => setHoveredAction(null)}
+        title={locale === 'en' ? 'More actions' : '更多操作'}
+        className={`
+          flex items-center justify-center w-7 h-7 rounded-md
+          text-muted-foreground hover:text-foreground hover:bg-accent
+          transition-colors duration-100
+          ${showMore ? 'bg-accent text-foreground' : ''}
+        `}
+      >
+        <MoreHorizontal size={13} />
+      </button>
     </div>
   )
 }

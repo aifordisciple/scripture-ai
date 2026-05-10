@@ -1,164 +1,152 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
 import { useTranslation } from '@/lib/i18n'
-import { cn } from '@/lib/utils'
 import { useBreakpoint } from '@/hooks/use-media-query'
 import { SermonSidebar } from './SermonSidebar'
-import { SermonListPanel } from './SermonListPanel'
 import { SermonEditor } from './SermonEditor'
-import { SermonEmptyState } from './SermonEmptyState'
-import { SermonAIPanel } from './SermonAIPanel'
-import { SermonVersePanel } from './SermonVersePanel'
-import { SermonTemplatePanel } from './SermonTemplatePanel'
-import { SermonReviewPanel } from './SermonReviewPanel'
 import { SermonSettingsPanel } from './SermonSettingsPanel'
 import { OutlinePanel } from './OutlinePanel'
-import { VoiceProfilePanel } from './VoiceProfilePanel'
-import { TheologyPanel } from './TheologyPanel'
-import { ToneDashboard } from './ToneDashboard'
-import { InspirationBubble } from './InspirationBubble'
-import { SermonMobileBottomBar } from './SermonMobileBottomBar'
-import { SermonEditorProvider } from './SermonEditorContext'
-import { SermonErrorBoundary } from './SermonErrorBoundary'
+import { SermonVersePanel } from './SermonVersePanel'
+import { SermonReviewPanel } from './SermonReviewPanel'
 import { SermonDualPane } from './SermonDualPane'
-import { getFirstVerseRef } from '@/lib/verse-utils'
+import { Button } from '@/components/ui/button'
+import { PanelLeftOpen, PanelLeftClose, Bot, Settings, List, BookOpen, PenLine, ShieldCheck } from 'lucide-react'
 
+/**
+ * SermonTab — Main sermon writing layout
+ *
+ * Refactored: Removed fixed right AI panel column.
+ * Editor now takes full width. AI interaction via:
+ * - Cmd+K: Command Palette (inline AI actions)
+ * - Cmd+J: AI Drawer (chat)
+ * - Floating toolbar on selection
+ * - Ghost text auto-trigger
+ */
 export function SermonTab() {
   const { t } = useTranslation()
   const { isMd } = useBreakpoint()
   const {
-    currentSermon,
     activeSermonPanel,
-    sermonMobileView,
-    setSermonMobileView,
-    sermonsLoading,
-    setSermonsLoading,
-    setSermons,
-    setSermonFolders,
-    isDarkMode,
+    setActiveSermonPanel,
+    currentSermon,
     sermonDualPane,
-    setSermonSplitBook,
-    setSermonSplitChapter,
   } = useBibleStore()
 
-  // Load sermons and folders on mount
-  useEffect(() => {
-    const loadData = async () => {
-      setSermonsLoading(true)
-      try {
-        const [sermonsRes, foldersRes] = await Promise.all([
-          fetch('/api/sermon'),
-          fetch('/api/sermon/folder'),
-        ])
-        const sermonsData = await sermonsRes.json()
-        const foldersData = await foldersRes.json()
-        setSermons(sermonsData.data || [])
-        setSermonFolders(foldersData.data || [])
-      } catch (error) {
-        console.error('[SermonTab] Failed to load sermons:', error)
-      } finally {
-        setSermonsLoading(false)
-      }
-    }
-    loadData()
-  }, [setSermons, setSermonFolders, setSermonsLoading])
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
-  // Mobile: auto-switch to editor when a sermon is selected
-  useEffect(() => {
-    if (!isMd && currentSermon) {
-      setSermonMobileView('editor')
-    }
-  }, [currentSermon?.id, isMd, setSermonMobileView])
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev)
+  }, [])
 
-  // Mobile: reset to list when no sermon
-  useEffect(() => {
-    if (!isMd && !currentSermon) {
-      setSermonMobileView('list')
-    }
-  }, [currentSermon, isMd, setSermonMobileView])
-
-  // Auto-sync: when dual pane is active and sermon has verseRefs, navigate left pane
-  useEffect(() => {
-    if (!sermonDualPane || !currentSermon?.verseRefs) return
-    const ref = getFirstVerseRef(currentSermon.verseRefs)
-    if (ref) {
-      setSermonSplitBook(ref.bookId)
-      setSermonSplitChapter(ref.chapter)
-    }
-  }, [sermonDualPane, currentSermon?.verseRefs, setSermonSplitBook, setSermonSplitChapter])
-
-  const panelContent = () => {
-    switch (activeSermonPanel) {
-      case 'list': return <SermonListPanel />
-      case 'ai': return <SermonAIPanel />
-      case 'verse': return <SermonVersePanel />
-      case 'template': return <SermonTemplatePanel />
-      case 'outline': return (
-        <div className="flex flex-col h-full overflow-y-auto">
-          <InspirationBubble />
-          <OutlinePanel />
-          <ToneDashboard />
+  if (!currentSermon) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-muted-foreground">
+        <div className="text-center">
+          <PenLine className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
+          <p className="text-sm font-medium">{t('sermon.selectOrCreate')}</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">{t('sermon.selectOrCreateDesc')}</p>
         </div>
-      )
-      case 'review': return <SermonReviewPanel />
-      case 'settings': return <SermonSettingsPanel />
-      default: return <SermonListPanel />
-    }
+      </div>
+    )
   }
 
-  // The editor area (right side of dual pane or full width)
-  const editorArea = currentSermon ? (
-    <SermonErrorBoundary><SermonEditor /></SermonErrorBoundary>
-  ) : (
-    <SermonEmptyState />
-  )
-
   return (
-    <SermonEditorProvider isDark={isDarkMode}>
-      <div
-        className="flex h-full antialiased bg-secondary dark:bg-card text-foreground dark:text-foreground"
-        style={{ fontFamily: "'SF Pro Display', 'SF Pro Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif" }}
-      >
-        {isMd ? (
-          /* Desktop layout */
-          <>
-            <SermonSidebar />
-            <div className={cn(
-              'border-r border-black/[0.04] dark:border-white/[0.06] transition-all duration-200 overflow-hidden',
-              activeSermonPanel === 'list' ? 'w-[280px]' : 'w-[300px]'
-            )}>
-              {panelContent()}
+    <div className="flex-1 flex min-h-0 h-full">
+      {/* Left Sidebar — sermon list, folders */}
+      {sidebarOpen && (
+        <div className={`${isMd ? 'w-[240px]' : 'w-[200px]'} border-r border-border dark:border-white/[0.06] flex-shrink-0 overflow-hidden`}>
+          <SermonSidebar />
+        </div>
+      )}
+
+      {/* Main Editor Area — full width */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Toolbar with sidebar toggle and quick panel buttons */}
+        <div className="flex items-center gap-1 px-2 py-1 border-b border-border dark:border-white/[0.06] bg-muted/30">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="h-7 w-7 p-0"
+          >
+            {sidebarOpen ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeftOpen className="w-3.5 h-3.5" />}
+          </Button>
+
+          <div className="flex-1" />
+
+          {/* Quick panel access buttons */}
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant={activeSermonPanel === 'outline' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveSermonPanel(activeSermonPanel === 'outline' ? 'list' : 'outline')}
+              className="h-7 px-2 text-[10px] gap-1"
+            >
+              <List className="w-3 h-3" />
+              {isMd && (t('sermon.outline') || '大纲')}
+            </Button>
+            <Button
+              variant={activeSermonPanel === 'verse' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveSermonPanel(activeSermonPanel === 'verse' ? 'list' : 'verse')}
+              className="h-7 px-2 text-[10px] gap-1"
+            >
+              <BookOpen className="w-3 h-3" />
+              {isMd && (t('sermon.verse') || '经文')}
+            </Button>
+            <Button
+              variant={activeSermonPanel === 'review' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveSermonPanel(activeSermonPanel === 'review' ? 'list' : 'review')}
+              className="h-7 px-2 text-[10px] gap-1"
+            >
+              <ShieldCheck className="w-3 h-3" />
+              {isMd && (t('sermon.review') || '审查')}
+            </Button>
+            <Button
+              variant={activeSermonPanel === 'settings' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveSermonPanel(activeSermonPanel === 'settings' ? 'list' : 'settings')}
+              className="h-7 px-2 text-[10px] gap-1"
+            >
+              <Settings className="w-3 h-3" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Content area — either dual pane or single editor */}
+        <div className="flex-1 min-h-0 flex">
+          {sermonDualPane ? (
+            <SermonDualPane />
+          ) : (
+            <SermonEditor />
+          )}
+
+          {/* Side panels — outline, verse, review, settings */}
+          {activeSermonPanel === 'outline' && (
+            <div className="w-[280px] border-l border-border dark:border-white/[0.06] flex-shrink-0 overflow-y-auto">
+              <OutlinePanel />
             </div>
-            {sermonDualPane ? (
-              <SermonDualPane>
-                {editorArea}
-              </SermonDualPane>
-            ) : (
-              <div className="flex-1 flex flex-col min-w-0">
-                {editorArea}
-              </div>
-            )}
-          </>
-        ) : (
-          /* Mobile: single-column view */
-          <>
-            <div className="flex-1 flex flex-col min-h-0 pb-20">
-              {sermonMobileView === 'list' ? (
-                panelContent()
-              ) : (
-                currentSermon ? (
-                  <SermonErrorBoundary><SermonEditor /></SermonErrorBoundary>
-                ) : (
-                  <SermonEmptyState />
-                )
-              )}
+          )}
+          {activeSermonPanel === 'verse' && (
+            <div className="w-[280px] border-l border-border dark:border-white/[0.06] flex-shrink-0 overflow-y-auto">
+              <SermonVersePanel />
             </div>
-            <SermonMobileBottomBar />
-          </>
-        )}
+          )}
+          {activeSermonPanel === 'review' && (
+            <div className="w-[320px] border-l border-border dark:border-white/[0.06] flex-shrink-0 overflow-y-auto">
+              <SermonReviewPanel />
+            </div>
+          )}
+          {activeSermonPanel === 'settings' && (
+            <div className="w-[300px] border-l border-border dark:border-white/[0.06] flex-shrink-0 overflow-y-auto">
+              <SermonSettingsPanel />
+            </div>
+          )}
+        </div>
       </div>
-    </SermonEditorProvider>
+    </div>
   )
 }

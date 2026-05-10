@@ -1,98 +1,83 @@
 'use client'
 
-import React from 'react'
 import { useBibleStore } from '@/store/useBibleStore'
-import { useTranslation } from '@/lib/i18n'
-import { FLOW_STAGES, getStageInfo, getStageSuggestions } from '@/lib/sermon-flow'
-import { Check, ChevronRight } from 'lucide-react'
+import {
+  BookOpen,
+  Target,
+  LayoutList,
+  PenLine,
+  Sparkles,
+  CheckCircle2,
+  ChevronRight,
+} from 'lucide-react'
 
-/** Horizontal progress bar for sermon preparation stages */
+/** Flow stage definitions — keys must match sermonFlowStage values */
+const STAGES = [
+  { key: 'verse-study', icon: BookOpen, labelZh: '经文研读', labelEn: 'Scripture' },
+  { key: 'outline', icon: LayoutList, labelZh: '大纲', labelEn: 'Outline' },
+  { key: 'draft', icon: PenLine, labelZh: '写作', labelEn: 'Draft' },
+  { key: 'refine', icon: Sparkles, labelZh: '润色', labelEn: 'Refine' },
+  { key: 'review', icon: CheckCircle2, labelZh: '审查', labelEn: 'Review' },
+]
+
+/**
+ * FlowGuide — Minimalist breadcrumb-style flow progress indicator
+ *
+ * Replaces the full-width progress bar with a compact breadcrumb
+ * showing the current writing stage. Clicking a completed stage
+ * navigates back to it.
+ *
+ * Inspired by: Notion's breadcrumb navigation, Linear's status pills
+ */
 export function FlowGuide() {
-  const { sermonFlowStage, setSermonFlowStage, setSermonAiSuggestions, locale } = useBibleStore()
-
-  const currentIndex = FLOW_STAGES.findIndex(s => s.stage === sermonFlowStage)
-  const stageInfo = getStageInfo(sermonFlowStage)
-
-  const label = locale === 'en' ? stageInfo.labelEn : stageInfo.labelZh
-  const description = locale === 'en' ? stageInfo.descriptionEn : stageInfo.descriptionZh
-
-  const handleStageClick = (index: number) => {
-    const stage = FLOW_STAGES[index]
-    if (stage) {
-      setSermonFlowStage(stage.stage)
-      // Update suggestions for the new stage
-      const suggestions = getStageSuggestions(stage.stage)
-      setSermonAiSuggestions(suggestions)
-    }
-  }
+  const { sermonFlowStage, setSermonFlowStage, locale } = useBibleStore()
+  const currentIdx = STAGES.findIndex(s => s.key === sermonFlowStage)
 
   return (
-    <div className="flex items-center gap-3 px-3 py-1.5 bg-muted/30 dark:bg-white/[0.02] border-b border-border dark:border-white/[0.06]"
-      style={{ minHeight: 40 }}
-    >
-      {/* Progress nodes — now interactive */}
-      <div className="flex items-center gap-0 flex-shrink-0">
-        {FLOW_STAGES.map((stage, index) => {
-          const isCompleted = index < currentIndex
-          const isCurrent = index === currentIndex
-          const isFuture = index > currentIndex
-          const stageLabel = locale === 'en' ? stage.labelEn : stage.labelZh
+    <div className="flex items-center gap-0 px-4 py-1.5 border-b border-border dark:border-white/[0.06] bg-muted/20">
+      {STAGES.map((stage, idx) => {
+        const Icon = stage.icon
+        const isCompleted = idx < currentIdx
+        const isCurrent = idx === currentIdx
+        const isFuture = idx > currentIdx
+        const label = locale === 'en' ? stage.labelEn : stage.labelZh
 
-          return (
-            <React.Fragment key={stage.stage}>
-              {/* Node — clickable */}
-              <button
-                onClick={() => handleStageClick(index)}
-                title={stageLabel}
-                className={`
-                  w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium transition-all duration-200
-                  ${isCompleted
-                    ? 'bg-primary text-primary-foreground hover:bg-primary/80 cursor-pointer'
-                    : isCurrent
-                      ? 'bg-primary text-primary-foreground ring-2 ring-primary/30'
-                      : 'bg-muted-foreground/20 text-muted-foreground hover:bg-muted-foreground/30 hover:text-foreground cursor-pointer'
-                  }
-                `}
-              >
-                {isCompleted ? (
-                  <Check size={10} strokeWidth={3} />
-                ) : (
-                  <span>{index + 1}</span>
-                )}
-              </button>
+        return (
+          <div key={stage.key} className="flex items-center">
+            {/* Stage pill */}
+            <button
+              onClick={() => {
+                // Allow clicking completed or current stages
+                if (isCompleted || isCurrent) {
+                  setSermonFlowStage(stage.key)
+                }
+              }}
+              disabled={isFuture}
+              className={`
+                flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium
+                transition-all duration-150
+                ${isCurrent
+                  ? 'bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary'
+                  : isCompleted
+                  ? 'bg-primary/5 text-primary/60 dark:bg-primary/10 dark:text-primary/50 hover:bg-primary/10 hover:text-primary/80 cursor-pointer'
+                  : 'text-muted-foreground/40 cursor-default'
+                }
+              `}
+            >
+              <Icon size={10} className={isCurrent ? 'text-primary' : ''} />
+              <span>{label}</span>
+            </button>
 
-              {/* Connector line */}
-              {index < FLOW_STAGES.length - 1 && (
-                <div
-                  className={`w-4 h-[2px] flex-shrink-0 transition-colors ${
-                    index < currentIndex
-                      ? 'bg-primary'
-                      : 'bg-muted-foreground/20'
-                  }`}
-                />
-              )}
-            </React.Fragment>
-          )
-        })}
-      </div>
-
-      {/* Current stage label + description */}
-      <div className="flex items-center gap-2 min-w-0 ml-1">
-        <span className="text-xs font-medium text-primary whitespace-nowrap">{label}</span>
-        <span className="text-[11px] text-muted-foreground truncate hidden sm:inline">{description}</span>
-      </div>
-
-      {/* Quick skip to next stage */}
-      {currentIndex < FLOW_STAGES.length - 1 && (
-        <button
-          onClick={() => handleStageClick(currentIndex + 1)}
-          className="ml-auto flex items-center gap-0.5 px-2 py-0.5 rounded text-[9px] font-medium text-primary/60 hover:text-primary hover:bg-primary/10 transition-colors shrink-0"
-          title={locale === 'en' ? 'Skip to next stage' : '跳到下一阶段'}
-        >
-          {locale === 'en' ? 'Next' : '下一阶段'}
-          <ChevronRight size={10} />
-        </button>
-      )}
+            {/* Chevron separator */}
+            {idx < STAGES.length - 1 && (
+              <ChevronRight
+                size={10}
+                className={`mx-0.5 ${idx < currentIdx ? 'text-primary/30' : 'text-muted-foreground/20'}`}
+              />
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

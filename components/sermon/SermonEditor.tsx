@@ -9,21 +9,19 @@ import { EditorToolbar } from './EditorToolbar'
 import { SermonEditorHeader } from './SermonEditorHeader'
 import { useSermonEditor } from './SermonEditorContext'
 import { FlowGuide } from './FlowGuide'
-import { FlowSuggestions } from './FlowSuggestions'
 import { FloatingToolbar } from './FloatingToolbar'
-import { GhostTextToolbar } from './GhostTextToolbar'
 import { useSermonKeyboardShortcuts } from './KeyboardShortcutsPanel'
-import { AtCommandMenu } from './AtCommandMenu'
-import { useAtCommand } from '@/hooks/use-at-command'
-import type { GhostTextType } from '@/hooks/use-inline-ai'
-import { SlashCommandMenu, type SlashCommand } from './SlashCommandMenu'
 import { DiffPreview } from './DiffPreview'
 import { FocusMode } from './FocusMode'
 import { GhostTextOverlay } from './GhostTextOverlay'
+import CommandPalette from './CommandPalette'
+import { AIDrawer } from './AIDrawer'
+import { InlineWeakMarker } from './InlineWeakMarker'
+import { type CommandItem } from '@/hooks/use-command-palette'
 import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
 import { analyzeTone } from '@/lib/sermon-flow'
-import { useSlashCommands } from '@/hooks/use-slash-commands'
 import { buildSermonContext, serializeContext } from '@/lib/sermon-context'
+import { useInlineAI } from '@/hooks/use-inline-ai'
 
 export function SermonEditor() {
   const { t } = useTranslation()
@@ -31,17 +29,7 @@ export function SermonEditor() {
 
   // Register global keyboard shortcuts
   useSermonKeyboardShortcuts()
-  const {
-    atCommandState,
-    triggerAtCommand,
-    updateFilter,
-    selectCommand,
-    closeAtCommand,
-    setSelectedIndex: setAtSelectedIndex,
-    consumeInjectedContext,
-    resolveContexts,
-    hasInjectedContext,
-  } = useAtCommand()
+
   const {
     currentSermon,
     setCurrentSermon,
@@ -55,6 +43,7 @@ export function SermonEditor() {
     parseOutlineToSections,
     setToneMetrics,
     locale,
+    sermonDualPane,
   } = useBibleStore()
   const { registerEditorHandle } = useSermonEditor()
 
@@ -76,41 +65,25 @@ export function SermonEditor() {
   const [diffPreview, setDiffPreview] = useState<{ visible: boolean; original: string; modified: string }>({
     visible: false, original: '', modified: '',
   })
-  const [ghostTextType, setGhostTextType] = useState<GhostTextType>('continue')
   const [isFocusMode, setIsFocusMode] = useState(false)
+  const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false)
 
-  // Slash commands — pass onSelectCommand so keyboard selection works
+  // Ghost text auto-trigger integration
   const {
-    visible: slashVisible,
-    filter: slashFilter,
-    selectedIndex: slashSelectedIndex,
-    setSelectedIndex: setSlashSelectedIndex,
-    commands: slashCommands,
-    handleKeyDown: handleSlashKeyDown,
-    handleInput: handleSlashInput,
-    selectCommand: selectSlashCommand,
-    close: closeSlash,
-    menuPosition: slashPosition,
-    setMenuPosition: setSlashPosition,
-  } = useSlashCommands({
-    onSelectCommand: (cmd: SlashCommand) => {
-      const action = cmd.action
-      if (action === 'verse' || action === 'section' || action === 'template') {
-        return
-      }
-      if (action === 'review') {
-        useBibleStore.getState().setActiveSermonPanel('review')
-        return
-      }
-      if (action === 'snippet') {
-        useBibleStore.getState().setActiveSermonPanel('settings')
-        return
-      }
-      handleAIAssist(action)
+    ghostText: sermonGhostText,
+    isGenerating: isGhostGenerating,
+    scheduleAutoTrigger,
+    cancelAutoTrigger,
+    acceptCompletion,
+    rejectCompletion,
+  } = useInlineAI({
+    onInsert: (text) => {
+      editorRef.current?.insertValue(text)
     },
+    autoTriggerDelay: 1500,
   })
 
-  // Register editor handle with context so SermonAIPanel/SermonVersePanel can insert content
+  // Register editor handle with context so other panels can insert content
   useEffect(() => {
     registerEditorHandle(editorRef.current)
   })
@@ -121,8 +94,7 @@ export function SermonEditor() {
       handleAIAssist('continue')
     }
     const handleToggleAIPanel = () => {
-      const { activeSermonPanel, setActiveSermonPanel } = useBibleStore.getState()
-      setActiveSermonPanel(activeSermonPanel === 'ai' ? 'list' : 'ai')
+      setIsAIDrawerOpen(prev => !prev)
     }
     const handleInspiration = (e: Event) => {
       const detail = (e as CustomEvent).detail
@@ -130,13 +102,32 @@ export function SermonEditor() {
         handleAIAssist(detail.action)
       }
     }
+    const handleInsertContent = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail?.content) {
+        editorRef.current?.insertValue(detail.content)
+      }
+    }
     window.addEventListener('sermon:ai-continue', handleAIContinue)
     window.addEventListener('sermon:toggle-ai-panel', handleToggleAIPanel)
     window.addEventListener('sermon-inspiration', handleInspiration)
+    window.addEventListener('sermon:insert-content', handleInsertContent)
+
+    // Cmd+J shortcut to toggle AI drawer
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
+        e.preventDefault()
+        setIsAIDrawerOpen(prev => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleGlobalKeyDown)
+
     return () => {
       window.removeEventListener('sermon:ai-continue', handleAIContinue)
       window.removeEventListener('sermon:toggle-ai-panel', handleToggleAIPanel)
       window.removeEventListener('sermon-inspiration', handleInspiration)
+      window.removeEventListener('sermon:insert-content', handleInsertContent)
+      window.removeEventListener('keydown', handleGlobalKeyDown)
     }
   }, [])
 
@@ -151,15 +142,12 @@ export function SermonEditor() {
       if (md !== markdownContent) {
         setMarkdownContent(md)
       }
-      // Update flow stage based on content
       const flowUpdate = updateSermonFlowStage(md, md.length)
       setSermonFlowStage(flowUpdate.sermonFlowStage!)
       setSermonAiSuggestions(flowUpdate.sermonAiSuggestions!)
-      // Parse outline sections when content has headings
       if (md.includes('## ')) {
         parseOutlineToSections(md)
       }
-      // [P2.3] Analyze tone metrics
       const tone = analyzeTone(md)
       setToneMetrics({ ...tone, timestamp: Date.now() })
     } else {
@@ -215,15 +203,19 @@ export function SermonEditor() {
     if (sermonAutoSave) {
       saveTimerRef.current = setTimeout(() => autoSave(content), 1500)
     }
-    // Update flow stage
     const flowUpdate = updateSermonFlowStage(content, content.length)
     setSermonFlowStage(flowUpdate.sermonFlowStage!)
     setSermonAiSuggestions(flowUpdate.sermonAiSuggestions!)
-    // Parse outline sections when content has headings
     if (content.includes('## ')) {
       parseOutlineToSections(content)
     }
-  }, [setCurrentSermon, setSermons, autoSave, sermonAutoSave, setSermonFlowStage, setSermonAiSuggestions, parseOutlineToSections])
+
+    // Ghost text auto-trigger: schedule completion after user pauses typing
+    const cursorPos = content.length
+    if (content.trim().length > 50) {
+      scheduleAutoTrigger(content, cursorPos)
+    }
+  }, [setCurrentSermon, setSermons, autoSave, sermonAutoSave, setSermonFlowStage, setSermonAiSuggestions, parseOutlineToSections, scheduleAutoTrigger])
 
   // Manual save handler for Cmd+S
   const handleSave = useCallback(() => {
@@ -240,12 +232,6 @@ export function SermonEditor() {
     if (!md && action !== 'generate') return
     setIsGenerating(true)
     try {
-      // Consume any @-command injected context
-      const injectedContexts = consumeInjectedContext()
-      const resolvedContext = injectedContexts.length > 0
-        ? await resolveContexts(injectedContexts)
-        : undefined
-
       const res = await fetch('/api/sermon/ai-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -256,7 +242,6 @@ export function SermonEditor() {
           style: currentSermon?.style,
           locale: useBibleStore.getState().locale,
           voiceProfile: useBibleStore.getState().voiceProfile,
-          injectedContext: resolvedContext,
         }),
       })
       const reader = res.body?.getReader()
@@ -269,14 +254,12 @@ export function SermonEditor() {
         result += decoder.decode(value, { stream: true })
       }
       if (result) {
-        // Determine version source based on action
         const versionSource = action === 'continue' ? 'ai-generated'
           : action === 'expand' ? 'ai-expanded'
           : action === 'shrink' ? 'ai-adjusted'
           : action.startsWith('add-') ? 'ai-generated'
           : 'ai-generated'
 
-        // Insert-type actions append; replace-type actions set full content
         const isInsertAction = ['continue', 'add-example', 'add-application', 'add-transition', 'add-prayer'].includes(action)
         if (isInsertAction) {
           editorRef.current?.insertValue(result)
@@ -284,7 +267,6 @@ export function SermonEditor() {
           editorRef.current?.setValue(result)
         }
 
-        // Create version snapshots for affected outline sections
         const { outlineSections, addSectionVersion } = useBibleStore.getState()
         if (outlineSections.length > 0 && result.includes('## ')) {
           const fullContent = editorRef.current?.getValue() || result
@@ -319,12 +301,11 @@ export function SermonEditor() {
     } finally {
       setIsGenerating(false)
     }
-  }, [markdownContent, currentSermon?.verseRefs, currentSermon?.style, consumeInjectedContext, resolveContexts])
+  }, [markdownContent, currentSermon?.verseRefs, currentSermon?.style])
 
   // Handle selection change from VditorEditor
   const handleSelectionChange = useCallback((selectedText: string, rect: DOMRect | null) => {
     if (selectedText && selectedText.length > 0 && rect) {
-      // Convert absolute rect to relative position within the editor container
       const container = editorContainerRef.current
       if (container) {
         const containerRect = container.getBoundingClientRect()
@@ -337,39 +318,15 @@ export function SermonEditor() {
     }
   }, [])
 
-  // Handle cursor activity from VditorEditor (for slash commands)
+  // Handle cursor activity — cancel ghost text auto-trigger when user is actively typing
   const handleCursorActivity = useCallback((textBeforeCursor: string, cursorOffset: number) => {
-    // Get full text from editor and pass to slash command handler
-    const fullText = editorRef.current?.getValue() || ''
-    handleSlashInput(fullText, cursorOffset)
-
-    // Update slash menu position based on cursor
-    if (slashVisible) {
-      const container = editorContainerRef.current
-      if (container) {
-        // Approximate position: use a fixed offset from top-left since we can't get exact cursor coords
-        // from Vditor easily. The menu will appear near the top of the editor.
-        const containerRect = container.getBoundingClientRect()
-        // Try to get cursor coordinates from Vditor's CodeMirror
-        const vd = editorRef.current?.getVditor()
-        const cm = (vd as any)?.vditor?.sv?.codeMirror || (vd as any)?.vditor?.ir?.codeMirror
-        if (cm) {
-          try {
-            const cursorCoords = cm.cursorCoords?.(cm.getCursor(), 'local')
-            if (cursorCoords) {
-              setSlashPosition({ x: cursorCoords.left, y: cursorCoords.top + 20 })
-            }
-          } catch {}
-        }
-      }
-    }
-  }, [handleSlashInput, slashVisible, setSlashPosition])
+    cancelAutoTrigger()
+  }, [cancelAutoTrigger])
 
   // Handle floating toolbar action
   const handleFloatingAction = useCallback((action: string) => {
     if (!floatingToolbar.selectedText) return
 
-    // Parse sub-actions like "expand-slight" → action="expand", degree="slight"
     let aiAction = action
     let expandDegree: 'slight' | 'moderate' | 'extensive' | undefined
     if (action.startsWith('expand-')) {
@@ -380,12 +337,8 @@ export function SermonEditor() {
       expandDegree = action.replace('shrink-', '') as 'slight' | 'moderate' | 'extensive'
     }
 
-    // Actions that modify selected text (show diff preview)
-    const isModifyAction = ['polish', 'expand', 'shrink'].includes(aiAction)
-    // Actions that insert new content (no diff needed)
-    const isInsertAction = ['insert-verse', 'add-example', 'cross-ref'].includes(aiAction)
+    const isModifyAction = ['polish', 'expand', 'shrink', 'deepen', 'simplify', 'rewrite'].includes(aiAction)
 
-    // Build sermon context for full-text awareness
     const fullContent = editorRef.current?.getValue() || markdownContent
     const sermonCtx = buildSermonContext(fullContent, fullContent.length, {
       title: currentSermon?.title,
@@ -413,14 +366,12 @@ export function SermonEditor() {
       .then(result => {
         if (result) {
           if (isModifyAction) {
-            // Show diff preview for modification actions
             setDiffPreview({
               visible: true,
               original: floatingToolbar.selectedText,
               modified: result,
             })
           } else {
-            // Insert directly for additive actions
             editorRef.current?.insertValue(result)
           }
         }
@@ -432,104 +383,99 @@ export function SermonEditor() {
       })
   }, [floatingToolbar.selectedText, currentSermon, markdownContent])
 
-  // Handle slash command selection (from click events)
-  const handleSlashSelect = useCallback((command: SlashCommand) => {
-    closeSlash()
-    const action = command.action
-    if (action === 'verse' || action === 'section' || action === 'template') {
+  // Handle command palette command execution
+  const handleCommandPaletteCommand = useCallback((command: CommandItem) => {
+    const { action } = command
+
+    // Format actions
+    if (action.startsWith('format-')) {
+      const vd = editorRef.current?.getVditor()
+      if (!vd) return
+      const formatType = action.replace('format-', '')
+      const toolbarKeys: Record<string, string> = {
+        bold: 'bold', italic: 'italic', h2: 'heading2', h3: 'heading3', list: 'list', quote: 'quote',
+      }
+      const key = toolbarKeys[formatType]
+      if (key) {
+        try { vd.toolbar?.handler?.(key) } catch {
+          const syntax: Record<string, string> = {
+            bold: '**text**', italic: '*text*', h2: '\n## ', h3: '\n### ', list: '\n- ', quote: '\n> ',
+          }
+          editorRef.current?.insertValue(syntax[formatType])
+        }
+      }
       return
     }
+
+    // Navigation actions
+    if (action === 'toggle-focus') {
+      setIsFocusMode(prev => !prev)
+      return
+    }
+    if (action === 'toggle-dualpane') {
+      useBibleStore.getState().setSermonDualPane(!sermonDualPane)
+      return
+    }
+    if (action === 'toggle-history') {
+      useBibleStore.getState().setActiveSermonPanel('settings')
+      return
+    }
+
+    // Flow actions
+    if (action === 'flow-next') {
+      const { sermonFlowStage } = useBibleStore.getState()
+      const stages = ['verse-study', 'outline', 'draft', 'refine', 'review']
+      const currentIdx = stages.indexOf(sermonFlowStage)
+      if (currentIdx < stages.length - 1) {
+        useBibleStore.getState().setSermonFlowStage(stages[currentIdx + 1] as typeof sermonFlowStage)
+      }
+      return
+    }
+    if (action === 'flow-prev') {
+      const { sermonFlowStage } = useBibleStore.getState()
+      const stages = ['verse-study', 'outline', 'draft', 'refine', 'review']
+      const currentIdx = stages.indexOf(sermonFlowStage)
+      if (currentIdx > 0) {
+        useBibleStore.getState().setSermonFlowStage(stages[currentIdx - 1] as typeof sermonFlowStage)
+      }
+      return
+    }
+
+    // Panel actions
     if (action === 'review') {
       useBibleStore.getState().setActiveSermonPanel('review')
       return
     }
+    if (action === 'snippet') {
+      useBibleStore.getState().setActiveSermonPanel('settings')
+      return
+    }
+    if (action === 'insert-verse') {
+      useBibleStore.getState().setActiveSermonPanel('verse')
+      return
+    }
+    if (action === 'section' || action === 'template') {
+      useBibleStore.getState().setActiveSermonPanel('template')
+      return
+    }
+
+    // Context injection actions (former @-commands)
+    if (action.startsWith('inject-')) {
+      // These are handled by the sermon context system — just trigger a relevant AI action
+      const injectType = action.replace('inject-', '')
+      if (injectType === 'commentary') {
+        handleAIAssist('deepen')
+      } else if (injectType === 'outline') {
+        useBibleStore.getState().setActiveSermonPanel('outline')
+      } else if (injectType === 'sermon') {
+        useBibleStore.getState().setActiveSermonPanel('list')
+      }
+      return
+    }
+
+    // AI actions
     handleAIAssist(action)
-  }, [handleAIAssist, closeSlash])
-
-  // Handle flow suggestion action
-  const handleFlowAction = useCallback((action: string) => {
-    handleAIAssist(action)
-  }, [handleAIAssist])
-
-  // Global keyboard handler for slash command and @-command navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (slashVisible) {
-        const handled = handleSlashKeyDown(e)
-        if (handled) return
-      }
-      // @-command menu keyboard navigation
-      if (atCommandState.visible) {
-        if (e.key === 'Escape') {
-          e.preventDefault()
-          closeAtCommand()
-          return
-        }
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-          e.preventDefault()
-          // Calculate total items (commands + scripture results if visible)
-          const totalItems = 4 // AT_COMMANDS.length
-          const delta = e.key === 'ArrowDown' ? 1 : -1
-          setAtSelectedIndex(Math.max(0, Math.min(totalItems - 1, atCommandState.selectedIndex + delta)))
-          return
-        }
-        if (e.key === 'Enter') {
-          e.preventDefault()
-          // Select current item — handled by AtCommandMenu click
-          return
-        }
-      }
-    }
-
-    // @-command detection: listen for @ character input in editor
-    const handleInputEvent = (e: InputEvent) => {
-      if (e.data === '@' && !slashVisible) {
-        // Get cursor position for menu placement
-        const container = editorContainerRef.current
-        if (container) {
-          const vd = editorRef.current?.getVditor()
-          const cm = (vd as any)?.vditor?.sv?.codeMirror || (vd as any)?.vditor?.ir?.codeMirror
-          if (cm) {
-            try {
-              const cursorCoords = cm.cursorCoords?.(cm.getCursor(), 'local')
-              if (cursorCoords) {
-                triggerAtCommand({ x: cursorCoords.left, y: cursorCoords.top + 20 })
-              }
-            } catch {
-              // Fallback position
-              triggerAtCommand({ x: 20, y: 100 })
-            }
-          } else {
-            triggerAtCommand({ x: 20, y: 100 })
-          }
-        }
-      }
-      // Update @-command filter as user types after @
-      if (atCommandState.visible) {
-        const fullText = editorRef.current?.getValue() || ''
-        // Find the @ character and extract filter text after it
-        const atIndex = fullText.lastIndexOf('@')
-        if (atIndex !== -1) {
-          const cursorPos = fullText.length // approximate
-          const filterText = fullText.slice(atIndex + 1, cursorPos)
-          updateFilter(filterText)
-        }
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    // Listen for input events on the editor container
-    const container = editorContainerRef.current
-    if (container) {
-      container.addEventListener('input', handleInputEvent as EventListener)
-    }
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      if (container) {
-        container.removeEventListener('input', handleInputEvent as EventListener)
-      }
-    }
-  }, [slashVisible, handleSlashKeyDown, atCommandState.visible, atCommandState.selectedIndex, closeAtCommand, setAtSelectedIndex, triggerAtCommand, updateFilter])
+  }, [sermonDualPane, handleAIAssist])
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -545,151 +491,118 @@ export function SermonEditor() {
   // Focus mode overlay
   if (isFocusMode) {
     return (
-      <FocusMode
-        content={markdownContent}
-        onContentChange={handleContentChange}
-        onAIAssist={handleAIAssist}
-        isGenerating={isGenerating}
-        onExit={() => setIsFocusMode(false)}
-      />
+      <>
+        <FocusMode
+          content={markdownContent}
+          onContentChange={handleContentChange}
+          onAIAssist={handleAIAssist}
+          isGenerating={isGenerating}
+          onExit={() => setIsFocusMode(false)}
+        />
+        <CommandPalette onCommand={handleCommandPaletteCommand} />
+      </>
     )
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      {/* Flow Guide progress bar */}
-      <FlowGuide />
+    <>
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Flow Guide progress bar */}
+        <FlowGuide />
 
-      {/* Header with title editing and status */}
-      <SermonEditorHeader />
+        {/* Header with title editing and status */}
+        <SermonEditorHeader />
 
-      <EditorToolbar
-        isGenerating={isGenerating}
-        onAIAssist={handleAIAssist}
-        onFormat={(type: 'bold' | 'italic' | 'h2' | 'h3' | 'list' | 'quote') => {
-          const vd = editorRef.current?.getVditor()
-          if (!vd) return
-          // Use Vditor's built-in toolbar API for formatting
-          const toolbarKeys: Record<string, string> = {
-            bold: 'bold',
-            italic: 'italic',
-            h2: 'heading2',
-            h3: 'heading3',
-            list: 'list',
-            quote: 'quote',
-          }
-          const key = toolbarKeys[type]
-          if (key) {
-            try {
-              vd.toolbar?.handler?.(key)
-            } catch {
-              // Fallback: insert markdown syntax
-              const syntax: Record<string, string> = {
-                bold: '**text**',
-                italic: '*text*',
-                h2: '\n## ',
-                h3: '\n### ',
-                list: '\n- ',
-                quote: '\n> ',
+        <EditorToolbar
+          isGenerating={isGenerating}
+          onAIAssist={handleAIAssist}
+          onFormat={(type: 'bold' | 'italic' | 'h2' | 'h3' | 'list' | 'quote') => {
+            const vd = editorRef.current?.getVditor()
+            if (!vd) return
+            const toolbarKeys: Record<string, string> = {
+              bold: 'bold', italic: 'italic', h2: 'heading2', h3: 'heading3', list: 'list', quote: 'quote',
+            }
+            const key = toolbarKeys[type]
+            if (key) {
+              try { (vd as any).toolbar?.handler?.(key) } catch {
+                const syntax: Record<string, string> = {
+                  bold: '**text**', italic: '*text*', h2: '\n## ', h3: '\n### ', list: '\n- ', quote: '\n> ',
+                }
+                editorRef.current?.insertValue(syntax[type])
               }
-              editorRef.current?.insertValue(syntax[type])
             }
-          }
-        }}
-        onFocusMode={() => setIsFocusMode(true)}
-        isFocusMode={isFocusMode}
-      />
-
-      {/* Flow Suggestions */}
-      <FlowSuggestions onAction={handleFlowAction} />
-
-      {/* Ghost Text Type Selector */}
-      <GhostTextToolbar
-        ghostTextType={ghostTextType}
-        isGenerating={isGenerating}
-        onTriggerType={(type) => {
-          setGhostTextType(type)
-          handleAIAssist(type === 'continue' ? 'continue' : type === 'illustration' ? 'add-example' : type === 'application' ? 'add-application' : type === 'transition' ? 'add-transition' : 'add-prayer')
-        }}
-      />
-
-      <div ref={editorContainerRef} className="flex-1 min-h-0 relative">
-        <VditorEditor
-          ref={editorRef}
-          content={markdownContent}
-          onChange={handleContentChange}
-          isDark={isDarkMode}
-          onSave={handleSave}
-          onSelectionChange={handleSelectionChange}
-          onCursorActivity={handleCursorActivity}
+          }}
+          onFocusMode={() => setIsFocusMode(true)}
+          isFocusMode={isFocusMode}
         />
 
-        {/* Ghost Text Overlay */}
-        <GhostTextOverlay
-          editorContainerRef={editorContainerRef}
-          onAccept={() => {
-            const { sermonGhostText } = useBibleStore.getState()
-            if (sermonGhostText) {
-              editorRef.current?.insertValue(sermonGhostText)
-            }
-            useBibleStore.getState().setSermonGhostText('')
-            useBibleStore.getState().setSermonGhostTextVisible(false)
-          }}
-          onReject={() => {
-            useBibleStore.getState().setSermonGhostText('')
-            useBibleStore.getState().setSermonGhostTextVisible(false)
-          }}
-        />
+        <div ref={editorContainerRef} className="flex-1 min-h-0 relative">
+          <VditorEditor
+            ref={editorRef}
+            content={markdownContent}
+            onChange={handleContentChange}
+            isDark={isDarkMode}
+            onSave={handleSave}
+            onSelectionChange={handleSelectionChange}
+            onCursorActivity={handleCursorActivity}
+          />
 
-        {/* Floating Toolbar for selected text */}
-        <FloatingToolbar
-          position={{ x: floatingToolbar.x, y: floatingToolbar.y }}
-          onAction={handleFloatingAction}
-          visible={floatingToolbar.visible}
-        />
+          {/* Ghost Text Overlay — auto-triggered, Tab to accept, Esc to reject */}
+          <GhostTextOverlay
+            editorContainerRef={editorContainerRef}
+            onAccept={acceptCompletion}
+            onReject={rejectCompletion}
+          />
 
-        {/* Slash Command Menu */}
-        <SlashCommandMenu
-          visible={slashVisible}
-          position={slashPosition}
-          filter={slashFilter}
-          onSelect={handleSlashSelect}
-          onClose={closeSlash}
-          selectedIndex={slashSelectedIndex}
-          onSelectedIndexChange={setSlashSelectedIndex}
-        />
+          {/* Floating Toolbar for selected text */}
+          <FloatingToolbar
+            position={{ x: floatingToolbar.x, y: floatingToolbar.y }}
+            onAction={handleFloatingAction}
+            visible={floatingToolbar.visible}
+          />
 
-        {/* Diff Preview for AI modification actions */}
-        <DiffPreview
-          original={diffPreview.original}
-          modified={diffPreview.modified}
-          visible={diffPreview.visible}
-          onAccept={(text) => {
-            // Replace selected text with accepted modification
-            editorRef.current?.insertValue(text)
-            setDiffPreview({ visible: false, original: '', modified: '' })
-          }}
-          onReject={() => {
-            setDiffPreview({ visible: false, original: '', modified: '' })
-          }}
-          onPartialAccept={(text) => {
-            editorRef.current?.insertValue(text)
-            setDiffPreview({ visible: false, original: '', modified: '' })
-          }}
-        />
+          {/* Diff Preview for AI modification actions */}
+          <DiffPreview
+            original={diffPreview.original}
+            modified={diffPreview.modified}
+            visible={diffPreview.visible}
+            onAccept={(text) => {
+              editorRef.current?.insertValue(text)
+              setDiffPreview({ visible: false, original: '', modified: '' })
+            }}
+            onReject={() => {
+              setDiffPreview({ visible: false, original: '', modified: '' })
+            }}
+            onPartialAccept={(text) => {
+              editorRef.current?.insertValue(text)
+              setDiffPreview({ visible: false, original: '', modified: '' })
+            }}
+          />
+
+          {/* Inline weak paragraph markers — expand chips for thin paragraphs */}
+          <InlineWeakMarker
+            editorContainerRef={editorContainerRef}
+            content={markdownContent}
+            onExpand={(text, action) => handleAIAssist(action)}
+          />
+        </div>
+
+        {/* Status Bar */}
+        <div className={`border-t border-border dark:border-white/[0.06] flex items-center gap-4 text-[12px] text-muted-foreground dark:text-muted-foreground ${isMd ? 'px-5 py-1.5' : 'px-3 py-2 pb-safe'}`}
+          style={{ fontFamily: "'SF Pro Text', system-ui, -apple-system, sans-serif", letterSpacing: '-0.12px' }}
+        >
+          <span>{charCount}{t('sermon.editorWords')}</span>
+          <span>~{Math.max(1, Math.round(charCount / 300))}{t('sermon.editorMinutes')}</span>
+          <span className="text-[10px] text-muted-foreground/60">⌘K {locale === 'en' ? 'Commands' : '命令'}</span>
+          <span className="text-[10px] text-muted-foreground/60">⌘J {locale === 'en' ? 'AI' : 'AI续写'}</span>
+        </div>
       </div>
 
-      {/* Status Bar */}
-      <div className={`border-t border-border dark:border-white/[0.06] flex items-center gap-4 text-[12px] text-muted-foreground dark:text-muted-foreground ${isMd ? 'px-5 py-1.5' : 'px-3 py-2 pb-safe'}`}
-        style={{ fontFamily: "'SF Pro Text', system-ui, -apple-system, sans-serif", letterSpacing: '-0.12px' }}
-      >
-        <span>{charCount}{t('sermon.editorWords')}</span>
-        <span>~{Math.max(1, Math.round(charCount / 300))}{t('sermon.editorMinutes')}</span>
-        <span className="text-[10px] text-muted-foreground/60">⌘J {locale === 'en' ? 'AI' : 'AI续写'}</span>
-        {hasInjectedContext && (
-          <span className="text-[10px] text-primary/70">@ {locale === 'en' ? 'context ready' : '上下文已注入'}</span>
-        )}
-      </div>
-    </div>
+      {/* Command Palette — global overlay, triggered by Cmd+K */}
+      <CommandPalette onCommand={handleCommandPaletteCommand} />
+
+      {/* AI Chat Drawer — triggered by Cmd+J or AI button */}
+      <AIDrawer open={isAIDrawerOpen} onClose={() => setIsAIDrawerOpen(false)} />
+    </>
   )
 }
