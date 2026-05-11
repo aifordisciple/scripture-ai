@@ -9,7 +9,7 @@ import { Bot, Send, StopCircle, ClipboardPaste, Sparkles, PenLine, BookOpen, Lig
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useSermonEditor } from './SermonEditorContext'
-import { stripThinkTags } from '@/lib/ai'
+import { stripAllThinkTags } from '@/lib/ai'
 import { getStageInfo, getStageSuggestions } from '@/lib/sermon-flow'
 
 type AiTab = 'chat' | 'suggest' | 'context'
@@ -143,14 +143,14 @@ export function SermonAIPanel() {
                 }`}>
                   <div className="whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                     {msg.role === 'assistant' ? (
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripThinkTags(msg.content)}</ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripAllThinkTags(msg.content)}</ReactMarkdown>
                     ) : (
                       msg.content
                     )}
                   </div>
                   {msg.role === 'assistant' && (
                     <button
-                      onClick={() => handleInsertToEditor(stripThinkTags(msg.content))}
+                      onClick={() => handleInsertToEditor(stripAllThinkTags(msg.content))}
                       className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-primary hover:text-primary/80"
                     >
                       <ClipboardPaste className="w-2.5 h-2.5" />

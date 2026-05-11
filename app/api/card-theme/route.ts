@@ -2,7 +2,7 @@
 // AI 经文卡片主题生成 - 全套推荐（背景+配色+标题+布局+字体）
 
 import { NextRequest, NextResponse } from 'next/server';
-import { stripThinkTags } from '@/lib/ai';
+import { stripAllThinkTags } from '@/lib/ai';
 import { getEnvConfig } from '@/lib/ai-client';
 
 const LAYOUT_MODES = ['classic', 'poster', 'card', 'modern', 'split', 'frame', 'film', 'minimal', 'magazine', 'stamp'] as const;
@@ -83,7 +83,7 @@ ${content}
 
     const data = await response.json();
     const rawContent = data.choices?.[0]?.message?.content || '';
-    const cleaned = stripThinkTags(rawContent);
+    const cleaned = stripAllThinkTags(rawContent);
 
     // 解析 JSON
     let theme: AICardThemeResponse;

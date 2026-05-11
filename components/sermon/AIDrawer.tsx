@@ -8,7 +8,7 @@ import { useBreakpoint } from '@/hooks/use-media-query'
 import { Bot, Send, StopCircle, X, Sparkles, PenLine, Lightbulb } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { stripThinkTags } from '@/lib/ai'
+import { stripAllThinkTags } from '@/lib/ai'
 
 interface AIDrawerProps {
   /** Whether the drawer is open */
@@ -57,7 +57,7 @@ export function AIDrawer({ open, onClose }: AIDrawerProps) {
     onFinish: (message) => {
       // Auto-flow: insert AI response into editor
       if (autoFlow && message.role === 'assistant') {
-        const content = stripThinkTags(message.content)
+        const content = stripAllThinkTags(message.content)
         if (content && content.trim().length > 20) {
           // Small delay to let the message render first
           setTimeout(() => {
@@ -182,14 +182,14 @@ export function AIDrawer({ open, onClose }: AIDrawerProps) {
               }`}>
                 <div className="whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                   {msg.role === 'assistant' ? (
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripThinkTags(msg.content)}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripAllThinkTags(msg.content)}</ReactMarkdown>
                   ) : (
                     msg.content
                   )}
                 </div>
                 {msg.role === 'assistant' && !autoFlow && (
                   <button
-                    onClick={() => insertToEditor(stripThinkTags(msg.content))}
+                    onClick={() => insertToEditor(stripAllThinkTags(msg.content))}
                     className="mt-2 inline-flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 font-medium"
                   >
                     {locale === 'en' ? 'Insert to editor' : '插入编辑器'}

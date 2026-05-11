@@ -16,7 +16,7 @@ import { useTranslation } from "@/lib/i18n";
 import { getClientLocale } from "@/lib/locale";
 import { useToast } from '@/components/ui/toast';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { stripThinkTags } from '@/lib/ai';
+import { stripAllThinkTags } from '@/lib/ai';
 
 interface PopulatedInsight {
   id: string;
@@ -163,7 +163,7 @@ export function InsightsTab() {
 
   // 获取摘要（前100字）
   const getSummary = (content: string) => {
-    const cleanContent = stripThinkTags(content);
+    const cleanContent = stripAllThinkTags(content);
   };
 
 
@@ -329,7 +329,7 @@ export function InsightsTab() {
                         )}
                         {expandedId === item.id ? (
                           <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripThinkTags(item.content || '')}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripAllThinkTags(item.content || '')}</ReactMarkdown>
                           </div>
                         ) : (
                           <p className="text-[15px] leading-relaxed text-foreground/80 line-clamp-2">
