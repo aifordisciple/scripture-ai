@@ -18,7 +18,7 @@ import { type CommandItem } from '@/hooks/use-command-palette'
 import { updateSermonFlowStage } from '@/store/slices/sermonSlice'
 import { analyzeTone } from '@/lib/sermon-flow'
 import { buildSermonContext, serializeContext } from '@/lib/sermon-context'
-import { stripThinkTags } from '@/lib/ai'
+import { stripAllThinkTags } from '@/lib/ai'
 export function SermonEditor() {
   const { t } = useTranslation()
   const { isMd } = useBreakpoint()
@@ -384,7 +384,7 @@ export function SermonEditor() {
           if (done) break
           result += decoder.decode(value, { stream: true })
         }
-        return stripThinkTags(result)
+        return stripAllThinkTags(result)
       })
       .then(result => {
         if (result) {
