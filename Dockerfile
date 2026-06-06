@@ -2,8 +2,9 @@
 # 优化后的 Dockerfile (利用缓存极限加速)
 # ----------------------------------------------------
 
-# 使用 Node 20
+# 使用 Node 20 (本地缓存优先)
 FROM node:20-alpine AS base
+#FROM node:24-bookworm-slim AS base
 
 # 1. 全局基础环境：提前安装公用依赖，利用 Docker 分层缓存
 # 把 openssl, python 和 edge-tts 放在 base，这样后面 deps, builder, runner 就不用重复安装了

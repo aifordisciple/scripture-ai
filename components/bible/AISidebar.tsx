@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Eraser, Sparkles, GraduationCap, FileText, BookMarked, Settings, Type, Edit, Trash2, Loader2 } from 'lucide-react'
+import { X, Sparkles, GraduationCap, FileText, BookMarked, Settings, Type, Edit, Trash2, Loader2, Download } from 'lucide-react'
 import { useChat } from 'ai/react'
 import { useSession } from 'next-auth/react'
 
 import { useBibleStore } from '@/store/useBibleStore'
 import { BIBLE_BOOKS } from '@/lib/constants'
 import { useTranslation } from '@/lib/i18n'
+import { buildSessionHTML } from '@/lib/export-session'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
@@ -456,17 +457,45 @@ export function AISidebar() {
     addSavedInsight(insight)
   }, [aiRequestTrigger, addSavedInsight])
 
-  // 清空当前会话对话 - 仅删除当前 session 的历史
-  const [showClearConfirm, setShowClearConfirm] = useState(false)
-  const handleClearChat = async () => {
-    setShowClearConfirm(true)
-  }
-  const confirmClearChat = async () => {
-    setShowClearConfirm(false)
-    setMessages([])
-    // 仅删除当前会话的历史，而非全部
-    if (currentSessionId && !currentSessionId.startsWith('temp-')) {
-      await fetch(`/api/chat/history?sessionId=${currentSessionId}`, { method: 'DELETE' })
+  // 导出会话为 HTML
+  const currentSession = sessions.find(s => s.id === currentSessionId)
+  const currentSessionTitle = currentSession?.title || t('ai.newChat')
+  const currentModeLabel =
+    aiMode === 'tutor' ? t('ai.tutorShort') :
+    aiMode === 'sermon' ? t('ai.sermonShort') :
+    aiMode === 'study-guide' ? t('ai.studyGuideShort') :
+    aiMode === 'custom' ? t('ai.custom') :
+    t('ai.general')
+
+  const handleExportHTML = () => {
+    if (messages.length === 0) {
+      addToast({ type: 'warning', message: t('ai.exportEmpty') })
+      return
+    }
+
+    try {
+      const html = buildSessionHTML({
+        title: currentSessionTitle,
+        modeLabel: currentModeLabel,
+        locale,
+        messages,
+        userLabel: t('bible.you'),
+        aiLabel: t('bible.aiInterpretation'),
+        generatedAt: new Date(),
+      })
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `ai-chat-${currentSessionTitle || 'session'}-${new Date().toISOString().slice(0, 10)}.html`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      addToast({ type: 'success', message: t('ai.exportSuccess') })
+    } catch (err) {
+      console.error('Export HTML failed:', err)
+      addToast({ type: 'error', message: t('ai.exportFailed') })
     }
   }
 
@@ -818,19 +847,9 @@ export function AISidebar() {
               </AnimatePresence>
             </div>
 
-            <Button variant="ghost" size="icon" onClick={handleClearChat} title={t('ai.clear')}>
-              <Eraser className="w-4 h-4 text-muted-foreground" />
+            <Button variant="ghost" size="icon" onClick={handleExportHTML} title={t('ai.exportTooltip')} aria-label={t('ai.export')}>
+              <Download className="w-4 h-4 text-muted-foreground" />
             </Button>
-            {/* [P3-1修复] 自定义确认对话框替代原生 confirm() */}
-            {showClearConfirm && (
-              <div className="absolute top-12 right-2 z-50 glass-panel rounded-lg border border-border dark:border-border p-3 text-sm">
-                <p className="mb-2 text-foreground dark:text-foreground/80">{t('ai.clearAllConfirm')}</p>
-                <div className="flex gap-2 justify-end">
-                  <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1 text-xs rounded-lg bg-secondary dark:bg-card text-foreground dark:text-foreground/80 hover:bg-accent">{t('common.cancel')}</button>
-                  <button onClick={confirmClearChat} className="px-3 py-1 text-xs rounded-lg bg-red-500 text-white hover:bg-red-600">{t('common.confirm')}</button>
-                </div>
-              </div>
-            )}
             <Button variant="ghost" size="icon" onClick={() => { setAiOpen(false); clearSelection(); }} className="dark:text-foreground/50 dark:hover:bg-white/[0.06]">
               <X className="w-5 h-5" />
             </Button>
