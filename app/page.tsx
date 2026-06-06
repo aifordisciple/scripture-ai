@@ -562,9 +562,13 @@ export default function Home() {
               <Button variant="ghost" size="icon" className={cn("hidden md:flex rounded-full text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 active:scale-95", !isDesktopSidebarOpen ? "text-muted-foreground" : "text-foreground")} onClick={toggleDesktopSidebar}>
                 <PanelLeft className="h-5 w-5" />
               </Button>
-              {/* Desktop: search button */}
+              {/* Tablet: search icon only (md..lg) */}
+              <Button variant="ghost" size="icon" className="hidden md:flex lg:hidden text-foreground/80 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-full h-8 w-8 active:scale-95" onClick={() => setIsSearchOpen(true)} title={t('reader.searchPlaceholder')}>
+                <Search className="h-[18px] w-[18px]" />
+              </Button>
+              {/* Desktop: search pill (lg+) */}
               <button
-                className="hidden md:flex items-center gap-1.5 rounded-full bg-black/[0.04] dark:bg-white/10 hover:bg-black/[0.07] dark:hover:bg-white/15 px-3 py-1 text-xs text-foreground/60 active:scale-95 transition-colors pointer-events-auto"
+                className="hidden lg:flex items-center gap-1.5 rounded-full bg-black/[0.04] dark:bg-white/10 hover:bg-black/[0.07] dark:hover:bg-white/15 px-3 py-1 text-xs text-foreground/60 active:scale-95 transition-colors pointer-events-auto"
                 onClick={() => setIsSearchOpen(true)}
               >
                 <Search className="w-3.5 h-3.5" />
@@ -606,13 +610,18 @@ export default function Home() {
 
             {/* Right side */}
             <div className="flex items-center gap-1 shrink-0">
-              {/* Mobile: TTS play button */}
+              {/* Mobile: TTS play button (< md) */}
               {activeTab.type === 'read' && (
                 <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none md:hidden" mode="minimal" />
               )}
 
-              {/* Desktop: right-side tools */}
-              <div className="hidden sm:flex items-center gap-0.5">
+              {/* Tablet: TTS play button (md..lg) */}
+              {activeTab.type === 'read' && (
+                <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none hidden md:flex lg:hidden" mode="minimal" />
+              )}
+
+              {/* Desktop: right-side tools (lg+) */}
+              <div className="hidden lg:flex items-center gap-0.5">
                 {activeTab.type === 'read' && (
                    <HeaderPlayer player={player} text={chapterSpeechText || ""} className="bg-transparent border-none" mode="full" />
                 )}
