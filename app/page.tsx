@@ -27,15 +27,16 @@ import { OnboardingManager } from "@/components/onboarding/OnboardingManager";
 import { TabContentRenderer } from "@/components/bible/TabContentRenderer";
 import { KeyboardShortcutsDialog } from "@/components/common/KeyboardShortcutsDialog";
 
-// 动态按需加载 - 非Tab内容组件
-const AISidebar = dynamic(() => import("@/components/bible/AISidebar").then(mod => mod.AISidebar), { ssr: false });
-const MagicBall = dynamic(() => import("@/components/bible/MagicBall").then(mod => mod.MagicBall), { ssr: false });
-const SearchDialog = dynamic(() => import("@/components/bible/SearchDialog").then(mod => mod.SearchDialog), { ssr: false });
-const NoteEditor = dynamic(() => import("@/components/bible/NoteEditor").then(mod => mod.NoteEditor), { ssr: false });
-const ShareCard = dynamic(() => import("@/components/bible/ShareCard").then(mod => mod.ShareCard), { ssr: false });
-const AuthDialog = dynamic(() => import("@/components/auth/AuthDialog").then(mod => mod.AuthDialog), { ssr: false });
-const PlanDailyFlow = dynamic(() => import("@/components/bible/PlanDailyFlow").then(mod => mod.PlanDailyFlow), { ssr: false });
-const GroupPlanDailyFlow = dynamic(() => import("@/components/group/GroupPlanDailyFlow").then(mod => mod.GroupPlanDailyFlow), { ssr: false });
+// 动态按需加载 - 保留代码分割但启用 SSR,避免整页降级到客户端渲染
+// 这些组件大多是 Dialog/Sheet 容器,SSR 时只渲染空壳,真正内容按需加载
+const AISidebar = dynamic(() => import("@/components/bible/AISidebar").then(mod => mod.AISidebar));
+const MagicBall = dynamic(() => import("@/components/bible/MagicBall").then(mod => mod.MagicBall));
+const SearchDialog = dynamic(() => import("@/components/bible/SearchDialog").then(mod => mod.SearchDialog));
+const NoteEditor = dynamic(() => import("@/components/bible/NoteEditor").then(mod => mod.NoteEditor));
+const ShareCard = dynamic(() => import("@/components/bible/ShareCard").then(mod => mod.ShareCard));
+const AuthDialog = dynamic(() => import("@/components/auth/AuthDialog").then(mod => mod.AuthDialog));
+const PlanDailyFlow = dynamic(() => import("@/components/bible/PlanDailyFlow").then(mod => mod.PlanDailyFlow));
+const GroupPlanDailyFlow = dynamic(() => import("@/components/group/GroupPlanDailyFlow").then(mod => mod.GroupPlanDailyFlow));
 
 // --- [新增] 独立的带左右滚动按钮的 Tab 标表组件 ---
 const TabList = ({ tabs, activeTabId, onSwitchTab, onCloseTab, onAddTab }: any) => {
