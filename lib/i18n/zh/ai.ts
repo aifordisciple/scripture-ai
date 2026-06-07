@@ -68,6 +68,10 @@ export const ai = {
     openAISidebar: '打开 AI 侧边栏',
     closeAssistant: '关闭助手',
     openInterpretation: '开启解读',
+    suggestedQuestions: '你可能还想问',
+    continueAnswer: '继续',
+    continueHint: '回答似乎未完成,让 AI 接着说',
+    suggestionsFailed: '生成建议问题失败',
     // ChatError i18n keys (P0-4 fix)
     chat: {
       sessionLoadFailed: '加载对话历史失败，请检查网络连接',

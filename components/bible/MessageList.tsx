@@ -1,14 +1,14 @@
 'use client'
 
-import { memo, useState } from 'react'
+import { memo, useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { Copy, Check, Bookmark, Share2, RefreshCw, User, Sparkles } from 'lucide-react'
+import { Copy, Check, Bookmark, Share2, RefreshCw, User, Sparkles, ArrowRight, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AudioButton } from './AudioButton'
 import { useToast } from '@/components/ui/toast'
 import { useTranslation } from '@/lib/i18n'
-import { parseThinkTags } from '@/lib/ai'
+import { parseThinkTags, stripAllThinkTags } from '@/lib/ai'
 
 export interface Message {
   id: string
@@ -23,8 +23,23 @@ export interface MessageListProps {
   onRetry?: () => void
   onSaveInsight?: (messageId: string, content: string) => void
   onShare?: () => void
+  onSendMessage?: (content: string) => void
+  locale?: 'zh' | 'en'
   fontSize?: 'small' | 'medium' | 'large' | 'xlarge'
   isSaved?: (messageId: string) => boolean
+}
+
+// 检查消息看起来是否"未完成"（被截断）
+function looksIncomplete(content: string): boolean {
+  const cleaned = stripAllThinkTags(content).trim();
+  if (cleaned.length === 0) return false;
+  // 取最后一个非空白字符
+  const lastChar = cleaned[cleaned.length - 1];
+  // 中英文常见句子结束标点 - 不算"未完成"
+  if (/[.。!！?？;；…"'…]/.test(lastChar)) return false;
+  // Markdown 列表、引用等也视为"可能完整"（不再追加新内容）
+  if (/[-*+>|]/.test(lastChar)) return false;
+  return true;
 }
 
 // 消息气泡组件
@@ -224,6 +239,142 @@ const MessageBubble = memo(function MessageBubble({
   )
 })
 
+// 引导式标签组件 - 显示建议问题或"继续"按钮
+const SuggestedFollowUps = memo(function SuggestedFollowUps({
+  lastAssistantContent,
+  lastUserContent,
+  isStreaming,
+  isIncomplete,
+  isLatest,
+  locale,
+  onSendMessage,
+  onContinue,
+}: {
+  lastAssistantContent: string
+  lastUserContent: string
+  isStreaming: boolean
+  isIncomplete: boolean
+  isLatest: boolean
+  locale: 'zh' | 'en'
+  onSendMessage?: (content: string) => void
+  onContinue?: () => void
+}) {
+  const { t } = useTranslation();
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const fetchedIdRef = useRef<string>('');
+
+  useEffect(() => {
+    // 流式中或被截断时清空旧建议
+    if (isStreaming || isIncomplete) {
+      if (suggestions.length > 0) setSuggestions([]);
+      if (isIncomplete) return;
+    }
+
+    // 只在最新消息、已结束、未截断、且有内容时获取建议
+    if (!isLatest || isStreaming || isIncomplete) return;
+    if (!lastAssistantContent || lastAssistantContent.trim().length < 10) return;
+
+    // 用 lastAssistantContent 的 hash 作为幂等键,避免重复请求
+    const fetchKey = `${lastAssistantContent.length}-${lastAssistantContent.slice(-50)}`;
+    if (fetchedIdRef.current === fetchKey) return;
+    fetchedIdRef.current = fetchKey;
+
+    let cancelled = false;
+    setLoading(true);
+
+    fetch('/api/chat/suggestions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lastUserMessage: lastUserContent,
+        lastAssistantMessage: lastAssistantContent,
+        locale,
+      }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!cancelled && Array.isArray(data?.suggestions)) {
+          setSuggestions(data.suggestions);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch suggestions:', err);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lastAssistantContent, lastUserContent, isStreaming, isIncomplete, isLatest, locale, suggestions.length]);
+
+  // 1) 已截断且未在流式：显示"继续"按钮
+  if (isIncomplete && !isStreaming && onContinue) {
+    return (
+      <div className="flex flex-wrap gap-2 mt-3 mb-3 pl-1">
+        <button
+          onClick={onContinue}
+          className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all active:scale-95 bg-primary/5 text-primary border-primary/20 hover:bg-primary/10"
+          title={t('ai.continueHint')}
+        >
+          <ArrowRight className="w-3 h-3" />
+          {t('ai.continueAnswer')}
+        </button>
+      </div>
+    );
+  }
+
+  // 2) 流式中：什么都不显示（避免在生成中弹出建议）
+  if (isStreaming) return null;
+
+  // 3) 加载中：显示骨架占位
+  if (loading && suggestions.length === 0) {
+    return (
+      <div className="flex flex-col gap-2 mt-3 mb-3 pl-1 animate-in fade-in duration-300">
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">
+          <Lightbulb className="w-3 h-3" />
+          {t('ai.suggestedQuestions')}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {[1, 2, 3].map(i => (
+            <div
+              key={i}
+              className="h-7 w-24 rounded-full bg-muted/40 animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 4) 没有建议：不渲染
+  if (suggestions.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-2 mt-3 mb-3 pl-1 animate-in fade-in slide-in-from-bottom-1 duration-400">
+      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">
+        <Lightbulb className="w-3 h-3" />
+        {t('ai.suggestedQuestions')}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {suggestions.map((s, i) => (
+          <button
+            key={`${i}-${s.slice(0, 10)}`}
+            onClick={() => onSendMessage?.(s)}
+            disabled={!onSendMessage}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all active:scale-95 bg-secondary text-foreground border-border hover:bg-accent hover:border-primary/30 disabled:opacity-50"
+          >
+            <Sparkles className="w-3 h-3 text-primary/70" />
+            {s}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+});
+
 // 空状态组件
 function EmptyState() {
   const { t } = useTranslation()
@@ -275,6 +426,8 @@ export const MessageList = memo(function MessageList({
   onRetry,
   onSaveInsight,
   onShare,
+  onSendMessage,
+  locale = 'zh',
   fontSize = 'medium',
   isSaved,
 }: MessageListProps) {
@@ -283,6 +436,35 @@ export const MessageList = memo(function MessageList({
   if (messages.length === 0 && !isLoading) {
     return <EmptyState />
   }
+
+  // 找到最后一条 assistant 消息及其前一条 user 消息
+  const lastAssistantIndex = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'assistant') return i;
+    }
+    return -1;
+  })();
+
+  const lastAssistant = lastAssistantIndex >= 0 ? messages[lastAssistantIndex] : null;
+  const lastUserMessage = (() => {
+    for (let i = lastAssistantIndex - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') return messages[i];
+    }
+    return null;
+  })();
+
+  const isLastMessageLatest = lastAssistantIndex === messages.length - 1;
+  const assistantContent = lastAssistant?.content || '';
+  const isStreaming = isLoading && isLastMessageLatest;
+  // 流式中也可能是截断（用户主动停止），但流式中我们隐藏建议
+  const isIncomplete = !isStreaming && assistantContent.length > 0 && looksIncomplete(assistantContent);
+
+  const handleContinue = () => {
+    if (!onSendMessage) return;
+    // 简单提示词让 AI 接着说
+    const prompt = locale === 'en' ? 'Please continue from where you left off.' : '请接着刚才的回答继续说，不要重复已说过的内容。';
+    onSendMessage(prompt);
+  };
 
   return (
     <div className="flex flex-col pb-6 pt-2">
@@ -305,6 +487,20 @@ export const MessageList = memo(function MessageList({
           />
         )
       })}
+
+      {/* 引导式建议问题 / 继续按钮 - 显示在最新 assistant 消息之后 */}
+      {lastAssistant && lastAssistantIndex === messages.length - 1 && (
+        <SuggestedFollowUps
+          lastAssistantContent={assistantContent}
+          lastUserContent={lastUserMessage?.content || ''}
+          isStreaming={isStreaming}
+          isIncomplete={isIncomplete}
+          isLatest={isLastMessageLatest}
+          locale={locale}
+          onSendMessage={onSendMessage}
+          onContinue={handleContinue}
+        />
+      )}
 
       {error && <ErrorState error={error} onRetry={onRetry} />}
     </div>

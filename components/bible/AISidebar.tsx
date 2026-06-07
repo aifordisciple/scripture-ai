@@ -875,6 +875,21 @@ export function AISidebar() {
             error={error || null}
             onRetry={!isLoading ? () => reload() : undefined}
             onSaveInsight={handleSaveInsight}
+            onSendMessage={(content) => {
+              if (isLoading || !content.trim()) return;
+              let sessionId = currentSessionId
+              if (currentSessionId?.startsWith('temp-')) {
+                savePendingSession(currentSessionId, content).then(savedId => {
+                  if (savedId) {
+                    setCurrentSessionId(savedId)
+                    append({ role: 'user', content }, { body: { sessionId: savedId } })
+                  }
+                })
+                return
+              }
+              append({ role: 'user', content }, { body: { sessionId } })
+            }}
+            locale={locale as 'zh' | 'en'}
             fontSize={aiFontSize}
             isSaved={(messageId) => savedInsights.some(i => i.messageId === messageId)}
           />

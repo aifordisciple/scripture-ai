@@ -68,6 +68,10 @@ export const ai = {
     openAISidebar: 'Open AI Sidebar',
     closeAssistant: 'Close',
     openInterpretation: 'Interpret',
+    suggestedQuestions: 'You may also ask',
+    continueAnswer: 'Continue',
+    continueHint: 'Answer seems incomplete, let AI continue',
+    suggestionsFailed: 'Failed to generate suggestions',
   },
   floatingMenu: {
     copy: 'Copy',
