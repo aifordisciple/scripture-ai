@@ -52,6 +52,8 @@ export function AISidebar() {
   const [showFontSizeSelector, setShowFontSizeSelector] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
   const [isImmersive, setIsImmersive] = useState(false)
+  // 记录最后一条流是否被用户主动停止（用于显示"继续"按钮）
+  const [lastStreamWasCancelled, setLastStreamWasCancelled] = useState(false)
 
   // 下拉菜单 ref（用于 click-outside 检测）
   const modeSelectorRef = useRef<HTMLDivElement>(null)
@@ -135,6 +137,8 @@ export function AISidebar() {
       setTimeout(() => {
         setAiGenerating(false)
         completeCurrentRequest()
+        // 流式自然完成时，清除"被取消"标记
+        setLastStreamWasCancelled(false)
       }, 0)
     }
   })
@@ -514,6 +518,8 @@ export function AISidebar() {
   useEffect(() => {
     if (isLoading) {
       setTimeout(() => setAiGenerating(true), 0)
+      // 新流开始时重置"被取消"标记
+      setLastStreamWasCancelled(false)
     } else if (!currentAiRequest || currentAiRequest.status !== 'processing') {
       setTimeout(() => setAiGenerating(false), 0)
     }
@@ -892,6 +898,7 @@ export function AISidebar() {
             locale={locale as 'zh' | 'en'}
             fontSize={aiFontSize}
             isSaved={(messageId) => savedInsights.some(i => i.messageId === messageId)}
+            wasStreamCancelled={lastStreamWasCancelled}
           />
 
           {isImmersive && (
@@ -937,6 +944,7 @@ export function AISidebar() {
               } else {
                 stop()
               }
+              setLastStreamWasCancelled(true)
             }}
           />
         </div>

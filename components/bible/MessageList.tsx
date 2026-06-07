@@ -27,19 +27,24 @@ export interface MessageListProps {
   locale?: 'zh' | 'en'
   fontSize?: 'small' | 'medium' | 'large' | 'xlarge'
   isSaved?: (messageId: string) => boolean
+  wasStreamCancelled?: boolean
 }
 
 // 检查消息看起来是否"未完成"（被截断）
+// 采用保守策略：只在明显中途截断时才返回 true
+// 中英文 AI 回复常不以 。 结尾，不能因此判断为"未完成"
 function looksIncomplete(content: string): boolean {
   const cleaned = stripAllThinkTags(content).trim();
+  if (cleaned.length < 30) return false; // 太短无法判断，按"完整"处理
   if (cleaned.length === 0) return false;
-  // 取最后一个非空白字符
+
   const lastChar = cleaned[cleaned.length - 1];
-  // 中英文常见句子结束标点 - 不算"未完成"
-  if (/[.。!！?？;；…"'…]/.test(lastChar)) return false;
-  // Markdown 列表、引用等也视为"可能完整"（不再追加新内容）
-  if (/[-*+>|]/.test(lastChar)) return false;
-  return true;
+  // 仅当结尾是明显"句中"标点时才算未完成
+  // 中英文逗号、分号、冒号、顿号、未配对的左括号 / 中括号
+  if (/[,;:、，；：]/.test(lastChar)) return true;
+  // Markdown 未闭合的格式符（开括号但无对应闭括号 / 列表项只有短横）
+  if (/[\(\[\{]/.test(lastChar)) return true;
+  return false;
 }
 
 // 消息气泡组件
@@ -430,6 +435,7 @@ export const MessageList = memo(function MessageList({
   locale = 'zh',
   fontSize = 'medium',
   isSaved,
+  wasStreamCancelled = false,
 }: MessageListProps) {
   const { addToast } = useToast();
 
@@ -457,7 +463,10 @@ export const MessageList = memo(function MessageList({
   const assistantContent = lastAssistant?.content || '';
   const isStreaming = isLoading && isLastMessageLatest;
   // 流式中也可能是截断（用户主动停止），但流式中我们隐藏建议
-  const isIncomplete = !isStreaming && assistantContent.length > 0 && looksIncomplete(assistantContent);
+  // 优先用 wasStreamCancelled 信号；否则用启发式判断
+  const isIncomplete = !isStreaming && assistantContent.length > 0 && (
+    wasStreamCancelled || looksIncomplete(assistantContent)
+  );
 
   const handleContinue = () => {
     if (!onSendMessage) return;
